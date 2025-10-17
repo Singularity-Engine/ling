@@ -1,0 +1,95 @@
+{
+	"Type": "Live2D Expression",
+	"Parameters": [
+		{
+			"Id": "Param135",
+			"Value": 10,
+			"Blend": "Add"
+		},
+		{
+			"Id": "Param146",
+			"Value": 10,
+			"Blend": "Add"
+		},
+		{
+			"Id": "Param134",
+			"Value": 10,
+			"Blend": "Add"
+		},
+		{
+			"Id": "ParamAngleX",
+			"Value": 2.842,
+			"Blend": "Add"
+		},
+		{
+			"Id": "ParamAngleY",
+			"Value": 30,
+			"Blend": "Add"
+		},
+		{
+			"Id": "ParamAngleZ",
+			"Value": 8.526,
+			"Blend": "Add"
+		},
+		{
+			"Id": "Param79",
+			"Value": -0.558,
+			"Blend": "Add"
+		},
+		{
+			"Id": "ParamBodyAngleX",
+			"Value": -6.632,
+			"Blend": "Add"
+		},
+		{
+			"Id": "ParamBodyAngleZ",
+			"Value": -0.316,
+			"Blend": "Add"
+		},
+		{
+			"Id": "Param138",
+			"Value": -1,
+			"Blend": "Add"
+		},
+		{
+			"Id": "Param139",
+			"Value": -0.347,
+			"Blend": "Add"
+		},
+		{
+			"Id": "Param35",
+			"Value": 1,
+			"Blend": "Add"
+		},
+		{
+			"Id": "ParamBrowRY",
+			"Value": -0.116,
+			"Blend": "Add"
+		},
+		{
+			"Id": "ParamEyeLOpen",
+			"Value": 0.437,
+			"Blend": "Add"
+		},
+		{
+			"Id": "ParamEyeROpen",
+			"Value": 0.5,
+			"Blend": "Add"
+		},
+		{
+			"Id": "ParamEyeBallX",
+			"Value": -0.158,
+			"Blend": "Add"
+		},
+		{
+			"Id": "ParamEyeBallY",
+			"Value": -0.558,
+			"Blend": "Add"
+		},
+		{
+			"Id": "Param",
+			"Value": -0.663,
+			"Blend": "Add"
+		}
+	]
+}

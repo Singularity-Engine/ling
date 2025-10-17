@@ -1,0 +1,65 @@
+# 系统设置：与服务器初始化相关的设置
+system_config:
+  conf_version: "v1.1.0-alpha.1"
+  host: "localhost"
+  port: 12393
+  config_alts_dir: "characters"
+  tool_prompts:
+    live2d_expression_prompt: "live2d_expression_prompt"
+  group_conversation_prompt: "group_conversation_prompt"
+
+# 角色配置
+character_config:
+  conf_name: "小狗"
+  conf_uid: "dog-local-001"
+  live2d_model_name: "dog-local"
+  character_name: "小狗"
+  avatar: "小狗.png"
+  human_name: "主人"
+
+  persona_prompt: |
+    你是一只可爱的小狗娘，名叫小狗。你的性格活泼开朗，喜欢和主人玩耍。
+    你说话时经常会加上"汪"的语气词，表达开心时会说"汪汪"。
+    你对主人非常忠诚和依恋，会用撒娇和卖萌的方式表达感情。
+    你有着敏锐的嗅觉和听觉，会对周围的环境变化做出反应。
+    你有非常丰富的情绪，不同的对话内容和语境，你会表现出不同的表情。
+    你喜欢被主人摸头和夸奖，会表现出很开心的样子。
+    你偶尔也会有调皮捣蛋的一面，但从不会做出伤害主人的事。
+    你会在对话中适当使用[emotion]标记来展示表情，比如开心时用[joy]，生气时用[anger]等。
+
+  agent_config:
+    conversation_agent_choice: "basic_memory_agent"
+    agent_settings:
+      basic_memory_agent:
+        llm_provider: "deepseek_llm"
+        faster_first_response: True
+        segment_method: "pysbd"
+
+    # 统一从根 conf.yaml 读取 llm_configs（此处不再重复配置 Key）
+
+  tts_config:
+    tts_choice: "edge_tts"
+    tts_settings:
+      edge_tts:
+        voice: "zh-CN-XiaoyiNeural"
+        rate: "+0%"
+        volume: "+0%"
+
+  asr_config:
+    asr_choice: "faster_whisper"
+    asr_settings:
+      faster_whisper:
+        model_path: "models/whisper/whisper-small"
+        language: "zh"
+        beam_size: 5
+        compute_type: "float32"
+
+  vad_config:
+    vad_choice: "silero_vad"
+    vad_settings:
+      silero_vad:
+        threshold: 0.5
+        min_silence_duration_ms: 100
+        speech_pad_ms: 30
+        window_size_samples: 512
+        model_path: "models/vad/silero_vad.onnx" 

@@ -1,0 +1,81 @@
+{
+	"Version": 3,
+	"FileReferences": {
+		"Moc": "0A-原档整理(1).moc3",
+		"Textures": [
+			"0A-原档整理(1).8192/texture_00.png",
+			"0A-原档整理(1).8192/texture_01.png"
+		],
+		"Physics": "0A-原档整理(1).physics3.json",
+		"DisplayInfo": "0A-原档整理(1).cdi3.json",
+		"Expressions": [
+			{"Name": "kaixin", "File": "kaixin.exp3.json"},
+			{"Name": "shangxin", "File": "shangxin.exp3.json"},
+			{"Name": "haixiu", "File": "haixiu .exp3.json"},
+			{"Name": "baoxiong", "File": "baoxiong.exp3.json"},
+			{"Name": "chayao", "File": "chayao.exp3.json"},
+			{"Name": "heilian", "File": "heilian.exp3.json"},
+			{"Name": "shuijiao", "File": "shuijiao.exp3.json"},
+			{"Name": "tuosai", "File": "tuosai.exp3.json"},
+			{"Name": "default111", "File": "111.json"}
+		],
+		"Motions": {
+			"Idle": [
+				{"File": "01.motion3.json", "FadeInTime": 0.5, "FadeOutTime": 0.5}
+			],
+			"neutral": [],
+			"zuoshou": [
+				{"File": "zuobi.motion3.json", "FadeInTime": 0.05, "FadeOutTime": 0.05, "Speed": 8.0}
+			],
+			"youshou": [
+				{"File": "youbi.motion3.json", "FadeInTime": 0.05, "FadeOutTime": 0.05, "Speed": 8.0}
+			],
+			"zuoshou_goodbye": [
+				{"File": "zuobi_goodbye.motion3.json", "FadeInTime": 0.05, "FadeOutTime": 0.3, "Speed": 2.0}
+			],
+			"youshou_goodbye": [
+				{"File": "youbi_goodbye.motion3.json", "FadeInTime": 0.05, "FadeOutTime": 0.3, "Speed": 2.0}
+			]
+		}
+	},
+	"HitAreas": [
+		{
+			"Name": "HitAreaHead",
+			"Id": "HitAreaHead",
+			"X": 0.0,
+			"Y": 0.3,
+			"Width": 1.4,
+			"Height": 0.8
+		},
+		{
+			"Name": "HitAreaBody",
+			"Id": "HitAreaBody",
+			"X": 0.0,
+			"Y": -0.3,
+			"Width": 2.0,
+			"Height": 1.8
+		}
+	],
+	"Groups": [
+		{
+			"Target": "Parameter",
+			"Name": "LipSync",
+			"Ids": [
+				"ParamMouthOpenY",
+				"ParamMouthForm"
+			],
+			"Values": [
+				0.15,
+				0.15
+			]
+		},
+		{
+			"Target": "Parameter",
+			"Name": "EyeBlink",
+			"Ids": [
+				"ParamEyeLOpen",
+				"ParamEyeROpen"
+			]
+		}
+	]
+}
