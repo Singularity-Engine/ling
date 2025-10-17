@@ -1,0 +1,41 @@
+# 使用完整版Python镜像（非slim版本），预装了更多依赖
+FROM python:3.11 AS base
+
+# 设置环境变量
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app \
+    HF_HOME=/app/models \
+    MODELSCOPE_CACHE=/app/models \
+    PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple \
+    PIP_TRUSTED_HOST=pypi.tuna.tsinghua.edu.cn \
+    PIP_TIMEOUT=120
+
+# 设置工作目录
+WORKDIR /app
+
+# 复制requirements-docker.txt并安装依赖
+COPY requirements-docker.txt /app/
+
+# 分步安装依赖，避免依赖冲突
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir fastapi uvicorn python-dotenv pydantic loguru PyYAML && \
+    pip install --no-cache-dir requests aiohttp websockets numpy && \
+    pip install --no-cache-dir torch torchaudio && \
+    pip install --no-cache-dir edge-tts pydub python-multipart httpx pysbd redis && \
+    pip install --no-cache-dir openai anthropic groq && \
+    pip install --no-cache-dir langchain langchain-community langchain-core
+
+# 复制应用代码
+COPY . /app/
+
+# 安装包（开发模式）
+RUN pip install --no-cache-dir -e .
+
+# 创建必要的目录
+RUN mkdir -p /app/logs /app/chat_history /app/cache /app/affinity_data /app/models
+
+# 暴露端口
+EXPOSE 12393
+
+# 运行命令
+CMD ["python3", "run_server.py"] 

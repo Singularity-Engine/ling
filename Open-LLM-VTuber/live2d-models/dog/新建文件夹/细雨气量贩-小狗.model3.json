@@ -1,0 +1,196 @@
+{
+	"Version": 3,
+	"FileReferences": {
+		"Moc": "细雨气量贩-小狗.moc3",
+		"Textures": [
+			"texture_00.png",
+			"texture_01.png",
+			"texture_02.png",
+			"texture_03.png",
+			"texture_04.png",
+			"texture_05.png"
+		],
+		"Physics": "细雨气量贩-小狗.physics3.json",
+		"DisplayInfo": "细雨气量贩-小狗.cdi3.json",
+		"Expressions": [
+			{
+				"Name": "exp_00",
+				"File": "新建文件夹/1.亲亲.exp3.json"
+			},
+			{
+				"Name": "exp_01",
+				"File": "新建文件夹/生气.exp3.json"
+			},
+			{
+				"Name": "exp_02",
+				"File": "新建文件夹/3.爱心.exp3.json"
+			},
+			{
+				"Name": "exp_03",
+				"File": "新建文件夹/13.哭哭.exp3.json"
+			},
+			{
+				"Name": "exp_04",
+				"File": "新建文件夹/2.wink.exp3.json"
+			},
+			{
+				"Name": "exp_05",
+				"File": "新建文件夹/5.黑化.exp3.json"
+			},
+			{
+				"Name": "exp_06",
+				"File": "新建文件夹/7.高光消失.exp3.json"
+			},
+			{
+				"Name": "exp_07",
+				"File": "新建文件夹/4.脸红.exp3.json"
+			},
+			{
+				"Name": "exp_08",
+				"File": "新建文件夹/11星星眼.exp3.json"
+			},
+			{
+				"Name": "exp_09",
+				"File": "新建文件夹/12.圈圈.exp3.json"
+			},
+			{
+				"Name": "exp_10",
+				"File": "新建文件夹/10.哭哭高光.exp3.json"
+			},
+			{
+				"Name": "exp_11",
+				"File": "新建文件夹/8.阴影.exp3.json"
+			},
+			{
+				"Name": "exp_12",
+				"File": "新建文件夹/14.asmr.exp3.json"
+			},
+			{
+				"Name": "exp_13",
+				"File": "新建文件夹/15.刀.exp3.json"
+			},
+			{
+				"Name": "exp_14",
+				"File": "新建文件夹/25.水印消失.exp3.json"
+			},
+			{
+				"Name": "exp_15",
+				"File": "新建文件夹/sese.exp3.json"
+			}
+		],
+		"Motions": {
+			"Idle": [
+				{
+					"File": "按键/哭哭n.motion3.json",
+					"FadeInTime": 2,
+					"FadeOutTime": 2
+				}
+			],
+			"TapBody": [
+				{
+					"File": "按键/1.亲亲.exp3.json",
+					"FadeInTime": 0.5,
+					"FadeOutTime": 0.5
+				},
+				{
+					"File": "按键/2.wink.exp3.json",
+					"FadeInTime": 0.5,
+					"FadeOutTime": 0.5
+				},
+				{
+					"File": "按键/3.爱心.exp3.json",
+					"FadeInTime": 0.5,
+					"FadeOutTime": 0.5
+				}
+			],
+			"TapHead": [
+				{
+					"File": "按键/11星星眼.exp3.json",
+					"FadeInTime": 0.5,
+					"FadeOutTime": 0.5
+				},
+				{
+					"File": "按键/12.圈圈.exp3.json",
+					"FadeInTime": 0.5,
+					"FadeOutTime": 0.5
+				},
+				{
+					"File": "按键/4.脸红.exp3.json",
+					"FadeInTime": 0.5,
+					"FadeOutTime": 0.5
+				}
+			],
+			"Happy": [
+				{
+					"File": "按键/3.爱心.exp3.json",
+					"FadeInTime": 0.5,
+					"FadeOutTime": 0.5
+				},
+				{
+					"File": "按键/11星星眼.exp3.json",
+					"FadeInTime": 0.5,
+					"FadeOutTime": 0.5
+				}
+			],
+			"Sad": [
+				{
+					"File": "按键/13.哭哭.exp3.json",
+					"FadeInTime": 0.5,
+					"FadeOutTime": 0.5
+				},
+				{
+					"File": "按键/10.哭哭高光.exp3.json",
+					"FadeInTime": 0.5,
+					"FadeOutTime": 0.5
+				}
+			],
+			"Angry": [
+				{
+					"File": "按键/生气.exp3.json",
+					"FadeInTime": 0.5,
+					"FadeOutTime": 0.5
+				},
+				{
+					"File": "按键/5.黑化.exp3.json",
+					"FadeInTime": 0.5,
+					"FadeOutTime": 0.5
+				}
+			],
+			"caring": [
+				{
+					"File": "按键/14.asmr.exp3.json",
+					"FadeInTime": 0.5,
+					"FadeOutTime": 0.5
+				},
+				{
+					"File": "按键/18.披发.exp3.json",
+					"FadeInTime": 0.5,
+					"FadeOutTime": 0.5
+				}
+			],
+			"sese": [
+				{
+					"File": "按键/sese.exp3.json",
+					"FadeInTime": 0.5,
+					"FadeOutTime": 0.5
+				}
+			]
+		}
+	},
+	"Groups": [
+		{
+			"Target": "Parameter",
+			"Name": "EyeBlink",
+			"Ids": [
+				"ParamEyeLOpen",
+				"ParamEyeROpen"
+			]
+		},
+		{
+			"Target": "Parameter",
+			"Name": "LipSync",
+			"Ids": []
+		}
+	],
+	"HitAreas": []
+}

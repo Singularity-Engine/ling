@@ -1,0 +1,45 @@
+{
+  "mcpServers": {
+    "us-weather-mcp": {
+      "type": "streamableHttp",
+      "url": "https://server.sngxai.com/us-weather-mcp/mcp?apikey=5499e9820f8d",
+      "description": "精准涵盖当前及未来天气（实时、分日、分小时）、天气预警、气象观测站等主要气象场景与关键词，且具备完整交互功能，极为适配用户天气信息查询意图，尤其针对美国地区。 (ID: mcp_c2b93df5eb60493a863df8a53babfd99)",
+      "enabled": true,
+      "mcpId": "mcp_c2b93df5eb60493a863df8a53babfd99",
+      "reason": "精准涵盖当前及未来天气（实时、分日、分小时）、天气预警、气象观测站等主要气象场景与关键词，且具备完整交互功能，极为适配用户天气信息查询意图，尤其针对美国地区。"
+    },
+    "local-doubao-suno": {
+      "type": "streamableHttp",
+      "url": "https://server.sngxai.com/music-mcp/mcp?apikey=d17130727537",
+      "description": "Suno音乐生成MCP服务器，音乐生成、流式下载等功能",
+      "enabled": true,
+      "features": [
+        "Suno音乐生成",
+        "音乐信息查询",
+        "流式音乐下载",
+        "日志记录",
+        "通知测试"
+      ]
+    },
+    "ai-image-generator-mcp": {
+      "type": "streamableHttp",
+      "url": "https://server.sngxai.com/ai-image-generator-mcp/mcp?apikey=4dd63c984b7a",
+      "description": "该服务支持多种AI图片生成模型（含OpenAI DALL-E, Google Gemini），覆盖image, 图片生成、AI绘图等关键词，并有详细的图像生成与风格控制说明，极为契合生成夕阳主题图片的需求。 (ID: mcp_91ca9997ae2147259ca108972a0ef346)",
+      "enabled": true,
+      "mcpId": "mcp_91ca9997ae2147259ca108972a0ef346",
+      "reason": "该服务支持多种AI图片生成模型（含OpenAI DALL-E, Google Gemini），覆盖image, 图片生成、AI绘图等关键词，并有详细的图像生成与风格控制说明，极为契合生成夕阳主题图片的需求。"
+    }
+  },
+  "searchApiUrl": "http://192.168.1.7:8080/lain/mcp/search/agent",
+  "searchApiDevMode": false,
+  "searchApiTestKey": "any-token-will-work",
+  "searchApiHeaders": {
+    "Authorization": "Bearer any-token-will-work"
+  },
+  "settings": {
+    "default_cache_ttl": 300,
+    "max_concurrent_calls": 5,
+    "enable_performance_monitoring": true,
+    "send_results_to_llm": true
+  }
+}
