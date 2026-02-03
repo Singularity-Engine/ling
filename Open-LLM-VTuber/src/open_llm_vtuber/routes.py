@@ -190,10 +190,15 @@ async def create_routes(default_context_cache: ServiceContext) -> APIRouter:
         """WebSocket endpoint for client connections"""
         await websocket.accept()
         client_uid = str(uuid4())
+        
+        # 🔧 支持通过URL参数传递token（解决跨域iframe无法传递cookie的问题）
+        url_token = websocket.query_params.get("token")
+        if url_token:
+            logger.info(f"🔑 WebSocket: 检测到URL参数中的token，长度: {len(url_token)}")
 
         try:
             # 🔧 在建立WebSocket连接时尝试设置用户上下文
-            await _setup_websocket_user_context(websocket, client_uid)
+            await _setup_websocket_user_context(websocket, client_uid, url_token=url_token)
             
             await ws_handler.handle_new_connection(websocket, client_uid)
             await ws_handler.handle_websocket_communication(websocket, client_uid)
@@ -211,8 +216,14 @@ async def create_routes(default_context_cache: ServiceContext) -> APIRouter:
             except Exception as cleanup_error:
                 logger.debug(f"清理用户上下文时出错: {cleanup_error}")
     
-    async def _setup_websocket_user_context(websocket: WebSocket, client_uid: str = None):
-        """设置WebSocket连接的用户上下文"""
+    async def _setup_websocket_user_context(websocket: WebSocket, client_uid: str = None, url_token: str = None):
+        """设置WebSocket连接的用户上下文
+        
+        Args:
+            websocket: WebSocket连接
+            client_uid: 客户端ID
+            url_token: 从URL参数传入的token（用于跨域iframe场景）
+        """
         try:
             logger.info("🔄 WebSocket: 开始设置用户上下文...")
             
@@ -221,10 +232,15 @@ async def create_routes(default_context_cache: ServiceContext) -> APIRouter:
             from .bff_integration.auth.user_context import UserContextManager, UserContext
             from .bff_integration.auth.websocket_user_cache import cache_user_for_websocket_client
             
-            # 提取internal_access_token Cookie（这个逻辑现在主要作为备用机制）
+            # 1. 优先从Cookie提取token
             websocket_headers = dict(websocket.headers)
             logger.info(f"🔧 调试WebSocket请求头: {websocket_headers}")
             session_cookie = extract_session_cookie_from_websocket(websocket_headers)
+            
+            # 2. 如果Cookie中没有token，使用URL参数中的token（跨域iframe场景）
+            if not session_cookie and url_token:
+                logger.info("🔑 WebSocket: Cookie中无token，使用URL参数中的token")
+                session_cookie = url_token
             
             if session_cookie:
                 logger.info(f"🍪 WebSocket: 检测到会话Cookie，长度: {len(session_cookie)}")

@@ -107,17 +107,29 @@ def decode_session_token(session_token: str) -> Optional[Dict[str, Any]]:
         if not username and user_id:
             username = f"user_{user_id[-8:]}"
             
-        # 检查用户是否在数据库中存在
+        # 检查用户是否在数据库中存在，如果不存在则自动创建
         try:
             from ..database.user_repository import UserRepository
             user_repo = UserRepository()
             db_user = user_repo.find_by_user_id(user_id)
 
             if not db_user:
-                logger.warning(f"⚠️ 用户 {user_id} 在JWT中有效，但在数据库中不存在，拒绝认证")
-                return None
-
-            logger.info(f"✅ 用户 {user_id} 在数据库中存在，验证通过")
+                # JWT 有效但用户不在数据库中，自动创建用户记录
+                logger.info(f"🆕 用户 {user_id} 在JWT中有效但数据库中不存在，自动创建用户记录...")
+                try:
+                    new_user = user_repo.create_user(
+                        user_id=user_id,
+                        username=username or f"user_{user_id[-8:]}",
+                        email=email
+                    )
+                    if new_user:
+                        logger.info(f"✅ 自动创建用户成功: {user_id}")
+                    else:
+                        logger.warning(f"⚠️ 自动创建用户失败，但允许继续（JWT已验证）: {user_id}")
+                except Exception as create_error:
+                    logger.warning(f"⚠️ 自动创建用户时出错: {create_error}，但允许继续（JWT已验证）")
+            else:
+                logger.info(f"✅ 用户 {user_id} 在数据库中存在，验证通过")
 
         except Exception as e:
             logger.error(f"❌ 数据库用户验证失败: {e}")
