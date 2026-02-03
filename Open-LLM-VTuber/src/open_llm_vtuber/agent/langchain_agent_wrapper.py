@@ -471,7 +471,7 @@ class LangchainAgentWrapper(AgentInterface):
                 logger.info("⚠️ 使用无工具代理模式")
 
             # langchain agents import will be handled in the method
-            from langchain import hub
+            import langchainhub as hub
 
             # 获取ReAct提示模板并自定义
             try:
@@ -500,7 +500,7 @@ class LangchainAgentWrapper(AgentInterface):
                 basic_system_prompt = f"{self.system_prompt}\n\n注意：当前系统在简化模式下运行，部分高级功能可能不可用。"
 
                 # 创建无工具的React Agent
-                from langchain import hub
+                import langchainhub as hub
                 try:
                     prompt = hub.pull("hwchase17/react")
                     prompt.messages[0].prompt.template = f"{basic_system_prompt}\n\n" + prompt.messages[0].prompt.template
@@ -541,7 +541,7 @@ class LangchainAgentWrapper(AgentInterface):
             enhanced_system_prompt = f"{self.system_prompt}\n\n{no_tool_guidance}"
 
             # 创建无工具的agent
-            from langchain import hub
+            import langchainhub as hub
 
             try:
                 prompt = hub.pull("hwchase17/react")

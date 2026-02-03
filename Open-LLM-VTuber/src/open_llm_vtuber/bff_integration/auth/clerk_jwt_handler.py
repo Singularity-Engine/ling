@@ -40,6 +40,9 @@ class ClerkJWTHandler:
                     issuer = issuer.replace('$', '')
                     logger.warning(f"🔧 修复了issuer中的错误字符: {issuer}")
 
+                # 确保issuer有https://前缀
+                if not issuer.startswith('http://') and not issuer.startswith('https://'):
+                    issuer = f"https://{issuer}"
                 jwks_url = f"{issuer.rstrip('/')}/.well-known/jwks.json"
                 logger.info(f"🔑 从令牌issuer生成JWKS URL: {jwks_url}")
                 return jwks_url

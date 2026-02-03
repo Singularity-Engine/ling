@@ -312,9 +312,9 @@ class WebSocketHandler:
                         logger.warning(f"取消失败连接客户端 {client_uid} 的对话任务时出现错误: {e}")
                 self.current_conversation_tasks.pop(client_uid, None)
             
-            # 从群组中移除客户端
+            # 从群组中移除客户端（客户端自己移除自己）
             if hasattr(self, 'chat_group_manager') and self.chat_group_manager:
-                self.chat_group_manager.remove_client_from_group(client_uid)
+                self.chat_group_manager.remove_client_from_group(client_uid, client_uid)
             
             logger.debug(f"已清理失败连接的客户端数据: {client_uid}")
             

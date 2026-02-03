@@ -22,16 +22,21 @@ def check_environment():
 
     logger.info(f"✅ Python版本: {sys.version}")
 
-    # 检查必要的包
-    required_packages = [
-        'fastapi', 'uvicorn', 'pydantic', 'loguru',
-        'psycopg2', 'pyjwt', 'aiohttp'
-    ]
+    # 检查必要的包 (包名 -> 导入名的映射)
+    required_packages = {
+        'fastapi': 'fastapi',
+        'uvicorn': 'uvicorn',
+        'pydantic': 'pydantic',
+        'loguru': 'loguru',
+        'psycopg2': 'psycopg2',
+        'pyjwt': 'jwt',  # pyjwt 的导入名是 jwt
+        'aiohttp': 'aiohttp'
+    }
 
     missing_packages = []
-    for package in required_packages:
+    for package, import_name in required_packages.items():
         try:
-            __import__(package.replace('-', '_'))
+            __import__(import_name)
         except ImportError:
             missing_packages.append(package)
 
