@@ -1044,7 +1044,14 @@ class LangchainAgentWrapper(AgentInterface):
 
                 # 返回错误消息
                 display_text = DisplayText(text=error_message, name="AI", avatar="")
-                tts_text = filter_text(text=error_message, ignore_brackets=True)
+                tts_text = filter_text(
+                    text=error_message,
+                    remove_special_char=False,
+                    ignore_brackets=True,
+                    ignore_parentheses=True,
+                    ignore_asterisks=True,
+                    ignore_angle_brackets=True,
+                )
                 yield SentenceOutput(display_text=display_text, tts_text=tts_text, actions=Actions())
                 return
 
