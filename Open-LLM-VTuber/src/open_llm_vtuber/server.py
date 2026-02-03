@@ -118,7 +118,16 @@ class WebSocketServer:
                 name="web_tool",
             )
 
-            # 前后端分离架构：使用独立的前端服务，不在此挂载前端静态文件
+            # Mount frontend static files (for local deployment)
+            if os.path.exists("frontend"):
+                self.app.mount(
+                    "/",
+                    CustomStaticFiles(directory="frontend", html=True),
+                    name="frontend",
+                )
+                logger.info("✅ Frontend static files mounted at /")
+            else:
+                logger.warning("⚠️ Frontend directory not found, using separate frontend service")
 
             # 启动 MCP 配置热更新后台监听任务
             try:
