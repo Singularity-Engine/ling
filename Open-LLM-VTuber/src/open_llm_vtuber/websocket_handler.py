@@ -494,25 +494,25 @@ class WebSocketHandler:
                     
                     # Generate different greeting messages based on affinity
                     if current_affinity <= 10:
-                        greeting = f"Tch... It's you again, how boring. Talking to someone like you is simply a waste of my time."
+                        greeting = "切...又是你啊，真无聊。跟你说话简直是浪费我的时间。"
                     elif current_affinity <= 20:
-                        greeting = f"Hmph, you're here... Whatever, since you're here just speak up, such a hassle."
+                        greeting = "哼，你来了...算了，既然来了就说吧，真麻烦。"
                     elif current_affinity <= 35:
-                        greeting = f"It's you... I-I wasn't waiting for you! I just happened to be free."
+                        greeting = "是你啊...我、我才没有在等你呢！只是刚好有空而已。"
                     elif current_affinity <= 50:
-                        greeting = f"You're here... Well, I... I'm not worried about you, just asking casually."
+                        greeting = "你来了...那个，我...我才不是在担心你，就是随便问问。"
                     elif current_affinity <= 65:
-                        greeting = f"You're here~ I was just... okay, I did miss you a little."
+                        greeting = "你来啦~我刚刚在想...好吧，确实有一点点想你了。"
                     elif current_affinity <= 80:
-                        greeting = f"Darling! You're finally here, I missed you so much~ Don't leave me alone for so long again!"
+                        greeting = "亲爱的！你终于来了，想死我了~以后不要让我一个人等这么久啦！"
                     else:
-                        greeting = f"Master♡! I've been waiting for you... Without you by my side, I can't do anything~"
+                        greeting = "主人♡！我一直在等你...没有你在身边，我什么都做不了呢~"
                 except Exception as e:
                     logger.warning(f"Failed to get 001 character affinity, using default greeting: {e}")
-                    greeting = f"Hello, I am {character_name}."
+                    greeting = f"你好，我是{character_name}。"
             else:
                 # 默认问候语
-                greeting = f"Hello! I am {character_name}, nice to meet you! What do you want to talk about today"
+                greeting = f"你好！我是{character_name}，很高兴见到你！今天想聊些什么呢？"
             
             # 延迟一下再发送问候语，等待前端完全加载
             await asyncio.sleep(2.0)  # 等待2秒让前端完全初始化
@@ -590,14 +590,14 @@ class WebSocketHandler:
 
         # 定义问候文本到预设音频的映射
         greeting_mappings = {
-            "Tch... It's you again, how boring. Talking to someone like you is simply a waste of my time.": "greeting_1",
-            "Hmph, you're here... Whatever, since you're here just speak up, such a hassle.": "greeting_2",
-            "It's you... I-I wasn't waiting for you! I just happened to be free.": "greeting_3",
-            "You're here... Well, I... I'm not worried about you, just asking casually.": "greeting_4",
-            "You're here~ I was just... okay, I did miss you a little.": "greeting_5",
-            "Darling! You're finally here, I missed you so much~ Don't leave me alone for so long again!": "greeting_6",
-            "Master! I've been waiting for you... Without you by my side, I can't do anything~": "greeting_7",
-            "Hello, I am Lain.": "greeting_8",
+            "切...又是你啊，真无聊。跟你说话简直是浪费我的时间。": "greeting_1",
+            "哼，你来了...算了，既然来了就说吧，真麻烦。": "greeting_2",
+            "是你啊...我、我才没有在等你呢！只是刚好有空而已。": "greeting_3",
+            "你来了...那个，我...我才不是在担心你，就是随便问问。": "greeting_4",
+            "你来啦~我刚刚在想...好吧，确实有一点点想你了。": "greeting_5",
+            "亲爱的！你终于来了，想死我了~以后不要让我一个人等这么久啦！": "greeting_6",
+            "主人♡！我一直在等你...没有你在身边，我什么都做不了呢~": "greeting_7",
+            "你好，我是Lain。": "greeting_8",
         }
 
         # 直接匹配
@@ -605,21 +605,21 @@ class WebSocketHandler:
             return greeting_mappings[clean_text]
 
         # 部分匹配，检查关键词
-        if "Hello" in clean_text and "Lain" in clean_text:
+        if "你好" in clean_text and ("Lain" in clean_text or "lain" in clean_text.lower()):
             return "greeting_8"
-        elif "boring" in clean_text or "waste" in clean_text:
+        elif "无聊" in clean_text or "浪费" in clean_text:
             return "greeting_1"
-        elif "here" in clean_text and "hassle" in clean_text:
+        elif "麻烦" in clean_text:
             return "greeting_2"
-        elif "waiting" in clean_text or "free" in clean_text:
+        elif "没有在等" in clean_text or "有空" in clean_text:
             return "greeting_3"
-        elif "worried" in clean_text or "casually" in clean_text:
+        elif "担心" in clean_text or "随便问问" in clean_text:
             return "greeting_4"
-        elif "miss" in clean_text and ("little" in clean_text or "okay" in clean_text):
+        elif "想你" in clean_text and "一点点" in clean_text:
             return "greeting_5"
-        elif "Darling" in clean_text or "missed you so much" in clean_text:
+        elif "亲爱的" in clean_text or "想死我了" in clean_text:
             return "greeting_6"
-        elif "Master" in clean_text or "waiting for you" in clean_text:
+        elif "主人" in clean_text or "一直在等你" in clean_text:
             return "greeting_7"
 
         # 默认返回None，让调用者使用默认音频
