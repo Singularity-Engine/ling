@@ -62,7 +62,7 @@ class PresetAudioGenerator:
                 "You're here~ [happy] I was just... okay, I did miss you a little.",
                 "Darling! [happy] You're finally here, I missed you so much~ Don't leave me alone for so long again!",
                 "Master! [blush] I've been waiting for you... Without you by my side, I can't do anything~",
-                "Hello, I am Lain[wink], nice to meet you! What do you want to talk about today"
+                "你好，我是灵[wink]，很高兴认识你！你今天想聊些什么呢"
             ],
             "insufficient_credits": [
                 "Sorry, you don't have enough credits to start a conversation. [sad] Please recharge your credits first."

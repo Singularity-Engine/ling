@@ -569,7 +569,7 @@ class WebSocketHandler:
                 await _play_preset_audio_direct(
                     websocket=websocket,
                     preset_key="greeting_8",
-                    message="Hello, I am Lain.",
+                    message="你好，我是灵。",
                     character_name=character_name,
                     expression="wink"  # 使用眨眼表情
                 )
@@ -597,7 +597,7 @@ class WebSocketHandler:
             "你来啦~我刚刚在想...好吧，确实有一点点想你了。": "greeting_5",
             "亲爱的！你终于来了，想死我了~以后不要让我一个人等这么久啦！": "greeting_6",
             "主人♡！我一直在等你...没有你在身边，我什么都做不了呢~": "greeting_7",
-            "你好，我是Lain。": "greeting_8",
+            "你好，我是灵。": "greeting_8",
         }
 
         # 直接匹配
@@ -605,7 +605,7 @@ class WebSocketHandler:
             return greeting_mappings[clean_text]
 
         # 部分匹配，检查关键词
-        if "你好" in clean_text and ("Lain" in clean_text or "lain" in clean_text.lower()):
+        if "你好" in clean_text and ("灵" in clean_text or "Ling" in clean_text or "ling" in clean_text.lower()):
             return "greeting_8"
         elif "无聊" in clean_text or "浪费" in clean_text:
             return "greeting_1"
