@@ -31,10 +31,10 @@ ws.addEventListener('message', (event) => {
       id: crypto.randomUUID(),
       method: 'connect',
       params: {
-        minProtocol: 1,
-        maxProtocol: 1,
+        minProtocol: 3,
+        maxProtocol: 3,
         client: {
-          id: 'ling-avatar-test',
+          id: 'cli',
           displayName: 'Gateway Test Script',
           version: '1.0.0',
           platform: 'node',

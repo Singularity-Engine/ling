@@ -223,10 +223,10 @@ class GatewayConnector {
             id: crypto.randomUUID(),
             method: 'connect',
             params: {
-              minProtocol: 1,
-              maxProtocol: 1,
+              minProtocol: 3,
+              maxProtocol: 3,
               client: {
-                id: this.options?.clientId || 'ling-avatar',
+                id: this.options?.clientId || 'cli',
                 displayName: this.options?.displayName || '灵 Avatar',
                 version: '1.0.0',
                 platform: 'web',
