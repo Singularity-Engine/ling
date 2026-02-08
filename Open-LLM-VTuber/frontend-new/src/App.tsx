@@ -107,13 +107,13 @@ function MainContent(): JSX.Element {
       {/* ===== Layer 1.5: 右侧工具栏 ===== */}
       <Box
         position="absolute"
-        top="16px"
-        right="12px"
+        top={{ base: "8px", md: "16px" }}
+        right={{ base: "8px", md: "12px" }}
         zIndex={20}
         display="flex"
         flexDirection="column"
         alignItems="center"
-        gap="12px"
+        gap={{ base: "8px", md: "12px" }}
       >
         {/* 好感度徽章 */}
         <AffinityBadge />
@@ -122,7 +122,7 @@ function MainContent(): JSX.Element {
         <Box
           as="button"
           onClick={toggleChat}
-          w="42px" h="42px"
+          w={{ base: "36px", md: "42px" }} h={{ base: "36px", md: "42px" }}
           borderRadius="50%"
           bg={chatExpanded ? "rgba(139, 92, 246, 0.4)" : "rgba(255, 255, 255, 0.08)"}
           border="1px solid"
@@ -160,7 +160,7 @@ function MainContent(): JSX.Element {
           position="relative"
           pointerEvents="auto"
           transition="all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
-          maxH={chatExpanded ? "50vh" : "0px"}
+          maxH={chatExpanded ? { base: "35vh", md: "40vh" } : "0px"}
           opacity={chatExpanded ? 1 : 0}
           css={{
             maskImage: "linear-gradient(to bottom, transparent 0%, black 15%)",
