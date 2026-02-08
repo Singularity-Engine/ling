@@ -1,5 +1,5 @@
 import { Box, Textarea, Text } from "@chakra-ui/react";
-import { memo, useState, useRef, useCallback } from "react";
+import { memo, useState, useRef, useCallback, useEffect } from "react";
 import { useWebSocket } from "@/context/websocket-context";
 import { useChatHistory } from "@/context/chat-history-context";
 import { useAiState } from "@/context/ai-state-context";
@@ -49,6 +49,20 @@ export const InputBar = memo(() => {
   const { aiState } = useAiState();
   const { interrupt } = useInterrupt();
   const { micOn, startMic, stopMic } = useVAD();
+
+  // Listen for fill-input events from CapabilityRing
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const text = (e as CustomEvent).detail?.text;
+      if (typeof text === 'string') {
+        setInputText(text);
+        // Focus the textarea so user can continue typing
+        setTimeout(() => textareaRef.current?.focus(), 0);
+      }
+    };
+    window.addEventListener('fill-input', handler);
+    return () => window.removeEventListener('fill-input', handler);
+  }, []);
 
   const hasText = inputText.trim().length > 0;
   const isAiBusy = aiState === "thinking" || aiState === "thinking-speaking";
@@ -179,7 +193,7 @@ export const InputBar = memo(() => {
           onKeyDown={handleKeyDown}
           onCompositionStart={() => setIsComposing(true)}
           onCompositionEnd={() => setIsComposing(false)}
-          placeholder={micOn ? "语音聆听中..." : "和 Lain 说点什么..."}
+          placeholder={micOn ? "语音聆听中..." : "和灵说点什么..."}
           rows={1}
           resize="none"
           flex="1"

@@ -151,19 +151,19 @@ async def handle_conversation_trigger(
         websocket_headers = dict(websocket.headers) if hasattr(websocket, 'headers') else {}
         extracted_user_id = get_user_id_from_websocket_cookie_only(client_uid, websocket_headers, "default_user")
 
-        # 如果用户是default_user，拒绝对话并播放TTS提示
-        if extracted_user_id == "default_user":
-            logger.warning(f"🚫 客户端 {client_uid} 使用default_user身份，拒绝对话")
-
-            # 发送阻止消息
-            await websocket.send_text(json.dumps({
-                "type": "conversation-blocked",
-                "message": "Please log in first to start a conversation"
-            }))
-
-            # 播放英文TTS提示
-            await _play_login_required_tts(context, websocket)
-            return
+# [DEMO MODE]         # 如果用户是default_user，拒绝对话并播放TTS提示
+# [DEMO MODE]         if extracted_user_id == "default_user":
+# [DEMO MODE]             logger.warning(f"🚫 客户端 {client_uid} 使用default_user身份，拒绝对话")
+# [DEMO MODE] 
+# [DEMO MODE]             # 发送阻止消息
+# [DEMO MODE]             await websocket.send_text(json.dumps({
+# [DEMO MODE]                 "type": "conversation-blocked",
+# [DEMO MODE]                 "message": "Please log in first to start a conversation"
+# [DEMO MODE]             }))
+# [DEMO MODE] 
+# [DEMO MODE]             # 播放英文TTS提示
+# [DEMO MODE]             await _play_login_required_tts(context, websocket)
+# [DEMO MODE]             return
 
         logger.info(f"✅ 用户 {extracted_user_id} 验证通过，允许对话")
 

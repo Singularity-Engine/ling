@@ -213,14 +213,14 @@ function MainContent(): JSX.Element {
 
 function App(): JSX.Element {
   const [showLanding, setShowLanding] = useState(() => {
-    return !sessionStorage.getItem('lain-visited');
+    return !sessionStorage.getItem('ling-visited');
   });
 
   if (showLanding) {
     return (
       <LandingAnimation onComplete={() => {
         setShowLanding(false);
-        sessionStorage.setItem('lain-visited', 'true');
+        sessionStorage.setItem('ling-visited', 'true');
       }} />
     );
   }

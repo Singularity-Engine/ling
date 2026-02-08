@@ -23,6 +23,7 @@ import { useInterrupt } from '@/hooks/utils/use-interrupt';
 import { useBrowser } from '@/context/browser-context';
 import { useAffinity } from '@/context/affinity-context';
 import { useToolState, categorize } from '@/context/tool-state-context';
+import { getUserId } from '@/utils/user-identity';
 
 function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
@@ -43,6 +44,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const { interrupt } = useInterrupt();
   const { setBrowserViewData } = useBrowser();
   const affinityContext = useAffinity();
+  const { startTool, updateTool, completeTool, failTool } = useToolState();
 
   useEffect(() => {
     autoStartMicOnConvEndRef.current = autoStartMicOnConvEnd;
@@ -307,6 +309,20 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             content: message.content || '',
             timestamp: message.timestamp || new Date().toISOString(),
           });
+
+          // Bridge to ToolStateContext for Soul Space visual effects
+          const toolStatus = message.status as string;
+          if (toolStatus === 'running') {
+            startTool({
+              name: message.tool_name,
+              category: categorize(message.tool_name),
+              arguments: message.content || '',
+            });
+          } else if (toolStatus === 'completed') {
+            completeTool(message.tool_id, message.content || '');
+          } else if (toolStatus === 'error') {
+            failTool(message.tool_id, message.content || 'Unknown error');
+          }
         } else {
           console.warn('Received incomplete tool_call_status message:', message);
         }
@@ -332,7 +348,9 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   }, [aiState, addAudioTask, appendHumanMessage, baseUrl, bgUrlContext, setAiState, setConfName, setConfUid, setConfigFiles, setCurrentHistoryUid, setHistoryList, setMessages, setModelInfo, setSubtitleText, startMic, stopMic, setSelfUid, setGroupMembers, setIsOwner, backendSynthComplete, setBackendSynthComplete, clearResponse, handleControlMessage, appendOrUpdateToolCallMessage, interrupt, setBrowserViewData, t, affinityContext]);
 
   useEffect(() => {
-    wsService.connect(wsUrl);
+    const url = new URL(wsUrl);
+    url.searchParams.set('user_id', getUserId());
+    wsService.connect(url.toString());
   }, [wsUrl]);
 
   useEffect(() => {
