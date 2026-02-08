@@ -9,7 +9,6 @@ import { useChatHistory } from '@/context/chat-history-context';
 import { audioTaskQueue } from '@/utils/task-queue';
 import { audioManager } from '@/utils/audio-manager';
 import { toaster } from '@/components/ui/toaster';
-import { useWebSocket } from '@/context/websocket-context';
 import { DisplayText } from '@/services/websocket-service';
 import { useLive2DExpression } from '@/hooks/canvas/use-live2d-expression';
 import * as LAppDefine from '../../../WebSDK/src/lappdefine';
@@ -35,7 +34,6 @@ export const useAudioTask = () => {
   const { aiState, backendSynthComplete, setBackendSynthComplete } = useAiState();
   const { setSubtitleText } = useSubtitle();
   const { appendResponse, appendAIMessage } = useChatHistory();
-  const { sendMessage } = useWebSocket();
   const { setExpression } = useLive2DExpression();
 
   // State refs to avoid stale closures
@@ -80,7 +78,7 @@ export const useAudioTask = () => {
       return;
     }
 
-    const { audioBase64, displayText, expressions, forwarded } = options;
+    const { audioBase64, displayText, expressions } = options;
 
     // Update display text
     if (displayText) {
@@ -88,13 +86,6 @@ export const useAudioTask = () => {
       appendAI(displayText.text, displayText.name, displayText.avatar);
       if (audioBase64) {
         updateSubtitle(displayText.text);
-      }
-      if (!forwarded) {
-        sendMessage({
-          type: "audio-play-start",
-          display_text: displayText,
-          forwarded: true,
-        });
       }
     }
 
@@ -234,7 +225,6 @@ export const useAudioTask = () => {
       await audioTaskQueue.waitForCompletion();
       if (isMounted && backendSynthComplete) {
         stopCurrentAudioAndLipSync();
-        sendMessage({ type: "frontend-playback-complete" });
         setBackendSynthComplete(false);
       }
     };
@@ -244,7 +234,7 @@ export const useAudioTask = () => {
     return () => {
       isMounted = false;
     };
-  }, [backendSynthComplete, sendMessage, setBackendSynthComplete, stopCurrentAudioAndLipSync]);
+  }, [backendSynthComplete, setBackendSynthComplete, stopCurrentAudioAndLipSync]);
 
   /**
    * Add a new audio task to the queue

@@ -1,60 +1,35 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useWebSocket } from '@/context/websocket-context';
 import { toaster } from '@/components/ui/toaster';
 
 export const useGroupDrawer = () => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [inviteUid, setInviteUid] = useState('');
-  const { sendMessage } = useWebSocket();
 
-  // Request latest group information to update the display
-  const requestGroupInfo = useCallback(() => {
-    sendMessage({
-      type: 'request-group-info',
+  const showUnsupported = useCallback(() => {
+    toaster.create({
+      title: '群组功能暂不可用',
+      type: 'info',
+      duration: 2000,
     });
-  }, [sendMessage]);
+  }, []);
+
+  const requestGroupInfo = useCallback(() => {
+    // Gateway doesn't support group functionality
+  }, []);
 
   const handleInvite = useCallback(async () => {
-    if (!inviteUid.trim()) {
-      toaster.create({
-        title: t('error.enterValidUuid'),
-        type: 'error',
-        duration: 2000,
-      });
-      return;
-    }
+    showUnsupported();
+  }, [showUnsupported]);
 
-    sendMessage({
-      type: 'add-client-to-group',
-      invitee_uid: inviteUid.trim(),
-    });
-    setInviteUid('');
+  const handleRemove = useCallback((_targetUid: string) => {
+    showUnsupported();
+  }, [showUnsupported]);
 
-    // Add a small delay to ensure server has processed the operation
-    setTimeout(requestGroupInfo, 100);
-  }, [inviteUid, sendMessage, requestGroupInfo, t]);
-
-  const handleRemove = useCallback((targetUid: string) => {
-    sendMessage({
-      type: 'remove-client-from-group',
-      target_uid: targetUid,
-    });
-
-    // Add a small delay to ensure server has processed the operation
-    setTimeout(requestGroupInfo, 100);
-  }, [sendMessage, requestGroupInfo]);
-
-  const handleLeaveGroup = useCallback((selfUid: string) => {
-    sendMessage({
-      type: 'remove-client-from-group',
-      target_uid: selfUid,
-    });
-
-    // Add a small delay to ensure server has processed the operation
-    setTimeout(requestGroupInfo, 100);
-  }, [sendMessage, requestGroupInfo]);
+  const handleLeaveGroup = useCallback((_selfUid: string) => {
+    showUnsupported();
+  }, [showUnsupported]);
 
   return {
     isOpen,
