@@ -1,4 +1,3 @@
-import { Box } from '@chakra-ui/react';
 import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { canvasStyles } from './canvas-styles';
@@ -23,17 +22,22 @@ const WebSocketStatus = memo((): JSX.Element => {
   } = useWSStatus();
 
   return (
-    <Box
-      {...canvasStyles.wsStatus.container}
-      backgroundColor={color}
+    <div
+      style={{
+        ...canvasStyles.wsStatus.container,
+        backgroundColor: color,
+        cursor: isDisconnected ? 'pointer' : 'default',
+      }}
       onClick={handleClick}
-      cursor={isDisconnected ? 'pointer' : 'default'}
-      _hover={{
-        opacity: isDisconnected ? 0.8 : 1,
+      onMouseEnter={(e) => {
+        if (isDisconnected) e.currentTarget.style.opacity = '0.8';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.opacity = '1';
       }}
     >
       <MemoizedStatusContent textKey={textKey} />
-    </Box>
+    </div>
   );
 });
 

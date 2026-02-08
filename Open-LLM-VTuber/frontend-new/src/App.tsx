@@ -1,4 +1,3 @@
-import { Box, ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import { useState, useEffect, useCallback, Component, ErrorInfo, ReactNode } from "react";
 import { LandingAnimation } from "./components/landing/LandingAnimation";
 import { AiStateProvider } from "./context/ai-state-context";
@@ -9,7 +8,6 @@ import WebSocketHandler from "./services/websocket-handler";
 import { CameraProvider } from "./context/camera-context";
 import { ChatHistoryProvider } from "./context/chat-history-context";
 import { CharacterConfigProvider } from "./context/character-config-context";
-import { Toaster } from "./components/ui/toaster";
 import { VADProvider } from "./context/vad-context";
 import { Live2D } from "./components/canvas/live2d";
 import { ProactiveSpeakProvider } from "./context/proactive-speak-context";
@@ -52,11 +50,13 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
 
 function MainContent(): JSX.Element {
   const [chatExpanded, setChatExpanded] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty("--vh", `${vh}px`);
+      setIsMobile(window.innerWidth < 768);
     };
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -79,139 +79,142 @@ function MainContent(): JSX.Element {
   }, []);
 
   return (
-    <Box
-      position="relative"
-      height="100vh"
-      width="100vw"
-      bg="#0a0015"
-      overflow="hidden"
+    <div
+      style={{
+        position: "relative",
+        height: "100vh",
+        width: "100vw",
+        background: "#0a0015",
+        overflow: "hidden",
+      }}
     >
       {/* ===== Layer -1: 星空背景 ===== */}
-      <Box position="absolute" inset="0" zIndex={-1}>
+      <div style={{ position: "absolute", inset: 0, zIndex: -1 }}>
         <StarField />
-      </Box>
+      </div>
 
       {/* ===== Layer 0: Live2D 全屏 ===== */}
-      <Box position="absolute" inset="0" zIndex={0}>
+      <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
         <Live2D />
-      </Box>
+      </div>
 
-      {/* ===== Layer 0.5: 工具状态反馈层（背景光 + 思考光环） ===== */}
-      <Box position="absolute" inset="0" zIndex={1} pointerEvents="none">
+      {/* ===== Layer 0.5: 工具状态反馈层 ===== */}
+      <div style={{ position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none" }}>
         <BackgroundReactor />
         <ThoughtHalo />
-      </Box>
+      </div>
 
-      {/* ===== Layer 1: 工具结果水晶（左右两侧浮动） ===== */}
+      {/* ===== Layer 1: 工具结果水晶 ===== */}
       <CrystalField />
 
       {/* ===== Layer 1.5: 右侧工具栏 ===== */}
-      <Box
-        position="absolute"
-        top={{ base: "8px", md: "16px" }}
-        right={{ base: "8px", md: "12px" }}
-        zIndex={20}
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        gap={{ base: "8px", md: "12px" }}
+      <div
+        style={{
+          position: "absolute",
+          top: isMobile ? "8px" : "16px",
+          right: isMobile ? "8px" : "12px",
+          zIndex: 20,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: isMobile ? "8px" : "12px",
+        }}
       >
-        {/* 好感度徽章 */}
         <AffinityBadge />
-
-        {/* 连接状态指示器 */}
         <ConnectionStatus />
-
-        {/* 聊天展开/收起按钮 */}
-        <Box
-          as="button"
+        <button
           onClick={toggleChat}
-          w={{ base: "36px", md: "42px" }} h={{ base: "36px", md: "42px" }}
-          borderRadius="50%"
-          bg={chatExpanded ? "rgba(139, 92, 246, 0.4)" : "rgba(255, 255, 255, 0.08)"}
-          border="1px solid"
-          borderColor={chatExpanded ? "rgba(139, 92, 246, 0.6)" : "rgba(255, 255, 255, 0.12)"}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          cursor="pointer"
-          transition="all 0.3s ease"
-          backdropFilter="blur(8px)"
-          _hover={{ bg: "rgba(139, 92, 246, 0.3)" }}
           title={chatExpanded ? "收起对话" : "展开对话"}
+          style={{
+            width: isMobile ? "36px" : "42px",
+            height: isMobile ? "36px" : "42px",
+            borderRadius: "50%",
+            background: chatExpanded ? "rgba(139, 92, 246, 0.4)" : "rgba(255, 255, 255, 0.08)",
+            border: chatExpanded ? "1px solid rgba(139, 92, 246, 0.6)" : "1px solid rgba(255, 255, 255, 0.12)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            padding: 0,
+          }}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
-        </Box>
-      </Box>
+        </button>
+      </div>
 
       {/* ===== Layer 2: 浮动聊天区域 ===== */}
-      <Box
-        position="absolute"
-        bottom="0"
-        left="0"
-        right="0"
-        zIndex={25}
-        display="flex"
-        flexDirection="column"
-        pointerEvents="none"
-        transition="all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 25,
+          display: "flex",
+          flexDirection: "column",
+          pointerEvents: "none",
+          transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+        }}
       >
-        {/* 对话气泡区 — 可展开/收起 */}
-        <Box
-          overflow="hidden"
-          position="relative"
-          pointerEvents="auto"
-          transition="all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
-          maxH={chatExpanded ? { base: "35vh", md: "40vh" } : "0px"}
-          opacity={chatExpanded ? 1 : 0}
-          css={{
+        <div
+          style={{
+            overflow: "hidden",
+            position: "relative",
+            pointerEvents: "auto",
+            transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+            maxHeight: chatExpanded ? (isMobile ? "35vh" : "40vh") : "0px",
+            opacity: chatExpanded ? 1 : 0,
             maskImage: "linear-gradient(to bottom, transparent 0%, black 15%)",
             WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 15%)",
           }}
         >
           <ChatArea />
-        </Box>
+        </div>
 
-        {/* 能力环 — 对话区下方快捷入口 */}
-        <Box pointerEvents="auto">
+        <div style={{ pointerEvents: "auto" }}>
           <CapabilityRing />
-        </Box>
+        </div>
 
-        {/* 状态提示条 — 收起时显示向上箭头 */}
         {!chatExpanded && (
-          <Box
-            pointerEvents="auto"
-            display="flex"
-            justifyContent="center"
-            py="6px"
-            cursor="pointer"
+          <div
+            style={{
+              pointerEvents: "auto",
+              display: "flex",
+              justifyContent: "center",
+              padding: "6px 0",
+              cursor: "pointer",
+            }}
             onClick={toggleChat}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(139, 92, 246, 0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="18 15 12 9 6 15" />
             </svg>
-          </Box>
+          </div>
         )}
 
-        {/* 输入栏 — 始终底部显示 */}
-        <Box
-          flexShrink={0}
-          pointerEvents="auto"
-          bg="rgba(10, 0, 21, 0.75)"
-          backdropFilter="blur(16px)"
-          borderTop="1px solid rgba(139, 92, 246, 0.1)"
+        <div
+          style={{
+            flexShrink: 0,
+            pointerEvents: "auto",
+            background: "rgba(10, 0, 21, 0.75)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            borderTop: "1px solid rgba(139, 92, 246, 0.1)",
+          }}
         >
           <InputBar />
-        </Box>
+        </div>
 
-        {/* 好感度状态条 — 最底部 */}
-        <Box flexShrink={0} pointerEvents="auto">
+        <div style={{ flexShrink: 0, pointerEvents: "auto" }}>
           <AffinityBar />
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -231,42 +234,39 @@ function App(): JSX.Element {
 
   return (
     <ErrorBoundary>
-      <ChakraProvider value={defaultSystem}>
-        <ModeProvider>
-          <CameraProvider>
-            <ScreenCaptureProvider>
-              <CharacterConfigProvider>
-                <ChatHistoryProvider>
-                  <AiStateProvider>
-                    <ProactiveSpeakProvider>
-                      <Live2DConfigProvider>
-                        <SubtitleProvider>
-                          <VADProvider>
-                            <BgUrlProvider>
-                              <GroupProvider>
-                                <BrowserProvider>
-                                  <ToolStateProvider>
-                                    <AffinityProvider>
-                                      <WebSocketHandler>
-                                        <Toaster />
-                                        <MainContent />
-                                      </WebSocketHandler>
-                                    </AffinityProvider>
-                                  </ToolStateProvider>
-                                </BrowserProvider>
-                              </GroupProvider>
-                            </BgUrlProvider>
-                          </VADProvider>
-                        </SubtitleProvider>
-                      </Live2DConfigProvider>
-                    </ProactiveSpeakProvider>
-                  </AiStateProvider>
-                </ChatHistoryProvider>
-              </CharacterConfigProvider>
-            </ScreenCaptureProvider>
-          </CameraProvider>
-        </ModeProvider>
-      </ChakraProvider>
+      <ModeProvider>
+        <CameraProvider>
+          <ScreenCaptureProvider>
+            <CharacterConfigProvider>
+              <ChatHistoryProvider>
+                <AiStateProvider>
+                  <ProactiveSpeakProvider>
+                    <Live2DConfigProvider>
+                      <SubtitleProvider>
+                        <VADProvider>
+                          <BgUrlProvider>
+                            <GroupProvider>
+                              <BrowserProvider>
+                                <ToolStateProvider>
+                                  <AffinityProvider>
+                                    <WebSocketHandler>
+                                      <MainContent />
+                                    </WebSocketHandler>
+                                  </AffinityProvider>
+                                </ToolStateProvider>
+                              </BrowserProvider>
+                            </GroupProvider>
+                          </BgUrlProvider>
+                        </VADProvider>
+                      </SubtitleProvider>
+                    </Live2DConfigProvider>
+                  </ProactiveSpeakProvider>
+                </AiStateProvider>
+              </ChatHistoryProvider>
+            </CharacterConfigProvider>
+          </ScreenCaptureProvider>
+        </CameraProvider>
+      </ModeProvider>
     </ErrorBoundary>
   );
 }

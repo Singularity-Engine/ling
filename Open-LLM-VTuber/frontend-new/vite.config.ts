@@ -56,22 +56,10 @@ export default defineConfig({
     outDir: path.join(__dirname, 'dist'),
     emptyOutDir: true,
     assetsDir: "assets",
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
-              return 'vendor-react';
-            }
-            if (id.includes('pixi') || id.includes('live2d')) {
-              return 'vendor-live2d';
-            }
-            if (id.includes('@chakra-ui') || id.includes('@emotion') || id.includes('framer-motion')) {
-              return 'vendor-ui';
-            }
-            return 'vendor-misc';
-          }
-        },
+        // 不再手动分 chunk，让 Rollup 自动处理避免循环依赖
       },
     },
   },

@@ -1,4 +1,3 @@
-import { Box, Text } from '@chakra-ui/react';
 import { memo } from 'react';
 import { canvasStyles } from './canvas-styles';
 import { useSubtitleDisplay } from '@/hooks/canvas/use-subtitle-display';
@@ -11,9 +10,9 @@ interface SubtitleTextProps {
 
 // Reusable components
 const SubtitleText = memo(({ text }: SubtitleTextProps) => (
-  <Text {...canvasStyles.subtitle.text}>
+  <span style={canvasStyles.subtitle.text}>
     {text}
-  </Text>
+  </span>
 ));
 
 SubtitleText.displayName = 'SubtitleText';
@@ -26,9 +25,9 @@ const Subtitle = memo((): JSX.Element | null => {
   if (!isLoaded || !subtitleText || !showSubtitle) return null;
 
   return (
-    <Box {...canvasStyles.subtitle.container}>
+    <div style={canvasStyles.subtitle.container}>
       <SubtitleText text={subtitleText} />
-    </Box>
+    </div>
   );
 });
 

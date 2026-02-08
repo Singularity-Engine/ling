@@ -19,44 +19,46 @@ console.error = (...args: any[]) => {
   if (typeof args[0] === 'string') {
     const shouldIgnore = errorMessagesToIgnore.some(msg => args[0].startsWith(msg));
     if (shouldIgnore) {
-      return; // Suppress the warning
+      return;
     }
   }
-  // Call the original console.error for other messages
   originalConsoleError.apply(console, args);
 };
 
 if (typeof window !== 'undefined') {
   (window as any).getLAppAdapter = () => LAppAdapter.getInstance();
 
-  // Dynamically load the Live2D Core script
-  const loadLive2DCore = () => {
-    return new Promise<void>((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = './libs/live2dcubismcore.js'; // Path to the copied script
-      script.onload = () => {
-        console.log('Live2D Cubism Core loaded successfully.');
-        resolve();
-      };
-      script.onerror = (error) => {
-        console.error('Failed to load Live2D Cubism Core:', error);
-        reject(error);
-      };
-      document.head.appendChild(script);
-    });
-  };
-
-  // Load the script and then render the app
   const renderApp = () => {
     createRoot(document.getElementById('root')!).render(
       <App />,
     );
   };
 
+  // Load Live2D Core with timeout protection
+  const loadLive2DCore = () => {
+    return new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        console.warn('Live2D Core load timeout (3s), rendering without it.');
+        resolve(); // 超时也渲染App
+      }, 3000);
+
+      const script = document.createElement('script');
+      script.src = './libs/live2dcubismcore.js';
+      script.onload = () => {
+        clearTimeout(timeout);
+        console.log('Live2D Cubism Core loaded successfully.');
+        resolve();
+      };
+      script.onerror = (error) => {
+        clearTimeout(timeout);
+        console.error('Failed to load Live2D Cubism Core:', error);
+        resolve(); // 失败也渲染App
+      };
+      document.head.appendChild(script);
+    });
+  };
+
   loadLive2DCore()
     .then(() => renderApp())
-    .catch((error) => {
-      console.error('Live2D Core failed to load, rendering app without it:', error);
-      renderApp(); // 仍然渲染 App
-    });
+    .catch(() => renderApp());
 }

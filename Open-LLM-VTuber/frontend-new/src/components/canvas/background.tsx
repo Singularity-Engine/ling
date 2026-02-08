@@ -1,4 +1,3 @@
-import { Box, Image } from '@chakra-ui/react';
 import { memo, useEffect, useRef } from 'react';
 import { canvasStyles } from './canvas-styles';
 import { useCamera } from '@/context/camera-context';
@@ -26,7 +25,7 @@ const Background = memo(({ children }: { children?: React.ReactNode }) => {
   }, [backgroundStream]);
 
   return (
-    <Box {...canvasStyles.background.container}>
+    <div style={canvasStyles.background.container}>
       {useCameraBackground ? (
         <video
           ref={videoRef}
@@ -40,14 +39,14 @@ const Background = memo(({ children }: { children?: React.ReactNode }) => {
           }}
         />
       ) : (
-        <Image
-          {...canvasStyles.background.image}
+        <img
+          style={canvasStyles.background.image}
           src={backgroundUrl}
           alt="background"
         />
       )}
       {children}
-    </Box>
+    </div>
   );
 });
 

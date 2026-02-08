@@ -25,14 +25,46 @@
     <title>灵 · Singularity Engine</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💜</text></svg>" />
     <style>
-      /* 防止 FOUC (Flash of Unstyled Content) */
       html, body { margin: 0; padding: 0; background: #0a0015; overflow: hidden; }
       #root { width: 100vw; height: 100vh; }
+      #loading-fallback {
+        position: fixed; inset: 0; z-index: 99999;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        background: #0a0015; color: rgba(255,255,255,0.6); font-family: system-ui, sans-serif;
+      }
+      #loading-fallback .spinner { width: 32px; height: 32px; border: 3px solid rgba(139,92,246,0.2); border-top-color: #8b5cf6; border-radius: 50%; animation: spin 0.8s linear infinite; }
+      #loading-fallback .text { margin-top: 16px; font-size: 14px; }
+      #loading-fallback .error { color: #ff6b6b; margin-top: 12px; font-size: 12px; max-width: 80vw; word-break: break-all; display: none; }
+      @keyframes spin { to { transform: rotate(360deg); } }
     </style>
+    <script>
+      // 全局错误捕获 — 如果 React 加载失败，显示错误信息
+      window.onerror = function(msg, url, line, col, error) {
+        var el = document.getElementById('loading-error');
+        if (el) { el.style.display = 'block'; el.textContent = msg + ' (' + url + ':' + line + ')'; }
+      };
+      // 5秒后如果 #root 还是空的，说明 JS 加载失败
+      setTimeout(function() {
+        var root = document.getElementById('root');
+        if (root && root.children.length === 0) {
+          var fb = document.getElementById('loading-fallback');
+          if (fb) {
+            var el = document.getElementById('loading-error');
+            if (el && !el.textContent) { el.style.display = 'block'; el.textContent = '加载超时，请刷新页面重试'; }
+          }
+        }
+      }, 8000);
+    </script>
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="loading-fallback">
+        <div class="spinner"></div>
+        <div class="text">灵正在醒来…</div>
+        <div class="error" id="loading-error"></div>
+      </div>
+    </div>
     <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>

@@ -1,6 +1,16 @@
-import { Box, Text } from "@chakra-ui/react";
 import { memo, useState, useEffect, useRef } from "react";
 import { useWebSocket } from "@/context/websocket-context";
+
+const keyframesStyle = `
+@keyframes connFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 0.7; transform: translateY(0); }
+}
+@keyframes connPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+`;
 
 /**
  * Minimal connection status indicator.
@@ -17,7 +27,6 @@ export const ConnectionStatus = memo(() => {
   const isConnecting = wsState === "CONNECTING";
   const isClosed = wsState === "CLOSED";
 
-  // Flash the green dot briefly when connection is established, then fade
   useEffect(() => {
     if (isOpen) {
       setShowConnected(true);
@@ -30,7 +39,6 @@ export const ConnectionStatus = memo(() => {
     };
   }, [isOpen]);
 
-  // When connected and the flash period is over, render nothing
   if (isOpen && !showConnected) return null;
 
   const dotColor = isOpen
@@ -45,69 +53,80 @@ export const ConnectionStatus = memo(() => {
       ? "重连中..."
       : "连接断开";
 
+  const Tag = isClosed ? "button" : "div";
+
   return (
-    <Box
-      as={isClosed ? "button" : undefined}
-      onClick={isClosed ? reconnect : undefined}
-      display="flex"
-      alignItems="center"
-      gap="6px"
-      px="10px"
-      py="5px"
-      bg="rgba(0, 0, 0, 0.35)"
-      backdropFilter="blur(12px)"
-      borderRadius="16px"
-      border="1px solid"
-      borderColor={isClosed ? "rgba(248, 113, 113, 0.3)" : "rgba(255,255,255,0.06)"}
-      cursor={isClosed ? "pointer" : "default"}
-      transition="all 0.4s ease"
-      opacity={isOpen ? 0.7 : 1}
-      _hover={isClosed ? { bg: "rgba(0, 0, 0, 0.55)", borderColor: "rgba(248, 113, 113, 0.5)" } : {}}
-      css={isOpen ? {
-        animation: "connFadeIn 0.3s ease-out",
-        "@keyframes connFadeIn": {
-          from: { opacity: 0, transform: "translateY(-4px)" },
-          to: { opacity: 0.7, transform: "translateY(0)" },
-        },
-      } : undefined}
-    >
-      {/* Status dot */}
-      <Box
-        w="7px"
-        h="7px"
-        borderRadius="50%"
-        bg={dotColor}
-        boxShadow={`0 0 6px ${dotColor}88`}
-        flexShrink={0}
-        css={isConnecting ? {
-          animation: "connPulse 1.2s ease-in-out infinite",
-          "@keyframes connPulse": {
-            "0%, 100%": { opacity: 1, transform: "scale(1)" },
-            "50%": { opacity: 0.4, transform: "scale(0.8)" },
-          },
-        } : undefined}
-      />
+    <>
+      <style>{keyframesStyle}</style>
+      <Tag
+        onClick={isClosed ? reconnect : undefined}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+          padding: "5px 10px",
+          background: "rgba(0, 0, 0, 0.35)",
+          backdropFilter: "blur(12px)",
+          borderRadius: "16px",
+          border: `1px solid ${isClosed ? "rgba(248, 113, 113, 0.3)" : "rgba(255,255,255,0.06)"}`,
+          cursor: isClosed ? "pointer" : "default",
+          transition: "all 0.4s ease",
+          opacity: isOpen ? 0.7 : 1,
+          animation: isOpen ? "connFadeIn 0.3s ease-out" : undefined,
+          // reset button styles
+          ...(isClosed ? { font: "inherit", color: "inherit" } : {}),
+        }}
+        onMouseEnter={(e) => {
+          if (isClosed) {
+            const el = e.currentTarget as HTMLElement;
+            el.style.background = "rgba(0, 0, 0, 0.55)";
+            el.style.borderColor = "rgba(248, 113, 113, 0.5)";
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (isClosed) {
+            const el = e.currentTarget as HTMLElement;
+            el.style.background = "rgba(0, 0, 0, 0.35)";
+            el.style.borderColor = "rgba(248, 113, 113, 0.3)";
+          }
+        }}
+      >
+        {/* Status dot */}
+        <div
+          style={{
+            width: "7px",
+            height: "7px",
+            borderRadius: "50%",
+            background: dotColor,
+            boxShadow: `0 0 6px ${dotColor}88`,
+            flexShrink: 0,
+            animation: isConnecting ? "connPulse 1.2s ease-in-out infinite" : undefined,
+          }}
+        />
 
-      {/* Label — hidden when connected (just the dot shows) */}
-      {!isOpen && (
-        <Text
-          fontSize="11px"
-          color={isClosed ? "rgba(248, 113, 113, 0.9)" : "rgba(251, 191, 36, 0.9)"}
-          fontWeight="500"
-          whiteSpace="nowrap"
-          lineHeight="1"
-        >
-          {label}
-        </Text>
-      )}
+        {/* Label */}
+        {!isOpen && (
+          <span
+            style={{
+              fontSize: "11px",
+              color: isClosed ? "rgba(248, 113, 113, 0.9)" : "rgba(251, 191, 36, 0.9)",
+              fontWeight: 500,
+              whiteSpace: "nowrap",
+              lineHeight: 1,
+            }}
+          >
+            {label}
+          </span>
+        )}
 
-      {/* Click hint for disconnected state */}
-      {isClosed && (
-        <Text fontSize="10px" color="rgba(255,255,255,0.35)" whiteSpace="nowrap" lineHeight="1">
-          点击重试
-        </Text>
-      )}
-    </Box>
+        {/* Click hint for disconnected state */}
+        {isClosed && (
+          <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", whiteSpace: "nowrap", lineHeight: 1 }}>
+            点击重试
+          </span>
+        )}
+      </Tag>
+    </>
   );
 });
 

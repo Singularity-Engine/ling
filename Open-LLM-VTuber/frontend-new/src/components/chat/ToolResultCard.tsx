@@ -1,5 +1,16 @@
-import { Box, Text } from "@chakra-ui/react";
 import { memo, useState, useMemo } from "react";
+
+// Inject scrollbar styles once
+const STYLE_ID = "tool-card-styles";
+if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
+  const style = document.createElement("style");
+  style.id = STYLE_ID;
+  style.textContent = `
+    .tool-code-scroll::-webkit-scrollbar { height: 3px; }
+    .tool-code-scroll::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.3); border-radius: 2px; }
+  `;
+  document.head.appendChild(style);
+}
 
 interface ToolResultCardProps {
   toolName: string;
@@ -7,7 +18,6 @@ interface ToolResultCardProps {
   status: string;
 }
 
-// 检测 content 中的代码块
 function extractCodeBlocks(text: string): { lang: string; code: string }[] {
   const regex = /```(\w*)\n?([\s\S]*?)```/g;
   const blocks: { lang: string; code: string }[] = [];
@@ -44,59 +54,61 @@ const CodeBlock = memo(({ lang, code }: { lang: string; code: string }) => {
   };
 
   return (
-    <Box
-      bg="rgba(0, 0, 0, 0.6)"
-      borderRadius="8px"
-      overflow="hidden"
-      mt="8px"
-      border="1px solid rgba(255,255,255,0.08)"
+    <div
+      style={{
+        background: "rgba(0, 0, 0, 0.6)",
+        borderRadius: "8px",
+        overflow: "hidden",
+        marginTop: "8px",
+        border: "1px solid rgba(255,255,255,0.08)",
+      }}
     >
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        px="12px"
-        py="6px"
-        bg="rgba(255,255,255,0.04)"
-        borderBottom="1px solid rgba(255,255,255,0.06)"
-      >
-        <Text fontSize="11px" color="rgba(139, 92, 246, 0.8)" fontFamily="monospace">
-          {lang}
-        </Text>
-        <Box
-          as="button"
-          onClick={handleCopy}
-          fontSize="11px"
-          color="rgba(255,255,255,0.4)"
-          cursor="pointer"
-          _hover={{ color: "rgba(255,255,255,0.7)" }}
-          transition="color 0.2s"
-        >
-          {copied ? "✓ 已复制" : "复制"}
-        </Box>
-      </Box>
-      <Box
-        px="12px"
-        py="10px"
-        overflowX="auto"
-        css={{
-          "&::-webkit-scrollbar": { height: "3px" },
-          "&::-webkit-scrollbar-thumb": { background: "rgba(139,92,246,0.3)", borderRadius: "2px" },
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "6px 12px",
+          background: "rgba(255,255,255,0.04)",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
         }}
       >
-        <Text
-          as="pre"
-          fontSize="12px"
-          fontFamily="'JetBrains Mono', 'Fira Code', monospace"
-          color="#e2e8f0"
-          whiteSpace="pre"
-          lineHeight="1.6"
-          m="0"
+        <span style={{ fontSize: "11px", color: "rgba(139, 92, 246, 0.8)", fontFamily: "monospace" }}>
+          {lang}
+        </span>
+        <button
+          onClick={handleCopy}
+          style={{
+            fontSize: "11px",
+            color: "rgba(255,255,255,0.4)",
+            cursor: "pointer",
+            transition: "color 0.2s",
+            background: "none",
+            border: "none",
+            padding: 0,
+          }}
+        >
+          {copied ? "✓ 已复制" : "复制"}
+        </button>
+      </div>
+      <div
+        className="tool-code-scroll"
+        style={{ padding: "10px 12px", overflowX: "auto" }}
+      >
+        <pre
+          style={{
+            fontSize: "12px",
+            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            color: "#e2e8f0",
+            whiteSpace: "pre",
+            lineHeight: 1.6,
+            margin: 0,
+          }}
         >
           {code}
-        </Text>
-      </Box>
-    </Box>
+        </pre>
+      </div>
+    </div>
   );
 });
 CodeBlock.displayName = "CodeBlock";
@@ -107,14 +119,12 @@ export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCar
   const hasCode = codeBlocks.length > 0;
   const icon = TOOL_ICONS[category] || TOOL_ICONS.generic;
 
-  // 去除代码块后的纯文本
   const textContent = hasCode
     ? content.replace(/```\w*\n?[\s\S]*?```/g, "").trim()
     : content;
 
   const statusIcon = status === "running" ? "⏳" : status === "completed" ? "✅" : "❌";
 
-  // 卡片颜色
   const cardColors: Record<string, { bg: string; border: string; accent: string }> = {
     search: { bg: "rgba(96, 165, 250, 0.08)", border: "rgba(96, 165, 250, 0.2)", accent: "#60a5fa" },
     weather: { bg: "rgba(250, 204, 21, 0.08)", border: "rgba(250, 204, 21, 0.2)", accent: "#facc15" },
@@ -126,51 +136,56 @@ export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCar
   const colors = cardColors[hasCode ? "code" : category] || cardColors.generic;
 
   return (
-    <Box
-      bg={colors.bg}
-      border={`1px solid ${colors.border}`}
-      borderRadius="12px"
-      overflow="hidden"
-      transition="all 0.3s ease"
-      _hover={{ border: `1px solid ${colors.accent}44` }}
+    <div
+      style={{
+        background: colors.bg,
+        border: `1px solid ${colors.border}`,
+        borderRadius: "12px",
+        overflow: "hidden",
+        transition: "all 0.3s ease",
+      }}
     >
       {/* Header */}
-      <Box
-        display="flex"
-        alignItems="center"
-        gap="8px"
-        px="14px"
-        py="8px"
-        borderBottom={textContent || hasCode ? `1px solid ${colors.border}` : "none"}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          padding: "8px 14px",
+          borderBottom: textContent || hasCode ? `1px solid ${colors.border}` : "none",
+        }}
       >
-        <Text fontSize="14px">{icon}</Text>
-        <Text fontSize="12px" color={colors.accent} fontWeight="600" flex="1">
+        <span style={{ fontSize: "14px" }}>{icon}</span>
+        <span style={{ fontSize: "12px", color: colors.accent, fontWeight: 600, flex: 1 }}>
           {toolName}
-        </Text>
-        <Text fontSize="11px" color="rgba(255,255,255,0.4)">
+        </span>
+        <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>
           {statusIcon}
-        </Text>
-      </Box>
+        </span>
+      </div>
 
       {/* Content */}
       {(textContent || hasCode) && (
-        <Box px="14px" py="10px">
+        <div style={{ padding: "10px 14px" }}>
           {textContent && (
-            <Text
-              fontSize="13px"
-              color="rgba(255,255,255,0.75)"
-              whiteSpace="pre-wrap"
-              lineHeight="1.6"
+            <span
+              style={{
+                display: "block",
+                fontSize: "13px",
+                color: "rgba(255,255,255,0.75)",
+                whiteSpace: "pre-wrap",
+                lineHeight: 1.6,
+              }}
             >
               {textContent}
-            </Text>
+            </span>
           )}
           {codeBlocks.map((block, i) => (
             <CodeBlock key={i} lang={block.lang} code={block.code} />
           ))}
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   );
 });
 

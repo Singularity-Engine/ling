@@ -1,9 +1,8 @@
-import { Box } from "@chakra-ui/react";
 import { memo, useMemo } from "react";
 import { useToolState } from "../../context/tool-state-context";
 import { InfoCrystal } from "./InfoCrystal";
 
-const POSITIONS: Record<number, Record<string, string>> = {
+const POSITIONS: Record<number, React.CSSProperties> = {
   0: { left: "3%", top: "15%" },
   1: { right: "3%", top: "22%" },
   2: { left: "3%", top: "42%" },
@@ -20,22 +19,24 @@ export const CrystalField = memo(() => {
   if (crystals.length === 0) return null;
 
   return (
-    <Box position="absolute" inset="0" pointerEvents="none" zIndex={15}>
+    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 15 }}>
       {crystals.map((tool, i) => (
-        <Box
+        <div
           key={tool.id}
-          position="absolute"
-          pointerEvents="auto"
-          {...POSITIONS[i]}
+          style={{
+            position: "absolute",
+            pointerEvents: "auto",
+            ...POSITIONS[i],
+          }}
         >
           <InfoCrystal
             tool={tool}
             position={i % 2 === 0 ? "left" : "right"}
             index={i}
           />
-        </Box>
+        </div>
       ))}
-    </Box>
+    </div>
   );
 });
 

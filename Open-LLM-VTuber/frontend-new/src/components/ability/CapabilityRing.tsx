@@ -1,5 +1,4 @@
-import { Box, Text } from "@chakra-ui/react";
-import { memo, useCallback } from "react";
+import { memo, useCallback, useState } from "react";
 import { useToolState, type ToolCategory } from "../../context/tool-state-context";
 
 const CATEGORY_COLORS: Record<ToolCategory, string> = {
@@ -18,13 +17,13 @@ const ABILITIES = [
   { key: "generic" as ToolCategory, icon: "🔧", label: "工具", prompt: "帮我 " },
 ] as const;
 
-// Arc layout: 5 buttons spread across ~120 degrees, centered at bottom
-const ARC_RADIUS = 90; // px from center
-const ARC_START = -60; // degrees (left side)
-const ARC_STEP = 30; // degrees between buttons
+const ARC_RADIUS = 90;
+const ARC_START = -60;
+const ARC_STEP = 30;
 
 export const CapabilityRing = memo(() => {
   const { dominantCategory } = useToolState();
+  const [containerHovered, setContainerHovered] = useState(false);
 
   const handleClick = useCallback((prompt: string) => {
     window.dispatchEvent(
@@ -33,17 +32,20 @@ export const CapabilityRing = memo(() => {
   }, []);
 
   return (
-    <Box
-      position="relative"
-      display="flex"
-      justifyContent="center"
-      py="8px"
-      pointerEvents="auto"
-      opacity={0.5}
-      transition="opacity 0.3s ease"
-      _hover={{ opacity: 0.9 }}
+    <div
+      style={{
+        position: "relative",
+        display: "flex",
+        justifyContent: "center",
+        padding: "8px 0",
+        pointerEvents: "auto",
+        opacity: containerHovered ? 0.9 : 0.5,
+        transition: "opacity 0.3s ease",
+      }}
+      onMouseEnter={() => setContainerHovered(true)}
+      onMouseLeave={() => setContainerHovered(false)}
     >
-      <Box position="relative" w={`${ARC_RADIUS * 2 + 40}px`} h="56px">
+      <div style={{ position: "relative", width: `${ARC_RADIUS * 2 + 40}px`, height: "56px" }}>
         {ABILITIES.map((ability, i) => {
           const angleDeg = ARC_START + i * ARC_STEP;
           const angleRad = (angleDeg * Math.PI) / 180;
@@ -53,48 +55,70 @@ export const CapabilityRing = memo(() => {
           const color = CATEGORY_COLORS[ability.key];
 
           return (
-            <Box
+            <AbilityButton
               key={ability.key}
-              as="button"
-              position="absolute"
-              left="50%"
-              bottom="0"
-              w="36px"
-              h="36px"
-              borderRadius="50%"
-              bg="rgba(10, 0, 21, 0.6)"
-              backdropFilter="blur(12px)"
-              border="1px solid"
-              borderColor={isActive ? `${color}88` : "rgba(255, 255, 255, 0.12)"}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              cursor="pointer"
-              transition="all 0.3s ease"
+              icon={ability.icon}
+              label={ability.label}
+              isActive={isActive}
+              color={color}
+              x={x}
+              y={y - ARC_RADIUS}
               onClick={() => handleClick(ability.prompt)}
-              title={ability.label}
-              css={{
-                transform: `translate(calc(-50% + ${x}px), calc(${y - ARC_RADIUS}px)) scale(${isActive ? 1.15 : 1})`,
-                boxShadow: isActive ? `0 0 16px ${color}55, 0 0 4px ${color}33` : "none",
-                animation: isActive ? `ringPulse_${ability.key} 2s ease-in-out infinite` : "none",
-                [`@keyframes ringPulse_${ability.key}`]: {
-                  "0%, 100%": { boxShadow: `0 0 12px ${color}33` },
-                  "50%": { boxShadow: `0 0 22px ${color}66` },
-                },
-                "&:hover": {
-                  transform: `translate(calc(-50% + ${x}px), calc(${y - ARC_RADIUS}px)) scale(1.2)`,
-                  borderColor: `${color}aa`,
-                  boxShadow: `0 0 20px ${color}44`,
-                },
-              }}
-            >
-              <Text fontSize="16px" lineHeight="1">{ability.icon}</Text>
-            </Box>
+            />
           );
         })}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 });
 
 CapabilityRing.displayName = "CapabilityRing";
+
+const AbilityButton = memo(({
+  icon, label, isActive, color, x, y, onClick,
+}: {
+  icon: string; label: string; isActive: boolean; color: string;
+  x: number; y: number; onClick: () => void;
+}) => {
+  const [hovered, setHovered] = useState(false);
+
+  const scale = hovered ? 1.2 : isActive ? 1.15 : 1;
+
+  return (
+    <button
+      style={{
+        position: "absolute",
+        left: "50%",
+        bottom: 0,
+        width: "36px",
+        height: "36px",
+        borderRadius: "50%",
+        background: "rgba(10, 0, 21, 0.6)",
+        backdropFilter: "blur(12px)",
+        border: `1px solid ${(hovered || isActive) ? `${color}${hovered ? 'aa' : '88'}` : "rgba(255, 255, 255, 0.12)"}`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: "pointer",
+        transition: "all 0.3s ease",
+        transform: `translate(calc(-50% + ${x}px), calc(${y}px)) scale(${scale})`,
+        boxShadow: hovered
+          ? `0 0 20px ${color}44`
+          : isActive
+            ? `0 0 16px ${color}55, 0 0 4px ${color}33`
+            : "none",
+        font: "inherit",
+        color: "inherit",
+        padding: 0,
+      }}
+      onClick={onClick}
+      title={label}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <span style={{ fontSize: "16px", lineHeight: 1 }}>{icon}</span>
+    </button>
+  );
+});
+
+AbilityButton.displayName = "AbilityButton";

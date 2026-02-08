@@ -304,7 +304,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     gatewayConnector.connect({
       url: gwUrl,
       token: GATEWAY_TOKEN,
-      clientId: 'ling-avatar',
+      clientId: 'cli',
       displayName: '灵 Avatar',
     }).then(() => {
       console.log('[WebSocketHandler] Gateway connected!');
@@ -602,7 +602,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       gatewayConnector.connect({
         url: gwUrl,
         token: GATEWAY_TOKEN,
-        clientId: 'ling-avatar',
+        clientId: 'cli',
         displayName: '灵 Avatar',
       }).catch(console.error);
     },

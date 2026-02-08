@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react';
+
 export const canvasStyles = {
   background: {
     container: {
@@ -6,7 +8,7 @@ export const canvasStyles = {
       height: '100%',
       overflow: 'hidden',
       pointerEvents: 'auto',
-    },
+    } as CSSProperties,
     image: {
       position: 'absolute',
       top: '0',
@@ -15,7 +17,7 @@ export const canvasStyles = {
       height: '100%',
       objectFit: 'cover',
       zIndex: 1,
-    },
+    } as CSSProperties,
     video: {
       position: 'absolute' as const,
       top: '0',
@@ -34,7 +36,7 @@ export const canvasStyles = {
       height: '100%',
       zIndex: '1',
       pointerEvents: 'auto',
-    },
+    } as CSSProperties,
   },
   subtitle: {
     container: {
@@ -43,32 +45,27 @@ export const canvasStyles = {
       borderRadius: '12px',
       minWidth: '60%',
       maxWidth: '95%',
-    },
+    } as CSSProperties,
     text: {
       color: 'white',
       fontSize: '1.5rem',
       textAlign: 'center',
       lineHeight: '1.4',
       whiteSpace: 'pre-wrap',
-    },
+    } as CSSProperties,
   },
   wsStatus: {
     container: {
       position: 'relative',
-      // top: '20px',
-      // left: '20px',
       zIndex: 2,
       padding: '8px 16px',
       borderRadius: '20px',
       fontSize: '14px',
-      fontWeight: 'medium',
+      fontWeight: 500,
       color: 'white',
       transition: 'all 0.2s',
       cursor: 'pointer',
       userSelect: 'none',
-      _hover: {
-        opacity: 0.8,
-      },
-    },
+    } as CSSProperties,
   },
 };

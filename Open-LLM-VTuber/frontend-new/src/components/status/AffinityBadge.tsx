@@ -1,6 +1,23 @@
-import { Box, Text } from "@chakra-ui/react";
 import { memo, useState, useMemo } from "react";
 import { useAffinity } from "@/context/affinity-context";
+
+const keyframesStyle = `
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  14% { transform: scale(1.1); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.08); }
+  70% { transform: scale(1); }
+}
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.8) translateY(-4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+`;
 
 const LEVEL_CONFIG: Record<string, { name: string; color: string; heartColor: string; beatSpeed: string }> = {
   hatred: { name: "敌意", color: "#ef4444", heartColor: "#4a1515", beatSpeed: "3s" },
@@ -12,7 +29,6 @@ const LEVEL_CONFIG: Record<string, { name: string; color: string; heartColor: st
   devoted: { name: "挚爱", color: "#f472b6", heartColor: "#f472b6", beatSpeed: "0.8s" },
 };
 
-// SVG Heart paths for different "fill levels"
 const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPercent: number; size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <defs>
@@ -38,151 +54,140 @@ export const AffinityBadge = memo(() => {
   const config = useMemo(() => LEVEL_CONFIG[level] || LEVEL_CONFIG.neutral, [level]);
 
   return (
-    <Box position="relative">
-      {/* Heart button */}
-      <Box
-        as="button"
-        onClick={() => setExpanded(!expanded)}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        display="flex"
-        alignItems="center"
-        gap="6px"
-        px="10px"
-        py="6px"
-        bg="rgba(0, 0, 0, 0.4)"
-        backdropFilter="blur(12px)"
-        borderRadius="20px"
-        border="1px solid rgba(255,255,255,0.08)"
-        cursor="pointer"
-        transition="all 0.3s ease"
-        _hover={{
-          bg: "rgba(0, 0, 0, 0.6)",
-          border: `1px solid ${config.color}44`,
-        }}
-        css={{
-          animation: `heartbeat ${config.beatSpeed} ease-in-out infinite`,
-          "@keyframes heartbeat": {
-            "0%, 100%": { transform: "scale(1)" },
-            "14%": { transform: "scale(1.1)" },
-            "28%": { transform: "scale(1)" },
-            "42%": { transform: "scale(1.08)" },
-            "70%": { transform: "scale(1)" },
-          },
-        }}
-      >
-        <HeartIcon color={config.heartColor} fillPercent={affinity} size={22} />
-        <Text fontSize="12px" color={`${config.color}cc`} fontWeight="600" transition="all 0.3s ease">
-          {config.name}
-        </Text>
-        <Text
-          fontSize="12px"
-          color="rgba(255,255,255,0.7)"
-          fontFamily="monospace"
-          fontWeight="500"
-          overflow="hidden"
-          maxW={hovered ? "40px" : "0px"}
-          opacity={hovered ? 1 : 0}
-          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-          whiteSpace="nowrap"
-        >
-          {affinity}
-        </Text>
-      </Box>
-
-      {/* Expanded panel */}
-      {expanded && (
-        <Box
-          position="absolute"
-          top="100%"
-          right="0"
-          mt="8px"
-          p="16px"
-          bg="rgba(10, 0, 21, 0.9)"
-          backdropFilter="blur(20px)"
-          borderRadius="16px"
-          border="1px solid rgba(255,255,255,0.1)"
-          minW="180px"
-          boxShadow={`0 8px 32px rgba(0,0,0,0.5), 0 0 20px ${config.color}22`}
-          css={{
-            animation: "fadeInDown 0.2s ease-out",
-            "@keyframes fadeInDown": {
-              from: { opacity: 0, transform: "translateY(-8px)" },
-              to: { opacity: 1, transform: "translateY(0)" },
-            },
+    <>
+      <style>{keyframesStyle}</style>
+      <div style={{ position: "relative" }}>
+        {/* Heart button */}
+        <button
+          onClick={() => setExpanded(!expanded)}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            padding: "6px 10px",
+            background: hovered ? "rgba(0, 0, 0, 0.6)" : "rgba(0, 0, 0, 0.4)",
+            backdropFilter: "blur(12px)",
+            borderRadius: "20px",
+            border: hovered ? `1px solid ${config.color}44` : "1px solid rgba(255,255,255,0.08)",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            animation: `heartbeat ${config.beatSpeed} ease-in-out infinite`,
+            font: "inherit",
+            color: "inherit",
           }}
         >
-          <Box display="flex" alignItems="center" gap="8px" mb="12px">
-            <HeartIcon color={config.heartColor} fillPercent={affinity} size={28} />
-            <Box>
-              <Text fontSize="14px" color={config.color} fontWeight="700">
-                {config.name}
-              </Text>
-              <Text fontSize="11px" color="rgba(255,255,255,0.4)">
-                好感度
-              </Text>
-            </Box>
-          </Box>
-
-          {/* Progress bar */}
-          <Box w="100%" h="4px" bg="rgba(255,255,255,0.08)" borderRadius="2px" mb="8px" overflow="hidden">
-            <Box
-              h="100%"
-              w={`${affinity}%`}
-              bg={`linear-gradient(90deg, ${config.color}88, ${config.color})`}
-              borderRadius="2px"
-              transition="width 0.8s cubic-bezier(0.4, 0, 0.2, 1)"
-            />
-          </Box>
-
-          <Box display="flex" justifyContent="space-between">
-            <Text fontSize="11px" color="rgba(255,255,255,0.3)">0</Text>
-            <Text fontSize="12px" color={config.color} fontWeight="600">{affinity}/100</Text>
-            <Text fontSize="11px" color="rgba(255,255,255,0.3)">100</Text>
-          </Box>
-
-          {/* Memory count */}
-          <Box
-            mt="12px"
-            pt="10px"
-            borderTop="1px solid rgba(255,255,255,0.06)"
-            display="flex"
-            alignItems="center"
-            gap="6px"
+          <HeartIcon color={config.heartColor} fillPercent={affinity} size={22} />
+          <span style={{ fontSize: "12px", color: `${config.color}cc`, fontWeight: 600, transition: "all 0.3s ease" }}>
+            {config.name}
+          </span>
+          <span
+            style={{
+              fontSize: "12px",
+              color: "rgba(255,255,255,0.7)",
+              fontFamily: "monospace",
+              fontWeight: 500,
+              overflow: "hidden",
+              maxWidth: hovered ? "40px" : "0px",
+              opacity: hovered ? 1 : 0,
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              whiteSpace: "nowrap",
+            }}
           >
-            <Text fontSize="13px">🧠</Text>
-            <Text fontSize="12px" color="rgba(255,255,255,0.5)">记忆中...</Text>
-          </Box>
-        </Box>
-      )}
+            {affinity}
+          </span>
+        </button>
 
-      {/* Milestone popup */}
-      {milestone && (
-        <Box
-          position="absolute"
-          top="100%"
-          right="0"
-          mt="8px"
-          px="14px"
-          py="8px"
-          bg={`linear-gradient(135deg, ${config.color}dd, ${config.color}99)`}
-          borderRadius="16px"
-          boxShadow={`0 4px 20px ${config.color}44`}
-          whiteSpace="nowrap"
-          css={{
-            animation: "popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
-            "@keyframes popIn": {
-              from: { opacity: 0, transform: "scale(0.8) translateY(-4px)" },
-              to: { opacity: 1, transform: "scale(1) translateY(0)" },
-            },
-          }}
-        >
-          <Text fontSize="13px" color="white" fontWeight="500">
-            ✨ {milestone}
-          </Text>
-        </Box>
-      )}
-    </Box>
+        {/* Expanded panel */}
+        {expanded && (
+          <div
+            style={{
+              position: "absolute",
+              top: "100%",
+              right: 0,
+              marginTop: "8px",
+              padding: "16px",
+              background: "rgba(10, 0, 21, 0.9)",
+              backdropFilter: "blur(20px)",
+              borderRadius: "16px",
+              border: "1px solid rgba(255,255,255,0.1)",
+              minWidth: "180px",
+              boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 20px ${config.color}22`,
+              animation: "fadeInDown 0.2s ease-out",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+              <HeartIcon color={config.heartColor} fillPercent={affinity} size={28} />
+              <div>
+                <span style={{ fontSize: "14px", color: config.color, fontWeight: 700, display: "block" }}>
+                  {config.name}
+                </span>
+                <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", display: "block" }}>
+                  好感度
+                </span>
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div style={{ width: "100%", height: "4px", background: "rgba(255,255,255,0.08)", borderRadius: "2px", marginBottom: "8px", overflow: "hidden" }}>
+              <div
+                style={{
+                  height: "100%",
+                  width: `${affinity}%`,
+                  background: `linear-gradient(90deg, ${config.color}88, ${config.color})`,
+                  borderRadius: "2px",
+                  transition: "width 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              />
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)" }}>0</span>
+              <span style={{ fontSize: "12px", color: config.color, fontWeight: 600 }}>{affinity}/100</span>
+              <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)" }}>100</span>
+            </div>
+
+            {/* Memory count */}
+            <div
+              style={{
+                marginTop: "12px",
+                paddingTop: "10px",
+                borderTop: "1px solid rgba(255,255,255,0.06)",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              <span style={{ fontSize: "13px" }}>🧠</span>
+              <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>记忆中...</span>
+            </div>
+          </div>
+        )}
+
+        {/* Milestone popup */}
+        {milestone && (
+          <div
+            style={{
+              position: "absolute",
+              top: "100%",
+              right: 0,
+              marginTop: "8px",
+              padding: "8px 14px",
+              background: `linear-gradient(135deg, ${config.color}dd, ${config.color}99)`,
+              borderRadius: "16px",
+              boxShadow: `0 4px 20px ${config.color}44`,
+              whiteSpace: "nowrap",
+              animation: "popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            }}
+          >
+            <span style={{ fontSize: "13px", color: "white", fontWeight: 500 }}>
+              ✨ {milestone}
+            </span>
+          </div>
+        )}
+      </div>
+    </>
   );
 });
 
