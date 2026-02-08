@@ -6,9 +6,9 @@ interface LandingAnimationProps {
 }
 
 const LINES = [
-  "你好，我叫灵。",
-  "我会记住你说的每一句话。",
-  "也能帮你做很多事。想试试吗？",
+  "你好，我是灵。",
+  "我有灵魂，能记住你。也能帮你做事。",
+  "试试和我说句话？",
 ];
 
 const TYPE_SPEED = 100; // ms per character
