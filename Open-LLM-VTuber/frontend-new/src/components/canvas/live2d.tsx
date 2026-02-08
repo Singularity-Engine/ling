@@ -171,7 +171,7 @@ export const Live2D = memo(
                     fontSize: 14,
                   }}
                 >
-                  正在唤醒 Lain...
+                  正在唤醒灵...
                 </span>
                 <style>{`@keyframes live2d-spin{to{transform:rotate(360deg)}}`}</style>
               </>

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useRef, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useRef, useEffect, ReactNode } from "react";
 
 export type ToolCategory = 'search' | 'code' | 'memory' | 'weather' | 'generic';
 
@@ -174,6 +174,26 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const dominantCategory = computeDominant(activeTools);
+
+  // Demo trigger: window.__triggerToolDemo('search') in browser console
+  useEffect(() => {
+    (window as any).__triggerToolDemo = (category: ToolCategory = 'search') => {
+      startTool({ name: `demo_${category}`, category, arguments: JSON.stringify({ query: 'Demo 展示' }) });
+      // The tool will auto-complete after 3s via the timeout below
+      const checkAndComplete = () => {
+        setActiveTools(prev => {
+          const demoTool = prev.find(t => t.name === `demo_${category}` && t.status === 'pending');
+          if (demoTool) {
+            setTimeout(() => completeTool(demoTool.id, JSON.stringify({ summary: `${category} 工具演示完成`, demo: true })), 3000);
+          }
+          return prev;
+        });
+      };
+      // Small delay to let React state settle
+      setTimeout(checkAndComplete, 50);
+    };
+    return () => { delete (window as any).__triggerToolDemo; };
+  }, [startTool, completeTool]);
 
   return (
     <ToolStateContext.Provider value={{

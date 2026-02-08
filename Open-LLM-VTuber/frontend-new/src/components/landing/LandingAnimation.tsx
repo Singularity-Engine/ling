@@ -6,7 +6,7 @@ interface LandingAnimationProps {
 }
 
 const LINES = [
-  "你好，我叫 Lain。",
+  "你好，我叫灵。",
   "我会记住你说的每一句话。",
   "也能帮你做很多事。想试试吗？",
 ];
