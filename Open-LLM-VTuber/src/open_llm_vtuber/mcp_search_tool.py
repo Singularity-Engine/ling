@@ -135,7 +135,7 @@ class MCPSearchTool:
             logger.info(f"使用配置文件中的备份搜索API URL: {url}")
             return url
 
-        # 默认使用 apifox mock 作为备份，使用文档指定的lain端点
+        # 默认使用 apifox mock 作为备份，使用文档指定的灵(ling)端点
         logger.warning("使用默认的备份API URL")
         return "http://13.54.95.72:8080/lain/mcp/search/agent"
 
@@ -342,11 +342,11 @@ class MCPSearchTool:
         return headers
 
     def _is_lain_endpoint(self, url: str) -> bool:
-        """检查是否为Lain端点（无需认证）"""
+        """检查是否为灵(Ling)端点（无需认证）"""
         return '/lain/' in url if url else False
 
     def _ensure_lain_endpoint(self, url: str) -> str:
-        """确保使用正确的Lain端点路径"""
+        """确保使用正确的灵(Ling)端点路径"""
         if not url:
             return url
 
@@ -402,7 +402,7 @@ class MCPSearchTool:
             if status_code == 400:
                 return "🚫 400 请求参数错误：请检查请求负载格式是否正确"
             elif status_code == 401:
-                return "🔒 401 未授权：Lain端点无需认证，如使用其他端点请配置鉴权信息"
+                return "🔒 401 未授权：灵(Ling)端点无需认证，如使用其他端点请配置鉴权信息"
             elif status_code == 403:
                 return "🚫 403 访问被拒绝：您没有权限访问此资源"
             elif status_code == 404:
@@ -435,14 +435,14 @@ class MCPSearchTool:
             "Accept": "application/json",
             "User-Agent": "Open-LLM-VTuber/1.0"
         }
-        # 确保使用正确的Lain端点
+        # 确保使用正确的灵(Ling)端点
         api_url = self._ensure_lain_endpoint(self.search_api_url)
 
-        # 对于Lain端点，根据文档说明跳过认证
+        # 对于灵(Ling)端点，根据文档说明跳过认证
         if self._is_lain_endpoint(api_url):
-            logger.info("🔓 检测到Lain端点，根据文档要求跳过认证处理")
+            logger.info("🔓 检测到灵(Ling)端点，根据文档要求跳过认证处理")
         else:
-            # 合并用户配置的自定义头（仅对非Lain端点）
+            # 合并用户配置的自定义头（仅对非灵(Ling)端点）
             custom_headers = self._load_search_api_headers_from_config()
             if custom_headers:
                 headers.update(custom_headers)
