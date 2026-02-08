@@ -21,6 +21,7 @@ import { ChatArea } from "./components/chat/ChatArea";
 import { InputBar } from "./components/chat/InputBar";
 import { AffinityBadge } from "./components/status/AffinityBadge";
 import { AffinityBar } from "./components/status/AffinityBar";
+import { ConnectionStatus } from "./components/status/ConnectionStatus";
 import { AffinityProvider } from "./context/affinity-context";
 import { ToolStateProvider } from "./context/tool-state-context";
 import { StarField } from "./components/background/StarField";
@@ -117,6 +118,9 @@ function MainContent(): JSX.Element {
       >
         {/* 好感度徽章 */}
         <AffinityBadge />
+
+        {/* 连接状态指示器 */}
+        <ConnectionStatus />
 
         {/* 聊天展开/收起按钮 */}
         <Box
