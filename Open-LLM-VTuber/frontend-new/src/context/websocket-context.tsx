@@ -22,14 +22,6 @@ function getDefaultUrls() {
     baseUrl: 'https://classic.sngxai.com',
   };
 
-  // 强制覆盖 localStorage 缓存，防止旧值（如 ws://127.0.0.1:12393）导致外网连接失败
-  try {
-    localStorage.setItem('wsUrl', JSON.stringify(urls.wsUrl));
-    localStorage.setItem('baseUrl', JSON.stringify(urls.baseUrl));
-  } catch {
-    // localStorage 不可用时静默失败
-  }
-
   return urls;
 }
 

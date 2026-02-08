@@ -57,8 +57,8 @@ function mapGatewayState(state: GatewayState): string {
 
 const LING_MODEL_INFO: ModelInfo = {
   name: '灵 (Ling)',
-  url: 'https://classic.sngxai.com/live2d-models/ling_pro_zh/ling_pro_zh.model3.json',
-  kScale: 0.65,
+  url: 'https://classic.sngxai.com/live2d-models/001/0A-原档整理(1).model3.json',
+  kScale: 0.35,
   initialXshift: 0,
   initialYshift: -100,
   idleMotionGroupName: 'Idle',
@@ -82,7 +82,7 @@ const DEFAULT_CONFIG_FILES = [
 function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const [wsState, setWsState] = useState<string>('CLOSED');
-  const [gwUrl, setGwUrl] = useLocalStorage<string>('wsUrl', getDefaultGatewayUrl());
+  const [gwUrl, setGwUrl] = useLocalStorage<string>('gwUrl', getDefaultGatewayUrl());
   const [baseUrl, setBaseUrl] = useLocalStorage<string>('baseUrl', defaultBaseUrl);
   const { aiState, setAiState, backendSynthComplete, setBackendSynthComplete } = useAiState();
   const { setModelInfo } = useLive2DConfig();
@@ -304,7 +304,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     gatewayConnector.connect({
       url: gwUrl,
       token: GATEWAY_TOKEN,
-      clientId: 'cli',
+      clientId: 'webchat-ui',
       displayName: '灵 Avatar',
     }).then(() => {
       console.log('[WebSocketHandler] Gateway connected!');
@@ -602,7 +602,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       gatewayConnector.connect({
         url: gwUrl,
         token: GATEWAY_TOKEN,
-        clientId: 'cli',
+        clientId: 'webchat-ui',
         displayName: '灵 Avatar',
       }).catch(console.error);
     },
