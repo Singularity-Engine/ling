@@ -33,6 +33,7 @@ const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPerce
 export const AffinityBadge = memo(() => {
   const { affinity, level, milestone } = useAffinity();
   const [expanded, setExpanded] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const config = useMemo(() => LEVEL_CONFIG[level] || LEVEL_CONFIG.neutral, [level]);
 
@@ -42,6 +43,8 @@ export const AffinityBadge = memo(() => {
       <Box
         as="button"
         onClick={() => setExpanded(!expanded)}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         display="flex"
         alignItems="center"
         gap="6px"
@@ -69,7 +72,20 @@ export const AffinityBadge = memo(() => {
         }}
       >
         <HeartIcon color={config.heartColor} fillPercent={affinity} size={22} />
-        <Text fontSize="12px" color="rgba(255,255,255,0.7)" fontFamily="monospace" fontWeight="500">
+        <Text fontSize="12px" color={`${config.color}cc`} fontWeight="600" transition="all 0.3s ease">
+          {config.name}
+        </Text>
+        <Text
+          fontSize="12px"
+          color="rgba(255,255,255,0.7)"
+          fontFamily="monospace"
+          fontWeight="500"
+          overflow="hidden"
+          maxW={hovered ? "40px" : "0px"}
+          opacity={hovered ? 1 : 0}
+          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+          whiteSpace="nowrap"
+        >
           {affinity}
         </Text>
       </Box>

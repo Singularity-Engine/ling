@@ -111,15 +111,33 @@ canvas {
   .chat-bubble {
     max-width: 85%;
   }
-  
+
   /* 禁止长按选择 */
   * {
     -webkit-touch-callout: none;
   }
-  
+
   /* 输入框在移动端不缩放 */
   input, textarea {
     font-size: 16px !important; /* 防止 iOS 自动缩放 */
+  }
+
+  /* Live2D 画布在手机上缩小并上移，避免遮挡聊天 */
+  canvas {
+    transform: scale(0.7) translateY(-15%);
+    transform-origin: top center;
+  }
+
+  /* Landing 动画文字缩小 */
+  .landing-text-line {
+    font-size: 20px !important;
+  }
+  .landing-text-line:first-child {
+    font-size: 24px !important;
+  }
+  .landing-start-btn {
+    padding: 12px 36px !important;
+    font-size: 16px !important;
   }
 }
 
