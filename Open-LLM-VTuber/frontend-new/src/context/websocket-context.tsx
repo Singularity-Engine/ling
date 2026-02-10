@@ -24,6 +24,15 @@ function getDefaultUrls() {
 
 const { wsUrl: DEFAULT_WS_URL, baseUrl: DEFAULT_BASE_URL } = getDefaultUrls();
 
+// 强制迁移：清除旧的缓存地址（一次性）
+if (typeof window !== 'undefined') {
+  const cached = localStorage.getItem('wsUrl');
+  if (cached && (cached.includes('classic.sngxai.com') || cached.includes('127.0.0.1'))) {
+    localStorage.removeItem('wsUrl');
+    localStorage.removeItem('baseUrl');
+  }
+}
+
 export interface HistoryInfo {
   uid: string;
   latest_message: {

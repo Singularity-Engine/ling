@@ -261,13 +261,23 @@ class WebSocketHandler:
         # Send initial group status
         await self.send_group_update(websocket, client_uid)
 
-        # Send TTS greeting message (Cookie通过同源策略自动传递，直接发送招呼语)
+        # Send TTS greeting message (暂时禁用 - 大payload通过tunnel导致连接断开)
+        # TODO: 改用文本问候 + 客户端本地TTS，而非发送完整音频
         character_name = session_service_context.character_config.character_name
-        logger.info(f"🎵 Cookie通过同源策略自动传递到后端，为角色 {character_name} 发送基于当前好感度的招呼语")
-        await self._send_tts_greeting_message(websocket, session_service_context, client_uid)
+        logger.info(f"🎵 跳过预设音频问候，发送文本问候: {character_name}")
+        try:
+            await websocket.send_text(json.dumps({
+                "type": "full-text",
+                "text": f"你好！我是{character_name}，很高兴见到你！今天想聊些什么呢？"
+            }))
+        except Exception as e:
+            logger.warning(f"⚠️ 文本问候发送失败: {e}")
 
         # Start microphone
-        await websocket.send_text(json.dumps({"type": "control", "text": "start-mic"}))
+        try:
+            await websocket.send_text(json.dumps({"type": "control", "text": "start-mic"}))
+        except Exception as e:
+            logger.warning(f"⚠️ start-mic 发送失败: {e}")
 
     def _is_websocket_connected(self, websocket: WebSocket) -> bool:
         """检查WebSocket是否处于连接状态
