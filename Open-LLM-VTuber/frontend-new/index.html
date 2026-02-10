@@ -25,7 +25,14 @@
     <title>灵 · Singularity Engine</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💜</text></svg>" />
 
-    <!-- crypto.randomUUID polyfill — MUST be first script, before any ES module -->
+    <!-- HTTPS redirect — must be absolute first script -->
+    <script>
+      if (location.protocol === 'http:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        location.replace('https://' + location.host + location.pathname + location.search + location.hash);
+      }
+    </script>
+
+    <!-- crypto.randomUUID polyfill — MUST run before any ES module -->
     <script>
       (function() {
         function fallback() {
