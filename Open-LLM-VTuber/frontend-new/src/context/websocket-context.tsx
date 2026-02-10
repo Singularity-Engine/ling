@@ -15,14 +15,11 @@ function getDefaultUrls() {
     };
   }
 
-  // 外网访问 - 通过 classic.sngxai.com 代理到后端
-  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const urls = {
-    wsUrl: `${wsProtocol}//classic.sngxai.com/client-ws`,
-    baseUrl: 'https://classic.sngxai.com',
+  // 外网访问 - 通过 lain.sngxai.com 连接数字人后端
+  return {
+    wsUrl: 'wss://lain.sngxai.com/client-ws',
+    baseUrl: 'https://lain.sngxai.com',
   };
-
-  return urls;
 }
 
 const { wsUrl: DEFAULT_WS_URL, baseUrl: DEFAULT_BASE_URL } = getDefaultUrls();

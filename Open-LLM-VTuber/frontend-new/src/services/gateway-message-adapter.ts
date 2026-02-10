@@ -82,8 +82,9 @@ class GatewayMessageAdapter {
         });
         break;
 
-      // agent.event and tick are handled elsewhere
+      // agent.event / agent and tick are handled elsewhere
       case 'agent.event':
+      case 'agent':
       case 'tick':
       case 'connect.challenge':
         break;

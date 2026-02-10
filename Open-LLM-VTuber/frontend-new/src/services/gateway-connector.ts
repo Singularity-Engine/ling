@@ -274,7 +274,7 @@ class GatewayConnector {
         }
 
         // ── Agent events ──
-        if (frame.type === 'event' && frame.event === 'agent.event') {
+        if (frame.type === 'event' && (frame.event === 'agent.event' || frame.event === 'agent')) {
           const payload = frame.payload as any;
           const agentEvent: GatewayAgentEvent = {
             runId: payload?.runId || '',
