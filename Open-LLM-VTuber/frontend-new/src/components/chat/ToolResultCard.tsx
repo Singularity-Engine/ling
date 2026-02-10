@@ -78,6 +78,8 @@ const CodeBlock = memo(({ lang, code }: { lang: string; code: string }) => {
         </span>
         <button
           onClick={handleCopy}
+          aria-label={copied ? "已复制代码" : "复制代码"}
+          title="复制代码"
           style={{
             fontSize: "11px",
             color: "rgba(255,255,255,0.4)",

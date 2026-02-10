@@ -34,10 +34,16 @@ const ToggleButton = memo(({ isCollapsed, onToggle }: {
 }) => (
   <Box
     {...sidebarStyles.sidebar.toggleButton}
+    role="button"
+    tabIndex={0}
+    aria-label={isCollapsed ? "展开侧边栏" : "收起侧边栏"}
+    aria-expanded={!isCollapsed}
+    title={isCollapsed ? "展开侧边栏" : "收起侧边栏"}
     style={{
       transform: isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)',
     }}
     onClick={onToggle}
+    onKeyDown={(e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle(); } }}
   >
     <FiChevronLeft />
   </Box>
@@ -84,23 +90,23 @@ ModeMenu.displayName = 'ModeMenu';
 
 const HeaderButtons = memo(({ onSettingsOpen, onNewHistory, setMode, currentMode, isElectron }: HeaderButtonsProps) => (
   <Box display="flex" gap={1}>
-    <Button onClick={onSettingsOpen}>
+    <Button onClick={onSettingsOpen} aria-label="打开设置" title="设置">
       <FiSettings />
     </Button>
 
     <GroupDrawer>
-      <Button>
+      <Button aria-label="群组" title="群组">
         <FiUsers />
       </Button>
     </GroupDrawer>
 
     <HistoryDrawer>
-      <Button>
+      <Button aria-label="聊天记录" title="聊天记录">
         <FiClock />
       </Button>
     </HistoryDrawer>
 
-    <Button onClick={onNewHistory}>
+    <Button onClick={onNewHistory} aria-label="新建对话" title="新建对话">
       <FiPlus />
     </Button>
 

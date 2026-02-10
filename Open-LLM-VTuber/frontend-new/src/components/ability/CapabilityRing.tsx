@@ -112,6 +112,7 @@ const AbilityButton = memo(({
         padding: 0,
       }}
       onClick={onClick}
+      aria-label={label}
       title={label}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}

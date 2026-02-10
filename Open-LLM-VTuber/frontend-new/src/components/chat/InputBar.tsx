@@ -163,6 +163,9 @@ export const InputBar = memo(() => {
       >
         <button
           onClick={handleMicToggle}
+          aria-label={micOn ? "关闭麦克风" : "开启麦克风"}
+          aria-pressed={micOn}
+          title={micOn ? "关闭麦克风" : "开启麦克风"}
           style={{
             width: "42px",
             height: "42px",
@@ -192,11 +195,14 @@ export const InputBar = memo(() => {
           onCompositionStart={() => setIsComposing(true)}
           onCompositionEnd={() => setIsComposing(false)}
           placeholder={micOn ? "语音聆听中..." : "和灵说点什么..."}
+          aria-label="聊天输入框"
           rows={1}
         />
 
         <button
           onClick={isAiBusy ? handleInterrupt : handleSend}
+          aria-label={isAiBusy ? "停止回复" : "发送消息"}
+          title={isAiBusy ? "停止回复" : "发送消息"}
           style={{
             width: "42px",
             height: "42px",

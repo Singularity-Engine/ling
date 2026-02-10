@@ -189,8 +189,14 @@ export class LAppLive2DManager {
       LAppPal.printMessage(`[APP]model index: ${this._sceneIndex}`);
     }
 
-    // Use the directory name and file name from our configuration
+    // Guard: skip loading if model config hasn't been set yet
     const model: string = LAppDefine.ModelDir[index];
+    if (!model) {
+      if (LAppDefine.DebugLogEnable) {
+        LAppPal.printMessage(`[APP]changeScene: ModelDir[${index}] is not configured yet, skipping`);
+      }
+      return;
+    }
     const modelPath: string = LAppDefine.ResourcesPath + model + '/';
     
     // Use ModelFileNames if available, otherwise fall back to ModelDir

@@ -24,6 +24,31 @@
 
     <title>灵 · Singularity Engine</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💜</text></svg>" />
+
+    <!-- crypto.randomUUID polyfill — MUST be first script, before any ES module -->
+    <script>
+      (function() {
+        function fallback() {
+          if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+            return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, function(c) {
+              return (+c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (+c / 4)))).toString(16);
+            });
+          }
+          return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = (Math.random() * 16) | 0;
+            return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+          });
+        }
+        if (typeof globalThis.crypto === 'undefined') {
+          globalThis.crypto = { randomUUID: fallback, getRandomValues: function(arr) { for (var i = 0; i < arr.length; i++) arr[i] = Math.floor(Math.random() * 256); return arr; } };
+        } else if (!crypto.randomUUID) {
+          crypto.randomUUID = fallback;
+        } else {
+          try { crypto.randomUUID(); } catch(e) { crypto.randomUUID = fallback; }
+        }
+      })();
+    </script>
+
     <style>
       html, body { margin: 0; padding: 0; background: #0a0015; overflow: hidden; }
       #root { width: 100vw; height: 100vh; }
@@ -38,20 +63,15 @@
       @keyframes spin { to { transform: rotate(360deg); } }
     </style>
     <script>
-      // 全局错误捕获 — 如果 React 加载失败，显示错误信息
       window.onerror = function(msg, url, line, col, error) {
         var el = document.getElementById('loading-error');
         if (el) { el.style.display = 'block'; el.textContent = msg + ' (' + url + ':' + line + ')'; }
       };
-      // 5秒后如果 #root 还是空的，说明 JS 加载失败
       setTimeout(function() {
         var root = document.getElementById('root');
         if (root && root.children.length === 0) {
-          var fb = document.getElementById('loading-fallback');
-          if (fb) {
-            var el = document.getElementById('loading-error');
-            if (el && !el.textContent) { el.style.display = 'block'; el.textContent = '加载超时，请刷新页面重试'; }
-          }
+          var el = document.getElementById('loading-error');
+          if (el && !el.textContent) { el.style.display = 'block'; el.textContent = '加载超时，请刷新页面重试'; }
         }
       }, 8000);
     </script>

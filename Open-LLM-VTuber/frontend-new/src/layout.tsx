@@ -34,7 +34,7 @@ export const layoutStyles = {
   },
   mainContent: {
     flex: 1,
-    height: { base: 'calc(100% - 120px)', md: '100%' },
+    height: '100%',
     position: 'relative',
     display: 'flex',
     flexDirection: 'column',
@@ -53,9 +53,12 @@ export const layoutStyles = {
   footer: {
     width: '100%',
     height: { base: '100px', md: '120px' },
+    position: { base: 'absolute', md: 'relative' },
+    bottom: { base: 0, md: 'auto' },
+    left: { base: 0, md: 'auto' },
+    background: { base: 'transparent', md: 'inherit' },
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     willChange: 'transform',
-    position: 'relative',
     zIndex: 1,
   },
   toggleButton: {
@@ -71,7 +74,7 @@ export const layoutStyles = {
     zIndex: 10,
   },
   canvasHeight: (isFooterCollapsed: boolean) => ({
-    height: isFooterCollapsed ? 'calc(100% - 24px)' : 'calc(100% - 120px)',
+    height: isFooterCollapsed ? { base: '100%', md: 'calc(100% - 24px)' } : { base: '100%', md: 'calc(100% - 120px)' },
   }),
   sidebarToggleButton: {
     position: 'absolute',

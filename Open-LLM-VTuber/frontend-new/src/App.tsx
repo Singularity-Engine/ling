@@ -124,6 +124,8 @@ function MainContent(): JSX.Element {
         <ConnectionStatus />
         <button
           onClick={toggleChat}
+          aria-label={chatExpanded ? "收起对话" : "展开对话"}
+          aria-pressed={chatExpanded}
           title={chatExpanded ? "收起对话" : "展开对话"}
           style={{
             width: isMobile ? "36px" : "42px",
@@ -182,6 +184,9 @@ function MainContent(): JSX.Element {
 
         {!chatExpanded && (
           <div
+            role="button"
+            tabIndex={0}
+            aria-label="展开对话"
             style={{
               pointerEvents: "auto",
               display: "flex",
@@ -190,6 +195,7 @@ function MainContent(): JSX.Element {
               cursor: "pointer",
             }}
             onClick={toggleChat}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleChat(); } }}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(139, 92, 246, 0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="18 15 12 9 6 15" />
@@ -201,7 +207,7 @@ function MainContent(): JSX.Element {
           style={{
             flexShrink: 0,
             pointerEvents: "auto",
-            background: "rgba(10, 0, 21, 0.75)",
+            background: isMobile ? "rgba(10, 0, 21, 0.45)" : "rgba(10, 0, 21, 0.75)",
             backdropFilter: "blur(16px)",
             WebkitBackdropFilter: "blur(16px)",
             borderTop: "1px solid rgba(139, 92, 246, 0.1)",

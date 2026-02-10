@@ -19,8 +19,8 @@ export const footerStyles: {
 } = {
   footer: {
     container: (isCollapsed) => ({
-      bg: isCollapsed ? 'transparent' : 'gray.800',
-      borderTopRadius: isCollapsed ? 'none' : 'lg',
+      bg: isCollapsed ? 'transparent' : { base: 'transparent', md: 'gray.800' },
+      borderTopRadius: isCollapsed ? 'none' : { base: 'none', md: 'lg' },
       transform: isCollapsed ? 'translateY(calc(100% - 24px))' : 'translateY(0)',
       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       height: '100%',

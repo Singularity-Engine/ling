@@ -41,7 +41,13 @@ interface MessageInputProps {
 const ToggleButton = memo(({ isCollapsed, onToggle }: ToggleButtonProps) => (
   <Box
     {...footerStyles.footer.toggleButton}
+    role="button"
+    tabIndex={0}
+    aria-label={isCollapsed ? "展开底栏" : "收起底栏"}
+    aria-expanded={!isCollapsed}
+    title={isCollapsed ? "展开底栏" : "收起底栏"}
     onClick={onToggle}
+    onKeyDown={(e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle?.(); } }}
     color="whiteAlpha.500"
     style={{
       transform: isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -56,6 +62,8 @@ ToggleButton.displayName = 'ToggleButton';
 const ActionButtons = memo(({ micOn, onMicToggle, onInterrupt }: ActionButtonsProps) => (
   <HStack gap={2}>
     <IconButton
+      aria-label={micOn ? "关闭麦克风" : "开启麦克风"}
+      title={micOn ? "关闭麦克风" : "开启麦克风"}
       bg={micOn ? 'green.500' : 'red.500'}
       {...footerStyles.footer.actionButton}
       onClick={onMicToggle}
@@ -101,6 +109,7 @@ const MessageInput = memo(({
           onCompositionStart={onCompositionStart}
           onCompositionEnd={onCompositionEnd}
           placeholder={t('footer.typeYourMessage')}
+          aria-label={t('footer.typeYourMessage')}
           {...footerStyles.footer.input}
         />
       </Box>

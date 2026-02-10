@@ -64,6 +64,9 @@ export const ChatArea = memo(() => {
     <div
       ref={scrollRef}
       className="chat-area-scroll"
+      role="log"
+      aria-label="聊天消息"
+      aria-live="polite"
       style={{
         height: "100%",
         overflowY: "auto",
@@ -124,6 +127,7 @@ export const ChatArea = memo(() => {
         >
           <button
             onClick={scrollToBottom}
+            aria-label="滚动到最新消息"
             style={{
               pointerEvents: "auto",
               padding: "6px 14px",
