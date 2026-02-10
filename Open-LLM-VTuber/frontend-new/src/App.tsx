@@ -179,7 +179,7 @@ function MainContent(): JSX.Element {
         </div>
 
         <div style={{ pointerEvents: "auto" }}>
-          <CapabilityRing />
+          {!isMobile && <CapabilityRing />}
         </div>
 
         {!chatExpanded && (
