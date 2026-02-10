@@ -182,7 +182,7 @@ function MainContent(): JSX.Element {
           {!isMobile && <CapabilityRing />}
         </div>
 
-        {!chatExpanded && (
+        {!chatExpanded && !isMobile && (
           <div
             role="button"
             tabIndex={0}

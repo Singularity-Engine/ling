@@ -60,9 +60,9 @@ const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 const LING_MODEL_INFO: ModelInfo = {
   name: '灵 (Ling)',
   url: 'https://lain.sngxai.com/live2d-models/001/0A-原档整理(1).model3.json',
-  kScale: isMobile ? 0.7 : 0.35,
+  kScale: isMobile ? 0.9 : 0.35,
   initialXshift: 0,
-  initialYshift: isMobile ? -15 : -100,
+  initialYshift: isMobile ? 25 : -100,
   idleMotionGroupName: 'Idle',
   emotionMap: {},
 };
