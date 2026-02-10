@@ -50,11 +50,24 @@ export class LAppView {
     }
     const { width, height } = canvas;
 
-    const ratio: number = width / height;
-    const left: number = -ratio;
-    const right: number = ratio;
-    const bottom: number = LAppDefine.ViewLogicalLeft;
-    const top: number = LAppDefine.ViewLogicalRight;
+    let left: number;
+    let right: number;
+    let bottom: number;
+    let top: number;
+
+    if (width >= height) {
+      const ratio: number = width / height;
+      left = -ratio;
+      right = ratio;
+      bottom = LAppDefine.ViewLogicalLeft;
+      top = LAppDefine.ViewLogicalRight;
+    } else {
+      const ratio: number = height / width;
+      left = LAppDefine.ViewLogicalLeft;
+      right = LAppDefine.ViewLogicalRight;
+      bottom = -ratio;
+      top = ratio;
+    }
 
     this._viewMatrix.setScreenRect(left, right, bottom, top); // デバイスに対応する画面の範囲。 Xの左端、Xの右端、Yの下端、Yの上端
     this._viewMatrix.scale(LAppDefine.ViewScale, LAppDefine.ViewScale);
