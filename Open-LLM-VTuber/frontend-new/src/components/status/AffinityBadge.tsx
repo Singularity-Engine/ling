@@ -148,20 +148,6 @@ export const AffinityBadge = memo(() => {
               <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)" }}>100</span>
             </div>
 
-            {/* Memory count */}
-            <div
-              style={{
-                marginTop: "12px",
-                paddingTop: "10px",
-                borderTop: "1px solid rgba(255,255,255,0.06)",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-              }}
-            >
-              <span style={{ fontSize: "13px" }}>🧠</span>
-              <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}>记忆中...</span>
-            </div>
           </div>
         )}
 

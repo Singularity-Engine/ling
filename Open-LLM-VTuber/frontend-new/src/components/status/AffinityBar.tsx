@@ -87,7 +87,6 @@ export const AffinityBar = memo(() => {
             🧠
           </span>
           <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.35)" }}>
-            记忆中...
           </span>
         </div>
 
