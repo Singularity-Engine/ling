@@ -93,7 +93,7 @@ const AbilityButton = memo(({
         width: "36px",
         height: "36px",
         borderRadius: "50%",
-        background: "rgba(10, 0, 21, 0.6)",
+        background: "rgba(10, 0, 21, 0.25)",
         backdropFilter: "blur(12px)",
         border: `1px solid ${(hovered || isActive) ? `${color}${hovered ? 'aa' : '88'}` : "rgba(255, 255, 255, 0.12)"}`,
         display: "flex",

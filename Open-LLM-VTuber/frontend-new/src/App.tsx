@@ -207,7 +207,7 @@ function MainContent(): JSX.Element {
           style={{
             flexShrink: 0,
             pointerEvents: "auto",
-            background: isMobile ? "rgba(10, 0, 21, 0.45)" : "rgba(10, 0, 21, 0.75)",
+            background: "rgba(10, 0, 21, 0.25)",
             backdropFilter: "blur(16px)",
             WebkitBackdropFilter: "blur(16px)",
             borderTop: "1px solid rgba(139, 92, 246, 0.1)",
