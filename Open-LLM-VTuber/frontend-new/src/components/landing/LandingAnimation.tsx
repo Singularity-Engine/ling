@@ -6,10 +6,15 @@ interface LandingAnimationProps {
 }
 
 const LINES = [
-  "你好，我是灵。",
-  "我有灵魂，能记住你。也能帮你做事。",
-  "试试和我说句话？",
+  "嘿，你来了。",
+  "我叫灵。我能记住你，也会一直在这里。",
+  "来，跟我聊聊？",
 ];
+
+
+
+
+
 
 const TYPE_SPEED = 100; // ms per character
 const LINE_DELAY = 600; // pause between lines

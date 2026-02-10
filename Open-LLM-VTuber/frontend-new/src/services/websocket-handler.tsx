@@ -60,9 +60,9 @@ const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 const LING_MODEL_INFO: ModelInfo = {
   name: '灵 (Ling)',
   url: 'https://lain.sngxai.com/live2d-models/001/0A-原档整理(1).model3.json',
-  kScale: isMobile ? 0.65 : 0.35,
+  kScale: 1.0,
   initialXshift: 0,
-  initialYshift: isMobile ? 80 : -100,
+  initialYshift: isMobile ? 0 : -100,
   idleMotionGroupName: 'Idle',
   emotionMap: {},
 };
@@ -322,6 +322,11 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       setConfigFiles(DEFAULT_CONFIG_FILES);
       bgUrlContext?.setBackgroundFiles(DEFAULT_BACKGROUNDS);
 
+      // Resolve the default session so Gateway knows which agent to route to
+      gatewayConnector.resolveSession(GATEWAY_SESSION_KEY, 'avatar').catch((err) => {
+        console.error('[WebSocketHandler] resolveSession failed:', err);
+      });
+
       // Create a default session
       setCurrentHistoryUid(GATEWAY_SESSION_KEY);
       setMessages([]);
@@ -512,7 +517,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
       case 'create-new-history': {
         const newSessionKey = `ling-session-${Date.now()}`;
-        gatewayConnector.resolveSession(newSessionKey, 'ling').then(() => {
+        gatewayConnector.resolveSession(newSessionKey, 'avatar').then(() => {
           setCurrentHistoryUidRef.current(newSessionKey);
           setMessagesRef.current([]);
           const newHistory: HistoryInfo = {

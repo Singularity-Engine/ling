@@ -16,7 +16,7 @@ export const CanvasSize: { width: number; height: number } | 'auto' = 'auto';
 
 // 画面
 export const ViewScale = 1.0;
-export let CurrentKScale = ViewScale;
+export let CurrentKScale = 1.0;
 export const ViewMaxScale = 2.0;
 export const ViewMinScale = 0.8;
 

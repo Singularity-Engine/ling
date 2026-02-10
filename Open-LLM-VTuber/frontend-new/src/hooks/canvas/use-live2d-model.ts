@@ -202,7 +202,7 @@ export const useLive2DModel = ({
     return { x, y };
   }, [getCanvasScale]);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
     const adapter = (window as any).getLAppAdapter?.();
     if (!adapter || !canvasRef.current) return;
 
@@ -227,6 +227,9 @@ export const useLive2DModel = ({
     // --- End Check ---
 
     if (hitAreaName !== null || isHitOnModel) {
+      // Capture pointer to ensure drag events are received even outside the element
+      (e.target as Element).setPointerCapture?.(e.pointerId);
+
       // Record potential tap/drag start
       mouseDownTimeRef.current = Date.now();
       mouseDownPosRef.current = { x: e.clientX, y: e.clientY }; // Use clientX/Y for distance check
@@ -241,7 +244,7 @@ export const useLive2DModel = ({
     }
   }, [canvasRef, modelInfo]);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
     const adapter = (window as any).getLAppAdapter?.();
     const view = LAppDelegate.getInstance().getView();
     const model = adapter?.getModel();
@@ -333,7 +336,7 @@ export const useLive2DModel = ({
     // --- End Pet Hover Logic ---
   }, [isPet, isDragging, electronApi, canvasRef]);
 
-  const handleMouseUp = useCallback((e: React.MouseEvent) => {
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
     const adapter = (window as any).getLAppAdapter?.();
     const model = adapter?.getModel();
     const view = LAppDelegate.getInstance().getView();
@@ -384,12 +387,12 @@ export const useLive2DModel = ({
     isPotentialTapRef.current = false;
   }, [isDragging, canvasRef, modelInfo]);
 
-  const handleMouseLeave = useCallback(() => {
+  const handlePointerLeave = useCallback(() => {
     if (isDragging) {
-      // If dragging and mouse leaves, treat it like a mouse up to end drag
-      handleMouseUp({} as React.MouseEvent); // Pass a dummy event or adjust handleMouseUp signature
+      // If dragging and pointer leaves, treat it like a pointer up to end drag
+      handlePointerUp({} as React.PointerEvent); // Pass a dummy event or adjust handlePointerUp signature
     }
-    // Reset potential tap if mouse leaves before mouse up
+    // Reset potential tap if pointer leaves before pointer up
     if (isPotentialTapRef.current) {
       isPotentialTapRef.current = false;
     }
@@ -398,7 +401,7 @@ export const useLive2DModel = ({
       isHoveringModelRef.current = false;
       electronApi.ipcRenderer.send('update-component-hover', 'live2d-model', false);
     }
-  }, [isPet, isDragging, electronApi, handleMouseUp]);
+  }, [isPet, isDragging, electronApi, handlePointerUp]);
 
   useEffect(() => {
     if (!isPet && electronApi && isHoveringModelRef.current) {
@@ -533,10 +536,10 @@ Live2DDebug.playRandomMotion("")  // Play random motion from default group
     position,
     isDragging,
     handlers: {
-      onMouseDown: handleMouseDown,
-      onMouseMove: handleMouseMove,
-      onMouseUp: handleMouseUp,
-      onMouseLeave: handleMouseLeave,
+      onPointerDown: handlePointerDown,
+      onPointerMove: handlePointerMove,
+      onPointerUp: handlePointerUp,
+      onPointerLeave: handlePointerLeave,
     },
   };
 };

@@ -95,10 +95,6 @@ export const Live2D = memo(
     // 判断是否需要显示加载覆盖层
     const showOverlay = wsState !== 'OPEN' || !modelInfo?.url;
 
-    const handlePointerDown = (e: React.PointerEvent) => {
-      handlers.onMouseDown(e);
-    };
-
     const handleContextMenu = (e: React.MouseEvent) => {
       if (!isPet) {
         return;
@@ -122,8 +118,8 @@ export const Live2D = memo(
           overflow: "hidden",
           position: "relative",
           cursor: isDragging ? "grabbing" : "default",
+          touchAction: "none",
         }}
-        onPointerDown={handlePointerDown}
         onContextMenu={handleContextMenu}
         {...handlers}
       >

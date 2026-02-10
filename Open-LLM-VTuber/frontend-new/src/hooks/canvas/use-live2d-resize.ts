@@ -166,9 +166,14 @@ export const useLive2DResize = ({
 
     try {
       const containerBounds = containerRef.current?.getBoundingClientRect();
-      const { width, height } = isPet
+      const isMobileView = !isPet && typeof window !== "undefined" && window.innerWidth < 768;
+      const { width, height } = isPet || isMobileView
         ? { width: window.innerWidth, height: window.innerHeight }
         : containerBounds || { width: 0, height: 0 };
+
+
+
+
 
       const lastDimensions = lastContainerDimensionsRef.current;
       const sidebarChanged = prevSidebarStateRef.current !== showSidebar;
@@ -192,11 +197,14 @@ export const useLive2DResize = ({
         return;
       }
 
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap at 2x to avoid exceeding Safari WebGL max texture size on high-dpr devices
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
+
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
+      canvas.style.marginLeft = '0px';
+      canvas.style.marginTop = '0px';
 
       const delegate = LAppDelegate.getInstance();
       if (delegate) {
@@ -321,29 +329,3 @@ export const setModelScale = (
   console.warn("setModelScale is potentially deprecated; scaling is primarily handled by view matrix now.");
 };
 
-/**
- * Helper function to center model in container with optional offset
- * This is now primarily handled within handleResize
- */
-export const resetModelPosition = (
-  model: any,
-  width: number, // Logical width (CSS pixels)
-  height: number, // Logical height (CSS pixels)
-  initialXshift: number | undefined, // Shift in logical pixels
-  initialYshift: number | undefined, // Shift in logical pixels
-) => {
-  if (!model || typeof model.setPosition !== 'function') return;
-
-  const dpr = window.devicePixelRatio || 1;
-  const canvasWidth = width * dpr; // Calculate canvas pixel dimensions
-  const canvasHeight = height * dpr;
-
-  const initXshiftPixels = Number(initialXshift || 0) * dpr; // Convert shift to canvas pixels
-  const initYshiftPixels = Number(initialYshift || 0) * dpr;
-
-  const centerX = canvasWidth / 2 + initXshiftPixels;
-  const centerY = canvasHeight / 2 + initYshiftPixels;
-
-  // @ts-ignore
-  model.setPosition(centerX, centerY);
-};

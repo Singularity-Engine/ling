@@ -72,7 +72,11 @@ export class LAppDelegate {
     // }
 
     if (LAppDefine.CanvasSize === 'auto') {
-      this._resizeCanvas();
+      // Canvas dimensions are already set by React's handleResize hook.
+      // Only sync the GL viewport here.
+      if (gl) {
+        gl.viewport(0, 0, canvas!.width, canvas!.height);
+      }
     } else {
       canvas!.width = LAppDefine.CanvasSize.width;
       canvas!.height = LAppDefine.CanvasSize.height;
@@ -123,24 +127,6 @@ export class LAppDelegate {
     if (this._view && canvas) {
       this._view.initialize();
       this._view.initializeSprite();
-      
-      // Try to get and center the model
-      const manager = LAppLive2DManager.getInstance();
-      if (manager) {
-        const model = manager.getModel(0);
-        if (model) {
-          // Keep model centered in canvas
-          const width = canvas!.width;
-          const height = canvas!.height;
-          if (width > 0 && height > 0) {
-            // @ts-ignore
-            if (model.setPosition) {
-              // @ts-ignore
-              model.setPosition(width / 2, height / 2);
-            }
-          }
-        }
-      }
     }
   }
 
@@ -333,17 +319,18 @@ export class LAppDelegate {
   }
 
   /**
-   * Resize the canvas to fill the screen.
+   * Update GL viewport to match current canvas dimensions.
+   * Canvas pixel size (canvas.width/height) is set exclusively by React's handleResize hook.
+   * This method only syncs the GL viewport to avoid race conditions on mobile.
    */
   private _resizeCanvas(): void {
     if (!canvas) {
       console.warn("Canvas is null, skipping resize");
       return;
     }
-    canvas.width = canvas.clientWidth * window.devicePixelRatio;
-    canvas.height = canvas.clientHeight * window.devicePixelRatio;
+    // canvas.width/height is set by React handleResize — only update GL viewport here
     if (gl) {
-      gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+      gl.viewport(0, 0, canvas.width, canvas.height);
     }
   }
 

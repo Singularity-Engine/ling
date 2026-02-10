@@ -136,7 +136,7 @@ export class LAppModel extends CubismUserModel {
           }
         })
         .then((arrayBuffer) => {
-          this.loadModel(arrayBuffer, this._mocConsistency, LAppDefine.CurrentKScale);
+          this.loadModel(arrayBuffer, this._mocConsistency);
           this._state = LoadStep.LoadExpression;
 
           // callback
@@ -538,6 +538,83 @@ export class LAppModel extends CubismUserModel {
   }
 
   /**
+   * Calculate the visible bounding box by iterating all drawable vertices.
+   * Must be called after at least one model.update() so vertices are positioned.
+   */
+  private calculateVisibleBounds(): { minX: number; maxX: number; minY: number; maxY: number } | null {
+    const drawableCount = this._model.getDrawableCount();
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    let hasVisible = false;
+
+    for (let i = 0; i < drawableCount; i++) {
+      if (!this._model.getDrawableDynamicFlagIsVisible(i)) continue;
+      const vertices = this._model.getDrawableVertices(i);
+      if (!vertices || vertices.length < 2) continue;
+
+      for (let j = 0; j < vertices.length; j += 2) {
+        const vx = vertices[j];
+        const vy = vertices[j + 1];
+        minX = Math.min(minX, vx);
+        maxX = Math.max(maxX, vx);
+        minY = Math.min(minY, vy);
+        maxY = Math.max(maxY, vy);
+      }
+      hasVisible = true;
+    }
+
+    if (!hasVisible) return null;
+    return { minX, maxX, minY, maxY };
+  }
+
+  /**
+   * Apply visible-bbox-based centering and scaling to the model matrix.
+   * This makes the visible content fill the viewport regardless of transparent canvas area.
+   */
+  private applyVisibleBboxAdjustment(): void {
+    const bounds = this.calculateVisibleBounds();
+    if (!bounds) return;
+
+    const { minX, maxX, minY, maxY } = bounds;
+    const bboxW = maxX - minX;
+    const bboxH = maxY - minY;
+
+    if (bboxW <= 0 || bboxH <= 0) return;
+
+    const centerX = (minX + maxX) / 2.0;
+    const centerY = (minY + maxY) / 2.0;
+
+    console.log(
+      `[BBox] raw bounds: x=[${minX.toFixed(4)}, ${maxX.toFixed(4)}] ` +
+      `y=[${minY.toFixed(4)}, ${maxY.toFixed(4)}] ` +
+      `size=${bboxW.toFixed(4)}x${bboxH.toFixed(4)}`
+    );
+
+    // Reset model matrix to identity before applying bbox-based transform
+    this._modelMatrix.loadIdentity();
+
+    // Live2D view space: portrait mode x=-1~1, y=-ratio~ratio (ratio=h/w)
+    const canvasW = canvas?.width || 1;
+    const canvasH = canvas?.height || 1;
+    const viewAspect = canvasH / canvasW; // >1 for portrait
+    const viewW = 2.0;  // view space width: -1 to 1
+    const viewH = 2.0 * viewAspect; // view space height
+
+    const padding = 0.85; // leave 15% margin
+    const scaleX = (viewW / bboxW) * padding;
+    const scaleY = (viewH / bboxH) * padding;
+    const fitScale = Math.min(scaleX, scaleY);
+
+    this._modelMatrix.scale(fitScale, fitScale);
+    // Translate so bbox center aligns to view center (0,0).
+    // translateRelative operates in the scaled coordinate space.
+    this._modelMatrix.translateRelative(-centerX, -centerY);
+
+    console.log(
+      `[BBox] applied: fitScale=${fitScale.toFixed(4)} viewAspect=${viewAspect.toFixed(4)}`
+    );
+  }
+
+  /**
    * 更新
    */
   public update(): void {
@@ -635,6 +712,12 @@ export class LAppModel extends CubismUserModel {
     }
 
     this._model.update();
+
+    // Apply visible bounding box adjustment on the first frame
+    if (this._needsBboxAdjust) {
+      this._needsBboxAdjust = false;
+      this.applyVisibleBboxAdjustment();
+    }
   }
 
   /**
@@ -1313,6 +1396,7 @@ export class LAppModel extends CubismUserModel {
     this._allMotionCount = 0;
     this._wavFileHandler = new LAppWavFileHandler();
     this._consistency = false;
+    this._needsBboxAdjust = true;
   }
 
   _modelSetting: ICubismModelSetting; // モデルセッティング情報
@@ -1342,4 +1426,5 @@ export class LAppModel extends CubismUserModel {
   _allMotionCount: number; // モーション総数
   _wavFileHandler: LAppWavFileHandler; //wavファイルハンドラ
   _consistency: boolean; // MOC3一貫性チェック管理用
+  _needsBboxAdjust: boolean; // Whether visible bbox adjustment is pending
 }
