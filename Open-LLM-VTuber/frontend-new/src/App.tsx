@@ -82,7 +82,7 @@ function MainContent(): JSX.Element {
     <div
       style={{
         position: "relative",
-        height: "100vh",
+        height: "100dvh",
         width: "100vw",
         background: "#0a0015",
         overflow: "hidden",
@@ -128,8 +128,8 @@ function MainContent(): JSX.Element {
           aria-pressed={chatExpanded}
           title={chatExpanded ? "收起对话" : "展开对话"}
           style={{
-            width: isMobile ? "36px" : "42px",
-            height: isMobile ? "36px" : "42px",
+            width: isMobile ? "44px" : "42px",
+            height: isMobile ? "44px" : "42px",
             borderRadius: "50%",
             background: chatExpanded ? "rgba(139, 92, 246, 0.4)" : "rgba(255, 255, 255, 0.08)",
             border: chatExpanded ? "1px solid rgba(139, 92, 246, 0.6)" : "1px solid rgba(255, 255, 255, 0.12)",
@@ -169,7 +169,7 @@ function MainContent(): JSX.Element {
             position: "relative",
             pointerEvents: "auto",
             transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-            maxHeight: chatExpanded ? (isMobile ? "35vh" : "40vh") : "0px",
+            maxHeight: chatExpanded ? (isMobile ? "35dvh" : "40dvh") : "0px",
             opacity: chatExpanded ? 1 : 0,
             maskImage: "linear-gradient(to bottom, transparent 0%, black 15%)",
             WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 15%)",

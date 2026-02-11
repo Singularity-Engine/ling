@@ -167,8 +167,8 @@ export const InputBar = memo(() => {
           aria-pressed={micOn}
           title={micOn ? "关闭麦克风" : "开启麦克风"}
           style={{
-            width: "42px",
-            height: "42px",
+            width: "44px",
+            height: "44px",
             borderRadius: "50%",
             background: micOn ? "rgba(239, 68, 68, 0.2)" : "rgba(255,255,255,0.06)",
             border: micOn ? "1px solid rgba(239, 68, 68, 0.4)" : "1px solid rgba(255,255,255,0.08)",
@@ -204,8 +204,8 @@ export const InputBar = memo(() => {
           aria-label={isAiBusy ? "停止回复" : "发送消息"}
           title={isAiBusy ? "停止回复" : "发送消息"}
           style={{
-            width: "42px",
-            height: "42px",
+            width: "44px",
+            height: "44px",
             borderRadius: "50%",
             background: isAiBusy
               ? "rgba(239, 68, 68, 0.2)"
