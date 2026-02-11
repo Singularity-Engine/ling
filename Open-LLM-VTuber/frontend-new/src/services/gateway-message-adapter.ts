@@ -105,7 +105,7 @@ class GatewayMessageAdapter {
 
   private handleAssistantDelta(event: GatewayAgentEvent) {
     const { runId, data } = event;
-    const deltaText = (data.text as string) || '';
+    const deltaText = (data.delta as string) || '';
 
     // Get or create run state
     let run = this.activeRuns.get(runId);
@@ -117,7 +117,11 @@ class GatewayMessageAdapter {
       this.emit({ type: 'force-new-message' } as any);
     }
 
-    run.accumulatedText += deltaText;
+    if (deltaText) {
+      run.accumulatedText += deltaText;
+    } else if (data.text) {
+      run.accumulatedText = data.text as string;
+    }
     run.lastSeq = event.seq;
 
     // Emit full-text with the accumulated text (for subtitle display)

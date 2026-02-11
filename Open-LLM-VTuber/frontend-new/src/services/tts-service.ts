@@ -32,7 +32,7 @@ export interface TTSResult {
 // ─── Service ─────────────────────────────────────────────────────
 
 class TTSService {
-  private useProxy = false;
+  private useProxy = true;
   private audioContext: AudioContext | null = null;
 
   /**
