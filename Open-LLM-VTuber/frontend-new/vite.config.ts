@@ -59,7 +59,23 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        // 不再手动分 chunk，让 Rollup 自动处理避免循环依赖
+        manualChunks(id) {
+          if (id.includes('node_modules/onnxruntime-web')) {
+            return 'vendor-onnx';
+          }
+          if (id.includes('WebSDK/') || id.includes('live2d')) {
+            return 'vendor-live2d';
+          }
+          if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/')) {
+            return 'vendor-react';
+          }
+          if (id.includes('node_modules/@chakra-ui') || id.includes('node_modules/@emotion') || id.includes('node_modules/framer-motion')) {
+            return 'vendor-ui';
+          }
+          if (id.includes('node_modules/@ricky0123/vad-web')) {
+            return 'vendor-vad';
+          }
+        },
       },
     },
   },
