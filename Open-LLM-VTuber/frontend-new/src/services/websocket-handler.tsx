@@ -311,6 +311,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           const toolStatus = message.status as string;
           if (toolStatus === 'running') {
             startTool({
+              id: message.tool_id,
               name: message.tool_name,
               category: categorize(message.tool_name),
               arguments: message.content || '',

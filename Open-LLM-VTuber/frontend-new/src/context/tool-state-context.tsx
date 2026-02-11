@@ -20,7 +20,7 @@ interface ToolStateContextType {
   currentPhase: 'idle' | 'thinking' | 'working' | 'presenting';
   dominantCategory: ToolCategory | null;
 
-  startTool: (tool: Omit<ToolCall, 'id' | 'startTime' | 'status'>) => void;
+  startTool: (tool: Omit<ToolCall, 'id' | 'startTime' | 'status'> & { id?: string }) => void;
   updateTool: (id: string, update: Partial<ToolCall>) => void;
   completeTool: (id: string, result: string) => void;
   failTool: (id: string, error: string) => void;
@@ -76,10 +76,10 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const startTool = useCallback((tool: Omit<ToolCall, 'id' | 'startTime' | 'status'>) => {
+  const startTool = useCallback((tool: Omit<ToolCall, 'id' | 'startTime' | 'status'> & { id?: string }) => {
     const newTool: ToolCall = {
       ...tool,
-      id: `tool-${++toolIdCounter}`,
+      id: tool.id || `tool-${++toolIdCounter}`,
       status: 'pending',
       startTime: Date.now(),
     };
