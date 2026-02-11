@@ -1,4 +1,5 @@
 import { memo } from "react";
+import ReactMarkdown from "react-markdown";
 import { ToolResultCard } from "./ToolResultCard";
 
 // Inject animation styles once
@@ -75,31 +76,37 @@ export const ChatBubble = memo(({ role, content, isStreaming, isToolCall, toolNa
               : "0 1px 8px rgba(0, 0, 0, 0.1)",
           }}
         >
-          <span
-            style={{
-              fontSize: "14px",
-              color: isUser ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.88)",
-              whiteSpace: "pre-wrap",
-              lineHeight: 1.7,
-              letterSpacing: "0.3px",
-            }}
-          >
-            {content}
-            {isStreaming && (
-              <span
-                style={{
-                  display: "inline-block",
-                  width: "6px",
-                  height: "6px",
-                  borderRadius: "50%",
-                  background: "#8b5cf6",
-                  marginLeft: "4px",
-                  verticalAlign: "middle",
-                  animation: "bubblePulse 1.2s ease-in-out infinite",
-                }}
-              />
-            )}
-          </span>
+          {isUser ? (
+            <span
+              style={{
+                fontSize: "14px",
+                color: "rgba(255,255,255,0.95)",
+                whiteSpace: "pre-wrap",
+                lineHeight: 1.7,
+                letterSpacing: "0.3px",
+              }}
+            >
+              {content}
+            </span>
+          ) : (
+            <div className="md-content" style={{ fontSize: "14px", color: "rgba(255,255,255,0.88)", lineHeight: 1.7, letterSpacing: "0.3px" }}>
+              <ReactMarkdown>{content}</ReactMarkdown>
+              {isStreaming && (
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: "6px",
+                    height: "6px",
+                    borderRadius: "50%",
+                    background: "#8b5cf6",
+                    marginLeft: "4px",
+                    verticalAlign: "middle",
+                    animation: "bubblePulse 1.2s ease-in-out infinite",
+                  }}
+                />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
