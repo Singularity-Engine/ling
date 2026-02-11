@@ -30,7 +30,7 @@ import { asrService } from '@/services/asr-service';
 
 // ─── Gateway configuration ──────────────────────────────────────
 
-const GATEWAY_TOKEN = 'ed7c72944103e6fecc89140cb5e9661d04dc6699a09bdf05';
+const GATEWAY_TOKEN = import.meta.env.VITE_GATEWAY_TOKEN || '';
 
 /** Per-visitor session key — each browser gets its own isolated session */
 /** Public site uses restricted agent; local dev uses full agent */
