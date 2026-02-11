@@ -180,10 +180,19 @@ class GatewayMessageAdapter {
         });
         break;
 
-      case 'end':
-        // Agent run finished — emit backend-synth-complete + conversation-chain-end
-        // Clean up run state
+      case 'end': {
+        // Agent run finished — finalize text, then emit lifecycle events
+        const endRun = this.activeRuns.get(event.runId);
+        const finalText = endRun?.accumulatedText || '';
         this.activeRuns.delete(event.runId);
+
+        // Emit finalized AI message text so the handler can persist it
+        if (finalText) {
+          this.emit({
+            type: 'ai-message-complete',
+            text: finalText,
+          } as any);
+        }
 
         this.emit({
           type: 'backend-synth-complete',
@@ -193,6 +202,7 @@ class GatewayMessageAdapter {
           text: 'conversation-chain-end',
         });
         break;
+      }
 
       case 'abort':
         // Agent run aborted

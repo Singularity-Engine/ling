@@ -79,6 +79,31 @@ const DEFAULT_CONFIG_FILES = [
   { filename: 'ling_pro_zh.yaml', name: '灵 (Ling)' },
 ];
 
+// ─── Debug overlay ──────────────────────────────────────────────
+
+function GatewayDebugPanel() {
+  const [info, setInfo] = useState({ rawFrames: 0, agentEvents: 0, ticks: 0, lastEvent: '', messageCount: 0, state: 'CLOSED' });
+  useEffect(() => {
+    const msgCounter = { count: 0 };
+    const msgSub = gatewayAdapter.message$.subscribe((msg) => {
+      msgCounter.count++;
+      if (import.meta.env.DEV) console.log('[DebugPanel] message$ event:', msg.type, msg);
+    });
+    const timer = setInterval(() => {
+      const c = gatewayConnector.debugCounters;
+      setInfo({ rawFrames: c.rawFrames, agentEvents: c.agentEvents, ticks: c.ticks, lastEvent: c.lastEvent, messageCount: msgCounter.count, state: gatewayConnector.getState() });
+    }, 500);
+    return () => { clearInterval(timer); msgSub.unsubscribe(); };
+  }, []);
+  return (
+    <div style={{ position: 'fixed', bottom: 8, left: 8, zIndex: 99999, background: 'rgba(0,0,0,0.85)', color: '#0f0', padding: '6px 10px', borderRadius: 6, fontSize: 11, fontFamily: 'monospace', pointerEvents: 'none', lineHeight: 1.5 }}>
+      <div>GW: {info.state} | Frames: {info.rawFrames} | Ticks: {info.ticks}</div>
+      <div>Agent: {info.agentEvents} | Msg$: {info.messageCount}</div>
+      <div style={{ maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Last: {info.lastEvent || 'none'}</div>
+    </div>
+  );
+}
+
 // ─── Component ──────────────────────────────────────────────────
 
 function WebSocketHandler({ children }: { children: React.ReactNode }) {
@@ -89,7 +114,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const { aiState, setAiState, backendSynthComplete, setBackendSynthComplete } = useAiState();
   const { setModelInfo } = useLive2DConfig();
   const { setSubtitleText } = useSubtitle();
-  const { clearResponse, setForceNewMessage, appendHumanMessage, appendOrUpdateToolCallMessage } = useChatHistory();
+  const { clearResponse, setForceNewMessage, appendHumanMessage, appendAIMessage, appendOrUpdateToolCallMessage, setFullResponse } = useChatHistory();
   const { addAudioTask } = useAudioTask();
   const bgUrlContext = useBgUrl();
   const { confUid, setConfName, setConfUid, setConfigFiles } = useConfig();
@@ -155,11 +180,11 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const handleControlMessage = useCallback((controlText: string) => {
     switch (controlText) {
       case 'start-mic':
-        console.log('Starting microphone...');
+        if (import.meta.env.DEV) console.log('Starting microphone...');
         startMic();
         break;
       case 'stop-mic':
-        console.log('Stopping microphone...');
+        if (import.meta.env.DEV) console.log('Stopping microphone...');
         stopMic();
         break;
       case 'conversation-chain-start':
@@ -189,15 +214,27 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   // ─── Message handler (receives adapted Gateway messages) ──────
 
   const handleWebSocketMessage = useCallback((message: MessageEvent) => {
+    if (import.meta.env.DEV) console.log('[WS-Handler] Processing message:', message.type, message);
     switch (message.type) {
       case 'control':
         if (message.text) {
+          if (import.meta.env.DEV) console.log('[WS-Handler] control:', message.text);
           handleControlMessage(message.text);
         }
         break;
       case 'full-text':
         if (message.text) {
+          if (import.meta.env.DEV) console.log('[WS-Handler] full-text:', message.text.slice(0, 50));
           setSubtitleText(message.text);
+          setFullResponse(message.text);
+        }
+        break;
+      case 'ai-message-complete':
+        // Finalize the streamed text as a permanent chat message
+        if (message.text) {
+          console.log('[WS-Handler] ai-message-complete:', message.text.slice(0, 50));
+          appendAIMessage(message.text);
+          clearResponse();
         }
         break;
       case 'error':
@@ -297,7 +334,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         // Suppress noisy warnings for known-unhandled types
         break;
     }
-  }, [aiState, addAudioTask, appendHumanMessage, baseUrl, bgUrlContext, setAiState, setConfName, setConfUid, setConfigFiles, setCurrentHistoryUid, setHistoryList, setMessages, setModelInfo, setSubtitleText, startMic, stopMic, setSelfUid, setGroupMembers, setIsOwner, backendSynthComplete, setBackendSynthComplete, clearResponse, handleControlMessage, appendOrUpdateToolCallMessage, interrupt, setBrowserViewData, t, affinityContext]);
+  }, [aiState, addAudioTask, appendHumanMessage, appendAIMessage, baseUrl, bgUrlContext, setAiState, setConfName, setConfUid, setConfigFiles, setCurrentHistoryUid, setHistoryList, setMessages, setModelInfo, setSubtitleText, setFullResponse, startMic, stopMic, setSelfUid, setGroupMembers, setIsOwner, backendSynthComplete, setBackendSynthComplete, clearResponse, handleControlMessage, appendOrUpdateToolCallMessage, interrupt, setBrowserViewData, t, affinityContext]);
 
   // ─── Connect to Gateway on mount / URL change ─────────────────
 
@@ -349,7 +386,10 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     };
   }, [gwUrl]);
 
-  // ─── Subscribe to Gateway events ───────────────────────────────
+  // ─── Subscribe to Gateway events (stable — never tears down) ───
+
+  const handleWebSocketMessageRef = useRef(handleWebSocketMessage);
+  useEffect(() => { handleWebSocketMessageRef.current = handleWebSocketMessage; }, [handleWebSocketMessage]);
 
   useEffect(() => {
     // Subscribe to Gateway state changes
@@ -368,7 +408,10 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     });
 
     // Subscribe to adapted messages → feed into existing message handler
-    const messageSub = gatewayAdapter.message$.subscribe(handleWebSocketMessage);
+    // Uses ref to always call the latest handler without tearing down subscriptions
+    const messageSub = gatewayAdapter.message$.subscribe((msg) => {
+      handleWebSocketMessageRef.current(msg);
+    });
 
     return () => {
       stateSub.unsubscribe();
@@ -376,7 +419,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       rawSub.unsubscribe();
       messageSub.unsubscribe();
     };
-  }, [handleWebSocketMessage]);
+  }, []); // Empty deps: subscribe once, never tear down
 
   // ─── TTS: synthesize speech when full-text arrives ─────────────
 
@@ -621,6 +664,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
   return (
     <WebSocketContext.Provider value={webSocketContextValue}>
+      {import.meta.env.DEV && <GatewayDebugPanel />}
       {children}
     </WebSocketContext.Provider>
   );

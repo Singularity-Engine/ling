@@ -69,6 +69,9 @@ class GatewayConnector {
   private instanceId = crypto.randomUUID();
   private connId: string | null = null;
 
+  /** Debug counters */
+  readonly debugCounters = { rawFrames: 0, agentEvents: 0, ticks: 0, lastEvent: '' };
+
   /** Observable for state changes */
   readonly state$ = new Subject<GatewayState>();
 
@@ -212,6 +215,7 @@ class GatewayConnector {
           return;
         }
 
+        this.debugCounters.rawFrames++;
         this.rawFrame$.next(frame);
         this.options?.onRawFrame?.(frame);
 
@@ -269,7 +273,7 @@ class GatewayConnector {
 
         // ── Tick (heartbeat) ──
         if (frame.type === 'event' && frame.event === 'tick') {
-          // Gateway heartbeat — no response needed, just keeps connection alive
+          this.debugCounters.ticks++;
           return;
         }
 
@@ -282,6 +286,9 @@ class GatewayConnector {
             seq: payload?.seq || 0,
             data: payload?.data || {},
           };
+          this.debugCounters.agentEvents++;
+          this.debugCounters.lastEvent = `${agentEvent.stream}:${JSON.stringify(agentEvent.data).slice(0, 60)}`;
+          console.log('[GatewayConnector] AGENT EVENT:', agentEvent.stream, agentEvent.data);
           this.agentEvent$.next(agentEvent);
           this.options?.onAgentEvent?.(agentEvent);
           return;

@@ -1,6 +1,6 @@
 /* eslint-disable no-else-return */
 import {
-  createContext, useContext, useState, useMemo, useCallback,
+  createContext, useContext, useState, useMemo, useCallback, useRef,
 } from 'react';
 import { Message } from '@/services/websocket-service';
 import { HistoryInfo } from './websocket-context';
@@ -59,7 +59,11 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
     DEFAULT_HISTORY.currentHistoryUid,
   );
   const [fullResponse, setFullResponse] = useState(DEFAULT_HISTORY.fullResponse);
-  const [forceNewMessage, setForceNewMessage] = useState<boolean>(false);
+  const forceNewMessageRef = useRef<boolean>(false);
+
+  const setForceNewMessage = useCallback((value: boolean) => {
+    forceNewMessageRef.current = value;
+  }, []);
 
   /**
    * Append a human message to the chat history
@@ -70,7 +74,7 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
       id: Date.now().toString(),
       content,
       role: 'human',
-      type: 'text', // Explicitly set type for human messages
+      type: 'text',
       timestamp: new Date().toISOString(),
     };
     setMessages((prevMessages) => [...prevMessages, newMessage]);
@@ -84,14 +88,14 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
     setMessages((prevMessages) => {
       const lastMessage = prevMessages[prevMessages.length - 1];
 
-      // If forceNewMessage is true or last message is not an AI text message, create new message
-      if (forceNewMessage || !lastMessage || lastMessage.role !== 'ai' || lastMessage.type !== 'text') {
-        setForceNewMessage(false); // Reset the flag
+      // Use ref to avoid stale closure — always reads latest value
+      if (forceNewMessageRef.current || !lastMessage || lastMessage.role !== 'ai' || lastMessage.type !== 'text') {
+        forceNewMessageRef.current = false;
         return [...prevMessages, {
           id: Date.now().toString(),
           content,
           role: 'ai',
-          type: 'text', // Explicitly set type for AI text messages
+          type: 'text',
           timestamp: new Date().toISOString(),
           name,
           avatar,
@@ -108,7 +112,7 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
         },
       ];
     });
-  }, [forceNewMessage, setForceNewMessage]);
+  }, []);
 
   /**
    * Append or update a Tool Call message using its tool_id
