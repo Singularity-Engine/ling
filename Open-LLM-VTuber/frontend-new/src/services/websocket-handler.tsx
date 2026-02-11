@@ -31,7 +31,31 @@ import { asrService } from '@/services/asr-service';
 // ─── Gateway configuration ──────────────────────────────────────
 
 const GATEWAY_TOKEN = 'ed7c72944103e6fecc89140cb5e9661d04dc6699a09bdf05';
-const GATEWAY_SESSION_KEY = 'ling-avatar-session';
+
+/** Per-visitor session key — each browser gets its own isolated session */
+/** Public site uses restricted agent; local dev uses full agent */
+function getAgentId(): string {
+  const hostname = window.location.hostname;
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'avatar';
+  }
+  return 'avatar-public';
+}
+
+/** Per-visitor session key in Gateway's agent-scoped format: agent:<agentId>:<uuid> */
+function getVisitorSessionKey(): string {
+  const agentId = getAgentId();
+  const STORAGE_KEY = `ling-sk-${agentId}`;
+  // Purge old key formats that didn't use agent: prefix
+  localStorage.removeItem('ling-visitor-session-key');
+  localStorage.removeItem(`ling-session-${agentId}`);
+  let key = localStorage.getItem(STORAGE_KEY);
+  if (!key || !key.startsWith('agent:')) {
+    key = `agent:${agentId}:${crypto.randomUUID()}`;
+    localStorage.setItem(STORAGE_KEY, key);
+  }
+  return key;
+}
 
 function getDefaultGatewayUrl(): string {
   const hostname = window.location.hostname;
@@ -161,6 +185,9 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
   const setSubtitleTextRef = useRef(setSubtitleText);
   useEffect(() => { setSubtitleTextRef.current = setSubtitleText; }, [setSubtitleText]);
+
+  // Per-visitor session key (stable across renders)
+  const sessionKeyRef = useRef(getVisitorSessionKey());
 
   // ─── ASR lifecycle: start/stop with microphone ─────────────────
 
@@ -334,7 +361,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         // Suppress noisy warnings for known-unhandled types
         break;
     }
-  }, [aiState, addAudioTask, appendHumanMessage, appendAIMessage, baseUrl, bgUrlContext, setAiState, setConfName, setConfUid, setConfigFiles, setCurrentHistoryUid, setHistoryList, setMessages, setModelInfo, setSubtitleText, setFullResponse, startMic, stopMic, setSelfUid, setGroupMembers, setIsOwner, backendSynthComplete, setBackendSynthComplete, clearResponse, handleControlMessage, appendOrUpdateToolCallMessage, interrupt, setBrowserViewData, t, affinityContext]);
+  }, [aiState, appendHumanMessage, appendAIMessage, baseUrl, bgUrlContext, setAiState, setConfName, setConfUid, setConfigFiles, setCurrentHistoryUid, setHistoryList, setMessages, setModelInfo, setSubtitleText, setFullResponse, startMic, stopMic, setSelfUid, setGroupMembers, setIsOwner, backendSynthComplete, setBackendSynthComplete, clearResponse, handleControlMessage, appendOrUpdateToolCallMessage, interrupt, setBrowserViewData, t, affinityContext]);
 
   // ─── Connect to Gateway on mount / URL change ─────────────────
 
@@ -360,15 +387,15 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       bgUrlContext?.setBackgroundFiles(DEFAULT_BACKGROUNDS);
 
       // Resolve the default session so Gateway knows which agent to route to
-      gatewayConnector.resolveSession(GATEWAY_SESSION_KEY, 'avatar').catch((err) => {
+      gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId()).catch((err) => {
         console.error('[WebSocketHandler] resolveSession failed:', err);
       });
 
       // Create a default session
-      setCurrentHistoryUid(GATEWAY_SESSION_KEY);
+      setCurrentHistoryUid(sessionKeyRef.current);
       setMessages([]);
       setHistoryList([{
-        uid: GATEWAY_SESSION_KEY,
+        uid: sessionKeyRef.current,
         latest_message: null,
         timestamp: new Date().toISOString(),
       }]);
@@ -424,55 +451,66 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   // ─── TTS: synthesize speech when full-text arrives ─────────────
 
   const lastTtsTextRef = useRef('');
+  const addAudioTaskRef = useRef(addAudioTask);
+  useEffect(() => { addAudioTaskRef.current = addAudioTask; }, [addAudioTask]);
+
+  // Synthesis queue: serialize synthesis calls to preserve sentence order
+  const synthQueueRef = useRef<Promise<void>>(Promise.resolve());
+  // Track synthesized sentences to prevent duplicates
+  const synthesizedRef = useRef(new Set<string>());
 
   useEffect(() => {
     const sub = gatewayAdapter.message$.subscribe((msg) => {
-      if (msg.type !== 'full-text' || !msg.text) return;
+      if (msg.type === 'full-text' && msg.text) {
+        const fullText = msg.text;
+        const prevText = lastTtsTextRef.current;
 
-      const fullText = msg.text;
-      const prevText = lastTtsTextRef.current;
+        const newText = fullText.slice(prevText.length);
+        if (!newText) return;
 
-      // Find newly completed sentences
-      const newText = fullText.slice(prevText.length);
-      if (!newText) return;
-
-      // Check if new text contains a sentence terminator
-      const sentences = ttsService.extractCompleteSentences(prevText, fullText);
-      for (const sentence of sentences) {
-        if (sentence.trim().length < 2) continue;
-        console.log('[TTS] Synthesizing sentence:', sentence);
-
-        ttsService.synthesize(sentence).then((result) => {
-          if (result) {
-            addAudioTask({
-              audioBase64: result.audioBase64,
-              volumes: result.volumes,
-              sliceLength: result.sliceLength,
-              displayText: { text: sentence, name: '灵', avatar: '' },
-              expressions: null,
-              forwarded: false,
-            });
+        const sentences = ttsService.extractCompleteSentences(prevText, fullText);
+        for (const sentence of sentences) {
+          if (sentence.trim().length < 2) continue;
+          // Dedup: skip if already synthesized in this conversation
+          if (synthesizedRef.current.has(sentence)) {
+            console.log('[TTS] Skipping duplicate:', sentence);
+            continue;
           }
-        }).catch((err) => {
-          console.error('[TTS] Synthesis failed:', err);
-        });
+          synthesizedRef.current.add(sentence);
+
+          // Chain synthesis sequentially to preserve order
+          synthQueueRef.current = synthQueueRef.current.then(async () => {
+            console.log('[TTS] Synthesizing:', sentence);
+            try {
+              const result = await ttsService.synthesize(sentence);
+              if (result) {
+                addAudioTaskRef.current({
+                  audioBase64: result.audioBase64,
+                  volumes: result.volumes,
+                  sliceLength: result.sliceLength,
+                  displayText: { text: sentence, name: '灵', avatar: '' },
+                  expressions: null,
+                  forwarded: false,
+                });
+              }
+            } catch (err) {
+              console.error('[TTS] Synthesis failed:', err);
+            }
+          });
+        }
+
+        lastTtsTextRef.current = fullText;
       }
 
-      lastTtsTextRef.current = fullText;
-    });
-
-    return () => sub.unsubscribe();
-  }, [addAudioTask]);
-
-  // Reset TTS text tracking on conversation chain start
-  useEffect(() => {
-    const sub = gatewayAdapter.message$.subscribe((msg) => {
+      // Reset TTS text tracking on conversation chain start
       if (msg.type === 'control' && msg.text === 'conversation-chain-start') {
         lastTtsTextRef.current = '';
+        synthesizedRef.current.clear();
       }
     });
+
     return () => sub.unsubscribe();
-  }, []);
+  }, []); // Stable: never tears down
 
   // ─── sendMessage: intercept ALL legacy message types ──────────
 
@@ -483,7 +521,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       // ── Phase 2: Text input → Gateway chat.send ──
       case 'text-input':
         if (msg.text) {
-          gatewayConnector.sendChat(GATEWAY_SESSION_KEY, msg.text).catch((err) => {
+          gatewayConnector.sendChat(sessionKeyRef.current, msg.text).catch((err) => {
             console.error('[Gateway] sendChat failed:', err);
           });
         }
@@ -510,7 +548,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         const transcript = asrService.stop();
         if (transcript.trim()) {
           appendHumanMessageRef.current(transcript.trim());
-          gatewayConnector.sendChat(GATEWAY_SESSION_KEY, transcript.trim()).catch((err) => {
+          gatewayConnector.sendChat(sessionKeyRef.current, transcript.trim()).catch((err) => {
             console.error('[Gateway] sendChat (ASR) failed:', err);
           });
         } else {
@@ -523,7 +561,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       // ── Phase 5: Proactive speak → Gateway chat.send ──
       case 'ai-speak-signal':
         gatewayConnector.sendChat(
-          GATEWAY_SESSION_KEY,
+          sessionKeyRef.current,
           '[proactive-speak]',
         ).catch((err) => {
           console.error('[Gateway] proactive speak failed:', err);
@@ -559,8 +597,8 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         return;
 
       case 'create-new-history': {
-        const newSessionKey = `ling-session-${Date.now()}`;
-        gatewayConnector.resolveSession(newSessionKey, 'avatar').then(() => {
+        const newSessionKey = `agent:${getAgentId()}:${crypto.randomUUID()}`;
+        gatewayConnector.resolveSession(newSessionKey, getAgentId()).then(() => {
           setCurrentHistoryUidRef.current(newSessionKey);
           setMessagesRef.current([]);
           const newHistory: HistoryInfo = {

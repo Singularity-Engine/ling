@@ -239,7 +239,7 @@ export const useAudioTask = () => {
   /**
    * Add a new audio task to the queue
    */
-  const addAudioTask = async (options: AudioTaskOptions) => {
+  const addAudioTask = useCallback((options: AudioTaskOptions) => {
     const { aiState: currentState } = stateRef.current;
 
     if (currentState === 'interrupted') {
@@ -247,9 +247,9 @@ export const useAudioTask = () => {
       return;
     }
 
-    console.log(`Adding audio task ${options.displayText?.text} to queue`);
+    console.log(`[AudioTask] Queuing: ${options.displayText?.text?.slice(0, 30)}`);
     audioTaskQueue.addTask(() => handleAudioPlayback(options));
-  };
+  }, []);
 
   return {
     addAudioTask,
