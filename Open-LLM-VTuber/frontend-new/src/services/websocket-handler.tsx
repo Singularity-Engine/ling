@@ -88,7 +88,26 @@ const LING_MODEL_INFO: ModelInfo = {
   initialXshift: 0,
   initialYshift: isMobile ? 0 : -100,
   idleMotionGroupName: 'Idle',
-  emotionMap: {},
+  emotionMap: {
+    // English emotion keywords → Live2D expression names
+    happy: 'kaixin',
+    sad: 'shangxin',
+    shy: 'haixiu',
+    angry: 'heilian',
+    thinking: 'tuosai',
+    confident: 'chayao',
+    sleepy: 'shuijiao',
+    // Chinese emotion keywords
+    开心: 'kaixin',
+    伤心: 'shangxin',
+    害羞: 'haixiu',
+    生气: 'heilian',
+    思考: 'tuosai',
+    自信: 'chayao',
+    困: 'shuijiao',
+    // Default expression (index 0)
+    neutral: 0,
+  },
 };
 
 // ─── Default backgrounds (no longer fetched from backend) ────────
