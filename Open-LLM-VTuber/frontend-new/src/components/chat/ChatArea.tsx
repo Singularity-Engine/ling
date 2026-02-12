@@ -75,15 +75,11 @@ export const ChatArea = memo(() => {
       }}
     >
       {(() => {
+        // Dedup: only remove exact adjacent duplicates (same role + same content)
         const dedupedMessages = messages.filter((msg, index, arr) => {
           if (index === 0) return true;
           const prev = arr[index - 1];
-          if (prev.role === msg.role && prev.content === msg.content) return false;
-          if (prev.role === msg.role && msg.content && prev.content &&
-              (msg.content.startsWith(prev.content) || prev.content.startsWith(msg.content))) {
-            return false;
-          }
-          return true;
+          return !(prev.role === msg.role && prev.content === msg.content);
         });
 
         const lastAiMsg = dedupedMessages.filter(m => m.role === 'ai').pop();

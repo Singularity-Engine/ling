@@ -459,6 +459,9 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const synthQueueRef = useRef<Promise<void>>(Promise.resolve());
   // Track synthesized sentences to prevent duplicates
   const synthesizedRef = useRef(new Set<string>());
+  // Track current expression for TTS audio tasks
+  const currentExpressionRef = useRef<string | null>(null);
+  useEffect(() => { currentExpressionRef.current = affinityContext.currentExpression; }, [affinityContext.currentExpression]);
 
   useEffect(() => {
     const sub = gatewayAdapter.message$.subscribe((msg) => {
@@ -485,12 +488,13 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             try {
               const result = await ttsService.synthesize(sentence);
               if (result) {
+                const expr = currentExpressionRef.current;
                 addAudioTaskRef.current({
                   audioBase64: result.audioBase64,
                   volumes: result.volumes,
                   sliceLength: result.sliceLength,
                   displayText: { text: sentence, name: '灵', avatar: '' },
-                  expressions: null,
+                  expressions: expr ? [{ expression: expr, intensity: 1.0 }] : null,
                   forwarded: false,
                 });
               }
