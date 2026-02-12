@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useRef, ReactNode } from "react";
+import { useAffinityEngine } from "@/hooks/use-affinity-engine";
 
 interface AffinityState {
   affinity: number;
@@ -41,6 +42,9 @@ export function AffinityProvider({ children }: { children: ReactNode }) {
   const setExpression = useCallback((expression: string, intensity: number) => {
     setState(prev => ({ ...prev, currentExpression: expression, expressionIntensity: intensity }));
   }, []);
+
+  // Frontend affinity engine — auto-computes affinity from chat events
+  useAffinityEngine({ updateAffinity, showMilestone });
 
   return (
     <AffinityContext.Provider value={{ ...state, updateAffinity, showMilestone, setExpression }}>
