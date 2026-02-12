@@ -20,7 +20,7 @@ interface ToolStateContextType {
   currentPhase: 'idle' | 'thinking' | 'working' | 'presenting';
   dominantCategory: ToolCategory | null;
 
-  startTool: (tool: Omit<ToolCall, 'id' | 'startTime' | 'status'> & { id?: string }) => void;
+  startTool: (tool: Omit<ToolCall, 'id' | 'startTime' | 'status'> & { id?: string; status?: ToolCall['status'] }) => void;
   updateTool: (id: string, update: Partial<ToolCall>) => void;
   completeTool: (id: string, result: string) => void;
   failTool: (id: string, error: string) => void;
@@ -76,11 +76,16 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const startTool = useCallback((tool: Omit<ToolCall, 'id' | 'startTime' | 'status'> & { id?: string }) => {
+  const startTool = useCallback((tool: Omit<ToolCall, 'id' | 'startTime' | 'status'> & { id?: string; status?: ToolCall['status'] }) => {
+    // Clear presenting timer if a new tool starts during presenting phase
+    if (presentingTimer.current) {
+      clearTimeout(presentingTimer.current);
+      presentingTimer.current = undefined;
+    }
     const newTool: ToolCall = {
       ...tool,
       id: tool.id || `tool-${++toolIdCounter}`,
-      status: 'pending',
+      status: tool.status || 'pending',
       startTime: Date.now(),
     };
     setActiveTools(prev => {
