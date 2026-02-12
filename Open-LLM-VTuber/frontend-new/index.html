@@ -25,6 +25,12 @@
     <title>灵 · Singularity Engine</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💜</text></svg>" />
 
+    <!-- Resource hints — TTS API & proxy -->
+    <link rel="dns-prefetch" href="https://api.fish.audio" />
+    <link rel="preconnect" href="https://api.fish.audio" crossorigin />
+    <link rel="dns-prefetch" href="https://tts.sngxai.com" />
+    <link rel="preconnect" href="https://tts.sngxai.com" crossorigin />
+
     <!-- HTTPS redirect — must be absolute first script -->
     <script>
       if (location.protocol === 'http:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
