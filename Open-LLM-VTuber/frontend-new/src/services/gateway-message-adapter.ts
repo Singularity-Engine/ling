@@ -13,6 +13,15 @@ import { Subject } from 'rxjs';
 import type { GatewayAgentEvent, GatewayFrame } from './gateway-connector';
 import type { MessageEvent } from './websocket-service';
 
+// Extended MessageEvent with Gateway-specific fields (affinity, emotion)
+export interface GatewayMessageEvent extends MessageEvent {
+  affinity?: number;
+  level?: string;
+  milestone?: string;
+  expression?: string;
+  intensity?: number;
+}
+
 // ─── Text accumulation state ──────────────────────────────────────
 
 interface RunState {
@@ -23,7 +32,7 @@ interface RunState {
 
 class GatewayMessageAdapter {
   /** Emits MessageEvent objects compatible with websocket-handler.tsx */
-  readonly message$ = new Subject<MessageEvent>();
+  readonly message$ = new Subject<GatewayMessageEvent>();
 
   private activeRuns = new Map<string, RunState>();
 
@@ -221,9 +230,9 @@ class GatewayMessageAdapter {
 
   // ── Helpers ────────────────────────────────────────────────────
 
-  private emit(partial: Partial<MessageEvent> & { type: string }) {
+  private emit(partial: Partial<GatewayMessageEvent> & { type: string }) {
     // Fill in missing fields with defaults to satisfy MessageEvent interface
-    const msg: MessageEvent = {
+    const msg: GatewayMessageEvent = {
       tool_id: undefined,
       tool_name: undefined,
       name: undefined,
@@ -231,7 +240,7 @@ class GatewayMessageAdapter {
       content: '',
       timestamp: new Date().toISOString(),
       ...partial,
-    } as MessageEvent;
+    } as GatewayMessageEvent;
 
     this.message$.next(msg);
   }
