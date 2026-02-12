@@ -65,7 +65,8 @@ class GatewayConnector {
   private options: GatewayConnectOptions | null = null;
   private reconnectAttempts = 0;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-  private pendingRequests = new Map<string, { resolve: (res: GatewayFrame) => void; reject: (err: Error) => void }>();
+  private pendingRequests = new Map<string, { resolve: (res: GatewayFrame) => void; reject: (err: Error) => void; timer: ReturnType<typeof setTimeout> }>();
+  private authFailed = false;
   private instanceId = crypto.randomUUID();
   private connId: string | null = null;
 
@@ -90,6 +91,7 @@ class GatewayConnector {
   connect(options: GatewayConnectOptions): Promise<void> {
     this.options = options;
     this.reconnectAttempts = 0;
+    this.authFailed = false;
     return this.doConnect();
   }
 
@@ -262,10 +264,11 @@ class GatewayConnector {
           return;
         }
 
-        // ── Connect Error ──
+        // ── Connect Error (auth failure) ──
         if (frame.type === 'res' && frame.ok === false && !handshakeResolved) {
           const errMsg = frame.error?.message || 'Connection rejected';
           console.error('[GatewayConnector] Handshake failed:', errMsg);
+          this.authFailed = true;
           handshakeResolved = true;
           reject(new Error(errMsg));
           return;
@@ -325,7 +328,10 @@ class GatewayConnector {
           reject(new Error(`WebSocket closed during handshake: ${event.code}`));
         }
 
-        if (this.state !== 'DISCONNECTED') {
+        if (this.authFailed) {
+          console.log('[GatewayConnector] Auth failed, not reconnecting');
+          this.setState('DISCONNECTED');
+        } else if (this.state !== 'DISCONNECTED') {
           this.scheduleReconnect();
         }
       };
