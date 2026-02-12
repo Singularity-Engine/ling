@@ -228,18 +228,21 @@ function App(): JSX.Element {
   const [showLanding, setShowLanding] = useState(() => {
     return !sessionStorage.getItem('ling-visited');
   });
+  const [landingExiting, setLandingExiting] = useState(false);
 
-  if (showLanding) {
-    return (
-      <LandingAnimation onComplete={() => {
-        setShowLanding(false);
-        sessionStorage.setItem('ling-visited', 'true');
-      }} />
-    );
-  }
+  const handleLandingComplete = useCallback(() => {
+    // Start crossfade: keep both mounted, fade landing out while main fades in
+    setLandingExiting(true);
+    // Wait for the crossfade to finish, then unmount landing
+    setTimeout(() => {
+      setShowLanding(false);
+      sessionStorage.setItem('ling-visited', 'true');
+    }, 600);
+  }, []);
 
   return (
     <ErrorBoundary>
+      {/* Always mount main content so it's ready behind landing */}
       <ModeProvider>
         <CameraProvider>
           <ScreenCaptureProvider>
@@ -256,7 +259,12 @@ function App(): JSX.Element {
                                 <ToolStateProvider>
                                   <AffinityProvider>
                                     <WebSocketHandler>
-                                      <MainContent />
+                                      <div style={{
+                                        opacity: landingExiting || !showLanding ? 1 : 0,
+                                        transition: 'opacity 0.6s ease-in',
+                                      }}>
+                                        <MainContent />
+                                      </div>
                                     </WebSocketHandler>
                                   </AffinityProvider>
                                 </ToolStateProvider>
@@ -273,6 +281,11 @@ function App(): JSX.Element {
           </ScreenCaptureProvider>
         </CameraProvider>
       </ModeProvider>
+
+      {/* Landing overlay — fades out during crossfade */}
+      {showLanding && (
+        <LandingAnimation onComplete={handleLandingComplete} />
+      )}
     </ErrorBoundary>
   );
 }

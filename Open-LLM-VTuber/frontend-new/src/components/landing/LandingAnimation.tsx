@@ -146,14 +146,14 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
         }}
       />
 
-      {/* Flash overlay */}
+      {/* Flash overlay — purple-tinted for theme consistency */}
       <div
         style={{
           position: "fixed",
           inset: 0,
-          background: "#fff",
+          background: "radial-gradient(circle at 50% 50%, rgba(196, 181, 253, 0.95) 0%, rgba(139, 92, 246, 0.6) 50%, transparent 80%)",
           opacity: flashOpacity,
-          transition: "opacity 0.4s ease-out",
+          transition: "opacity 0.5s ease-out",
           zIndex: 3,
           pointerEvents: "none",
         }}
