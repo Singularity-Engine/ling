@@ -23,8 +23,10 @@ const SENTENCE_TERMINATORS = /[。！？.!?\n；;]/;
 export interface TTSResult {
   /** Base64-encoded WAV/MP3 audio */
   audioBase64: string;
-  /** Volume levels per frame for lip sync (30fps) */
+  /** Volume levels per frame for lip sync (30fps), normalized 0-1 */
   volumes: number[];
+  /** Mouth form values per frame (30fps), 0=round/narrow, 1=wide/smile */
+  mouthForms: number[];
   /** Number of volume samples (same as volumes.length) */
   sliceLength: number;
 }
@@ -48,12 +50,13 @@ class TTSService {
 
       const arrayBuffer = await audioBlob.arrayBuffer();
       const base64 = this.arrayBufferToBase64(arrayBuffer);
-      const volumes = await this.extractVolumes(arrayBuffer);
+      const lipSyncData = await this.extractLipSyncData(arrayBuffer);
 
       return {
         audioBase64: base64,
-        volumes,
-        sliceLength: volumes.length,
+        volumes: lipSyncData.volumes,
+        mouthForms: lipSyncData.mouthForms,
+        sliceLength: lipSyncData.volumes.length,
       };
     } catch (err) {
       console.error('[TTSService] Synthesis failed:', err);
@@ -138,34 +141,124 @@ class TTSService {
     return response.blob();
   }
 
-  private async extractVolumes(arrayBuffer: ArrayBuffer): Promise<number[]> {
+  private async extractLipSyncData(
+    arrayBuffer: ArrayBuffer
+  ): Promise<{ volumes: number[]; mouthForms: number[] }> {
     try {
       const ctx = this.getAudioContext();
       const audioBuffer = await ctx.decodeAudioData(arrayBuffer.slice(0));
-      return this.computeVolumes(audioBuffer);
+      return this.computeLipSyncData(audioBuffer);
     } catch (err) {
-      console.warn('[TTSService] Volume extraction failed, using empty volumes:', err);
-      return [];
+      console.warn('[TTSService] Lip sync extraction failed:', err);
+      return { volumes: [], mouthForms: [] };
     }
   }
 
-  private computeVolumes(audioBuffer: AudioBuffer, fps = 30): number[] {
+  private computeLipSyncData(
+    audioBuffer: AudioBuffer,
+    fps = 30
+  ): { volumes: number[]; mouthForms: number[] } {
     const channelData = audioBuffer.getChannelData(0);
-    const samplesPerFrame = Math.floor(audioBuffer.sampleRate / fps);
-    const volumes: number[] = [];
+    const sampleRate = audioBuffer.sampleRate;
+    const samplesPerFrame = Math.floor(sampleRate / fps);
+    const rawRms: number[] = [];
+    const mouthForms: number[] = [];
+
+    // FFT size for spectral analysis
+    const fftSize = 1024;
 
     for (let i = 0; i < channelData.length; i += samplesPerFrame) {
       const end = Math.min(i + samplesPerFrame, channelData.length);
+
+      // ── RMS volume ──
       let sumSquares = 0;
       for (let j = i; j < end; j++) {
         sumSquares += channelData[j] * channelData[j];
       }
-      const rms = Math.sqrt(sumSquares / (end - i));
-      // Normalize to 0-1 range with some amplification for lip sync visibility
-      volumes.push(Math.min(rms * 5, 1));
+      rawRms.push(Math.sqrt(sumSquares / (end - i)));
+
+      // ── Spectral centroid for mouth form ──
+      // Extract a window for FFT-like analysis
+      const windowSize = Math.min(fftSize, end - i);
+      const windowStart = i;
+
+      // Compute energy in low band (0-1kHz) vs high band (1k-4kHz)
+      // Using zero-crossing rate as a lightweight proxy for spectral brightness
+      let zeroCrossings = 0;
+      let highFreqEnergy = 0;
+      let totalEnergy = 0;
+      for (let j = windowStart + 1; j < windowStart + windowSize; j++) {
+        if (j >= channelData.length) break;
+        // Zero-crossing rate correlates with spectral centroid
+        if (
+          (channelData[j] >= 0 && channelData[j - 1] < 0) ||
+          (channelData[j] < 0 && channelData[j - 1] >= 0)
+        ) {
+          zeroCrossings++;
+        }
+        // Simple high-pass energy via difference (approximates high-freq content)
+        const diff = channelData[j] - channelData[j - 1];
+        highFreqEnergy += diff * diff;
+        totalEnergy += channelData[j] * channelData[j];
+      }
+
+      // Normalize zero-crossing rate to approximate spectral brightness
+      // Higher ZCR → brighter sound → wider mouth (like "ee", "aa")
+      // Lower ZCR → darker sound → rounder mouth (like "oo", "uu")
+      const zcr = zeroCrossings / windowSize;
+      // Typical speech ZCR range is 0.02-0.15; map to 0-1
+      const brightness = Math.min(1.0, Math.max(0, (zcr - 0.02) / 0.12));
+
+      // Blend with high-freq ratio for more accuracy
+      const hfRatio =
+        totalEnergy > 1e-10
+          ? Math.min(1.0, (highFreqEnergy / totalEnergy) * 2)
+          : 0;
+      // MouthForm: 0 = narrow/round, 1 = wide
+      mouthForms.push(brightness * 0.6 + hfRatio * 0.4);
     }
 
-    return volumes;
+    // ── Adaptive normalization ──
+    // Use percentile-based normalization to handle varying recording levels
+    if (rawRms.length === 0) return { volumes: [], mouthForms: [] };
+
+    const sorted = [...rawRms].sort((a, b) => a - b);
+    // Noise floor: 10th percentile (below this → silence)
+    const noiseFloor = sorted[Math.floor(sorted.length * 0.1)] || 0;
+    // Peak reference: 95th percentile (avoid outlier spikes)
+    const peakRef = sorted[Math.floor(sorted.length * 0.95)] || 0.01;
+    const range = Math.max(peakRef - noiseFloor, 0.001);
+
+    // ── Normalize + smooth ──
+    const smoothingUp = 0.35; // Fast attack for opening mouth
+    const smoothingDown = 0.15; // Slower release for natural closing
+    const volumes: number[] = [];
+    let smoothed = 0;
+
+    for (let i = 0; i < rawRms.length; i++) {
+      // Normalize: subtract noise floor, scale to 0-1 using peak reference
+      let normalized = (rawRms[i] - noiseFloor) / range;
+      // Apply slight power curve for more natural feel (quiet sounds less visible)
+      normalized = Math.pow(Math.max(0, normalized), 0.8);
+      // Clamp
+      normalized = Math.min(1.0, Math.max(0, normalized));
+
+      // Exponential smoothing with asymmetric attack/release
+      const alpha = normalized > smoothed ? smoothingUp : smoothingDown;
+      smoothed = smoothed + alpha * (normalized - smoothed);
+      volumes.push(smoothed);
+
+      // Also smooth mouth form
+      if (i > 0) {
+        mouthForms[i] = mouthForms[i - 1] + 0.3 * (mouthForms[i] - mouthForms[i - 1]);
+      }
+      // Suppress mouth form when volume is very low (silence → neutral)
+      if (smoothed < 0.05) {
+        mouthForms[i] *= smoothed / 0.05;
+      }
+    }
+
+    return { volumes, mouthForms };
   }
 
   private getAudioContext(): AudioContext {

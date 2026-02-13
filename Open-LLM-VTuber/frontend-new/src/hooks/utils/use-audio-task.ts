@@ -19,6 +19,7 @@ type Live2DModel = any;
 interface AudioTaskOptions {
   audioBase64: string
   volumes: number[]
+  mouthForms?: number[]
   sliceLength: number
   displayText?: DisplayText | null
   expressions?: string[] | number[] | null
@@ -78,7 +79,7 @@ export const useAudioTask = () => {
       return;
     }
 
-    const { audioBase64, displayText, expressions } = options;
+    const { audioBase64, displayText, expressions, volumes, mouthForms } = options;
 
     // Update display text
     if (displayText) {
@@ -108,13 +109,6 @@ export const useAudioTask = () => {
           resolve();
           return;
         }
-        console.log('Found model for audio playback');
-
-        if (!model._wavFileHandler) {
-          console.warn('Model does not have _wavFileHandler for lip sync');
-        } else {
-          console.log('Model has _wavFileHandler available');
-        }
 
         // Set expression if available
         const lappAdapter = (window as any).getLAppAdapter?.();
@@ -128,23 +122,29 @@ export const useAudioTask = () => {
 
         // Start talk motion
         if (LAppDefine && LAppDefine.PriorityNormal) {
-          console.log("Starting random 'Talk' motion");
           model.startRandomMotion(
             "Talk",
             LAppDefine.PriorityNormal,
           );
-        } else {
-          console.warn("LAppDefine.PriorityNormal not found - cannot start talk motion");
         }
 
         // Setup audio element
         const audio = new Audio(audioDataUrl);
-        
+
         // Register with global audio manager IMMEDIATELY after creating audio
         audioManager.setCurrentAudio(audio, model);
         let isFinished = false;
+        let lipSyncRafId: number | null = null;
 
         const cleanup = () => {
+          if (lipSyncRafId !== null) {
+            cancelAnimationFrame(lipSyncRafId);
+            lipSyncRafId = null;
+          }
+          // Reset lip sync state on the model
+          if (model._wavFileHandler) {
+            model._wavFileHandler._lastRms = 0.0;
+          }
           audioManager.clearCurrentAudio(audio);
           if (!isFinished) {
             isFinished = true;
@@ -152,48 +152,93 @@ export const useAudioTask = () => {
           }
         };
 
-        // Enhance lip sync sensitivity
-        const lipSyncScale = 2.0;
-
         audio.addEventListener('canplaythrough', () => {
           // Check for interruption before playback
           if (stateRef.current.aiState === 'interrupted' || !audioManager.hasCurrentAudio()) {
-            console.warn('Audio playback cancelled due to interruption or audio was stopped');
             cleanup();
             return;
           }
 
-          console.log('Starting audio playback with lip sync');
           audio.play().catch((err) => {
             console.error("Audio play error:", err);
             cleanup();
           });
 
-          // Setup lip sync
-          if (model._wavFileHandler) {
-            if (!model._wavFileHandler._initialized) {
-              console.log('Applying enhanced lip sync');
-              model._wavFileHandler._initialized = true;
+          // ── Drive lip sync from pre-computed volumes ──
+          // The _wavFileHandler.update() in lappmodel.ts reads getRms() each frame.
+          // For MP3 audio, the WAV parser fails and _pcmData is null, so update()
+          // always returns _lastRms=0. We bypass this by directly setting _lastRms
+          // from our pre-computed volume data, synced to audio.currentTime.
+          if (model._wavFileHandler && volumes && volumes.length > 0) {
+            const fps = 30;
 
-              const originalUpdate = model._wavFileHandler.update.bind(model._wavFileHandler);
-              model._wavFileHandler.update = function (deltaTimeSeconds: number) {
-                const result = originalUpdate(deltaTimeSeconds);
+            // Override getRms to return our driven value
+            if (!model._wavFileHandler._lipSyncOverridden) {
+              model._wavFileHandler._lipSyncOverridden = true;
+              model._wavFileHandler._externalRms = 0;
+              const origGetRms = model._wavFileHandler.getRms.bind(model._wavFileHandler);
+              model._wavFileHandler.getRms = function () {
+                // If external driving is active, use that value;
+                // otherwise fall back to original (for WAV files that work natively)
                 // @ts-ignore
-                this._lastRms = Math.min(2.0, this._lastRms * lipSyncScale);
-                return result;
+                return this._externalRms > 0 ? this._externalRms : origGetRms();
               };
             }
 
-            if (audioManager.hasCurrentAudio()) {
-              model._wavFileHandler.start(audioDataUrl);
-            } else {
-              console.warn('WavFileHandler start skipped - audio was stopped');
+            // Also find ParamMouthForm ID on the model for mouth shape
+            let mouthFormParamIndex = -1;
+            if (mouthForms && mouthForms.length > 0 && model._model) {
+              try {
+                // Try to find ParamMouthForm parameter index
+                const paramCount = model._model.getParameterCount?.() ?? 0;
+                for (let p = 0; p < paramCount; p++) {
+                  const id = model._model.getParameterId?.(p);
+                  if (id && id.getString?.() === 'ParamMouthForm') {
+                    mouthFormParamIndex = p;
+                    break;
+                  }
+                }
+              } catch {
+                // Parameter lookup failed, skip MouthForm
+              }
             }
+
+            const driveLipSync = () => {
+              if (isFinished || audio.paused || audio.ended) return;
+
+              const time = audio.currentTime;
+              const frameIndex = Math.min(
+                Math.floor(time * fps),
+                volumes.length - 1
+              );
+
+              // Set external RMS for the model's lip sync loop to pick up
+              model._wavFileHandler._externalRms = volumes[frameIndex] ?? 0;
+
+              // Drive MouthForm directly if parameter exists
+              if (mouthFormParamIndex >= 0 && mouthForms && model._model) {
+                const formValue = mouthForms[frameIndex] ?? 0.5;
+                // ParamMouthForm range: typically -1 to 1 or 0 to 1
+                // Map our 0-1 to a subtle range to avoid extreme deformation
+                try {
+                  model._model.setParameterValueByIndex(
+                    mouthFormParamIndex,
+                    formValue * 0.6 - 0.1, // Slight bias toward narrower
+                    1.0
+                  );
+                } catch {
+                  // Ignore if parameter setting fails
+                }
+              }
+
+              lipSyncRafId = requestAnimationFrame(driveLipSync);
+            };
+
+            lipSyncRafId = requestAnimationFrame(driveLipSync);
           }
         });
 
         audio.addEventListener('ended', () => {
-          console.log("Audio playback completed");
           cleanup();
         });
 
