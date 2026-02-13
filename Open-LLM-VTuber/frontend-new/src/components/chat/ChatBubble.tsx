@@ -9,7 +9,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   style.id = STYLE_ID;
   style.textContent = `
     @keyframes bubbleFadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes bubblePulse { 0%, 100% { opacity: 0.4; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+    @keyframes streamingCursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
   `;
   document.head.appendChild(style);
 }
@@ -95,13 +95,13 @@ export const ChatBubble = memo(({ role, content, isStreaming, isToolCall, toolNa
                 <span
                   style={{
                     display: "inline-block",
-                    width: "6px",
-                    height: "6px",
-                    borderRadius: "50%",
+                    width: "2px",
+                    height: "14px",
                     background: "#8b5cf6",
-                    marginLeft: "4px",
-                    verticalAlign: "middle",
-                    animation: "bubblePulse 1.2s ease-in-out infinite",
+                    marginLeft: "2px",
+                    verticalAlign: "text-bottom",
+                    borderRadius: "1px",
+                    animation: "streamingCursor 0.8s steps(1) infinite",
                   }}
                 />
               )}

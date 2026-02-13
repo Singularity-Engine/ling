@@ -15,6 +15,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     .chat-area-scroll::-webkit-scrollbar-track { background: transparent; }
     .chat-area-scroll::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 2px; }
     @keyframes chatFadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes emptyStateFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
   `;
   document.head.appendChild(style);
 }
@@ -84,9 +85,43 @@ export const ChatArea = memo(() => {
 
         const lastAiMsg = dedupedMessages.filter(m => m.role === 'ai').pop();
         const showStreaming = isStreaming && !(lastAiMsg && lastAiMsg.content && fullResponse.startsWith(lastAiMsg.content));
+        const isEmpty = dedupedMessages.length === 0 && !showStreaming && !showTyping;
 
         return (
           <>
+            {isEmpty && (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: "100%",
+                  padding: "24px 16px",
+                  gap: "8px",
+                  animation: "chatFadeInUp 0.5s ease-out",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "28px",
+                    animation: "emptyStateFloat 3s ease-in-out infinite",
+                  }}
+                >
+                  💬
+                </span>
+                <span
+                  style={{
+                    fontSize: "13px",
+                    color: "rgba(255, 255, 255, 0.3)",
+                    textAlign: "center",
+                    letterSpacing: "0.3px",
+                  }}
+                >
+                  和灵开始聊天吧
+                </span>
+              </div>
+            )}
             {dedupedMessages.map((msg) => (
               <ChatBubble
                 key={msg.id}
