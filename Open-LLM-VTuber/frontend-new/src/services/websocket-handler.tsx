@@ -278,7 +278,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       case 'ai-message-complete':
         // Finalize the streamed text as a permanent chat message
         if (message.text) {
-          console.log('[WS-Handler] ai-message-complete:', message.text.slice(0, 50));
+          if (import.meta.env.DEV) console.log('[WS-Handler] ai-message-complete:', message.text.slice(0, 50));
           appendAIMessage(message.text);
           clearResponse();
         }
@@ -393,7 +393,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       clientId: 'webchat-ui',
       displayName: '灵 Avatar',
     }).then(() => {
-      console.log('[WebSocketHandler] Gateway connected!');
+      if (import.meta.env.DEV) console.log('[WebSocketHandler] Gateway connected!');
 
       // Initialize: set model info directly (no backend fetch needed)
       setConfName('灵 (Ling)');
@@ -496,14 +496,14 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           if (sentence.trim().length < 2) continue;
           // Dedup: skip if already synthesized in this conversation
           if (synthesizedRef.current.has(sentence)) {
-            console.log('[TTS] Skipping duplicate:', sentence);
+            if (import.meta.env.DEV) console.log('[TTS] Skipping duplicate:', sentence);
             continue;
           }
           synthesizedRef.current.add(sentence);
 
           // Chain synthesis sequentially to preserve order
           synthQueueRef.current = synthQueueRef.current.then(async () => {
-            console.log('[TTS] Synthesizing:', sentence);
+            if (import.meta.env.DEV) console.log('[TTS] Synthesizing:', sentence);
             try {
               const result = await ttsService.synthesize(sentence);
               if (result) {
@@ -678,7 +678,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       case 'switch-config':
         // In Gateway mode, character switching is handled locally
         // The model info is set directly without backend involvement
-        console.log('[Gateway] switch-config intercepted, handled locally');
+        if (import.meta.env.DEV) console.log('[Gateway] switch-config intercepted, handled locally');
         return;
 
       case 'fetch-configs':
@@ -701,7 +701,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
       default:
         // Unknown message type — log for debugging
-        console.log('[Gateway] Unhandled sendMessage type:', msg.type);
+        if (import.meta.env.DEV) console.log('[Gateway] Unhandled sendMessage type:', msg.type);
         return;
     }
   }, []);

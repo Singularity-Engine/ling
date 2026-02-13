@@ -204,7 +204,7 @@ class GatewayConnector {
       let handshakeResolved = false;
 
       this.ws.onopen = () => {
-        console.log('[GatewayConnector] WebSocket open, waiting for challenge...');
+        if (import.meta.env.DEV) console.log('[GatewayConnector] WebSocket open, waiting for challenge...');
         this.setState('HANDSHAKING');
       };
 
@@ -223,7 +223,7 @@ class GatewayConnector {
 
         // ── Challenge ──
         if (frame.type === 'event' && frame.event === 'connect.challenge') {
-          console.log('[GatewayConnector] Challenge received, authenticating...');
+          if (import.meta.env.DEV) console.log('[GatewayConnector] Challenge received, authenticating...');
           const connectReq: GatewayFrame = {
             type: 'req',
             id: crypto.randomUUID(),
@@ -256,7 +256,7 @@ class GatewayConnector {
           this.connId = (frame.payload as any)?.server?.connId || null;
           this.reconnectAttempts = 0;
           this.setState('CONNECTED');
-          console.log(`[GatewayConnector] Connected! connId=${this.connId}`);
+          if (import.meta.env.DEV) console.log(`[GatewayConnector] Connected! connId=${this.connId}`);
           if (!handshakeResolved) {
             handshakeResolved = true;
             resolve();
@@ -291,7 +291,7 @@ class GatewayConnector {
           };
           this.debugCounters.agentEvents++;
           this.debugCounters.lastEvent = `${agentEvent.stream}:${JSON.stringify(agentEvent.data).slice(0, 60)}`;
-          console.log('[GatewayConnector] AGENT EVENT:', agentEvent.stream, agentEvent.data);
+          if (import.meta.env.DEV) console.log('[GatewayConnector] AGENT EVENT:', agentEvent.stream, agentEvent.data);
           this.agentEvent$.next(agentEvent);
           this.options?.onAgentEvent?.(agentEvent);
           return;
@@ -320,7 +320,7 @@ class GatewayConnector {
       };
 
       this.ws.onclose = (event) => {
-        console.log(`[GatewayConnector] Closed: code=${event.code} reason=${event.reason}`);
+        if (import.meta.env.DEV) console.log(`[GatewayConnector] Closed: code=${event.code} reason=${event.reason}`);
         this.rejectAllPending('Connection closed');
 
         if (!handshakeResolved) {
@@ -329,7 +329,7 @@ class GatewayConnector {
         }
 
         if (this.authFailed) {
-          console.log('[GatewayConnector] Auth failed, not reconnecting');
+          if (import.meta.env.DEV) console.log('[GatewayConnector] Auth failed, not reconnecting');
           this.setState('DISCONNECTED');
         } else if (this.state !== 'DISCONNECTED') {
           this.scheduleReconnect();
@@ -374,7 +374,7 @@ class GatewayConnector {
 
   private scheduleReconnect() {
     if (this.reconnectAttempts >= RECONNECT_MAX_RETRIES) {
-      console.log('[GatewayConnector] Max reconnect attempts reached');
+      if (import.meta.env.DEV) console.log('[GatewayConnector] Max reconnect attempts reached');
       this.setState('DISCONNECTED');
       return;
     }
@@ -385,7 +385,7 @@ class GatewayConnector {
       RECONNECT_MAX_MS,
     );
     this.reconnectAttempts++;
-    console.log(`[GatewayConnector] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${RECONNECT_MAX_RETRIES})`);
+    if (import.meta.env.DEV) console.log(`[GatewayConnector] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${RECONNECT_MAX_RETRIES})`);
 
     this.reconnectTimer = setTimeout(() => {
       this.doConnect().catch((err) => {

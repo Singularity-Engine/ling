@@ -195,7 +195,7 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
    * Handle speech start event (initial detection)
    */
   const handleSpeechStart = useCallback(() => {
-    console.log('Speech started - saving current state');
+    if (import.meta.env.DEV) console.log('Speech started - saving current state');
     // Save current AI state but DON'T change to listening yet
     previousAiStateRef.current = aiStateRef.current;
     isProcessingRef.current = true;
@@ -206,10 +206,10 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
    * Handle real speech start event (confirmed speech)
    */
   const handleSpeechRealStart = useCallback(() => {
-    console.log('Real speech confirmed - checking if need to interrupt');
+    if (import.meta.env.DEV) console.log('Real speech confirmed - checking if need to interrupt');
     // Check if we need to interrupt based on the PREVIOUS state (before speech started)
     if (previousAiStateRef.current === 'thinking-speaking') {
-      console.log('Interrupting AI speech due to user speaking');
+      if (import.meta.env.DEV) console.log('Interrupting AI speech due to user speaking');
       interruptRef.current();
     }
     // Now change to listening state
@@ -230,13 +230,13 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
    */
   const handleSpeechEnd = useCallback((audio: Float32Array) => {
     if (!isProcessingRef.current) return;
-    console.log('Speech ended');
+    if (import.meta.env.DEV) console.log('Speech ended');
     audioTaskQueue.clearQueue();
 
     if (autoStopMicRef.current) {
       stopMic();
     } else {
-      console.log('Auto stop mic is OFF, keeping mic active');
+      if (import.meta.env.DEV) console.log('Auto stop mic is OFF, keeping mic active');
     }
 
     setPreviousTriggeredProbability(0);
@@ -250,7 +250,7 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
    */
   const handleVADMisfire = useCallback(() => {
     if (!isProcessingRef.current) return;
-    console.log('VAD misfire detected');
+    if (import.meta.env.DEV) console.log('VAD misfire detected');
     setPreviousTriggeredProbability(0);
     isProcessingRef.current = false;
 
@@ -301,10 +301,10 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
   const startMic = useCallback(async () => {
     try {
       if (!vadRef.current) {
-        console.log('Initializing VAD');
+        if (import.meta.env.DEV) console.log('Initializing VAD');
         await initVAD();
       } else {
-        console.log('Starting VAD');
+        if (import.meta.env.DEV) console.log('Starting VAD');
         vadRef.current.start();
       }
       setMicOn(true);
@@ -322,15 +322,15 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
    * Stop microphone and VAD processing
    */
   const stopMic = useCallback(() => {
-    console.log('Stopping VAD');
+    if (import.meta.env.DEV) console.log('Stopping VAD');
     if (vadRef.current) {
       vadRef.current.pause();
       vadRef.current.destroy();
       vadRef.current = null;
-      console.log('VAD stopped and destroyed successfully');
+      if (import.meta.env.DEV) console.log('VAD stopped and destroyed successfully');
       setPreviousTriggeredProbability(0);
     } else {
-      console.log('VAD instance not found');
+      if (import.meta.env.DEV) console.log('VAD instance not found');
     }
     setMicOn(false);
     isProcessingRef.current = false;

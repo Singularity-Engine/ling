@@ -60,7 +60,7 @@ class TTSService {
 
       // If direct API fails, try proxy
       if (!this.useProxy) {
-        console.log('[TTSService] Switching to proxy...');
+        if (import.meta.env.DEV) console.log('[TTSService] Switching to proxy...');
         this.useProxy = true;
         return this.synthesize(text);
       }

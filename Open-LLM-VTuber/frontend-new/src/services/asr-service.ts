@@ -76,7 +76,7 @@ class ASRService {
       this.isListening = true;
       this.currentTranscript = '';
       this.finalTranscript = '';
-      console.log('[ASRService] Started listening');
+      if (import.meta.env.DEV) console.log('[ASRService] Started listening');
     } catch (err) {
       console.error('[ASRService] Failed to start:', err);
     }
@@ -99,7 +99,7 @@ class ASRService {
     const result = this.currentTranscript || this.finalTranscript;
     this.currentTranscript = '';
     this.finalTranscript = '';
-    console.log('[ASRService] Stopped, transcript:', result);
+    if (import.meta.env.DEV) console.log('[ASRService] Stopped, transcript:', result);
     return result;
   }
 
