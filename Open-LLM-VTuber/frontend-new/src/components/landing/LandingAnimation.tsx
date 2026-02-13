@@ -11,13 +11,8 @@ const LINES = [
   "来，跟我聊聊？",
 ];
 
-
-
-
-
-
-const TYPE_SPEED = 100; // ms per character
-const LINE_DELAY = 600; // pause between lines
+const TYPE_SPEED = 70; // ms per character — 更流畅的打字节奏
+const LINE_DELAY = 500; // pause between lines
 
 export function LandingAnimation({ onComplete }: LandingAnimationProps) {
   const [particlePhase, setParticlePhase] = useState<ParticlePhase>("float");
@@ -43,7 +38,6 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
   // Keyboard skip
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      // Only skip on Escape or if button is already visible
       if (e.key === "Escape" || showButton) {
         handleSkip();
       }
@@ -52,38 +46,35 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [handleSkip, showButton]);
 
-  // Main timeline
+  // Main timeline — 压缩到 3.5s 开始出文字
   useEffect(() => {
     startTimeRef.current = performance.now();
 
-    // Phase 0: float (0-2s) — already default
-    // Phase 1: converge (2-4s)
+    // Phase 1: converge (1.5-3s)
     const convergeTimer = setTimeout(() => {
       setParticlePhase("converge");
-    }, 2000);
+    }, 1500);
 
-    // Converge progress updates
     const convergeInterval = setInterval(() => {
       const elapsed = performance.now() - startTimeRef.current;
-      if (elapsed > 2000 && elapsed < 4000) {
-        setPhaseProgress((elapsed - 2000) / 2000);
+      if (elapsed > 1500 && elapsed < 3000) {
+        setPhaseProgress((elapsed - 1500) / 1500);
       }
     }, 16);
 
-    // Phase 2: explode (4-4.5s)
+    // Phase 2: explode (3-3.5s)
     const explodeTimer = setTimeout(() => {
       setParticlePhase("explode");
       setFlashOpacity(0.8);
-      // Flash fades
       setTimeout(() => setFlashOpacity(0), 400);
-    }, 4000);
+    }, 3000);
 
-    // Phase 3+: text appears (4.5s+)
+    // Phase 3: text (3.5s+)
     const textTimer = setTimeout(() => {
       setParticlePhase("fade");
       setBgDim(0.6);
       setShowText(true);
-    }, 4500);
+    }, 3500);
 
     return () => {
       clearTimeout(convergeTimer);
@@ -93,11 +84,10 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
     };
   }, []);
 
-  // Typewriter effect for current line
+  // Typewriter effect
   useEffect(() => {
     if (!showText) return;
     if (currentLine >= LINES.length) {
-      // All lines done → show button
       const t = setTimeout(() => setShowButton(true), 400);
       return () => clearTimeout(t);
     }
@@ -110,7 +100,6 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
       );
       return () => clearTimeout(t);
     } else {
-      // Line complete, move to next after delay
       const t = setTimeout(() => {
         setCurrentLine((l) => l + 1);
         setDisplayedChars(0);
@@ -146,7 +135,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
         }}
       />
 
-      {/* Flash overlay — purple-tinted for theme consistency */}
+      {/* Flash overlay */}
       <div
         style={{
           position: "fixed",
@@ -187,6 +176,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                 i < currentLine ? line.length : displayedChars;
               const text = line.slice(0, chars);
               const isActive = i === currentLine && chars < line.length;
+              const isComplete = i < currentLine;
 
               return (
                 <div
@@ -201,6 +191,10 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                     minHeight: i === 0 ? "36px" : "28px",
                     animation: "fadeInUp 0.5s ease-out both",
                     animationDelay: `${i * 0.1}s`,
+                    textShadow: isComplete
+                      ? "0 0 20px rgba(139, 92, 246, 0.3)"
+                      : "none",
+                    transition: "text-shadow 0.8s ease",
                   }}
                 >
                   {text}
@@ -237,7 +231,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                 border: "none",
                 borderRadius: "999px",
                 cursor: "pointer",
-                animation: "fadeInUp 0.6s ease-out both",
+                animation: "fadeInUp 0.6s ease-out both, breatheGlow 3s ease-in-out infinite 0.6s",
                 boxShadow: "0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2)",
                 transition: "transform 0.2s, box-shadow 0.2s",
                 position: "relative",
@@ -254,16 +248,15 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                   "0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2)";
               }}
             >
-              <span style={{ animation: "glowPulse 2s infinite" }}>
-                开始对话
-              </span>
+              开始对话
             </button>
           )}
         </div>
       )}
 
-      {/* Skip hint */}
+      {/* Skip hint — 移动端也友好 */}
       <div
+        onClick={handleSkip}
         style={{
           position: "fixed",
           bottom: "24px",
@@ -272,10 +265,20 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
           fontSize: "12px",
           zIndex: 5,
           animation: "fadeInUp 1s ease-out 1s both",
+          cursor: "pointer",
+          padding: "8px",
         }}
       >
-        按 ESC 跳过
+        跳过 ›
       </div>
+
+      {/* 呼吸光效 keyframes */}
+      <style>{`
+        @keyframes breatheGlow {
+          0%, 100% { box-shadow: 0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2); }
+          50% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.6), 0 0 80px rgba(139, 92, 246, 0.3); }
+        }
+      `}</style>
     </div>
   );
 }
