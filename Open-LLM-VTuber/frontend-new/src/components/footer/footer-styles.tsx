@@ -60,6 +60,7 @@ export const footerStyles: {
       _focus: {
         border: 'none',
         bg: 'gray.700',
+        boxShadow: '0 0 0 2px rgba(139, 92, 246, 0.4)',
       },
       resize: 'none',
       minHeight: '80px',

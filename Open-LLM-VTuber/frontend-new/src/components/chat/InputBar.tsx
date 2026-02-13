@@ -14,8 +14,8 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     @keyframes inputPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
     @keyframes micPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); } }
     .ling-textarea { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; color: white; font-size: 14px; padding: 10px 16px; min-height: 42px; max-height: 96px; resize: none; flex: 1; outline: none; font-family: inherit; line-height: 1.5; }
-    .ling-textarea::placeholder { color: rgba(255, 255, 255, 0.3); }
-    .ling-textarea:focus { border-color: rgba(139, 92, 246, 0.5); box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.3); }
+    .ling-textarea::placeholder { color: rgba(255, 255, 255, 0.4); }
+    .ling-textarea:focus { border-color: rgba(139, 92, 246, 0.6); box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.4); }
   `;
   document.head.appendChild(style);
 }

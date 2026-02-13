@@ -74,7 +74,6 @@ export const inputSubtitleStyles = {
     borderColor: 'whiteAlpha.300',
     _focus: {
       borderColor: 'whiteAlpha.500',
-      outline: 'none',
     },
     flex: '1',
   },
