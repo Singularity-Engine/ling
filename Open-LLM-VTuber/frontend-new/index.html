@@ -33,6 +33,9 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💜</text></svg>" />
     <link rel="apple-touch-icon" href="/og-image.png" />
 
+    <!-- Preload Live2D Core — start fetching immediately, used later by main.tsx -->
+    <link rel="preload" href="./libs/live2dcubismcore.js" as="script" />
+
     <!-- Resource hints — TTS API & proxy -->
     <link rel="dns-prefetch" href="https://api.fish.audio" />
     <link rel="preconnect" href="https://api.fish.audio" crossorigin />
