@@ -12,7 +12,7 @@
  *   5. Ready for chat.send / agent.event streaming
  */
 
-import { Subject } from 'rxjs';
+import { Subject, ReplaySubject } from 'rxjs';
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -73,14 +73,17 @@ class GatewayConnector {
   /** Debug counters */
   readonly debugCounters = { rawFrames: 0, agentEvents: 0, ticks: 0, lastEvent: '' };
 
-  /** Observable for state changes */
-  readonly state$ = new Subject<GatewayState>();
+  /** Observable for state changes (replay last state for late subscribers) */
+  readonly state$ = new ReplaySubject<GatewayState>(1);
 
-  /** Observable for all agent events */
-  readonly agentEvent$ = new Subject<GatewayAgentEvent>();
+  /** Observable for all agent events (buffer up to 50 for late subscribers) */
+  readonly agentEvent$ = new ReplaySubject<GatewayAgentEvent>(50);
 
-  /** Observable for raw frames (for debugging / forwarding) */
-  readonly rawFrame$ = new Subject<GatewayFrame>();
+  /** Observable for raw frames (buffer up to 20 for late subscribers) */
+  readonly rawFrame$ = new ReplaySubject<GatewayFrame>(20);
+
+  /** Fires when a reconnection handshake completes successfully */
+  readonly reconnected$ = new Subject<void>();
 
   // ── Public API ──────────────────────────────────────────────────
 
