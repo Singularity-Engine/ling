@@ -27,6 +27,7 @@ import { BackgroundReactor } from "./components/effects/BackgroundReactor";
 import { ThoughtHalo } from "./components/effects/ThoughtHalo";
 import { CrystalField } from "./components/crystal/CrystalField";
 import { CapabilityRing } from "./components/ability/CapabilityRing";
+import { Toaster } from "./components/ui/toaster";
 import "./index.css";
 
 // Error Boundary
@@ -286,6 +287,8 @@ function App(): JSX.Element {
       {showLanding && (
         <LandingAnimation onComplete={handleLandingComplete} />
       )}
+
+      <Toaster />
     </ErrorBoundary>
   );
 }
