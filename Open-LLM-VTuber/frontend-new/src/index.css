@@ -123,7 +123,7 @@ canvas {
   }
 
   /* Live2D 画布在手机上缩小并上移，避免遮挡聊天 */
-  canvas {
+  canvas#canvas {
     transform: scale(0.7) translateY(-15%);
     transform-origin: top center;
   }
