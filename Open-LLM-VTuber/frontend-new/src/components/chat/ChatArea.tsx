@@ -98,8 +98,8 @@ export const ChatArea = memo(() => {
                   justifyContent: "center",
                   height: "100%",
                   padding: "24px 16px",
-                  gap: "8px",
-                  animation: "chatFadeInUp 0.5s ease-out",
+                  gap: "14px",
+                  animation: "chatFadeInUp 0.6s ease-out",
                 }}
               >
                 <span
@@ -108,17 +108,27 @@ export const ChatArea = memo(() => {
                     animation: "emptyStateFloat 3s ease-in-out infinite",
                   }}
                 >
-                  💬
+                  ✦
                 </span>
                 <span
                   style={{
-                    fontSize: "13px",
-                    color: "rgba(255, 255, 255, 0.3)",
+                    fontSize: "14px",
+                    color: "rgba(226, 212, 255, 0.6)",
                     textAlign: "center",
                     letterSpacing: "0.3px",
+                    lineHeight: "1.6",
                   }}
                 >
-                  和灵开始聊天吧
+                  我在这里，随时可以聊
+                </span>
+                <span
+                  style={{
+                    fontSize: "12px",
+                    color: "rgba(255, 255, 255, 0.2)",
+                    textAlign: "center",
+                  }}
+                >
+                  试试说「你好」或直接语音
                 </span>
               </div>
             )}
