@@ -6,14 +6,6 @@
  * speech ends, and provide the accumulated transcript.
  */
 
-// Type declarations for Web Speech API (webkit prefix)
-declare global {
-  interface Window {
-    SpeechRecognition: typeof SpeechRecognition;
-    webkitSpeechRecognition: typeof SpeechRecognition;
-  }
-}
-
 class ASRService {
   private recognition: SpeechRecognition | null = null;
   private isListening = false;
@@ -66,7 +58,7 @@ class ASRService {
       }
     };
 
-    this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+    this.recognition.onerror = (event: any) => {
       if (event.error === 'no-speech' || event.error === 'aborted') return;
       console.warn('[ASRService] Error:', event.error);
     };

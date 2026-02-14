@@ -301,6 +301,7 @@ class GatewayConnector {
         if (frame.type === 'res' && frame.id) {
           const pending = this.pendingRequests.get(frame.id);
           if (pending) {
+            clearTimeout(pending.timer);
             this.pendingRequests.delete(frame.id);
             if (frame.ok) {
               pending.resolve(frame);
@@ -351,16 +352,17 @@ class GatewayConnector {
       }
 
       const id = frame.id || crypto.randomUUID();
-      this.pendingRequests.set(id, { resolve, reject });
-      this.ws.send(JSON.stringify(frame));
 
       // Timeout after 30s
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         if (this.pendingRequests.has(id)) {
           this.pendingRequests.delete(id);
           reject(new Error(`Request ${frame.method} timed out`));
         }
       }, 30000);
+
+      this.pendingRequests.set(id, { resolve, reject, timer });
+      this.ws.send(JSON.stringify(frame));
     });
   }
 
@@ -402,7 +404,8 @@ class GatewayConnector {
   }
 
   private rejectAllPending(reason: string) {
-    for (const [id, pending] of this.pendingRequests) {
+    for (const [, pending] of this.pendingRequests) {
+      clearTimeout(pending.timer);
       pending.reject(new Error(reason));
     }
     this.pendingRequests.clear();
