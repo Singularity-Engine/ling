@@ -44,6 +44,15 @@ export const footerStyles: {
       width: '50px',
       height: '50px',
       minW: '50px',
+      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+      _hover: {
+        transform: 'scale(1.08)',
+        filter: 'brightness(1.15)',
+      },
+      _active: {
+        transform: 'scale(0.93)',
+        filter: 'brightness(0.9)',
+      },
     },
     input: {
       bg: 'gray.700',

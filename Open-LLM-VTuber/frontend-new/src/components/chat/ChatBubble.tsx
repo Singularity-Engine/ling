@@ -21,6 +21,7 @@ interface ChatBubbleProps {
   isToolCall?: boolean;
   toolName?: string;
   toolStatus?: string;
+  staggerIndex?: number;
 }
 
 export const ChatBubble = memo(({ role, content, isStreaming, isToolCall, toolName, toolStatus }: ChatBubbleProps) => {
