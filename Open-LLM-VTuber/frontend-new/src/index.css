@@ -128,6 +128,7 @@ body {
 @keyframes ripple {
   0% { transform: scale(0.8); opacity: 1; }
   100% { transform: scale(2.4); opacity: 0; }
+}
 
 @keyframes btnPress {
   0% { transform: scale(1); }
@@ -144,6 +145,21 @@ body {
 @keyframes focusExpand {
   0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
   100% { box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.4); }
+}
+
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes skeletonOrb {
+  0%, 100% { transform: scale(0.95); opacity: 0.3; }
+  50% { transform: scale(1.05); opacity: 0.6; }
+}
+
+@keyframes skeletonBarShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
 }
 
 /* 打字光标 */

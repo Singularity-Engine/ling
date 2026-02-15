@@ -27,6 +27,7 @@ import { BackgroundReactor } from "./components/effects/BackgroundReactor";
 import { ThoughtHalo } from "./components/effects/ThoughtHalo";
 import { CrystalField } from "./components/crystal/CrystalField";
 import { CapabilityRing } from "./components/ability/CapabilityRing";
+import { LoadingSkeleton } from "./components/loading/LoadingSkeleton";
 import { Toaster } from "./components/ui/toaster";
 import "./index.css";
 
@@ -104,6 +105,9 @@ function MainContent(): JSX.Element {
         <BackgroundReactor />
         <ThoughtHalo />
       </div>
+
+      {/* ===== Layer 0.8: 加载骨架屏 ===== */}
+      <LoadingSkeleton />
 
       {/* ===== Layer 1: 工具结果水晶 ===== */}
       <CrystalField />
