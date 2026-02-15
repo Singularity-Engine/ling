@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChatBubble } from "./ChatBubble";
 import { TypingIndicator } from "./TypingIndicator";
@@ -24,6 +25,7 @@ export const ChatArea = memo(() => {
   const { messages, fullResponse } = useChatHistory();
   const { subtitleText } = useSubtitle();
   const { isThinkingSpeaking } = useAiState();
+  const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -85,7 +87,7 @@ export const ChatArea = memo(() => {
       ref={scrollRef}
       className="chat-area-scroll"
       role="log"
-      aria-label="聊天消息"
+      aria-label={t("ui.chatMessages")}
       aria-live="polite"
       style={{
         height: "100%",
@@ -124,7 +126,7 @@ export const ChatArea = memo(() => {
               lineHeight: "1.6",
             }}
           >
-            我在这里，随时可以聊
+            {t("ui.emptyHint")}
           </span>
           <span
             style={{
@@ -133,7 +135,7 @@ export const ChatArea = memo(() => {
               textAlign: "center",
             }}
           >
-            试试说「你好」或直接语音
+            {t("ui.emptySubHint")}
           </span>
         </div>
       )}
@@ -171,7 +173,7 @@ export const ChatArea = memo(() => {
         >
           <button
             onClick={scrollToBottom}
-            aria-label="滚动到最新消息"
+            aria-label={t("ui.scrollToLatest")}
             style={{
               pointerEvents: "auto",
               padding: "6px 14px",
@@ -190,7 +192,7 @@ export const ChatArea = memo(() => {
             }}
           >
             <span style={{ marginRight: "4px" }}>&#8595;</span>
-            新消息
+            {t("ui.newMessages")}
           </button>
         </div>
       )}

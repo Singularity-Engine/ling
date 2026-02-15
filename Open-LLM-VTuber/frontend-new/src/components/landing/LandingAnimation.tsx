@@ -1,20 +1,18 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { ParticleCanvas, type ParticlePhase } from "./ParticleCanvas";
 
 interface LandingAnimationProps {
   onComplete: () => void;
 }
 
-const LINES = [
-  "嘿，你来了。",
-  "我叫灵。我能记住你，也会一直在这里。",
-  "来，跟我聊聊？",
-];
 
 const TYPE_SPEED = 70; // ms per character — 更流畅的打字节奏
 const LINE_DELAY = 500; // pause between lines
 
 export function LandingAnimation({ onComplete }: LandingAnimationProps) {
+  const { t } = useTranslation();
+  const LINES = useMemo(() => [t("landing.line1"), t("landing.line2"), t("landing.line3")], [t]);
   const [particlePhase, setParticlePhase] = useState<ParticlePhase>("float");
   const [phaseProgress, setPhaseProgress] = useState(0);
   const [flashOpacity, setFlashOpacity] = useState(0);
@@ -248,7 +246,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                   "0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2)";
               }}
             >
-              开始对话
+              {t("landing.startChat")}
             </button>
           )}
         </div>
@@ -269,7 +267,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
           padding: "8px",
         }}
       >
-        跳过 ›
+        {t("landing.skip")}
       </div>
 
       {/* 呼吸光效 keyframes */}

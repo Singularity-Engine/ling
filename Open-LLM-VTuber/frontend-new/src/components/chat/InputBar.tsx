@@ -1,4 +1,5 @@
 import { memo, useState, useRef, useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useWebSocket } from "@/context/websocket-context";
 import { useChatHistory } from "@/context/chat-history-context";
 import { useAiState } from "@/context/ai-state-context";
@@ -42,15 +43,16 @@ const StopIcon = () => (
   </svg>
 );
 
-const AI_STATE_TEXT: Record<string, string> = {
+const AI_STATE_KEYS: Record<string, string> = {
   idle: "",
-  loading: "加载中...",
-  thinking: "思考中...",
-  "thinking-speaking": "说话中...",
+  loading: "chat.loading",
+  thinking: "chat.thinking",
+  "thinking-speaking": "chat.speaking",
   interrupted: "",
 };
 
 export const InputBar = memo(() => {
+  const { t } = useTranslation();
   const [inputText, setInputText] = useState("");
   const [isComposing, setIsComposing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -74,7 +76,8 @@ export const InputBar = memo(() => {
 
   const hasText = inputText.trim().length > 0;
   const isAiBusy = aiState === "thinking-speaking";
-  const stateText = AI_STATE_TEXT[aiState] || "";
+  const stateKey = AI_STATE_KEYS[aiState] || "";
+  const stateText = stateKey ? t(stateKey) : "";
 
   const handleSend = useCallback(() => {
     const text = inputText.trim();
@@ -163,9 +166,9 @@ export const InputBar = memo(() => {
       >
         <button
           onClick={handleMicToggle}
-          aria-label={micOn ? "关闭麦克风" : "开启麦克风"}
+          aria-label={micOn ? t("chat.micOn") : t("chat.micOff")}
           aria-pressed={micOn}
-          title={micOn ? "关闭麦克风" : "开启麦克风"}
+          title={micOn ? t("chat.micOn") : t("chat.micOff")}
           style={{
             width: "44px",
             height: "44px",
@@ -194,15 +197,15 @@ export const InputBar = memo(() => {
           onKeyDown={handleKeyDown}
           onCompositionStart={() => setIsComposing(true)}
           onCompositionEnd={() => setIsComposing(false)}
-          placeholder={micOn ? "语音聆听中..." : "和灵说点什么..."}
-          aria-label="聊天输入框"
+          placeholder={micOn ? t("chat.placeholderListening") : t("chat.placeholder")}
+          aria-label={t("chat.inputLabel")}
           rows={1}
         />
 
         <button
           onClick={isAiBusy ? handleInterrupt : handleSend}
-          aria-label={isAiBusy ? "停止回复" : "发送消息"}
-          title={isAiBusy ? "停止回复" : "发送消息"}
+          aria-label={isAiBusy ? t("chat.stopReply") : t("chat.sendMessage")}
+          title={isAiBusy ? t("chat.stopReply") : t("chat.sendMessage")}
           style={{
             width: "44px",
             height: "44px",

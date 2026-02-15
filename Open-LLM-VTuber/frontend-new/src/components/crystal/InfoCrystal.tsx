@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { memo, useState, useCallback } from "react";
 import type { ToolCategory } from "../../context/tool-state-context";
 
@@ -59,6 +60,7 @@ interface InfoCrystalProps {
 
 export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) => {
   const [expanded, setExpanded] = useState(false);
+  const { t } = useTranslation();
   const [hovered, setHovered] = useState(false);
   const color = CATEGORY_COLORS[(tool.category as ToolCategory) ?? "generic"] || CATEGORY_COLORS.generic;
   const icon = TOOL_ICONS[tool.category] || TOOL_ICONS.generic;
@@ -133,7 +135,7 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
               display: "block",
             }}
           >
-            {content || "暂无内容"}
+            {content || t("crystal.noContent")}
           </span>
         </div>
       </>
@@ -198,7 +200,7 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
             WebkitBoxOrient: "vertical",
           }}
         >
-          {content || (tool.status === "running" ? "执行中..." : "等待结果...")}
+          {content || (tool.status === "running" ? t("crystal.running") : t("crystal.waiting"))}
         </span>
 
         {/* Footer */}
@@ -211,7 +213,7 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
             display: "block",
           }}
         >
-          点击查看详情 →
+          {t("crystal.clickToView")}
         </span>
       </div>
     </>

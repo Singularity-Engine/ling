@@ -135,5 +135,85 @@
     "connected": "Connected",
     "connecting": "Connecting",
     "clickToReconnect": "Click to Reconnect"
+  },
+  "chat": {
+    "characterName": "Ling",
+    "placeholder": "Say something to Ling...",
+    "placeholderListening": "Listening...",
+    "inputLabel": "Chat input",
+    "micOn": "Mute microphone",
+    "micOff": "Unmute microphone",
+    "stopReply": "Stop reply",
+    "sendMessage": "Send message",
+    "loading": "Loading...",
+    "thinking": "Thinking...",
+    "speaking": "Speaking...",
+    "copyCode": "Copy code",
+    "codeCopied": "Code copied",
+    "copy": "Copy",
+    "copied": "Copied"
+  },
+  "connection": {
+    "connected": "Connected",
+    "reconnecting": "Reconnecting...",
+    "disconnected": "Disconnected",
+    "clickRetry": "Click to retry"
+  },
+  "affinity": {
+    "label": "Affinity",
+    "hatred": "Hatred",
+    "hostile": "Hostile",
+    "indifferent": "Indifferent",
+    "neutral": "Neutral",
+    "friendly": "Friendly",
+    "close": "Close",
+    "devoted": "Devoted"
+  },
+  "capability": {
+    "search": "Search",
+    "code": "Code",
+    "memory": "Memory",
+    "weather": "Weather",
+    "tool": "Tool",
+    "searchPrompt": "Help me search ",
+    "codePrompt": "Help me write code ",
+    "memoryPrompt": "Do you remember ",
+    "weatherPrompt": "How's the weather today?",
+    "genericPrompt": "Help me "
+  },
+  "tts": {
+    "synthesizing": "Generating speech...",
+    "playing": "Playing",
+    "error": "Speech generation failed"
+  },
+  "crystal": {
+    "noContent": "No content yet",
+    "running": "Running...",
+    "waiting": "Waiting for result...",
+    "clickToView": "Click for details →"
+  },
+  "landing": {
+    "line1": "Hey, you're here.",
+    "line2": "I'm Ling. I can remember you, and I'll always be here.",
+    "line3": "Come, let's chat?",
+    "startChat": "Start chatting",
+    "skip": "Skip ›"
+  },
+  "ui": {
+    "expandFooter": "Expand footer",
+    "collapseFooter": "Collapse footer",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar",
+    "openSettings": "Open settings",
+    "settings": "Settings",
+    "group": "Group",
+    "chatHistory": "Chat history",
+    "newChat": "New chat",
+    "deleteChat": "Delete this chat",
+    "chatMessages": "Chat messages",
+    "emptyHint": "I'm here, let's chat anytime",
+    "emptySubHint": "Try saying \"hello\" or use voice",
+    "scrollToLatest": "Scroll to latest",
+    "newMessages": "New messages"
   }
 } 

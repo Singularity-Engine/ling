@@ -1,4 +1,5 @@
 import { memo, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useAffinity } from "@/context/affinity-context";
 
 const breatheKeyframes = `
@@ -15,18 +16,19 @@ const slideUpKeyframes = `
 }
 `;
 
-const LEVEL_CONFIG: Record<string, { name: string; color: string; icon: string }> = {
-  hatred: { name: "敌意", color: "#ef4444", icon: "💔" },
-  hostile: { name: "冷淡", color: "#f97316", icon: "❄️" },
-  indifferent: { name: "无感", color: "#a3a3a3", icon: "😐" },
-  neutral: { name: "中立", color: "#60a5fa", icon: "💙" },
-  friendly: { name: "友好", color: "#a78bfa", icon: "💜" },
-  close: { name: "亲密", color: "#c084fc", icon: "💗" },
-  devoted: { name: "挚爱", color: "#f472b6", icon: "💕" },
+const LEVEL_CONFIG: Record<string, { i18nKey: string; color: string; icon: string }> = {
+  hatred: { i18nKey: "affinity.hatred", color: "#ef4444", icon: "💔" },
+  hostile: { i18nKey: "affinity.hostile", color: "#f97316", icon: "❄️" },
+  indifferent: { i18nKey: "affinity.indifferent", color: "#a3a3a3", icon: "😐" },
+  neutral: { i18nKey: "affinity.neutral", color: "#60a5fa", icon: "💙" },
+  friendly: { i18nKey: "affinity.friendly", color: "#a78bfa", icon: "💜" },
+  close: { i18nKey: "affinity.close", color: "#c084fc", icon: "💗" },
+  devoted: { i18nKey: "affinity.devoted", color: "#f472b6", icon: "💕" },
 };
 
 export const AffinityBar = memo(() => {
   const { affinity, level, milestone } = useAffinity();
+  const { t } = useTranslation();
 
   const config = useMemo(() => LEVEL_CONFIG[level] || LEVEL_CONFIG.neutral, [level]);
 
@@ -51,7 +53,7 @@ export const AffinityBar = memo(() => {
             {config.icon}
           </span>
           <span style={{ fontSize: "12px", color: config.color, fontWeight: 600, transition: "color 0.5s ease" }}>
-            {config.name}
+            {t(config.i18nKey)}
           </span>
           <div
             style={{

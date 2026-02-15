@@ -1,4 +1,5 @@
 import { memo, useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useWebSocket } from "@/context/websocket-context";
 
 const keyframesStyle = `
@@ -19,6 +20,7 @@ const keyframesStyle = `
  * - Disconnected: red dot + "连接断开" + click-to-retry
  */
 export const ConnectionStatus = memo(() => {
+  const { t } = useTranslation();
   const { wsState, reconnect } = useWebSocket();
   const [showConnected, setShowConnected] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -48,10 +50,10 @@ export const ConnectionStatus = memo(() => {
       : "#f87171";
 
   const label = isOpen
-    ? "已连接"
+    ? t("connection.connected")
     : isConnecting
-      ? "重连中..."
-      : "连接断开";
+      ? t("connection.reconnecting")
+      : t("connection.disconnected");
 
   const Tag = isClosed ? "button" : "div";
 
@@ -122,7 +124,7 @@ export const ConnectionStatus = memo(() => {
         {/* Click hint for disconnected state */}
         {isClosed && (
           <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", whiteSpace: "nowrap", lineHeight: 1 }}>
-            点击重试
+            {t("connection.clickRetry")}
           </span>
         )}
       </Tag>

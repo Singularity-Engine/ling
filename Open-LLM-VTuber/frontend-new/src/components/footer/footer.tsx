@@ -43,9 +43,9 @@ const ToggleButton = memo(({ isCollapsed, onToggle }: ToggleButtonProps) => (
     {...footerStyles.footer.toggleButton}
     role="button"
     tabIndex={0}
-    aria-label={isCollapsed ? "展开底栏" : "收起底栏"}
+    aria-label={isCollapsed ? t('ui.expandFooter') : t('ui.collapseFooter')}
     aria-expanded={!isCollapsed}
-    title={isCollapsed ? "展开底栏" : "收起底栏"}
+    title={isCollapsed ? t('ui.expandFooter') : t('ui.collapseFooter')}
     onClick={onToggle}
     onKeyDown={(e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle?.(); } }}
     color="whiteAlpha.500"
@@ -62,8 +62,8 @@ ToggleButton.displayName = 'ToggleButton';
 const ActionButtons = memo(({ micOn, onMicToggle, onInterrupt }: ActionButtonsProps) => (
   <HStack gap={2}>
     <IconButton
-      aria-label={micOn ? "关闭麦克风" : "开启麦克风"}
-      title={micOn ? "关闭麦克风" : "开启麦克风"}
+      aria-label={micOn ? t('chat.micOn') : t('chat.micOff')}
+      title={micOn ? t('chat.micOn') : t('chat.micOff')}
       bg={micOn ? 'green.500' : 'red.500'}
       {...footerStyles.footer.actionButton}
       onClick={onMicToggle}

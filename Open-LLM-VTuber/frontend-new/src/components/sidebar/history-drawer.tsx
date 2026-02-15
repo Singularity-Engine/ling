@@ -56,8 +56,8 @@ const HistoryItem = memo(({
         <Button
           onClick={onDelete}
           disabled={isDeleteDisabled}
-          aria-label="删除此聊天记录"
-          title="删除此聊天记录"
+          aria-label={t('ui.deleteChat')}
+          title={t('ui.deleteChat')}
           {...sidebarStyles.historyDrawer.deleteButton}
         >
           <FiTrash2 />

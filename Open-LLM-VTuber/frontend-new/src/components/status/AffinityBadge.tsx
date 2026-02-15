@@ -1,4 +1,5 @@
 import { memo, useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useAffinity } from "@/context/affinity-context";
 
 const keyframesStyle = `
@@ -19,14 +20,14 @@ const keyframesStyle = `
 }
 `;
 
-const LEVEL_CONFIG: Record<string, { name: string; color: string; heartColor: string; beatSpeed: string }> = {
-  hatred: { name: "敌意", color: "#ef4444", heartColor: "#4a1515", beatSpeed: "3s" },
-  hostile: { name: "冷淡", color: "#f97316", heartColor: "#6b3a1a", beatSpeed: "2.5s" },
-  indifferent: { name: "无感", color: "#a3a3a3", heartColor: "#525252", beatSpeed: "2.2s" },
-  neutral: { name: "中立", color: "#60a5fa", heartColor: "#60a5fa", beatSpeed: "2s" },
-  friendly: { name: "友好", color: "#a78bfa", heartColor: "#a78bfa", beatSpeed: "1.6s" },
-  close: { name: "亲密", color: "#c084fc", heartColor: "#c084fc", beatSpeed: "1.2s" },
-  devoted: { name: "挚爱", color: "#f472b6", heartColor: "#f472b6", beatSpeed: "0.8s" },
+const LEVEL_CONFIG: Record<string, { i18nKey: string; color: string; heartColor: string; beatSpeed: string }> = {
+  hatred: { i18nKey: "affinity.hatred", color: "#ef4444", heartColor: "#4a1515", beatSpeed: "3s" },
+  hostile: { i18nKey: "affinity.hostile", color: "#f97316", heartColor: "#6b3a1a", beatSpeed: "2.5s" },
+  indifferent: { i18nKey: "affinity.indifferent", color: "#a3a3a3", heartColor: "#525252", beatSpeed: "2.2s" },
+  neutral: { i18nKey: "affinity.neutral", color: "#60a5fa", heartColor: "#60a5fa", beatSpeed: "2s" },
+  friendly: { i18nKey: "affinity.friendly", color: "#a78bfa", heartColor: "#a78bfa", beatSpeed: "1.6s" },
+  close: { i18nKey: "affinity.close", color: "#c084fc", heartColor: "#c084fc", beatSpeed: "1.2s" },
+  devoted: { i18nKey: "affinity.devoted", color: "#f472b6", heartColor: "#f472b6", beatSpeed: "0.8s" },
 };
 
 const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPercent: number; size?: number }) => (
@@ -50,6 +51,7 @@ export const AffinityBadge = memo(() => {
   const { affinity, level, milestone } = useAffinity();
   const [expanded, setExpanded] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const { t } = useTranslation();
 
   const config = useMemo(() => LEVEL_CONFIG[level] || LEVEL_CONFIG.neutral, [level]);
 
@@ -81,7 +83,7 @@ export const AffinityBadge = memo(() => {
         >
           <HeartIcon color={config.heartColor} fillPercent={affinity} size={22} />
           <span style={{ fontSize: "12px", color: `${config.color}cc`, fontWeight: 600, transition: "all 0.3s ease" }}>
-            {config.name}
+            {t(config.i18nKey)}
           </span>
           <span
             style={{
@@ -122,10 +124,10 @@ export const AffinityBadge = memo(() => {
               <HeartIcon color={config.heartColor} fillPercent={affinity} size={28} />
               <div>
                 <span style={{ fontSize: "14px", color: config.color, fontWeight: 700, display: "block" }}>
-                  {config.name}
+                  {t(config.i18nKey)}
                 </span>
                 <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", display: "block" }}>
-                  好感度
+                  {t("affinity.label")}
                 </span>
               </div>
             </div>

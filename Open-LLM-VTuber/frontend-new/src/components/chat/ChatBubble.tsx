@@ -1,5 +1,6 @@
 import { memo } from "react";
 import ReactMarkdown from "react-markdown";
+import { useTranslation } from "react-i18next";
 import { ToolResultCard } from "./ToolResultCard";
 
 // Inject animation styles once
@@ -35,6 +36,7 @@ function formatTime(ts: string): string {
 }
 
 export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolCall, toolName, toolStatus }: ChatBubbleProps) => {
+  const { t } = useTranslation();
   const isUser = role === "user";
 
   if (isToolCall && toolName) {
@@ -68,7 +70,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
               letterSpacing: "0.5px",
             }}
           >
-            灵
+            {t("chat.characterName")}
           </span>
         )}
         <div

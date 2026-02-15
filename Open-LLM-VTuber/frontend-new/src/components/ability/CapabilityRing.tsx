@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { memo, useCallback, useState } from "react";
 import { useToolState, type ToolCategory } from "../../context/tool-state-context";
 
@@ -10,11 +11,11 @@ const CATEGORY_COLORS: Record<ToolCategory, string> = {
 };
 
 const ABILITIES = [
-  { key: "search" as ToolCategory, icon: "🔍", label: "搜索", prompt: "帮我搜索 " },
-  { key: "code" as ToolCategory, icon: "💻", label: "代码", prompt: "帮我写代码 " },
-  { key: "memory" as ToolCategory, icon: "🧠", label: "记忆", prompt: "你还记得 " },
-  { key: "weather" as ToolCategory, icon: "🌤️", label: "天气", prompt: "今天天气怎么样？" },
-  { key: "generic" as ToolCategory, icon: "🔧", label: "工具", prompt: "帮我 " },
+  { key: "search" as ToolCategory, icon: "🔍", labelKey: "capability.search", promptKey: "capability.searchPrompt" },
+  { key: "code" as ToolCategory, icon: "💻", labelKey: "capability.code", promptKey: "capability.codePrompt" },
+  { key: "memory" as ToolCategory, icon: "🧠", labelKey: "capability.memory", promptKey: "capability.memoryPrompt" },
+  { key: "weather" as ToolCategory, icon: "🌤️", labelKey: "capability.weather", promptKey: "capability.weatherPrompt" },
+  { key: "generic" as ToolCategory, icon: "🔧", labelKey: "capability.tool", promptKey: "capability.genericPrompt" },
 ] as const;
 
 const ARC_RADIUS = 90;
@@ -23,6 +24,7 @@ const ARC_STEP = 30;
 
 export const CapabilityRing = memo(() => {
   const { dominantCategory } = useToolState();
+  const { t } = useTranslation();
   const [containerHovered, setContainerHovered] = useState(false);
 
   const handleClick = useCallback((prompt: string) => {
@@ -58,12 +60,12 @@ export const CapabilityRing = memo(() => {
             <AbilityButton
               key={ability.key}
               icon={ability.icon}
-              label={ability.label}
+              label={t(ability.labelKey)}
               isActive={isActive}
               color={color}
               x={x}
               y={y - ARC_RADIUS}
-              onClick={() => handleClick(ability.prompt)}
+              onClick={() => handleClick(t(ability.promptKey))}
             />
           );
         })}

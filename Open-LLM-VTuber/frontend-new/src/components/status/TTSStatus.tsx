@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { memo, useState, useEffect, useRef } from 'react';
 import { useTTSState, TTSPhase } from '@/context/tts-state-context';
 
@@ -30,22 +31,22 @@ const keyframesStyle = `
 
 const phaseConfig: Record<Exclude<TTSPhase, 'idle'>, {
   dotColor: string;
-  label: string;
+  i18nKey: string;
   animate: boolean;
 }> = {
   synthesizing: {
     dotColor: '#a78bfa',
-    label: '语音生成中...',
+    i18nKey: 'tts.synthesizing',
     animate: true,
   },
   playing: {
     dotColor: '#4ade80',
-    label: '播放中',
+    i18nKey: 'tts.playing',
     animate: false,
   },
   error: {
     dotColor: '#f87171',
-    label: '语音生成失败',
+    i18nKey: 'tts.error',
     animate: false,
   },
 };
@@ -59,6 +60,7 @@ const phaseConfig: Record<Exclude<TTSPhase, 'idle'>, {
  */
 export const TTSStatus = memo(() => {
   const { phase, lastError } = useTTSState();
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [fading, setFading] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -160,7 +162,7 @@ export const TTSStatus = memo(() => {
             lineHeight: 1,
           }}
         >
-          {cfg.label}
+          {t(cfg.i18nKey)}
         </span>
       </div>
     </>

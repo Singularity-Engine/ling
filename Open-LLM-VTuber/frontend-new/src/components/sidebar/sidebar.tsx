@@ -36,9 +36,9 @@ const ToggleButton = memo(({ isCollapsed, onToggle }: {
     {...sidebarStyles.sidebar.toggleButton}
     role="button"
     tabIndex={0}
-    aria-label={isCollapsed ? "展开侧边栏" : "收起侧边栏"}
+    aria-label={isCollapsed ? t('ui.expandSidebar') : t('ui.collapseSidebar')}
     aria-expanded={!isCollapsed}
-    title={isCollapsed ? "展开侧边栏" : "收起侧边栏"}
+    title={isCollapsed ? t('ui.expandSidebar') : t('ui.collapseSidebar')}
     style={{
       transform: isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)',
     }}
@@ -90,23 +90,23 @@ ModeMenu.displayName = 'ModeMenu';
 
 const HeaderButtons = memo(({ onSettingsOpen, onNewHistory, setMode, currentMode, isElectron }: HeaderButtonsProps) => (
   <Box display="flex" gap={1}>
-    <Button onClick={onSettingsOpen} aria-label="打开设置" title="设置">
+    <Button onClick={onSettingsOpen} aria-label={t('ui.openSettings')} title={t('ui.settings')}>
       <FiSettings />
     </Button>
 
     <GroupDrawer>
-      <Button aria-label="群组" title="群组">
+      <Button aria-label={t('ui.group')} title={t('ui.group')}>
         <FiUsers />
       </Button>
     </GroupDrawer>
 
     <HistoryDrawer>
-      <Button aria-label="聊天记录" title="聊天记录">
+      <Button aria-label={t('ui.chatHistory')} title={t('ui.chatHistory')}>
         <FiClock />
       </Button>
     </HistoryDrawer>
 
-    <Button onClick={onNewHistory} aria-label="新建对话" title="新建对话">
+    <Button onClick={onNewHistory} aria-label={t('ui.newChat')} title={t('ui.newChat')}>
       <FiPlus />
     </Button>
 

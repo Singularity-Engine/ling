@@ -1,4 +1,5 @@
 import { memo, useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 // Inject scrollbar styles once
 const STYLE_ID = "tool-card-styles";
@@ -45,6 +46,7 @@ const TOOL_ICONS: Record<string, string> = {
 };
 
 const CodeBlock = memo(({ lang, code }: { lang: string; code: string }) => {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -78,8 +80,8 @@ const CodeBlock = memo(({ lang, code }: { lang: string; code: string }) => {
         </span>
         <button
           onClick={handleCopy}
-          aria-label={copied ? "已复制代码" : "复制代码"}
-          title="复制代码"
+          aria-label={copied ? t("chat.codeCopied") : t("chat.copyCode")}
+          title={t("chat.copyCode")}
           style={{
             fontSize: "11px",
             color: "rgba(255,255,255,0.4)",
@@ -90,7 +92,7 @@ const CodeBlock = memo(({ lang, code }: { lang: string; code: string }) => {
             padding: 0,
           }}
         >
-          {copied ? "✓ 已复制" : "复制"}
+          {copied ? `✓ ${t("chat.copied")}` : t("chat.copy")}
         </button>
       </div>
       <div
