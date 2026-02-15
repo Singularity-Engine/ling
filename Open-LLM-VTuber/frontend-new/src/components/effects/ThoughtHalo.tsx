@@ -1,5 +1,6 @@
 import { memo, useMemo } from 'react';
 import { useToolState, ToolCategory } from '../../context/tool-state-context';
+import { useAiState } from '../../context/ai-state-context';
 
 const CATEGORY_COLORS: Record<ToolCategory, string> = {
   search: '#60a5fa',
@@ -8,6 +9,8 @@ const CATEGORY_COLORS: Record<ToolCategory, string> = {
   weather: '#facc15',
   generic: '#8b5cf6',
 };
+
+const AI_THINKING_COLOR = '#c4b5fd'; // soft lavender for normal AI thinking
 
 const PARTICLE_COUNT = 14;
 const INNER_PARTICLE_COUNT = 8;
@@ -18,18 +21,22 @@ const INNER_B = 14;
 
 export const ThoughtHalo = memo(() => {
   const { currentPhase, dominantCategory } = useToolState();
-  const isActive = currentPhase === 'thinking' || currentPhase === 'working';
+  const { isThinkingSpeaking } = useAiState();
+  const isToolActive = currentPhase === 'thinking' || currentPhase === 'working';
   const isWorking = currentPhase === 'working';
-  const color = CATEGORY_COLORS[dominantCategory ?? 'generic'];
+  // Show a softer halo during normal AI thinking (no tool calls)
+  const isAiThinking = isThinkingSpeaking && !isToolActive;
+  const isActive = isToolActive || isAiThinking;
+  const color = isAiThinking ? AI_THINKING_COLOR : CATEGORY_COLORS[dominantCategory ?? 'generic'];
 
-  const rotationSpeed = isWorking ? '1.8s' : '3s';
-  const innerRotationSpeed = isWorking ? '2.4s' : '4s';
+  const rotationSpeed = isWorking ? '1.8s' : isAiThinking ? '5s' : '3s';
+  const innerRotationSpeed = isWorking ? '2.4s' : isAiThinking ? '6s' : '4s';
 
-  // Particle sizes: thinking 4-8px range, working 6-12px range
-  const particleMinSize = isWorking ? 6 : 4;
-  const particleMaxSize = isWorking ? 12 : 8;
-  const innerParticleMin = isWorking ? 4 : 3;
-  const innerParticleMax = isWorking ? 8 : 5;
+  // Particle sizes: ai-thinking smaller & softer, thinking 4-8px, working 6-12px
+  const particleMinSize = isWorking ? 6 : isAiThinking ? 3 : 4;
+  const particleMaxSize = isWorking ? 12 : isAiThinking ? 6 : 8;
+  const innerParticleMin = isWorking ? 4 : isAiThinking ? 2 : 3;
+  const innerParticleMax = isWorking ? 8 : isAiThinking ? 4 : 5;
 
   const particles = useMemo(() => {
     return Array.from({ length: PARTICLE_COUNT }, (_, i) => {

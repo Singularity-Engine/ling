@@ -1,20 +1,26 @@
 import { memo, useMemo } from 'react';
 import { useToolState } from '../../context/tool-state-context';
+import { useAiState } from '../../context/ai-state-context';
 
-// Stage-specific colors: thinking=blue, working=cyan, presenting=gold
+// Stage-specific colors: thinking=blue, working=cyan, presenting=gold, ai-thinking=purple
 const PHASE_COLORS = {
   thinking: '#60a5fa',
   working: '#22d3ee',
   presenting: '#fbbf24',
   idle: '#8b5cf6',
+  aiThinking: '#a78bfa',
 } as const;
 
 export const BackgroundReactor = memo(() => {
   const { currentPhase } = useToolState();
+  const { isThinkingSpeaking } = useAiState();
   const isThinking = currentPhase === 'thinking';
   const isWorking = currentPhase === 'working';
-  const isActive = isThinking || isWorking;
+  const isToolActive = isThinking || isWorking;
   const isPresenting = currentPhase === 'presenting';
+  // AI thinking/speaking without tool calls — softer ambient glow
+  const isAiThinking = isThinkingSpeaking && !isToolActive && !isPresenting;
+  const isActive = isToolActive || isAiThinking;
 
   const phaseColor = isThinking
     ? PHASE_COLORS.thinking
@@ -22,14 +28,18 @@ export const BackgroundReactor = memo(() => {
       ? PHASE_COLORS.working
       : isPresenting
         ? PHASE_COLORS.presenting
-        : PHASE_COLORS.idle;
+        : isAiThinking
+          ? PHASE_COLORS.aiThinking
+          : PHASE_COLORS.idle;
 
   // Phase-specific animation names
   const activeAnimation = isThinking
     ? 'bgThinkingPulse'
     : isWorking
       ? 'bgWorkingFlow'
-      : 'none';
+      : isAiThinking
+        ? 'bgAiThinkingBreathe'
+        : 'none';
 
   const glowStyle = useMemo(
     () => ({
@@ -37,16 +47,18 @@ export const BackgroundReactor = memo(() => {
       inset: 0,
       pointerEvents: 'none' as const,
       transition: 'opacity 0.8s ease',
-      opacity: isActive ? 0.6 : isPresenting ? 0.7 : 0,
+      opacity: isActive ? (isAiThinking ? 0.45 : 0.6) : isPresenting ? 0.7 : 0,
       background: isPresenting
         ? `radial-gradient(ellipse 80% 70% at 50% 40%, ${phaseColor}66 0%, ${phaseColor}33 35%, ${phaseColor}11 60%, transparent 80%)`
-        : isWorking
-          ? `radial-gradient(ellipse 70% 60% at 50% 40%, ${phaseColor}55 0%, ${phaseColor}22 40%, transparent 75%)`
-          : `radial-gradient(ellipse 65% 55% at 50% 40%, ${phaseColor}44 0%, ${phaseColor}1a 45%, transparent 70%)`,
+        : isAiThinking
+          ? `radial-gradient(ellipse 60% 50% at 50% 40%, ${phaseColor}33 0%, ${phaseColor}15 40%, transparent 65%)`
+          : isWorking
+            ? `radial-gradient(ellipse 70% 60% at 50% 40%, ${phaseColor}55 0%, ${phaseColor}22 40%, transparent 75%)`
+            : `radial-gradient(ellipse 65% 55% at 50% 40%, ${phaseColor}44 0%, ${phaseColor}1a 45%, transparent 70%)`,
       willChange: 'opacity',
-      animation: isActive ? `${activeAnimation} 3s ease-in-out infinite` : 'none',
+      animation: isActive ? `${activeAnimation} ${isAiThinking ? '4s' : '3s'} ease-in-out infinite` : 'none',
     }),
-    [isActive, isPresenting, isWorking, phaseColor, activeAnimation],
+    [isActive, isPresenting, isWorking, isAiThinking, phaseColor, activeAnimation],
   );
 
   // Secondary ambient layer for depth
@@ -56,19 +68,21 @@ export const BackgroundReactor = memo(() => {
       inset: 0,
       pointerEvents: 'none' as const,
       transition: 'opacity 1s ease',
-      opacity: isActive ? 0.4 : isPresenting ? 0.5 : 0,
-      background: isWorking
-        ? `conic-gradient(from 0deg at 50% 40%, transparent 0deg, ${phaseColor}22 90deg, transparent 180deg, ${phaseColor}22 270deg, transparent 360deg)`
-        : isPresenting
-          ? `radial-gradient(ellipse 60% 50% at 50% 35%, ${phaseColor}44 0%, transparent 60%)`
-          : 'none',
+      opacity: isActive ? (isAiThinking ? 0.25 : 0.4) : isPresenting ? 0.5 : 0,
+      background: isAiThinking
+        ? `radial-gradient(ellipse 50% 40% at 50% 38%, ${phaseColor}1a 0%, transparent 55%)`
+        : isWorking
+          ? `conic-gradient(from 0deg at 50% 40%, transparent 0deg, ${phaseColor}22 90deg, transparent 180deg, ${phaseColor}22 270deg, transparent 360deg)`
+          : isPresenting
+            ? `radial-gradient(ellipse 60% 50% at 50% 35%, ${phaseColor}44 0%, transparent 60%)`
+            : 'none',
       animation: isWorking
         ? 'bgWorkingSpin 8s linear infinite'
         : isPresenting
           ? 'bgPresentingRays 2s ease-out forwards'
           : 'none',
     }),
-    [isActive, isPresenting, isWorking, phaseColor],
+    [isActive, isPresenting, isWorking, isAiThinking, phaseColor],
   );
 
   const vignetteStyle = useMemo(
@@ -93,6 +107,10 @@ export const BackgroundReactor = memo(() => {
         @keyframes bgWorkingFlow {
           0%, 100% { opacity: 0.55; transform: scale(1); }
           50% { opacity: 0.7; transform: scale(1.02); }
+        }
+        @keyframes bgAiThinkingBreathe {
+          0%, 100% { opacity: 0.35; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(1.01); }
         }
         @keyframes bgWorkingSpin {
           from { transform: rotate(0deg); }
