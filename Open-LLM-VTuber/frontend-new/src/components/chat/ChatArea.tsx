@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChatBubble } from "./ChatBubble";
 import { TypingIndicator } from "./TypingIndicator";
 import { useChatHistory } from "@/context/chat-history-context";
@@ -61,6 +61,25 @@ export const ChatArea = memo(() => {
   const isStreaming = fullResponse.length > 0;
   const showTyping = isThinkingSpeaking && !isStreaming;
 
+  // Memoize dedup so it only recalculates when messages change, not on every streaming delta
+  const dedupedMessages = useMemo(
+    () =>
+      messages.filter((msg, index, arr) => {
+        if (index === 0) return true;
+        const prev = arr[index - 1];
+        return !(prev.role === msg.role && prev.content === msg.content);
+      }),
+    [messages]
+  );
+
+  const showStreaming = useMemo(() => {
+    if (!isStreaming) return false;
+    const lastAiMsg = dedupedMessages.findLast(m => m.role === 'ai');
+    return !(lastAiMsg && lastAiMsg.content && fullResponse.startsWith(lastAiMsg.content));
+  }, [isStreaming, dedupedMessages, fullResponse]);
+
+  const isEmpty = dedupedMessages.length === 0 && !showStreaming && !showTyping;
+
   return (
     <div
       ref={scrollRef}
@@ -75,84 +94,68 @@ export const ChatArea = memo(() => {
         position: "relative",
       }}
     >
-      {(() => {
-        // Dedup: only remove exact adjacent duplicates (same role + same content)
-        const dedupedMessages = messages.filter((msg, index, arr) => {
-          if (index === 0) return true;
-          const prev = arr[index - 1];
-          return !(prev.role === msg.role && prev.content === msg.content);
-        });
-
-        const lastAiMsg = dedupedMessages.filter(m => m.role === 'ai').pop();
-        const showStreaming = isStreaming && !(lastAiMsg && lastAiMsg.content && fullResponse.startsWith(lastAiMsg.content));
-        const isEmpty = dedupedMessages.length === 0 && !showStreaming && !showTyping;
-
-        return (
-          <>
-            {isEmpty && (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: "100%",
-                  padding: "24px 16px",
-                  gap: "14px",
-                  animation: "chatFadeInUp 0.6s ease-out",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "28px",
-                    animation: "emptyStateFloat 3s ease-in-out infinite",
-                  }}
-                >
-                  ✦
-                </span>
-                <span
-                  style={{
-                    fontSize: "14px",
-                    color: "rgba(226, 212, 255, 0.6)",
-                    textAlign: "center",
-                    letterSpacing: "0.3px",
-                    lineHeight: "1.6",
-                  }}
-                >
-                  我在这里，随时可以聊
-                </span>
-                <span
-                  style={{
-                    fontSize: "12px",
-                    color: "rgba(255, 255, 255, 0.2)",
-                    textAlign: "center",
-                  }}
-                >
-                  试试说「你好」或直接语音
-                </span>
-              </div>
-            )}
-            {dedupedMessages.map((msg) => (
-              <ChatBubble
-                key={msg.id}
-                role={msg.role === "human" ? "user" : "assistant"}
-                content={msg.content}
-                isToolCall={msg.type === "tool_call_status"}
-                toolName={msg.tool_name}
-                toolStatus={msg.status}
-              />
-            ))}
-            {showStreaming && (
-              <ChatBubble
-                role="assistant"
-                content={fullResponse}
-                isStreaming={true}
-              />
-            )}
-            {showTyping && <TypingIndicator />}
-          </>
-        );
-      })()}
+      {isEmpty && (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100%",
+            padding: "24px 16px",
+            gap: "14px",
+            animation: "chatFadeInUp 0.6s ease-out",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "28px",
+              animation: "emptyStateFloat 3s ease-in-out infinite",
+            }}
+          >
+            ✦
+          </span>
+          <span
+            style={{
+              fontSize: "14px",
+              color: "rgba(226, 212, 255, 0.6)",
+              textAlign: "center",
+              letterSpacing: "0.3px",
+              lineHeight: "1.6",
+            }}
+          >
+            我在这里，随时可以聊
+          </span>
+          <span
+            style={{
+              fontSize: "12px",
+              color: "rgba(255, 255, 255, 0.2)",
+              textAlign: "center",
+            }}
+          >
+            试试说「你好」或直接语音
+          </span>
+        </div>
+      )}
+      {dedupedMessages.map((msg) => (
+        <ChatBubble
+          key={msg.id}
+          role={msg.role === "human" ? "user" : "assistant"}
+          content={msg.content}
+          timestamp={msg.timestamp}
+          isToolCall={msg.type === "tool_call_status"}
+          toolName={msg.tool_name}
+          toolStatus={msg.status}
+        />
+      ))}
+      {showStreaming && (
+        <ChatBubble
+          role="assistant"
+          content={fullResponse}
+          isStreaming={true}
+        />
+      )}
+      {showTyping && <TypingIndicator />}
 
       <div ref={bottomRef} />
 

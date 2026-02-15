@@ -17,6 +17,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
 interface ChatBubbleProps {
   role: "user" | "assistant";
   content: string;
+  timestamp?: string;
   isStreaming?: boolean;
   isToolCall?: boolean;
   toolName?: string;
@@ -24,7 +25,16 @@ interface ChatBubbleProps {
   staggerIndex?: number;
 }
 
-export const ChatBubble = memo(({ role, content, isStreaming, isToolCall, toolName, toolStatus }: ChatBubbleProps) => {
+function formatTime(ts: string): string {
+  try {
+    const d = new Date(ts);
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+  } catch {
+    return "";
+  }
+}
+
+export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolCall, toolName, toolStatus }: ChatBubbleProps) => {
   const isUser = role === "user";
 
   if (isToolCall && toolName) {
@@ -109,6 +119,21 @@ export const ChatBubble = memo(({ role, content, isStreaming, isToolCall, toolNa
             </div>
           )}
         </div>
+        {timestamp && (
+          <span
+            style={{
+              display: "block",
+              fontSize: "10px",
+              color: "rgba(255, 255, 255, 0.25)",
+              marginTop: "3px",
+              textAlign: isUser ? "right" : "left",
+              marginLeft: isUser ? undefined : "4px",
+              marginRight: isUser ? "4px" : undefined,
+            }}
+          >
+            {formatTime(timestamp)}
+          </span>
+        )}
       </div>
     </div>
   );
