@@ -1,10 +1,17 @@
 import { createContext, useContext, useState, useCallback, useRef, ReactNode } from "react";
 import { useAffinityEngine } from "@/hooks/use-affinity-engine";
 
+export interface PointGain {
+  id: number;
+  delta: number;
+  streak: boolean;
+}
+
 interface AffinityState {
   affinity: number;
   level: string;
   milestone: string | null;
+  pointGains: PointGain[];
   currentExpression: string | null;
   expressionIntensity: number;
 }
@@ -12,6 +19,7 @@ interface AffinityState {
 interface AffinityContextType extends AffinityState {
   updateAffinity: (affinity: number, level: string) => void;
   showMilestone: (message: string) => void;
+  showPointGain: (delta: number, streak: boolean) => void;
   setExpression: (expression: string, intensity: number) => void;
 }
 
@@ -22,10 +30,12 @@ export function AffinityProvider({ children }: { children: ReactNode }) {
     affinity: 50,
     level: "neutral",
     milestone: null,
+    pointGains: [],
     currentExpression: null,
     expressionIntensity: 0,
   });
   const milestoneTimer = useRef<ReturnType<typeof setTimeout>>();
+  const pointGainIdRef = useRef(0);
 
   const updateAffinity = useCallback((affinity: number, level: string) => {
     setState(prev => ({ ...prev, affinity, level }));
