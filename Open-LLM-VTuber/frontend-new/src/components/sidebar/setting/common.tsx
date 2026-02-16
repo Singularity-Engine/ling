@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
-  Text, Input, NumberInput, createListCollection, Flex, Box,
+  Text, Input, NumberInput, createListCollection, Flex, Box, Stack,
 } from '@chakra-ui/react';
 import { HiQuestionMarkCircle } from 'react-icons/hi';
 import { Field } from '@/components/ui/field';
@@ -205,5 +205,22 @@ export function InputField({
         onChange={(e) => onChange(e.target.value)}
       />
     </Field>
+  );
+}
+
+// Section card for grouping related settings
+interface SettingSectionProps {
+  title?: string;
+  children: ReactNode;
+}
+
+export function SettingSection({ title, children }: SettingSectionProps): JSX.Element {
+  return (
+    <Box {...settingStyles.common.sectionCard}>
+      {title && <Text {...settingStyles.common.sectionTitle}>{title}</Text>}
+      <Stack gap={5}>
+        {children}
+      </Stack>
+    </Box>
   );
 }
