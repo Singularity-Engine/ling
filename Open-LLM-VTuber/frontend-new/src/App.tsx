@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, Component, ErrorInfo, ReactNode } from "react";
+import { useState, useEffect, useCallback, useMemo, Component, ErrorInfo, ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { LandingAnimation } from "./components/landing/LandingAnimation";
 import { AiStateProvider } from "./context/ai-state-context";
 import { Live2DConfigProvider } from "./context/live2d-config-context";
@@ -6,10 +7,10 @@ import { SubtitleProvider } from "./context/subtitle-context";
 import { BgUrlProvider } from "./context/bgurl-context";
 import WebSocketHandler from "./services/websocket-handler";
 import { CameraProvider } from "./context/camera-context";
-import { ChatHistoryProvider } from "./context/chat-history-context";
+import { ChatHistoryProvider, useChatHistory } from "./context/chat-history-context";
 import { CharacterConfigProvider } from "./context/character-config-context";
-import { VADProvider } from "./context/vad-context";
-import { Live2D } from "./components/canvas/live2d";
+import { VADProvider, useVAD } from "./context/vad-context";
+import { Live2D, useInterrupt } from "./components/canvas/live2d";
 import { ProactiveSpeakProvider } from "./context/proactive-speak-context";
 import { ScreenCaptureProvider } from "./context/screen-capture-context";
 import { GroupProvider } from "./context/group-context";
@@ -29,6 +30,9 @@ import { CrystalField } from "./components/crystal/CrystalField";
 import { CapabilityRing } from "./components/ability/CapabilityRing";
 import { LoadingSkeleton } from "./components/loading/LoadingSkeleton";
 import { Toaster } from "./components/ui/toaster";
+import { useWebSocket } from "./context/websocket-context";
+import { useKeyboardShortcuts, ShortcutDef } from "./hooks/use-keyboard-shortcuts";
+import { ShortcutsOverlay } from "./components/shortcuts/ShortcutsOverlay";
 import "./index.css";
 
 // Error Boundary
@@ -51,8 +55,16 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
 }
 
 function MainContent(): JSX.Element {
+  const { t } = useTranslation();
   const [chatExpanded, setChatExpanded] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+
+  // Contexts for keyboard shortcuts
+  const { micOn, startMic, stopMic } = useVAD();
+  const { sendMessage } = useWebSocket();
+  const { interrupt } = useInterrupt();
+  const { currentHistoryUid, messages, updateHistoryList } = useChatHistory();
 
   useEffect(() => {
     const handleResize = () => {
@@ -79,6 +91,58 @@ function MainContent(): JSX.Element {
   const toggleChat = useCallback(() => {
     setChatExpanded(prev => !prev);
   }, []);
+
+  const createNewChat = useCallback(() => {
+    if (currentHistoryUid && messages.length > 0) {
+      const latestMessage = messages[messages.length - 1];
+      updateHistoryList(currentHistoryUid, latestMessage);
+    }
+    interrupt();
+    sendMessage({ type: "create-new-history" });
+  }, [currentHistoryUid, messages, updateHistoryList, interrupt, sendMessage]);
+
+  // Keyboard shortcuts definition
+  const shortcuts: ShortcutDef[] = useMemo(() => [
+    {
+      key: "mod+m",
+      labelKey: "shortcuts.toggleMic",
+      action: () => { micOn ? stopMic() : startMic(); },
+    },
+    {
+      key: "/",
+      labelKey: "shortcuts.focusInput",
+      action: () => {
+        const textarea = document.querySelector<HTMLTextAreaElement>(".ling-textarea");
+        textarea?.focus();
+      },
+    },
+    {
+      key: "mod+j",
+      labelKey: "shortcuts.toggleChat",
+      action: () => setChatExpanded(prev => !prev),
+      allowInInput: true,
+    },
+    {
+      key: "mod+k",
+      labelKey: "shortcuts.newChat",
+      action: createNewChat,
+      allowInInput: true,
+    },
+    {
+      key: "shift+?",
+      labelKey: "shortcuts.showHelp",
+      action: () => setShortcutsOpen(prev => !prev),
+      allowInInput: true,
+    },
+    {
+      key: "escape",
+      labelKey: "shortcuts.closeOverlay",
+      action: () => setShortcutsOpen(false),
+      allowInInput: true,
+    },
+  ], [micOn, startMic, stopMic, createNewChat, t]);
+
+  useKeyboardShortcuts(shortcuts);
 
   return (
     <div
@@ -225,6 +289,9 @@ function MainContent(): JSX.Element {
           <AffinityBar />
         </div>
       </div>
+
+      {/* ===== Layer 99: 快捷键帮助浮层 ===== */}
+      <ShortcutsOverlay open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
     </div>
   );
 }

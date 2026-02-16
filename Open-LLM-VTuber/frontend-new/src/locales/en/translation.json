@@ -215,5 +215,15 @@
     "emptySubHint": "Try saying \"hello\" or use voice",
     "scrollToLatest": "Scroll to latest",
     "newMessages": "New messages"
+  },
+  "shortcuts": {
+    "title": "Keyboard Shortcuts",
+    "toggleMic": "Toggle microphone",
+    "focusInput": "Focus input",
+    "toggleChat": "Toggle chat panel",
+    "newChat": "New conversation",
+    "showHelp": "Show shortcuts help",
+    "closeOverlay": "Close overlay",
+    "tip": "Press Shift+? anytime to view"
   }
 } 
