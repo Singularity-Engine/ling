@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChatBubble } from "./ChatBubble";
 import { ThinkingBubble } from "./ThinkingBubble";
+import { TimeSeparator, shouldShowSeparator } from "./TimeSeparator";
 import { useChatHistory } from "@/context/chat-history-context";
 import { useSubtitle } from "@/context/subtitle-context";
 import { useAiState } from "@/context/ai-state-context";
@@ -192,17 +193,23 @@ export const ChatArea = memo(() => {
           </span>
         </div>
       )}
-      {dedupedMessages.map((msg) => (
-        <ChatBubble
-          key={msg.id}
-          role={msg.role === "human" ? "user" : "assistant"}
-          content={msg.content}
-          timestamp={msg.timestamp}
-          isToolCall={msg.type === "tool_call_status"}
-          toolName={msg.tool_name}
-          toolStatus={msg.status}
-        />
-      ))}
+      {dedupedMessages.map((msg, i) => {
+        const prev = dedupedMessages[i - 1];
+        const showSep = prev && msg.timestamp && prev.timestamp && shouldShowSeparator(prev.timestamp, msg.timestamp);
+        return (
+          <div key={msg.id}>
+            {showSep && <TimeSeparator timestamp={msg.timestamp} />}
+            <ChatBubble
+              role={msg.role === "human" ? "user" : "assistant"}
+              content={msg.content}
+              timestamp={msg.timestamp}
+              isToolCall={msg.type === "tool_call_status"}
+              toolName={msg.tool_name}
+              toolStatus={msg.status}
+            />
+          </div>
+        );
+      })}
       {(showStreaming || showTyping) && (
         <ThinkingBubble
           content={displayResponse}
