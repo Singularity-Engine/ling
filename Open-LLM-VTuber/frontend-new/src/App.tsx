@@ -36,6 +36,7 @@ import { useKeyboardShortcuts, ShortcutDef } from "./hooks/use-keyboard-shortcut
 import { ShortcutsOverlay } from "./components/shortcuts/ShortcutsOverlay";
 import { AboutOverlay } from "./components/about/AboutOverlay";
 import { NetworkStatusBanner } from "./components/effects/NetworkStatusBanner";
+import { TapParticles } from "./components/effects/TapParticles";
 import "./index.css";
 
 // Error Boundary
@@ -173,6 +174,9 @@ function MainContent(): JSX.Element {
       <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
         <Live2D />
       </div>
+
+      {/* ===== Layer 0+: Live2D 点击粒子 ===== */}
+      <TapParticles />
 
       {/* ===== Layer 0.5: 工具状态反馈层 ===== */}
       <div style={{ position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none" }}>
