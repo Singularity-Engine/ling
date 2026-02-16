@@ -85,6 +85,9 @@ class GatewayConnector {
   /** Fires when a reconnection handshake completes successfully */
   readonly reconnected$ = new Subject<void>();
 
+  /** Current reconnect attempt (0 = not reconnecting) */
+  readonly reconnectAttempt$ = new ReplaySubject<number>(1);
+
   // ── Public API ──────────────────────────────────────────────────
 
   /**
@@ -257,9 +260,14 @@ class GatewayConnector {
         // ── Hello OK ──
         if (frame.type === 'res' && frame.ok === true && (frame.payload as any)?.type === 'hello-ok') {
           this.connId = (frame.payload as any)?.server?.connId || null;
+          const wasReconnecting = this.reconnectAttempts > 0;
           this.reconnectAttempts = 0;
+          this.reconnectAttempt$.next(0);
           this.setState('CONNECTED');
           if (import.meta.env.DEV) console.log(`[GatewayConnector] Connected! connId=${this.connId}`);
+          if (wasReconnecting) {
+            this.reconnected$.next();
+          }
           if (!handshakeResolved) {
             handshakeResolved = true;
             resolve();
@@ -390,6 +398,7 @@ class GatewayConnector {
       RECONNECT_MAX_MS,
     );
     this.reconnectAttempts++;
+    this.reconnectAttempt$.next(this.reconnectAttempts);
     if (import.meta.env.DEV) console.log(`[GatewayConnector] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${RECONNECT_MAX_RETRIES})`);
 
     this.reconnectTimer = setTimeout(() => {

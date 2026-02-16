@@ -1,6 +1,7 @@
 import { memo, useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useWebSocket } from "@/context/websocket-context";
+import { gatewayConnector } from "@/services/gateway-connector";
 
 const keyframesStyle = `
 @keyframes connFadeIn {
@@ -23,6 +24,7 @@ export const ConnectionStatus = memo(() => {
   const { t } = useTranslation();
   const { wsState, reconnect } = useWebSocket();
   const [showConnected, setShowConnected] = useState(false);
+  const [reconnectAttempt, setReconnectAttempt] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
 
   const isOpen = wsState === "OPEN";
@@ -41,6 +43,11 @@ export const ConnectionStatus = memo(() => {
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    const sub = gatewayConnector.reconnectAttempt$.subscribe(setReconnectAttempt);
+    return () => sub.unsubscribe();
+  }, []);
+
   if (isOpen && !showConnected) return null;
 
   const dotColor = isOpen
@@ -52,7 +59,9 @@ export const ConnectionStatus = memo(() => {
   const label = isOpen
     ? t("connection.connected")
     : isConnecting
-      ? t("connection.reconnecting")
+      ? reconnectAttempt > 0
+        ? `${t("connection.reconnecting")} (${reconnectAttempt}/10)`
+        : t("connection.reconnecting")
       : t("connection.disconnected");
 
   const Tag = isClosed ? "button" : "div";

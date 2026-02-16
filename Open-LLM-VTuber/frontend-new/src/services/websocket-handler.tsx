@@ -460,11 +460,32 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       handleWebSocketMessageRef.current(msg);
     });
 
+    // Post-reconnect recovery: reset stale state & re-resolve session
+    const reconnectSub = gatewayConnector.reconnected$.subscribe(() => {
+      // Clear stale adapter runs from interrupted generation
+      gatewayAdapter.reset();
+      // Reset AI state — may be stuck in 'thinking-speaking' if disconnect mid-run
+      setAiStateRef.current('idle');
+      // Clear any leftover subtitle from interrupted generation
+      setSubtitleTextRef.current('');
+      // Re-resolve session so Gateway knows which agent to route to
+      gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId()).catch((err) => {
+        console.error('[WebSocketHandler] Post-reconnect resolveSession failed:', err);
+      });
+      // Notify user
+      toaster.create({
+        title: '连接已恢复',
+        type: 'success',
+        duration: 3000,
+      });
+    });
+
     return () => {
       stateSub.unsubscribe();
       agentSub.unsubscribe();
       rawSub.unsubscribe();
       messageSub.unsubscribe();
+      reconnectSub.unsubscribe();
     };
   }, []); // Empty deps: subscribe once, never tear down
 
@@ -711,12 +732,31 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     wsState,
     reconnect: () => {
       gatewayConnector.disconnect();
+      gatewayAdapter.reset();
+      setAiState('idle');
       gatewayConnector.connect({
         url: gwUrl,
         token: GATEWAY_TOKEN,
         clientId: 'webchat-ui',
         displayName: '灵 Avatar',
-      }).catch(console.error);
+      }).then(() => {
+        // Re-resolve session after manual reconnect
+        gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId()).catch((err) => {
+          console.error('[WebSocketHandler] Manual reconnect resolveSession failed:', err);
+        });
+        toaster.create({
+          title: '连接已恢复',
+          type: 'success',
+          duration: 3000,
+        });
+      }).catch((err) => {
+        console.error('[WebSocketHandler] Manual reconnect failed:', err);
+        toaster.create({
+          title: `重连失败: ${err.message}`,
+          type: 'error',
+          duration: 5000,
+        });
+      });
     },
     wsUrl: gwUrl,
     setWsUrl: setGwUrl,
