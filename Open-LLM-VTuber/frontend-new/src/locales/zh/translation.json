@@ -215,6 +215,8 @@
     "chatMessages": "聊天消息",
     "emptyHint": "我在这里，随时可以聊",
     "emptySubHint": "试试说「你好」或直接语音",
+    "welcomeTitle": "嗨，有什么想聊的？",
+    "welcomeChips": ["你好！", "介绍一下你自己", "今天心情怎么样", "讲个笑话吧"],
     "scrollToLatest": "滚动到最新消息",
     "newMessages": "新消息"
   },

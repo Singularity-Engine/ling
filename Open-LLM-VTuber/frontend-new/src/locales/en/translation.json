@@ -218,6 +218,8 @@
     "chatMessages": "Chat messages",
     "emptyHint": "I'm here, let's chat anytime",
     "emptySubHint": "Try saying \"hello\" or use voice",
+    "welcomeTitle": "Hey, what's on your mind?",
+    "welcomeChips": ["Hello!", "Tell me about yourself", "How's your day?", "Tell me a joke"],
     "scrollToLatest": "Scroll to latest",
     "newMessages": "New messages"
   },

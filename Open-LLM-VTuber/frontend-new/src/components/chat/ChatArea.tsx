@@ -6,6 +6,7 @@ import { TimeSeparator, shouldShowSeparator } from "./TimeSeparator";
 import { useChatHistory } from "@/context/chat-history-context";
 import { useSubtitle } from "@/context/subtitle-context";
 import { useAiState } from "@/context/ai-state-context";
+import { useWebSocket } from "@/context/websocket-context";
 
 // Inject scrollbar + animation styles once
 const STYLE_ID = "chat-area-styles";
@@ -20,6 +21,10 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     @keyframes emptyStateFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
     @keyframes scrollBtnIn { from { opacity: 0; transform: translateY(12px) scale(0.8); } to { opacity: 1; transform: translateY(0) scale(1); } }
     @keyframes scrollBtnPulse { 0%, 100% { box-shadow: 0 2px 12px rgba(139, 92, 246, 0.3); } 50% { box-shadow: 0 2px 20px rgba(139, 92, 246, 0.5); } }
+    @keyframes chipFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .welcome-chip { transition: all 0.2s ease; }
+    .welcome-chip:hover { background: rgba(139, 92, 246, 0.25) !important; border-color: rgba(139, 92, 246, 0.35) !important; transform: translateY(-1px); }
+    .welcome-chip:active { transform: scale(0.97); }
   `;
   document.head.appendChild(style);
 }
@@ -63,9 +68,10 @@ function useThrottledValue(source: string): string {
 }
 
 export const ChatArea = memo(() => {
-  const { messages, fullResponse } = useChatHistory();
+  const { messages, fullResponse, appendHumanMessage } = useChatHistory();
   const { subtitleText } = useSubtitle();
   const { isThinkingSpeaking } = useAiState();
+  const { sendMessage } = useWebSocket();
   const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -136,6 +142,16 @@ export const ChatArea = memo(() => {
 
   const isEmpty = dedupedMessages.length === 0 && !showStreaming && !showTyping;
 
+  const welcomeChips = t("ui.welcomeChips", { returnObjects: true }) as string[];
+
+  const handleChipClick = useCallback(
+    (text: string) => {
+      appendHumanMessage(text);
+      sendMessage({ type: "text-input", text, images: [] });
+    },
+    [appendHumanMessage, sendMessage]
+  );
+
   return (
     <div
       ref={scrollRef}
@@ -159,38 +175,89 @@ export const ChatArea = memo(() => {
             justifyContent: "center",
             height: "100%",
             padding: "24px 16px",
-            gap: "14px",
+            gap: "20px",
             animation: "chatFadeInUp 0.6s ease-out",
           }}
         >
           <span
             style={{
-              fontSize: "28px",
+              fontSize: "32px",
               animation: "emptyStateFloat 3s ease-in-out infinite",
             }}
           >
             ✦
           </span>
-          <span
+
+          {/* Glassmorphism welcome card */}
+          <div
             style={{
-              fontSize: "14px",
-              color: "rgba(226, 212, 255, 0.6)",
+              background: "rgba(255, 255, 255, 0.04)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              border: "1px solid rgba(255, 255, 255, 0.06)",
+              borderRadius: "16px",
+              padding: "20px 24px",
+              maxWidth: "320px",
+              width: "100%",
               textAlign: "center",
-              letterSpacing: "0.3px",
-              lineHeight: "1.6",
+              display: "flex",
+              flexDirection: "column",
+              gap: "8px",
             }}
           >
-            {t("ui.emptyHint")}
-          </span>
-          <span
+            <span
+              style={{
+                fontSize: "15px",
+                color: "rgba(226, 212, 255, 0.85)",
+                fontWeight: 500,
+                letterSpacing: "0.3px",
+                lineHeight: "1.5",
+              }}
+            >
+              {t("ui.welcomeTitle")}
+            </span>
+            <span
+              style={{
+                fontSize: "12px",
+                color: "rgba(255, 255, 255, 0.25)",
+              }}
+            >
+              {t("ui.emptySubHint")}
+            </span>
+          </div>
+
+          {/* Suggestion chips */}
+          <div
             style={{
-              fontSize: "12px",
-              color: "rgba(255, 255, 255, 0.2)",
-              textAlign: "center",
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              gap: "8px",
+              maxWidth: "340px",
             }}
           >
-            {t("ui.emptySubHint")}
-          </span>
+            {Array.isArray(welcomeChips) &&
+              welcomeChips.map((chip, i) => (
+                <button
+                  key={chip}
+                  className="welcome-chip"
+                  onClick={() => handleChipClick(chip)}
+                  style={{
+                    background: "rgba(139, 92, 246, 0.12)",
+                    border: "1px solid rgba(139, 92, 246, 0.2)",
+                    borderRadius: "20px",
+                    padding: "8px 16px",
+                    color: "rgba(226, 212, 255, 0.8)",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                    animation: `chipFadeIn 0.4s ease-out ${i * 0.08}s both`,
+                    lineHeight: "1.4",
+                  }}
+                >
+                  {chip}
+                </button>
+              ))}
+          </div>
         </div>
       )}
       {dedupedMessages.map((msg, i) => {
