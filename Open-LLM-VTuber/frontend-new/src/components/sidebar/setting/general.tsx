@@ -6,6 +6,7 @@ import { settingStyles } from "./setting-styles";
 import { useConfig } from "@/context/character-config-context";
 import { useGeneralSettings } from "@/hooks/sidebar/setting/use-general-settings";
 import { useWebSocket } from "@/context/websocket-context";
+import { useTheme, type ThemeMode } from "@/context/theme-context";
 import { SelectField, SwitchField, InputField } from "./common";
 
 interface GeneralProps {
@@ -14,7 +15,7 @@ interface GeneralProps {
 }
 
 // Data collection definition
-const useCollections = () => {
+const useCollections = (t: (key: string) => string) => {
   const { backgroundFiles } = useBgUrl() || {};
   const { configFiles } = useConfig();
 
@@ -22,6 +23,14 @@ const useCollections = () => {
     items: [
       { label: "English", value: "en" },
       { label: "中文", value: "zh" },
+    ],
+  });
+
+  const themes = createListCollection({
+    items: [
+      { label: t("settings.general.themeDark"), value: "dark" },
+      { label: t("settings.general.themeLight"), value: "light" },
+      { label: t("settings.general.themeSystem"), value: "system" },
     ],
   });
 
@@ -42,6 +51,7 @@ const useCollections = () => {
 
   return {
     languages,
+    themes,
     backgrounds,
     characterPresets,
   };
@@ -52,7 +62,8 @@ function General({ onSave, onCancel }: GeneralProps): JSX.Element {
   const bgUrlContext = useBgUrl();
   const { confName, setConfName } = useConfig();
   const { wsUrl, setWsUrl, baseUrl, setBaseUrl } = useWebSocket();
-  const collections = useCollections();
+  const { mode: themeMode, setMode: setThemeMode } = useTheme();
+  const collections = useCollections(t);
 
   const {
     settings,

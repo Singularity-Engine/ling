@@ -16,6 +16,7 @@ import { ScreenCaptureProvider } from "./context/screen-capture-context";
 import { GroupProvider } from "./context/group-context";
 import { BrowserProvider } from "./context/browser-context";
 import { ModeProvider } from "./context/mode-context";
+import { ThemeProvider } from "./context/theme-context";
 import { ChatArea } from "./components/chat/ChatArea";
 import { InputBar } from "./components/chat/InputBar";
 import { AffinityBadge } from "./components/status/AffinityBadge";
@@ -354,6 +355,7 @@ function App(): JSX.Element {
   return (
     <ErrorBoundary>
       {/* Always mount main content so it's ready behind landing */}
+      <ThemeProvider>
       <ModeProvider>
         <CameraProvider>
           <ScreenCaptureProvider>
@@ -395,6 +397,7 @@ function App(): JSX.Element {
           </ScreenCaptureProvider>
         </CameraProvider>
       </ModeProvider>
+      </ThemeProvider>
 
       {/* Landing overlay — fades out during crossfade */}
       {showLanding && (

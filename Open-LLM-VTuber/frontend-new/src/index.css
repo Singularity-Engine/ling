@@ -50,6 +50,80 @@
   /* 代码块 */
   --ling-code-text: #c4b5fd;
   --ling-code-bg: rgba(10, 0, 21, 0.6);
+
+  /* 全局背景（供 body 引用） */
+  --ling-body-bg: linear-gradient(180deg, var(--ling-bg-deep) 0%, var(--ling-bg-mid) 50%, var(--ling-bg-warm) 100%);
+  --ling-body-color: #ffffff;
+  --ling-placeholder-color: rgba(255, 255, 255, 0.4);
+  --ling-selection-color: #fff;
+  --ling-md-em: rgba(200, 180, 255, 0.9);
+  --ling-md-pre-code: rgba(255, 255, 255, 0.85);
+  --ling-md-blockquote-color: rgba(255, 255, 255, 0.7);
+  --ling-md-heading-color: rgba(255, 255, 255, 0.95);
+}
+
+/* === 亮色主题变量 === */
+[data-theme="light"] {
+  /* 基底色 */
+  --ling-bg-deep: #f5f0ff;
+  --ling-bg-mid: #ede5ff;
+  --ling-bg-warm: #e8deff;
+
+  /* 主题紫（保持不变，仅微调对比度） */
+  --ling-purple: #7c3aed;
+  --ling-purple-light: #8b5cf6;
+  --ling-purple-lighter: #a78bfa;
+  --ling-purple-deep: #6d28d9;
+  --ling-purple-text: #4c1d95;
+
+  /* 表面/容器 */
+  --ling-surface: rgba(0, 0, 0, 0.04);
+  --ling-surface-hover: rgba(0, 0, 0, 0.07);
+  --ling-surface-border: rgba(0, 0, 0, 0.1);
+  --ling-surface-elevated: rgba(255, 255, 255, 0.8);
+
+  /* 文字 */
+  --ling-text-primary: rgba(0, 0, 0, 0.9);
+  --ling-text-secondary: rgba(0, 0, 0, 0.65);
+  --ling-text-tertiary: rgba(0, 0, 0, 0.4);
+  --ling-text-muted: rgba(0, 0, 0, 0.2);
+
+  /* 语义色 */
+  --ling-success: #16a34a;
+  --ling-warning: #d97706;
+  --ling-error: #dc2626;
+  --ling-error-bg: rgba(220, 38, 38, 0.1);
+  --ling-error-border: rgba(220, 38, 38, 0.2);
+
+  /* 紫色常用透明度 */
+  --ling-purple-15: rgba(124, 58, 237, 0.12);
+  --ling-purple-25: rgba(124, 58, 237, 0.2);
+  --ling-purple-30: rgba(124, 58, 237, 0.25);
+  --ling-purple-40: rgba(124, 58, 237, 0.3);
+  --ling-purple-50: rgba(124, 58, 237, 0.4);
+  --ling-purple-60: rgba(124, 58, 237, 0.5);
+  --ling-purple-70: rgba(124, 58, 237, 0.6);
+  --ling-purple-85: rgba(124, 58, 237, 0.75);
+
+  /* 气泡 */
+  --ling-bubble-user-bg: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(109, 40, 217, 0.12));
+  --ling-bubble-ai-bg: var(--ling-surface);
+  --ling-bubble-user-border: var(--ling-purple-25);
+  --ling-bubble-ai-border: var(--ling-surface-border);
+
+  /* 代码块 */
+  --ling-code-text: #6d28d9;
+  --ling-code-bg: rgba(124, 58, 237, 0.08);
+
+  /* 全局背景 */
+  --ling-body-bg: linear-gradient(180deg, var(--ling-bg-deep) 0%, var(--ling-bg-mid) 50%, var(--ling-bg-warm) 100%);
+  --ling-body-color: #1a1a2e;
+  --ling-placeholder-color: rgba(0, 0, 0, 0.35);
+  --ling-selection-color: #1a1a2e;
+  --ling-md-em: rgba(109, 40, 217, 0.85);
+  --ling-md-pre-code: rgba(0, 0, 0, 0.75);
+  --ling-md-blockquote-color: rgba(0, 0, 0, 0.6);
+  --ling-md-heading-color: rgba(0, 0, 0, 0.9);
 }
 
 /* === 全局基础 === */
@@ -60,11 +134,11 @@ body, html {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background: linear-gradient(180deg, var(--ling-bg-deep) 0%, var(--ling-bg-mid) 50%, var(--ling-bg-warm) 100%) !important;
+  background: var(--ling-body-bg) !important;
   min-height: 100vh;
   min-height: -webkit-fill-available;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
-  color: #ffffff;
+  color: var(--ling-body-color);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -193,12 +267,12 @@ body {
 /* === 选择样式 === */
 ::selection {
   background: var(--ling-purple-30);
-  color: #fff;
+  color: var(--ling-selection-color);
 }
 
 /* === 输入框 placeholder === */
 input::placeholder, textarea::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--ling-placeholder-color);
 }
 
 /* === 聚焦环 === */
@@ -249,21 +323,21 @@ canvas {
 .md-content p { margin: 0 0 0.5em; }
 .md-content p:last-child { margin-bottom: 0; }
 .md-content strong { color: var(--ling-text-primary); }
-.md-content em { color: rgba(200,180,255,0.9); }
+.md-content em { color: var(--ling-md-em); }
 .md-content del { color: var(--ling-text-tertiary); }
 .md-content a { color: var(--ling-purple-light); text-decoration: none; border-bottom: 1px solid rgba(167,139,250,0.3); transition: border-color 0.2s; }
 .md-content a:hover { border-color: var(--ling-purple-light); }
 .md-content code {
-  background: rgba(139,92,246,0.15);
-  color: #c4b5fd;
+  background: var(--ling-purple-15);
+  color: var(--ling-code-text);
   padding: 1px 5px;
   border-radius: 4px;
   font-size: 0.9em;
   font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
 }
 .md-content pre {
-  background: rgba(10,0,21,0.6);
-  border: 1px solid rgba(139,92,246,0.25);
+  background: var(--ling-code-bg);
+  border: 1px solid var(--ling-purple-25);
   border-radius: 8px;
   padding: 10px 14px;
   overflow-x: auto;
@@ -273,20 +347,20 @@ canvas {
   background: none;
   padding: 0;
   font-size: 0.85em;
-  color: rgba(255,255,255,0.85);
+  color: var(--ling-md-pre-code);
 }
 .md-content ul, .md-content ol { margin: 0.4em 0; padding-left: 1.5em; }
 .md-content li { margin-bottom: 0.2em; }
 .md-content blockquote {
   margin: 0.5em 0;
   padding: 4px 12px;
-  border-left: 3px solid rgba(139,92,246,0.4);
-  color: rgba(255,255,255,0.7);
+  border-left: 3px solid var(--ling-purple-40);
+  color: var(--ling-md-blockquote-color);
 }
 .md-content h1, .md-content h2, .md-content h3,
 .md-content h4, .md-content h5, .md-content h6 {
   margin: 0.6em 0 0.3em;
-  color: rgba(255,255,255,0.95);
+  color: var(--ling-md-heading-color);
   font-weight: 600;
 }
 .md-content h1 { font-size: 1.3em; }
@@ -294,13 +368,14 @@ canvas {
 .md-content h3 { font-size: 1.05em; }
 .md-content hr {
   border: none;
-  border-top: 1px solid rgba(139,92,246,0.2);
+  border-top: 1px solid var(--ling-purple-15);
   margin: 0.6em 0;
 }
 
-/* === 暗色模式兼容 === */
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-  }
+/* === 主题 color-scheme === */
+:root {
+  color-scheme: dark;
+}
+[data-theme="light"] {
+  color-scheme: light;
 }
