@@ -4,6 +4,7 @@ import {
   FiSettings, FiClock, FiPlus, FiChevronLeft, FiUsers, FiLayers
 } from 'react-icons/fi';
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { sidebarStyles } from './sidebar-styles';
 import SettingUI from './setting/setting-ui';
 import ChatHistoryPanel from './chat-history-panel';
@@ -31,7 +32,9 @@ interface HeaderButtonsProps {
 const ToggleButton = memo(({ isCollapsed, onToggle }: {
   isCollapsed: boolean
   onToggle: () => void
-}) => (
+}) => {
+  const { t } = useTranslation();
+  return (
   <Box
     {...sidebarStyles.sidebar.toggleButton}
     role="button"
@@ -47,7 +50,8 @@ const ToggleButton = memo(({ isCollapsed, onToggle }: {
   >
     <FiChevronLeft />
   </Box>
-));
+  );
+});
 
 ToggleButton.displayName = 'ToggleButton';
 
@@ -88,7 +92,9 @@ const ModeMenu = memo(({ setMode, currentMode, isElectron }: {
 
 ModeMenu.displayName = 'ModeMenu';
 
-const HeaderButtons = memo(({ onSettingsOpen, onNewHistory, setMode, currentMode, isElectron }: HeaderButtonsProps) => (
+const HeaderButtons = memo(({ onSettingsOpen, onNewHistory, setMode, currentMode, isElectron }: HeaderButtonsProps) => {
+  const { t } = useTranslation();
+  return (
   <Box display="flex" gap={1}>
     <Button onClick={onSettingsOpen} aria-label={t('ui.openSettings')} title={t('ui.settings')}>
       <FiSettings />
@@ -112,7 +118,8 @@ const HeaderButtons = memo(({ onSettingsOpen, onNewHistory, setMode, currentMode
 
     <ModeMenu setMode={setMode} currentMode={currentMode} isElectron={isElectron} />
   </Box>
-));
+  );
+});
 
 HeaderButtons.displayName = 'HeaderButtons';
 

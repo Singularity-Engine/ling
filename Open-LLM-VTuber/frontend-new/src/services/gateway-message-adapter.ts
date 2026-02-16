@@ -70,24 +70,24 @@ class GatewayMessageAdapter {
       case 'affinity-update':
         this.emit({
           type: 'affinity-update',
-          affinity: payload.affinity,
-          level: payload.level,
+          affinity: payload.affinity as number,
+          level: payload.level as string,
         });
         break;
 
       case 'affinity-milestone':
         this.emit({
           type: 'affinity-milestone',
-          milestone: payload.milestone,
-          message: payload.message,
+          milestone: payload.milestone as string,
+          message: payload.message as string,
         });
         break;
 
       case 'emotion-expression':
         this.emit({
           type: 'emotion-expression',
-          expression: payload.expression,
-          intensity: payload.intensity,
+          expression: payload.expression as string,
+          intensity: payload.intensity as number,
         });
         break;
 

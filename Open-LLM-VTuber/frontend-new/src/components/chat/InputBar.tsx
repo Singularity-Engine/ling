@@ -79,7 +79,7 @@ export const InputBar = memo(() => {
 
   const trimmed = inputText.trim();
   const hasText = trimmed.length > 0;
-  const isAiBusy = aiState === "thinking-speaking" || aiState === "thinking" || aiState === "loading";
+  const isAiBusy = aiState === "thinking-speaking" || aiState === "loading";
   const isAiSpeaking = aiState === "thinking-speaking";
   const stateKey = AI_STATE_KEYS[aiState] || "";
   const stateText = stateKey ? t(stateKey) : "";

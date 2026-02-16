@@ -38,7 +38,9 @@ interface MessageInputProps {
 }
 
 // Reusable components
-const ToggleButton = memo(({ isCollapsed, onToggle }: ToggleButtonProps) => (
+const ToggleButton = memo(({ isCollapsed, onToggle }: ToggleButtonProps) => {
+  const { t } = useTranslation();
+  return (
   <Box
     {...footerStyles.footer.toggleButton}
     role="button"
@@ -54,11 +56,14 @@ const ToggleButton = memo(({ isCollapsed, onToggle }: ToggleButtonProps) => (
   >
     <FiChevronDown />
   </Box>
-));
+  );
+});
 
 ToggleButton.displayName = 'ToggleButton';
 
-const ActionButtons = memo(({ micOn, onMicToggle, onInterrupt }: ActionButtonsProps) => (
+const ActionButtons = memo(({ micOn, onMicToggle, onInterrupt }: ActionButtonsProps) => {
+  const { t } = useTranslation();
+  return (
   <HStack gap={2}>
     <IconButton
       aria-label={micOn ? t('chat.micOn') : t('chat.micOff')}
@@ -78,7 +83,8 @@ const ActionButtons = memo(({ micOn, onMicToggle, onInterrupt }: ActionButtonsPr
       <IoHandRightSharp size="24" />
     </IconButton>
   </HStack>
-));
+  );
+});
 
 ActionButtons.displayName = 'ActionButtons';
 
