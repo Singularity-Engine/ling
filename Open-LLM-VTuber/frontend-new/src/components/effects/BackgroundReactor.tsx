@@ -1,6 +1,7 @@
 import { memo, useMemo } from 'react';
 import { useToolState } from '../../context/tool-state-context';
 import { useAiState } from '../../context/ai-state-context';
+import { useAffinity } from '../../context/affinity-context';
 
 // Stage-specific colors: thinking=blue, working=cyan, presenting=gold, ai-thinking=purple
 const PHASE_COLORS = {
@@ -11,9 +12,31 @@ const PHASE_COLORS = {
   aiThinking: '#a78bfa',
 } as const;
 
+// Affinity-level tint applied to idle/ambient background
+interface AffinityTint {
+  color: string;        // hex color for idle ambient tint
+  idleOpacity: number;  // base idle ambient opacity (0 = invisible)
+  activeBoost: number;  // opacity multiplier when tools/AI active (1.0 = no boost)
+}
+
+const AFFINITY_TINTS: Record<string, AffinityTint> = {
+  hatred:      { color: '#ef4444', idleOpacity: 0.12, activeBoost: 0.8  },
+  hostile:     { color: '#f97316', idleOpacity: 0.08, activeBoost: 0.9  },
+  indifferent: { color: '#a3a3a3', idleOpacity: 0,    activeBoost: 1.0  },
+  neutral:     { color: '#8b5cf6', idleOpacity: 0,    activeBoost: 1.0  },
+  friendly:    { color: '#a78bfa', idleOpacity: 0.06, activeBoost: 1.05 },
+  close:       { color: '#c084fc', idleOpacity: 0.10, activeBoost: 1.1  },
+  devoted:     { color: '#f472b6', idleOpacity: 0.14, activeBoost: 1.15 },
+};
+
+const DEFAULT_TINT: AffinityTint = AFFINITY_TINTS.neutral;
+
 export const BackgroundReactor = memo(() => {
   const { currentPhase } = useToolState();
   const { isThinkingSpeaking } = useAiState();
+  const { level } = useAffinity();
+  const tint = AFFINITY_TINTS[level] || DEFAULT_TINT;
+
   const isThinking = currentPhase === 'thinking';
   const isWorking = currentPhase === 'working';
   const isToolActive = isThinking || isWorking;
@@ -47,7 +70,11 @@ export const BackgroundReactor = memo(() => {
       inset: 0,
       pointerEvents: 'none' as const,
       transition: 'opacity 0.8s ease',
-      opacity: isActive ? (isAiThinking ? 0.45 : 0.6) : isPresenting ? 0.7 : 0,
+      opacity: isActive
+        ? (isAiThinking ? 0.45 : 0.6) * tint.activeBoost
+        : isPresenting
+          ? 0.7 * tint.activeBoost
+          : 0,
       background: isPresenting
         ? `radial-gradient(ellipse 80% 70% at 50% 40%, ${phaseColor}66 0%, ${phaseColor}33 35%, ${phaseColor}11 60%, transparent 80%)`
         : isAiThinking
@@ -58,7 +85,7 @@ export const BackgroundReactor = memo(() => {
       willChange: 'opacity',
       animation: isActive ? `${activeAnimation} ${isAiThinking ? '4s' : '3s'} ease-in-out infinite` : 'none',
     }),
-    [isActive, isPresenting, isWorking, isAiThinking, phaseColor, activeAnimation],
+    [isActive, isPresenting, isWorking, isAiThinking, phaseColor, activeAnimation, tint.activeBoost],
   );
 
   // Secondary ambient layer for depth
@@ -97,6 +124,21 @@ export const BackgroundReactor = memo(() => {
     [isActive, isPresenting],
   );
 
+  // Affinity-level ambient tint: always-on subtle glow for non-neutral levels
+  // hatred/hostile = warm danger tint, close/devoted = warm pink/purple glow
+  const affinityTintStyle = useMemo(
+    () => ({
+      position: 'absolute' as const,
+      inset: 0,
+      pointerEvents: 'none' as const,
+      transition: 'opacity 1.5s ease, background 1.5s ease',
+      opacity: tint.idleOpacity,
+      background: `radial-gradient(ellipse 70% 60% at 50% 45%, ${tint.color}44 0%, ${tint.color}18 40%, transparent 70%)`,
+      animation: tint.idleOpacity > 0 ? 'bgAffinityBreathe 6s ease-in-out infinite' : 'none',
+    }),
+    [tint.color, tint.idleOpacity],
+  );
+
   return (
     <>
       <style>{`
@@ -131,10 +173,15 @@ export const BackgroundReactor = memo(() => {
           15% { opacity: 0.8; }
           100% { opacity: 0; }
         }
+        @keyframes bgAffinityBreathe {
+          0%, 100% { opacity: var(--affinity-idle-opacity, 0.1); }
+          50% { opacity: calc(var(--affinity-idle-opacity, 0.1) * 1.6); }
+        }
       `}</style>
       <div style={glowStyle} />
       <div style={ambientStyle} />
       <div style={vignetteStyle} />
+      <div style={{ ...affinityTintStyle, '--affinity-idle-opacity': tint.idleOpacity } as React.CSSProperties} />
       {/* Presenting: gold bloom burst + flash */}
       {isPresenting && (
         <>

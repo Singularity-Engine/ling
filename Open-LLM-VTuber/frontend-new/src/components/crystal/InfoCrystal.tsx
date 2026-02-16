@@ -12,16 +12,18 @@ interface LevelTheme {
   scale: number;       // base scale (higher affinity → slightly larger)
   floatRange: number;  // px of vertical float animation
   shimmer: boolean;    // whether to show shimmer highlight
+  bgAlpha: number;     // background panel darkness (higher = more opaque)
+  blur: number;        // backdrop-filter blur in px
 }
 
 const LEVEL_THEMES: Record<string, LevelTheme> = {
-  hatred:      { glow: "239, 68, 68",   borderAlpha: 0.25, breatheIntensity: 0.6, scale: 0.94, floatRange: 2,  shimmer: false },
-  hostile:     { glow: "249, 115, 22",   borderAlpha: 0.3,  breatheIntensity: 0.7, scale: 0.96, floatRange: 3,  shimmer: false },
-  indifferent: { glow: "163, 163, 163",  borderAlpha: 0.35, breatheIntensity: 0.8, scale: 0.97, floatRange: 4,  shimmer: false },
-  neutral:     { glow: "96, 165, 250",   borderAlpha: 0.4,  breatheIntensity: 1.0, scale: 1.0,  floatRange: 5,  shimmer: false },
-  friendly:    { glow: "167, 139, 250",  borderAlpha: 0.5,  breatheIntensity: 1.2, scale: 1.02, floatRange: 6,  shimmer: true  },
-  close:       { glow: "192, 132, 252",  borderAlpha: 0.6,  breatheIntensity: 1.4, scale: 1.04, floatRange: 7,  shimmer: true  },
-  devoted:     { glow: "244, 114, 182",  borderAlpha: 0.75, breatheIntensity: 1.7, scale: 1.06, floatRange: 8,  shimmer: true  },
+  hatred:      { glow: "239, 68, 68",   borderAlpha: 0.25, breatheIntensity: 0.6, scale: 0.92, floatRange: 1,  shimmer: false, bgAlpha: 0.75, blur: 12 },
+  hostile:     { glow: "249, 115, 22",   borderAlpha: 0.3,  breatheIntensity: 0.7, scale: 0.95, floatRange: 2,  shimmer: false, bgAlpha: 0.70, blur: 14 },
+  indifferent: { glow: "163, 163, 163",  borderAlpha: 0.35, breatheIntensity: 0.8, scale: 0.97, floatRange: 4,  shimmer: false, bgAlpha: 0.65, blur: 16 },
+  neutral:     { glow: "96, 165, 250",   borderAlpha: 0.4,  breatheIntensity: 1.0, scale: 1.0,  floatRange: 5,  shimmer: false, bgAlpha: 0.60, blur: 16 },
+  friendly:    { glow: "167, 139, 250",  borderAlpha: 0.5,  breatheIntensity: 1.2, scale: 1.02, floatRange: 6,  shimmer: true,  bgAlpha: 0.55, blur: 18 },
+  close:       { glow: "192, 132, 252",  borderAlpha: 0.6,  breatheIntensity: 1.4, scale: 1.04, floatRange: 7,  shimmer: true,  bgAlpha: 0.50, blur: 20 },
+  devoted:     { glow: "244, 114, 182",  borderAlpha: 0.75, breatheIntensity: 1.7, scale: 1.06, floatRange: 8,  shimmer: true,  bgAlpha: 0.45, blur: 24 },
 };
 
 const DEFAULT_THEME: LevelTheme = LEVEL_THEMES.neutral;
