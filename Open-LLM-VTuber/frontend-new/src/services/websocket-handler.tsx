@@ -27,6 +27,7 @@ import { gatewayConnector, GatewayState } from '@/services/gateway-connector';
 import { gatewayAdapter } from '@/services/gateway-message-adapter';
 import { ttsService } from '@/services/tts-service';
 import { asrService } from '@/services/asr-service';
+import { useTTSState } from '@/context/tts-state-context';
 
 // ─── Gateway configuration ──────────────────────────────────────
 
@@ -169,6 +170,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const { setBrowserViewData } = useBrowser();
   const affinityContext = useAffinity();
   const { startTool, updateTool, completeTool, failTool } = useToolState();
+  const { markSynthStart, markSynthDone, markSynthError, markPlayStart, markPlayDone, reset: resetTTSState } = useTTSState();
 
   useEffect(() => {
     autoStartMicOnConvEndRef.current = autoStartMicOnConvEnd;
@@ -489,6 +491,21 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     };
   }, []); // Empty deps: subscribe once, never tear down
 
+  // ─── TTS state refs (for stable useEffect access) ──────────────
+
+  const markSynthStartRef = useRef(markSynthStart);
+  useEffect(() => { markSynthStartRef.current = markSynthStart; }, [markSynthStart]);
+  const markSynthDoneRef = useRef(markSynthDone);
+  useEffect(() => { markSynthDoneRef.current = markSynthDone; }, [markSynthDone]);
+  const markSynthErrorRef = useRef(markSynthError);
+  useEffect(() => { markSynthErrorRef.current = markSynthError; }, [markSynthError]);
+  const markPlayStartRef = useRef(markPlayStart);
+  useEffect(() => { markPlayStartRef.current = markPlayStart; }, [markPlayStart]);
+  const markPlayDoneRef = useRef(markPlayDone);
+  useEffect(() => { markPlayDoneRef.current = markPlayDone; }, [markPlayDone]);
+  const resetTTSStateRef = useRef(resetTTSState);
+  useEffect(() => { resetTTSStateRef.current = resetTTSState; }, [resetTTSState]);
+
   // ─── TTS: synthesize speech when full-text arrives ─────────────
 
   const lastTtsTextRef = useRef('');
@@ -525,9 +542,12 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           // Chain synthesis sequentially to preserve order
           synthQueueRef.current = synthQueueRef.current.then(async () => {
             if (import.meta.env.DEV) console.log('[TTS] Synthesizing:', sentence);
+            markSynthStartRef.current();
             try {
               const result = await ttsService.synthesize(sentence);
+              markSynthDoneRef.current();
               if (result) {
+                markPlayStartRef.current();
                 const expr = currentExpressionRef.current;
                 addAudioTaskRef.current({
                   audioBase64: result.audioBase64,
@@ -540,6 +560,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
               }
             } catch (err) {
               console.error('[TTS] Synthesis failed:', err);
+              markSynthErrorRef.current(err instanceof Error ? err.message : 'TTS synthesis failed');
             }
           });
         }

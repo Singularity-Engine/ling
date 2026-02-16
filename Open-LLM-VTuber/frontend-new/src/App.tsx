@@ -23,6 +23,7 @@ import { AffinityBar } from "./components/status/AffinityBar";
 import { ConnectionStatus } from "./components/status/ConnectionStatus";
 import { AffinityProvider } from "./context/affinity-context";
 import { ToolStateProvider } from "./context/tool-state-context";
+import { TTSStateProvider } from "./context/tts-state-context";
 import { StarField } from "./components/background/StarField";
 import { BackgroundReactor } from "./components/effects/BackgroundReactor";
 import { ThoughtHalo } from "./components/effects/ThoughtHalo";
@@ -327,6 +328,7 @@ function App(): JSX.Element {
                             <GroupProvider>
                               <BrowserProvider>
                                 <ToolStateProvider>
+                                  <TTSStateProvider>
                                   <AffinityProvider>
                                     <WebSocketHandler>
                                       <div style={{
@@ -338,6 +340,7 @@ function App(): JSX.Element {
                                       </div>
                                     </WebSocketHandler>
                                   </AffinityProvider>
+                                  </TTSStateProvider>
                                 </ToolStateProvider>
                               </BrowserProvider>
                             </GroupProvider>
