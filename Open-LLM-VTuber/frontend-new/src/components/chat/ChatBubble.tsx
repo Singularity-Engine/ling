@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import { useTranslation } from "react-i18next";
 import { ToolResultCard } from "./ToolResultCard";
@@ -11,6 +11,9 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   style.textContent = `
     @keyframes bubbleFadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes streamingCursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    .chat-copy-btn { opacity: 0; }
+    .chat-bubble-wrap:hover .chat-copy-btn { opacity: 1; }
+    .chat-copy-btn:hover { color: rgba(255,255,255,0.7) !important; background: rgba(255,255,255,0.08) !important; }
   `;
   document.head.appendChild(style);
 }
@@ -38,6 +41,14 @@ function formatTime(ts: string): string {
 export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolCall, toolName, toolStatus }: ChatBubbleProps) => {
   const { t } = useTranslation();
   const isUser = role === "user";
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(content).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }, [content]);
 
   if (isToolCall && toolName) {
     return (
@@ -57,7 +68,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
         animation: "bubbleFadeInUp 0.3s ease-out",
       }}
     >
-      <div style={{ maxWidth: "78%" }}>
+      <div style={{ maxWidth: "78%" }} className={!isUser ? "chat-bubble-wrap" : undefined}>
         {!isUser && (
           <span
             style={{
@@ -73,52 +84,84 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
             {t("chat.characterName")}
           </span>
         )}
-        <div
-          style={{
-            padding: "10px 16px",
-            borderRadius: isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
-            background: isUser
-              ? "linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(109, 40, 217, 0.25))"
-              : "rgba(255, 255, 255, 0.06)",
-            border: isUser ? "1px solid rgba(139, 92, 246, 0.25)" : "1px solid rgba(255, 255, 255, 0.08)",
-            backdropFilter: "blur(10px)",
-            WebkitBackdropFilter: "blur(10px)",
-            transition: "all 0.2s ease",
-            boxShadow: isUser
-              ? "0 2px 12px rgba(139, 92, 246, 0.15)"
-              : "0 1px 8px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          {isUser ? (
-            <span
+        <div style={{ position: "relative" }}>
+          <div
+            style={{
+              padding: "10px 16px",
+              borderRadius: isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+              background: isUser
+                ? "linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(109, 40, 217, 0.25))"
+                : "rgba(255, 255, 255, 0.06)",
+              border: isUser ? "1px solid rgba(139, 92, 246, 0.25)" : "1px solid rgba(255, 255, 255, 0.08)",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
+              transition: "all 0.2s ease",
+              boxShadow: isUser
+                ? "0 2px 12px rgba(139, 92, 246, 0.15)"
+                : "0 1px 8px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            {isUser ? (
+              <span
+                style={{
+                  fontSize: "14px",
+                  color: "rgba(255,255,255,0.95)",
+                  whiteSpace: "pre-wrap",
+                  lineHeight: 1.7,
+                  letterSpacing: "0.3px",
+                }}
+              >
+                {content}
+              </span>
+            ) : (
+              <div className="md-content" style={{ fontSize: "14px", color: "rgba(255,255,255,0.88)", lineHeight: 1.7, letterSpacing: "0.3px" }}>
+                <ReactMarkdown>{content}</ReactMarkdown>
+                {isStreaming && (
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: "2px",
+                      height: "14px",
+                      background: "#8b5cf6",
+                      marginLeft: "2px",
+                      verticalAlign: "text-bottom",
+                      borderRadius: "1px",
+                      animation: "streamingCursor 0.8s steps(1) infinite",
+                    }}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+          {!isUser && !isStreaming && content && (
+            <button
+              onClick={handleCopy}
+              className="chat-copy-btn"
+              title={copied ? "已复制" : "复制"}
               style={{
-                fontSize: "14px",
-                color: "rgba(255,255,255,0.95)",
-                whiteSpace: "pre-wrap",
-                lineHeight: 1.7,
-                letterSpacing: "0.3px",
+                position: "absolute",
+                top: "6px",
+                right: "-32px",
+                width: "24px",
+                height: "24px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "transparent",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                padding: 0,
+                color: copied ? "rgba(34,197,94,0.8)" : "rgba(255,255,255,0.3)",
+                transition: "all 0.2s ease",
               }}
             >
-              {content}
-            </span>
-          ) : (
-            <div className="md-content" style={{ fontSize: "14px", color: "rgba(255,255,255,0.88)", lineHeight: 1.7, letterSpacing: "0.3px" }}>
-              <ReactMarkdown>{content}</ReactMarkdown>
-              {isStreaming && (
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: "2px",
-                    height: "14px",
-                    background: "#8b5cf6",
-                    marginLeft: "2px",
-                    verticalAlign: "text-bottom",
-                    borderRadius: "1px",
-                    animation: "streamingCursor 0.8s steps(1) infinite",
-                  }}
-                />
+              {copied ? (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
               )}
-            </div>
+            </button>
           )}
         </div>
         {timestamp && (
