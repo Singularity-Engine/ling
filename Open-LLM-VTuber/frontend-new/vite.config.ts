@@ -3,7 +3,7 @@ import path from 'path';
 import react from '@vitejs/plugin-react-swc';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     viteStaticCopy({
       targets: [
@@ -52,6 +52,10 @@ export default defineConfig({
       },
     },
   },
+  esbuild: {
+    drop: mode === 'production' ? ['debugger'] : [],
+    pure: mode === 'production' ? ['console.log', 'console.debug'] : [],
+  },
   build: {
     outDir: path.join(__dirname, 'dist'),
     emptyOutDir: true,
@@ -79,4 +83,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));
