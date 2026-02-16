@@ -48,7 +48,6 @@ const ToggleButton = memo(({ isCollapsed, onToggle }: ToggleButtonProps) => (
     title={isCollapsed ? t('ui.expandFooter') : t('ui.collapseFooter')}
     onClick={onToggle}
     onKeyDown={(e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle?.(); } }}
-    color="whiteAlpha.500"
     style={{
       transform: isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)',
     }}
