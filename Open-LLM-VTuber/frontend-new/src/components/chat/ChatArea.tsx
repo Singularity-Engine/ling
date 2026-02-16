@@ -23,6 +23,44 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   document.head.appendChild(style);
 }
 
+/**
+ * Hook: throttle a rapidly-changing string to ~30 fps using rAF.
+ * Returns the latest snapshot that the render loop should display.
+ * When the source becomes empty the hook returns "" immediately (no delay).
+ */
+function useThrottledValue(source: string): string {
+  const [display, setDisplay] = useState(source);
+  const rafRef = useRef(0);
+  const latestRef = useRef(source);
+
+  latestRef.current = source;
+
+  useEffect(() => {
+    // Fast path: source cleared → flush immediately
+    if (source === '') {
+      setDisplay('');
+      return;
+    }
+
+    // Schedule an rAF to batch rapid updates
+    if (!rafRef.current) {
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = 0;
+        setDisplay(latestRef.current);
+      });
+    }
+
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = 0;
+      }
+    };
+  }, [source]);
+
+  return display;
+}
+
 export const ChatArea = memo(() => {
   const { messages, fullResponse } = useChatHistory();
   const { subtitleText } = useSubtitle();
@@ -30,6 +68,9 @@ export const ChatArea = memo(() => {
   const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Throttle the rapidly-updating fullResponse to ~display refresh rate
+  const displayResponse = useThrottledValue(fullResponse);
 
   const [isNearBottom, setIsNearBottom] = useState(true);
   const [hasNewMessage, setHasNewMessage] = useState(false);
@@ -49,20 +90,30 @@ export const ChatArea = memo(() => {
     return () => el.removeEventListener("scroll", checkNearBottom);
   }, [checkNearBottom]);
 
+  // During active streaming use instant scroll to keep up with rapid updates;
+  // for normal new messages use smooth scroll.
+  const isStreaming = displayResponse.length > 0;
+
   useEffect(() => {
     if (isNearBottom) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      const el = bottomRef.current;
+      if (!el) return;
+      if (isStreaming) {
+        // Instant scroll during streaming — avoids "smooth" animation lag
+        el.scrollIntoView({ behavior: "instant" });
+      } else {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
     } else {
       setHasNewMessage(true);
     }
-  }, [messages, fullResponse, subtitleText, isNearBottom]);
+  }, [messages, displayResponse, subtitleText, isNearBottom, isStreaming]);
 
   const scrollToBottom = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     setHasNewMessage(false);
   }, []);
 
-  const isStreaming = fullResponse.length > 0;
   const showTyping = isThinkingSpeaking && !isStreaming;
 
   // Memoize dedup so it only recalculates when messages change, not on every streaming delta
@@ -79,8 +130,8 @@ export const ChatArea = memo(() => {
   const showStreaming = useMemo(() => {
     if (!isStreaming) return false;
     const lastAiMsg = dedupedMessages.findLast(m => m.role === 'ai');
-    return !(lastAiMsg && lastAiMsg.content && fullResponse.startsWith(lastAiMsg.content));
-  }, [isStreaming, dedupedMessages, fullResponse]);
+    return !(lastAiMsg && lastAiMsg.content && displayResponse.startsWith(lastAiMsg.content));
+  }, [isStreaming, dedupedMessages, displayResponse]);
 
   const isEmpty = dedupedMessages.length === 0 && !showStreaming && !showTyping;
 
@@ -155,7 +206,7 @@ export const ChatArea = memo(() => {
       {showStreaming && (
         <ChatBubble
           role="assistant"
-          content={fullResponse}
+          content={displayResponse}
           isStreaming={true}
         />
       )}

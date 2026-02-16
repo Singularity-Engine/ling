@@ -10,7 +10,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   style.id = STYLE_ID;
   style.textContent = `
     @keyframes bubbleFadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes streamingCursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    @keyframes streamingCursor { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
     .chat-copy-btn { opacity: 0; }
     .chat-bubble-wrap:hover .chat-copy-btn { opacity: 1; }
     .chat-copy-btn:hover { color: rgba(255,255,255,0.7) !important; background: rgba(255,255,255,0.08) !important; }
@@ -126,7 +126,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
                       marginLeft: "2px",
                       verticalAlign: "text-bottom",
                       borderRadius: "1px",
-                      animation: "streamingCursor 0.8s steps(1) infinite",
+                      animation: "streamingCursor 1s ease-in-out infinite",
                     }}
                   />
                 )}
