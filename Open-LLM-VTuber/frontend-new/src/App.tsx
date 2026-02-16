@@ -303,13 +303,11 @@ function App(): JSX.Element {
   const [landingExiting, setLandingExiting] = useState(false);
 
   const handleLandingComplete = useCallback(() => {
-    // Start crossfade: keep both mounted, fade landing out while main fades in
     setLandingExiting(true);
-    // Wait for the crossfade to finish, then unmount landing
     setTimeout(() => {
       setShowLanding(false);
       sessionStorage.setItem('ling-visited', 'true');
-    }, 600);
+    }, 700);
   }, []);
 
   return (
@@ -333,7 +331,8 @@ function App(): JSX.Element {
                                     <WebSocketHandler>
                                       <div style={{
                                         opacity: landingExiting || !showLanding ? 1 : 0,
-                                        transition: 'opacity 0.6s ease-in',
+                                        transform: landingExiting || !showLanding ? 'scale(1)' : 'scale(0.97)',
+                                        transition: 'opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)',
                                       }}>
                                         <MainContent />
                                       </div>

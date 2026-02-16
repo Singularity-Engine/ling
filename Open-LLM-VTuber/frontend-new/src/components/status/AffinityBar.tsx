@@ -38,6 +38,7 @@ export const AffinityBar = memo(() => {
       <div
         style={{
           padding: "8px 16px",
+          paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
           background: "rgba(0, 0, 0, 0.3)",
           backdropFilter: "blur(10px)",
           display: "flex",

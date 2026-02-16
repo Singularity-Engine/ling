@@ -53,6 +53,9 @@
 }
 
 /* === 全局基础 === */
+html {
+  background: var(--ling-bg-deep) !important;
+}
 body, html {
   margin: 0;
   padding: 0;
@@ -64,11 +67,6 @@ body, html {
   color: #ffffff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* iOS safe area */
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
 }
 
 /* 防止 iOS 橡皮筋滚动 */
@@ -108,6 +106,11 @@ body {
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes glowPulse {
