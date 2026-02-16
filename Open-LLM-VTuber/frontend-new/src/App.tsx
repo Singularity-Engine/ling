@@ -31,6 +31,7 @@ import { AudioVisualizer } from "./components/effects/AudioVisualizer";
 import { CrystalField } from "./components/crystal/CrystalField";
 import { CapabilityRing } from "./components/ability/CapabilityRing";
 import { LoadingSkeleton } from "./components/loading/LoadingSkeleton";
+import { ModelLoadingOverlay } from "./components/loading/ModelLoadingOverlay";
 import { Toaster } from "./components/ui/toaster";
 import { useWebSocket } from "./context/websocket-context";
 import { useKeyboardShortcuts, ShortcutDef } from "./hooks/use-keyboard-shortcuts";
@@ -187,6 +188,9 @@ function MainContent(): JSX.Element {
 
       {/* ===== Layer 0.8: 加载骨架屏 ===== */}
       <LoadingSkeleton />
+
+      {/* ===== Layer 0.9: Live2D 模型加载覆盖层 ===== */}
+      <ModelLoadingOverlay />
 
       {/* ===== Layer 1: 工具结果水晶 ===== */}
       <CrystalField />
