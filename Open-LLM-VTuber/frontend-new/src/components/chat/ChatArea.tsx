@@ -17,6 +17,8 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     .chat-area-scroll::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 2px; }
     @keyframes chatFadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes emptyStateFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+    @keyframes scrollBtnIn { from { opacity: 0; transform: translateY(12px) scale(0.8); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes scrollBtnPulse { 0%, 100% { box-shadow: 0 2px 12px rgba(139, 92, 246, 0.3); } 50% { box-shadow: 0 2px 20px rgba(139, 92, 246, 0.5); } }
   `;
   document.head.appendChild(style);
 }
@@ -161,11 +163,11 @@ export const ChatArea = memo(() => {
 
       <div ref={bottomRef} />
 
-      {hasNewMessage && (
+      {!isNearBottom && (
         <div
           style={{
             position: "sticky",
-            bottom: "8px",
+            bottom: "12px",
             display: "flex",
             justifyContent: "center",
             pointerEvents: "none",
@@ -176,23 +178,44 @@ export const ChatArea = memo(() => {
             aria-label={t("ui.scrollToLatest")}
             style={{
               pointerEvents: "auto",
-              padding: "6px 14px",
-              borderRadius: "16px",
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
               background: "rgba(139, 92, 246, 0.85)",
               color: "rgba(255,255,255,0.95)",
-              fontSize: "12px",
-              fontWeight: 500,
+              fontSize: "16px",
+              lineHeight: 1,
               border: "1px solid rgba(139, 92, 246, 0.4)",
               backdropFilter: "blur(12px)",
               WebkitBackdropFilter: "blur(12px)",
               boxShadow: "0 2px 12px rgba(139, 92, 246, 0.3)",
               cursor: "pointer",
               transition: "all 0.2s ease",
-              animation: "chatFadeInUp 0.25s ease-out",
+              animation: hasNewMessage
+                ? "scrollBtnIn 0.25s ease-out, scrollBtnPulse 2s ease-in-out infinite"
+                : "scrollBtnIn 0.25s ease-out",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              position: "relative",
             }}
           >
-            <span style={{ marginRight: "4px" }}>&#8595;</span>
-            {t("ui.newMessages")}
+            ↓
+            {hasNewMessage && (
+              <span
+                style={{
+                  position: "absolute",
+                  top: "-2px",
+                  right: "-2px",
+                  width: "10px",
+                  height: "10px",
+                  borderRadius: "50%",
+                  background: "#ef4444",
+                  border: "2px solid rgba(15, 15, 20, 0.9)",
+                  animation: "chatFadeInUp 0.2s ease-out",
+                }}
+              />
+            )}
           </button>
         </div>
       )}
