@@ -51,10 +51,13 @@ const AI_STATE_KEYS: Record<string, string> = {
   interrupted: "",
 };
 
+const MAX_LENGTH = 2000;
+
 export const InputBar = memo(() => {
   const { t } = useTranslation();
   const [inputText, setInputText] = useState("");
   const [isComposing, setIsComposing] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const wsContext = useWebSocket();
   const { appendHumanMessage } = useChatHistory();
@@ -66,7 +69,7 @@ export const InputBar = memo(() => {
     const handler = (e: Event) => {
       const text = (e as CustomEvent).detail?.text;
       if (typeof text === 'string') {
-        setInputText(text);
+        setInputText(text.slice(0, MAX_LENGTH));
         setTimeout(() => textareaRef.current?.focus(), 0);
       }
     };
@@ -74,19 +77,25 @@ export const InputBar = memo(() => {
     return () => window.removeEventListener('fill-input', handler);
   }, []);
 
-  const hasText = inputText.trim().length > 0;
-  const isAiBusy = aiState === "thinking-speaking";
+  const trimmed = inputText.trim();
+  const hasText = trimmed.length > 0;
+  const isAiBusy = aiState === "thinking-speaking" || aiState === "thinking" || aiState === "loading";
+  const isAiSpeaking = aiState === "thinking-speaking";
   const stateKey = AI_STATE_KEYS[aiState] || "";
   const stateText = stateKey ? t(stateKey) : "";
+  const charCount = trimmed.length;
+  const isOverLimit = charCount > MAX_LENGTH;
+  const canSend = hasText && !isOverLimit && !isSending && wsContext;
 
   const handleSend = useCallback(() => {
     const text = inputText.trim();
-    if (!text || !wsContext) return;
+    if (!text || text.length > MAX_LENGTH || isSending || !wsContext) return;
 
     if (aiState === "thinking-speaking") {
       interrupt();
     }
 
+    setIsSending(true);
     appendHumanMessage(text);
     wsContext.sendMessage({
       type: "text-input",
@@ -98,7 +107,9 @@ export const InputBar = memo(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
-  }, [inputText, wsContext, aiState, interrupt, appendHumanMessage]);
+    // Debounce: prevent rapid-fire sends
+    setTimeout(() => setIsSending(false), 500);
+  }, [inputText, wsContext, aiState, interrupt, appendHumanMessage, isSending]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -112,7 +123,9 @@ export const InputBar = memo(() => {
   );
 
   const handleInput = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputText(e.target.value);
+    const value = e.target.value;
+    // Hard cap at MAX_LENGTH + small buffer for paste UX (counter turns red)
+    setInputText(value.length > MAX_LENGTH + 200 ? value.slice(0, MAX_LENGTH + 200) : value);
     const el = e.target;
     el.style.height = "auto";
     el.style.height = Math.min(el.scrollHeight, 96) + "px";
@@ -203,35 +216,42 @@ export const InputBar = memo(() => {
         />
 
         <button
-          onClick={isAiBusy ? handleInterrupt : handleSend}
-          aria-label={isAiBusy ? t("chat.stopReply") : t("chat.sendMessage")}
-          title={isAiBusy ? t("chat.stopReply") : t("chat.sendMessage")}
+          onClick={isAiSpeaking ? handleInterrupt : handleSend}
+          disabled={!isAiSpeaking && !canSend}
+          aria-label={isAiSpeaking ? t("chat.stopReply") : t("chat.sendMessage")}
+          title={isAiSpeaking ? t("chat.stopReply") : t("chat.sendMessage")}
           style={{
             width: "44px",
             height: "44px",
             borderRadius: "50%",
-            background: isAiBusy
+            background: isAiSpeaking
               ? "rgba(239, 68, 68, 0.2)"
-              : hasText
+              : canSend
                 ? "linear-gradient(135deg, #8b5cf6, #6d28d9)"
                 : "rgba(255,255,255,0.06)",
-            border: isAiBusy ? "1px solid rgba(239, 68, 68, 0.3)" : "none",
+            border: isAiSpeaking ? "1px solid rgba(239, 68, 68, 0.3)" : "none",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            cursor: hasText || isAiBusy ? "pointer" : "default",
+            cursor: canSend || isAiSpeaking ? "pointer" : "default",
+            opacity: !isAiSpeaking && !canSend && hasText ? 0.4 : 1,
             transition: "all 0.2s ease",
             flexShrink: 0,
             padding: 0,
           }}
         >
-          {isAiBusy ? <StopIcon /> : <SendIcon />}
+          {isAiSpeaking ? <StopIcon /> : <SendIcon />}
         </button>
       </div>
-      <div style={{ maxWidth: "720px", margin: "2px auto 0", paddingLeft: "52px" }}>
+      <div style={{ maxWidth: "720px", margin: "2px auto 0", paddingLeft: "52px", display: "flex", justifyContent: "space-between" }}>
         <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.2)" }}>
           {t("chat.markdownHint")}
         </span>
+        {charCount > 0 && (
+          <span style={{ fontSize: "10px", color: isOverLimit ? "#ef4444" : charCount > MAX_LENGTH * 0.9 ? "rgba(251, 191, 36, 0.7)" : "rgba(255,255,255,0.25)", transition: "color 0.2s" }}>
+            {charCount}/{MAX_LENGTH}
+          </span>
+        )}
       </div>
     </div>
   );
