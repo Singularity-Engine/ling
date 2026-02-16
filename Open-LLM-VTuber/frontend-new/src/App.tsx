@@ -27,6 +27,7 @@ import { TTSStateProvider } from "./context/tts-state-context";
 import { StarField } from "./components/background/StarField";
 import { BackgroundReactor } from "./components/effects/BackgroundReactor";
 import { ThoughtHalo } from "./components/effects/ThoughtHalo";
+import { AudioVisualizer } from "./components/effects/AudioVisualizer";
 import { CrystalField } from "./components/crystal/CrystalField";
 import { CapabilityRing } from "./components/ability/CapabilityRing";
 import { LoadingSkeleton } from "./components/loading/LoadingSkeleton";
@@ -177,6 +178,7 @@ function MainContent(): JSX.Element {
       <div style={{ position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none" }}>
         <BackgroundReactor />
         <ThoughtHalo />
+        <AudioVisualizer />
       </div>
 
       {/* ===== Layer 0.8: 加载骨架屏 ===== */}

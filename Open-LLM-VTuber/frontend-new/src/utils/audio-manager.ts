@@ -1,3 +1,5 @@
+type AudioEventListener = (audio: HTMLAudioElement | null) => void;
+
 /**
  * Global audio manager for handling audio playback and interruption
  * This ensures all components share the same audio reference
@@ -5,6 +7,20 @@
 class AudioManager {
   private currentAudio: HTMLAudioElement | null = null;
   private currentModel: any | null = null;
+  private listeners: Set<AudioEventListener> = new Set();
+
+  /**
+   * Subscribe to audio change events (for visualizer, etc.)
+   */
+  onAudioChange(listener: AudioEventListener): () => void {
+    this.listeners.add(listener);
+    return () => { this.listeners.delete(listener); };
+  }
+
+  private notifyListeners() {
+    const audio = this.currentAudio;
+    this.listeners.forEach(fn => fn(audio));
+  }
 
   /**
    * Set the current playing audio
@@ -12,6 +28,7 @@ class AudioManager {
   setCurrentAudio(audio: HTMLAudioElement, model: any) {
     this.currentAudio = audio;
     this.currentModel = model;
+    this.notifyListeners();
   }
 
   /**
@@ -52,6 +69,7 @@ class AudioManager {
       // Clear references
       this.currentAudio = null;
       this.currentModel = null;
+      this.notifyListeners();
     } else {
       console.log('[AudioManager] No current audio playing to stop.');
     }
@@ -64,6 +82,7 @@ class AudioManager {
     if (this.currentAudio === audio) {
       this.currentAudio = null;
       this.currentModel = null;
+      this.notifyListeners();
     }
   }
 
