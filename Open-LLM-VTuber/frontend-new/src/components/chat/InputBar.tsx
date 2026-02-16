@@ -228,6 +228,11 @@ export const InputBar = memo(() => {
           {isAiBusy ? <StopIcon /> : <SendIcon />}
         </button>
       </div>
+      <div style={{ maxWidth: "720px", margin: "2px auto 0", paddingLeft: "52px" }}>
+        <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.2)" }}>
+          {t("chat.markdownHint")}
+        </span>
+      </div>
     </div>
   );
 });
