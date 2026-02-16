@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChatBubble } from "./ChatBubble";
-import { TypingIndicator } from "./TypingIndicator";
+import { ThinkingBubble } from "./ThinkingBubble";
 import { useChatHistory } from "@/context/chat-history-context";
 import { useSubtitle } from "@/context/subtitle-context";
 import { useAiState } from "@/context/ai-state-context";
@@ -203,14 +203,13 @@ export const ChatArea = memo(() => {
           toolStatus={msg.status}
         />
       ))}
-      {showStreaming && (
-        <ChatBubble
-          role="assistant"
+      {(showStreaming || showTyping) && (
+        <ThinkingBubble
           content={displayResponse}
-          isStreaming={true}
+          isThinking={showTyping}
+          isStreaming={showStreaming}
         />
       )}
-      {showTyping && <TypingIndicator />}
 
       <div ref={bottomRef} />
 

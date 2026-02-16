@@ -6,49 +6,63 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   const style = document.createElement("style");
   style.id = STYLE_ID;
   style.textContent = `
-    @keyframes typingFadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes typingDot { 0%, 60%, 100% { opacity: 0.3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-4px); } }
+    @keyframes typingFadeInUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes thinkingDot {
+      0%, 80%, 100% { opacity: 0.35; transform: translateY(0) scale(0.85); }
+      40% { opacity: 1; transform: translateY(-6px) scale(1.1); }
+    }
+    @keyframes thinkingPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+      50% { box-shadow: 0 0 12px 2px rgba(139, 92, 246, 0.08); }
+    }
+    @keyframes thinkingFadeOut {
+      from { opacity: 1; transform: scale(1); }
+      to   { opacity: 0; transform: scale(0.92); }
+    }
   `;
   document.head.appendChild(style);
 }
 
-export const TypingIndicator = memo(() => {
+const DOT_COLORS = [
+  "linear-gradient(135deg, #a78bfa, #8b5cf6)",
+  "linear-gradient(135deg, #8b5cf6, #7c3aed)",
+  "linear-gradient(135deg, #7c3aed, #6d28d9)",
+];
+
+interface TypingIndicatorProps {
+  /** When true, plays fade-out animation before removal */
+  fadeOut?: boolean;
+}
+
+export const TypingIndicator = memo(({ fadeOut }: TypingIndicatorProps) => {
   return (
     <div
       style={{
         display: "flex",
-        justifyContent: "flex-start",
-        marginBottom: "12px",
-        padding: "0 16px",
-        animation: "typingFadeInUp 0.3s ease-out",
+        alignItems: "center",
+        gap: "6px",
+        padding: "4px 2px",
+        animation: fadeOut
+          ? "thinkingFadeOut 0.25s ease-out forwards"
+          : "typingFadeInUp 0.3s ease-out",
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "5px",
-          padding: "12px 18px",
-          borderRadius: "18px 18px 18px 4px",
-          background: "rgba(255, 255, 255, 0.06)",
-          border: "1px solid rgba(255, 255, 255, 0.06)",
-          backdropFilter: "blur(10px)",
-          WebkitBackdropFilter: "blur(10px)",
-        }}
-      >
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            style={{
-              width: "7px",
-              height: "7px",
-              borderRadius: "50%",
-              background: "rgba(139, 92, 246, 0.7)",
-              animation: `typingDot 1.4s ease-in-out ${i * 0.16}s infinite`,
-            }}
-          />
-        ))}
-      </div>
+      {[0, 1, 2].map((i) => (
+        <div
+          key={i}
+          style={{
+            width: "8px",
+            height: "8px",
+            borderRadius: "50%",
+            background: DOT_COLORS[i],
+            animation: `thinkingDot 1.4s ease-in-out ${i * 0.2}s infinite`,
+            boxShadow: "0 1px 4px rgba(139, 92, 246, 0.25)",
+          }}
+        />
+      ))}
     </div>
   );
 });
