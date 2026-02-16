@@ -18,6 +18,7 @@ import { FaTools, FaCheck, FaTimes } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { Message } from '@/services/websocket-service';
 import { MessageContextMenu } from './message-context-menu';
+import { toaster } from '@/components/ui/toaster';
 
 // Long-press threshold in ms
 const LONG_PRESS_MS = 500;

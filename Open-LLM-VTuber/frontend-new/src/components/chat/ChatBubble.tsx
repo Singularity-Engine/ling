@@ -1,8 +1,9 @@
-import { memo, useState, useCallback } from "react";
+import { memo, useState, useCallback, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import { useTranslation } from "react-i18next";
+import { toaster } from "@/components/ui/toaster";
 import { ToolResultCard } from "./ToolResultCard";
 
 const remarkPlugins = [remarkGfm];
@@ -21,6 +22,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   style.textContent = `
     @keyframes bubbleFadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes streamingCursor { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
+    @keyframes bubbleCopyFlash { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.97); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
     .chat-copy-btn { opacity: 0; }
     .chat-bubble-wrap:hover .chat-copy-btn { opacity: 1; }
     .chat-copy-btn:hover { color: rgba(255,255,255,0.7) !important; background: rgba(255,255,255,0.08) !important; }
@@ -53,12 +55,26 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
   const isUser = role === "user";
   const [copied, setCopied] = useState(false);
 
+  const [flashing, setFlashing] = useState(false);
+  const bubbleRef = useRef<HTMLDivElement>(null);
+
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(content).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     });
   }, [content]);
+
+  const handleDoubleClick = useCallback(() => {
+    // Skip if user is selecting text
+    const sel = window.getSelection();
+    if (sel && sel.toString().length > 0) return;
+    navigator.clipboard.writeText(content).then(() => {
+      setFlashing(true);
+      toaster.create({ title: t("chat.textCopied"), type: "success", duration: 1500 });
+      setTimeout(() => setFlashing(false), 350);
+    });
+  }, [content, t]);
 
   if (isToolCall && toolName) {
     return (
@@ -96,6 +112,8 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
         )}
         <div style={{ position: "relative" }}>
           <div
+            ref={bubbleRef}
+            onDoubleClick={!isUser && !isStreaming && content ? handleDoubleClick : undefined}
             style={{
               padding: "10px 16px",
               borderRadius: isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
@@ -109,6 +127,8 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
               boxShadow: isUser
                 ? "0 2px 12px rgba(139, 92, 246, 0.15)"
                 : "0 1px 8px rgba(0, 0, 0, 0.1)",
+              cursor: !isUser && !isStreaming && content ? "default" : undefined,
+              animation: flashing ? "bubbleCopyFlash 0.35s ease-out" : undefined,
             }}
           >
             {isUser ? (
