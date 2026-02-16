@@ -26,7 +26,6 @@ import { ToolStateProvider } from "./context/tool-state-context";
 import { TTSStateProvider } from "./context/tts-state-context";
 import { StarField } from "./components/background/StarField";
 import { BackgroundReactor } from "./components/effects/BackgroundReactor";
-import { ThoughtHalo } from "./components/effects/ThoughtHalo";
 import { AudioVisualizer } from "./components/effects/AudioVisualizer";
 import { CrystalField } from "./components/crystal/CrystalField";
 import { CapabilityRing } from "./components/ability/CapabilityRing";
@@ -36,6 +35,7 @@ import { useWebSocket } from "./context/websocket-context";
 import { useKeyboardShortcuts, ShortcutDef } from "./hooks/use-keyboard-shortcuts";
 import { ShortcutsOverlay } from "./components/shortcuts/ShortcutsOverlay";
 import { AboutOverlay } from "./components/about/AboutOverlay";
+import { NetworkStatusBanner } from "./components/effects/NetworkStatusBanner";
 import "./index.css";
 
 // Error Boundary
@@ -177,7 +177,6 @@ function MainContent(): JSX.Element {
       {/* ===== Layer 0.5: 工具状态反馈层 ===== */}
       <div style={{ position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none" }}>
         <BackgroundReactor />
-        <ThoughtHalo />
         <AudioVisualizer />
       </div>
 
@@ -398,6 +397,7 @@ function App(): JSX.Element {
         <LandingAnimation onComplete={handleLandingComplete} />
       )}
 
+      <NetworkStatusBanner />
       <Toaster />
     </ErrorBoundary>
   );

@@ -228,6 +228,10 @@
     "github": "GitHub",
     "docs": "Docs"
   },
+  "network": {
+    "offline": "Network disconnected",
+    "recovered": "Network restored"
+  },
   "shortcuts": {
     "title": "Keyboard Shortcuts",
     "toggleMic": "Toggle microphone",

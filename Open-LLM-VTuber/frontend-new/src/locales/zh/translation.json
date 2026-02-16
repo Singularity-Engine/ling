@@ -225,6 +225,10 @@
     "github": "GitHub",
     "docs": "文档"
   },
+  "network": {
+    "offline": "网络已断开",
+    "recovered": "网络已恢复"
+  },
   "shortcuts": {
     "title": "键盘快捷键",
     "toggleMic": "切换麦克风",
