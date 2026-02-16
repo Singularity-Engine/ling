@@ -31,13 +31,13 @@ const STREAK_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
 
 // ─── Level mapping ────────────────────────────────────────────────
 
-interface LevelDef {
+export interface LevelDef {
   min: number;
   max: number;
   level: string;
 }
 
-const LEVELS: LevelDef[] = [
+export const LEVELS: LevelDef[] = [
   { min: 0,  max: 15,  level: 'hatred' },
   { min: 15, max: 30,  level: 'hostile' },
   { min: 30, max: 45,  level: 'indifferent' },
@@ -95,6 +95,7 @@ function saveState(s: PersistedAffinity) {
 interface UseAffinityEngineOptions {
   updateAffinity: (affinity: number, level: string) => void;
   showMilestone: (message: string) => void;
+  showPointGain: (delta: number, streak: boolean) => void;
 }
 
 /**
@@ -102,15 +103,17 @@ interface UseAffinityEngineOptions {
  * It subscribes to `gatewayAdapter.message$` to detect user/AI messages
  * and gradually adjusts the affinity value.
  */
-export function useAffinityEngine({ updateAffinity, showMilestone }: UseAffinityEngineOptions) {
+export function useAffinityEngine({ updateAffinity, showMilestone, showPointGain }: UseAffinityEngineOptions) {
   const stateRef = useRef<PersistedAffinity>(loadState());
   const backendDrivenRef = useRef(false);
 
   // Keep latest callbacks in refs to avoid re-subscribing
   const updateAffinityRef = useRef(updateAffinity);
   const showMilestoneRef = useRef(showMilestone);
+  const showPointGainRef = useRef(showPointGain);
   useEffect(() => { updateAffinityRef.current = updateAffinity; }, [updateAffinity]);
   useEffect(() => { showMilestoneRef.current = showMilestone; }, [showMilestone]);
+  useEffect(() => { showPointGainRef.current = showPointGain; }, [showPointGain]);
 
   useEffect(() => {
     // On mount: push persisted affinity into context
@@ -155,6 +158,12 @@ export function useAffinityEngine({ updateAffinity, showMilestone }: UseAffinity
       stateRef.current = newState;
       saveState(newState);
       updateAffinityRef.current(clamped, newLevel);
+
+      // Show floating point gain indicator
+      const totalDelta = delta + bonus;
+      if (totalDelta !== 0) {
+        showPointGainRef.current(totalDelta, bonus > 0);
+      }
     }
 
     // ── Subscribe to message stream ─────────────────────────────

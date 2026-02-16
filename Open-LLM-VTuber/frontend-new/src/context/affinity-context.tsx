@@ -49,15 +49,23 @@ export function AffinityProvider({ children }: { children: ReactNode }) {
     }, 5000);
   }, []);
 
+  const showPointGain = useCallback((delta: number, streak: boolean) => {
+    const id = ++pointGainIdRef.current;
+    setState(prev => ({ ...prev, pointGains: [...prev.pointGains, { id, delta, streak }] }));
+    setTimeout(() => {
+      setState(prev => ({ ...prev, pointGains: prev.pointGains.filter(p => p.id !== id) }));
+    }, 1500);
+  }, []);
+
   const setExpression = useCallback((expression: string, intensity: number) => {
     setState(prev => ({ ...prev, currentExpression: expression, expressionIntensity: intensity }));
   }, []);
 
   // Frontend affinity engine — auto-computes affinity from chat events
-  useAffinityEngine({ updateAffinity, showMilestone });
+  useAffinityEngine({ updateAffinity, showMilestone, showPointGain });
 
   return (
-    <AffinityContext.Provider value={{ ...state, updateAffinity, showMilestone, setExpression }}>
+    <AffinityContext.Provider value={{ ...state, updateAffinity, showMilestone, showPointGain, setExpression }}>
       {children}
     </AffinityContext.Provider>
   );
