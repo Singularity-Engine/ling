@@ -151,7 +151,9 @@
     "copyCode": "Copy code",
     "codeCopied": "Code copied",
     "copy": "Copy",
-    "copied": "Copied"
+    "copied": "Copied",
+    "toolCollapse": "Collapse",
+    "toolExpandLines": "Expand {{count}} more lines"
   },
   "connection": {
     "connected": "Connected",
