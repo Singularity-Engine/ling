@@ -26,6 +26,7 @@ import { AffinityProvider } from "./context/affinity-context";
 import { ToolStateProvider } from "./context/tool-state-context";
 import { TTSStateProvider } from "./context/tts-state-context";
 import { StarField } from "./components/background/StarField";
+import { MOBILE_BREAKPOINT } from "./constants/breakpoints";
 import { BackgroundReactor } from "./components/effects/BackgroundReactor";
 import { AudioVisualizer } from "./components/effects/AudioVisualizer";
 import { CrystalField } from "./components/crystal/CrystalField";

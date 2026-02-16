@@ -1,4 +1,5 @@
 import { useRef, useEffect, useCallback } from "react";
+import { MOBILE_BREAKPOINT } from "@/constants/breakpoints";
 
 export type ParticlePhase = "float" | "converge" | "explode" | "fade";
 

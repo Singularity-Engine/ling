@@ -28,6 +28,7 @@ import { gatewayAdapter } from '@/services/gateway-message-adapter';
 import { ttsService } from '@/services/tts-service';
 import { asrService } from '@/services/asr-service';
 import { useTTSState } from '@/context/tts-state-context';
+import { isMobileViewport } from '@/constants/breakpoints';
 
 // ─── Gateway configuration ──────────────────────────────────────
 
