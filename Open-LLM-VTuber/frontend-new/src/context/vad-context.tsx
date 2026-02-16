@@ -3,7 +3,7 @@ import {
   createContext, useContext, useRef, useCallback, useEffect, useReducer, useMemo,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MicVAD } from '@ricky0123/vad-web';
+import type { MicVAD } from '@ricky0123/vad-web';
 import { useInterrupt } from '@/components/canvas/live2d';
 import { audioTaskQueue } from '@/utils/task-queue';
 import { useSendAudio } from '@/hooks/utils/use-send-audio';
@@ -276,6 +276,7 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
    * Initialize new VAD instance
    */
   const initVAD = async () => {
+    const { MicVAD } = await import('@ricky0123/vad-web');
     const newVAD = await MicVAD.new({
       model: "v5",
       preSpeechPadFrames: 20,
