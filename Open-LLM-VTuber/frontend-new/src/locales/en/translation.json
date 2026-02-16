@@ -221,12 +221,20 @@
     "scrollToLatest": "Scroll to latest",
     "newMessages": "New messages"
   },
+  "about": {
+    "name": "Ling",
+    "tagline": "Your AI companion, always here for you.",
+    "version": "Version",
+    "github": "GitHub",
+    "docs": "Docs"
+  },
   "shortcuts": {
     "title": "Keyboard Shortcuts",
     "toggleMic": "Toggle microphone",
     "focusInput": "Focus input",
     "toggleChat": "Toggle chat panel",
     "newChat": "New conversation",
+    "showAbout": "About",
     "showHelp": "Show shortcuts help",
     "closeOverlay": "Close overlay",
     "tip": "Press Shift+? anytime to view"

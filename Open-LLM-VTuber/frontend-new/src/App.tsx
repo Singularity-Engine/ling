@@ -34,6 +34,7 @@ import { Toaster } from "./components/ui/toaster";
 import { useWebSocket } from "./context/websocket-context";
 import { useKeyboardShortcuts, ShortcutDef } from "./hooks/use-keyboard-shortcuts";
 import { ShortcutsOverlay } from "./components/shortcuts/ShortcutsOverlay";
+import { AboutOverlay } from "./components/about/AboutOverlay";
 import "./index.css";
 
 // Error Boundary
@@ -60,6 +61,7 @@ function MainContent(): JSX.Element {
   const [chatExpanded, setChatExpanded] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   // Contexts for keyboard shortcuts
   const { micOn, startMic, stopMic } = useVAD();
@@ -130,6 +132,12 @@ function MainContent(): JSX.Element {
       allowInInput: true,
     },
     {
+      key: "shift+i",
+      labelKey: "shortcuts.showAbout",
+      action: () => setAboutOpen(prev => !prev),
+      allowInInput: true,
+    },
+    {
       key: "shift+?",
       labelKey: "shortcuts.showHelp",
       action: () => setShortcutsOpen(prev => !prev),
@@ -138,7 +146,7 @@ function MainContent(): JSX.Element {
     {
       key: "escape",
       labelKey: "shortcuts.closeOverlay",
-      action: () => setShortcutsOpen(false),
+      action: () => { setShortcutsOpen(false); setAboutOpen(false); },
       allowInInput: true,
     },
   ], [micOn, startMic, stopMic, createNewChat, t]);
@@ -217,6 +225,32 @@ function MainContent(): JSX.Element {
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
         </button>
+        <button
+          onClick={() => setAboutOpen(true)}
+          aria-label={t("shortcuts.showAbout")}
+          title={t("shortcuts.showAbout")}
+          style={{
+            width: isMobile ? "44px" : "42px",
+            height: isMobile ? "44px" : "42px",
+            borderRadius: "50%",
+            background: "rgba(255, 255, 255, 0.08)",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            padding: 0,
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+        </button>
       </div>
 
       {/* ===== Layer 2: 浮动聊天区域 ===== */}
@@ -293,6 +327,7 @@ function MainContent(): JSX.Element {
 
       {/* ===== Layer 99: 快捷键帮助浮层 ===== */}
       <ShortcutsOverlay open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+      <AboutOverlay open={aboutOpen} onClose={() => setAboutOpen(false)} />
     </div>
   );
 }

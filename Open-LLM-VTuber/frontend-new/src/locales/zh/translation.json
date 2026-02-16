@@ -218,12 +218,20 @@
     "scrollToLatest": "滚动到最新消息",
     "newMessages": "新消息"
   },
+  "about": {
+    "name": "灵 · Ling",
+    "tagline": "你的 AI 伙伴，一直在这里。",
+    "version": "版本",
+    "github": "GitHub",
+    "docs": "文档"
+  },
   "shortcuts": {
     "title": "键盘快捷键",
     "toggleMic": "切换麦克风",
     "focusInput": "聚焦输入框",
     "toggleChat": "展开/收起对话",
     "newChat": "新建对话",
+    "showAbout": "关于",
     "showHelp": "显示快捷键帮助",
     "closeOverlay": "关闭弹窗",
     "tip": "按 Shift+? 随时查看"

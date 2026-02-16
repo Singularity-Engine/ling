@@ -14,6 +14,7 @@ const SHORTCUT_GROUPS = [
   { labelKey: "shortcuts.focusInput", keys: "/" },
   { labelKey: "shortcuts.toggleChat", keys: `${MOD} + J` },
   { labelKey: "shortcuts.newChat", keys: `${MOD} + K` },
+  { labelKey: "shortcuts.showAbout", keys: "Shift + I" },
   { labelKey: "shortcuts.showHelp", keys: "Shift + ?" },
   { labelKey: "shortcuts.closeOverlay", keys: "Esc" },
 ] as const;
