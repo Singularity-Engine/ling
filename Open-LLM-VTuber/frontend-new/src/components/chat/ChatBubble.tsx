@@ -1,7 +1,17 @@
 import { memo, useState, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
 import { useTranslation } from "react-i18next";
 import { ToolResultCard } from "./ToolResultCard";
+
+const remarkPlugins = [remarkGfm];
+const rehypePlugins = [rehypeHighlight];
+const mdComponents = {
+  a: ({ ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a {...props} target="_blank" rel="noopener noreferrer" />
+  ),
+};
 
 // Inject animation styles once
 const STYLE_ID = "chat-bubble-styles";
@@ -115,7 +125,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
               </span>
             ) : (
               <div className="md-content" style={{ fontSize: "14px", color: "rgba(255,255,255,0.88)", lineHeight: 1.7, letterSpacing: "0.3px" }}>
-                <ReactMarkdown>{content}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins} components={mdComponents}>{content}</ReactMarkdown>
                 {isStreaming && (
                   <span
                     style={{
@@ -137,7 +147,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
             <button
               onClick={handleCopy}
               className="chat-copy-btn"
-              title={copied ? "已复制" : "复制"}
+              title={copied ? t("chat.copied") : t("chat.copy")}
               style={{
                 position: "absolute",
                 top: "6px",
