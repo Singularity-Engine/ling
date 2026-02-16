@@ -92,8 +92,10 @@
     "leave": "离开"
   },
   "history": {
-    "chatHistoryList": "聊天历史列表",
-    "noMessages": "暂无消息"
+    "chatHistoryList": "聊天记录",
+    "noMessages": "暂无消息",
+    "emptyState": "还没有聊天记录",
+    "emptyStateHint": "开始新的对话后会在这里显示"
   },
   "notification": {
     "characterLoaded": "新角色已加载",

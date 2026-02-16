@@ -1,6 +1,7 @@
 import { Box, Button } from '@chakra-ui/react';
 import { FiTrash2 } from 'react-icons/fi';
-import { formatDistanceToNow } from 'date-fns';
+import { format, isToday, isYesterday, isThisYear } from 'date-fns';
+import { zhCN, enUS } from 'date-fns/locale';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -32,6 +33,28 @@ interface HistoryItemProps {
   isDeleteDisabled: boolean;
 }
 
+function formatTimestamp(timestamp: string, lang: string): string {
+  const date = new Date(timestamp);
+  const locale = lang === 'zh' ? zhCN : enUS;
+
+  if (isToday(date)) {
+    return format(date, 'HH:mm', { locale });
+  }
+  if (isYesterday(date)) {
+    return lang === 'zh'
+      ? `昨天 ${format(date, 'HH:mm', { locale })}`
+      : `Yesterday ${format(date, 'HH:mm', { locale })}`;
+  }
+  if (isThisYear(date)) {
+    return lang === 'zh'
+      ? format(date, 'M月d日 HH:mm', { locale })
+      : format(date, 'MMM d, HH:mm', { locale });
+  }
+  return lang === 'zh'
+    ? format(date, 'yyyy年M月d日', { locale })
+    : format(date, 'MMM d, yyyy', { locale });
+}
+
 // Reusable components
 const HistoryItem = memo(({
   isSelected,
@@ -40,32 +63,38 @@ const HistoryItem = memo(({
   onDelete,
   isDeleteDisabled,
 }: HistoryItemProps): JSX.Element => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   return (
     <Box
       {...sidebarStyles.historyDrawer.historyItem}
       {...(isSelected ? sidebarStyles.historyDrawer.historyItemSelected : {})}
       onClick={onSelect}
+      className="group"
     >
       <Box {...sidebarStyles.historyDrawer.historyHeader}>
         <Box {...sidebarStyles.historyDrawer.timestamp}>
           {latestMessage.timestamp
-            ? formatDistanceToNow(new Date(latestMessage.timestamp), { addSuffix: true })
+            ? formatTimestamp(latestMessage.timestamp, i18n.language)
             : t('history.noMessages')}
         </Box>
-        <Button
-          onClick={onDelete}
-          disabled={isDeleteDisabled}
-          aria-label={t('ui.deleteChat')}
-          title={t('ui.deleteChat')}
-          {...sidebarStyles.historyDrawer.deleteButton}
-        >
-          <FiTrash2 />
-        </Button>
+        {!isDeleteDisabled && (
+          <Button
+            onClick={onDelete}
+            aria-label={t('ui.deleteChat')}
+            title={t('ui.deleteChat')}
+            {...sidebarStyles.historyDrawer.deleteButton}
+          >
+            <FiTrash2 />
+          </Button>
+        )}
       </Box>
-      {latestMessage.content && (
+      {latestMessage.content ? (
         <Box {...sidebarStyles.historyDrawer.messagePreview}>
           {latestMessage.content}
+        </Box>
+      ) : (
+        <Box {...sidebarStyles.historyDrawer.messagePreview} color="whiteAlpha.400" fontStyle="italic">
+          {t('history.noMessages')}
         </Box>
       )}
     </Box>
@@ -73,6 +102,26 @@ const HistoryItem = memo(({
 });
 
 HistoryItem.displayName = 'HistoryItem';
+
+// Empty state component
+const EmptyState = memo((): JSX.Element => {
+  const { t } = useTranslation();
+  return (
+    <Box {...sidebarStyles.historyDrawer.emptyState}>
+      <Box {...sidebarStyles.historyDrawer.emptyStateIcon}>
+        💬
+      </Box>
+      <Box {...sidebarStyles.historyDrawer.emptyStateText}>
+        {t('history.emptyState')}
+      </Box>
+      <Box {...sidebarStyles.historyDrawer.emptyStateHint}>
+        {t('history.emptyStateHint')}
+      </Box>
+    </Box>
+  );
+});
+
+EmptyState.displayName = 'EmptyState';
 
 // Main component
 function HistoryDrawer({ children }: HistoryDrawerProps): JSX.Element {
@@ -104,21 +153,25 @@ function HistoryDrawer({ children }: HistoryDrawerProps): JSX.Element {
         </DrawerHeader>
 
         <DrawerBody>
-          <Box {...sidebarStyles.historyDrawer.listContainer}>
-            {historyList.map((history: HistoryInfo) => (
-              <HistoryItem
-                key={history.uid}
-                isSelected={currentHistoryUid === history.uid}
-                latestMessage={getLatestMessageContent(history)}
-                onSelect={() => fetchAndSetHistory(history.uid)}
-                onDelete={(e) => {
-                  e.stopPropagation();
-                  deleteHistory(history.uid);
-                }}
-                isDeleteDisabled={currentHistoryUid === history.uid}
-              />
-            ))}
-          </Box>
+          {historyList.length === 0 ? (
+            <EmptyState />
+          ) : (
+            <Box {...sidebarStyles.historyDrawer.listContainer}>
+              {historyList.map((history: HistoryInfo) => (
+                <HistoryItem
+                  key={history.uid}
+                  isSelected={currentHistoryUid === history.uid}
+                  latestMessage={getLatestMessageContent(history)}
+                  onSelect={() => fetchAndSetHistory(history.uid)}
+                  onDelete={(e) => {
+                    e.stopPropagation();
+                    deleteHistory(history.uid);
+                  }}
+                  isDeleteDisabled={currentHistoryUid === history.uid}
+                />
+              ))}
+            </Box>
+          )}
         </DrawerBody>
 
         <DrawerFooter>

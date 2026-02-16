@@ -95,8 +95,10 @@
     "leave": "Leave"
   },
   "history": {
-    "chatHistoryList": "Chat History List",
-    "noMessages": "No messages"
+    "chatHistoryList": "Chat History",
+    "noMessages": "No messages",
+    "emptyState": "No chat history yet",
+    "emptyStateHint": "Start a new conversation to see it here"
   },
   "notification": {
     "characterLoaded": "New Character Loaded",
