@@ -211,11 +211,6 @@ canvas {
     font-size: 16px !important; /* 防止 iOS 自动缩放 */
   }
 
-  /* Live2D 画布在手机上缩小并上移，避免遮挡聊天 */
-  canvas#canvas {
-    transform: scale(0.7) translateY(-15%);
-    transform-origin: top center;
-  }
 
   /* Landing 动画文字缩小 */
   .landing-text-line {
