@@ -40,6 +40,7 @@ import { ShortcutsOverlay } from "./components/shortcuts/ShortcutsOverlay";
 import { AboutOverlay } from "./components/about/AboutOverlay";
 import { NetworkStatusBanner } from "./components/effects/NetworkStatusBanner";
 import { TapParticles } from "./components/effects/TapParticles";
+import { useAffinityIdleExpression } from "./hooks/use-affinity-idle-expression";
 import "./index.css";
 
 // Error Boundary
