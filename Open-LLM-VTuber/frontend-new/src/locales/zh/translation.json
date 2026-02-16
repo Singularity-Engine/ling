@@ -153,7 +153,12 @@
     "copied": "已复制",
     "toolCollapse": "收起",
     "toolExpandLines": "展开剩余 {{count}} 行",
-    "markdownHint": "支持 Markdown 格式"
+    "markdownHint": "支持 Markdown 格式",
+    "copyText": "复制文本",
+    "regenerate": "重新生成",
+    "readAloud": "朗读",
+    "textCopied": "文本已复制",
+    "regenerating": "正在重新生成..."
   },
   "connection": {
     "connected": "已连接",

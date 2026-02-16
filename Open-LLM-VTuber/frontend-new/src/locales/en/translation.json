@@ -156,7 +156,12 @@
     "copied": "Copied",
     "toolCollapse": "Collapse",
     "toolExpandLines": "Expand {{count}} more lines",
-    "markdownHint": "Markdown supported"
+    "markdownHint": "Markdown supported",
+    "copyText": "Copy text",
+    "regenerate": "Regenerate",
+    "readAloud": "Read aloud",
+    "textCopied": "Text copied",
+    "regenerating": "Regenerating..."
   },
   "connection": {
     "connected": "Connected",
