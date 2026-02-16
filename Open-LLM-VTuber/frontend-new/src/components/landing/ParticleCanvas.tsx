@@ -184,6 +184,12 @@ export function ParticleCanvas({ phase, phaseProgress = 0 }: ParticleCanvasProps
         ctx.restore();
       });
 
+      // Stop loop when all particles are invisible (mobile perf)
+      if ((phase === "fade" || phase === "explode") &&
+          particlesRef.current.every((p) => p.alpha <= 0)) {
+        return;
+      }
+
       // Draw central glow during converge phase
       if (phase === "converge" && phaseProgress > 0.3) {
         const glowAlpha = (phaseProgress - 0.3) * 1.4;

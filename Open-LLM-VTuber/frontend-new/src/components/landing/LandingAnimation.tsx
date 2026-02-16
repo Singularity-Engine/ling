@@ -167,6 +167,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
               flexDirection: "column",
               alignItems: "center",
               gap: "16px",
+              maxWidth: "min(90vw, 600px)",
             }}
           >
             {LINES.map((line, i) => {
@@ -187,6 +188,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                     color: i === 0 ? "#e2d4ff" : "rgba(255,255,255,0.8)",
                     letterSpacing: "0.05em",
                     textAlign: "center",
+                    wordBreak: "break-word" as const,
                     minHeight: i === 0 ? "36px" : "28px",
                     animation: "fadeInUp 0.5s ease-out both",
                     animationDelay: `${i * 0.1}s`,
@@ -253,19 +255,24 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
         </div>
       )}
 
-      {/* Skip hint — 移动端也友好 */}
+      {/* Skip hint — 移动端友好触摸区域 */}
       <div
         onClick={handleSkip}
         style={{
           position: "fixed",
-          bottom: "24px",
-          right: "24px",
+          bottom: "max(16px, env(safe-area-inset-bottom, 0px))",
+          right: "16px",
           color: "rgba(255,255,255,0.3)",
-          fontSize: "12px",
+          fontSize: "13px",
           zIndex: 5,
           animation: "fadeInUp 1s ease-out 1s both",
           cursor: "pointer",
-          padding: "8px",
+          minWidth: "48px",
+          minHeight: "48px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "8px 12px",
         }}
       >
         {t("landing.skip")}
