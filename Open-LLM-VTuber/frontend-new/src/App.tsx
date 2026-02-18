@@ -93,6 +93,7 @@ function MainContent(): JSX.Element {
   const [isMobile, setIsMobile] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [kbOffset, setKbOffset] = useState(0);
 
   // Contexts for keyboard shortcuts
   const { micOn, startMic, stopMic } = useVAD();
@@ -120,6 +121,26 @@ function MainContent(): JSX.Element {
     document.body.style.position = "fixed";
     document.documentElement.style.width = "100%";
     document.body.style.width = "100%";
+  }, []);
+
+  // Mobile virtual keyboard: use visualViewport API to detect keyboard height
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const onResize = () => {
+      // When keyboard opens, visualViewport.height < window.innerHeight
+      // The offset from the bottom tells us how much the keyboard covers
+      const offset = window.innerHeight - vv.height - vv.offsetTop;
+      setKbOffset(Math.max(0, offset));
+    };
+
+    vv.addEventListener("resize", onResize);
+    vv.addEventListener("scroll", onResize);
+    return () => {
+      vv.removeEventListener("resize", onResize);
+      vv.removeEventListener("scroll", onResize);
+    };
   }, []);
 
   const toggleChat = useCallback(() => {
