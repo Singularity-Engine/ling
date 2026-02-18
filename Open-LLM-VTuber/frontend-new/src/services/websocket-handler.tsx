@@ -24,7 +24,7 @@ import { useBrowser } from '@/context/browser-context';
 import { useAffinity } from '@/context/affinity-context';
 import { useToolState, categorize } from '@/context/tool-state-context';
 import { gatewayConnector, GatewayState } from '@/services/gateway-connector';
-import { gatewayAdapter } from '@/services/gateway-message-adapter';
+import { gatewayAdapter, GatewayMessageEvent } from '@/services/gateway-message-adapter';
 import { ttsService } from '@/services/tts-service';
 import { asrService } from '@/services/asr-service';
 import { useTTSState } from '@/context/tts-state-context';
@@ -349,17 +349,20 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       // ── Phase 7: Affinity & emotion ──
       case 'affinity-update':
         if (affinityContext) {
-          affinityContext.updateAffinity(message.affinity, message.level);
+          const aMsg = message as GatewayMessageEvent;
+          affinityContext.updateAffinity(aMsg.affinity, aMsg.level);
         }
         break;
       case 'affinity-milestone':
         if (affinityContext) {
-          affinityContext.showMilestone(message.message || `好感度达到 ${message.milestone}！`);
+          const mMsg = message as GatewayMessageEvent;
+          affinityContext.showMilestone(message.content || `好感度达到 ${mMsg.milestone}！`);
         }
         break;
       case 'emotion-expression':
         if (affinityContext) {
-          affinityContext.setExpression(message.expression, message.intensity || 0.5);
+          const eMsg = message as GatewayMessageEvent;
+          affinityContext.setExpression(eMsg.expression, eMsg.intensity || 0.5);
         }
         break;
 
@@ -555,7 +558,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
                   volumes: result.volumes,
                   sliceLength: result.sliceLength,
                   displayText: { text: sentence, name: '灵', avatar: '' },
-                  expressions: expr ? [{ expression: expr, intensity: 1.0 }] : null,
+                  expressions: expr ? [expr] : null,
                   forwarded: false,
                 });
               }

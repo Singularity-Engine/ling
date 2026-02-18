@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useRef, useState, useEffect } from 'react';
 import { useToolState } from '../../context/tool-state-context';
 import { useAiState } from '../../context/ai-state-context';
 import { useAffinity } from '../../context/affinity-context';
@@ -34,8 +34,30 @@ const DEFAULT_TINT: AffinityTint = AFFINITY_TINTS.neutral;
 export const BackgroundReactor = memo(() => {
   const { currentPhase } = useToolState();
   const { isThinkingSpeaking } = useAiState();
-  const { level } = useAffinity();
+  const { level, pointGains } = useAffinity();
   const tint = AFFINITY_TINTS[level] || DEFAULT_TINT;
+
+  // ── Level transition detection ─────────────────────────────────
+  const prevLevelRef = useRef(level);
+  const [levelTransition, setLevelTransition] = useState<{
+    key: number;
+    color: string;
+  } | null>(null);
+  const transitionKeyRef = useRef(0);
+
+  useEffect(() => {
+    if (prevLevelRef.current !== level) {
+      prevLevelRef.current = level;
+      transitionKeyRef.current++;
+      setLevelTransition({ key: transitionKeyRef.current, color: tint.color });
+      const timer = setTimeout(() => setLevelTransition(null), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [level, tint.color]);
+
+  // ── Point gain pulse ───────────────────────────────────────────
+  const latestGain = pointGains.length > 0 ? pointGains[pointGains.length - 1] : null;
+  const gainPulseColor = latestGain && latestGain.delta > 0 ? tint.color : '#ef4444';
 
   const isThinking = currentPhase === 'thinking';
   const isWorking = currentPhase === 'working';
@@ -177,6 +199,17 @@ export const BackgroundReactor = memo(() => {
           0%, 100% { opacity: var(--affinity-idle-opacity, 0.1); }
           50% { opacity: calc(var(--affinity-idle-opacity, 0.1) * 1.6); }
         }
+        @keyframes bgGainPulse {
+          0% { opacity: 0; transform: scale(0.85); }
+          25% { opacity: 0.4; transform: scale(1); }
+          100% { opacity: 0; transform: scale(1.08); }
+        }
+        @keyframes bgLevelBloom {
+          0% { opacity: 0; transform: scale(0.6); }
+          20% { opacity: 0.65; transform: scale(1); }
+          55% { opacity: 0.3; transform: scale(1.15); }
+          100% { opacity: 0; transform: scale(1.3); }
+        }
       `}</style>
       <div style={glowStyle} />
       <div style={ambientStyle} />
@@ -205,6 +238,35 @@ export const BackgroundReactor = memo(() => {
             }}
           />
         </>
+      )}
+      {/* Affinity point-gain pulse — brief radial flash on every affinity change */}
+      {latestGain && (
+        <div
+          key={latestGain.id}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            background: `radial-gradient(ellipse 55% 45% at 50% 45%, ${gainPulseColor}40 0%, ${gainPulseColor}15 40%, transparent 65%)`,
+            animation: 'bgGainPulse 1.2s ease-out forwards',
+            willChange: 'opacity, transform',
+          }}
+        />
+      )}
+      {/* Level transition bloom — dramatic flash when crossing affinity level boundary */}
+      {levelTransition && (
+        <div
+          key={levelTransition.key}
+          style={{
+            position: 'absolute',
+            inset: '-5%',
+            pointerEvents: 'none',
+            borderRadius: '50%',
+            background: `radial-gradient(ellipse 50% 45% at 50% 45%, ${levelTransition.color}55 0%, ${levelTransition.color}22 40%, transparent 65%)`,
+            animation: 'bgLevelBloom 1.8s ease-out forwards',
+            willChange: 'opacity, transform',
+          }}
+        />
       )}
     </>
   );
