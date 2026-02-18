@@ -1,4 +1,4 @@
-import { memo, useState, useCallback, useRef } from "react";
+import { memo, useState, useCallback, useRef, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -8,10 +8,84 @@ import { ToolResultCard } from "./ToolResultCard";
 
 const remarkPlugins = [remarkGfm];
 const rehypePlugins = [rehypeHighlight];
+
+// Language display names
+const LANG_LABELS: Record<string, string> = {
+  js: "JavaScript", javascript: "JavaScript", ts: "TypeScript", typescript: "TypeScript",
+  jsx: "JSX", tsx: "TSX", py: "Python", python: "Python", rb: "Ruby", ruby: "Ruby",
+  go: "Go", rust: "Rust", rs: "Rust", java: "Java", cpp: "C++", c: "C", cs: "C#",
+  csharp: "C#", swift: "Swift", kotlin: "Kotlin", kt: "Kotlin", php: "PHP",
+  sql: "SQL", html: "HTML", css: "CSS", scss: "SCSS", less: "LESS", json: "JSON",
+  yaml: "YAML", yml: "YAML", xml: "XML", md: "Markdown", markdown: "Markdown",
+  bash: "Bash", sh: "Shell", shell: "Shell", zsh: "Zsh", powershell: "PowerShell",
+  ps1: "PowerShell", dockerfile: "Dockerfile", docker: "Docker", toml: "TOML",
+  ini: "INI", lua: "Lua", r: "R", dart: "Dart", scala: "Scala", elixir: "Elixir",
+  ex: "Elixir", clojure: "Clojure", clj: "Clojure", haskell: "Haskell", hs: "Haskell",
+  graphql: "GraphQL", gql: "GraphQL", vue: "Vue", svelte: "Svelte",
+  plaintext: "Text", text: "Text", txt: "Text",
+};
+
+function extractLang(children: ReactNode): string | null {
+  if (!children || typeof children !== "object") return null;
+  const child = Array.isArray(children) ? children[0] : children;
+  if (!child || typeof child !== "object" || !("props" in child)) return null;
+  const cls = (child as { props?: { className?: string } }).props?.className || "";
+  const match = cls.match(/language-(\S+)/);
+  return match ? match[1] : null;
+}
+
+function extractTextContent(node: ReactNode): string {
+  if (typeof node === "string") return node;
+  if (typeof node === "number") return String(node);
+  if (!node) return "";
+  if (Array.isArray(node)) return node.map(extractTextContent).join("");
+  if (typeof node === "object" && "props" in node) {
+    return extractTextContent((node as { props?: { children?: ReactNode } }).props?.children);
+  }
+  return "";
+}
+
+function CodeBlockHeader({ lang, code }: { lang: string | null; code: string }) {
+  const [copied, setCopied] = useState(false);
+  const label = lang ? (LANG_LABELS[lang.toLowerCase()] || lang) : null;
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(code).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }, [code]);
+
+  return (
+    <div className="code-block-header">
+      {label && <span className="code-block-lang">{label}</span>}
+      <button onClick={handleCopy} className="code-block-copy" aria-label={copied ? "Copied" : "Copy code"}>
+        {copied ? (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        )}
+      </button>
+    </div>
+  );
+}
+
+function CodeBlock({ children, ...props }: React.HTMLAttributes<HTMLPreElement> & { children?: ReactNode }) {
+  const lang = extractLang(children);
+  const code = extractTextContent(children).replace(/\n$/, "");
+  return (
+    <div className="code-block-wrap">
+      <CodeBlockHeader lang={lang} code={code} />
+      <pre {...props}>{children}</pre>
+    </div>
+  );
+}
+
 const mdComponents = {
   a: ({ ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a {...props} target="_blank" rel="noopener noreferrer" />
   ),
+  pre: CodeBlock,
 };
 
 // Inject animation styles once
