@@ -128,6 +128,8 @@ export function MessageContextMenu({ message, position, onClose }: MessageContex
   return (
     <Box
       ref={menuRef}
+      role="menu"
+      aria-label={t('chat.messageActions')}
       position="fixed"
       left={`${adjustedPosition.x}px`}
       top={`${adjustedPosition.y}px`}
@@ -150,22 +152,22 @@ export function MessageContextMenu({ message, position, onClose }: MessageContex
       }}
     >
       {/* Copy */}
-      <Flex {...menuItemStyle} onClick={handleCopy}>
-        <FaCopy size={13} color="var(--chakra-colors-whiteAlpha-700)" />
+      <Flex {...menuItemStyle} role="menuitem" tabIndex={0} onClick={handleCopy} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCopy(); } }}>
+        <FaCopy size={13} color="var(--chakra-colors-whiteAlpha-700)" aria-hidden="true" />
         <Text fontSize="sm" color="whiteAlpha.900">{t('chat.copyText')}</Text>
       </Flex>
 
       {/* Regenerate — AI messages only */}
       {isAI && (
-        <Flex {...menuItemStyle} onClick={handleRegenerate}>
-          <FaRedo size={13} color="var(--chakra-colors-whiteAlpha-700)" />
+        <Flex {...menuItemStyle} role="menuitem" tabIndex={0} onClick={handleRegenerate} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleRegenerate(); } }}>
+          <FaRedo size={13} color="var(--chakra-colors-whiteAlpha-700)" aria-hidden="true" />
           <Text fontSize="sm" color="whiteAlpha.900">{t('chat.regenerate')}</Text>
         </Flex>
       )}
 
       {/* Read Aloud */}
-      <Flex {...menuItemStyle} onClick={handleReadAloud}>
-        <FaVolumeUp size={13} color="var(--chakra-colors-whiteAlpha-700)" />
+      <Flex {...menuItemStyle} role="menuitem" tabIndex={0} onClick={handleReadAloud} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleReadAloud(); } }}>
+        <FaVolumeUp size={13} color="var(--chakra-colors-whiteAlpha-700)" aria-hidden="true" />
         <Text fontSize="sm" color="whiteAlpha.900">{t('chat.readAloud')}</Text>
       </Flex>
     </Box>

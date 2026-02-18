@@ -91,7 +91,11 @@ function ScreenPanel(): JSX.Element {
       >
         <Box
           {...sidebarStyles.screenPanel.screenContainer}
+          role="button"
+          tabIndex={0}
+          aria-label={isStreaming ? t('footer.screenStopping') : t('footer.screenControl')}
           onClick={toggleCapture}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleCapture(); } }}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           cursor="pointer"

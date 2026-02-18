@@ -44,19 +44,44 @@ import { useAffinityIdleExpression } from "./hooks/use-affinity-idle-expression"
 import "./index.css";
 
 // Error Boundary
-interface ErrorBoundaryState { hasError: boolean; error: Error | null; errorInfo: ErrorInfo | null; }
+interface ErrorBoundaryState { hasError: boolean; error: Error | null; errorInfo: ErrorInfo | null; showDetail: boolean; }
 class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryState> {
-  constructor(props: { children: ReactNode }) { super(props); this.state = { hasError: false, error: null, errorInfo: null }; }
+  constructor(props: { children: ReactNode }) { super(props); this.state = { hasError: false, error: null, errorInfo: null, showDetail: false }; }
   static getDerivedStateFromError(error: Error) { return { hasError: true, error }; }
   componentDidCatch(error: Error, errorInfo: ErrorInfo) { this.setState({ errorInfo }); console.error('[ErrorBoundary]', error, errorInfo); }
   render() {
     if (this.state.hasError) {
-      return (<div style={{ width: '100vw', height: '100vh', background: '#0a0015', color: '#ff6b6b', padding: 20, fontFamily: 'monospace', fontSize: 13, overflow: 'auto', wordBreak: 'break-all' }}>
-        <h2 style={{ color: '#c4b5fd', marginBottom: 12 }}>⚠️ 渲染错误</h2>
-        <p>{this.state.error?.toString()}</p>
-        <pre style={{ color: 'rgba(255,255,255,0.5)', marginTop: 12, whiteSpace: 'pre-wrap', fontSize: 11 }}>{this.state.errorInfo?.componentStack}</pre>
-        <button onClick={() => { localStorage.clear(); window.location.reload(); }} style={{ marginTop: 16, padding: '10px 24px', background: 'rgba(139,92,246,0.3)', border: '1px solid rgba(139,92,246,0.6)', borderRadius: 8, color: '#c4b5fd', fontSize: 14, cursor: 'pointer' }}>清除缓存并刷新</button>
-      </div>);
+      const btnBase: React.CSSProperties = { padding: '10px 24px', borderRadius: 8, fontSize: 14, cursor: 'pointer', border: 'none', transition: 'opacity 0.2s' };
+      return (
+        <div style={{ width: '100vw', height: '100vh', background: '#0a0015', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}>
+          <div style={{ maxWidth: 440, textAlign: 'center', padding: 32 }}>
+            <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.8 }}>:(</div>
+            <h2 style={{ color: '#c4b5fd', marginBottom: 8, fontSize: 20, fontWeight: 600 }}>页面出了点问题</h2>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, marginBottom: 24, lineHeight: 1.6 }}>
+              别担心，刷新一下通常就好了。<br />如果问题持续出现，可以尝试清除缓存。
+            </p>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button onClick={() => window.location.reload()} style={{ ...btnBase, background: 'rgba(139,92,246,0.5)', color: '#fff' }}>
+                刷新页面
+              </button>
+              <button onClick={() => { localStorage.clear(); window.location.reload(); }} style={{ ...btnBase, background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                清除缓存并刷新
+              </button>
+            </div>
+            <button
+              onClick={() => this.setState({ showDetail: !this.state.showDetail })}
+              style={{ marginTop: 20, background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: 12, cursor: 'pointer' }}
+            >
+              {this.state.showDetail ? '收起详情' : '查看错误详情'}
+            </button>
+            {this.state.showDetail && (
+              <pre style={{ marginTop: 12, textAlign: 'left', color: 'rgba(255,107,107,0.7)', fontSize: 11, fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all', maxHeight: 200, overflow: 'auto', background: 'rgba(0,0,0,0.3)', padding: 12, borderRadius: 8 }}>
+                {this.state.error?.toString()}{'\n'}{this.state.errorInfo?.componentStack}
+              </pre>
+            )}
+          </div>
+        </div>
+      );
     }
     return this.props.children;
   }

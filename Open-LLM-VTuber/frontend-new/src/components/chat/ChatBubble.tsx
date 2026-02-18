@@ -167,6 +167,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
             <button
               onClick={handleCopy}
               className="chat-copy-btn"
+              aria-label={copied ? t("chat.copied") : t("chat.copy")}
               title={copied ? t("chat.copied") : t("chat.copy")}
               style={{
                 position: "absolute",
@@ -199,7 +200,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
             style={{
               display: "block",
               fontSize: "10px",
-              color: "rgba(255, 255, 255, 0.25)",
+              color: "rgba(255, 255, 255, 0.5)",
               marginTop: "3px",
               textAlign: isUser ? "right" : "left",
               marginLeft: isUser ? undefined : "4px",

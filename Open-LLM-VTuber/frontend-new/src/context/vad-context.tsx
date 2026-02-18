@@ -311,11 +311,11 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
       setMicOn(true);
     } catch (error) {
       console.error('Failed to start VAD:', error);
-      console.warn("VAD not available:", error); // toaster.create({
-        // title: ...,
-        // type: ...,
-        // duration: ...,
-// });
+      toaster.create({
+        title: t('error.failedStartVAD'),
+        type: 'error',
+        duration: 4000,
+      });
     }
   }, [t]);
 
