@@ -158,6 +158,7 @@ function MainContent(): JSX.Element {
   ], [micOn, startMic, stopMic, createNewChat, t]);
 
   useKeyboardShortcuts(shortcuts);
+  useAffinityIdleExpression();
 
   return (
     <div
