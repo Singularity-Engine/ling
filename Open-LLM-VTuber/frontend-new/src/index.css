@@ -320,6 +320,11 @@ canvas {
 }
 
 /* === Markdown 内容（AI 气泡） === */
+.md-content {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
+}
 .md-content p { margin: 0 0 0.5em; }
 .md-content p:last-child { margin-bottom: 0; }
 .md-content strong { color: var(--ling-text-primary); }
@@ -334,6 +339,7 @@ canvas {
   border-radius: 4px;
   font-size: 0.9em;
   font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+  word-break: break-all;
 }
 /* Code block wrapper (language label + copy button + pre) */
 .md-content .code-block-wrap {
@@ -401,6 +407,7 @@ canvas {
   padding: 0;
   font-size: 0.85em;
   color: var(--ling-md-pre-code);
+  word-break: normal;
 }
 .md-content ul, .md-content ol { margin: 0.4em 0; padding-left: 1.5em; }
 .md-content li { margin-bottom: 0.2em; }
@@ -423,6 +430,28 @@ canvas {
   border: none;
   border-top: 1px solid var(--ling-purple-15);
   margin: 0.6em 0;
+}
+/* Table — scrollable wrapper to prevent bubble overflow */
+.md-content table {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+  border-collapse: collapse;
+  margin: 0.5em 0;
+  font-size: 0.9em;
+}
+.md-content th, .md-content td {
+  padding: 6px 12px;
+  border: 1px solid var(--ling-purple-25);
+  white-space: nowrap;
+}
+.md-content th {
+  background: rgba(255, 255, 255, 0.04);
+  font-weight: 600;
+  color: var(--ling-md-heading-color);
+}
+.md-content tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
 }
 
 /* === 主题 color-scheme === */

@@ -81,11 +81,15 @@ export const ChatArea = memo(() => {
 
   const [isNearBottom, setIsNearBottom] = useState(true);
   const [hasNewMessage, setHasNewMessage] = useState(false);
+  // Ref mirrors isNearBottom so the auto-scroll effect can read the latest
+  // value without depending on it (avoids re-firing on scroll-position changes).
+  const isNearBottomRef = useRef(true);
 
   const checkNearBottom = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
     const near = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+    isNearBottomRef.current = near;
     setIsNearBottom(near);
     if (near) setHasNewMessage(false);
   }, []);
@@ -102,10 +106,10 @@ export const ChatArea = memo(() => {
   const isStreaming = displayResponse.length > 0;
 
   useEffect(() => {
-    if (isNearBottom) {
+    if (isNearBottomRef.current) {
       const el = bottomRef.current;
       if (!el) return;
-      if (isStreaming) {
+      if (displayResponse.length > 0) {
         // Instant scroll during streaming — avoids "smooth" animation lag
         el.scrollIntoView({ behavior: "instant" });
       } else {
@@ -114,7 +118,9 @@ export const ChatArea = memo(() => {
     } else {
       setHasNewMessage(true);
     }
-  }, [messages, displayResponse, subtitleText, isNearBottom, isStreaming]);
+    // Only re-run when actual content changes, NOT on scroll-position changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, displayResponse, subtitleText]);
 
   const scrollToBottom = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
