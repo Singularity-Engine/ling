@@ -36,7 +36,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
   // Keyboard skip
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" || showButton) {
+      if (e.key === "Escape" || (showButton && (e.key === "Enter" || e.key === " "))) {
         handleSkip();
       }
     };
@@ -177,23 +177,31 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
               const text = line.slice(0, chars);
               const isActive = i === currentLine && chars < line.length;
               const isComplete = i < currentLine;
+              const isLastLine = i === LINES.length - 1;
 
               return (
                 <div
                   key={i}
                   className="landing-text-line"
                   style={{
-                    fontSize: i === 0 ? "28px" : "20px",
-                    fontWeight: i === 0 ? 700 : 400,
-                    color: i === 0 ? "#e2d4ff" : "rgba(255,255,255,0.8)",
-                    letterSpacing: "0.05em",
+                    fontSize: i === 0 ? "30px" : isLastLine ? "22px" : "18px",
+                    fontWeight: i === 0 ? 700 : isLastLine ? 500 : 400,
+                    color: i === 0
+                      ? "#e2d4ff"
+                      : isLastLine
+                        ? "rgba(196, 181, 253, 0.95)"
+                        : "rgba(255,255,255,0.6)",
+                    letterSpacing: i === 0 ? "0.08em" : "0.04em",
                     textAlign: "center",
                     wordBreak: "break-word" as const,
-                    minHeight: i === 0 ? "36px" : "28px",
+                    minHeight: i === 0 ? "40px" : "28px",
+                    marginTop: isLastLine ? "8px" : "0",
                     animation: "fadeInUp 0.5s ease-out both",
                     animationDelay: `${i * 0.1}s`,
                     textShadow: isComplete
-                      ? "0 0 20px rgba(139, 92, 246, 0.3)"
+                      ? i === 0
+                        ? "0 0 30px rgba(139, 92, 246, 0.4)"
+                        : "0 0 20px rgba(139, 92, 246, 0.2)"
                       : "none",
                     transition: "text-shadow 0.8s ease",
                   }}
@@ -204,7 +212,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                       style={{
                         display: "inline-block",
                         width: "2px",
-                        height: i === 0 ? "24px" : "18px",
+                        height: i === 0 ? "26px" : "18px",
                         background: "#8b5cf6",
                         marginLeft: "2px",
                         verticalAlign: "middle",
@@ -219,38 +227,42 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
 
           {/* Start button */}
           {showButton && (
-            <button
-              onClick={handleSkip}
-              className="landing-start-btn"
-              style={{
-                marginTop: "48px",
-                padding: "14px 48px",
-                fontSize: "18px",
-                fontWeight: 600,
-                color: "#fff",
-                background: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
-                border: "none",
-                borderRadius: "999px",
-                cursor: "pointer",
-                animation: "fadeInUp 0.6s ease-out both, breatheGlow 3s ease-in-out infinite 0.6s",
-                boxShadow: "0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2)",
-                transition: "transform 0.2s, box-shadow 0.2s",
-                position: "relative",
-                overflow: "hidden",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "scale(1.05)";
-                e.currentTarget.style.boxShadow =
-                  "0 0 40px rgba(139, 92, 246, 0.6), 0 0 80px rgba(139, 92, 246, 0.3)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "scale(1)";
-                e.currentTarget.style.boxShadow =
-                  "0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2)";
-              }}
-            >
-              {t("landing.startChat")}
-            </button>
+            <div style={{ marginTop: "48px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px", animation: "fadeInUp 0.6s ease-out both" }}>
+              <button
+                onClick={handleSkip}
+                className="landing-start-btn"
+                style={{
+                  padding: "15px 52px",
+                  fontSize: "18px",
+                  fontWeight: 600,
+                  color: "#fff",
+                  background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%)",
+                  border: "1px solid rgba(167, 139, 250, 0.3)",
+                  borderRadius: "999px",
+                  cursor: "pointer",
+                  animation: "breatheGlow 3s ease-in-out infinite",
+                  boxShadow: "0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2), inset 0 1px 0 rgba(255,255,255,0.15)",
+                  transition: "transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "scale(1.06)";
+                  e.currentTarget.style.boxShadow =
+                    "0 0 45px rgba(139, 92, 246, 0.6), 0 0 90px rgba(139, 92, 246, 0.3), inset 0 1px 0 rgba(255,255,255,0.2)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "scale(1)";
+                  e.currentTarget.style.boxShadow =
+                    "0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2), inset 0 1px 0 rgba(255,255,255,0.15)";
+                }}
+              >
+                {t("landing.startChat")}
+              </button>
+              <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.25)", letterSpacing: "0.05em" }}>
+                Press Enter ↵
+              </span>
+            </div>
           )}
         </div>
       )}

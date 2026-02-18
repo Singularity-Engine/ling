@@ -37,7 +37,7 @@ function createParticles(
       originY: y,
       vx: (Math.random() - 0.5) * 0.5,
       vy: (Math.random() - 0.5) * 0.5,
-      size: Math.random() * 2.5 + 1,
+      size: Math.random() < 0.1 ? Math.random() * 3 + 3 : Math.random() * 2.5 + 1,
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
       alpha: Math.random() * 0.6 + 0.4,
       floatAngle: Math.random() * Math.PI * 2,
@@ -62,7 +62,7 @@ export function ParticleCanvas({ phase, phaseProgress = 0 }: ParticleCanvasProps
   const timeRef = useRef(0);
 
   const getParticleCount = useCallback(() => {
-    return window.innerWidth < 768 ? 30 : 65;
+    return window.innerWidth < MOBILE_BREAKPOINT ? 40 : 100;
   }, []);
 
   // Initialize canvas + particles
