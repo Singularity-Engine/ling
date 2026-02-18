@@ -4,7 +4,7 @@ import { ChatBubble } from "./ChatBubble";
 import { ThinkingBubble } from "./ThinkingBubble";
 import { TimeSeparator, shouldShowSeparator } from "./TimeSeparator";
 import { useChatHistory } from "@/context/chat-history-context";
-import { useSubtitle } from "@/context/subtitle-context";
+
 import { useAiState } from "@/context/ai-state-context";
 import { useWebSocket } from "@/context/websocket-context";
 
@@ -69,7 +69,6 @@ function useThrottledValue(source: string): string {
 
 export const ChatArea = memo(() => {
   const { messages, fullResponse, appendHumanMessage } = useChatHistory();
-  const { subtitleText } = useSubtitle();
   const { isThinkingSpeaking } = useAiState();
   const { sendMessage } = useWebSocket();
   const { t } = useTranslation();
@@ -120,7 +119,7 @@ export const ChatArea = memo(() => {
     }
     // Only re-run when actual content changes, NOT on scroll-position changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages, displayResponse, subtitleText]);
+  }, [messages, displayResponse]);
 
   const scrollToBottom = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
