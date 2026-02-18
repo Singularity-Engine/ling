@@ -137,10 +137,12 @@ export const AffinityBadge = memo(() => {
               <div
                 style={{
                   height: "100%",
-                  width: `${affinity}%`,
+                  width: "100%",
                   background: `linear-gradient(90deg, ${config.color}88, ${config.color})`,
                   borderRadius: "2px",
-                  transition: "width 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
+                  transformOrigin: "left",
+                  transform: `scaleX(${affinity / 100})`,
+                  transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
               />
             </div>

@@ -16,16 +16,16 @@ const keyframesStyle = `
   to { opacity: 0; transform: translateY(-4px); }
 }
 @keyframes ttsBarBounce1 {
-  0%, 100% { height: 4px; }
-  50% { height: 12px; }
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(3); }
 }
 @keyframes ttsBarBounce2 {
-  0%, 100% { height: 6px; }
-  50% { height: 10px; }
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.67); }
 }
 @keyframes ttsBarBounce3 {
-  0%, 100% { height: 3px; }
-  50% { height: 14px; }
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(4.67); }
 }
 `;
 
@@ -126,14 +126,20 @@ export const TTSStatus = memo(() => {
         {/* Indicator: dot for synthesizing/error, equalizer bars for playing */}
         {isPlaying ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '2px', height: '14px' }}>
-            {[1, 2, 3].map(i => (
+            {([
+              { idx: 1, baseH: 4 },
+              { idx: 2, baseH: 6 },
+              { idx: 3, baseH: 3 },
+            ] as const).map(({ idx, baseH }) => (
               <div
-                key={i}
+                key={idx}
                 style={{
                   width: '2px',
+                  height: `${baseH}px`,
                   background: cfg.dotColor,
                   borderRadius: '1px',
-                  animation: `ttsBarBounce${i} ${0.6 + i * 0.15}s ease-in-out infinite`,
+                  willChange: 'transform',
+                  animation: `ttsBarBounce${idx} ${0.6 + idx * 0.15}s ease-in-out infinite`,
                 }}
               />
             ))}

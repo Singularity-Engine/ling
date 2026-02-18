@@ -217,7 +217,7 @@ export const ThoughtHalo = memo(() => {
                   ? `particlePulse 2s ease-in-out ${p.delay}s infinite`
                   : 'none',
                 opacity: isActive ? undefined : 0,
-                transition: 'background-color 0.5s ease, box-shadow 0.5s ease, width 0.3s ease, height 0.3s ease',
+                transition: 'background-color 0.5s ease, box-shadow 0.5s ease',
               }}
             />
           );
