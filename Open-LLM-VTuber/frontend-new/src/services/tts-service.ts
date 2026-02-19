@@ -118,27 +118,34 @@ class TTSService {
 
   private async callFishAudio(text: string): Promise<Blob | null> {
     const url = this.useProxy ? FISH_TTS_PROXY : FISH_TTS_API;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30_000);
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${FISH_TTS_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        text,
-        reference_id: FISH_TTS_REFERENCE_ID,
-        format: 'mp3',
-        latency: 'normal',
-      }),
-    });
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${FISH_TTS_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text,
+          reference_id: FISH_TTS_REFERENCE_ID,
+          format: 'mp3',
+          latency: 'normal',
+        }),
+        signal: controller.signal,
+      });
 
-    if (!response.ok) {
-      const errText = await response.text().catch(() => '');
-      throw new Error(`Fish Audio API error ${response.status}: ${errText}`);
+      if (!response.ok) {
+        const errText = await response.text().catch(() => '');
+        throw new Error(`Fish Audio API error ${response.status}: ${errText}`);
+      }
+
+      return response.blob();
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    return response.blob();
   }
 
   private async extractLipSyncData(

@@ -416,7 +416,13 @@ class GatewayConnector {
       }, 30000);
 
       this.pendingRequests.set(id, { resolve, reject, timer });
-      this.ws.send(JSON.stringify(frame));
+      try {
+        this.ws.send(JSON.stringify(frame));
+      } catch (err) {
+        clearTimeout(timer);
+        this.pendingRequests.delete(id);
+        reject(err instanceof Error ? err : new Error('Failed to send'));
+      }
     });
   }
 
@@ -467,6 +473,49 @@ class GatewayConnector {
       pending.reject(new Error(reason));
     }
     this.pendingRequests.clear();
+  }
+
+  // ── Heartbeat monitor ───────────────────────────────────────────
+
+  private startHeartbeatMonitor() {
+    this.stopHeartbeatMonitor();
+    this.heartbeatTimer = setInterval(() => {
+      if (this.state !== 'CONNECTED') return;
+      if (this.lastTickAt > 0 && Date.now() - this.lastTickAt > HEARTBEAT_TIMEOUT_MS) {
+        console.warn(`[GatewayConnector] Heartbeat timeout — no tick in ${HEARTBEAT_TIMEOUT_MS}ms, closing`);
+        this.ws?.close(4001, 'Heartbeat timeout');
+      }
+    }, HEARTBEAT_CHECK_MS);
+  }
+
+  private stopHeartbeatMonitor() {
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = null;
+    }
+  }
+
+  // ── Tab visibility handler ──────────────────────────────────────
+
+  private setupVisibilityHandler() {
+    this.removeVisibilityHandler();
+    this.onVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && this.state === 'CONNECTED') {
+        // Tab became visible — check if connection went stale while hidden
+        if (this.lastTickAt > 0 && Date.now() - this.lastTickAt > HEARTBEAT_TIMEOUT_MS) {
+          console.warn('[GatewayConnector] Stale connection detected on tab focus, reconnecting...');
+          this.ws?.close(4001, 'Stale after tab resume');
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', this.onVisibilityChange);
+  }
+
+  private removeVisibilityHandler() {
+    if (this.onVisibilityChange) {
+      document.removeEventListener('visibilitychange', this.onVisibilityChange);
+      this.onVisibilityChange = null;
+    }
   }
 }
 

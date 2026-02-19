@@ -493,10 +493,38 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       gatewayAdapter.handleRawFrame(frame);
     });
 
+    // ── Response timeout: detect when AI hangs mid-response ──
+    // Track last activity timestamp; if >60s with no events while AI is thinking, warn user
+    const RESPONSE_TIMEOUT_MS = 60_000;
+    let lastActivity = 0;
+    const responseCheckTimer = setInterval(() => {
+      if (lastActivity > 0 && Date.now() - lastActivity > RESPONSE_TIMEOUT_MS) {
+        lastActivity = 0; // Don't re-fire
+        toaster.create({
+          title: 'AI 响应似乎已超时，可以尝试重新发送',
+          type: 'warning',
+          duration: 5000,
+        });
+        setAiStateRef.current('idle');
+        setSubtitleTextRef.current('');
+      }
+    }, 10_000);
+
     // Subscribe to adapted messages → feed into existing message handler
     // Uses ref to always call the latest handler without tearing down subscriptions
     const messageSub = gatewayAdapter.message$.subscribe((msg) => {
       handleWebSocketMessageRef.current(msg);
+      // Track activity for response timeout
+      if (msg.type === 'control' && msg.text === 'conversation-chain-start') {
+        lastActivity = Date.now();
+      } else if (msg.type === 'full-text' || msg.type === 'tool_call_status') {
+        if (lastActivity > 0) lastActivity = Date.now();
+      } else if (
+        (msg.type === 'control' && msg.text === 'conversation-chain-end') ||
+        msg.type === 'ai-message-complete'
+      ) {
+        lastActivity = 0;
+      }
     });
 
     // Network recovery: immediately retry if in RECONNECTING state
@@ -524,6 +552,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     });
 
     return () => {
+      clearInterval(responseCheckTimer);
       window.removeEventListener('online', onOnline);
       stateSub.unsubscribe();
       agentSub.unsubscribe();
@@ -640,6 +669,10 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       // ── Phase 2: Text input → Gateway chat.send ──
       case 'text-input':
         if (msg.text) {
+          // Optimistic: show thinking indicator immediately instead of
+          // waiting for Gateway's conversation-chain-start lifecycle event
+          clearResponseRef.current();
+          setAiStateRef.current('thinking-speaking');
           gatewayConnector.sendChat(sessionKeyRef.current, msg.text).catch((err) => {
             console.error('[Gateway] sendChat failed:', err);
             toaster.create({
@@ -678,6 +711,9 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         const transcript = asrService.stop();
         if (transcript.trim()) {
           appendHumanMessageRef.current(transcript.trim());
+          // Optimistic: show thinking indicator immediately
+          clearResponseRef.current();
+          setAiStateRef.current('thinking-speaking');
           gatewayConnector.sendChat(sessionKeyRef.current, transcript.trim()).catch((err) => {
             console.error('[Gateway] sendChat (ASR) failed:', err);
             toaster.create({
