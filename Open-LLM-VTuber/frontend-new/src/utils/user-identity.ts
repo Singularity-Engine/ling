@@ -30,9 +30,9 @@ export function getUserId(): string {
   if (!uid) {
     uid = crypto.randomUUID();
     setCookie(COOKIE_NAME, uid, MAX_AGE_DAYS);
-    console.log('[user-identity] New user, generated ling_uid:', uid);
+    if (import.meta.env.DEV) console.log('[user-identity] New user, generated ling_uid:', uid);
   } else {
-    console.log('[user-identity] Returning user, ling_uid:', uid);
+    if (import.meta.env.DEV) console.log('[user-identity] Returning user, ling_uid:', uid);
   }
 
   cachedUid = uid;

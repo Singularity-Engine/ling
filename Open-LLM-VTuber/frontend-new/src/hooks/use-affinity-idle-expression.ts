@@ -64,7 +64,7 @@ export function useAffinityIdleExpression() {
           const name = lappAdapter.getExpressionName(expression);
           if (name) lappAdapter.setExpression(name);
         }
-        console.log(`[Affinity] Idle expression set to "${expression}" (level: ${level})`);
+        if (import.meta.env.DEV) console.log(`[Affinity] Idle expression set to "${expression}" (level: ${level})`);
       } catch (e) {
         console.warn('[Affinity] Failed to set idle expression:', e);
       }

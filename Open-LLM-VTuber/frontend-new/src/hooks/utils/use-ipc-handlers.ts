@@ -33,7 +33,7 @@ export function useIpcHandlers() {
   }, [modelInfo, setModelInfo]);
 
   const switchCharacterHandler = useCallback(
-    (_event: Electron.IpcRendererEvent, filename: string) => {
+    (_event: unknown, filename: string) => {
       switchCharacter(filename);
     },
     [switchCharacter],
@@ -41,8 +41,8 @@ export function useIpcHandlers() {
 
   // Handler for force ignore mouse state changes from main process
   const forceIgnoreMouseChangedHandler = useCallback(
-    (_event: Electron.IpcRendererEvent, isForced: boolean) => {
-      console.log("Force ignore mouse changed:", isForced);
+    (_event: unknown, isForced: boolean) => {
+      if (import.meta.env.DEV) console.log("Force ignore mouse changed:", isForced);
       setForceIgnoreMouse(isForced);
     },
     [setForceIgnoreMouse],

@@ -38,7 +38,7 @@ if (typeof window !== 'undefined') {
   // Load Live2D Core in background (preloaded via <link rel="preload"> in index.html)
   const script = document.createElement('script');
   script.src = './libs/live2dcubismcore.js';
-  script.onload = () => console.log('Live2D Cubism Core loaded successfully.');
+  script.onload = () => { if (import.meta.env.DEV) console.log('Live2D Cubism Core loaded successfully.'); };
   script.onerror = (error) => console.error('Failed to load Live2D Cubism Core:', error);
   document.head.appendChild(script);
 }

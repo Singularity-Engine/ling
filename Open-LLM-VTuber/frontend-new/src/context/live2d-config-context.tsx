@@ -127,7 +127,7 @@ export function Live2DConfigProvider({ children }: { children: React.ReactNode }
 
     // Always use the scale defined in the incoming info object (from config)
     const finalScale = Number(info.kScale || 0.5) * 2;
-    console.log("Setting model info with default scale:", finalScale);
+    if (import.meta.env.DEV) console.log("Setting model info with default scale:", finalScale);
 
     setModelInfoState({
       ...info,

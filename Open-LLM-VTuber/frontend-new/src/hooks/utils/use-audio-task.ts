@@ -288,11 +288,11 @@ export const useAudioTask = () => {
     const { aiState: currentState } = stateRef.current;
 
     if (currentState === 'interrupted') {
-      console.log('Skipping audio task due to interrupted state');
+      if (import.meta.env.DEV) console.log('Skipping audio task due to interrupted state');
       return;
     }
 
-    console.log(`[AudioTask] Queuing: ${options.displayText?.text?.slice(0, 30)}`);
+    if (import.meta.env.DEV) console.log(`[AudioTask] Queuing: ${options.displayText?.text?.slice(0, 30)}`);
     audioTaskQueue.addTask(() => handleAudioPlayback(options));
   }, []);
 

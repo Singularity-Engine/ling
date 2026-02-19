@@ -36,7 +36,7 @@ class AudioManager {
    */
   stopCurrentAudioAndLipSync() {
     if (this.currentAudio) {
-      console.log('[AudioManager] Stopping current audio and lip sync');
+      if (import.meta.env.DEV) console.log('[AudioManager] Stopping current audio and lip sync');
       const audio = this.currentAudio;
       
       // Stop audio playback
@@ -50,20 +50,20 @@ class AudioManager {
         try {
           // Release PCM data to stop lip sync calculation in update()
           model._wavFileHandler.releasePcmData();
-          console.log('[AudioManager] Called _wavFileHandler.releasePcmData()');
+          if (import.meta.env.DEV) console.log('[AudioManager] Called _wavFileHandler.releasePcmData()');
 
           // Additional reset of state variables as fallback
           model._wavFileHandler._lastRms = 0.0;
           model._wavFileHandler._sampleOffset = 0;
           model._wavFileHandler._userTimeSeconds = 0.0;
-          console.log('[AudioManager] Also reset _lastRms, _sampleOffset, _userTimeSeconds as fallback');
+          if (import.meta.env.DEV) console.log('[AudioManager] Also reset _lastRms, _sampleOffset, _userTimeSeconds as fallback');
         } catch (e) {
           console.error('[AudioManager] Error stopping/resetting wavFileHandler:', e);
         }
       } else if (model) {
         console.warn('[AudioManager] Current model does not have _wavFileHandler to stop/reset.');
       } else {
-        console.log('[AudioManager] No associated model found to stop lip sync.');
+        if (import.meta.env.DEV) console.log('[AudioManager] No associated model found to stop lip sync.');
       }
 
       // Clear references
@@ -71,7 +71,7 @@ class AudioManager {
       this.currentModel = null;
       this.notifyListeners();
     } else {
-      console.log('[AudioManager] No current audio playing to stop.');
+      if (import.meta.env.DEV) console.log('[AudioManager] No current audio playing to stop.');
     }
   }
 

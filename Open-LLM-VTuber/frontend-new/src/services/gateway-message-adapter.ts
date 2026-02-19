@@ -99,7 +99,7 @@ class GatewayMessageAdapter {
         break;
 
       default:
-        console.log('[GatewayAdapter] Unhandled event:', event);
+        if (import.meta.env.DEV) console.log('[GatewayAdapter] Unhandled event:', event);
     }
   }
 
