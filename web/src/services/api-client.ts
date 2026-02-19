@@ -5,9 +5,10 @@
  */
 
 function getApiBase(): string {
-  const hostname = window.location.hostname;
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return 'http://127.0.0.1:12393';
+  // 开发模式：Vite proxy 会把 /api 转发到后端，无需指定地址
+  // 生产模式：使用实际后端域名
+  if (import.meta.env.DEV) {
+    return '';
   }
   return 'https://lain.sngxai.com';
 }
