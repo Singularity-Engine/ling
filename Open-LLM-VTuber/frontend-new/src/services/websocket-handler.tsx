@@ -124,6 +124,19 @@ const DEFAULT_CONFIG_FILES = [
   { filename: 'ling_pro_zh.yaml', name: '灵 (Ling)' },
 ];
 
+// ─── Greeting expression helper ─────────────────────────────────
+
+/** Set a welcoming expression (kaixin/happy) on the Live2D model during greeting.
+ *  Delayed to ensure the model is loaded — longer delay for initial page load. */
+function setGreetingExpression(delayMs = 200) {
+  setTimeout(() => {
+    const lappAdapter = (window as any).getLAppAdapter?.();
+    if (lappAdapter) {
+      try { lappAdapter.setExpression('kaixin'); } catch { /* model may not be ready */ }
+    }
+  }, delayMs);
+}
+
 // ─── Debug overlay ──────────────────────────────────────────────
 
 function GatewayDebugPanel() {
