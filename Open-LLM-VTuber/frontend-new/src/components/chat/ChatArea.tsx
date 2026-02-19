@@ -307,37 +307,7 @@ export const ChatArea = memo(() => {
           </div>
 
           {/* Suggestion chips */}
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              gap: "8px",
-              maxWidth: "340px",
-            }}
-          >
-            {Array.isArray(welcomeChips) &&
-              welcomeChips.map((chip, i) => (
-                <button
-                  key={chip}
-                  className="welcome-chip"
-                  onClick={() => handleChipClick(chip)}
-                  style={{
-                    background: "rgba(139, 92, 246, 0.12)",
-                    border: "1px solid rgba(139, 92, 246, 0.2)",
-                    borderRadius: "20px",
-                    padding: "8px 16px",
-                    color: "rgba(226, 212, 255, 0.8)",
-                    fontSize: "13px",
-                    cursor: "pointer",
-                    animation: `chipFadeIn 0.4s ease-out ${i * 0.08}s both`,
-                    lineHeight: "1.4",
-                  }}
-                >
-                  {chip}
-                </button>
-              ))}
-          </div>
+          <SuggestionChips chips={welcomeChips} onChipClick={handleChipClick} centered />
         </div>
       )}
       {dedupedMessages.map((msg, i) => {
@@ -360,37 +330,7 @@ export const ChatArea = memo(() => {
       })}
       {/* Suggestion chips: stay visible after greeting until user sends first message */}
       {isGreeting && !emptyExiting && (
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "8px",
-            padding: "4px 16px 12px",
-            maxWidth: "340px",
-          }}
-        >
-          {Array.isArray(welcomeChips) &&
-            welcomeChips.map((chip, i) => (
-              <button
-                key={chip}
-                className="welcome-chip"
-                onClick={() => handleChipClick(chip)}
-                style={{
-                  background: "rgba(139, 92, 246, 0.12)",
-                  border: "1px solid rgba(139, 92, 246, 0.2)",
-                  borderRadius: "20px",
-                  padding: "8px 16px",
-                  color: "rgba(226, 212, 255, 0.8)",
-                  fontSize: "13px",
-                  cursor: "pointer",
-                  animation: `chipFadeIn 0.4s ease-out ${0.2 + i * 0.1}s both`,
-                  lineHeight: "1.4",
-                }}
-              >
-                {chip}
-              </button>
-            ))}
-        </div>
+        <SuggestionChips chips={welcomeChips} onChipClick={handleChipClick} baseDelay={0.2} />
       )}
 
       {(showStreaming || showTyping) && (

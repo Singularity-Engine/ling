@@ -399,6 +399,9 @@ function App(): JSX.Element {
 
   const handleLandingComplete = useCallback(() => {
     setLandingExiting(true);
+    // Signal websocket-handler that the user has finished the Landing animation
+    // so it can now send the auto-greeting (avoids greeting arriving while Landing is still visible)
+    window.dispatchEvent(new Event('ling-landing-complete'));
     setTimeout(() => {
       setShowLanding(false);
       sessionStorage.setItem('ling-visited', 'true');

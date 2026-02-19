@@ -422,11 +422,28 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId())
         .then(() => {
           // Auto-greeting: AI welcomes the user on page load
+          // If Landing animation is still showing, defer greeting until it completes
+          // to avoid the response arriving before the user sees the chat area.
           if (!greetingSentRef.current) {
-            greetingSentRef.current = true;
-            gatewayConnector.sendChat(sessionKeyRef.current, '[greeting]').catch((err) => {
-              if (import.meta.env.DEV) console.error('[WebSocketHandler] Auto-greeting failed:', err);
-            });
+            const sendGreeting = () => {
+              if (greetingSentRef.current) return;
+              greetingSentRef.current = true;
+              gatewayConnector.sendChat(sessionKeyRef.current, '[greeting]').catch((err) => {
+                if (import.meta.env.DEV) console.error('[WebSocketHandler] Auto-greeting failed:', err);
+              });
+            };
+
+            if (sessionStorage.getItem('ling-visited')) {
+              // Return visit — no Landing, send immediately
+              sendGreeting();
+            } else {
+              // First visit — wait for Landing to complete
+              const onLandingComplete = () => {
+                sendGreeting();
+                window.removeEventListener('ling-landing-complete', onLandingComplete);
+              };
+              window.addEventListener('ling-landing-complete', onLandingComplete);
+            }
           }
         })
         .catch((err) => {
