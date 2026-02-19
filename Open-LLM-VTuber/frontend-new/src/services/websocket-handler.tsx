@@ -465,10 +465,14 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             if (sessionStorage.getItem('ling-visited')) {
               // Return visit — no Landing, send immediately
               sendGreeting();
+              // Model may still be loading — longer delay
+              setGreetingExpression(2000);
             } else {
               // First visit — wait for Landing to complete
               const onLandingComplete = () => {
                 sendGreeting();
+                // Model has had time to load during Landing animation
+                setGreetingExpression(800);
                 window.removeEventListener('ling-landing-complete', onLandingComplete);
               };
               window.addEventListener('ling-landing-complete', onLandingComplete);
@@ -861,6 +865,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             duration: 2000,
           });
           // Auto-greeting for the new session
+          setGreetingExpression(200); // Model is already loaded
           gatewayConnector.sendChat(newSessionKey, '[greeting]').catch((err) => {
             if (import.meta.env.DEV) console.error('[WebSocketHandler] New session greeting failed:', err);
           });
