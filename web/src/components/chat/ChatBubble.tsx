@@ -169,7 +169,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
         animation: isGreeting ? "greetingBubbleIn 0.5s ease-out" : "bubbleFadeInUp 0.3s ease-out",
       }}
     >
-      <div style={{ maxWidth: "78%" }} className={!isUser ? "chat-bubble-wrap" : undefined}>
+      <div style={{ maxWidth: "78%", minWidth: 0 }} className={!isUser ? "chat-bubble-wrap" : undefined}>
         {!isUser && (
           <span
             style={{
@@ -198,6 +198,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
               border: isUser ? "1px solid rgba(139, 92, 246, 0.25)" : "1px solid rgba(255, 255, 255, 0.08)",
               backdropFilter: "blur(10px)",
               WebkitBackdropFilter: "blur(10px)",
+              overflow: "hidden",
               transition: "all 0.2s ease",
               boxShadow: isUser
                 ? "0 2px 12px rgba(139, 92, 246, 0.15)"
@@ -212,6 +213,8 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
                   fontSize: "14px",
                   color: "rgba(255,255,255,0.95)",
                   whiteSpace: "pre-wrap",
+                  overflowWrap: "break-word",
+                  wordBreak: "break-word",
                   lineHeight: 1.7,
                   letterSpacing: "0.3px",
                 }}
