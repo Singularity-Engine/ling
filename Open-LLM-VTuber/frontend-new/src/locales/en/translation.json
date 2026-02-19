@@ -160,6 +160,8 @@
     "copied": "Copied",
     "toolCollapse": "Collapse",
     "toolExpandLines": "Expand {{count}} more lines",
+    "placeholderDisconnected": "Disconnected, please wait...",
+    "sendDisconnected": "Not connected",
     "markdownHint": "Markdown supported",
     "copyText": "Copy text",
     "regenerate": "Regenerate",

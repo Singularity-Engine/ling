@@ -211,7 +211,7 @@ export const InputBar = memo(() => {
           onKeyDown={handleKeyDown}
           onCompositionStart={() => { isComposingRef.current = true; }}
           onCompositionEnd={() => { isComposingRef.current = false; }}
-          placeholder={micOn ? t("chat.placeholderListening") : t("chat.placeholder")}
+          placeholder={!isConnected ? t("chat.placeholderDisconnected") : micOn ? t("chat.placeholderListening") : t("chat.placeholder")}
           aria-label={t("chat.inputLabel")}
           rows={1}
         />
@@ -219,8 +219,8 @@ export const InputBar = memo(() => {
         <button
           onClick={isAiSpeaking ? handleInterrupt : handleSend}
           disabled={!isAiSpeaking && !canSend}
-          aria-label={isAiSpeaking ? t("chat.stopReply") : t("chat.sendMessage")}
-          title={isAiSpeaking ? t("chat.stopReply") : t("chat.sendMessage")}
+          aria-label={isAiSpeaking ? t("chat.stopReply") : !isConnected ? t("chat.sendDisconnected") : t("chat.sendMessage")}
+          title={isAiSpeaking ? t("chat.stopReply") : !isConnected ? t("chat.sendDisconnected") : t("chat.sendMessage")}
           style={{
             width: "44px",
             height: "44px",

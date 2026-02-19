@@ -157,6 +157,8 @@
     "copied": "已复制",
     "toolCollapse": "收起",
     "toolExpandLines": "展开剩余 {{count}} 行",
+    "placeholderDisconnected": "连接断开，请稍候...",
+    "sendDisconnected": "未连接",
     "markdownHint": "支持 Markdown 格式",
     "copyText": "复制文本",
     "regenerate": "重新生成",
