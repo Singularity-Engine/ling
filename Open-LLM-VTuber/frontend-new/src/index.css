@@ -240,26 +240,9 @@ body {
   animation: none;
 }
 
-/* Landing text glow — GPU-friendly: static text-shadow on ::before, animate opacity only */
+/* Landing text line */
 .landing-text-line {
   position: relative;
-}
-.landing-text-line::before {
-  content: attr(data-text);
-  position: absolute;
-  inset: 0;
-  color: transparent;
-  text-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
-  opacity: 0;
-  transition: opacity 0.8s ease;
-  pointer-events: none;
-  will-change: opacity;
-}
-.landing-text-line:first-child::before {
-  text-shadow: 0 0 30px rgba(139, 92, 246, 0.4);
-}
-.landing-text-line.glow-active::before {
-  opacity: 1;
 }
 
 @keyframes btnPress {
@@ -361,11 +344,11 @@ canvas {
 
   /* Landing 动画移动端优化 */
   .landing-text-line {
-    font-size: 18px !important;
+    font-size: 17px !important;
     line-height: 1.5 !important;
   }
   .landing-text-line:first-child {
-    font-size: 22px !important;
+    font-size: 26px !important;
   }
   .landing-start-btn {
     padding: 14px 40px !important;

@@ -208,6 +208,9 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const setSubtitleTextRef = useRef(setSubtitleText);
   useEffect(() => { setSubtitleTextRef.current = setSubtitleText; }, [setSubtitleText]);
 
+  const clearResponseRef = useRef(clearResponse);
+  useEffect(() => { clearResponseRef.current = clearResponse; }, [clearResponse]);
+
   // Per-visitor session key (stable across renders)
   const sessionKeyRef = useRef(getVisitorSessionKey());
 

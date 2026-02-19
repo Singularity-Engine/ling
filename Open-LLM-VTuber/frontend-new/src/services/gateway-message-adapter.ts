@@ -104,6 +104,16 @@ class GatewayMessageAdapter {
   }
 
   /**
+   * Return accumulated texts from all active (interrupted) runs.
+   * Useful for detecting if a response was mid-stream when connection dropped.
+   */
+  getActiveTexts(): string[] {
+    return Array.from(this.activeRuns.values())
+      .map(run => run.accumulatedText)
+      .filter(text => text.length > 0);
+  }
+
+  /**
    * Clear state for all runs (e.g., on disconnect)
    */
   reset() {

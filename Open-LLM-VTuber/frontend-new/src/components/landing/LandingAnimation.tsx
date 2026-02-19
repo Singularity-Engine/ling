@@ -187,9 +187,9 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
             }}
           >
             {LINES.map((line, i) => {
-              if (i > currentLine) return null;
+              const isVisible = i <= currentLine;
               const chars =
-                i < currentLine ? line.length : displayedChars;
+                i < currentLine ? line.length : i === currentLine ? displayedChars : 0;
               const text = line.slice(0, chars);
               const isActive = i === currentLine && chars < line.length;
               const isComplete = i < currentLine;
@@ -200,26 +200,26 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                   key={i}
                   className="landing-text-line"
                   style={{
-                    fontSize: i === 0 ? "30px" : isLastLine ? "22px" : "18px",
+                    fontSize: i === 0 ? "38px" : isLastLine ? "21px" : "20px",
                     fontWeight: i === 0 ? 700 : isLastLine ? 500 : 400,
                     color: i === 0
                       ? "#e2d4ff"
                       : isLastLine
                         ? "rgba(196, 181, 253, 0.95)"
-                        : "rgba(255,255,255,0.6)",
-                    letterSpacing: i === 0 ? "0.08em" : "0.04em",
+                        : "rgba(255,255,255,0.7)",
+                    letterSpacing: i === 0 ? "0.1em" : "0.04em",
                     textAlign: "center",
                     wordBreak: "break-word" as const,
-                    minHeight: i === 0 ? "40px" : "28px",
-                    marginTop: isLastLine ? "8px" : "0",
-                    animation: "fadeInUp 0.5s ease-out both",
-                    animationDelay: `${i * 0.1}s`,
+                    minHeight: i === 0 ? "48px" : "28px",
+                    marginTop: isLastLine ? "12px" : "0",
+                    opacity: isVisible ? 1 : 0,
+                    transform: isVisible ? "translateY(0)" : "translateY(12px)",
+                    transition: "opacity 0.5s ease-out, transform 0.5s ease-out, text-shadow 0.8s ease",
                     textShadow: isComplete
                       ? i === 0
                         ? "0 0 30px rgba(139, 92, 246, 0.4)"
                         : "0 0 20px rgba(139, 92, 246, 0.2)"
                       : "none",
-                    transition: "text-shadow 0.8s ease",
                   }}
                 >
                   {text}
@@ -228,7 +228,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                       style={{
                         display: "inline-block",
                         width: "2px",
-                        height: i === 0 ? "26px" : "18px",
+                        height: i === 0 ? "32px" : "18px",
                         background: "#8b5cf6",
                         marginLeft: "2px",
                         verticalAlign: "middle",
@@ -241,55 +241,64 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
             })}
           </div>
 
-          {/* Start button */}
-          {showButton && (
-            <div style={{ marginTop: "48px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px", animation: "fadeInUp 0.6s ease-out both" }}>
-              <button
-                onClick={handleSkip}
-                className="landing-start-btn"
-                disabled={exiting}
-                style={{
-                  padding: "15px 52px",
-                  fontSize: "18px",
-                  fontWeight: 600,
-                  color: "#fff",
-                  background: exiting
-                    ? "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)"
-                    : "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%)",
-                  border: "1px solid rgba(167, 139, 250, 0.3)",
-                  borderRadius: "999px",
-                  cursor: exiting ? "default" : "pointer",
-                  boxShadow: "0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2), inset 0 1px 0 rgba(255,255,255,0.15)",
-                  transition: "transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease",
-                  position: "relative",
-                  overflow: "hidden",
-                  opacity: exiting ? 0.85 : 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "10px",
-                }}
-              >
-                {exiting && (
-                  <span
-                    style={{
-                      display: "inline-block",
-                      width: "16px",
-                      height: "16px",
-                      border: "2px solid rgba(255,255,255,0.3)",
-                      borderTopColor: "#fff",
-                      borderRadius: "50%",
-                      animation: "landingBtnSpin 0.6s linear infinite",
-                    }}
-                  />
-                )}
-                {t("landing.startChat")}
-              </button>
-              <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.25)", letterSpacing: "0.05em" }}>
-                Press Enter ↵
-              </span>
-            </div>
-          )}
+          {/* Start button — container always rendered to prevent layout shift */}
+          <div style={{
+            marginTop: "48px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "16px",
+            opacity: showButton ? 1 : 0,
+            transform: showButton ? "translateY(0) scale(1)" : "translateY(16px) scale(0.96)",
+            transition: "opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            pointerEvents: showButton ? "auto" : "none",
+          }}>
+            <button
+              onClick={handleSkip}
+              className="landing-start-btn"
+              disabled={exiting || !showButton}
+              tabIndex={showButton ? 0 : -1}
+              style={{
+                padding: "15px 52px",
+                fontSize: "18px",
+                fontWeight: 600,
+                color: "#fff",
+                background: exiting
+                  ? "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)"
+                  : "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%)",
+                border: "1px solid rgba(167, 139, 250, 0.3)",
+                borderRadius: "999px",
+                cursor: exiting ? "default" : "pointer",
+                boxShadow: "0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2), inset 0 1px 0 rgba(255,255,255,0.15)",
+                transition: "transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease",
+                position: "relative",
+                overflow: "hidden",
+                opacity: exiting ? 0.85 : 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "10px",
+              }}
+            >
+              {exiting && (
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: "16px",
+                    height: "16px",
+                    border: "2px solid rgba(255,255,255,0.3)",
+                    borderTopColor: "#fff",
+                    borderRadius: "50%",
+                    animation: "landingBtnSpin 0.6s linear infinite",
+                  }}
+                />
+              )}
+              {t("landing.startChat")}
+            </button>
+            <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.25)", letterSpacing: "0.05em" }}>
+              Press Enter ↵
+            </span>
+          </div>
         </div>
       )}
 
