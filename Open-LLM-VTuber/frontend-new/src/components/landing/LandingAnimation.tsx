@@ -231,32 +231,57 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
               <button
                 onClick={handleSkip}
                 className="landing-start-btn"
+                disabled={exiting}
                 style={{
                   padding: "15px 52px",
                   fontSize: "18px",
                   fontWeight: 600,
                   color: "#fff",
-                  background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%)",
+                  background: exiting
+                    ? "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)"
+                    : "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%)",
                   border: "1px solid rgba(167, 139, 250, 0.3)",
                   borderRadius: "999px",
-                  cursor: "pointer",
-                  animation: "breatheGlow 3s ease-in-out infinite",
-                  boxShadow: "0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2), inset 0 1px 0 rgba(255,255,255,0.15)",
-                  transition: "transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease",
+                  cursor: exiting ? "default" : "pointer",
+                  animation: exiting ? "none" : "breatheGlow 3s ease-in-out infinite",
+                  boxShadow: exiting
+                    ? "0 0 20px rgba(139, 92, 246, 0.3)"
+                    : "0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2), inset 0 1px 0 rgba(255,255,255,0.15)",
+                  transition: "transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, opacity 0.2s ease",
                   position: "relative",
                   overflow: "hidden",
+                  opacity: exiting ? 0.85 : 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "10px",
                 }}
                 onMouseEnter={(e) => {
+                  if (exiting) return;
                   e.currentTarget.style.transform = "scale(1.06)";
                   e.currentTarget.style.boxShadow =
                     "0 0 45px rgba(139, 92, 246, 0.6), 0 0 90px rgba(139, 92, 246, 0.3), inset 0 1px 0 rgba(255,255,255,0.2)";
                 }}
                 onMouseLeave={(e) => {
+                  if (exiting) return;
                   e.currentTarget.style.transform = "scale(1)";
                   e.currentTarget.style.boxShadow =
                     "0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2), inset 0 1px 0 rgba(255,255,255,0.15)";
                 }}
               >
+                {exiting && (
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: "16px",
+                      height: "16px",
+                      border: "2px solid rgba(255,255,255,0.3)",
+                      borderTopColor: "#fff",
+                      borderRadius: "50%",
+                      animation: "landingBtnSpin 0.6s linear infinite",
+                    }}
+                  />
+                )}
                 {t("landing.startChat")}
               </button>
               <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.25)", letterSpacing: "0.05em" }}>
@@ -295,6 +320,9 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
         @keyframes breatheGlow {
           0%, 100% { box-shadow: 0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2); }
           50% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.6), 0 0 80px rgba(139, 92, 246, 0.3); }
+        }
+        @keyframes landingBtnSpin {
+          to { transform: rotate(360deg); }
         }
       `}</style>
     </div>
