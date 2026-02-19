@@ -148,14 +148,19 @@ export const BackgroundReactor = memo(() => {
 
   // Affinity-level ambient tint: always-on subtle glow for non-neutral levels
   // hatred/hostile = warm danger tint, close/devoted = warm pink/purple glow
+  // Note: CSS cannot transition between radial-gradient() values, so we use
+  // background-color (which CAN transition) + mask-image for the gradient shape.
+  const TINT_MASK = 'radial-gradient(ellipse 70% 60% at 50% 45%, rgba(0,0,0,0.267) 0%, rgba(0,0,0,0.094) 40%, transparent 70%)';
   const affinityTintStyle = useMemo(
     () => ({
       position: 'absolute' as const,
       inset: 0,
       pointerEvents: 'none' as const,
-      transition: 'opacity 1.5s ease, background 1.5s ease',
+      transition: 'opacity 1.5s ease, background-color 1.5s ease',
       opacity: tint.idleOpacity,
-      background: `radial-gradient(ellipse 70% 60% at 50% 45%, ${tint.color}44 0%, ${tint.color}18 40%, transparent 70%)`,
+      backgroundColor: tint.color,
+      WebkitMaskImage: TINT_MASK,
+      maskImage: TINT_MASK,
       animation: tint.idleOpacity > 0 ? 'bgAffinityBreathe 6s ease-in-out infinite' : 'none',
     }),
     [tint.color, tint.idleOpacity],

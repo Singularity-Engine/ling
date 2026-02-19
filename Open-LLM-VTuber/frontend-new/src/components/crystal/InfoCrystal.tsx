@@ -110,8 +110,9 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
 
   const theme = LEVEL_THEMES[level] || DEFAULT_THEME;
 
-  // Stable animation-name suffix for this crystal instance
-  const animId = useMemo(() => `${index}-${level}`, [index, level]);
+  // Stable animation-name suffix — only depends on index so level changes
+  // update keyframe *content* (via theme) without restarting running animations
+  const animId = useMemo(() => `${index}`, [index]);
   const keyframes = useMemo(() => buildKeyframes(theme, animId), [theme, animId]);
 
   const color = CATEGORY_COLORS[(tool.category as ToolCategory) ?? "generic"] || CATEGORY_COLORS.generic;
