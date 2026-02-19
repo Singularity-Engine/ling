@@ -654,6 +654,8 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       // ── Phase 6: Session management ──
       case 'fetch-and-set-history':
         if (msg.history_uid) {
+          // Sync sessionKeyRef so subsequent sendChat uses the selected session
+          sessionKeyRef.current = msg.history_uid;
           setCurrentHistoryUidRef.current(msg.history_uid);
           gatewayConnector.getChatHistory(msg.history_uid).then((res) => {
             const payload = res.payload as any;
@@ -682,6 +684,8 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       case 'create-new-history': {
         const newSessionKey = `agent:${getAgentId()}:${crypto.randomUUID()}`;
         gatewayConnector.resolveSession(newSessionKey, getAgentId()).then(() => {
+          // Sync sessionKeyRef so subsequent sendChat uses the new session
+          sessionKeyRef.current = newSessionKey;
           setCurrentHistoryUidRef.current(newSessionKey);
           setMessagesRef.current([]);
           const newHistory: HistoryInfo = {
@@ -691,11 +695,15 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           };
           setHistoryListRef.current((prev: HistoryInfo[]) => [newHistory, ...prev]);
           setAiStateRef.current('idle');
-          setSubtitleTextRef.current('新对话已创建');
+          setSubtitleTextRef.current('');
           toaster.create({
             title: '新对话已创建',
             type: 'success',
             duration: 2000,
+          });
+          // Auto-greeting for the new session
+          gatewayConnector.sendChat(newSessionKey, '[greeting]').catch((err) => {
+            if (import.meta.env.DEV) console.error('[WebSocketHandler] New session greeting failed:', err);
           });
         }).catch((err) => {
           console.error('[Gateway] resolveSession failed:', err);
