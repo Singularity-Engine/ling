@@ -33,6 +33,7 @@
 
   /* 紫色常用透明度 */
   --ling-purple-15: rgba(139, 92, 246, 0.15);
+  --ling-purple-20: rgba(139, 92, 246, 0.2);
   --ling-purple-25: rgba(139, 92, 246, 0.25);
   --ling-purple-30: rgba(139, 92, 246, 0.3);
   --ling-purple-40: rgba(139, 92, 246, 0.4);
@@ -97,6 +98,7 @@
 
   /* 紫色常用透明度 */
   --ling-purple-15: rgba(124, 58, 237, 0.12);
+  --ling-purple-20: rgba(124, 58, 237, 0.16);
   --ling-purple-25: rgba(124, 58, 237, 0.2);
   --ling-purple-30: rgba(124, 58, 237, 0.25);
   --ling-purple-40: rgba(124, 58, 237, 0.3);
@@ -225,7 +227,7 @@ body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  box-shadow: 0 0 45px rgba(139, 92, 246, 0.6), 0 0 90px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 45px var(--ling-purple-60), 0 0 90px var(--ling-purple-30);
   opacity: 0;
   animation: breatheGlowOpacity 3s ease-in-out infinite;
   pointer-events: none;
@@ -238,6 +240,23 @@ body {
 .landing-start-btn:not(:disabled):hover::after {
   opacity: 1;
   animation: none;
+}
+
+/* Landing 始终暗色主题——覆盖 [data-theme="light"] 的变量继承 */
+[data-landing] {
+  --ling-bg-deep: #0a0015;
+  --ling-bg-mid: #0d1b2a;
+  --ling-bg-warm: #1a0a2e;
+  --ling-purple: #8b5cf6;
+  --ling-purple-deep: #6d28d9;
+  --ling-purple-lighter: #c4b5fd;
+  --ling-purple-text: #e2d4ff;
+  --ling-purple-20: rgba(139, 92, 246, 0.2);
+  --ling-purple-30: rgba(139, 92, 246, 0.3);
+  --ling-purple-40: rgba(139, 92, 246, 0.4);
+  --ling-purple-60: rgba(139, 92, 246, 0.6);
+  --ling-text-secondary: rgba(255, 255, 255, 0.75);
+  --ling-text-muted: rgba(255, 255, 255, 0.2);
 }
 
 /* Landing text line */
@@ -351,7 +370,7 @@ canvas {
     font-size: 26px !important;
   }
   .landing-start-btn {
-    padding: 14px 40px !important;
+    padding: 16px 40px !important;
     font-size: 16px !important;
     min-height: 48px !important;
   }

@@ -123,11 +123,12 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
 
   return (
     <div
+      data-landing
       style={{
         position: "fixed",
         inset: 0,
         zIndex: 9999,
-        background: "linear-gradient(180deg, #0a0015 0%, #0d1b2a 50%, #1a0a2e 100%)",
+        background: "linear-gradient(180deg, var(--ling-bg-deep) 0%, var(--ling-bg-mid) 50%, var(--ling-bg-warm) 100%)",
         overflow: "hidden",
         opacity: exiting ? 0 : 1,
         transform: exiting ? "scale(1.04)" : "scale(1)",
@@ -142,7 +143,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
         style={{
           position: "fixed",
           inset: 0,
-          background: "rgb(10, 0, 21)",
+          background: "var(--ling-bg-deep)",
           opacity: bgDim,
           transition: "opacity 1s ease",
           zIndex: 2,
@@ -155,7 +156,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
         style={{
           position: "fixed",
           inset: 0,
-          background: "radial-gradient(circle at 50% 50%, rgba(196, 181, 253, 0.95) 0%, rgba(139, 92, 246, 0.6) 50%, transparent 80%)",
+          background: "radial-gradient(circle at 50% 50%, var(--ling-purple-lighter) 0%, var(--ling-purple-60) 50%, transparent 80%)",
           opacity: flashOpacity,
           transition: "opacity 0.5s ease-out",
           zIndex: 3,
@@ -200,26 +201,30 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                   key={i}
                   className="landing-text-line"
                   style={{
-                    fontSize: i === 0 ? "38px" : isLastLine ? "21px" : "20px",
+                    fontSize: i === 0 ? "2.375rem" : isLastLine ? "1.3125rem" : "1.25rem",
                     fontWeight: i === 0 ? 700 : isLastLine ? 500 : 400,
                     color: i === 0
-                      ? "#e2d4ff"
+                      ? "var(--ling-purple-text)"
                       : isLastLine
-                        ? "rgba(196, 181, 253, 0.95)"
-                        : "rgba(255,255,255,0.7)",
+                        ? "var(--ling-purple-lighter)"
+                        : "var(--ling-text-secondary)",
                     letterSpacing: i === 0 ? "0.1em" : "0.04em",
                     textAlign: "center",
                     wordBreak: "break-word" as const,
-                    minHeight: i === 0 ? "48px" : "28px",
-                    marginTop: isLastLine ? "12px" : "0",
+                    minHeight: i === 0 ? "3rem" : "1.75rem",
+                    marginTop: isLastLine ? "16px" : "0",
                     opacity: isVisible ? 1 : 0,
                     transform: isVisible ? "translateY(0)" : "translateY(12px)",
                     transition: "opacity 0.5s ease-out, transform 0.5s ease-out, text-shadow 0.8s ease",
-                    textShadow: isComplete
-                      ? i === 0
-                        ? "0 0 30px rgba(139, 92, 246, 0.4)"
-                        : "0 0 20px rgba(139, 92, 246, 0.2)"
-                      : "none",
+                    textShadow: i === 0
+                      ? isComplete
+                        ? "0 0 30px var(--ling-purple-40), 0 0 60px var(--ling-purple-20)"
+                        : isVisible
+                          ? "0 0 20px var(--ling-purple-25)"
+                          : "none"
+                      : isComplete
+                        ? "0 0 20px var(--ling-purple-20)"
+                        : "none",
                   }}
                 >
                   {text}
@@ -228,8 +233,8 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                       style={{
                         display: "inline-block",
                         width: "2px",
-                        height: i === 0 ? "32px" : "18px",
-                        background: "#8b5cf6",
+                        height: i === 0 ? "2rem" : "1.125rem",
+                        background: "var(--ling-purple)",
                         marginLeft: "2px",
                         verticalAlign: "middle",
                         animation: "blink 1s infinite",
@@ -259,17 +264,15 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
               disabled={exiting || !showButton}
               tabIndex={showButton ? 0 : -1}
               style={{
-                padding: "15px 52px",
-                fontSize: "18px",
+                padding: "16px 48px",
+                fontSize: "1.125rem",
                 fontWeight: 600,
                 color: "#fff",
-                background: exiting
-                  ? "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)"
-                  : "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%)",
-                border: "1px solid rgba(167, 139, 250, 0.3)",
+                background: "linear-gradient(135deg, var(--ling-purple) 0%, var(--ling-purple-deep) 100%)",
+                border: "1px solid var(--ling-purple-30)",
                 borderRadius: "999px",
                 cursor: exiting ? "default" : "pointer",
-                boxShadow: "0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2), inset 0 1px 0 rgba(255,255,255,0.15)",
+                boxShadow: "0 0 30px var(--ling-purple-40), 0 0 60px var(--ling-purple-20), inset 0 1px 0 rgba(255,255,255,0.15)",
                 transition: "transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease",
                 position: "relative",
                 overflow: "hidden",
@@ -277,7 +280,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: "10px",
+                gap: "8px",
               }}
             >
               {exiting && (
@@ -295,7 +298,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
               )}
               {t("landing.startChat")}
             </button>
-            <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.25)", letterSpacing: "0.05em" }}>
+            <span style={{ fontSize: "0.75rem", color: "var(--ling-text-tertiary)", letterSpacing: "0.05em" }}>
               Press Enter ↵
             </span>
           </div>
@@ -305,12 +308,13 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
       {/* Skip hint — 移动端友好触摸区域 */}
       <div
         onClick={handleSkip}
+        className="landing-skip"
         style={{
           position: "fixed",
           bottom: "max(16px, env(safe-area-inset-bottom, 0px))",
           right: "16px",
-          color: "rgba(255,255,255,0.3)",
-          fontSize: "13px",
+          color: "var(--ling-text-tertiary)",
+          fontSize: "0.75rem",
           zIndex: 5,
           animation: "fadeInUp 1s ease-out 1s both",
           cursor: "pointer",
@@ -319,7 +323,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          padding: "8px 12px",
+          padding: "8px 16px",
         }}
       >
         {t("landing.skip")}

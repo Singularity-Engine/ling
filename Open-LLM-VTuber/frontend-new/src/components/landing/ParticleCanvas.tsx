@@ -3,6 +3,7 @@ import { MOBILE_BREAKPOINT } from "@/constants/breakpoints";
 
 export type ParticlePhase = "float" | "converge" | "explode" | "fade";
 
+// Canvas 2D context 无法读取 CSS 变量，此处保留字面量（与 --ling-purple 色系一致）
 const COLORS = ["#8b5cf6", "#60a5fa", "#a78bfa", "#c084fc"];
 
 /** Diameter of each pre-rendered glow sprite (px) */
