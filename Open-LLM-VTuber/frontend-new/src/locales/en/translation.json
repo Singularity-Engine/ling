@@ -209,10 +209,10 @@
     "clickToView": "Click for details →"
   },
   "landing": {
-    "line1": "Hey, you're here.",
+    "line1": "Hey, you made it.",
     "line2": "I'm Ling. I can remember you, and I'll always be here.",
-    "line3": "Come, let's chat?",
-    "startChat": "Start chatting",
+    "line3": "Go ahead, I'm listening.",
+    "startChat": "Chat with Ling",
     "skip": "Skip ›"
   },
   "ui": {

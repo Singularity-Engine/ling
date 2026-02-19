@@ -265,6 +265,14 @@ body {
   position: relative;
 }
 
+/* Landing title — gradient text for visual impact */
+.landing-title-gradient {
+  background: linear-gradient(135deg, #fff 0%, #e2d4ff 40%, #c4b5fd 80%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 @keyframes btnPress {
   0% { transform: scale(1); }
   40% { transform: scale(0.92); }
