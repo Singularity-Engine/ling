@@ -198,7 +198,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
               border: isUser ? "1px solid rgba(139, 92, 246, 0.25)" : "1px solid rgba(255, 255, 255, 0.08)",
               backdropFilter: "blur(10px)",
               WebkitBackdropFilter: "blur(10px)",
-              overflow: "hidden",
+              overflow: "visible",
               transition: "all 0.2s ease",
               boxShadow: isUser
                 ? "0 2px 12px rgba(139, 92, 246, 0.15)"

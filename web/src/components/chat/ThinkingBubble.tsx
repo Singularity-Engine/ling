@@ -57,7 +57,7 @@ export const ThinkingBubble = memo(({ content, isThinking, isStreaming }: Thinki
         animation: "thinkingBubbleIn 0.3s ease-out",
       }}
     >
-      <div style={{ maxWidth: "78%" }}>
+      <div style={{ maxWidth: "78%", minWidth: 0 }}>
         <span
           style={{
             display: "block",
