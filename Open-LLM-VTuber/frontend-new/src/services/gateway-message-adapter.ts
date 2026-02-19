@@ -124,7 +124,6 @@ class GatewayMessageAdapter {
 
   private handleAssistantDelta(event: GatewayAgentEvent) {
     const { runId, data } = event;
-    const deltaText = (data.delta as string) || '';
 
     // Get or create run state
     let run = this.activeRuns.get(runId);
@@ -136,6 +135,13 @@ class GatewayMessageAdapter {
       this.emit({ type: 'force-new-message' } as any);
     }
 
+    // Skip duplicate or out-of-order seq
+    if (event.seq <= run.lastSeq) {
+      if (import.meta.env.DEV) console.warn('[GatewayAdapter] Skipping duplicate/out-of-order seq', event.seq, '<=', run.lastSeq);
+      return;
+    }
+
+    const deltaText = (data.delta as string) || '';
     if (deltaText) {
       run.accumulatedText += deltaText;
     } else if (data.text) {

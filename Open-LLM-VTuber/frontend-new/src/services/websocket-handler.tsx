@@ -641,6 +641,11 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         if (runId) {
           gatewayConnector.abortRun(runId).catch((err) => {
             console.error('[Gateway] abortRun failed:', err);
+            toaster.create({
+              title: '停止失败，请重试',
+              type: 'error',
+              duration: 3000,
+            });
           });
         }
         return;
@@ -685,6 +690,12 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           '[proactive-speak]',
         ).catch((err) => {
           console.error('[Gateway] proactive speak failed:', err);
+          toaster.create({
+            title: '主动发言失败',
+            type: 'error',
+            duration: 3000,
+          });
+          setAiStateRef.current('idle');
         });
         return;
 
@@ -744,6 +755,11 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           });
         }).catch((err) => {
           console.error('[Gateway] resolveSession failed:', err);
+          toaster.create({
+            title: '创建新对话失败',
+            type: 'error',
+            duration: 3000,
+          });
         });
         return;
       }
@@ -761,6 +777,11 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           }
         }).catch((err) => {
           console.error('[Gateway] listSessions failed:', err);
+          toaster.create({
+            title: '加载会话列表失败',
+            type: 'error',
+            duration: 3000,
+          });
         });
         return;
 
