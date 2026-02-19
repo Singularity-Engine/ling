@@ -19,9 +19,11 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     .chat-area-scroll::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 2px; }
     @keyframes chatFadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes emptyStateFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+    @keyframes emptyStateFadeOut { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(-12px) scale(0.96); } }
     @keyframes scrollBtnIn { from { opacity: 0; transform: translateY(12px) scale(0.8); } to { opacity: 1; transform: translateY(0) scale(1); } }
     @keyframes scrollBtnPulse { 0%, 100% { box-shadow: 0 2px 12px rgba(139, 92, 246, 0.3); } 50% { box-shadow: 0 2px 20px rgba(139, 92, 246, 0.5); } }
     @keyframes chipFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes greetingBubbleIn { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
     .welcome-chip { transition: all 0.2s ease; }
     .welcome-chip:hover { background: rgba(139, 92, 246, 0.25) !important; border-color: rgba(139, 92, 246, 0.35) !important; transform: translateY(-1px); }
     .welcome-chip:active { transform: scale(0.97); }
@@ -77,6 +79,10 @@ export const ChatArea = memo(() => {
 
   // Throttle the rapidly-updating fullResponse to ~display refresh rate
   const displayResponse = useThrottledValue(fullResponse);
+
+  // Track empty-state exit animation: keep showing for 350ms with fade-out
+  const [emptyExiting, setEmptyExiting] = useState(false);
+  const prevEmptyRef = useRef(true);
 
   const [isNearBottom, setIsNearBottom] = useState(true);
   const [hasNewMessage, setHasNewMessage] = useState(false);
@@ -147,6 +153,19 @@ export const ChatArea = memo(() => {
 
   const isEmpty = dedupedMessages.length === 0 && !showStreaming && !showTyping;
 
+  // Detect isEmpty going from true → false, trigger exit animation
+  useEffect(() => {
+    if (prevEmptyRef.current && !isEmpty) {
+      setEmptyExiting(true);
+      const timer = setTimeout(() => setEmptyExiting(false), 350);
+      return () => clearTimeout(timer);
+    }
+    prevEmptyRef.current = isEmpty;
+  }, [isEmpty]);
+
+  // True when this is the first AI message (greeting bubble)
+  const isGreeting = dedupedMessages.length === 1 && dedupedMessages[0].role === "ai";
+
   const welcomeChips = t("ui.welcomeChips", { returnObjects: true }) as string[];
 
   const handleChipClick = useCallback(
@@ -171,7 +190,7 @@ export const ChatArea = memo(() => {
         position: "relative",
       }}
     >
-      {isEmpty && (
+      {(isEmpty || emptyExiting) && (
         <div
           style={{
             display: "flex",
@@ -181,7 +200,10 @@ export const ChatArea = memo(() => {
             height: "100%",
             padding: "24px 16px",
             gap: "20px",
-            animation: "chatFadeInUp 0.6s ease-out",
+            animation: emptyExiting
+              ? "emptyStateFadeOut 0.35s ease-in forwards"
+              : "chatFadeInUp 0.6s ease-out",
+            pointerEvents: emptyExiting ? "none" : undefined,
           }}
         >
           <span
@@ -278,6 +300,7 @@ export const ChatArea = memo(() => {
               isToolCall={msg.type === "tool_call_status"}
               toolName={msg.tool_name}
               toolStatus={msg.status}
+              isGreeting={i === 0 && msg.role === "ai" && isGreeting}
             />
           </div>
         );

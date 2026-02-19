@@ -48,7 +48,16 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
   }, [handleSkip, showButton]);
 
   // Main timeline — 压缩到 3.5s 开始出文字
+  // reduced-motion: 跳过粒子动画，直接显示文字
   useEffect(() => {
+    if (prefersReducedMotion()) {
+      setParticlePhase("fade");
+      setBgDim(0.6);
+      setShowText(true);
+      setCurrentLine(LINES.length); // 跳过打字机，直接全部显示
+      return;
+    }
+
     startTimeRef.current = performance.now();
 
     // Phase 1: converge (1.5-3s)

@@ -113,6 +113,7 @@ interface ChatBubbleProps {
   toolName?: string;
   toolStatus?: string;
   staggerIndex?: number;
+  isGreeting?: boolean;
 }
 
 function formatTime(ts: string): string {
@@ -124,7 +125,7 @@ function formatTime(ts: string): string {
   }
 }
 
-export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolCall, toolName, toolStatus }: ChatBubbleProps) => {
+export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolCall, toolName, toolStatus, isGreeting }: ChatBubbleProps) => {
   const { t } = useTranslation();
   const isUser = role === "user";
   const [copied, setCopied] = useState(false);
@@ -165,7 +166,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
         justifyContent: isUser ? "flex-end" : "flex-start",
         marginBottom: "12px",
         padding: "0 16px",
-        animation: "bubbleFadeInUp 0.3s ease-out",
+        animation: isGreeting ? "greetingBubbleIn 0.5s ease-out" : "bubbleFadeInUp 0.3s ease-out",
       }}
     >
       <div style={{ maxWidth: "78%" }} className={!isUser ? "chat-bubble-wrap" : undefined}>

@@ -538,6 +538,8 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const synthQueueRef = useRef<Promise<void>>(Promise.resolve());
   // Track synthesized sentences to prevent duplicates
   const synthesizedRef = useRef(new Set<string>());
+  // Only show TTS error toast once per conversation to avoid spam
+  const ttsErrorShownRef = useRef(false);
   // Track current expression for TTS audio tasks
   const currentExpressionRef = useRef<string | null>(null);
   useEffect(() => { currentExpressionRef.current = affinityContext.currentExpression; }, [affinityContext.currentExpression]);
@@ -583,6 +585,14 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             } catch (err) {
               console.error('[TTS] Synthesis failed:', err);
               markSynthErrorRef.current(err instanceof Error ? err.message : 'TTS synthesis failed');
+              if (!ttsErrorShownRef.current) {
+                ttsErrorShownRef.current = true;
+                toaster.create({
+                  title: '语音合成暂时不可用',
+                  type: 'warning',
+                  duration: 4000,
+                });
+              }
             }
           });
         }
@@ -594,6 +604,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       if (msg.type === 'control' && msg.text === 'conversation-chain-start') {
         lastTtsTextRef.current = '';
         synthesizedRef.current.clear();
+        ttsErrorShownRef.current = false;
       }
     });
 
@@ -653,6 +664,12 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           });
         } else {
           console.warn('[ASR] No transcript available from speech recognition');
+          toaster.create({
+            title: '未识别到语音，请重试',
+            type: 'info',
+            duration: 3000,
+          });
+          setAiStateRef.current('idle');
         }
         // Restart ASR if mic is still on (will be re-started by micOn effect)
         return;
