@@ -69,10 +69,58 @@ function useThrottledValue(source: string): string {
   return display;
 }
 
+// Reusable suggestion chips strip
+function SuggestionChips({
+  chips,
+  onChipClick,
+  centered,
+  baseDelay = 0,
+}: {
+  chips: string[];
+  onChipClick: (text: string) => void;
+  centered?: boolean;
+  baseDelay?: number;
+}) {
+  if (!Array.isArray(chips) || chips.length === 0) return null;
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        justifyContent: centered ? "center" : undefined,
+        gap: "8px",
+        maxWidth: "340px",
+        ...(centered ? {} : { padding: "4px 16px 12px" }),
+      }}
+    >
+      {chips.map((chip, i) => (
+        <button
+          key={chip}
+          className="welcome-chip"
+          onClick={() => onChipClick(chip)}
+          style={{
+            background: "rgba(139, 92, 246, 0.12)",
+            border: "1px solid rgba(139, 92, 246, 0.2)",
+            borderRadius: "20px",
+            padding: "8px 16px",
+            color: "rgba(226, 212, 255, 0.8)",
+            fontSize: "13px",
+            cursor: "pointer",
+            animation: `chipFadeIn 0.4s ease-out ${baseDelay + i * 0.08}s both`,
+            lineHeight: "1.4",
+          }}
+        >
+          {chip}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export const ChatArea = memo(() => {
   const { messages, fullResponse, appendHumanMessage } = useChatHistory();
   const { isThinkingSpeaking } = useAiState();
-  const { sendMessage } = useWebSocket();
+  const { sendMessage, wsState } = useWebSocket();
   const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -168,12 +216,15 @@ export const ChatArea = memo(() => {
 
   const welcomeChips = t("ui.welcomeChips", { returnObjects: true }) as string[];
 
+  const isConnected = wsState === "OPEN";
+
   const handleChipClick = useCallback(
     (text: string) => {
+      if (!isConnected) return;
       appendHumanMessage(text);
       sendMessage({ type: "text-input", text, images: [] });
     },
-    [appendHumanMessage, sendMessage]
+    [appendHumanMessage, sendMessage, isConnected]
   );
 
   return (
