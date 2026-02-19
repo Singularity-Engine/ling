@@ -199,26 +199,26 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
               return (
                 <div
                   key={i}
-                  className="landing-text-line"
+                  className={`landing-text-line${i === 0 ? " landing-title-gradient" : ""}${i === 0 && isComplete ? " landing-title-glow" : ""}`}
                   style={{
-                    fontSize: i === 0 ? "2.375rem" : "1.25rem",
+                    fontSize: i === 0 ? "2.75rem" : "1.25rem",
                     fontWeight: i === 0 ? 700 : isLastLine ? 500 : 400,
                     color: i === 0
-                      ? "var(--ling-purple-text)"
+                      ? undefined  // handled by .landing-title-gradient
                       : isLastLine
                         ? "var(--ling-purple-lighter)"
                         : "var(--ling-text-secondary)",
                     letterSpacing: i === 0 ? "0.1em" : "0.04em",
                     textAlign: "center",
                     wordBreak: "break-word" as const,
-                    minHeight: i === 0 ? "3rem" : "1.75rem",
+                    minHeight: i === 0 ? "3.5rem" : "1.75rem",
                     marginTop: isLastLine ? "16px" : "0",
                     opacity: isVisible ? 1 : 0,
                     transform: isVisible ? "translateY(0)" : "translateY(12px)",
                     transition: "opacity 0.5s ease-out, transform 0.5s ease-out, text-shadow 0.8s ease",
                     textShadow: i === 0
                       ? isComplete
-                        ? "0 0 30px var(--ling-purple-40), 0 0 60px var(--ling-purple-20)"
+                        ? undefined  // handled by .landing-title-glow animation
                         : isVisible
                           ? "0 0 20px var(--ling-purple-25)"
                           : "none"

@@ -265,6 +265,15 @@ body {
   position: relative;
 }
 
+/* Landing title — breathing glow after typewriter completes */
+@keyframes titleGlow {
+  0%, 100% { text-shadow: 0 0 30px var(--ling-purple-40), 0 0 60px var(--ling-purple-20); }
+  50% { text-shadow: 0 0 40px var(--ling-purple-60), 0 0 80px var(--ling-purple-30); }
+}
+.landing-title-glow {
+  animation: titleGlow 4s ease-in-out infinite;
+}
+
 /* Landing title — gradient text for visual impact */
 .landing-title-gradient {
   background: linear-gradient(135deg, #fff 0%, #e2d4ff 40%, #c4b5fd 80%, #a78bfa 100%);
