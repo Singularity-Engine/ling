@@ -440,8 +440,12 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             const sendGreeting = () => {
               if (greetingSentRef.current) return;
               greetingSentRef.current = true;
+              // Show thinking indicator immediately — avoids empty-state flash
+              // while waiting for Gateway's conversation-chain-start event
+              setAiState('thinking-speaking');
               gatewayConnector.sendChat(sessionKeyRef.current, '[greeting]').catch((err) => {
                 if (import.meta.env.DEV) console.error('[WebSocketHandler] Auto-greeting failed:', err);
+                setAiState('idle');
               });
             };
 
