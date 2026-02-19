@@ -196,7 +196,10 @@ class GatewayConnector {
     if (this.state === 'RECONNECTING') {
       this.clearReconnectTimer();
     } else if (this.state === 'DISCONNECTED' && this.options && !this.authFailed) {
-      this.reconnectAttempts = 0;
+      // Set to 1 (not 0) so hello-ok handler detects this as a reconnection
+      // and fires reconnected$ — which triggers session re-resolve and UI recovery.
+      // Setting to 0 would cause wasReconnecting to be false, skipping recovery.
+      this.reconnectAttempts = 1;
     } else {
       return;
     }
@@ -376,6 +379,7 @@ class GatewayConnector {
       this.ws.onclose = (event) => {
         if (import.meta.env.DEV) console.log(`[GatewayConnector] Closed: code=${event.code} reason=${event.reason}`);
         clearTimeout(handshakeTimer);
+        this.stopHeartbeatMonitor();
         this.rejectAllPending('Connection closed');
 
         if (!handshakeResolved) {
