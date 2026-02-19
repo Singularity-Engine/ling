@@ -229,7 +229,7 @@ dist/
 *.zip
 models/
 # 但不忽略源代码中的模型定义文件
-!Open-LLM-VTuber/src/**/models/
+!engine/src/**/models/
 *.model
 *.pt
 
@@ -306,9 +306,9 @@ user_data/
 *.flv
 *.webm
 
-# 但是跟踪 Open-LLM-VTuber/audio 文件夹中的音频文件
-!Open-LLM-VTuber/audio/**/*.mp3
-!Open-LLM-VTuber/audio/**/*.wav
+# 但是跟踪 engine/audio 文件夹中的音频文件
+!engine/audio/**/*.mp3
+!engine/audio/**/*.wav
 
 # Images (except small ones)
 backgrounds/*.jpg
@@ -400,37 +400,37 @@ pixi.lock
 /db_connection_patch.py
 /docker-compose.dev.yml
 /docker-compose.yml
-/Open-LLM-VTuber/requirements.txt
+/engine/requirements.txt
 /requirements.txt
 /test-image.py
-/Open-LLM-VTuber/enhanced_mcp_config.json
+/engine/enhanced_mcp_config.json
 /.claude/settings.local.json
 # ========================================
 # BFF集成相关文档和测试文件
 # ========================================
-Open-LLM-VTuber/BFF_*.md
-Open-LLM-VTuber/DOCKER_DEPLOYMENT.md
-Open-LLM-VTuber/KEY_SOURCES_GUIDE.md
-Open-LLM-VTuber/doc/mcp_config.md
+engine/BFF_*.md
+engine/DOCKER_DEPLOYMENT.md
+engine/KEY_SOURCES_GUIDE.md
+engine/doc/mcp_config.md
 
 # 前端测试文件
-Open-LLM-VTuber/frontend/test.html
+engine/frontend/test.html
 
 # BFF集成测试文件（保留测试文件忽略，但移除关键业务逻辑文件）
-Open-LLM-VTuber/test_*.py
+engine/test_*.py
 # 注意：bff_integration的核心文件需要被跟踪，只忽略测试文件
-Open-LLM-VTuber/src/open_llm_vtuber/bff_integration/test_*.py
-Open-LLM-VTuber/src/open_llm_vtuber/emotion_system/test_emotion.py
+engine/src/ling_engine/bff_integration/test_*.py
+engine/src/ling_engine/emotion_system/test_emotion.py
 
 # 其他工具脚本
-Open-LLM-VTuber/init_git_repo.ps1
+engine/init_git_repo.ps1
 init_git_repo.ps1
 # ========================================
-/Open-LLM-VTuber/frontend/libs/ort-wasm-simd.wasm
-/Open-LLM-VTuber/frontend/assets/favicon-PRYZbaNo.ico
-/Open-LLM-VTuber/frontend/assets/main-BFv-umY1.js
-/Open-LLM-VTuber/frontend/assets/main-CgDDGPt4.css
-/Open-LLM-VTuber/frontend/assets/main-CgZZ9vye.js
+/engine/frontend/libs/ort-wasm-simd.wasm
+/engine/frontend/assets/favicon-PRYZbaNo.ico
+/engine/frontend/assets/main-BFv-umY1.js
+/engine/frontend/assets/main-CgDDGPt4.css
+/engine/frontend/assets/main-CgZZ9vye.js
 /MCP_Implementation_Documentation.md
 # /.env.docker  # 注释掉，因为部署脚本需要这个文件
 /nul

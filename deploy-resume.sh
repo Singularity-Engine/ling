@@ -5,7 +5,7 @@ set -e
 # 配置变量 - 请根据实际情况修改
 SERVER_IP="35.193.74.48"
 SERVER_USER="open-llm-vtuber-deploy"
-SSH_KEY="C:/Users/20597/.ssh/open_llm_vtuber_deploy"
+SSH_KEY="C:/Users/20597/.ssh/ling_engine_deploy"
 REMOTE_PATH="/home/${SERVER_USER}/App/qdyqszr"
 IMAGE_NAME="qdyqszr"
 IMAGE_TAG="v3"

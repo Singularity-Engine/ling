@@ -5,7 +5,7 @@ set -e
 # 配置变量 - 请根据实际情况修改
 SERVER_IP="35.193.74.48"
 SERVER_USER="open-llm-vtuber-deploy"
-SSH_KEY="C:/Users/20597/.ssh/open_llm_vtuber_deploy"
+SSH_KEY="C:/Users/20597/.ssh/ling_engine_deploy"
 REMOTE_PATH="/home/${SERVER_USER}/App/qdyqszr"
 IMAGE_NAME="qdyqszr"
 IMAGE_TAG="v3"
@@ -17,7 +17,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🚀 开始部署 Open-LLM-VTuber 服务...${NC}"
+echo -e "${BLUE}🚀 开始部署 Ling Engine 服务...${NC}"
 
 # 检查必要文件
 if [ ! -f ".env" ]; then
@@ -40,9 +40,9 @@ if [ ! -f "${SSH_KEY}" ]; then
     exit 1
 fi
 
-# 检查Open-LLM-VTuber目录和配置文件
-if [ ! -f "Open-LLM-VTuber/conf.yaml" ]; then
-    echo -e "${RED}❌ 错误: Open-LLM-VTuber/conf.yaml 配置文件不存在${NC}"
+# 检查engine目录和配置文件
+if [ ! -f "engine/conf.yaml" ]; then
+    echo -e "${RED}❌ 错误: engine/conf.yaml 配置文件不存在${NC}"
     exit 1
 fi
 
@@ -53,7 +53,7 @@ rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
 
 # 复制必要文件到构建目录 (按照缓存友好的顺序: 不常变化的文件优先)
-mkdir -p ${BUILD_DIR}/Open-LLM-VTuber
+mkdir -p ${BUILD_DIR}/engine
 
 # 1. 复制Docker相关配置文件 (很少变化)
 cp Dockerfile.china ${BUILD_DIR}/
