@@ -56,7 +56,7 @@ const MAX_LENGTH = 2000;
 export const InputBar = memo(() => {
   const { t } = useTranslation();
   const [inputText, setInputText] = useState("");
-  const [isComposing, setIsComposing] = useState(false);
+  const isComposingRef = useRef(false);
   const [isSending, setIsSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const wsContext = useWebSocket();
@@ -81,15 +81,16 @@ export const InputBar = memo(() => {
   const hasText = trimmed.length > 0;
   const isAiBusy = aiState === "thinking-speaking" || aiState === "loading";
   const isAiSpeaking = aiState === "thinking-speaking";
+  const isConnected = wsContext?.wsState === "OPEN";
   const stateKey = AI_STATE_KEYS[aiState] || "";
   const stateText = stateKey ? t(stateKey) : "";
   const charCount = trimmed.length;
   const isOverLimit = charCount > MAX_LENGTH;
-  const canSend = hasText && !isOverLimit && !isSending && wsContext;
+  const canSend = hasText && !isOverLimit && !isSending && isConnected;
 
   const handleSend = useCallback(() => {
     const text = inputText.trim();
-    if (!text || text.length > MAX_LENGTH || isSending || !wsContext) return;
+    if (!text || text.length > MAX_LENGTH || isSending || !isConnected) return;
 
     if (aiState === "thinking-speaking") {
       interrupt();
@@ -113,13 +114,13 @@ export const InputBar = memo(() => {
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (isComposing) return;
+      if (isComposingRef.current) return;
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         handleSend();
       }
     },
-    [isComposing, handleSend]
+    [handleSend]
   );
 
   const handleInput = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -208,8 +209,8 @@ export const InputBar = memo(() => {
           value={inputText}
           onChange={handleInput}
           onKeyDown={handleKeyDown}
-          onCompositionStart={() => setIsComposing(true)}
-          onCompositionEnd={() => setIsComposing(false)}
+          onCompositionStart={() => { isComposingRef.current = true; }}
+          onCompositionEnd={() => { isComposingRef.current = false; }}
           placeholder={micOn ? t("chat.placeholderListening") : t("chat.placeholder")}
           aria-label={t("chat.inputLabel")}
           rows={1}
