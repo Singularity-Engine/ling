@@ -47,6 +47,11 @@ const SHARED_STYLES = `
 @property --cb-lo-a { syntax: '<number>'; inherits: false; initial-value: 0.12; }
 @property --cb-hi-a { syntax: '<number>'; inherits: false; initial-value: 0.30; }
 @property --cf-y { syntax: '<length>'; inherits: false; initial-value: 0px; }
+@property --c-scale { syntax: '<number>'; inherits: false; initial-value: 1; }
+@property --c-bg-alpha { syntax: '<number>'; inherits: false; initial-value: 0.60; }
+@property --c-blur { syntax: '<length>'; inherits: false; initial-value: 16px; }
+@property --ce-scale { syntax: '<number>'; inherits: false; initial-value: 1; }
+@property --ce-y { syntax: '<length>'; inherits: false; initial-value: 0px; }
 
 @keyframes crystalOverlayIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes crystalExpandIn {
@@ -56,6 +61,10 @@ const SHARED_STYLES = `
 @keyframes crystalBreathe {
   0%, 100% { box-shadow: 0 0 var(--cb-lo) rgba(var(--cg-r), var(--cg-g), var(--cg-b), var(--cb-lo-a)); }
   50%      { box-shadow: 0 0 var(--cb-hi) rgba(var(--cg-r), var(--cg-g), var(--cg-b), var(--cb-hi-a)); }
+}
+@keyframes crystalEnter {
+  from { opacity: 0; --ce-scale: 0.5; --ce-y: 40px; }
+  to   { opacity: 1; --ce-scale: 1; --ce-y: 0px; }
 }
 @keyframes crystalFloat {
   0%, 100% { --cf-y: 0px; }
@@ -75,18 +84,6 @@ function ensureSharedStyles() {
   el.textContent = SHARED_STYLES;
   document.head.appendChild(el);
   _sharedInjected = true;
-}
-
-// ─── Per-instance enter keyframe ─────────────────────────────────
-// Uses var(--c-scale) so the target scale stays in sync with the
-// current theme without regenerating the keyframe text.
-
-function buildEnterKeyframe(id: string, rotateY: number) {
-  return `
-@keyframes crystalEnter-${id} {
-  from { opacity: 0; transform: perspective(800px) rotateY(${rotateY}deg) scale(0.5) translateY(40px); }
-  to   { opacity: 1; transform: perspective(800px) rotateY(${rotateY}deg) scale(var(--c-scale, 1)) translateY(0); }
-}`;
 }
 
 // ─── Static data ─────────────────────────────────────────────────
@@ -119,7 +116,7 @@ const LEVEL_TRANSITION = [
   "--cg-r 0.8s ease", "--cg-g 0.8s ease", "--cg-b 0.8s ease",
   "--cb-lo 0.8s ease", "--cb-hi 0.8s ease",
   "--cb-lo-a 0.8s ease", "--cb-hi-a 0.8s ease",
-  "background 0.8s ease", "backdrop-filter 0.8s ease",
+  "--c-scale 0.8s ease", "--c-bg-alpha 0.8s ease", "--c-blur 0.8s ease",
 ].join(", ");
 
 // ─── Component ───────────────────────────────────────────────────
@@ -156,10 +153,7 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
   // Inject shared @property + keyframes once
   useEffect(ensureSharedStyles, []);
 
-  // Per-instance enter keyframe — stable across level changes
-  const animId = useMemo(() => `${index}`, [index]);
   const rotateY = position === "left" ? 5 : position === "right" ? -5 : 0;
-  const enterKeyframe = useMemo(() => buildEnterKeyframe(animId, rotateY), [animId, rotateY]);
 
   const color = CATEGORY_COLORS[(tool.category as ToolCategory) ?? "generic"] || CATEGORY_COLORS.generic;
   const icon = TOOL_ICONS[tool.category] || TOOL_ICONS.generic;
@@ -171,9 +165,9 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
   const handleOverlayClick = useCallback(() => setExpanded(false), []);
   const handleAnimEnd = useCallback(
     (e: React.AnimationEvent) => {
-      if (e.animationName === `crystalEnter-${animId}`) setEntered(true);
+      if (e.animationName === "crystalEnter") setEntered(true);
     },
-    [animId],
+    [],
   );
 
   // CSS custom properties for theme-dependent animation values
@@ -187,7 +181,9 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
     "--cb-hi-a": +(0.30 * theme.breatheIntensity).toFixed(2),
     "--cf-range": `${-theme.floatRange}px`,
     "--c-scale": theme.scale,
-  }), [glowR, glowG, glowB, theme.breatheIntensity, theme.floatRange, theme.scale]);
+    "--c-bg-alpha": theme.bgAlpha,
+    "--c-blur": `${theme.blur}px`,
+  }), [glowR, glowG, glowB, theme.breatheIntensity, theme.floatRange, theme.scale, theme.bgAlpha, theme.blur]);
 
   // ─── Expanded overlay ────────────────────────────────────────
 
@@ -266,31 +262,31 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
 
   return (
     <>
-      <style>{enterKeyframe}</style>
       <div
         style={{
           position: "relative",
           width: "200px",
           minHeight: "80px",
           maxHeight: "200px",
-          background: `rgba(10, 0, 21, ${theme.bgAlpha})`,
-          backdropFilter: `blur(${theme.blur}px)`,
+          background: "rgba(10, 0, 21, var(--c-bg-alpha))",
+          backdropFilter: "blur(var(--c-blur))",
           border: `1px solid ${borderHex}`,
           borderRadius: "16px",
           padding: "12px 14px",
           color: "white",
           cursor: "pointer",
           overflow: "hidden",
-          // After enter animation ends (backwards = no post-fill), inline
-          // transform takes over. Float is driven via --cf-y so it doesn't
+          // --ce-scale/--ce-y are animated by crystalEnter (0.5→1 / 40px→0),
+          // then revert to @property initial values (1 / 0px) after the
+          // animation ends. Float is driven via --cf-y so it doesn't
           // conflict with hover scale/rotateY changes.
-          transform: `perspective(800px) rotateY(${currentRotateY}deg) scale(${currentScale}) translateY(var(--cf-y))`,
+          transform: `perspective(800px) rotateY(${currentRotateY}deg) scale(calc(var(--ce-scale) * ${currentScale})) translateY(calc(var(--ce-y) + var(--cf-y)))`,
           animation: [
             // Position 0: enter or none — keeps positions 1&2 stable so
             // crystalBreathe and crystalFloat don't restart when entered flips.
             entered
               ? "none 0s"
-              : `crystalEnter-${animId} 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${animDelay}s backwards`,
+              : `crystalEnter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${animDelay}s backwards`,
             `crystalBreathe 3s ease-in-out ${animDelay}s infinite`,
             `crystalFloat ${floatDur}s ease-in-out ${animDelay + 0.6}s infinite`,
           ].join(", "),
