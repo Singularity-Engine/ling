@@ -181,11 +181,17 @@ class GatewayConnector {
 
   /**
    * Immediately retry connection (e.g. when browser comes back online).
-   * Only effective when in RECONNECTING state.
+   * Works in RECONNECTING state (cancels pending timer) and also in
+   * DISCONNECTED state (resets retry counter for a fresh attempt).
    */
   retryNow() {
-    if (this.state !== 'RECONNECTING') return;
-    this.clearReconnectTimer();
+    if (this.state === 'RECONNECTING') {
+      this.clearReconnectTimer();
+    } else if (this.state === 'DISCONNECTED' && this.options && !this.authFailed) {
+      this.reconnectAttempts = 0;
+    } else {
+      return;
+    }
     if (import.meta.env.DEV) console.log('[GatewayConnector] retryNow — network recovered, reconnecting immediately');
     this.doConnect().catch((err) => {
       console.error('[GatewayConnector] retryNow failed:', err.message);
@@ -419,10 +425,13 @@ class GatewayConnector {
     }
 
     this.setState('RECONNECTING');
-    const delay = Math.min(
+    const base = Math.min(
       RECONNECT_BASE_MS * Math.pow(2, this.reconnectAttempts),
       RECONNECT_MAX_MS,
     );
+    // Add ±25% jitter to prevent thundering herd on server restart
+    const jitter = base * (0.75 + Math.random() * 0.5);
+    const delay = Math.round(jitter);
     this.reconnectAttempts++;
     this.reconnectAttempt$.next(this.reconnectAttempts);
     if (import.meta.env.DEV) console.log(`[GatewayConnector] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${RECONNECT_MAX_RETRIES})`);

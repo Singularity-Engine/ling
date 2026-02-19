@@ -611,6 +611,12 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         if (msg.text) {
           gatewayConnector.sendChat(sessionKeyRef.current, msg.text).catch((err) => {
             console.error('[Gateway] sendChat failed:', err);
+            toaster.create({
+              title: `发送失败: ${err.message}`,
+              type: 'error',
+              duration: 3000,
+            });
+            setAiStateRef.current('idle');
           });
         }
         return;
@@ -638,6 +644,12 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           appendHumanMessageRef.current(transcript.trim());
           gatewayConnector.sendChat(sessionKeyRef.current, transcript.trim()).catch((err) => {
             console.error('[Gateway] sendChat (ASR) failed:', err);
+            toaster.create({
+              title: `语音发送失败: ${err.message}`,
+              type: 'error',
+              duration: 3000,
+            });
+            setAiStateRef.current('idle');
           });
         } else {
           console.warn('[ASR] No transcript available from speech recognition');
