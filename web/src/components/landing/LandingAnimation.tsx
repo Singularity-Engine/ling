@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { ParticleCanvas, type ParticlePhase } from "./ParticleCanvas";
+import { MOBILE_BREAKPOINT } from "@/constants/breakpoints";
 
 const prefersReducedMotion = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -308,7 +309,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
               )}
             </button>
             <span style={{ fontSize: "0.75rem", color: "var(--ling-text-tertiary)", letterSpacing: "0.04em" }}>
-              Press Enter ↵
+              {window.innerWidth < MOBILE_BREAKPOINT ? t("landing.tapHint", "Tap to start") : "Press Enter ↵"}
             </span>
           </div>
         </div>

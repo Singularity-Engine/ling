@@ -237,6 +237,9 @@ body {
 .landing-start-btn:not(:disabled):hover {
   transform: scale(1.06);
 }
+.landing-start-btn:not(:disabled):hover .landing-btn-arrow {
+  transform: translateX(4px);
+}
 .landing-start-btn:not(:disabled):active {
   transform: scale(0.97);
   transition-duration: 0.1s;
@@ -410,11 +413,14 @@ canvas {
 
   /* Landing 动画移动端优化 */
   .landing-text-line {
-    font-size: 17px !important;
+    font-size: 15px !important;
     line-height: 1.5 !important;
   }
   .landing-text-line:first-child {
     font-size: 26px !important;
+  }
+  .landing-text-line:nth-child(2) {
+    font-size: 17px !important;
   }
   .landing-start-btn {
     padding: 16px 40px !important;

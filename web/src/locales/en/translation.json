@@ -215,7 +215,9 @@
     "line2": "An AI companion that remembers you",
     "line3": "Go ahead, I'm listening.",
     "startChat": "Chat with Ling",
-    "skip": "Skip ›"
+    "skip": "Skip ›",
+    "tapHint": "Tap to start",
+    "enterHint": "Press Enter ↵"
   },
   "ui": {
     "expandFooter": "Expand footer",

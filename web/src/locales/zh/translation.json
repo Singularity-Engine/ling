@@ -215,7 +215,9 @@
     "line2": "有记忆的 AI 伙伴",
     "line3": "说点什么吧，我在听。",
     "startChat": "和灵聊聊",
-    "skip": "跳过 ›"
+    "skip": "跳过 ›",
+    "tapHint": "点击开始",
+    "enterHint": "按 Enter 键开始 ↵"
   },
   "ui": {
     "expandFooter": "展开底栏",
