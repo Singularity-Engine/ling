@@ -56,7 +56,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
     const convergeInterval = setInterval(() => {
       const elapsed = performance.now() - startTimeRef.current;
       if (elapsed > 1500 && elapsed < 3000) {
-        setPhaseProgress((elapsed - 1500) / 1500);
+        phaseProgressRef.current = (elapsed - 1500) / 1500;
       }
     }, 16);
 
@@ -120,7 +120,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
       }}
     >
       {/* Particle canvas */}
-      <ParticleCanvas phase={particlePhase} phaseProgress={phaseProgress} />
+      <ParticleCanvas phase={particlePhase} phaseProgressRef={phaseProgressRef} />
 
       {/* Background dim overlay */}
       <div
