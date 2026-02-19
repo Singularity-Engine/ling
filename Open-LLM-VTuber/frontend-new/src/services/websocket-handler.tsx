@@ -217,6 +217,12 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   // Guard: only send auto-greeting once per page load
   const greetingSentRef = useRef(false);
 
+  // TTS generation counter — incremented on new conversation to discard stale synthesis results
+  const ttsGenerationRef = useRef(0);
+
+  // Pending new chat flag — prevents stale conversation-chain-end from flickering to idle
+  const pendingNewChatRef = useRef(false);
+
   // ─── ASR lifecycle: start/stop with microphone ─────────────────
 
   useEffect(() => {
@@ -243,11 +249,17 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         stopMic();
         break;
       case 'conversation-chain-start':
+        pendingNewChatRef.current = false;
         setAiState('thinking-speaking');
         audioTaskQueue.clearQueue();
         clearResponse();
         break;
       case 'conversation-chain-end':
+        // Skip idle transition if a new message was just sent (prevents flicker)
+        if (pendingNewChatRef.current) {
+          if (import.meta.env.DEV) console.log('[WS-Handler] Skipping idle transition — pending new chat');
+          break;
+        }
         audioTaskQueue.addTask(() => new Promise<void>((resolve) => {
           setAiState((currentState: AiState) => {
             if (currentState === 'thinking-speaking') {
@@ -690,6 +702,10 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       // ── Phase 2: Text input → Gateway chat.send ──
       case 'text-input':
         if (msg.text) {
+          // Mark pending to suppress stale conversation-chain-end idle transition
+          pendingNewChatRef.current = true;
+          ttsGenerationRef.current++;
+          audioTaskQueue.clearQueue();
           // Optimistic: show thinking indicator immediately instead of
           // waiting for Gateway's conversation-chain-start lifecycle event
           clearResponseRef.current();
@@ -701,6 +717,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
               type: 'error',
               duration: 3000,
             });
+            pendingNewChatRef.current = false;
             setAiStateRef.current('idle');
           });
         }
@@ -708,6 +725,9 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
       // ── Phase 5: Interrupt → Gateway abort ──
       case 'interrupt-signal': {
+        // Stop local TTS pipeline immediately — discard in-flight synthesis
+        ttsGenerationRef.current++;
+        audioTaskQueue.clearQueue();
         const runId = gatewayAdapter.getActiveRunId();
         if (runId) {
           gatewayConnector.abortRun(runId).catch((err) => {
