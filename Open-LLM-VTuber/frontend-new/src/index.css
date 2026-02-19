@@ -516,3 +516,15 @@ canvas {
 [data-theme="light"] {
   color-scheme: light;
 }
+
+/* === Reduced motion 无障碍 === */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01s !important;
+    scroll-behavior: auto !important;
+  }
+}
