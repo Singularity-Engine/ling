@@ -57,6 +57,9 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
       const elapsed = performance.now() - startTimeRef.current;
       if (elapsed > 1500 && elapsed < 3000) {
         phaseProgressRef.current = (elapsed - 1500) / 1500;
+      } else if (elapsed >= 3000) {
+        phaseProgressRef.current = 1;
+        clearInterval(convergeInterval);
       }
     }, 16);
 
@@ -104,7 +107,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
       }, LINE_DELAY);
       return () => clearTimeout(t);
     }
-  }, [showText, currentLine, displayedChars]);
+  }, [showText, currentLine, displayedChars, LINES]);
 
   return (
     <div
