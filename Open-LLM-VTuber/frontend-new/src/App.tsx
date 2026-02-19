@@ -399,12 +399,16 @@ function App(): JSX.Element {
 
   const handleLandingComplete = useCallback(() => {
     setLandingExiting(true);
+    // Mark visited BEFORE dispatching event to avoid race condition:
+    // If Gateway resolves session during the 700ms exit animation, it will
+    // find sessionStorage set and send the greeting immediately instead of
+    // waiting for an event that already fired.
+    sessionStorage.setItem('ling-visited', 'true');
     // Signal websocket-handler that the user has finished the Landing animation
     // so it can now send the auto-greeting (avoids greeting arriving while Landing is still visible)
     window.dispatchEvent(new Event('ling-landing-complete'));
     setTimeout(() => {
       setShowLanding(false);
-      sessionStorage.setItem('ling-visited', 'true');
     }, 700);
   }, []);
 

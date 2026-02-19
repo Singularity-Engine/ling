@@ -478,9 +478,30 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   useEffect(() => { handleWebSocketMessageRef.current = handleWebSocketMessage; }, [handleWebSocketMessage]);
 
   useEffect(() => {
-    // Subscribe to Gateway state changes
+    // Subscribe to Gateway state changes — track transitions for user notifications
+    let prevGwState: GatewayState | null = null;
     const stateSub = gatewayConnector.state$.subscribe((state) => {
       setWsState(mapGatewayState(state));
+
+      // Issue 1: Notify user when connection drops and auto-reconnect starts
+      if (state === 'RECONNECTING' && prevGwState === 'CONNECTED') {
+        toaster.create({
+          title: '连接断开，正在重连…',
+          type: 'warning',
+          duration: 4000,
+        });
+      }
+
+      // Issue 2: Notify user when all reconnect attempts are exhausted
+      if (state === 'DISCONNECTED' && prevGwState === 'RECONNECTING') {
+        toaster.create({
+          title: '重连失败，请点击右上角状态图标手动重试',
+          type: 'error',
+          duration: 8000,
+        });
+      }
+
+      prevGwState = state;
     });
 
     // Subscribe to agent events (via adapter → MessageEvent format)
