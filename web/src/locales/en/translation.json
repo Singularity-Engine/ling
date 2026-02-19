@@ -210,14 +210,17 @@
   },
   "landing": {
     "heroName": "Ling",
-    "tagline": "An AI companion that remembers you",
+    "tagline": "Your AI digital companion",
     "line1": "Hey, I'm Ling",
-    "line2": "An AI companion that remembers you",
+    "line2": "Your AI digital companion",
     "line3": "Go ahead, I'm listening.",
     "startChat": "Chat with Ling",
     "skip": "Skip ›",
     "tapHint": "Tap to start",
-    "enterHint": "Press Enter ↵"
+    "enterHint": "Press Enter ↵",
+    "featureMemory": "Memory",
+    "featureVoice": "Voice",
+    "featureAvatar": "Avatar"
   },
   "ui": {
     "expandFooter": "Expand footer",
