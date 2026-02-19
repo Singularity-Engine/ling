@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { memo, useState, useCallback, useMemo } from "react";
+import { memo, useState, useCallback, useMemo, useEffect } from "react";
 import type { ToolCategory } from "../../context/tool-state-context";
 import { useAffinity } from "@/context/affinity-context";
 
@@ -28,37 +28,65 @@ const LEVEL_THEMES: Record<string, LevelTheme> = {
 
 const DEFAULT_THEME: LevelTheme = LEVEL_THEMES.neutral;
 
-// ─── Keyframes (generated per-instance with theme params) ────────
+// ─── Shared CSS: @property + static keyframes ───────────────────
+// @property enables smooth CSS variable transitions when affinity
+// level changes. Keyframes reference var() so they pick up live
+// values without regeneration — glow color, intensity and float
+// range interpolate over 0.8s instead of jumping.
+//
+// crystalFloat animates --cf-y (a custom property) rather than
+// transform directly, so the inline transform remains controllable
+// for hover effects.
 
-function buildKeyframes(theme: LevelTheme, id: string) {
-  const { glow, breatheIntensity, floatRange } = theme;
-  const loR = Math.round(10 * breatheIntensity);
-  const hiR = Math.round(22 * breatheIntensity);
-  const loA = (0.12 * breatheIntensity).toFixed(2);
-  const hiA = (0.30 * breatheIntensity).toFixed(2);
-  return `
+const SHARED_STYLES = `
+@property --cg-r { syntax: '<number>'; inherits: false; initial-value: 96; }
+@property --cg-g { syntax: '<number>'; inherits: false; initial-value: 165; }
+@property --cg-b { syntax: '<number>'; inherits: false; initial-value: 250; }
+@property --cb-lo { syntax: '<length>'; inherits: false; initial-value: 10px; }
+@property --cb-hi { syntax: '<length>'; inherits: false; initial-value: 22px; }
+@property --cb-lo-a { syntax: '<number>'; inherits: false; initial-value: 0.12; }
+@property --cb-hi-a { syntax: '<number>'; inherits: false; initial-value: 0.30; }
+@property --cf-y { syntax: '<length>'; inherits: false; initial-value: 0px; }
+
 @keyframes crystalOverlayIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes crystalExpandIn {
   from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
   to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
-@keyframes crystalEnter-${id} {
-  from { opacity: 0; transform: perspective(800px) scale(0.5) translateY(40px); }
-  to   { opacity: 1; transform: perspective(800px) scale(${theme.scale}) translateY(0); }
+@keyframes crystalBreathe {
+  0%, 100% { box-shadow: 0 0 var(--cb-lo) rgba(var(--cg-r), var(--cg-g), var(--cg-b), var(--cb-lo-a)); }
+  50%      { box-shadow: 0 0 var(--cb-hi) rgba(var(--cg-r), var(--cg-g), var(--cg-b), var(--cb-hi-a)); }
 }
-@keyframes crystalBreathe-${id} {
-  0%, 100% { box-shadow: 0 0 ${loR}px rgba(${glow}, ${loA}); }
-  50%      { box-shadow: 0 0 ${hiR}px rgba(${glow}, ${hiA}); }
-}
-@keyframes crystalFloat-${id} {
-  0%, 100% { transform: perspective(800px) scale(${theme.scale}) translateY(0); }
-  50%      { transform: perspective(800px) scale(${theme.scale}) translateY(-${floatRange}px); }
+@keyframes crystalFloat {
+  0%, 100% { --cf-y: 0px; }
+  50%      { --cf-y: var(--cf-range); }
 }
 @keyframes shimmerSweep {
   0%   { transform: translateX(-100%) rotate(25deg); }
   100% { transform: translateX(200%) rotate(25deg); }
 }
 `;
+
+let _sharedInjected = false;
+function ensureSharedStyles() {
+  if (_sharedInjected || typeof document === "undefined") return;
+  const el = document.createElement("style");
+  el.setAttribute("data-info-crystal", "");
+  el.textContent = SHARED_STYLES;
+  document.head.appendChild(el);
+  _sharedInjected = true;
+}
+
+// ─── Per-instance enter keyframe ─────────────────────────────────
+// Uses var(--c-scale) so the target scale stays in sync with the
+// current theme without regenerating the keyframe text.
+
+function buildEnterKeyframe(id: string, rotateY: number) {
+  return `
+@keyframes crystalEnter-${id} {
+  from { opacity: 0; transform: perspective(800px) rotateY(${rotateY}deg) scale(0.5) translateY(40px); }
+  to   { opacity: 1; transform: perspective(800px) rotateY(${rotateY}deg) scale(var(--c-scale, 1)) translateY(0); }
+}`;
 }
 
 // ─── Static data ─────────────────────────────────────────────────
@@ -86,6 +114,14 @@ const STATUS_ICONS: Record<string, string> = {
   error: "❌",
 };
 
+// Transition string for smooth level changes via @property
+const LEVEL_TRANSITION = [
+  "--cg-r 0.8s ease", "--cg-g 0.8s ease", "--cg-b 0.8s ease",
+  "--cb-lo 0.8s ease", "--cb-hi 0.8s ease",
+  "--cb-lo-a 0.8s ease", "--cb-hi-a 0.8s ease",
+  "background 0.8s ease", "backdrop-filter 0.8s ease",
+].join(", ");
+
 // ─── Component ───────────────────────────────────────────────────
 
 interface InfoCrystalProps {
@@ -106,36 +142,58 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
   const [expanded, setExpanded] = useState(false);
   const { t } = useTranslation();
   const [hovered, setHovered] = useState(false);
+  const [entered, setEntered] = useState(false);
   const { level } = useAffinity();
 
   const theme = LEVEL_THEMES[level] || DEFAULT_THEME;
 
-  // Stable animation-name suffix — only depends on index so level changes
-  // update keyframe *content* (via theme) without restarting running animations
+  // Parse glow RGB channels for CSS custom properties
+  const [glowR, glowG, glowB] = useMemo(() => {
+    const [r, g, b] = theme.glow.split(",").map(s => Number(s.trim()));
+    return [r, g, b] as const;
+  }, [theme.glow]);
+
+  // Inject shared @property + keyframes once
+  useEffect(ensureSharedStyles, []);
+
+  // Per-instance enter keyframe — stable across level changes
   const animId = useMemo(() => `${index}`, [index]);
-  const keyframes = useMemo(() => buildKeyframes(theme, animId), [theme, animId]);
+  const rotateY = position === "left" ? 5 : position === "right" ? -5 : 0;
+  const enterKeyframe = useMemo(() => buildEnterKeyframe(animId, rotateY), [animId, rotateY]);
 
   const color = CATEGORY_COLORS[(tool.category as ToolCategory) ?? "generic"] || CATEGORY_COLORS.generic;
   const icon = TOOL_ICONS[tool.category] || TOOL_ICONS.generic;
   const statusIcon = STATUS_ICONS[tool.status] || "⏳";
   const content = tool.result || tool.partialResult || "";
-  const rotateY = position === "left" ? 5 : position === "right" ? -5 : 0;
   const animDelay = index * 0.12;
 
-  const handleClick = useCallback(() => {
-    setExpanded((p) => !p);
-  }, []);
+  const handleClick = useCallback(() => setExpanded(p => !p), []);
+  const handleOverlayClick = useCallback(() => setExpanded(false), []);
+  const handleAnimEnd = useCallback(
+    (e: React.AnimationEvent) => {
+      if (e.animationName === `crystalEnter-${animId}`) setEntered(true);
+    },
+    [animId],
+  );
 
-  const handleOverlayClick = useCallback(() => {
-    setExpanded(false);
-  }, []);
+  // CSS custom properties for theme-dependent animation values
+  const cssVars = useMemo<Record<string, string | number>>(() => ({
+    "--cg-r": glowR,
+    "--cg-g": glowG,
+    "--cg-b": glowB,
+    "--cb-lo": `${Math.round(10 * theme.breatheIntensity)}px`,
+    "--cb-hi": `${Math.round(22 * theme.breatheIntensity)}px`,
+    "--cb-lo-a": +(0.12 * theme.breatheIntensity).toFixed(2),
+    "--cb-hi-a": +(0.30 * theme.breatheIntensity).toFixed(2),
+    "--cf-range": `${-theme.floatRange}px`,
+    "--c-scale": theme.scale,
+  }), [glowR, glowG, glowB, theme.breatheIntensity, theme.floatRange, theme.scale]);
 
   // ─── Expanded overlay ────────────────────────────────────────
 
   if (expanded) {
     return (
       <>
-        <style>{keyframes}</style>
         {/* Overlay backdrop */}
         <div
           style={{
@@ -174,9 +232,7 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
           {/* Header */}
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
             <span style={{ fontSize: "20px" }}>{icon}</span>
-            <span style={{ fontSize: "16px", fontWeight: 600, flex: 1 }}>
-              {tool.name}
-            </span>
+            <span style={{ fontSize: "16px", fontWeight: 600, flex: 1 }}>{tool.name}</span>
             <span style={{ fontSize: "14px" }}>{statusIcon}</span>
           </div>
           {/* Full content */}
@@ -204,61 +260,72 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
     ? `${color}${Math.round(theme.borderAlpha * 255 * 1.4).toString(16).padStart(2, "0")}`
     : `${color}${Math.round(theme.borderAlpha * 255).toString(16).padStart(2, "0")}`;
 
+  const floatDur = 4 + index * 0.5;
+  const currentScale = hovered ? theme.scale * 1.03 : theme.scale;
+  const currentRotateY = hovered ? rotateY * 0.5 : rotateY;
+
   return (
     <>
-      <style>{keyframes}</style>
+      <style>{enterKeyframe}</style>
       <div
         style={{
           position: "relative",
           width: "200px",
           minHeight: "80px",
           maxHeight: "200px",
-          background: "rgba(10, 0, 21, 0.6)",
-          backdropFilter: "blur(16px)",
+          background: `rgba(10, 0, 21, ${theme.bgAlpha})`,
+          backdropFilter: `blur(${theme.blur}px)`,
           border: `1px solid ${borderHex}`,
           borderRadius: "16px",
           padding: "12px 14px",
           color: "white",
           cursor: "pointer",
           overflow: "hidden",
-          transform: hovered
-            ? `perspective(800px) rotateY(${rotateY * 0.5}deg) scale(${theme.scale * 1.03})`
-            : `perspective(800px) rotateY(${rotateY}deg) scale(${theme.scale})`,
+          // After enter animation ends (backwards = no post-fill), inline
+          // transform takes over. Float is driven via --cf-y so it doesn't
+          // conflict with hover scale/rotateY changes.
+          transform: `perspective(800px) rotateY(${currentRotateY}deg) scale(${currentScale}) translateY(var(--cf-y))`,
           animation: [
-            `crystalEnter-${animId} 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${animDelay}s both`,
-            `crystalBreathe-${animId} 3s ease-in-out ${animDelay}s infinite`,
-            `crystalFloat-${animId} ${4 + index * 0.5}s ease-in-out ${animDelay + 0.6}s infinite`,
+            // Position 0: enter or none — keeps positions 1&2 stable so
+            // crystalBreathe and crystalFloat don't restart when entered flips.
+            entered
+              ? "none 0s"
+              : `crystalEnter-${animId} 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${animDelay}s backwards`,
+            `crystalBreathe 3s ease-in-out ${animDelay}s infinite`,
+            `crystalFloat ${floatDur}s ease-in-out ${animDelay + 0.6}s infinite`,
           ].join(", "),
-          transition: "transform 0.25s ease, border-color 0.3s ease, box-shadow 0.3s ease",
-        }}
+          transition: `transform 0.25s ease, border-color 0.3s ease, ${LEVEL_TRANSITION}`,
+          ...cssVars,
+        } as React.CSSProperties}
         onClick={handleClick}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
+        onAnimationEnd={handleAnimEnd}
       >
-        {/* Shimmer highlight for high affinity */}
-        {theme.shimmer && (
+        {/* Shimmer highlight — always rendered, visibility via opacity transition */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: "16px",
+            overflow: "hidden",
+            pointerEvents: "none",
+            opacity: theme.shimmer ? 1 : 0,
+            transition: "opacity 0.8s ease",
+          }}
+        >
           <div
             style={{
               position: "absolute",
-              inset: 0,
-              borderRadius: "16px",
-              overflow: "hidden",
-              pointerEvents: "none",
+              top: "-50%",
+              left: "-50%",
+              width: "40%",
+              height: "200%",
+              background: `linear-gradient(90deg, transparent, rgba(${theme.glow}, 0.08), transparent)`,
+              animation: "shimmerSweep 4s ease-in-out infinite",
             }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                top: "-50%",
-                left: "-50%",
-                width: "40%",
-                height: "200%",
-                background: `linear-gradient(90deg, transparent, rgba(${theme.glow}, 0.08), transparent)`,
-                animation: "shimmerSweep 4s ease-in-out infinite",
-              }}
-            />
-          </div>
-        )}
+          />
+        </div>
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
