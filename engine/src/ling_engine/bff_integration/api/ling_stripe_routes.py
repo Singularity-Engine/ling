@@ -93,27 +93,27 @@ def create_ling_stripe_router(repo: LingUserRepository) -> APIRouter:
         user: dict = Depends(get_current_user),
     ):
         if not stripe.api_key:
-            raise HTTPException(500, "Stripe 未配置")
+            raise HTTPException(500, "Stripe not configured")
 
         customer_id = _get_or_create_customer(user, repo)
 
         if req.type == "subscription":
             price_id = PLAN_PRICES.get(req.plan or "")
             if not price_id:
-                raise HTTPException(400, f"无效的订阅方案: {req.plan}")
+                raise HTTPException(400, f"Invalid plan: {req.plan}")
 
             session = stripe.checkout.Session.create(
                 customer=customer_id,
                 mode="subscription",
                 line_items=[{"price": price_id, "quantity": 1}],
-                success_url=f"{FRONTEND_URL}/pricing?success=true",
-                cancel_url=f"{FRONTEND_URL}/pricing?canceled=true",
+                success_url=f"{FRONTEND_URL}/?checkout=success",
+                cancel_url=f"{FRONTEND_URL}/?checkout=canceled",
                 metadata={"ling_user_id": str(user["id"]), "plan": req.plan},
             )
 
         elif req.type == "credits":
             if req.credits not in CREDIT_PACKAGES:
-                raise HTTPException(400, f"无效的积分包: {req.credits}")
+                raise HTTPException(400, f"Invalid credit pack: {req.credits}")
 
             amount_cents = CREDIT_PACKAGES[req.credits]
 
@@ -124,12 +124,12 @@ def create_ling_stripe_router(repo: LingUserRepository) -> APIRouter:
                     "price_data": {
                         "currency": "usd",
                         "unit_amount": amount_cents,
-                        "product_data": {"name": f"灵积分 x{req.credits}"},
+                        "product_data": {"name": f"Ling Credits x{req.credits}"},
                     },
                     "quantity": 1,
                 }],
-                success_url=f"{FRONTEND_URL}/pricing?success=true&credits={req.credits}",
-                cancel_url=f"{FRONTEND_URL}/pricing?canceled=true",
+                success_url=f"{FRONTEND_URL}/?checkout=success&credits={req.credits}",
+                cancel_url=f"{FRONTEND_URL}/?checkout=canceled",
                 metadata={
                     "ling_user_id": str(user["id"]),
                     "credits": str(req.credits),
@@ -137,7 +137,7 @@ def create_ling_stripe_router(repo: LingUserRepository) -> APIRouter:
                 },
             )
         else:
-            raise HTTPException(400, "type 必须是 subscription 或 credits")
+            raise HTTPException(400, "type must be 'subscription' or 'credits'")
 
         return {"checkout_url": session.url}
 
@@ -153,7 +153,7 @@ def create_ling_stripe_router(repo: LingUserRepository) -> APIRouter:
                 payload, sig_header, STRIPE_WEBHOOK_SECRET
             )
         except (ValueError, stripe.error.SignatureVerificationError):
-            raise HTTPException(400, "无效的 Webhook 签名")
+            raise HTTPException(400, "Invalid webhook signature")
 
         event_type = event["type"]
         data = event["data"]["object"]
@@ -194,11 +194,11 @@ def create_ling_stripe_router(repo: LingUserRepository) -> APIRouter:
     @router.get("/portal")
     async def customer_portal(user: dict = Depends(get_current_user)):
         if not user.get("stripe_customer_id"):
-            raise HTTPException(400, "未绑定 Stripe 账户")
+            raise HTTPException(400, "No Stripe account linked")
 
         session = stripe.billing_portal.Session.create(
             customer=user["stripe_customer_id"],
-            return_url=f"{FRONTEND_URL}/pricing",
+            return_url=f"{FRONTEND_URL}/",
         )
         return {"portal_url": session.url}
 

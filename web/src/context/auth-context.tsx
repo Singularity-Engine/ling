@@ -40,6 +40,7 @@ interface AuthContextType {
   ): Promise<void>;
   logout(): void;
   refreshUser(): Promise<void>;
+  updateCredits(balance: number): void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -112,6 +113,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const updateCredits = useCallback((balance: number) => {
+    setUser((prev) => prev ? { ...prev, credits_balance: balance } : prev);
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -122,6 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register,
         logout,
         refreshUser,
+        updateCredits,
       }}
     >
       {children}

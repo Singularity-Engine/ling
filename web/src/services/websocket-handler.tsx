@@ -29,6 +29,9 @@ import { ttsService } from '@/services/tts-service';
 import { asrService } from '@/services/asr-service';
 import { useTTSState } from '@/context/tts-state-context';
 import { isMobileViewport } from '@/constants/breakpoints';
+import { useAuth } from '@/context/auth-context';
+import { useUI } from '@/context/ui-context';
+import { apiClient } from '@/services/api-client';
 
 // ─── Gateway configuration ──────────────────────────────────────
 
@@ -185,6 +188,8 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const affinityContext = useAffinity();
   const { startTool, updateTool, completeTool, failTool } = useToolState();
   const { markSynthStart, markSynthDone, markSynthError, markPlayStart, markPlayDone, reset: resetTTSState } = useTTSState();
+  const { updateCredits } = useAuth();
+  const { setBillingModal } = useUI();
 
   useEffect(() => {
     autoStartMicOnConvEndRef.current = autoStartMicOnConvEnd;
@@ -226,6 +231,41 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
   // Per-visitor session key (stable across renders)
   const sessionKeyRef = useRef(getVisitorSessionKey());
+
+  // ─── Billing check ──────────────────────────────────────────
+  const billingInFlightRef = useRef(false);
+  const updateCreditsRef = useRef(updateCredits);
+  useEffect(() => { updateCreditsRef.current = updateCredits; }, [updateCredits]);
+  const setBillingModalRef = useRef(setBillingModal);
+  useEffect(() => { setBillingModalRef.current = setBillingModal; }, [setBillingModal]);
+
+  const checkBilling = useCallback(async (): Promise<boolean> => {
+    const token = apiClient.getToken();
+    if (!token) return true; // guest → allow, backend handles it
+
+    if (billingInFlightRef.current) return true;
+    billingInFlightRef.current = true;
+    try {
+      const data = await apiClient.checkAndDeduct();
+      if (data.credits_balance !== undefined) {
+        updateCreditsRef.current(data.credits_balance);
+      }
+      if (!data.allowed) {
+        setBillingModalRef.current({
+          open: true,
+          reason: data.reason as any,
+          message: data.message,
+        });
+        return false;
+      }
+      return true;
+    } catch (err) {
+      // Network error → allow (don't block user)
+      return true;
+    } finally {
+      billingInFlightRef.current = false;
+    }
+  }, []);
 
   // Guard: only send auto-greeting once per page load
   const greetingSentRef = useRef(false);
@@ -737,26 +777,31 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     const msg = message as any;
 
     switch (msg.type) {
-      // ── Phase 2: Text input → Gateway chat.send ──
+      // ── Phase 2: Text input → Gateway chat.send (with billing check) ──
       case 'text-input':
         if (msg.text) {
-          // Mark pending to suppress stale conversation-chain-end idle transition
-          pendingNewChatRef.current = true;
-          ttsGenerationRef.current++;
-          audioTaskQueue.clearQueue();
-          // Optimistic: show thinking indicator immediately instead of
-          // waiting for Gateway's conversation-chain-start lifecycle event
-          clearResponseRef.current();
-          setAiStateRef.current('thinking-speaking');
-          gatewayConnector.sendChat(sessionKeyRef.current, msg.text).catch((err) => {
-            console.error('[Gateway] sendChat failed:', err);
-            toaster.create({
-              title: `发送失败: ${err.message}`,
-              type: 'error',
-              duration: 3000,
+          const text = msg.text;
+          // Billing check before sending
+          checkBilling().then((allowed) => {
+            if (!allowed) return;
+            // Mark pending to suppress stale conversation-chain-end idle transition
+            pendingNewChatRef.current = true;
+            ttsGenerationRef.current++;
+            audioTaskQueue.clearQueue();
+            // Optimistic: show thinking indicator immediately instead of
+            // waiting for Gateway's conversation-chain-start lifecycle event
+            clearResponseRef.current();
+            setAiStateRef.current('thinking-speaking');
+            gatewayConnector.sendChat(sessionKeyRef.current, text).catch((err) => {
+              console.error('[Gateway] sendChat failed:', err);
+              toaster.create({
+                title: `发送失败: ${err.message}`,
+                type: 'error',
+                duration: 3000,
+              });
+              pendingNewChatRef.current = false;
+              setAiStateRef.current('idle');
             });
-            pendingNewChatRef.current = false;
-            setAiStateRef.current('idle');
           });
         }
         return;
@@ -789,18 +834,23 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         // Harvest ASR transcript and send as text
         const transcript = asrService.stop();
         if (transcript.trim()) {
-          appendHumanMessageRef.current(transcript.trim());
-          // Optimistic: show thinking indicator immediately
-          clearResponseRef.current();
-          setAiStateRef.current('thinking-speaking');
-          gatewayConnector.sendChat(sessionKeyRef.current, transcript.trim()).catch((err) => {
-            console.error('[Gateway] sendChat (ASR) failed:', err);
-            toaster.create({
-              title: `语音发送失败: ${err.message}`,
-              type: 'error',
-              duration: 3000,
+          const trimmed = transcript.trim();
+          // Billing check before sending voice message
+          checkBilling().then((allowed) => {
+            if (!allowed) return;
+            appendHumanMessageRef.current(trimmed);
+            // Optimistic: show thinking indicator immediately
+            clearResponseRef.current();
+            setAiStateRef.current('thinking-speaking');
+            gatewayConnector.sendChat(sessionKeyRef.current, trimmed).catch((err) => {
+              console.error('[Gateway] sendChat (ASR) failed:', err);
+              toaster.create({
+                title: `语音发送失败: ${err.message}`,
+                type: 'error',
+                duration: 3000,
+              });
+              setAiStateRef.current('idle');
             });
-            setAiStateRef.current('idle');
           });
         } else {
           console.warn('[ASR] No transcript available from speech recognition');

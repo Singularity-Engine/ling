@@ -119,6 +119,43 @@ class ApiClient {
     });
   }
 
+  // ── Billing ────────────────────────────────────────────
+
+  async checkAndDeduct(): Promise<{
+    allowed: boolean;
+    reason?: string;
+    message?: string;
+    credits_balance?: number;
+    daily_count?: number;
+    daily_limit?: number;
+  }> {
+    return this.post('/api/billing/check-and-deduct');
+  }
+
+  async getBalance(): Promise<{
+    credits_balance: number;
+    plan: string;
+    role: string;
+    daily_count: number;
+    daily_limit: number;
+  }> {
+    return this.get('/api/billing/balance');
+  }
+
+  // ── Stripe ────────────────────────────────────────────
+
+  async createCheckout(
+    type: 'subscription' | 'credits',
+    plan?: string,
+    credits?: number,
+  ): Promise<{ checkout_url?: string; detail?: string }> {
+    return this.post('/api/stripe/create-checkout', { type, plan, credits });
+  }
+
+  async getPortalUrl(): Promise<{ portal_url: string }> {
+    return this.get('/api/stripe/portal');
+  }
+
   // ── Refresh ─────────────────────────────────────────────
 
   private async _tryRefresh(): Promise<boolean> {

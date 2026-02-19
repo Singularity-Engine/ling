@@ -19,7 +19,7 @@ export function LoginPage() {
       await login(identifier, password);
       navigate('/');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : '登录失败，请稍后重试');
+      setError(err instanceof ApiError ? err.message : 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -28,13 +28,13 @@ export function LoginPage() {
   return (
     <div style={styles.page}>
       <div style={styles.card}>
-        <h1 style={styles.title}>灵</h1>
-        <p style={styles.subtitle}>登录你的账户</p>
+        <h1 style={styles.title}>Ling</h1>
+        <p style={styles.subtitle}>Sign in to your account</p>
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <input
             type="text"
-            placeholder="邮箱或用户名"
+            placeholder="Email or username"
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             required
@@ -43,7 +43,7 @@ export function LoginPage() {
           />
           <input
             type="password"
-            placeholder="密码"
+            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -54,14 +54,14 @@ export function LoginPage() {
           {error && <p style={styles.error}>{error}</p>}
 
           <button type="submit" disabled={loading} style={styles.button}>
-            {loading ? '登录中...' : '登录'}
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
         <p style={styles.footer}>
-          还没有账户？{' '}
+          Don't have an account?{' '}
           <Link to="/register" style={styles.link}>
-            立即注册
+            Create one
           </Link>
         </p>
       </div>

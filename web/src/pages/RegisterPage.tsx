@@ -19,12 +19,12 @@ export function RegisterPage() {
     setError('');
 
     if (!ageConfirm) {
-      setError('请确认您已年满 16 周岁');
+      setError('Please confirm you are 16 or older');
       return;
     }
 
     if (password !== confirm) {
-      setError('两次密码输入不一致');
+      setError('Passwords do not match');
       return;
     }
 
@@ -33,7 +33,7 @@ export function RegisterPage() {
       await register(email, username, password);
       navigate('/');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : '注册失败，请稍后重试');
+      setError(err instanceof ApiError ? err.message : 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -42,13 +42,13 @@ export function RegisterPage() {
   return (
     <div style={styles.page}>
       <div style={styles.card}>
-        <h1 style={styles.title}>灵</h1>
-        <p style={styles.subtitle}>创建你的账户</p>
+        <h1 style={styles.title}>Ling</h1>
+        <p style={styles.subtitle}>Create your account</p>
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <input
             type="email"
-            placeholder="邮箱"
+            placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -57,7 +57,7 @@ export function RegisterPage() {
           />
           <input
             type="text"
-            placeholder="用户名（3-30 字符，字母数字下划线）"
+            placeholder="Username (3-30 chars, letters/numbers/underscore)"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
@@ -66,7 +66,7 @@ export function RegisterPage() {
           />
           <input
             type="password"
-            placeholder="密码（至少 8 个字符）"
+            placeholder="Password (min 8 characters)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -76,7 +76,7 @@ export function RegisterPage() {
           />
           <input
             type="password"
-            placeholder="确认密码"
+            placeholder="Confirm password"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             required
@@ -92,9 +92,9 @@ export function RegisterPage() {
               style={styles.checkbox}
             />
             <span>
-              我已年满 16 周岁，并同意{' '}
+              I am 16 or older and agree to the{' '}
               <Link to="/terms" target="_blank" style={styles.link}>
-                使用条款
+                Terms of Service
               </Link>
             </span>
           </label>
@@ -102,14 +102,14 @@ export function RegisterPage() {
           {error && <p style={styles.error}>{error}</p>}
 
           <button type="submit" disabled={loading} style={styles.button}>
-            {loading ? '注册中...' : '注册'}
+            {loading ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
 
         <p style={styles.footer}>
-          已有账户？{' '}
+          Already have an account?{' '}
           <Link to="/login" style={styles.link}>
-            立即登录
+            Sign in
           </Link>
         </p>
       </div>

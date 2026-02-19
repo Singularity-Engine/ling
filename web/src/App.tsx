@@ -34,7 +34,7 @@ import { CrystalField } from "./components/crystal/CrystalField";
 import { CapabilityRing } from "./components/ability/CapabilityRing";
 import { LoadingSkeleton } from "./components/loading/LoadingSkeleton";
 import { ModelLoadingOverlay } from "./components/loading/ModelLoadingOverlay";
-import { Toaster } from "./components/ui/toaster";
+import { Toaster, toaster } from "./components/ui/toaster";
 import { useWebSocket } from "./context/websocket-context";
 import { useKeyboardShortcuts, ShortcutDef } from "./hooks/use-keyboard-shortcuts";
 import { ShortcutsOverlay } from "./components/shortcuts/ShortcutsOverlay";
@@ -43,9 +43,13 @@ import { NetworkStatusBanner } from "./components/effects/NetworkStatusBanner";
 import { TapParticles } from "./components/effects/TapParticles";
 import { useAffinityIdleExpression } from "./hooks/use-affinity-idle-expression";
 import { AuthProvider, useAuth } from "./context/auth-context";
+import { UIProvider, useUI } from "./context/ui-context";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { TermsPage } from "./pages/TermsPage";
+import CreditsDisplay from "./components/billing/CreditsDisplay";
+import PricingOverlay from "./components/billing/PricingOverlay";
+import InsufficientCreditsModal from "./components/billing/InsufficientCreditsModal";
 import "./index.css";
 
 // Error Boundary
@@ -262,6 +266,7 @@ function MainContent(): JSX.Element {
           gap: isMobile ? "8px" : "12px",
         }}
       >
+        <CreditsDisplay />
         <AffinityBadge />
         <ConnectionStatus />
         <button
@@ -430,12 +435,31 @@ function GuestOnly({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+/** 处理 Stripe checkout 回调 */
+function useCheckoutCallback() {
+  const { refreshUser } = useAuth();
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const checkout = params.get('checkout');
+    if (checkout === 'success') {
+      toaster.create({ title: 'Payment successful! Welcome aboard.', type: 'success', duration: 5000 });
+      refreshUser();
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (checkout === 'canceled') {
+      toaster.create({ title: 'Checkout canceled. You can try again anytime.', type: 'info', duration: 3000 });
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [refreshUser]);
+}
+
 /** 主应用（包含 Landing + 所有 Providers） */
 function MainApp() {
   const [showLanding, setShowLanding] = useState(() => {
     return !sessionStorage.getItem('ling-visited');
   });
   const [landingExiting, setLandingExiting] = useState(false);
+  useCheckoutCallback();
 
   const handleLandingComplete = useCallback(() => {
     setLandingExiting(true);
@@ -448,6 +472,7 @@ function MainApp() {
 
   return (
     <>
+      <UIProvider>
       <ThemeProvider>
       <ModeProvider>
         <CameraProvider>
@@ -495,6 +520,10 @@ function MainApp() {
       {showLanding && (
         <LandingAnimation onComplete={handleLandingComplete} />
       )}
+
+      <PricingOverlay />
+      <InsufficientCreditsModal />
+      </UIProvider>
 
       <NetworkStatusBanner />
       <Toaster />

@@ -56,9 +56,14 @@ class WebSocketServer:
         else:
             cors_origins = [
                 "http://localhost:3000",
+                "http://localhost:3001",
                 "http://127.0.0.1:3000",
+                "http://127.0.0.1:3001",
                 "http://localhost:12393",
                 "http://127.0.0.1:12393",
+                "https://sngxai.com",
+                "https://www.sngxai.com",
+                "https://lain.sngxai.com",
             ]
         self.app.add_middleware(
             CORSMiddleware,
