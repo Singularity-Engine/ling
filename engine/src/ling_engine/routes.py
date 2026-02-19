@@ -103,6 +103,12 @@ async def create_routes(default_context_cache: ServiceContext) -> APIRouter:
         ling_admin_router = create_ling_admin_router(_get_repo())
         router.include_router(ling_admin_router)
         logger.info("✅ 灵管理员路由已注册 (/api/admin/*)")
+
+        # 计费路由
+        from .bff_integration.api.ling_billing_routes import create_ling_billing_router
+        ling_billing_router = create_ling_billing_router(_get_repo())
+        router.include_router(ling_billing_router)
+        logger.info("✅ 灵计费路由已注册 (/api/billing/*)")
     except Exception as e:
         logger.error(f"❌ 注册灵路由失败: {e}")
         import traceback
