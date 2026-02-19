@@ -1,3 +1,3 @@
-"""Redis helpers for Open LLM VTuber database layer."""
+"""Redis helpers for Ling Engine database layer."""
 
 

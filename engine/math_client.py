@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 TOOLS_TIMEOUT = 30
 API_CALL_TIMEOUT = 60
 
-CONF_PATH = r"F:\vtuber\Open-LLM-VTuber\Open-LLM-VTuber\conf.yaml"
+CONF_PATH = r"F:\vtuber\ling-engine\ling-engine\conf.yaml"
 
 def _load_llm_from_conf():
     try:

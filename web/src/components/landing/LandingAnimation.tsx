@@ -215,7 +215,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                     marginTop: isLastLine ? "16px" : "0",
                     opacity: isVisible ? 1 : 0,
                     transform: isVisible ? "translateY(0)" : "translateY(12px)",
-                    transition: "opacity 0.5s ease-out, transform 0.5s ease-out, text-shadow 0.8s ease",
+                    transition: "opacity 0.5s ease-out, transform 0.5s ease-out",
                     textShadow: i === 0
                       ? isComplete
                         ? undefined  // handled by .landing-title-glow animation

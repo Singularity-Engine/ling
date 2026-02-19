@@ -90,7 +90,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
 function MainContent(): JSX.Element {
   const { t } = useTranslation();
   const [chatExpanded, setChatExpanded] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [kbOffset, setKbOffset] = useState(0);

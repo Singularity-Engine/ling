@@ -3,7 +3,7 @@
 
 echo "🔄 回退 OpenClaw 配置..."
 
-cd ~/Projects/qdyqszr/Open-LLM-VTuber
+cd ~/Projects/qdyqszr/engine
 
 # 停止服务
 pkill -f "run_server.py" 2>/dev/null

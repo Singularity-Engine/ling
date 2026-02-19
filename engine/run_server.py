@@ -44,7 +44,7 @@ def init_logger(console_log_level: str = "INFO") -> None:
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Open-LLM-VTuber Server")
+    parser = argparse.ArgumentParser(description="Ling Engine Server")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
     parser.add_argument(
         "--hf_mirror", action="store_true", help="Use Hugging Face mirror"
@@ -53,13 +53,13 @@ def parse_args():
         "--config-dir",
         type=str,
         default=None,
-        help="Directory that contains conf.yaml and characters/*.yaml; can also set via env OPEN_LLM_VTUBER_CONFIG_DIR",
+        help="Directory that contains conf.yaml and characters/*.yaml; can also set via env LING_ENGINE_CONFIG_DIR",
     )
     parser.add_argument(
         "--config-file",
         type=str,
         default="conf.yaml",
-        help="Config file name or absolute path; resolved against --config-dir or OPEN_LLM_VTUBER_CONFIG_DIR when relative",
+        help="Config file name or absolute path; resolved against --config-dir or LING_ENGINE_CONFIG_DIR when relative",
     )
     parser.add_argument(
         "--mcp-enabled",
@@ -79,7 +79,7 @@ def init_config():
 @logger.catch
 def run(console_log_level: str):
     init_logger(console_log_level)
-    logger.info(f"Open-LLM-VTuber, version v{get_version()}")
+    logger.info(f"Ling Engine, version v{get_version()}")
     init_config()
 
     atexit.register(WebSocketServer.clean_cache)
@@ -90,7 +90,7 @@ def run(console_log_level: str):
 
     args_local = args  # use parsed args from __main__
     if args_local.config_dir:
-        os.environ["OPEN_LLM_VTUBER_CONFIG_DIR"] = args_local.config_dir
+        os.environ["LING_ENGINE_CONFIG_DIR"] = args_local.config_dir
         logger.info(f"Using config dir: {args_local.config_dir}")
 
     # 设置全局MCP开关状态

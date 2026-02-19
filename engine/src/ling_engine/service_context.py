@@ -506,7 +506,7 @@ class ServiceContext:
                             logger.info(f"Found MCP config via MCP_CONFIG_PATH: {config_file}")
 
                     # 其次尝试用户要求的统一路径（Windows 绝对路径），仅当存在时启用
-                    fallback_unified = r"D:\\Open-LLM-VTuber\\Open-LLM-VTuber\\enhanced_mcp_config.json"
+                    fallback_unified = r"D:\\ling-engine\\ling-engine\\enhanced_mcp_config.json"
                     try:
                         if not os.path.isabs(config_file) and os.path.exists(fallback_unified):
                             config_file = fallback_unified
@@ -1147,7 +1147,7 @@ class ServiceContext:
         
         按照以下优先级检查MCP工具的启用状态：
         1. 命令行参数（通过ServiceContext静态变量）
-        2. 环境变量OPEN_LLM_VTUBER_MCP_ENABLED
+        2. 环境变量LING_ENGINE_MCP_ENABLED
         3. 配置文件中的system_config.mcp_tools_config.enabled设置
         
         Returns:
@@ -1162,7 +1162,7 @@ class ServiceContext:
             
             # 2. 检查环境变量
             import os
-            env_mcp_enabled = os.environ.get("OPEN_LLM_VTUBER_MCP_ENABLED")
+            env_mcp_enabled = os.environ.get("LING_ENGINE_MCP_ENABLED")
             if env_mcp_enabled is not None:
                 enabled = env_mcp_enabled.lower() in ("true", "1", "yes", "y", "on")
                 logger.info(f"使用环境变量MCP开关状态: {enabled}")

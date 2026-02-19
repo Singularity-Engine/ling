@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Open-LLM-VTuber BFF集成启动脚本
+Ling Engine BFF集成启动脚本
 
-该脚本帮助用户快速启动带有BFF集成功能的Open-LLM-VTuber服务
+该脚本帮助用户快速启动带有BFF集成功能的Ling Engine服务
 """
 
 import os
@@ -171,7 +171,7 @@ def check_config_file():
 
 def start_server():
     """启动服务器"""
-    logger.info("🚀 启动Open-LLM-VTuber服务器...")
+    logger.info("🚀 启动Ling Engine服务器...")
 
     try:
         # 使用run_server.py启动
@@ -185,7 +185,7 @@ def start_server():
 
 def main():
     """主函数"""
-    logger.info("🎯 Open-LLM-VTuber BFF集成启动器")
+    logger.info("🎯 Ling Engine BFF集成启动器")
     logger.info("=" * 50)
 
     # 检查环境

@@ -541,7 +541,7 @@ class WebSocketHandler:
                 await websocket.send_text(
                     json.dumps({
                         "type": "greeting-message",
-                        "text": "你好！欢迎来到Open-LLM-VTuber！",
+                        "text": "你好！欢迎来到Ling Engine！",
                         "character_name": "AI助手"
                     })
                 )
@@ -773,9 +773,9 @@ class WebSocketHandler:
                 project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
                 cache_dir = os.path.join(project_root, "cache")
 
-            # 如果还是不存在，尝试Open-LLM-VTuber目录下的cache
+            # 如果还是不存在，尝试ling-engine目录下的cache
             if not os.path.exists(cache_dir):
-                cache_dir = os.path.join(os.getcwd(), "Open-LLM-VTuber", "cache")
+                cache_dir = os.path.join(os.getcwd(), "ling-engine", "cache")
 
             if not os.path.exists(cache_dir):
                 logger.warning(f"音频缓存目录不存在: {cache_dir}")

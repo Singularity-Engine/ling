@@ -90,7 +90,7 @@ class MCPSearchTool:
             # 定义可能的配置文件路径
             config_paths = [
                 "enhanced_mcp_config.json",  # 当前目录
-                os.path.join("Open-LLM-VTuber", "enhanced_mcp_config.json"),  # 子目录
+                os.path.join("ling-engine", "enhanced_mcp_config.json"),  # 子目录
                 self.config_path  # 自定义路径
             ]
 
@@ -433,7 +433,7 @@ class MCPSearchTool:
         headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "User-Agent": "Open-LLM-VTuber/1.0"
+            "User-Agent": "Ling-Engine/1.0"
         }
         # 确保使用正确的灵(Ling)端点
         api_url = self._ensure_lain_endpoint(self.search_api_url)

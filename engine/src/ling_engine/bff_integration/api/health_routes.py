@@ -97,7 +97,7 @@ def create_health_router() -> APIRouter:
 
         health_info = {
             "status": overall_status,
-            "service": "Open-LLM-VTuber BFF Integration",
+            "service": "Ling Engine BFF Integration",
             "timestamp": datetime.now().isoformat(),
             "port": int(os.getenv('SERVER_PORT', '12393')),
             "version": "1.2.0",

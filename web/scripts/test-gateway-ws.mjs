@@ -6,7 +6,7 @@
  */
 
 const url = process.argv[2] || 'ws://localhost:18789';
-const TOKEN = 'ed7c72944103e6fecc89140cb5e9661d04dc6699a09bdf05';
+const TOKEN = process.env.OPENCLAW_API_KEY || 'SET_OPENCLAW_API_KEY_ENV';
 
 console.log(`Connecting to ${url} ...`);
 

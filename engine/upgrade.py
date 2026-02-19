@@ -56,10 +56,10 @@ def configure_logging():
 # Language dictionaries and other constants
 TEXTS = {
     "zh": {
-        "welcome_message": "Auto-Upgrade Script v.0.1.0\nOpen-LLM-VTuber 升级脚本 - 此脚本仍在实验阶段，可能无法按预期工作。",
+        "welcome_message": "Auto-Upgrade Script v.0.1.0\nLing Engine 升级脚本 - 此脚本仍在实验阶段，可能无法按预期工作。",
         "lang_select": "请选择语言/Please select language (zh/en):",
         "invalid_lang": "无效的语言选择，使用英文作为默认语言",
-        "not_git_repo": "错误：当前目录不是git仓库。请进入 Open-LLM-VTuber 目录后再运行此脚本。\n当然，更有可能的是你下载的Open-LLM-VTuber不包含.git文件夹 (如果你是透过下载压缩包而非使用 git clone 命令下载的话可能会造成这种情况)，这种情况下目前无法用脚本升级。",
+        "not_git_repo": "错误：当前目录不是git仓库。请进入 Ling Engine 目录后再运行此脚本。\n当然，更有可能的是你下载的Ling Engine不包含.git文件夹 (如果你是透过下载压缩包而非使用 git clone 命令下载的话可能会造成这种情况)，这种情况下目前无法用脚本升级。",
         "backup_user_config": "正在备份 {user_conf} 到 {backup_conf}",
         "configs_up_to_date": "[DEBUG] 用户配置已是最新。",
         "no_config": "警告：未找到conf.yaml文件",
@@ -93,10 +93,10 @@ TEXTS = {
         "merge_failed": "配置合并失败: {error}",
     },
     "en": {
-        "welcome_message": "Auto-Upgrade Script v.0.1.0\nOpen-LLM-VTuber upgrade script - This script is highly experimental and may not work as expected.",
+        "welcome_message": "Auto-Upgrade Script v.0.1.0\nLing Engine upgrade script - This script is highly experimental and may not work as expected.",
         "lang_select": "请选择语言/Please select language (zh/en):",
         "invalid_lang": "Invalid language selection, using English as default",
-        "not_git_repo": "Error: Current directory is not a git repository. Please run this script inside the Open-LLM-VTuber directory.\nAlternatively, it is likely that the Open-LLM-VTuber you downloaded does not contain the .git folder (this can happen if you downloaded a zip archive instead of using git clone), in which case you cannot upgrade using this script.",
+        "not_git_repo": "Error: Current directory is not a git repository. Please run this script inside the Ling Engine directory.\nAlternatively, it is likely that the Ling Engine you downloaded does not contain the .git folder (this can happen if you downloaded a zip archive instead of using git clone), in which case you cannot upgrade using this script.",
         "backup_user_config": "Backing up {user_conf} to {backup_conf}",
         "configs_up_to_date": "[DEBUG] User configuration is up-to-date.",
         "no_config": "Warning: conf.yaml not found",

@@ -18,10 +18,10 @@ def get_config_dir() -> str:
     获取配置目录。
 
     优先级：
-    1. 环境变量 OPEN_LLM_VTUBER_CONFIG_DIR
+    1. 环境变量 LING_ENGINE_CONFIG_DIR
     2. 当前工作目录
     """
-    env_dir = os.getenv("OPEN_LLM_VTUBER_CONFIG_DIR")
+    env_dir = os.getenv("LING_ENGINE_CONFIG_DIR")
     if env_dir and os.path.isdir(env_dir):
         return os.path.abspath(env_dir)
 

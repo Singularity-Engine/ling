@@ -40,21 +40,21 @@ class WebSocketServer:
 
         self.app = FastAPI()
 
-        # 🔧 修改CORS配置，明确支持192.168.1.5同域和Cookie传递
+        # CORS 配置 — 从环境变量读取允许的域名
+        cors_origins_env = os.environ.get("CORS_ALLOWED_ORIGINS", "")
+        if cors_origins_env:
+            cors_origins = [o.strip() for o in cors_origins_env.split(",") if o.strip()]
+        else:
+            cors_origins = [
+                "http://localhost:3000",
+                "http://127.0.0.1:3000",
+                "http://localhost:12393",
+                "http://127.0.0.1:12393",
+            ]
         self.app.add_middleware(
             CORSMiddleware,
-            allow_origins=[
-                "http://localhost:3000/",
-                "http://127.0.0.1:3000",
-                "http://192.168.1.5:12393", 
-                "ws://192.168.1.5:12393",
-                "http://localhost:12393", 
-                "ws://localhost:12393",
-                "http://127.0.0.1:12393",
-                "ws://127.0.0.1:12393",
-                "*"  # 保留通配符兼容性
-            ],
-            allow_credentials=True,  # 关键：允许Cookie传递
+            allow_origins=cors_origins,
+            allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
         )

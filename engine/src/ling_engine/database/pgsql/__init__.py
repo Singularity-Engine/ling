@@ -1,4 +1,4 @@
-"""PostgreSQL subpackage for Open LLM VTuber database layer."""
+"""PostgreSQL subpackage for Ling Engine database layer."""
 
 from .database_manager import (
     DatabaseManager,

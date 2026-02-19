@@ -1,5 +1,5 @@
 """
-Emotion and affinity system for Open LLM VTuber.
+Emotion and affinity system for Ling Engine.
 This module provides functionality for managing character emotions and user affinity.
 """
 

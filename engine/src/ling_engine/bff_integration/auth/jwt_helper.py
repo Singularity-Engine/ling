@@ -157,6 +157,9 @@ def decode_session_token(session_token: str) -> Optional[Dict[str, Any]]:
         
         # 尝试在不验证时间的情况下解码过期的令牌
         try:
+            # SECURITY WARNING: verify_signature=False 仅用于内部 session 解码（已过期令牌的用户信息提取）。
+            # 此处不面向外部请求，且后续会通过数据库验证用户存在性。
+            # TODO(Phase 1): 迁移到自签 HS256 JWT 后，应始终验证签名，移除此 fallback。
             payload = jwt.decode(session_token, options={"verify_signature": False, "verify_exp": False})
             
             # 提取用户信息

@@ -3,7 +3,7 @@
 
 echo "🌸 启用 OpenClaw 模式..."
 
-cd ~/Projects/qdyqszr/Open-LLM-VTuber
+cd ~/Projects/qdyqszr/engine
 
 # 停止服务
 pkill -f "run_server.py" 2>/dev/null
@@ -15,7 +15,7 @@ if ! curl -s http://localhost:12394/health | grep -q "UP"; then
     cd ~/Projects/qdyqszr/openclaw-bridge
     nohup .venv/bin/python server.py > /tmp/openclaw-bridge.log 2>&1 &
     sleep 3
-    cd ~/Projects/qdyqszr/Open-LLM-VTuber
+    cd ~/Projects/qdyqszr/engine
 fi
 
 # 修改 LLM 配置

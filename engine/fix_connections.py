@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-修复Open-LLM-VTuber项目的连接问题
+修复Ling Engine项目的连接问题
 """
 
 import os
@@ -282,7 +282,7 @@ CREATE INDEX IF NOT EXISTS idx_chat_history_user_id ON chat_history(user_id);
 
 def main():
     """主函数"""
-    parser = argparse.ArgumentParser(description="修复Open-LLM-VTuber项目的连接问题")
+    parser = argparse.ArgumentParser(description="修复Ling Engine项目的连接问题")
     parser.add_argument("--config", default="conf.yaml", help="配置文件路径")
     parser.add_argument("--skip-database", action="store_true", help="跳过数据库配置修复")
     parser.add_argument("--skip-redis", action="store_true", help="跳过Redis配置修复")
@@ -292,7 +292,7 @@ def main():
     
     args = parser.parse_args()
     
-    print_color("Open-LLM-VTuber连接修复工具", Colors.BOLD + Colors.HEADER)
+    print_color("Ling Engine连接修复工具", Colors.BOLD + Colors.HEADER)
     print_color("=" * 50, Colors.BOLD + Colors.HEADER)
     
     # 加载配置文件

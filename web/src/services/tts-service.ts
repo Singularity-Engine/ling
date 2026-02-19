@@ -9,7 +9,10 @@
 // ─── Configuration ───────────────────────────────────────────────
 
 const FISH_TTS_API = 'https://api.fish.audio/v1/tts';
-const FISH_TTS_API_KEY = 'ceea7f5420dc4214807f4ce5dccb9da3';
+// SECURITY: API Key 不应硬编码在前端代码中。从环境变量读取。
+// 在 .env 或 .env.local 中设置 VITE_FISH_TTS_API_KEY=<your-key>
+// TODO: 长期方案应通过后端代理转发 TTS 请求，避免在前端暴露 API Key。
+const FISH_TTS_API_KEY = import.meta.env.VITE_FISH_TTS_API_KEY || '';
 const FISH_TTS_REFERENCE_ID = '9dec9671824543b4a4f9f382dbf15748';
 
 // Fallback proxy for CORS issues

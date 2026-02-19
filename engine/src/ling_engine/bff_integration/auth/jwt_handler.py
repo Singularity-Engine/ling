@@ -37,13 +37,17 @@ class JWTHandler:
                 jwt_config = {}
                 clerk_config = {}
 
-            self.secret_key = jwt_config.get('secret_key') or os.getenv('JWT_SECRET_KEY', 'default-secret-key')
+            self.secret_key = jwt_config.get('secret_key') or os.getenv('JWT_SECRET_KEY')
+            if not self.secret_key:
+                logger.warning("JWT_SECRET_KEY 未设置，JWT 认证将不可用")
             self.algorithm = jwt_config.get('algorithm') or os.getenv('JWT_ALGORITHM', 'RS256')
             self.expiration_hours = jwt_config.get('expiration_hours', 24)
             self.webhook_secret = clerk_config.get('webhook_secret') or os.getenv('CLERK_WEBHOOK_SECRET')
         else:
             # 使用环境变量作为后备
-            self.secret_key = os.getenv('JWT_SECRET_KEY', 'default-secret-key')
+            self.secret_key = os.getenv('JWT_SECRET_KEY')
+            if not self.secret_key:
+                logger.warning("JWT_SECRET_KEY 未设置，JWT 认证将不可用")
             self.algorithm = os.getenv('JWT_ALGORITHM', 'RS256')
             self.expiration_hours = int(os.getenv('JWT_EXPIRATION_HOURS', '24'))
             self.webhook_secret = os.getenv('CLERK_WEBHOOK_SECRET')
@@ -145,88 +149,10 @@ class JWTHandler:
             # 支持多种算法
             algorithms = [self.algorithm]  # 默认使用配置的算法
 
-            # 如果令牌使用的是RS256算法，尝试不验证签名解码
+            # RS256 令牌需要公钥验证签名，不再接受未验证签名的令牌
             if token_alg == 'RS256':
-                logger.info("🔍 检测到RS256算法，尝试不验证签名解码...")
-                try:
-                    # 不验证签名的情况下解码令牌
-                    payload = jwt.decode(
-                        token,
-                        options={
-                            'verify_signature': False,
-                            'verify_exp': True,
-                            'verify_iat': True,
-                            'verify_aud': False,
-                            'verify_iss': False,
-                        }
-                    )
-
-                    # 基本验证：检查必要字段
-                    user_id = payload.get('sub') or payload.get('user_id')
-                    if not user_id:
-                        raise jwt.InvalidTokenError("令牌缺少用户ID字段")
-
-                    logger.info("✅ 成功解码RS256令牌（未验证签名）")
-
-                    # 详细记录解码后的用户信息
-                    username = payload.get('username') or payload.get('email', '').split('@')[0] if payload.get('email') else 'unknown'
-                    email = payload.get('email')
-                    roles = payload.get('roles', [])
-
-                    logger.info(f"🎯 JWT令牌解码成功！")
-                    logger.info(f"   👤 用户ID: {user_id}")
-                    logger.info(f"   📝 用户名: {username}")
-                    logger.info(f"   📧 邮箱: {email}")
-                    logger.info(f"   🏷️ 角色: {roles}")
-                    logger.info(f"   ⏰ 签发时间: {payload.get('iat')}")
-                    logger.info(f"   ⏰ 过期时间: {payload.get('exp')}")
-
-                    return payload
-                except jwt.ExpiredSignatureError:
-                    logger.warning("⚠️ RS256令牌已过期，尝试不验证时间的解码...")
-                    try:
-                        # 不验证签名和时间的情况下解码令牌
-                        payload = jwt.decode(
-                            token,
-                            options={
-                                'verify_signature': False,
-                                'verify_exp': False,
-                                'verify_iat': False,
-                                'verify_aud': False,
-                                'verify_iss': False,
-                            }
-                        )
-                        
-                        # 基本验证：检查必要字段
-                        user_id = payload.get('sub') or payload.get('user_id')
-                        if not user_id:
-                            raise jwt.InvalidTokenError("令牌缺少用户ID字段")
-
-                        logger.info("✅ 成功从过期的RS256令牌中提取用户信息（未验证签名和时间）")
-
-                        # 详细记录解码后的用户信息
-                        username = payload.get('username') or payload.get('email', '').split('@')[0] if payload.get('email') else 'unknown'
-                        email = payload.get('email')
-                        roles = payload.get('roles', [])
-
-                        logger.info(f"🎯 过期JWT令牌解码成功！")
-                        logger.info(f"   👤 用户ID: {user_id}")
-                        logger.info(f"   📝 用户名: {username}")
-                        logger.info(f"   📧 邮箱: {email}")
-                        logger.info(f"   🏷️ 角色: {roles}")
-                        logger.info(f"   ⏰ 签发时间: {payload.get('iat')}")
-                        logger.info(f"   ⏰ 过期时间: {payload.get('exp')}")
-                        logger.warning(f"   ⚠️ 注意：此令牌已过期，建议用户重新登录")
-                        
-                        # 标记为过期令牌
-                        payload['expired'] = True
-                        return payload
-                        
-                    except Exception as fallback_e:
-                        logger.error(f"💥 从过期RS256令牌提取用户信息也失败: {str(fallback_e)}")
-                        # 继续到传统JWT验证
-                except Exception as e:
-                    logger.warning(f"⚠️ 不验证签名解码失败: {str(e)}")
+                logger.warning("检测到 RS256 令牌，但当前未配置 RS256 公钥，拒绝此令牌")
+                logger.warning("Phase 1 将迁移到 HS256 自签 JWT，届时此路径将移除")
 
             # 仅对非RS256令牌尝试使用传统方式验证
             if token_alg != 'RS256':

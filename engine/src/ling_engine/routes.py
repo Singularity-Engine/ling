@@ -1,9 +1,8 @@
 import json
 from uuid import uuid4
 import numpy as np
-from datetime import datetime, timedelta
-from fastapi import APIRouter, WebSocket, UploadFile, File, Response, HTTPException, Depends, Body
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from datetime import datetime
+from fastapi import APIRouter, WebSocket, UploadFile, File, Response, HTTPException
 from pydantic import BaseModel
 from starlette.websockets import WebSocketDisconnect
 from loguru import logger
@@ -11,62 +10,7 @@ from .service_context import ServiceContext
 from .websocket_handler import WebSocketHandler
 from .utils.sentence_divider import segment_text_by_pysbd
 
-# 简单的用户存储（生产环境应使用数据库）
-USERS = {
-    "admin": {
-        "password": "admin123",  # 生产环境应使用加密密码
-        "role": "admin"
-    },
-    "user": {
-        "password": "user123",
-        "role": "user"
-    }
-}
-
-# 简单的会话存储（生产环境应使用Redis等）
-SESSIONS = {}
-
-# 安全令牌
-security = HTTPBearer()
-
-# 登录请求模型
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-# 登出请求模型
-class LogoutRequest(BaseModel):
-    token: str
-
-def create_token(user_id: str) -> str:
-    """创建简单的token（生产环境应使用JWT）"""
-    token = str(uuid4())
-    SESSIONS[token] = {
-        "user_id": user_id,
-        "created_at": datetime.now(),
-        "expires_at": datetime.now() + timedelta(hours=24)
-    }
-    return token
-
-def verify_token(token: str) -> dict:
-    """验证token"""
-    if token not in SESSIONS:
-        return None
-
-    session = SESSIONS[token]
-    if datetime.now() > session["expires_at"]:
-        del SESSIONS[token]
-        return None
-
-    return session
-
-async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
-    """获取当前用户"""
-    token = credentials.credentials
-    session = verify_token(token)
-    if not session:
-        raise HTTPException(status_code=401, detail="无效的认证token")
-    return session
+# TODO: Phase 1 将移植 ai-creative-studio 的 JWT+bcrypt 认证系统
 
 async def create_routes(default_context_cache: ServiceContext) -> APIRouter:
     """
@@ -151,39 +95,7 @@ async def create_routes(default_context_cache: ServiceContext) -> APIRouter:
         logger.error(f"错误堆栈: {traceback.format_exc()}")
         # 不阻塞应用启动，继续执行
 
-    @router.post("/api/login")
-    async def login(request: LoginRequest):
-        """用户登录"""
-        if request.username not in USERS or USERS[request.username]["password"] != request.password:
-            raise HTTPException(status_code=401, detail="用户名或密码错误")
-
-        token = create_token(request.username)
-        return {
-            "success": True,
-            "token": token,
-            "user": {
-                "username": request.username,
-                "role": USERS[request.username]["role"]
-            }
-        }
-
-    @router.post("/api/logout")
-    async def logout(request: LogoutRequest):
-        """用户登出"""
-        if request.token in SESSIONS:
-            del SESSIONS[request.token]
-        return {"success": True}
-
-    @router.get("/api/verify")
-    async def verify_auth(current_user: dict = Depends(get_current_user)):
-        """验证用户认证状态"""
-        return {
-            "success": True,
-            "user": {
-                "username": current_user["user_id"],
-                "role": USERS[current_user["user_id"]]["role"]
-            }
-        }
+    # TODO: Phase 1 - 登录/登出/验证端点将由 JWT+bcrypt 认证系统替代
 
     @router.websocket("/client-ws")
     async def websocket_endpoint(websocket: WebSocket):

@@ -35,7 +35,7 @@ def load_prompt(prompt_name: str) -> str:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         # 构建一组候选根目录（从当前目录向上多层尝试）
         candidate_roots = [
-            os.path.abspath(os.path.join(current_dir, "..", "..", "..", "..")),  # repo 根: Open-LLM-VTuber/
+            os.path.abspath(os.path.join(current_dir, "..", "..", "..", "..")),  # repo 根: ling-engine/
             os.path.abspath(os.path.join(current_dir, "..", "..", "..")),        # 兼容旧逻辑: src/ling_engine/
             os.path.abspath(os.path.join(current_dir, "..", "..", "..", "..", "..")),
             os.getcwd(),
@@ -44,7 +44,7 @@ def load_prompt(prompt_name: str) -> str:
         candidate_paths = []
         for root in candidate_roots:
             candidate_paths.append(os.path.join(root, "prompts", "utils", f"{prompt_name}.txt"))
-            candidate_paths.append(os.path.join(root, "Open-LLM-VTuber", "prompts", "utils", f"{prompt_name}.txt"))
+            candidate_paths.append(os.path.join(root, "ling-engine", "prompts", "utils", f"{prompt_name}.txt"))
         # 去重保持顺序
         seen = set()
         unique_candidates = []

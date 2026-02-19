@@ -24,7 +24,10 @@ class EnhancedJWTHandler:
     def __init__(self, config: Optional[Any] = None):
         """初始化增强JWT处理器"""
         # 基础JWT配置
-        self.secret_key = os.getenv('JWT_SECRET_KEY', 'default-secret-key')
+        self.secret_key = os.getenv('JWT_SECRET_KEY')
+        if not self.secret_key:
+            logger.error("SECURITY: JWT_SECRET_KEY 环境变量未设置！拒绝使用默认密钥。")
+            raise ValueError("JWT_SECRET_KEY 环境变量必须设置，不允许使用默认密钥")
         self.algorithm = os.getenv('JWT_ALGORITHM', 'RS256')
         self.expiration_hours = int(os.getenv('JWT_EXPIRATION_HOURS', '24'))
 
@@ -155,21 +158,10 @@ class EnhancedJWTHandler:
             raise
 
     def verify_clerk_jwt(self, token: str) -> Dict[str, Any]:
-        """验证Clerk JWT令牌"""
-        try:
-            # 这里应该使用Clerk的JWKS来验证
-            # 简化实现，实际应该从JWKS端点获取公钥
-            unverified_payload = jwt.decode(token, options={"verify_signature": False})
-
-            # 检查发行者
-            if unverified_payload.get("iss") != self.clerk_issuer:
-                raise jwt.InvalidTokenError("Clerk令牌发行者不匹配")
-
-            logger.debug(f"Clerk JWT验证成功，用户ID: {unverified_payload.get('sub')}")
-            return unverified_payload
-        except jwt.InvalidTokenError as e:
-            logger.warning(f"Clerk JWT验证失败: {str(e)}")
-            raise
+        """验证Clerk JWT令牌 — 已禁用，Phase 1 将迁移到自签 HS256 JWT"""
+        # Clerk 集成已移除，不再接受未验证签名的令牌
+        logger.warning("Clerk JWT 验证已禁用，请使用本地 JWT 认证")
+        raise jwt.InvalidTokenError("Clerk JWT 验证已禁用")
 
     def verify_api_key(self, api_key: str) -> bool:
         """验证API密钥"""
@@ -304,7 +296,12 @@ class EnhancedJWTHandler:
             raise
 
     def get_token_info(self, token: str) -> Dict[str, Any]:
-        """获取令牌信息（不验证签名）"""
+        """获取令牌信息（不验证签名）
+
+        SECURITY WARNING: 此方法不验证签名，仅用于调试/日志目的。
+        不要将返回值用于授权决策。
+        """
+        logger.warning("SECURITY: get_token_info() 跳过签名验证，仅用于调试/信息获取，不可用于授权决策")
         try:
             payload = jwt.decode(token, options={"verify_signature": False})
             return {
@@ -323,7 +320,12 @@ class EnhancedJWTHandler:
             return {}
 
     def is_token_expired(self, token: str) -> bool:
-        """检查令牌是否过期"""
+        """检查令牌是否过期
+
+        SECURITY WARNING: 此方法不验证签名，仅检查时间戳。
+        不要单独依赖此方法进行授权决策。
+        """
+        logger.warning("SECURITY: is_token_expired() 跳过签名验证，仅检查过期时间")
         try:
             payload = jwt.decode(token, options={"verify_signature": False})
             exp = payload.get("exp")

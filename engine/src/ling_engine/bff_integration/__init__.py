@@ -9,7 +9,7 @@ BFF集成模块
 """
 
 __version__ = "1.0.0"
-__author__ = "Open-LLM-VTuber Team"
+__author__ = "Ling Engine Team"
 
 from .auth.jwt_handler import JWTHandler
 from .auth.user_context import UserContext, UserContextManager

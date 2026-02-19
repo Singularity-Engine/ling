@@ -129,7 +129,7 @@ character_config:
         model: "qwen2.5:latest"
         temperature: 1.0 # value between 0 to 2
         # seconds to keep the model in memory after inactivity. 
-        # set to -1 to keep the model in memory forever (even after exiting open llm vtuber)
+        # set to -1 to keep the model in memory forever (even after exiting Ling Engine)
         keep_alive: -1
         unload_at_exit: True # unload the model from memory at exit
 

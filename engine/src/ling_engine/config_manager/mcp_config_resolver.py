@@ -117,8 +117,8 @@ class MCPConfigPathResolver:
             "config",
             "configs", 
             ".",
-            "Open-LLM-VTuber",
-            "Open-LLM-VTuber/Open-LLM-VTuber"
+            "ling-engine",
+            "ling-engine/ling-engine"
         ]
         
         for base_path in [current_dir, script_dir]:

@@ -5,7 +5,7 @@
 ## 配置文件列表
 
 ### 1. conf.yaml
-**路径**: `Open-LLM-VTuber/conf.yaml`
+**路径**: `engine/conf.yaml`
 **说明**: 项目主配置文件,包含:
 - ASR (语音识别) 配置
 - TTS (语音合成) 配置
@@ -14,11 +14,11 @@
 - API密钥等敏感信息
 
 ### 2. docker-compose.yml
-**路径**: `Open-LLM-VTuber/docker-compose.yml`
+**路径**: `engine/docker-compose.yml`
 **说明**: Docker容器编排配置文件,定义服务、端口、环境变量等
 
 ### 3. google-tts-credentials.json
-**路径**: `Open-LLM-VTuber/google-tts-credentials.json`
+**路径**: `engine/google-tts-credentials.json`
 **说明**: Google Cloud Text-to-Speech API凭证文件,包含服务账号密钥
 
 ### 4. .env
