@@ -130,8 +130,9 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
         style={{
           position: "fixed",
           inset: 0,
-          background: `rgba(10, 0, 21, ${bgDim})`,
-          transition: "background 1s ease",
+          background: "rgb(10, 0, 21)",
+          opacity: bgDim,
+          transition: "opacity 1s ease",
           zIndex: 2,
           pointerEvents: "none",
         }}
