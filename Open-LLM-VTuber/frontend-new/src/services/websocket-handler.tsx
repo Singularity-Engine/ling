@@ -479,6 +479,10 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       handleWebSocketMessageRef.current(msg);
     });
 
+    // Network recovery: immediately retry if in RECONNECTING state
+    const onOnline = () => gatewayConnector.retryNow();
+    window.addEventListener('online', onOnline);
+
     // Post-reconnect recovery: reset stale state & re-resolve session
     const reconnectSub = gatewayConnector.reconnected$.subscribe(() => {
       // Clear stale adapter runs from interrupted generation
@@ -500,6 +504,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     });
 
     return () => {
+      window.removeEventListener('online', onOnline);
       stateSub.unsubscribe();
       agentSub.unsubscribe();
       rawSub.unsubscribe();

@@ -304,16 +304,6 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
         {t("landing.skip")}
       </div>
 
-      {/* 呼吸光效 keyframes */}
-      <style>{`
-        @keyframes breatheGlow {
-          0%, 100% { box-shadow: 0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2); }
-          50% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.6), 0 0 80px rgba(139, 92, 246, 0.3); }
-        }
-        @keyframes landingBtnSpin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }

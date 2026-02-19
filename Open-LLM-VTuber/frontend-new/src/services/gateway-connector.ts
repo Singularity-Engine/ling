@@ -179,6 +179,19 @@ class GatewayConnector {
     }
   }
 
+  /**
+   * Immediately retry connection (e.g. when browser comes back online).
+   * Only effective when in RECONNECTING state.
+   */
+  retryNow() {
+    if (this.state !== 'RECONNECTING') return;
+    this.clearReconnectTimer();
+    if (import.meta.env.DEV) console.log('[GatewayConnector] retryNow — network recovered, reconnecting immediately');
+    this.doConnect().catch((err) => {
+      console.error('[GatewayConnector] retryNow failed:', err.message);
+    });
+  }
+
   /** Current connection state */
   getState(): GatewayState {
     return this.state;
