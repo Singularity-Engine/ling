@@ -205,18 +205,18 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                   key={i}
                   className={`landing-text-line${i === 0 ? " landing-title-gradient" : ""}${i === 0 && isComplete ? " landing-title-glow" : ""}`}
                   style={{
-                    fontSize: i === 0 ? "2.75rem" : "1.25rem",
-                    fontWeight: i === 0 ? 700 : isLastLine ? 500 : 400,
+                    fontSize: i === 0 ? "3.75rem" : i === 1 ? "1.4rem" : "1.25rem",
+                    fontWeight: i === 0 ? 700 : i === 1 ? 500 : 400,
                     color: i === 0
                       ? undefined  // handled by .landing-title-gradient
                       : isLastLine
                         ? "var(--ling-purple-lighter)"
                         : "var(--ling-text-secondary)",
-                    letterSpacing: i === 0 ? "0.1em" : "0.04em",
+                    letterSpacing: i === 0 ? "0.12em" : "0.04em",
                     textAlign: "center",
                     wordBreak: "break-word" as const,
-                    minHeight: i === 0 ? "3.5rem" : "1.75rem",
-                    marginTop: isLastLine ? "16px" : "0",
+                    minHeight: i === 0 ? "4.5rem" : "1.75rem",
+                    marginTop: i === 1 ? "8px" : isLastLine ? "28px" : "0",
                     opacity: isVisible ? 1 : 0,
                     transform: isVisible ? "translateY(0)" : "translateY(12px)",
                     transition: "opacity 0.5s ease-out, transform 0.5s ease-out",
@@ -301,6 +301,11 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                 />
               )}
               {t("landing.startChat")}
+              {!exiting && (
+                <span className="landing-btn-arrow" style={{ fontSize: "1.1em", opacity: 0.8, transition: "transform 0.25s ease" }}>
+                  {"\u2192"}
+                </span>
+              )}
             </button>
             <span style={{ fontSize: "0.75rem", color: "var(--ling-text-tertiary)", letterSpacing: "0.04em" }}>
               Press Enter ↵

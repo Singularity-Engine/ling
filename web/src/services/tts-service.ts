@@ -111,6 +111,22 @@ class TTSService {
     return sentences;
   }
 
+  /**
+   * Extract trailing text after the last sentence terminator.
+   * This is text that hasn't been synthesized because it lacks a terminator.
+   * Returns empty string if there's no trailing text.
+   */
+  getTrailingText(fullText: string): string {
+    let lastTermIdx = -1;
+    for (let i = fullText.length - 1; i >= 0; i--) {
+      if (SENTENCE_TERMINATORS.test(fullText[i])) {
+        lastTermIdx = i;
+        break;
+      }
+    }
+    return lastTermIdx >= 0 ? fullText.slice(lastTermIdx + 1).trim() : fullText.trim();
+  }
+
   // ── Private ────────────────────────────────────────────────────
 
   private async callFishAudio(text: string): Promise<Blob | null> {

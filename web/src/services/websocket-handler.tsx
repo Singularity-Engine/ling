@@ -680,11 +680,14 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           synthesizedRef.current.add(sentence);
 
           // Chain synthesis sequentially to preserve order
+          const gen = ttsGenerationRef.current;
           synthQueueRef.current = synthQueueRef.current.then(async () => {
+            if (gen !== ttsGenerationRef.current) return; // Stale — discard
             if (import.meta.env.DEV) console.log('[TTS] Synthesizing:', sentence);
             markSynthStartRef.current();
             try {
               const result = await ttsService.synthesize(sentence);
+              if (gen !== ttsGenerationRef.current) return; // Stale after await
               markSynthDoneRef.current();
               if (result) {
                 markPlayStartRef.current();
@@ -699,6 +702,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
                 });
               }
             } catch (err) {
+              if (gen !== ttsGenerationRef.current) return; // Stale — suppress error
               console.error('[TTS] Synthesis failed:', err);
               markSynthErrorRef.current(err instanceof Error ? err.message : 'TTS synthesis failed');
               if (!ttsErrorShownRef.current) {

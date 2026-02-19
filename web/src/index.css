@@ -277,14 +277,14 @@ body {
  * GPU-friendly: static text-shadow (painted once) + opacity-only animated pseudo-element.
  * Replaces per-frame text-shadow animation that triggered full repaints. */
 .landing-title-glow {
-  text-shadow: 0 0 30px var(--ling-purple-40), 0 0 60px var(--ling-purple-20);
+  text-shadow: 0 0 40px var(--ling-purple-40), 0 0 80px var(--ling-purple-20);
 }
 .landing-title-glow::before {
   content: '';
   position: absolute;
-  inset: -30px -10px;
-  border-radius: 40%;
-  background: radial-gradient(ellipse at center, var(--ling-purple-30) 0%, transparent 70%);
+  inset: -40px -20px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, var(--ling-purple-40) 0%, var(--ling-purple-20) 40%, transparent 70%);
   opacity: 0;
   animation: breatheGlowOpacity 4s ease-in-out infinite;
   will-change: opacity;
@@ -292,12 +292,23 @@ body {
   z-index: -1;
 }
 
-/* Landing title — gradient text for visual impact */
+/* Landing title — gradient text with subtle shimmer sweep */
 .landing-title-gradient {
-  background: linear-gradient(135deg, #fff 0%, #e2d4ff 40%, #c4b5fd 80%, #a78bfa 100%);
+  background: linear-gradient(
+    90deg,
+    #fff 0%, #e2d4ff 15%, #c4b5fd 30%, #a78bfa 45%,
+    #fff 50%,
+    #a78bfa 55%, #c4b5fd 70%, #e2d4ff 85%, #fff 100%
+  );
+  background-size: 200% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  animation: textShimmer 6s ease-in-out 1s infinite;
+}
+@keyframes textShimmer {
+  0%, 35% { background-position: 100% center; }
+  65%, 100% { background-position: -100% center; }
 }
 
 @keyframes btnPress {
