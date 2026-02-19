@@ -211,6 +211,9 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   // Per-visitor session key (stable across renders)
   const sessionKeyRef = useRef(getVisitorSessionKey());
 
+  // Guard: only send auto-greeting once per page load
+  const greetingSentRef = useRef(false);
+
   // ─── ASR lifecycle: start/stop with microphone ─────────────────
 
   useEffect(() => {
@@ -413,9 +416,19 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       bgUrlContext?.setBackgroundFiles(DEFAULT_BACKGROUNDS);
 
       // Resolve the default session so Gateway knows which agent to route to
-      gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId()).catch((err) => {
-        console.error('[WebSocketHandler] resolveSession failed:', err);
-      });
+      gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId())
+        .then(() => {
+          // Auto-greeting: AI welcomes the user on page load
+          if (!greetingSentRef.current) {
+            greetingSentRef.current = true;
+            gatewayConnector.sendChat(sessionKeyRef.current, '[greeting]').catch((err) => {
+              if (import.meta.env.DEV) console.error('[WebSocketHandler] Auto-greeting failed:', err);
+            });
+          }
+        })
+        .catch((err) => {
+          console.error('[WebSocketHandler] resolveSession failed:', err);
+        });
 
       // Create a default session
       setCurrentHistoryUid(sessionKeyRef.current);
