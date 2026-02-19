@@ -110,6 +110,17 @@
       })();
     </script>
 
+    <!-- Sync theme to prevent FOUC for light-mode returning visitors -->
+    <script>
+      (function() {
+        var t = localStorage.getItem('ling-theme');
+        var r = t === 'light' ? 'light'
+              : t === 'system' && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light'
+              : null;
+        if (r) document.documentElement.setAttribute('data-theme', r);
+      })();
+    </script>
+
     <style>
       html, body { margin: 0; padding: 0; background: #0a0015; overflow: hidden; }
       #root { width: 100vw; height: 100vh; }
