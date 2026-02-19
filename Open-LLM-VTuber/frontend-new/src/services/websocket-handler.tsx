@@ -864,10 +864,13 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             type: 'success',
             duration: 2000,
           });
-          // Auto-greeting for the new session
+          // Auto-greeting for the new session — show thinking indicator
+          // immediately to avoid empty-state flash (same as initial page load path)
+          setAiStateRef.current('thinking-speaking');
           setGreetingExpression(200); // Model is already loaded
           gatewayConnector.sendChat(newSessionKey, '[greeting]').catch((err) => {
             if (import.meta.env.DEV) console.error('[WebSocketHandler] New session greeting failed:', err);
+            setAiStateRef.current('idle');
           });
         }).catch((err) => {
           console.error('[Gateway] resolveSession failed:', err);
