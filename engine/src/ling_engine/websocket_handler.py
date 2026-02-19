@@ -1277,10 +1277,105 @@ class WebSocketHandler:
                         json.dumps({"type": "control", "text": "mic-audio-end"})
                     )
 
+    async def _check_and_deduct_message(self, websocket: WebSocket, client_uid: str) -> bool:
+        """检查用户是否可以发送消息，若可以则扣减积分。
+
+        Returns:
+            True = 允许发送，False = 拒绝
+        """
+        try:
+            from .bff_integration.auth.websocket_user_cache import websocket_user_cache
+            from .bff_integration.auth.plan_gates import (
+                check_daily_messages,
+                record_message_sent,
+                should_deduct_credits,
+            )
+
+            cached = websocket_user_cache.get_user_for_client(client_uid)
+            if not cached:
+                return True  # 无缓存信息，放行（后端 WS 未启用认证时）
+
+            user_id = cached.user_id
+
+            # guest 用户：检查每日消息上限（作为 free 用户）
+            if user_id.startswith("guest_"):
+                from .bff_integration.auth.plan_gates import _get_daily_count, _increment_daily_count
+                count = _get_daily_count(user_id)
+                if count >= 20:
+                    await websocket.send_text(json.dumps({
+                        "type": "billing",
+                        "action": "daily_limit_reached",
+                        "message": "今日免费消息已用完，注册账户获取更多额度",
+                        "current": count,
+                        "limit": 20,
+                    }))
+                    return False
+                _increment_daily_count(user_id)
+                return True
+
+            # 已认证用户：查数据库获取最新信息
+            from .bff_integration.auth.ling_deps import _get_repo
+            try:
+                repo = _get_repo()
+                user = repo.get_user_by_id(user_id)
+            except RuntimeError:
+                return True  # 仓储未初始化，放行
+
+            if not user:
+                return True
+
+            # 检查每日消息上限
+            allowed, current, limit = check_daily_messages(user_id, user)
+            if not allowed:
+                await websocket.send_text(json.dumps({
+                    "type": "billing",
+                    "action": "daily_limit_reached",
+                    "message": f"今日消息已达上限 ({limit} 条)",
+                    "current": current,
+                    "limit": limit,
+                }))
+                return False
+
+            # 扣减积分（如果需要）
+            if should_deduct_credits(user):
+                from decimal import Decimal
+                success, balance = repo.deduct_credits(
+                    user_id, Decimal("1"), "对话消息"
+                )
+                if not success:
+                    await websocket.send_text(json.dumps({
+                        "type": "billing",
+                        "action": "insufficient_credits",
+                        "message": "积分不足，请充值继续对话",
+                        "credits_balance": 0,
+                    }))
+                    return False
+
+                # 发送余额更新
+                await websocket.send_text(json.dumps({
+                    "type": "billing",
+                    "action": "credits_updated",
+                    "credits_balance": float(balance),
+                }))
+
+            # 记录每日消息计数
+            record_message_sent(user_id)
+            return True
+
+        except Exception as e:
+            logger.warning(f"计费检查异常: {e}，放行消息")
+            return True
+
     async def _handle_conversation_trigger(
         self, websocket: WebSocket, client_uid: str, data: WSMessage
     ) -> None:
         """Handle triggers that start a conversation"""
+        # Phase 1: 计费检查（仅对 text-input 和 mic-audio-end 生效）
+        msg_type = data.get("type", "")
+        if msg_type in ("text-input", "mic-audio-end"):
+            if not await self._check_and_deduct_message(websocket, client_uid):
+                return
+
         await handle_conversation_trigger(
             msg_type=data.get("type", ""),
             data=data,

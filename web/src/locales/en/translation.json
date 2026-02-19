@@ -211,8 +211,9 @@
   "landing": {
     "heroName": "Ling",
     "tagline": "An AI companion that remembers you",
-    "line1": "Hey, you made it.",
-    "line2": "Go ahead, I'm listening.",
+    "line1": "Hey, I'm Ling",
+    "line2": "An AI companion that remembers you",
+    "line3": "Go ahead, I'm listening.",
     "startChat": "Chat with Ling",
     "skip": "Skip ›"
   },

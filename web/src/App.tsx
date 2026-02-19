@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, Component, ErrorInfo, ReactNode } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LandingAnimation } from "./components/landing/LandingAnimation";
 import { AiStateProvider } from "./context/ai-state-context";
@@ -41,6 +42,10 @@ import { AboutOverlay } from "./components/about/AboutOverlay";
 import { NetworkStatusBanner } from "./components/effects/NetworkStatusBanner";
 import { TapParticles } from "./components/effects/TapParticles";
 import { useAffinityIdleExpression } from "./hooks/use-affinity-idle-expression";
+import { AuthProvider, useAuth } from "./context/auth-context";
+import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
+import { TermsPage } from "./pages/TermsPage";
 import "./index.css";
 
 // Error Boundary
@@ -391,7 +396,24 @@ function MainContent(): JSX.Element {
   );
 }
 
-function App(): JSX.Element {
+/** 需要认证时包裹子组件，未登录跳转 /login */
+function RequireAuth({ children }: { children: ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return null; // 初始化中不闪屏
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
+
+/** 已登录时阻止访问 login/register */
+function GuestOnly({ children }: { children: ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return null;
+  if (isAuthenticated) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
+/** 主应用（包含 Landing + 所有 Providers） */
+function MainApp() {
   const [showLanding, setShowLanding] = useState(() => {
     return !sessionStorage.getItem('ling-visited');
   });
@@ -399,13 +421,7 @@ function App(): JSX.Element {
 
   const handleLandingComplete = useCallback(() => {
     setLandingExiting(true);
-    // Mark visited BEFORE dispatching event to avoid race condition:
-    // If Gateway resolves session during the 700ms exit animation, it will
-    // find sessionStorage set and send the greeting immediately instead of
-    // waiting for an event that already fired.
     sessionStorage.setItem('ling-visited', 'true');
-    // Signal websocket-handler that the user has finished the Landing animation
-    // so it can now send the auto-greeting (avoids greeting arriving while Landing is still visible)
     window.dispatchEvent(new Event('ling-landing-complete'));
     setTimeout(() => {
       setShowLanding(false);
@@ -413,8 +429,7 @@ function App(): JSX.Element {
   }, []);
 
   return (
-    <ErrorBoundary>
-      {/* Always mount main content so it's ready behind landing */}
+    <>
       <ThemeProvider>
       <ModeProvider>
         <CameraProvider>
@@ -459,13 +474,33 @@ function App(): JSX.Element {
       </ModeProvider>
       </ThemeProvider>
 
-      {/* Landing overlay — fades out during crossfade */}
       {showLanding && (
         <LandingAnimation onComplete={handleLandingComplete} />
       )}
 
       <NetworkStatusBanner />
       <Toaster />
+    </>
+  );
+}
+
+function App(): JSX.Element {
+  return (
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<GuestOnly><LoginPage /></GuestOnly>} />
+            <Route path="/register" element={<GuestOnly><RegisterPage /></GuestOnly>} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/*" element={
+              <RequireAuth>
+                <MainApp />
+              </RequireAuth>
+            } />
+          </Routes>
+        </AuthProvider>
+      </BrowserRouter>
     </ErrorBoundary>
   );
 }

@@ -10,8 +10,6 @@ from .service_context import ServiceContext
 from .websocket_handler import WebSocketHandler
 from .utils.sentence_divider import segment_text_by_pysbd
 
-# TODO: Phase 1 将移植 ai-creative-studio 的 JWT+bcrypt 认证系统
-
 async def create_routes(default_context_cache: ServiceContext) -> APIRouter:
     """
     Create and return API routes for handling WebSocket connections.
@@ -93,25 +91,53 @@ async def create_routes(default_context_cache: ServiceContext) -> APIRouter:
         logger.error(f"❌ 注册BFF路由失败: {str(e)}")
         import traceback
         logger.error(f"错误堆栈: {traceback.format_exc()}")
-        # 不阻塞应用启动，继续执行
 
-    # TODO: Phase 1 - 登录/登出/验证端点将由 JWT+bcrypt 认证系统替代
+    # ── 灵认证系统 (Phase 1) ──────────────────────────────────
+    try:
+        from .bff_integration.api.ling_auth_routes import create_ling_auth_router
+        db_manager = getattr(default_context_cache, 'database_manager', None)
+        ling_auth_router = create_ling_auth_router(db_manager)
+        router.include_router(ling_auth_router)
+        logger.info("✅ 灵认证路由已注册 (/api/auth/*)")
+
+        # Stripe 支付路由
+        from .bff_integration.api.ling_stripe_routes import create_ling_stripe_router
+        from .bff_integration.auth.ling_deps import _get_repo
+        ling_stripe_router = create_ling_stripe_router(_get_repo())
+        router.include_router(ling_stripe_router)
+        logger.info("✅ 灵 Stripe 路由已注册 (/api/stripe/*)")
+
+        # TTS 代理路由
+        from .bff_integration.api.ling_tts_routes import create_ling_tts_router
+        ling_tts_router = create_ling_tts_router()
+        router.include_router(ling_tts_router)
+        logger.info("✅ 灵 TTS 代理路由已注册 (/api/tts/*)")
+
+        # 管理员路由
+        from .bff_integration.api.ling_admin_routes import create_ling_admin_router
+        ling_admin_router = create_ling_admin_router(_get_repo())
+        router.include_router(ling_admin_router)
+        logger.info("✅ 灵管理员路由已注册 (/api/admin/*)")
+    except Exception as e:
+        logger.error(f"❌ 注册灵路由失败: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
 
     @router.websocket("/client-ws")
     async def websocket_endpoint(websocket: WebSocket):
         """WebSocket endpoint for client connections"""
         await websocket.accept()
         client_uid = str(uuid4())
-        
-        # 🔧 支持通过URL参数传递token（解决跨域iframe无法传递cookie的问题）
+
+        # 支持通过 URL 参数传递 token
         url_token = websocket.query_params.get("token")
         if url_token:
             logger.info(f"🔑 WebSocket: 检测到URL参数中的token，长度: {len(url_token)}")
 
         try:
-            # 🔧 在建立WebSocket连接时尝试设置用户上下文
-            await _setup_websocket_user_context(websocket, client_uid, url_token=url_token)
-            
+            # Phase 1: 优先用灵 JWT 认证
+            await _setup_ling_websocket_auth(websocket, client_uid, url_token=url_token)
+
             await ws_handler.handle_new_connection(websocket, client_uid)
             await ws_handler.handle_websocket_communication(websocket, client_uid)
         except WebSocketDisconnect:
@@ -121,84 +147,95 @@ async def create_routes(default_context_cache: ServiceContext) -> APIRouter:
             await ws_handler.handle_disconnect(client_uid)
             raise
         finally:
-            # 🔧 连接结束时清理用户上下文
             try:
-                from .bff_integration.auth.user_context import UserContextManager
-                UserContextManager.clear_user_context()
+                from .bff_integration.auth.websocket_user_cache import clear_websocket_client_cache
+                clear_websocket_client_cache(client_uid)
             except Exception as cleanup_error:
-                logger.debug(f"清理用户上下文时出错: {cleanup_error}")
+                logger.debug(f"清理 WebSocket 缓存时出错: {cleanup_error}")
     
-    async def _setup_websocket_user_context(websocket: WebSocket, client_uid: str = None, url_token: str = None):
-        """设置WebSocket连接的用户上下文
-        
-        Args:
-            websocket: WebSocket连接
-            client_uid: 客户端ID
-            url_token: 从URL参数传入的token（用于跨域iframe场景）
+    async def _setup_ling_websocket_auth(
+        websocket: WebSocket, client_uid: str, url_token: str | None = None
+    ):
+        """Phase 1 WebSocket 认证：用灵 JWT 验证用户。
+
+        认证成功 → 缓存用户信息到 websocket_user_cache；
+        无 token 或验证失败 → 以 guest 身份连接。
         """
         try:
-            logger.info("🔄 WebSocket: 开始设置用户上下文...")
-            
-            # 使用新的jwt_helper模块从WebSocket Cookie中提取用户ID
-            from .bff_integration.auth.jwt_helper import extract_session_cookie_from_websocket, decode_session_token
-            from .bff_integration.auth.user_context import UserContextManager, UserContext
+            from .bff_integration.auth.ling_auth import verify_jwt_token
             from .bff_integration.auth.websocket_user_cache import cache_user_for_websocket_client
-            
-            # 1. 优先从Cookie提取token
-            websocket_headers = dict(websocket.headers)
-            logger.info(f"🔧 调试WebSocket请求头: {websocket_headers}")
-            session_cookie = extract_session_cookie_from_websocket(websocket_headers)
-            
-            # 2. 如果Cookie中没有token，使用URL参数中的token（跨域iframe场景）
-            if not session_cookie and url_token:
-                logger.info("🔑 WebSocket: Cookie中无token，使用URL参数中的token")
-                session_cookie = url_token
-            
-            if session_cookie:
-                logger.info(f"🍪 WebSocket: 检测到会话Cookie，长度: {len(session_cookie)}")
-                
-                # 解码JWT获取用户信息
-                user_info = decode_session_token(session_cookie)
-                
-                if user_info and user_info.get("user_id"):
-                    # 创建用户上下文对象
-                    user_context = UserContext(
-                        user_id=user_info["user_id"],
-                        username=user_info["username"],
-                        email=user_info.get("email"),
-                        roles=user_info.get("roles", []),
-                        token=session_cookie
-                    )
-                    
-                    # 设置用户上下文
-                    UserContextManager.set_user_context(user_context)
-                    
-                    # 如果有客户端ID，则缓存用户信息
-                    if client_uid:
-                        cache_user_for_websocket_client(
-                            client_uid=client_uid,
-                            user_id=user_info["user_id"],
-                            username=user_info["username"],
-                            email=user_info.get("email"),
-                            roles=user_info.get("roles", []),
-                            token=session_cookie
-                        )
-                    
-                    logger.info(f"✅ WebSocket: 用户上下文设置成功!")
-                    logger.info(f"   👤 用户ID: {user_context.user_id}")
-                    logger.info(f"   📝 用户名: {user_context.username}")
-                    logger.info(f"   📧 邮箱: {user_context.email}")
-                    logger.info(f"   🏷️ 角色: {user_context.roles}")
-                    logger.info(f"   🗂️ 客户端缓存: {'已缓存' if client_uid else '未缓存'}")
-                else:
-                    logger.warning("⚠️ WebSocket: 无法从session token中提取用户信息，将使用默认用户")
+
+            token = url_token
+            if not token:
+                # 尝试从 Cookie 中读取
+                cookies = websocket.cookies
+                token = cookies.get("ling_token")
+
+            if not token:
+                logger.info(f"WebSocket {client_uid}: 无 token，以 guest 身份连接")
+                cache_user_for_websocket_client(
+                    client_uid=client_uid,
+                    user_id=f"guest_{client_uid}",
+                    username="guest",
+                    email=None,
+                    roles=[],
+                    token="",
+                )
+                return
+
+            payload = verify_jwt_token(token)
+            if not payload:
+                logger.warning(f"WebSocket {client_uid}: JWT 验证失败，以 guest 身份连接")
+                cache_user_for_websocket_client(
+                    client_uid=client_uid,
+                    user_id=f"guest_{client_uid}",
+                    username="guest",
+                    email=None,
+                    roles=[],
+                    token="",
+                )
+                return
+
+            # JWT 有效 → 查询数据库获取完整用户信息
+            from .bff_integration.auth.ling_deps import _get_repo
+            try:
+                repo = _get_repo()
+                user = repo.get_user_by_id(payload["sub"])
+            except RuntimeError:
+                user = None
+
+            if user:
+                cache_user_for_websocket_client(
+                    client_uid=client_uid,
+                    user_id=str(user["id"]),
+                    username=user["username"],
+                    email=user.get("email"),
+                    roles=[user.get("role", "user")],
+                    token=token,
+                )
+                logger.info(f"WebSocket {client_uid}: 认证用户 {user['username']} ({user['id']})")
             else:
-                logger.info("🔍 WebSocket: 未检测到internal_access_token Cookie，将使用默认用户")
-                
+                cache_user_for_websocket_client(
+                    client_uid=client_uid,
+                    user_id=payload["sub"],
+                    username=payload.get("username", "unknown"),
+                    email=payload.get("email"),
+                    roles=[payload.get("role", "user")],
+                    token=token,
+                )
+                logger.info(f"WebSocket {client_uid}: JWT 有效但数据库无此用户，使用 payload 信息")
+
         except Exception as e:
-            logger.warning(f"⚠️ WebSocket: 设置用户上下文失败: {e}，将使用默认用户")
-            import traceback
-            logger.debug(f"详细错误信息: {traceback.format_exc()}")
+            logger.warning(f"WebSocket {client_uid}: 认证异常: {e}，以 guest 身份连接")
+            from .bff_integration.auth.websocket_user_cache import cache_user_for_websocket_client
+            cache_user_for_websocket_client(
+                client_uid=client_uid,
+                user_id=f"guest_{client_uid}",
+                username="guest",
+                email=None,
+                roles=[],
+                token="",
+            )
 
     @router.get("/web-tool")
     async def web_tool_redirect():

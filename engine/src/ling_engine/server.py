@@ -9,6 +9,10 @@ from starlette.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import Response
 
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+
 from .routes import create_routes
 from .service_context import ServiceContext
 from .config_manager.utils import Config
@@ -39,6 +43,11 @@ class WebSocketServer:
         apply_patches()
 
         self.app = FastAPI()
+
+        # 限速中间件
+        limiter = Limiter(key_func=get_remote_address)
+        self.app.state.limiter = limiter
+        self.app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
         # CORS 配置 — 从环境变量读取允许的域名
         cors_origins_env = os.environ.get("CORS_ALLOWED_ORIGINS", "")

@@ -50,6 +50,10 @@ export default defineConfig(({ mode }) => ({
         target: 'ws://localhost:12393',
         ws: true,
       },
+      '/api': {
+        target: 'http://localhost:12393',
+        changeOrigin: true,
+      },
     },
   },
   esbuild: {

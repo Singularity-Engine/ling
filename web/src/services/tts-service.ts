@@ -8,15 +8,17 @@
 
 // ─── Configuration ───────────────────────────────────────────────
 
-const FISH_TTS_API = 'https://api.fish.audio/v1/tts';
-// SECURITY: API Key 不应硬编码在前端代码中。从环境变量读取。
-// 在 .env 或 .env.local 中设置 VITE_FISH_TTS_API_KEY=<your-key>
-// TODO: 长期方案应通过后端代理转发 TTS 请求，避免在前端暴露 API Key。
-const FISH_TTS_API_KEY = import.meta.env.VITE_FISH_TTS_API_KEY || '';
-const FISH_TTS_REFERENCE_ID = '9dec9671824543b4a4f9f382dbf15748';
+// Phase 1: TTS 通过后端代理，不再暴露 API Key
+function getTTSProxyUrl(): string {
+  const hostname = window.location.hostname;
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://127.0.0.1:12393/api/tts/generate';
+  }
+  return 'https://lain.sngxai.com/api/tts/generate';
+}
 
-// Fallback proxy for CORS issues
-const FISH_TTS_PROXY = 'https://tts.sngxai.com/v1/tts';
+const TTS_PROXY_URL = getTTSProxyUrl();
+const FISH_TTS_REFERENCE_ID = '9dec9671824543b4a4f9f382dbf15748';
 
 // Sentence boundary pattern (Chinese + English punctuation + newlines)
 const SENTENCE_TERMINATORS = /[。！？.!?\n；;]/;
@@ -37,7 +39,6 @@ export interface TTSResult {
 // ─── Service ─────────────────────────────────────────────────────
 
 class TTSService {
-  private useProxy = true;
   private audioContext: AudioContext | null = null;
 
   /**
@@ -63,13 +64,6 @@ class TTSService {
       };
     } catch (err) {
       console.error('[TTSService] Synthesis failed:', err);
-
-      // If direct API fails, try proxy
-      if (!this.useProxy) {
-        if (import.meta.env.DEV) console.log('[TTSService] Switching to proxy...');
-        this.useProxy = true;
-        return this.synthesize(text);
-      }
 
       return null;
     }
@@ -120,17 +114,22 @@ class TTSService {
   // ── Private ────────────────────────────────────────────────────
 
   private async callFishAudio(text: string): Promise<Blob | null> {
-    const url = this.useProxy ? FISH_TTS_PROXY : FISH_TTS_API;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30_000);
 
+    // Phase 1: 通过后端代理请求 TTS，注入认证 token
+    const token = localStorage.getItem('ling_token');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     try {
-      const response = await fetch(url, {
+      const response = await fetch(TTS_PROXY_URL, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${FISH_TTS_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           text,
           reference_id: FISH_TTS_REFERENCE_ID,
@@ -142,7 +141,7 @@ class TTSService {
 
       if (!response.ok) {
         const errText = await response.text().catch(() => '');
-        throw new Error(`Fish Audio API error ${response.status}: ${errText}`);
+        throw new Error(`TTS proxy error ${response.status}: ${errText}`);
       }
 
       return response.blob();
