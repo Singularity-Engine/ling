@@ -247,11 +247,8 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                   border: "1px solid rgba(167, 139, 250, 0.3)",
                   borderRadius: "999px",
                   cursor: exiting ? "default" : "pointer",
-                  animation: exiting ? "none" : "breatheGlow 3s ease-in-out infinite",
-                  boxShadow: exiting
-                    ? "0 0 20px rgba(139, 92, 246, 0.3)"
-                    : "0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2), inset 0 1px 0 rgba(255,255,255,0.15)",
-                  transition: "transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, opacity 0.2s ease",
+                  boxShadow: "0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2), inset 0 1px 0 rgba(255,255,255,0.15)",
+                  transition: "transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease",
                   position: "relative",
                   overflow: "hidden",
                   opacity: exiting ? 0.85 : 1,
@@ -259,18 +256,6 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "10px",
-                }}
-                onMouseEnter={(e) => {
-                  if (exiting) return;
-                  e.currentTarget.style.transform = "scale(1.06)";
-                  e.currentTarget.style.boxShadow =
-                    "0 0 45px rgba(139, 92, 246, 0.6), 0 0 90px rgba(139, 92, 246, 0.3), inset 0 1px 0 rgba(255,255,255,0.2)";
-                }}
-                onMouseLeave={(e) => {
-                  if (exiting) return;
-                  e.currentTarget.style.transform = "scale(1)";
-                  e.currentTarget.style.boxShadow =
-                    "0 0 30px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.2), inset 0 1px 0 rgba(255,255,255,0.15)";
                 }}
               >
                 {exiting && (

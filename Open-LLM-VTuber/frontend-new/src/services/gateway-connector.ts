@@ -56,6 +56,7 @@ export interface GatewayConnectOptions {
 const RECONNECT_BASE_MS = 1000;
 const RECONNECT_MAX_MS = 30000;
 const RECONNECT_MAX_RETRIES = 10;
+const HANDSHAKE_TIMEOUT_MS = 15000;
 
 // ─── Connector ────────────────────────────────────────────────────
 
@@ -209,6 +210,15 @@ class GatewayConnector {
 
       let handshakeResolved = false;
 
+      // Handshake timeout: reject if hello-ok not received within limit
+      const handshakeTimer = setTimeout(() => {
+        if (!handshakeResolved) {
+          handshakeResolved = true;
+          this.ws?.close(4000, 'Handshake timeout');
+          reject(new Error('Handshake timeout'));
+        }
+      }, HANDSHAKE_TIMEOUT_MS);
+
       this.ws.onopen = () => {
         if (import.meta.env.DEV) console.log('[GatewayConnector] WebSocket open, waiting for challenge...');
         this.setState('HANDSHAKING');
@@ -270,6 +280,7 @@ class GatewayConnector {
           }
           if (!handshakeResolved) {
             handshakeResolved = true;
+            clearTimeout(handshakeTimer);
             resolve();
           }
           return;
@@ -281,6 +292,7 @@ class GatewayConnector {
           console.error('[GatewayConnector] Handshake failed:', errMsg);
           this.authFailed = true;
           handshakeResolved = true;
+          clearTimeout(handshakeTimer);
           reject(new Error(errMsg));
           return;
         }
@@ -333,6 +345,7 @@ class GatewayConnector {
 
       this.ws.onclose = (event) => {
         if (import.meta.env.DEV) console.log(`[GatewayConnector] Closed: code=${event.code} reason=${event.reason}`);
+        clearTimeout(handshakeTimer);
         this.rejectAllPending('Connection closed');
 
         if (!handshakeResolved) {

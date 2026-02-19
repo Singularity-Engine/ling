@@ -207,6 +207,39 @@ body {
   100% { transform: scale(2.4); opacity: 0; }
 }
 
+@keyframes landingBtnSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Landing — GPU-friendly glow breathing via opacity-only animation on ::after */
+@keyframes breatheGlowOpacity {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+.landing-start-btn {
+  will-change: transform;
+}
+.landing-start-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 45px rgba(139, 92, 246, 0.6), 0 0 90px rgba(139, 92, 246, 0.3);
+  opacity: 0;
+  animation: breatheGlowOpacity 3s ease-in-out infinite;
+  pointer-events: none;
+  will-change: opacity;
+  transition: opacity 0.25s ease;
+}
+.landing-start-btn:not(:disabled):hover {
+  transform: scale(1.06);
+}
+.landing-start-btn:not(:disabled):hover::after {
+  opacity: 1;
+  animation: none;
+}
+
 @keyframes btnPress {
   0% { transform: scale(1); }
   40% { transform: scale(0.92); }
