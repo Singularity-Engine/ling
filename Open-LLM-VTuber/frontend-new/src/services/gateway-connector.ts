@@ -12,7 +12,7 @@
  *   5. Ready for chat.send / agent.event streaming
  */
 
-import { Subject, ReplaySubject } from 'rxjs';
+import { Subject, ReplaySubject, BehaviorSubject } from 'rxjs';
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -82,11 +82,11 @@ class GatewayConnector {
   /** Observable for state changes (replay last state for late subscribers) */
   readonly state$ = new ReplaySubject<GatewayState>(1);
 
-  /** Observable for all agent events (buffer up to 50 for late subscribers) */
-  readonly agentEvent$ = new ReplaySubject<GatewayAgentEvent>(50);
+  /** Observable for all agent events (no replay — prevents stale event processing on re-subscribe) */
+  readonly agentEvent$ = new Subject<GatewayAgentEvent>();
 
-  /** Observable for raw frames (buffer up to 20 for late subscribers) */
-  readonly rawFrame$ = new ReplaySubject<GatewayFrame>(20);
+  /** Observable for raw frames (no replay — same reason) */
+  readonly rawFrame$ = new Subject<GatewayFrame>();
 
   /** Fires when a reconnection handshake completes successfully */
   readonly reconnected$ = new Subject<void>();
@@ -228,10 +228,25 @@ class GatewayConnector {
         return;
       }
 
+      // Clean up any in-progress socket to prevent cross-socket interference.
+      // Null out event handlers BEFORE closing so the old onclose doesn't
+      // trigger reconnect or rejectAllPending against the new socket.
+      if (this.ws) {
+        const oldWs = this.ws;
+        oldWs.onopen = null;
+        oldWs.onmessage = null;
+        oldWs.onclose = null;
+        oldWs.onerror = null;
+        this.ws = null;
+        try { oldWs.close(4002, 'Superseded by new connection'); } catch { /* ignore */ }
+      }
+
       this.setState('CONNECTING');
 
+      let ws: WebSocket;
       try {
-        this.ws = new WebSocket(this.options.url);
+        ws = new WebSocket(this.options.url);
+        this.ws = ws;
       } catch (err) {
         this.setState('DISCONNECTED');
         reject(err);
@@ -244,17 +259,21 @@ class GatewayConnector {
       const handshakeTimer = setTimeout(() => {
         if (!handshakeResolved) {
           handshakeResolved = true;
-          this.ws?.close(4000, 'Handshake timeout');
+          ws.close(4000, 'Handshake timeout');
           reject(new Error('Handshake timeout'));
         }
       }, HANDSHAKE_TIMEOUT_MS);
 
-      this.ws.onopen = () => {
+      ws.onopen = () => {
+        // Ignore events from a superseded socket
+        if (this.ws !== ws) return;
         if (import.meta.env.DEV) console.log('[GatewayConnector] WebSocket open, waiting for challenge...');
         this.setState('HANDSHAKING');
       };
 
-      this.ws.onmessage = (event) => {
+      ws.onmessage = (event) => {
+        if (this.ws !== ws) return;
+
         let frame: GatewayFrame;
         try {
           frame = JSON.parse(event.data);
@@ -293,7 +312,7 @@ class GatewayConnector {
               scopes: ['operator.admin'],
             },
           };
-          this.ws!.send(JSON.stringify(connectReq));
+          ws.send(JSON.stringify(connectReq));
           return;
         }
 
@@ -376,10 +395,14 @@ class GatewayConnector {
         }
       };
 
-      this.ws.onclose = (event) => {
+      ws.onclose = (event) => {
+        // Ignore close events from superseded sockets
+        if (this.ws !== ws && this.ws !== null) return;
+
         if (import.meta.env.DEV) console.log(`[GatewayConnector] Closed: code=${event.code} reason=${event.reason}`);
         clearTimeout(handshakeTimer);
         this.stopHeartbeatMonitor();
+        this.ws = null;
         this.rejectAllPending('Connection closed');
 
         if (!handshakeResolved) {
@@ -395,7 +418,8 @@ class GatewayConnector {
         }
       };
 
-      this.ws.onerror = () => {
+      ws.onerror = () => {
+        if (this.ws !== ws) return;
         console.error('[GatewayConnector] WebSocket error');
         this.options?.onError?.({ code: 'WS_ERROR', message: 'WebSocket connection error' });
       };
