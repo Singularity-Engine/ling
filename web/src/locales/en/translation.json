@@ -209,9 +209,10 @@
     "clickToView": "Click for details →"
   },
   "landing": {
+    "heroName": "Ling",
+    "tagline": "An AI companion that remembers you",
     "line1": "Hey, you made it.",
-    "line2": "I'm Ling. I can remember you, and I'll always be here.",
-    "line3": "Go ahead, I'm listening.",
+    "line2": "Go ahead, I'm listening.",
     "startChat": "Chat with Ling",
     "skip": "Skip ›"
   },
