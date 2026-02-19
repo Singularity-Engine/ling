@@ -280,7 +280,6 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                 boxShadow: "0 0 30px var(--ling-purple-40), 0 0 60px var(--ling-purple-20), inset 0 1px 0 rgba(255,255,255,0.15)",
                 transition: "transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease",
                 position: "relative",
-                overflow: "hidden",
                 opacity: exiting ? 0.85 : 1,
                 display: "flex",
                 alignItems: "center",
