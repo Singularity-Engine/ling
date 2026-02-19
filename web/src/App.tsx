@@ -396,6 +396,24 @@ function MainContent(): JSX.Element {
   );
 }
 
+/**
+ * 隐藏 index.html 中的 #loading-fallback。
+ * 放在 AuthProvider 内部，当 auth 初始化完成后平滑淡出 fallback。
+ */
+function DismissFallback() {
+  const { isLoading } = useAuth();
+  useEffect(() => {
+    if (!isLoading) {
+      const el = document.getElementById('loading-fallback');
+      if (el) {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 400);
+      }
+    }
+  }, [isLoading]);
+  return null;
+}
+
 /** 需要认证时包裹子组件，未登录跳转 /login */
 function RequireAuth({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -489,6 +507,7 @@ function App(): JSX.Element {
     <ErrorBoundary>
       <BrowserRouter>
         <AuthProvider>
+          <DismissFallback />
           <Routes>
             <Route path="/login" element={<GuestOnly><LoginPage /></GuestOnly>} />
             <Route path="/register" element={<GuestOnly><RegisterPage /></GuestOnly>} />
