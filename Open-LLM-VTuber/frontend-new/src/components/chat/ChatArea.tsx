@@ -255,6 +255,8 @@ export const ChatArea = memo(() => {
               ? "emptyStateFadeOut 0.35s ease-in forwards"
               : "chatFadeInUp 0.6s ease-out",
             pointerEvents: emptyExiting ? "none" : undefined,
+            // During exit: overlay so incoming content isn't pushed below viewport
+            ...(emptyExiting ? { position: "absolute" as const, inset: 0, zIndex: 10 } : {}),
           }}
         >
           <span

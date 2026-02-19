@@ -33,7 +33,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
     if (skippedRef.current) return;
     skippedRef.current = true;
     setExiting(true);
-    setTimeout(() => onComplete(), 400);
+    onComplete(); // Fire immediately — cross-dissolve with main content
   }, [onComplete]);
 
   // Keyboard skip
@@ -132,7 +132,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
         overflow: "hidden",
         opacity: exiting ? 0 : 1,
         transform: exiting ? "scale(1.04)" : "scale(1)",
-        transition: "opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+        transition: "opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
       }}
     >
       {/* Particle canvas */}

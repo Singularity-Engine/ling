@@ -57,6 +57,8 @@ const RECONNECT_BASE_MS = 1000;
 const RECONNECT_MAX_MS = 30000;
 const RECONNECT_MAX_RETRIES = 10;
 const HANDSHAKE_TIMEOUT_MS = 15000;
+const HEARTBEAT_TIMEOUT_MS = 90_000; // Treat connection as dead if no tick in 90s
+const HEARTBEAT_CHECK_MS = 30_000;   // Check heartbeat every 30s
 
 // ─── Connector ────────────────────────────────────────────────────
 
@@ -70,6 +72,9 @@ class GatewayConnector {
   private authFailed = false;
   private instanceId = crypto.randomUUID();
   private connId: string | null = null;
+  private lastTickAt = 0;
+  private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+  private onVisibilityChange: (() => void) | null = null;
 
   /** Debug counters */
   readonly debugCounters = { rawFrames: 0, agentEvents: 0, ticks: 0, lastEvent: '' };
@@ -99,12 +104,15 @@ class GatewayConnector {
     this.options = options;
     this.reconnectAttempts = 0;
     this.authFailed = false;
+    this.setupVisibilityHandler();
     return this.doConnect();
   }
 
   /** Disconnect and stop reconnecting */
   disconnect() {
     this.clearReconnectTimer();
+    this.stopHeartbeatMonitor();
+    this.removeVisibilityHandler();
     this.reconnectAttempts = RECONNECT_MAX_RETRIES; // prevent reconnect
     if (this.ws) {
       this.ws.close(1000, 'client disconnect');
@@ -292,6 +300,8 @@ class GatewayConnector {
           const wasReconnecting = this.reconnectAttempts > 0;
           this.reconnectAttempts = 0;
           this.reconnectAttempt$.next(0);
+          this.lastTickAt = Date.now();
+          this.startHeartbeatMonitor();
           this.setState('CONNECTED');
           if (import.meta.env.DEV) console.log(`[GatewayConnector] Connected! connId=${this.connId}`);
           if (wasReconnecting) {
@@ -319,6 +329,7 @@ class GatewayConnector {
         // ── Tick (heartbeat) ──
         if (frame.type === 'event' && frame.event === 'tick') {
           this.debugCounters.ticks++;
+          this.lastTickAt = Date.now();
           return;
         }
 
