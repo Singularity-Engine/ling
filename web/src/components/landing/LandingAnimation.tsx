@@ -65,15 +65,19 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
       setParticlePhase("converge");
     }, 1500);
 
-    const convergeInterval = setInterval(() => {
+    let convergeRafId = 0;
+    const updateProgress = () => {
       const elapsed = performance.now() - startTimeRef.current;
       if (elapsed > 1500 && elapsed < 3000) {
         phaseProgressRef.current = (elapsed - 1500) / 1500;
+        convergeRafId = requestAnimationFrame(updateProgress);
       } else if (elapsed >= 3000) {
         phaseProgressRef.current = 1;
-        clearInterval(convergeInterval);
+      } else {
+        convergeRafId = requestAnimationFrame(updateProgress);
       }
-    }, 16);
+    };
+    convergeRafId = requestAnimationFrame(updateProgress);
 
     // Phase 2: explode (3-3.5s)
     const explodeTimer = setTimeout(() => {
@@ -91,7 +95,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
 
     return () => {
       clearTimeout(convergeTimer);
-      clearInterval(convergeInterval);
+      cancelAnimationFrame(convergeRafId);
       clearTimeout(explodeTimer);
       clearTimeout(textTimer);
     };

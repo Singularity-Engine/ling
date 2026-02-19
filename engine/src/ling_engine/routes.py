@@ -61,30 +61,15 @@ async def create_routes(default_context_cache: ServiceContext) -> APIRouter:
         if bff_enabled:
             logger.info("🔧 开始注册BFF集成路由...")
 
-            # 导入BFF路由模块
-            from .bff_integration.api.auth_routes import create_auth_router
-            from .bff_integration.api.user_routes import create_user_router
             from .bff_integration.api.health_routes import create_health_router
 
-            # 获取数据库管理器
-            db_manager = getattr(default_context_cache, 'database_manager', None)
-
-            # 创建并注册健康检查路由（无需认证）
+            # 健康检查路由（保留）
             health_router = create_health_router()
             router.include_router(health_router)
             logger.info("✅ BFF健康检查路由已注册")
 
-            # 创建并注册认证路由
-            auth_router = create_auth_router(config, db_manager)
-            router.include_router(auth_router)
-            logger.info("✅ BFF认证路由已注册")
-
-            # 创建并注册用户路由
-            user_router = create_user_router(config, db_manager)
-            router.include_router(user_router)
-            logger.info("✅ BFF用户路由已注册")
-
-            logger.info("🎉 BFF集成路由注册完成")
+            # Phase 1: 旧的 Clerk auth_routes 和 user_routes 已被 ling_auth_routes 替代，不再注册
+            logger.info("ℹ️ 旧 BFF auth/user 路由已跳过（Phase 1 灵认证替代）")
         else:
             logger.info("ℹ️ BFF集成未启用，跳过BFF路由注册")
     except Exception as e:

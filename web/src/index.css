@@ -237,9 +237,17 @@ body {
 .landing-start-btn:not(:disabled):hover {
   transform: scale(1.06);
 }
+.landing-start-btn:not(:disabled):active {
+  transform: scale(0.97);
+  transition-duration: 0.1s;
+}
 .landing-start-btn:not(:disabled):hover::after {
   opacity: 1;
   animation: none;
+}
+.landing-start-btn:focus-visible {
+  outline: 2px solid var(--ling-purple-lighter);
+  outline-offset: 3px;
 }
 
 /* Landing 始终暗色主题——覆盖 [data-theme="light"] 的变量继承 */
