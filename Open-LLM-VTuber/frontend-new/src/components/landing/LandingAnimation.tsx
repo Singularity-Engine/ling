@@ -14,7 +14,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
   const { t } = useTranslation();
   const LINES = useMemo(() => [t("landing.line1"), t("landing.line2"), t("landing.line3")], [t]);
   const [particlePhase, setParticlePhase] = useState<ParticlePhase>("float");
-  const [phaseProgress, setPhaseProgress] = useState(0);
+  const phaseProgressRef = useRef(0);
   const [flashOpacity, setFlashOpacity] = useState(0);
   const [showText, setShowText] = useState(false);
   const [currentLine, setCurrentLine] = useState(0);

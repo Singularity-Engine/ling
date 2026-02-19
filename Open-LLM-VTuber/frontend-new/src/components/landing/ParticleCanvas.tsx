@@ -1,9 +1,12 @@
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, memo } from "react";
 import { MOBILE_BREAKPOINT } from "@/constants/breakpoints";
 
 export type ParticlePhase = "float" | "converge" | "explode" | "fade";
 
 const COLORS = ["#8b5cf6", "#60a5fa", "#a78bfa", "#c084fc"];
+
+/** Diameter of each pre-rendered glow sprite (px) */
+const SPRITE_SIZE = 64;
 
 interface Particle {
   x: number;
@@ -13,12 +16,35 @@ interface Particle {
   vx: number;
   vy: number;
   size: number;
-  color: string;
+  colorIndex: number;
   alpha: number;
   /** Random offset for floating motion */
   floatAngle: number;
   floatSpeed: number;
   floatRadius: number;
+}
+
+/**
+ * Pre-render a radial glow sprite per color on an offscreen canvas.
+ * Replaces per-particle-per-frame createRadialGradient calls with
+ * GPU-accelerated drawImage.
+ */
+function createGlowSprites(): HTMLCanvasElement[] {
+  return COLORS.map((color) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = SPRITE_SIZE;
+    canvas.height = SPRITE_SIZE;
+    const ctx = canvas.getContext("2d")!;
+    const r = SPRITE_SIZE / 2;
+    const gradient = ctx.createRadialGradient(r, r, 0, r, r, r);
+    gradient.addColorStop(0, color);
+    gradient.addColorStop(1, "transparent");
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(r, r, r, 0, Math.PI * 2);
+    ctx.fill();
+    return canvas;
+  });
 }
 
 function createParticles(
@@ -38,7 +64,7 @@ function createParticles(
       vx: (Math.random() - 0.5) * 0.5,
       vy: (Math.random() - 0.5) * 0.5,
       size: Math.random() < 0.1 ? Math.random() * 3 + 3 : Math.random() * 2.5 + 1,
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      colorIndex: Math.floor(Math.random() * COLORS.length),
       alpha: Math.random() * 0.6 + 0.4,
       floatAngle: Math.random() * Math.PI * 2,
       floatSpeed: Math.random() * 0.008 + 0.004,
@@ -50,25 +76,36 @@ function createParticles(
 
 interface ParticleCanvasProps {
   phase: ParticlePhase;
-  /** 0-1 progress within the current phase */
-  phaseProgress?: number;
+  /** Mutable ref to 0-1 progress within the current phase (read-only for us) */
+  phaseProgressRef: { readonly current: number };
 }
 
-export function ParticleCanvas({ phase, phaseProgress = 0 }: ParticleCanvasProps) {
+/**
+ * Full-screen particle canvas. Perf notes:
+ * - Glow gradients are pre-rendered to offscreen canvases (1 per color)
+ * - phaseProgress is passed as a ref to avoid re-creating the animation loop
+ * - Wrapped in React.memo to prevent parent typewriter re-renders from triggering reconciliation
+ */
+export const ParticleCanvas = memo(function ParticleCanvas({
+  phase,
+  phaseProgressRef,
+}: ParticleCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const animFrameRef = useRef<number>(0);
   const prevPhaseRef = useRef<ParticlePhase>("float");
-  const timeRef = useRef(0);
+  const glowSpritesRef = useRef<HTMLCanvasElement[]>([]);
 
   const getParticleCount = useCallback(() => {
     return window.innerWidth < MOBILE_BREAKPOINT ? 40 : 100;
   }, []);
 
-  // Initialize canvas + particles
+  // Initialize canvas + particles + glow sprites
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
+    glowSpritesRef.current = createGlowSprites();
 
     const resize = () => {
       const dpr = window.devicePixelRatio || 1;
@@ -91,16 +128,15 @@ export function ParticleCanvas({ phase, phaseProgress = 0 }: ParticleCanvasProps
     return () => window.removeEventListener("resize", resize);
   }, [getParticleCount]);
 
-  // Animation loop
+  // Animation loop — only restarts on phase change (NOT on phaseProgress)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // When phase changes, capture snapshot for explode
+    // When phase changes to explode, assign explosion velocities
     if (phase === "explode" && prevPhaseRef.current !== "explode") {
-      // Assign random explosion velocities
       const cx = window.innerWidth / 2;
       const cy = window.innerHeight / 2;
       particlesRef.current.forEach((p) => {
@@ -116,10 +152,13 @@ export function ParticleCanvas({ phase, phaseProgress = 0 }: ParticleCanvasProps
     const h = window.innerHeight;
     const cx = w / 2;
     const cy = h / 2;
+    const glowSprites = glowSpritesRef.current;
 
     const animate = () => {
-      timeRef.current++;
       ctx.clearRect(0, 0, w, h);
+
+      // Read progress from ref — no React re-render needed
+      const phaseProgress = phaseProgressRef.current;
 
       particlesRef.current.forEach((p) => {
         switch (phase) {
@@ -160,41 +199,40 @@ export function ParticleCanvas({ phase, phaseProgress = 0 }: ParticleCanvasProps
           }
         }
 
-        // Draw particle with glow
-        ctx.save();
+        // Draw particle — no ctx.save/restore, just set globalAlpha directly
         ctx.globalAlpha = p.alpha;
 
-        // Outer glow
-        const gradient = ctx.createRadialGradient(
-          p.x, p.y, 0,
-          p.x, p.y, p.size * 4
+        // Outer glow via pre-rendered sprite (drawImage, GPU-accelerated)
+        const glowDiameter = p.size * 8;
+        ctx.drawImage(
+          glowSprites[p.colorIndex],
+          p.x - glowDiameter / 2,
+          p.y - glowDiameter / 2,
+          glowDiameter,
+          glowDiameter
         );
-        gradient.addColorStop(0, p.color);
-        gradient.addColorStop(1, "transparent");
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * 4, 0, Math.PI * 2);
-        ctx.fill();
 
         // Core
-        ctx.fillStyle = p.color;
+        ctx.fillStyle = COLORS[p.colorIndex];
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
-
-        ctx.restore();
       });
 
-      // Stop loop when all particles are invisible (mobile perf)
+      // Reset globalAlpha for subsequent draws
+      ctx.globalAlpha = 1;
+
+      // Stop loop when all particles are invisible
       if ((phase === "fade" || phase === "explode") &&
           particlesRef.current.every((p) => p.alpha <= 0)) {
         return;
       }
 
-      // Draw central glow during converge phase
-      if (phase === "converge" && phaseProgress > 0.3) {
-        const glowAlpha = (phaseProgress - 0.3) * 1.4;
-        const glowRadius = 30 + phaseProgress * 60;
+      // Draw central glow during converge phase (single gradient per frame — acceptable)
+      if (phase === "converge" && phaseProgressRef.current > 0.3) {
+        const progress = phaseProgressRef.current;
+        const glowAlpha = (progress - 0.3) * 1.4;
+        const glowRadius = 30 + progress * 60;
         const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowRadius);
         gradient.addColorStop(0, `rgba(139, 92, 246, ${glowAlpha * 0.8})`);
         gradient.addColorStop(0.5, `rgba(96, 165, 250, ${glowAlpha * 0.4})`);
@@ -210,7 +248,7 @@ export function ParticleCanvas({ phase, phaseProgress = 0 }: ParticleCanvasProps
 
     animFrameRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animFrameRef.current);
-  }, [phase, phaseProgress]);
+  }, [phase, phaseProgressRef]);
 
   return (
     <canvas
@@ -226,4 +264,4 @@ export function ParticleCanvas({ phase, phaseProgress = 0 }: ParticleCanvasProps
       }}
     />
   );
-}
+});
