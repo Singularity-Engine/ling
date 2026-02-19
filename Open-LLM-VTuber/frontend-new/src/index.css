@@ -256,6 +256,7 @@ body {
   --ling-purple-40: rgba(139, 92, 246, 0.4);
   --ling-purple-60: rgba(139, 92, 246, 0.6);
   --ling-text-secondary: rgba(255, 255, 255, 0.75);
+  --ling-text-tertiary: rgba(255, 255, 255, 0.4);
   --ling-text-muted: rgba(255, 255, 255, 0.2);
 }
 

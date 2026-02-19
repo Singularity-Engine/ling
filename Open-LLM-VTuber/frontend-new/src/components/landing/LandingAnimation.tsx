@@ -201,7 +201,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                   key={i}
                   className="landing-text-line"
                   style={{
-                    fontSize: i === 0 ? "2.375rem" : isLastLine ? "1.3125rem" : "1.25rem",
+                    fontSize: i === 0 ? "2.375rem" : "1.25rem",
                     fontWeight: i === 0 ? 700 : isLastLine ? 500 : 400,
                     color: i === 0
                       ? "var(--ling-purple-text)"
@@ -298,7 +298,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
               )}
               {t("landing.startChat")}
             </button>
-            <span style={{ fontSize: "0.75rem", color: "var(--ling-text-tertiary)", letterSpacing: "0.05em" }}>
+            <span style={{ fontSize: "0.75rem", color: "var(--ling-text-tertiary)", letterSpacing: "0.04em" }}>
               Press Enter ↵
             </span>
           </div>
