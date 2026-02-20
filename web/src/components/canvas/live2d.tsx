@@ -103,9 +103,7 @@ export const Live2D = memo(
       }
 
       e.preventDefault();
-      console.log(
-        "[ContextMenu] (Pet Mode) Right-click detected, requesting menu...",
-      );
+      if (import.meta.env.DEV) console.log('[ContextMenu] (Pet Mode) Right-click detected, requesting menu...');
       window.api?.showContextMenu?.();
     };
 

@@ -44,10 +44,7 @@ export class LAppView {
    * 初期化する。
    */
   public initialize(): void {
-    if (!canvas) {
-      console.warn("Canvas is null, cannot initialize LAppView");
-      return;
-    }
+    if (!canvas) return;
     const { width, height } = canvas;
 
     let left: number;

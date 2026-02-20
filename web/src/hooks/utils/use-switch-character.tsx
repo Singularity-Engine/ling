@@ -19,7 +19,6 @@ export function useSwitchCharacter() {
     const currentFilename = getFilenameByName(confName);
 
     if (currentFilename === fileName) {
-      console.log('Skipping character switch - same configuration file');
       return;
     }
 
@@ -32,7 +31,6 @@ export function useSwitchCharacter() {
       type: 'switch-config',
       file: fileName,
     });
-    console.log('Switch Character fileName: ', fileName);
   }, [confName, getFilenameByName, sendMessage, interrupt, stopMic, setSubtitleText, setAiState]);
 
   return { switchCharacter };

@@ -100,6 +100,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     .chat-copy-btn { opacity: 0; }
     .chat-bubble-wrap:hover .chat-copy-btn { opacity: 1; }
     .chat-copy-btn:hover { color: rgba(255,255,255,0.7) !important; background: rgba(255,255,255,0.08) !important; }
+    @media (hover: none) { .chat-copy-btn { opacity: 0.5; } }
   `;
   document.head.appendChild(style);
 }

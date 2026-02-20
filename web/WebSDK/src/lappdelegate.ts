@@ -324,10 +324,7 @@ export class LAppDelegate {
    * This method only syncs the GL viewport to avoid race conditions on mobile.
    */
   private _resizeCanvas(): void {
-    if (!canvas) {
-      console.warn("Canvas is null, skipping resize");
-      return;
-    }
+    if (!canvas) return;
     // canvas.width/height is set by React handleResize — only update GL viewport here
     if (gl) {
       gl.viewport(0, 0, canvas.width, canvas.height);

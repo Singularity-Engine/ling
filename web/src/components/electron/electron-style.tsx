@@ -12,7 +12,6 @@ export const inputSubtitleStyles = {
     transform: 'translateX(-50%)',
     zIndex: 1000,
     userSelect: 'none',
-    willChange: 'transform',
     padding: 0,
   },
 

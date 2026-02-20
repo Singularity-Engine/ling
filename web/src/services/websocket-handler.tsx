@@ -513,59 +513,55 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       setConfigFiles(DEFAULT_CONFIG_FILES);
       bgUrlContext?.setBackgroundFiles(DEFAULT_BACKGROUNDS);
 
-      // Resolve the default session so Gateway knows which agent to route to
-      gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId())
-        .then(() => {
-          // Helper: send auto-greeting (used when no previous history exists)
-          const sendGreetingIfNeeded = () => {
-            if (!greetingSentRef.current) {
-              const sendGreeting = () => {
-                if (greetingSentRef.current) return;
-                greetingSentRef.current = true;
-                setAiState('thinking-speaking');
-                const prefs = localStorage.getItem('ling-user-preferences');
-                const greetingMsg = prefs ? `[greeting:context]${prefs}` : '[greeting]';
-                gatewayConnector.sendChat(sessionKeyRef.current, greetingMsg).catch((err) => {
-                  if (import.meta.env.DEV) console.error('[WebSocketHandler] Auto-greeting failed:', err);
-                  setAiState('idle');
-                });
-              };
-
-              if (sessionStorage.getItem('ling-visited')) {
-                sendGreeting();
-                setGreetingExpression(2000);
-              } else {
-                const onLandingComplete = () => {
-                  sendGreeting();
-                  setGreetingExpression(800);
-                  window.removeEventListener('ling-landing-complete', onLandingComplete);
-                };
-                window.addEventListener('ling-landing-complete', onLandingComplete);
-              }
-            }
+      // Helper: send auto-greeting (used when no previous history exists)
+      const sendGreetingIfNeeded = () => {
+        if (!greetingSentRef.current) {
+          const sendGreeting = () => {
+            if (greetingSentRef.current) return;
+            greetingSentRef.current = true;
+            setAiState('thinking-speaking');
+            const prefs = localStorage.getItem('ling-user-preferences');
+            const greetingMsg = prefs ? `[greeting:context]${prefs}` : '[greeting]';
+            gatewayConnector.sendChat(sessionKeyRef.current, greetingMsg).catch((err) => {
+              if (import.meta.env.DEV) console.error('[WebSocketHandler] Auto-greeting failed:', err);
+              setAiState('idle');
+            });
           };
 
-          // Try to restore chat history from previous session
+          if (sessionStorage.getItem('ling-visited')) {
+            sendGreeting();
+            setGreetingExpression(2000);
+          } else {
+            const onLandingComplete = () => {
+              sendGreeting();
+              setGreetingExpression(800);
+              window.removeEventListener('ling-landing-complete', onLandingComplete);
+            };
+            window.addEventListener('ling-landing-complete', onLandingComplete);
+          }
+        }
+      };
+
+      // Try to resolve session and restore history; fall through to greeting on any failure
+      gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId())
+        .then(() =>
           gatewayConnector.getChatHistory(sessionKeyRef.current)
             .then((res) => {
               const payload = res.payload as any;
               if (payload?.messages?.length > 0) {
-                // Restore previous messages — skip auto-greeting
                 setMessagesRef.current(payload.messages);
                 greetingSentRef.current = true;
                 if (import.meta.env.DEV) console.log(`[WebSocketHandler] Restored ${payload.messages.length} messages from previous session`);
                 return;
               }
-              // No existing history — send auto-greeting
               sendGreetingIfNeeded();
             })
-            .catch(() => {
-              // History fetch failed — still send greeting for a clean start
-              sendGreetingIfNeeded();
-            });
-        })
+            .catch(() => sendGreetingIfNeeded()),
+        )
         .catch((err) => {
-          console.error('[WebSocketHandler] resolveSession failed:', err);
+          // Session doesn't exist yet — chat.send will create it on first message
+          if (import.meta.env.DEV) console.log('[WebSocketHandler] resolveSession failed (will create on first chat):', err.message);
+          sendGreetingIfNeeded();
         });
 
       // Create a default session

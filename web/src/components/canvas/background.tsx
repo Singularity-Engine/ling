@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef } from 'react';
+import { memo, useEffect, useRef, useState, useCallback } from 'react';
 import { canvasStyles } from './canvas-styles';
 import { useCamera } from '@/context/camera-context';
 import { useBgUrl } from '@/context/bgurl-context';
@@ -9,6 +9,12 @@ const Background = memo(({ children }: { children?: React.ReactNode }) => {
     backgroundStream, isBackgroundStreaming, startBackgroundCamera, stopBackgroundCamera,
   } = useCamera();
   const { useCameraBackground, backgroundUrl } = useBgUrl();
+  const [bgLoaded, setBgLoaded] = useState(false);
+
+  const handleBgLoad = useCallback(() => setBgLoaded(true), []);
+
+  // Reset loaded state when URL changes
+  useEffect(() => { setBgLoaded(false); }, [backgroundUrl]);
 
   useEffect(() => {
     if (useCameraBackground) {
@@ -40,9 +46,15 @@ const Background = memo(({ children }: { children?: React.ReactNode }) => {
         />
       ) : (
         <img
-          style={canvasStyles.background.image}
+          style={{
+            ...canvasStyles.background.image,
+            opacity: bgLoaded ? 1 : 0,
+            transition: 'opacity 0.4s ease-in',
+          }}
           src={backgroundUrl}
           alt="background"
+          decoding="async"
+          onLoad={handleBgLoad}
         />
       )}
       {children}

@@ -169,21 +169,24 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
         }}
       />
 
-      {/* Text content */}
-      {showText && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 4,
-            padding: "0 24px",
-          }}
-        >
+      {/* Text content — always rendered to avoid FOUC; opacity controls visibility */}
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 4,
+          padding: "0 24px",
+          opacity: showText ? 1 : 0,
+          transition: "opacity 0.6s ease-out",
+          pointerEvents: showText ? "auto" : "none",
+        }}
+      >
           <div
+            className="landing-text-block"
             style={{
               display: "flex",
               flexDirection: "column",
@@ -320,7 +323,6 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
             </div>
           </div>
         </div>
-      )}
 
       {/* Skip hint — 移动端友好触摸区域 */}
       <div

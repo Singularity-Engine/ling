@@ -1,7 +1,8 @@
-import { memo, useMemo, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { useToolState, ToolCategory } from '../../context/tool-state-context';
 import { useAiState } from '../../context/ai-state-context';
 import { useAffinity } from '../../context/affinity-context';
+import { MOBILE_BREAKPOINT } from '../../constants/breakpoints';
 
 const CATEGORY_COLORS: Record<ToolCategory, string> = {
   search: '#60a5fa',
@@ -22,17 +23,23 @@ const AFFINITY_HALO_COLORS: Record<string, string> = {
   devoted:     '#fb7185',
 };
 
-const PARTICLE_COUNT = 14;
-const INNER_PARTICLE_COUNT = 8;
-const ELLIPSE_A = 60;
-const ELLIPSE_B = 20;
-const INNER_A = 42;
-const INNER_B = 14;
+// Desktop / Mobile geometry
+const DESKTOP = { particles: 14, innerParticles: 8, a: 60, b: 20, innerA: 42, innerB: 14 };
+const MOBILE  = { particles: 8,  innerParticles: 5,  a: 40, b: 13, innerA: 28, innerB: 9  };
 
 export const ThoughtHalo = memo(() => {
   const { currentPhase, dominantCategory } = useToolState();
   const { isThinkingSpeaking } = useAiState();
   const { level, expressionIntensity } = useAffinity();
+
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < MOBILE_BREAKPOINT);
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  const geo = isMobile ? MOBILE : DESKTOP;
   const isToolActive = currentPhase === 'thinking' || currentPhase === 'working';
   const isWorking = currentPhase === 'working';
   // Show a softer halo during normal AI thinking (no tool calls)
@@ -62,25 +69,24 @@ export const ThoughtHalo = memo(() => {
   const innerParticleMax = (isWorking ? 8 : isAiThinking ? 4 : 5) * emotionSizeBoost;
 
   const particles = useMemo(() => {
-    return Array.from({ length: PARTICLE_COUNT }, (_, i) => {
-      const angle = (i * 2 * Math.PI) / PARTICLE_COUNT;
-      const x = ELLIPSE_A * Math.cos(angle);
-      const y = ELLIPSE_B * Math.sin(angle);
-      // Vary particle sizes for organic feel
+    return Array.from({ length: geo.particles }, (_, i) => {
+      const angle = (i * 2 * Math.PI) / geo.particles;
+      const x = geo.a * Math.cos(angle);
+      const y = geo.b * Math.sin(angle);
       const sizeFactor = 0.6 + 0.4 * Math.abs(Math.sin(angle * 2));
       return { x, y, delay: i * 0.15, sizeFactor };
     });
-  }, []);
+  }, [geo]);
 
   const innerParticles = useMemo(() => {
-    return Array.from({ length: INNER_PARTICLE_COUNT }, (_, i) => {
-      const angle = (i * 2 * Math.PI) / INNER_PARTICLE_COUNT;
-      const x = INNER_A * Math.cos(angle);
-      const y = INNER_B * Math.sin(angle);
+    return Array.from({ length: geo.innerParticles }, (_, i) => {
+      const angle = (i * 2 * Math.PI) / geo.innerParticles;
+      const x = geo.innerA * Math.cos(angle);
+      const y = geo.innerB * Math.sin(angle);
       const sizeFactor = 0.7 + 0.3 * Math.abs(Math.cos(angle * 1.5));
       return { x, y, delay: i * 0.2, sizeFactor };
     });
-  }, []);
+  }, [geo]);
 
   return (
     <>
@@ -125,8 +131,8 @@ export const ThoughtHalo = memo(() => {
           position: 'absolute',
           left: '50%',
           top: '27%',
-          width: `${ELLIPSE_A * 2 + 20}px`,
-          height: `${ELLIPSE_B * 2 + 20}px`,
+          width: `${geo.a * 2 + 20}px`,
+          height: `${geo.b * 2 + 20}px`,
           borderRadius: '50%',
           background: `radial-gradient(ellipse at center, ${color}44 0%, ${color}22 40%, transparent 70%)`,
           transform: 'translate(-50%, -50%)',
@@ -135,9 +141,9 @@ export const ThoughtHalo = memo(() => {
             ? `thoughtHaloEnter 0.5s ease-out forwards, innerGlowPulse 2s ease-in-out 0.5s infinite`
             : exitAnim,
           opacity: isActive ? undefined : 0,
-          filter: 'blur(6px)',
+          filter: isMobile ? 'none' : 'blur(6px)',
           transition: 'background 0.5s ease',
-          willChange: 'opacity',
+          willChange: isActive ? 'opacity' : 'auto',
         }}
       />
 
@@ -147,11 +153,13 @@ export const ThoughtHalo = memo(() => {
           position: 'absolute',
           left: '50%',
           top: '27%',
-          width: `${ELLIPSE_A * 2 + 8}px`,
-          height: `${ELLIPSE_B * 2 + 8}px`,
+          width: `${geo.a * 2 + 8}px`,
+          height: `${geo.b * 2 + 8}px`,
           borderRadius: '50%',
           border: `2px solid ${color}88`,
-          boxShadow: `0 0 30px ${color}55, 0 0 60px ${color}33, inset 0 0 30px ${color}44`,
+          boxShadow: isMobile
+            ? `0 0 12px ${color}44, inset 0 0 10px ${color}33`
+            : `0 0 30px ${color}55, 0 0 60px ${color}33, inset 0 0 30px ${color}44`,
           transform: 'translate(-50%, -50%)',
           pointerEvents: 'none',
           animation: isActive
@@ -159,7 +167,7 @@ export const ThoughtHalo = memo(() => {
             : exitAnim,
           opacity: isActive ? undefined : 0,
           transition: 'border-color 0.5s ease, box-shadow 0.5s ease',
-          willChange: 'transform, opacity',
+          willChange: isActive ? 'transform, opacity' : 'auto',
         }}
       />
 
@@ -169,15 +177,15 @@ export const ThoughtHalo = memo(() => {
           position: 'absolute',
           left: '50%',
           top: '27%',
-          width: `${INNER_A * 2}px`,
-          height: `${INNER_B * 2}px`,
+          width: `${geo.innerA * 2}px`,
+          height: `${geo.innerB * 2}px`,
           transform: 'translate(-50%, -50%)',
           pointerEvents: 'none',
           animation: isActive
             ? `thoughtHaloEnter 0.5s ease-out forwards, thoughtHaloRotateReverse ${innerRotationSpeed} linear 0.5s infinite`
             : exitAnim,
           opacity: isActive ? undefined : 0,
-          willChange: 'transform, opacity',
+          willChange: isActive ? 'transform, opacity' : 'auto',
         }}
       >
         {innerParticles.map((p, i) => {
@@ -187,19 +195,21 @@ export const ThoughtHalo = memo(() => {
               key={`inner-${i}`}
               style={{
                 position: 'absolute',
-                left: `${INNER_A + p.x}px`,
-                top: `${INNER_B + p.y}px`,
+                left: `${geo.innerA + p.x}px`,
+                top: `${geo.innerB + p.y}px`,
                 width: `${size}px`,
                 height: `${size}px`,
                 borderRadius: '50%',
                 backgroundColor: color,
-                boxShadow: `0 0 ${size * 3}px ${color}aa, 0 0 ${size * 1.5}px ${color}cc`,
+                boxShadow: isMobile
+                  ? 'none'
+                  : `0 0 ${size * 3}px ${color}aa, 0 0 ${size * 1.5}px ${color}cc`,
                 transform: 'translate(-50%, -50%)',
                 animation: isActive
                   ? `particlePulseInner 1.8s ease-in-out ${p.delay}s infinite`
                   : 'none',
                 opacity: isActive ? undefined : 0,
-                transition: 'background-color 0.5s ease, box-shadow 0.5s ease',
+                transition: isMobile ? 'none' : 'background-color 0.5s ease, box-shadow 0.5s ease',
               }}
             />
           );
@@ -212,15 +222,15 @@ export const ThoughtHalo = memo(() => {
           position: 'absolute',
           left: '50%',
           top: '27%',
-          width: `${ELLIPSE_A * 2}px`,
-          height: `${ELLIPSE_B * 2}px`,
+          width: `${geo.a * 2}px`,
+          height: `${geo.b * 2}px`,
           transform: 'translate(-50%, -50%)',
           pointerEvents: 'none',
           animation: isActive
             ? `thoughtHaloEnter 0.5s ease-out forwards, thoughtHaloRotate ${rotationSpeed} linear 0.5s infinite`
             : exitAnim,
           opacity: isActive ? undefined : 0,
-          willChange: 'transform, opacity',
+          willChange: isActive ? 'transform, opacity' : 'auto',
         }}
       >
         {particles.map((p, i) => {
@@ -230,13 +240,15 @@ export const ThoughtHalo = memo(() => {
               key={i}
               style={{
                 position: 'absolute',
-                left: `${ELLIPSE_A + p.x}px`,
-                top: `${ELLIPSE_B + p.y}px`,
+                left: `${geo.a + p.x}px`,
+                top: `${geo.b + p.y}px`,
                 width: `${size}px`,
                 height: `${size}px`,
                 borderRadius: '50%',
                 backgroundColor: color,
-                boxShadow: `0 0 ${size * 4}px ${color}88, 0 0 ${size * 2}px ${color}bb`,
+                boxShadow: isMobile
+                  ? `0 0 ${size * 2}px ${color}66`
+                  : `0 0 ${size * 4}px ${color}88, 0 0 ${size * 2}px ${color}bb`,
                 transform: 'translate(-50%, -50%)',
                 animation: isActive
                   ? `particlePulse 2s ease-in-out ${p.delay}s infinite`

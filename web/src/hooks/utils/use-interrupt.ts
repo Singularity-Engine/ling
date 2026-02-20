@@ -15,7 +15,6 @@ export const useInterrupt = () => {
 
   const interrupt = (sendSignal = true) => {
     if (aiState !== 'thinking-speaking') return;
-    console.log('Interrupting conversation chain');
 
     stopCurrentAudioAndLipSync();
 
@@ -35,7 +34,6 @@ export const useInterrupt = () => {
     if (subtitleText === 'Thinking...') {
       setSubtitleText('');
     }
-    console.log('Interrupted!');
   };
 
   return { interrupt };

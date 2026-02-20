@@ -30,6 +30,13 @@ interface ChatHistoryState {
 }
 
 /**
+ * Keep at most this many messages in memory.
+ * Oldest messages are trimmed when the limit is exceeded to prevent
+ * unbounded DOM growth and state-update slowdowns in long conversations.
+ */
+const MAX_MESSAGES = 200;
+
+/**
  * Default values and constants
  */
 const DEFAULT_HISTORY = {
@@ -65,6 +72,10 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
     forceNewMessageRef.current = value;
   }, []);
 
+  /** Trim to the most recent MAX_MESSAGES entries. */
+  const trimMessages = (msgs: Message[]): Message[] =>
+    msgs.length > MAX_MESSAGES ? msgs.slice(-MAX_MESSAGES) : msgs;
+
   /**
    * Append a human message to the chat history
    * @param content - Message content
@@ -77,7 +88,7 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
       type: 'text',
       timestamp: new Date().toISOString(),
     };
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
+    setMessages((prevMessages) => trimMessages([...prevMessages, newMessage]));
   }, []);
 
   /**
@@ -91,7 +102,7 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
       // Use ref to avoid stale closure — always reads latest value
       if (forceNewMessageRef.current || !lastMessage || lastMessage.role !== 'ai' || lastMessage.type !== 'text') {
         forceNewMessageRef.current = false;
-        return [...prevMessages, {
+        return trimMessages([...prevMessages, {
           id: Date.now().toString(),
           content,
           role: 'ai',
@@ -99,7 +110,7 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
           timestamp: new Date().toISOString(),
           name,
           avatar,
-        }];
+        }]);
       }
 
       // Otherwise, merge with last AI text message
