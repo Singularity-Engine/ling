@@ -35,6 +35,7 @@ export function AffinityProvider({ children }: { children: ReactNode }) {
     expressionIntensity: 0,
   });
   const milestoneTimer = useRef<ReturnType<typeof setTimeout>>();
+  const expressionDecayTimer = useRef<ReturnType<typeof setTimeout>>();
   const pointGainIdRef = useRef(0);
 
   const updateAffinity = useCallback((affinity: number, level: string) => {
@@ -58,7 +59,12 @@ export function AffinityProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setExpression = useCallback((expression: string, intensity: number) => {
+    if (expressionDecayTimer.current) clearTimeout(expressionDecayTimer.current);
     setState(prev => ({ ...prev, currentExpression: expression, expressionIntensity: intensity }));
+    // Decay expression intensity back to 0 after 8 seconds
+    expressionDecayTimer.current = setTimeout(() => {
+      setState(prev => ({ ...prev, currentExpression: null, expressionIntensity: 0 }));
+    }, 8000);
   }, []);
 
   // Frontend affinity engine — auto-computes affinity from chat events

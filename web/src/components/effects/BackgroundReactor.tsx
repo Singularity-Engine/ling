@@ -37,7 +37,7 @@ const DEFAULT_TINT: AffinityTint = AFFINITY_TINTS.neutral;
 export const BackgroundReactor = memo(() => {
   const { currentPhase } = useToolState();
   const { isThinkingSpeaking } = useAiState();
-  const { level, pointGains } = useAffinity();
+  const { level, pointGains, expressionIntensity } = useAffinity();
   const tint = AFFINITY_TINTS[level] || DEFAULT_TINT;
 
   // ── Level transition detection ─────────────────────────────────
@@ -70,6 +70,11 @@ export const BackgroundReactor = memo(() => {
   const isAiThinking = isThinkingSpeaking && !isToolActive && !isPresenting;
   const isActive = isToolActive || isAiThinking;
 
+  // Emotion intensity boost: when Gateway sends emotion-expression with high
+  // intensity, amplify the active glow and speed up affinity breathing.
+  // Range: 0 → no extra boost, 1 → +40% glow opacity, 30% faster breathing
+  const emotionBoost = 1 + expressionIntensity * 0.4;
+
   const phaseColor = isThinking
     ? PHASE_COLORS.thinking
     : isWorking
@@ -96,9 +101,9 @@ export const BackgroundReactor = memo(() => {
       pointerEvents: 'none' as const,
       transition: 'opacity 0.8s ease',
       opacity: isActive
-        ? (isAiThinking ? 0.45 : 0.6) * tint.activeBoost
+        ? (isAiThinking ? 0.45 : 0.6) * tint.activeBoost * emotionBoost
         : isPresenting
-          ? 0.7 * tint.activeBoost
+          ? 0.7 * tint.activeBoost * emotionBoost
           : 0,
       background: isPresenting
         ? `radial-gradient(ellipse 80% 70% at 50% 40%, ${phaseColor}66 0%, ${phaseColor}33 35%, ${phaseColor}11 60%, transparent 80%)`
@@ -110,7 +115,7 @@ export const BackgroundReactor = memo(() => {
       willChange: 'opacity',
       animation: isActive ? `${activeAnimation} ${isAiThinking ? '4s' : '3s'} ease-in-out infinite` : 'none',
     }),
-    [isActive, isPresenting, isWorking, isAiThinking, phaseColor, activeAnimation, tint.activeBoost],
+    [isActive, isPresenting, isWorking, isAiThinking, phaseColor, activeAnimation, tint.activeBoost, emotionBoost],
   );
 
   // Secondary ambient layer for depth
@@ -164,9 +169,11 @@ export const BackgroundReactor = memo(() => {
       backgroundColor: tint.color,
       WebkitMaskImage: tintMask,
       maskImage: tintMask,
-      animation: tint.idleOpacity > 0 ? `bgAffinityBreathe ${tint.breatheSpeed}s ease-in-out infinite` : 'none',
+      animation: tint.idleOpacity > 0
+        ? `bgAffinityBreathe ${tint.breatheSpeed * (1 / (1 + expressionIntensity * 0.3))}s ease-in-out infinite`
+        : 'none',
     }),
-    [tint.color, tint.idleOpacity, tint.breatheSpeed, tintMask],
+    [tint.color, tint.idleOpacity, tint.breatheSpeed, tintMask, expressionIntensity],
   );
 
   return (
@@ -222,7 +229,7 @@ export const BackgroundReactor = memo(() => {
       <div style={glowStyle} />
       <div style={ambientStyle} />
       <div style={vignetteStyle} />
-      <div style={{ ...affinityTintStyle, '--affinity-idle-opacity': tint.idleOpacity } as React.CSSProperties} />
+      <div style={{ ...affinityTintStyle, '--affinity-idle-opacity': tint.idleOpacity, '--affinity-breathe-amp': tint.breatheAmplitude } as React.CSSProperties} />
       {/* Presenting: gold bloom burst + flash */}
       {isPresenting && (
         <>

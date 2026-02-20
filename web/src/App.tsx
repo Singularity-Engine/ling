@@ -30,6 +30,7 @@ import { TTSStateProvider } from "./context/tts-state-context";
 import { StarField } from "./components/background/StarField";
 import { MOBILE_BREAKPOINT } from "./constants/breakpoints";
 import { BackgroundReactor } from "./components/effects/BackgroundReactor";
+import { ThoughtHalo } from "./components/effects/ThoughtHalo";
 import { AudioVisualizer } from "./components/effects/AudioVisualizer";
 import { CrystalField } from "./components/crystal/CrystalField";
 import { CapabilityRing } from "./components/ability/CapabilityRing";
@@ -245,6 +246,7 @@ function MainContent(): JSX.Element {
       {/* ===== Layer 0.5: 工具状态反馈层 ===== */}
       <div style={{ position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none" }}>
         <BackgroundReactor />
+        <ThoughtHalo />
         <AudioVisualizer />
       </div>
 

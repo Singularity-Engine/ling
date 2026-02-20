@@ -1,6 +1,7 @@
 import { memo, useMemo } from 'react';
 import { useToolState, ToolCategory } from '../../context/tool-state-context';
 import { useAiState } from '../../context/ai-state-context';
+import { useAffinity } from '../../context/affinity-context';
 
 const CATEGORY_COLORS: Record<ToolCategory, string> = {
   search: '#60a5fa',
@@ -10,7 +11,16 @@ const CATEGORY_COLORS: Record<ToolCategory, string> = {
   generic: '#8b5cf6',
 };
 
-const AI_THINKING_COLOR = '#c4b5fd'; // soft lavender for normal AI thinking
+// Affinity-linked colors for AI thinking halo (matches BackgroundReactor tints)
+const AFFINITY_HALO_COLORS: Record<string, string> = {
+  hatred:      '#dc2626',
+  hostile:     '#ea580c',
+  indifferent: '#78716c',
+  neutral:     '#c4b5fd',
+  friendly:    '#60a5fa',
+  close:       '#d946ef',
+  devoted:     '#fb7185',
+};
 
 const PARTICLE_COUNT = 14;
 const INNER_PARTICLE_COUNT = 8;
@@ -22,21 +32,29 @@ const INNER_B = 14;
 export const ThoughtHalo = memo(() => {
   const { currentPhase, dominantCategory } = useToolState();
   const { isThinkingSpeaking } = useAiState();
+  const { level, expressionIntensity } = useAffinity();
   const isToolActive = currentPhase === 'thinking' || currentPhase === 'working';
   const isWorking = currentPhase === 'working';
   // Show a softer halo during normal AI thinking (no tool calls)
   const isAiThinking = isThinkingSpeaking && !isToolActive;
   const isActive = isToolActive || isAiThinking;
-  const color = isAiThinking ? AI_THINKING_COLOR : CATEGORY_COLORS[dominantCategory ?? 'generic'];
 
-  const rotationSpeed = isWorking ? '1.8s' : isAiThinking ? '5s' : '3s';
-  const innerRotationSpeed = isWorking ? '2.4s' : isAiThinking ? '6s' : '4s';
+  // AI thinking color now follows affinity level
+  const affinityColor = AFFINITY_HALO_COLORS[level] || AFFINITY_HALO_COLORS.neutral;
+  const color = isAiThinking ? affinityColor : CATEGORY_COLORS[dominantCategory ?? 'generic'];
+
+  // expressionIntensity speeds up rotation: 0 → normal, 1 → ~30% faster
+  const emotionSpeedFactor = 1 / (1 + expressionIntensity * 0.3);
+  const rotationSpeed = `${(isWorking ? 1.8 : isAiThinking ? 5 : 3) * emotionSpeedFactor}s`;
+  const innerRotationSpeed = `${(isWorking ? 2.4 : isAiThinking ? 6 : 4) * emotionSpeedFactor}s`;
 
   // Particle sizes: ai-thinking smaller & softer, thinking 4-8px, working 6-12px
-  const particleMinSize = isWorking ? 6 : isAiThinking ? 3 : 4;
-  const particleMaxSize = isWorking ? 12 : isAiThinking ? 6 : 8;
-  const innerParticleMin = isWorking ? 4 : isAiThinking ? 2 : 3;
-  const innerParticleMax = isWorking ? 8 : isAiThinking ? 4 : 5;
+  // expressionIntensity enlarges particles up to +30%
+  const emotionSizeBoost = 1 + expressionIntensity * 0.3;
+  const particleMinSize = (isWorking ? 6 : isAiThinking ? 3 : 4) * emotionSizeBoost;
+  const particleMaxSize = (isWorking ? 12 : isAiThinking ? 6 : 8) * emotionSizeBoost;
+  const innerParticleMin = (isWorking ? 4 : isAiThinking ? 2 : 3) * emotionSizeBoost;
+  const innerParticleMax = (isWorking ? 8 : isAiThinking ? 4 : 5) * emotionSizeBoost;
 
   const particles = useMemo(() => {
     return Array.from({ length: PARTICLE_COUNT }, (_, i) => {
