@@ -10,16 +10,16 @@ if (typeof document !== 'undefined' && !document.getElementById(KEYFRAMES_ID)) {
   style.id = KEYFRAMES_ID;
   style.textContent = `
     @keyframes bgThinkingPulse {
-      0%, 100% { opacity: 0.5; }
-      50% { opacity: 0.7; }
+      0%, 100% { opacity: calc(0.5 * var(--bg-glow-boost, 1)); }
+      50% { opacity: calc(0.7 * var(--bg-glow-boost, 1)); }
     }
     @keyframes bgWorkingFlow {
-      0%, 100% { opacity: 0.55; transform: scale(1); }
-      50% { opacity: 0.7; transform: scale(1.02); }
+      0%, 100% { opacity: calc(0.55 * var(--bg-glow-boost, 1)); transform: scale(1); }
+      50% { opacity: calc(0.7 * var(--bg-glow-boost, 1)); transform: scale(1.02); }
     }
     @keyframes bgAiThinkingBreathe {
-      0%, 100% { opacity: 0.35; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.01); }
+      0%, 100% { opacity: calc(0.35 * var(--bg-glow-boost, 1)); transform: scale(1); }
+      50% { opacity: calc(0.5 * var(--bg-glow-boost, 1)); transform: scale(1.01); }
     }
     @keyframes bgWorkingSpin {
       from { transform: rotate(0deg); }
@@ -156,6 +156,10 @@ export const BackgroundReactor = memo(() => {
       inset: 0,
       pointerEvents: 'none' as const,
       transition: 'opacity 0.8s ease',
+      // Expose boost multiplier as CSS variable so keyframe animations
+      // (bgThinkingPulse, bgWorkingFlow, bgAiThinkingBreathe) can scale
+      // their hardcoded opacity values by emotionBoost × activeBoost.
+      '--bg-glow-boost': tint.activeBoost * emotionBoost,
       opacity: isActive
         ? (isAiThinking ? 0.45 : 0.6) * tint.activeBoost * emotionBoost
         : isPresenting
@@ -231,9 +235,13 @@ export const BackgroundReactor = memo(() => {
       backgroundColor: tint.color,
       WebkitMaskImage: tintMask,
       maskImage: tintMask,
-      animation: tint.idleOpacity > 0
-        ? `bgAffinityBreathe ${tint.breatheSpeed * (1 / (1 + expressionIntensity * 0.3))}s ease-in-out infinite`
-        : 'none',
+      // Split animation into individual properties so that when only
+      // expressionIntensity changes, the browser adjusts duration without
+      // restarting the animation (shorthand changes cause restart).
+      animationName: tint.idleOpacity > 0 ? 'bgAffinityBreathe' : 'none',
+      animationDuration: `${tint.breatheSpeed * (1 / (1 + expressionIntensity * 0.3))}s`,
+      animationTimingFunction: 'ease-in-out',
+      animationIterationCount: 'infinite' as const,
     }),
     [tint.color, tint.idleOpacity, tint.breatheSpeed, tintMask, expressionIntensity],
   );
@@ -241,7 +249,7 @@ export const BackgroundReactor = memo(() => {
   return (
     <>
       {/* Keyframes injected at module level — no inline <style> needed */}
-      <div style={glowStyle} />
+      <div style={glowStyle as CSSProperties} />
       <div style={ambientStyle} />
       <div style={vignetteStyle} />
       <div style={{ ...affinityTintStyle, '--affinity-idle-opacity': tint.idleOpacity, '--affinity-breathe-amp': tint.breatheAmplitude } as React.CSSProperties} />
