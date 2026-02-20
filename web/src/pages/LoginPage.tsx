@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/auth-context';
 import { ApiError } from '@/services/api-client';
@@ -27,6 +28,14 @@ export function LoginPage() {
 
   return (
     <div style={styles.page}>
+      <Helmet>
+        <title>登录 — 灵 Ling</title>
+        <meta name="description" content="登录灵 Ling，开始与你的 AI 数字人对话。" />
+        <meta property="og:title" content="登录 — 灵 Ling" />
+        <meta property="og:description" content="登录灵 Ling，开始与你的 AI 数字人对话。" />
+        <meta property="og:image" content="https://sngxai.com/og-image.png" />
+        <link rel="canonical" href="https://sngxai.com/login" />
+      </Helmet>
       <div style={styles.card}>
         <h1 style={styles.title}>Ling</h1>
         <p style={styles.subtitle}>Sign in to your account</p>

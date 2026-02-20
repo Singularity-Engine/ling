@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/auth-context';
 import { ApiError } from '@/services/api-client';
@@ -41,6 +42,14 @@ export function RegisterPage() {
 
   return (
     <div style={styles.page}>
+      <Helmet>
+        <title>注册 — 灵 Ling</title>
+        <meta name="description" content="注册灵 Ling 账号，拥有你的 AI 数字人伴侣。" />
+        <meta property="og:title" content="注册 — 灵 Ling" />
+        <meta property="og:description" content="注册灵 Ling 账号，拥有你的 AI 数字人伴侣。" />
+        <meta property="og:image" content="https://sngxai.com/og-image.png" />
+        <link rel="canonical" href="https://sngxai.com/register" />
+      </Helmet>
       <div style={styles.card}>
         <h1 style={styles.title}>Ling</h1>
         <p style={styles.subtitle}>Create your account</p>

@@ -59,6 +59,7 @@ const RECONNECT_MAX_RETRIES = 10;
 const HANDSHAKE_TIMEOUT_MS = 15000;
 const HEARTBEAT_TIMEOUT_MS = 90_000; // Treat connection as dead if no tick in 90s
 const HEARTBEAT_CHECK_MS = 30_000;   // Check heartbeat every 30s
+const IDLE_RETRY_MS = 60_000;        // After max retries exhausted, retry every 60s
 
 // ─── Connector ────────────────────────────────────────────────────
 
@@ -74,6 +75,7 @@ class GatewayConnector {
   private connId: string | null = null;
   private lastTickAt = 0;
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+  private idleRetryTimer: ReturnType<typeof setTimeout> | null = null;
   private onVisibilityChange: (() => void) | null = null;
 
   /** Debug counters */

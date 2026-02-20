@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -7,6 +8,14 @@ export function TermsPage() {
 
   return (
     <div style={styles.page}>
+      <Helmet>
+        <title>服务条款 — 灵 Ling</title>
+        <meta name="description" content="灵 Ling AI 数字人平台服务条款与使用协议。" />
+        <meta property="og:title" content="服务条款 — 灵 Ling" />
+        <meta property="og:description" content="灵 Ling AI 数字人平台服务条款与使用协议。" />
+        <meta property="og:image" content="https://sngxai.com/og-image.png" />
+        <link rel="canonical" href="https://sngxai.com/terms" />
+      </Helmet>
       <div style={styles.container}>
         <h1 style={styles.title}>{t('terms.title')}</h1>
         <p style={styles.updated}>{t('terms.updated')}</p>

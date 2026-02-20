@@ -1,4 +1,5 @@
 import { createRoot } from 'react-dom/client';
+import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
 import 'highlight.js/styles/atom-one-dark.min.css';
 import App from './App';
@@ -32,7 +33,9 @@ if (typeof window !== 'undefined') {
   // Render React immediately — don't block on Live2D Core.
   // Landing animation runs ~7s, plenty of time for the script to load in background.
   createRoot(document.getElementById('root')!).render(
-    <App />,
+    <HelmetProvider>
+      <App />
+    </HelmetProvider>,
   );
 
   // Load Live2D Core in background (preloaded via <link rel="preload"> in index.html)
