@@ -43,47 +43,27 @@ async def process_agent_response(
     input_tokens = 0
     output_tokens = 0
 
-    # 🧠 记忆增强处理（如果启用且提供了用户输入）
-    if enable_memory and isinstance(user_input, str) and user_input:
-        # 分析用户当前的问题类型
-        is_asking_name = any(keyword in user_input.lower() for keyword in ["我的姓名", "我叫什么", "我是谁", "我的名字"])
-        is_asking_hobby = any(keyword in user_input.lower() for keyword in ["我的爱好", "我喜欢什么", "我的兴趣"])
-        is_asking_other = "我的" in user_input.lower() or "我是" in user_input.lower()
+    # 🧠 记忆增强处理 — 每轮触发（输入 > 5 字符即搜索 top-3）
+    if enable_memory and isinstance(user_input, str) and len(user_input.strip()) > 5:
+        logger.info("🧠 每轮记忆召回：搜索用户相关记忆")
+        try:
+            results = search_similar_memories(user_input, user_id, limit=3)
+            if results:
+                memory_info = [item[1] for item in results if len(item) >= 2 and item[1]]
+                if memory_info:
+                    logger.info(f"🧠 召回 {len(memory_info)} 条相关记忆")
+                    memory_context = "\n".join([f"- {info}" for info in memory_info])
+                    character_name = getattr(context.character_config, 'character_name', 'AI') if hasattr(context, 'character_config') else 'AI'
 
-        # 如果用户在询问个人信息，搜索相关记忆并增强输入
-        if is_asking_name or is_asking_hobby or is_asking_other:
-            logger.info("🧠 搜索用户相关记忆进行输入增强")
-            try:
-                results = search_similar_memories(user_input, user_id)
-                if results:
-                    # 将记忆搜索结果转换为更有用的格式
-                    memory_info = [item[1] for item in results if len(item) >= 2 and item[1]]
+                    enhanced_input = f"{user_input}\n\n[记忆上下文 — 以下是你记住的关于这位用户的信息，自然地融入回答中，不要逐条复述]\n{memory_context}"
 
-                    # 过滤记忆，只保留与用户当前问题相关的记忆
-                    filtered_memory_info = []
-                    if is_asking_name:
-                        filtered_memory_info = [info for info in memory_info if "姓名" in info or "名字" in info]
-                    elif is_asking_hobby:
-                        filtered_memory_info = [info for info in memory_info if "喜欢" in info or "爱好" in info or "兴趣" in info]
-                    else:
-                        filtered_memory_info = memory_info
-
-                    # 如果找到有用的记忆，更新batch_input
-                    if filtered_memory_info:
-                        logger.info(f"🧠 找到相关记忆: {len(filtered_memory_info)}条")
-                        memory_context = "\n".join([f"- {info}" for info in filtered_memory_info])
-                        character_name = getattr(context.character_config, 'character_name', 'AI') if hasattr(context, 'character_config') else 'AI'
-
-                        enhanced_input = f"{user_input}\n\n系统提示：我已经找到了以下关于用户的信息：\n{memory_context}\n\n请以{character_name}的角色特点回答，表现出强烈的个性和情感。请确保你的回答充满个性和情感，让对话更加生动有趣！"
-
-                        # 更新batch_input
-                        if hasattr(batch_input, 'texts') and batch_input.texts:
-                            batch_input.texts[0].content = enhanced_input
-                        elif hasattr(batch_input, '__setitem__'):
-                            batch_input['content'] = enhanced_input
-                        logger.info("🧠 用户输入已增强，包含记忆信息")
-            except Exception as e:
-                logger.warning(f"🧠 记忆增强失败，继续正常处理: {e}")
+                    if hasattr(batch_input, 'texts') and batch_input.texts:
+                        batch_input.texts[0].content = enhanced_input
+                    elif hasattr(batch_input, '__setitem__'):
+                        batch_input['content'] = enhanced_input
+                    logger.info("🧠 用户输入已增强，包含记忆信息")
+        except Exception as e:
+            logger.warning(f"🧠 记忆增强失败，继续正常处理: {e}")
 
     # 🔄 每次新对话开始时清除重复处理标记
     if context.agent_engine is not None and hasattr(context.agent_engine, '_background_processed'):
@@ -161,6 +141,26 @@ async def process_agent_response(
                     pass
         except Exception as e:
             logger.warning(f"每轮注入情感提示（direct）失败: {e}")
+
+        # 🔀 模型路由：根据用户 plan 动态切换 Anthropic 模型
+        try:
+            if user_id_for_affinity and user_id_for_affinity != "default_user":
+                from ..bff_integration.database.ling_user_repository import LingUserRepository
+                from ..bff_integration.auth.model_router import resolve_model
+                _repo = LingUserRepository()
+                _user_record = _repo.get_user_by_id(user_id_for_affinity)
+                if _user_record:
+                    target_model = resolve_model(_user_record)
+                    if context.agent_engine is not None and hasattr(context.agent_engine, '_llm'):
+                        llm = context.agent_engine._llm
+                        old_model = getattr(llm, 'model', getattr(llm, 'model_name', 'unknown'))
+                        if hasattr(llm, 'model'):
+                            llm.model = target_model
+                        elif hasattr(llm, 'model_name'):
+                            llm.model_name = target_model
+                        logger.info(f"🔀 模型路由: {old_model} → {target_model} (plan={_user_record.get('plan', 'free')})")
+        except Exception as e:
+            logger.warning(f"🔀 模型路由失败，使用默认模型: {e}")
 
         # 调用情感系统处理用户输入
         logger.debug("Starting agent response processing...")

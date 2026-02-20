@@ -48,7 +48,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [handleSkip, showButton]);
 
-  // Main timeline — 压缩到 3.5s 开始出文字
+  // Main timeline — 压缩到 3.0s 开始出文字（更快触达内容）
   // reduced-motion: 跳过粒子动画，直接显示文字
   useEffect(() => {
     if (prefersReducedMotion()) {
@@ -61,18 +61,18 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
 
     startTimeRef.current = performance.now();
 
-    // Phase 1: converge (1.5-3s)
+    // Phase 1: converge (1.2-2.5s)
     const convergeTimer = setTimeout(() => {
       setParticlePhase("converge");
-    }, 1500);
+    }, 1200);
 
     let convergeRafId = 0;
     const updateProgress = () => {
       const elapsed = performance.now() - startTimeRef.current;
-      if (elapsed > 1500 && elapsed < 3000) {
-        phaseProgressRef.current = (elapsed - 1500) / 1500;
+      if (elapsed > 1200 && elapsed < 2500) {
+        phaseProgressRef.current = (elapsed - 1200) / 1300;
         convergeRafId = requestAnimationFrame(updateProgress);
-      } else if (elapsed >= 3000) {
+      } else if (elapsed >= 2500) {
         phaseProgressRef.current = 1;
       } else {
         convergeRafId = requestAnimationFrame(updateProgress);
@@ -80,19 +80,19 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
     };
     convergeRafId = requestAnimationFrame(updateProgress);
 
-    // Phase 2: explode (3-3.5s)
+    // Phase 2: explode (2.5-3.0s)
     const explodeTimer = setTimeout(() => {
       setParticlePhase("explode");
       setFlashOpacity(0.8);
       setTimeout(() => setFlashOpacity(0), 400);
-    }, 3000);
+    }, 2500);
 
-    // Phase 3: text (3.5s+)
+    // Phase 3: text (3.0s+)
     const textTimer = setTimeout(() => {
       setParticlePhase("fade");
       setBgDim(0.6);
       setShowText(true);
-    }, 3500);
+    }, 3000);
 
     return () => {
       clearTimeout(convergeTimer);
@@ -206,7 +206,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                   key={i}
                   className={`landing-text-line${i === 0 ? " landing-title-gradient" : ""}${i === 0 && isComplete ? " landing-title-glow" : ""}`}
                   style={{
-                    fontSize: i === 0 ? "3.75rem" : i === 1 ? "1.4rem" : "1.25rem",
+                    fontSize: i === 0 ? "clamp(3rem, 7vw, 4.5rem)" : i === 1 ? "1.4rem" : "1.25rem",
                     fontWeight: i === 0 ? 700 : i === 1 ? 500 : 400,
                     color: i === 0
                       ? undefined  // handled by .landing-title-gradient
@@ -310,6 +310,14 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
             <span style={{ fontSize: "0.75rem", color: "var(--ling-text-tertiary)", letterSpacing: "0.04em" }}>
               {window.innerWidth < MOBILE_BREAKPOINT ? t("landing.tapHint", "Tap to start") : "Press Enter ↵"}
             </span>
+            {/* Feature pills */}
+            <div className="landing-feature-pills">
+              {(["featureMemory", "featureVoice", "featureAvatar"] as const).map((key) => (
+                <span key={key} className="landing-feature-pill">
+                  {t(`landing.${key}`)}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       )}

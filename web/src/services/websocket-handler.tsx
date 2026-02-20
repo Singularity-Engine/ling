@@ -745,8 +745,8 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             try {
               const result = await ttsService.synthesize(sentence);
               if (gen !== ttsGenerationRef.current) return; // Stale after await
-              markSynthDoneRef.current();
               if (result) {
+                markSynthDoneRef.current();
                 markPlayStartRef.current();
                 const expr = currentExpressionRef.current;
                 addAudioTaskRef.current({
@@ -757,6 +757,17 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
                   expressions: expr ? [expr] : null,
                   forwarded: false,
                 });
+              } else {
+                // synthesize() caught internally and returned null — surface the error
+                markSynthErrorRef.current('TTS synthesis returned no audio');
+                if (!ttsErrorShownRef.current) {
+                  ttsErrorShownRef.current = true;
+                  toaster.create({
+                    title: i18next.t('notification.voiceSynthUnavailable'),
+                    type: 'warning',
+                    duration: 4000,
+                  });
+                }
               }
             } catch (err) {
               if (gen !== ttsGenerationRef.current) return; // Stale — suppress error
@@ -855,6 +866,11 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           // Billing check before sending voice message
           checkBilling().then((allowed) => {
             if (!allowed) return;
+            // Mark pending to suppress stale conversation-chain-end idle transition
+            pendingNewChatRef.current = true;
+            // Increment TTS generation to discard any stale in-flight synthesis
+            ttsGenerationRef.current++;
+            audioTaskQueue.clearQueue();
             appendHumanMessageRef.current(trimmed);
             // Optimistic: show thinking indicator immediately
             clearResponseRef.current();
@@ -866,6 +882,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
                 type: 'error',
                 duration: 3000,
               });
+              pendingNewChatRef.current = false;
               setAiStateRef.current('idle');
             });
           });

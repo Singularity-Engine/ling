@@ -239,6 +239,35 @@ class GatewayMessageAdapter {
         });
         break;
 
+      case 'error': {
+        // Agent run errored — clean up and notify UI
+        const errorRun = this.activeRuns.get(event.runId);
+        const partialText = errorRun?.accumulatedText || '';
+        this.activeRuns.delete(event.runId);
+
+        // Persist any partial text that was streamed before the error
+        if (partialText) {
+          this.emit({
+            type: 'ai-message-complete',
+            text: partialText,
+          } as any);
+        }
+
+        // Surface the error message to the user
+        const errorMessage = (event.data.message as string) || (event.data.error as string) || 'Agent encountered an error';
+        this.emit({
+          type: 'error',
+          message: errorMessage,
+        } as any);
+
+        // End the conversation chain so UI resets from thinking-speaking
+        this.emit({
+          type: 'control',
+          text: 'conversation-chain-end',
+        });
+        break;
+      }
+
       default:
         console.warn('[GatewayAdapter] Unknown lifecycle phase:', phase);
     }

@@ -140,14 +140,40 @@ class LangchainAgentWrapper(AgentInterface):
         self._websocket_handler = None
         self._client_uid = None
         
-        # 创建 LLM，严格按照 math_client.py 的方式（移除硬编码默认 Key）
-        self.llm = ChatOpenAI(
-            model=llm_config.get("model", "gpt-4o-mini"),
-            api_key=llm_config.get("api_key"),
-            base_url=llm_config.get("base_url"),
-            temperature=llm_config.get("temperature", 0.7),
-            request_timeout=30  # 设置请求超时时间
-        )
+        # 创建 LLM — 根据模型名自动选择 ChatOpenAI 或 ChatAnthropic
+        _model_name = llm_config.get("model", "gpt-4o-mini")
+        if _model_name.startswith("claude-"):
+            try:
+                from langchain_anthropic import ChatAnthropic
+                _anthropic_kwargs = {
+                    "model": _model_name,
+                    "api_key": llm_config.get("api_key"),
+                    "temperature": llm_config.get("temperature", 0.7),
+                    "timeout": 30,
+                    "max_retries": 2,
+                }
+                _base_url = llm_config.get("base_url")
+                if _base_url and "anthropic.com" not in _base_url:
+                    _anthropic_kwargs["anthropic_api_url"] = _base_url
+                self.llm = ChatAnthropic(**_anthropic_kwargs)
+                logger.info(f"✅ 使用 ChatAnthropic: {_model_name}")
+            except ImportError:
+                logger.error("❌ langchain-anthropic 未安装，回退到 ChatOpenAI")
+                self.llm = ChatOpenAI(
+                    model=_model_name,
+                    api_key=llm_config.get("api_key"),
+                    base_url=llm_config.get("base_url"),
+                    temperature=llm_config.get("temperature", 0.7),
+                    request_timeout=30,
+                )
+        else:
+            self.llm = ChatOpenAI(
+                model=_model_name,
+                api_key=llm_config.get("api_key"),
+                base_url=llm_config.get("base_url"),
+                temperature=llm_config.get("temperature", 0.7),
+                request_timeout=30,
+            )
         
         # 🔧 预加载工具（允许优雅降级，不影响基本聊天功能）
         logger.info("🔄 预加载MCP工具...")

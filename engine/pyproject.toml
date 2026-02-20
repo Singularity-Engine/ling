@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.10,<3.13"
 dependencies = [
     "anthropic>=0.40.0",
+    "langchain-anthropic>=0.3.0",
     "azure-cognitiveservices-speech>=1.41.1",
     "chardet>=5.2.0",
     "edge-tts>=7.0.0",

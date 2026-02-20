@@ -203,15 +203,15 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
               padding: "10px 16px",
               borderRadius: isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
               background: isUser
-                ? "linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(109, 40, 217, 0.25))"
-                : "rgba(255, 255, 255, 0.06)",
-              border: isUser ? "1px solid rgba(139, 92, 246, 0.25)" : "1px solid rgba(255, 255, 255, 0.08)",
+                ? "linear-gradient(135deg, rgba(139, 92, 246, 0.45), rgba(109, 40, 217, 0.4))"
+                : "rgba(255, 255, 255, 0.08)",
+              border: isUser ? "1px solid rgba(139, 92, 246, 0.35)" : "1px solid rgba(255, 255, 255, 0.1)",
               backdropFilter: "blur(10px)",
               WebkitBackdropFilter: "blur(10px)",
               overflow: "visible",
               transition: "all 0.2s ease",
               boxShadow: isUser
-                ? "0 2px 12px rgba(139, 92, 246, 0.15)"
+                ? "0 2px 12px rgba(139, 92, 246, 0.2)"
                 : "0 1px 8px rgba(0, 0, 0, 0.1)",
               cursor: !isUser && !isStreaming && content ? "default" : undefined,
               animation: flashing ? "bubbleCopyFlash 0.35s ease-out" : undefined,

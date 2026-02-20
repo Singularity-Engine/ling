@@ -200,6 +200,37 @@ class LlamaCppConfig(StatelessLLMBaseConfig):
     }
 
 
+class AnthropicConfig(StatelessLLMBaseConfig):
+    """Configuration for Anthropic API (native, via langchain-anthropic)."""
+
+    base_url: str = Field("https://api.anthropic.com/v1", alias="base_url")
+    llm_api_key: str = Field(..., alias="llm_api_key")
+    model: str = Field("claude-sonnet-4-20250514", alias="model")
+    temperature: float = Field(0.7, alias="temperature")
+    interrupt_method: Literal["system", "user"] = Field(
+        "user", alias="interrupt_method"
+    )
+
+    _ANTHROPIC_DESCRIPTIONS: ClassVar[dict[str, Description]] = {
+        "base_url": Description(
+            en="Base URL for Anthropic API", zh="Anthropic API 端点"
+        ),
+        "llm_api_key": Description(en="Anthropic API key", zh="Anthropic API 密钥"),
+        "model": Description(
+            en="Anthropic model ID (e.g. claude-sonnet-4-20250514)",
+            zh="Anthropic 模型 ID",
+        ),
+        "temperature": Description(
+            en="Sampling temperature (0-1)", zh="采样温度 (0-1)"
+        ),
+    }
+
+    DESCRIPTIONS: ClassVar[dict[str, Description]] = {
+        **StatelessLLMBaseConfig.DESCRIPTIONS,
+        **_ANTHROPIC_DESCRIPTIONS,
+    }
+
+
 class StatelessLLMConfigs(I18nMixin, BaseModel):
     """Pool of LLM provider configurations.
     This class contains configurations for different LLM providers."""
@@ -214,6 +245,7 @@ class StatelessLLMConfigs(I18nMixin, BaseModel):
     deepseek_llm: DeepseekConfig | None = Field(None, alias="deepseek_llm")
     groq_llm: GroqConfig | None = Field(None, alias="groq_llm")
     claude_llm: ClaudeConfig | None = Field(None, alias="claude_llm")
+    anthropic_llm: AnthropicConfig | None = Field(None, alias="anthropic_llm")
     llama_cpp_llm: LlamaCppConfig | None = Field(None, alias="llama_cpp_llm")
     mistral_llm: MistralConfig | None = Field(None, alias="mistral_llm")
 
@@ -238,7 +270,11 @@ class StatelessLLMConfigs(I18nMixin, BaseModel):
         ),
         "groq_llm": Description(en="Configuration for Groq API", zh="Groq API 配置"),
         "claude_llm": Description(
-            en="Configuration for Claude API", zh="Claude API配置"
+            en="Configuration for Claude API (legacy)", zh="Claude API配置 (旧版)"
+        ),
+        "anthropic_llm": Description(
+            en="Configuration for Anthropic API (native)",
+            zh="Anthropic API 配置 (原生)",
         ),
         "llama_cpp_llm": Description(
             en="Configuration for local Llama.cpp", zh="本地Llama.cpp配置"

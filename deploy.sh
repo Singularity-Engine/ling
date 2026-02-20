@@ -3,9 +3,9 @@
 set -e
 
 # 配置变量 - 请根据实际情况修改
-SERVER_IP="35.193.74.48"
+SERVER_IP="136.113.4.243"
 SERVER_USER="open-llm-vtuber-deploy"
-SSH_KEY="C:/Users/20597/.ssh/ling_engine_deploy"
+SSH_KEY="${HOME}/.ssh/ling_engine_deploy"
 REMOTE_PATH="/home/${SERVER_USER}/App/ling"
 IMAGE_NAME="ling-engine"
 IMAGE_TAG="v3"
@@ -25,8 +25,8 @@ if [ ! -f ".env" ]; then
     exit 1
 fi
 
-if [ ! -f "docker-compose.yml" ]; then
-    echo -e "${RED}❌ 错误: docker-compose.yml 文件不存在${NC}"
+if [ ! -f "docker-compose.prod.yml" ]; then
+    echo -e "${RED}❌ 错误: docker-compose.prod.yml 文件不存在${NC}"
     exit 1
 fi
 
@@ -58,7 +58,7 @@ mkdir -p ${BUILD_DIR}/engine
 # 1. 复制Docker相关配置文件 (很少变化)
 cp Dockerfile.china ${BUILD_DIR}/
 cp requirements-docker.txt ${BUILD_DIR}/
-cp docker-compose.yml ${BUILD_DIR}/
+cp docker-compose.prod.yml ${BUILD_DIR}/docker-compose.yml
 
 # 2. 复制项目配置文件 (不常变化)
 cp engine/pyproject.toml ${BUILD_DIR}/engine/
@@ -152,7 +152,7 @@ scp -i ${SSH_KEY} ${IMAGE_NAME}.tar ${SERVER_USER}@${SERVER_IP}:${REMOTE_PATH}/
 
 echo "上传配置文件..."
 scp -i ${SSH_KEY} .env.docker ${SERVER_USER}@${SERVER_IP}:${REMOTE_PATH}/.env
-scp -i ${SSH_KEY} docker-compose.yml ${SERVER_USER}@${SERVER_IP}:${REMOTE_PATH}/
+scp -i ${SSH_KEY} docker-compose.prod.yml ${SERVER_USER}@${SERVER_IP}:${REMOTE_PATH}/docker-compose.yml
 
 echo "上传项目配置..."
 scp -i ${SSH_KEY} engine/conf.yaml ${SERVER_USER}@${SERVER_IP}:${REMOTE_PATH}/engine/

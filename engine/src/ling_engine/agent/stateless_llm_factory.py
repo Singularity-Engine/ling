@@ -148,12 +148,23 @@ class LLMFactory:
                     llm_api_key=kwargs.get("llm_api_key"),
                 )
 
+            elif llm_provider == "anthropic_llm":
+                # Anthropic native — 创建一个 OpenAI 兼容的薄包装
+                # 实际的 ChatAnthropic 在 LangchainAgentWrapper 中创建
+                logger.info(f"✅ 创建 Anthropic LLM (native): {kwargs.get('model')}")
+                return OpenAICompatibleLLM(
+                    model=kwargs.get("model", "claude-sonnet-4-20250514"),
+                    base_url=kwargs.get("base_url", "https://api.anthropic.com/v1"),
+                    llm_api_key=kwargs.get("llm_api_key"),
+                    temperature=kwargs.get("temperature", 0.7),
+                )
+
             else:
                 logger.error(f"❌ 不支持的 LLM 提供商: {llm_provider}")
                 supported_providers = [
                     "openai_compatible_llm", "openai_llm", "gemini_llm",
                     "zhipu_llm", "deepseek_llm", "groq_llm", "mistral_llm",
-                    "ollama_llm", "llama_cpp_llm", "claude_llm"
+                    "ollama_llm", "llama_cpp_llm", "claude_llm", "anthropic_llm"
                 ]
                 logger.error(f"❌ 支持的提供商: {supported_providers}")
                 return None
