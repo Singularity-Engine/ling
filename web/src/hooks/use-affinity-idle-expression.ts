@@ -13,27 +13,7 @@
 import { useEffect, useRef } from 'react';
 import { useAiState, AiStateEnum } from '@/context/ai-state-context';
 import { useAffinity } from '@/context/affinity-context';
-
-/**
- * Maps affinity level → Live2D expression name/index.
- *
- * Available expressions for Ling:
- *   kaixin (开心), shangxin (伤心), haixiu (害羞),
- *   heilian (黑脸), tuosai (拓塞), chayao (茶腰),
- *   shuijiao (困), 0 (neutral)
- */
-const LEVEL_IDLE_EXPRESSION: Record<string, string | number | null> = {
-  hatred:      'heilian',   // 黑脸 — cold/hostile face
-  hostile:     'heilian',   // 黑脸
-  indifferent: null,        // keep default neutral
-  neutral:     null,        // keep default neutral
-  friendly:    'kaixin',    // 开心 — smiling
-  close:       'haixiu',    // 害羞 — blushing/shy (affectionate)
-  devoted:     'kaixin',    // 开心 — beaming
-};
-
-/** Delay (ms) to ensure this fires after live2d.tsx resetExpression */
-const OVERRIDE_DELAY_MS = 150;
+import { getIdleExpression, EXPRESSION_TRANSITION } from '@/config/expression-presets';
 
 export function useAffinityIdleExpression() {
   const { aiState } = useAiState();
@@ -49,7 +29,7 @@ export function useAffinityIdleExpression() {
 
     if (aiState !== AiStateEnum.IDLE) return;
 
-    const expression = LEVEL_IDLE_EXPRESSION[level];
+    const expression = getIdleExpression(level);
     if (expression == null) return; // null = keep the default neutral
 
     // Override idle expression after a short delay
@@ -68,7 +48,7 @@ export function useAffinityIdleExpression() {
       } catch (e) {
         console.warn('[Affinity] Failed to set idle expression:', e);
       }
-    }, OVERRIDE_DELAY_MS);
+    }, EXPRESSION_TRANSITION.idleOverrideDelay);
 
     return () => {
       if (timerRef.current) {
