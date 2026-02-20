@@ -327,6 +327,10 @@ body {
   flex-wrap: wrap;
   justify-content: center;
 }
+/* Landing hint — CSS media query instead of JS layout read */
+.landing-hint-mobile { display: none; }
+.landing-hint-desktop { display: inline; }
+
 .landing-feature-pill {
   padding: 4px 14px;
   font-size: 0.7rem;
@@ -452,6 +456,8 @@ canvas {
     font-size: 16px !important;
     min-height: 48px !important;
   }
+  .landing-hint-mobile { display: inline; }
+  .landing-hint-desktop { display: none; }
 }
 
 /* === Markdown 内容（AI 气泡） === */
