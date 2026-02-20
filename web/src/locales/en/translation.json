@@ -194,7 +194,9 @@
     "regenerate": "Regenerate",
     "readAloud": "Read aloud",
     "textCopied": "Text copied",
-    "regenerating": "Regenerating..."
+    "regenerating": "Regenerating...",
+    "loadOlder": "Load {{count}} older messages",
+    "noResponse": "Ling doesn't seem to be responding — try sending again?"
   },
   "connection": {
     "connected": "Connected",

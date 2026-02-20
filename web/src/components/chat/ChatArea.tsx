@@ -119,6 +119,13 @@ const SuggestionChips = memo(function SuggestionChips({
 });
 SuggestionChips.displayName = "SuggestionChips";
 
+/**
+ * Max messages to render to the DOM at once.
+ * Older ones are hidden behind a "load more" button to prevent DOM bloat.
+ * Messages beyond this window still exist in state (up to MAX_MESSAGES=200).
+ */
+const RENDER_WINDOW = 80;
+
 export const ChatArea = memo(() => {
   const { messages, fullResponse, appendHumanMessage } = useChatHistory();
   const { isThinkingSpeaking } = useAiState();
@@ -127,6 +134,8 @@ export const ChatArea = memo(() => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const rafScrollRef = useRef(0);
+  // Track message count so we can detect newly-added human messages
+  const lastMsgCountRef = useRef(messages.length);
 
   // Throttle the rapidly-updating fullResponse to ~display refresh rate
   const displayResponse = useThrottledValue(fullResponse);
@@ -175,7 +184,14 @@ export const ChatArea = memo(() => {
   const isStreaming = displayResponse.length > 0;
 
   useEffect(() => {
-    if (!isNearBottomRef.current) {
+    // Detect newly-added human message → always scroll to show it,
+    // even if the user had scrolled up to read history.
+    const isNewMsg = messages.length !== lastMsgCountRef.current;
+    const lastMsg = messages[messages.length - 1];
+    const isOwnNewMsg = isNewMsg && lastMsg?.role === "human";
+    lastMsgCountRef.current = messages.length;
+
+    if (!isNearBottomRef.current && !isOwnNewMsg) {
       setHasNewMessage(true);
       return;
     }
@@ -227,7 +243,19 @@ export const ChatArea = memo(() => {
     return lastMsg?.role === "human";
   }, [dedupedMessages, isThinkingSpeaking, isStreaming, isConnected]);
 
-  const showTyping = (isThinkingSpeaking || awaitingReply) && !isStreaming;
+  // Safety timeout: if awaitingReply stays true for 15s (billing block,
+  // sendChat failure, or server not responding), stop showing typing dots.
+  const [awaitingTimedOut, setAwaitingTimedOut] = useState(false);
+  useEffect(() => {
+    if (!awaitingReply) {
+      setAwaitingTimedOut(false);
+      return;
+    }
+    const timer = setTimeout(() => setAwaitingTimedOut(true), 15_000);
+    return () => clearTimeout(timer);
+  }, [awaitingReply]);
+
+  const showTyping = (isThinkingSpeaking || (awaitingReply && !awaitingTimedOut)) && !isStreaming;
 
   const isEmpty = dedupedMessages.length === 0 && !showStreaming && !showTyping;
 
@@ -265,13 +293,38 @@ export const ChatArea = memo(() => {
     [appendHumanMessage, sendMessage, isConnected]
   );
 
+  // ── Render windowing: only mount the last RENDER_WINDOW messages ──
+  // Keeps the DOM small in long conversations while all messages remain in state.
+  const [showAll, setShowAll] = useState(false);
+  const hiddenCount = showAll ? 0 : Math.max(0, dedupedMessages.length - RENDER_WINDOW);
+  const visibleMessages = hiddenCount > 0 ? dedupedMessages.slice(hiddenCount) : dedupedMessages;
+
+  // Preserve scroll position when revealing older messages
+  const handleLoadMore = useCallback(() => {
+    const el = scrollRef.current;
+    const prevHeight = el?.scrollHeight ?? 0;
+    setShowAll(true);
+    // After React commits the new DOM, adjust scrollTop so the viewport
+    // stays on the same message the user was looking at.
+    requestAnimationFrame(() => {
+      if (el) el.scrollTop += el.scrollHeight - prevHeight;
+    });
+  }, []);
+
+  // Reset windowing when conversation is cleared (new session)
+  useEffect(() => {
+    if (dedupedMessages.length <= RENDER_WINDOW) setShowAll(false);
+  }, [dedupedMessages.length]);
+
   // Memoize the message list so .map() is skipped during streaming.
   // displayResponse changes ~60fps triggering ChatArea re-renders,
   // but dedupedMessages is unchanged — this avoids recreating 200 VDOM nodes per frame.
   const messageElements = useMemo(
     () =>
-      dedupedMessages.map((msg, i) => {
-        const prev = dedupedMessages[i - 1];
+      visibleMessages.map((msg, i) => {
+        // Compute the original index in dedupedMessages for separator logic
+        const origIdx = i + hiddenCount;
+        const prev = dedupedMessages[origIdx - 1];
         const showSep =
           prev &&
           msg.timestamp &&
@@ -280,7 +333,7 @@ export const ChatArea = memo(() => {
         // Skip entry animation on the AI bubble that just transitioned from
         // streaming ThinkingBubble — wasStreamingRef is still true during this
         // render (useEffect hasn't flushed yet), avoiding a redundant fade-in.
-        const isLastAi = i === dedupedMessages.length - 1 && msg.role === "ai" && msg.type !== "tool_call_status";
+        const isLastAi = origIdx === dedupedMessages.length - 1 && msg.role === "ai" && msg.type !== "tool_call_status";
         return (
           <div key={msg.id} className="chat-msg-item">
             {showSep && <TimeSeparator timestamp={msg.timestamp} />}
@@ -291,13 +344,13 @@ export const ChatArea = memo(() => {
               isToolCall={msg.type === "tool_call_status"}
               toolName={msg.tool_name}
               toolStatus={msg.status}
-              isGreeting={i === 0 && msg.role === "ai" && isGreeting}
+              isGreeting={origIdx === 0 && msg.role === "ai" && isGreeting}
               skipEntryAnimation={isLastAi && wasStreamingRef.current || undefined}
             />
           </div>
         );
       }),
-    [dedupedMessages, isGreeting]
+    [visibleMessages, hiddenCount, dedupedMessages, isGreeting]
   );
 
   return (
@@ -383,6 +436,25 @@ export const ChatArea = memo(() => {
           <SuggestionChips chips={welcomeChips} onChipClick={handleChipClick} centered />
         </div>
       )}
+      {hiddenCount > 0 && (
+        <div style={{ display: "flex", justifyContent: "center", padding: "8px 0 12px" }}>
+          <button
+            onClick={handleLoadMore}
+            style={{
+              background: "rgba(255, 255, 255, 0.06)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              borderRadius: "16px",
+              padding: "6px 16px",
+              color: "rgba(255, 255, 255, 0.5)",
+              fontSize: "12px",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+            }}
+          >
+            {t("chat.loadOlder", { count: hiddenCount })}
+          </button>
+        </div>
+      )}
       {messageElements}
       {/* Suggestion chips: stay visible after greeting until user sends first message */}
       {isGreeting && !emptyExiting && (
@@ -395,6 +467,29 @@ export const ChatArea = memo(() => {
           isThinking={showTyping}
           isStreaming={showStreaming}
         />
+      )}
+
+      {/* Hint when typing indicator timed out — silent disappearance is confusing */}
+      {awaitingTimedOut && !isStreaming && !showTyping && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            padding: "8px 16px 12px",
+            animation: "chatFadeInUp 0.3s ease-out",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "12px",
+              color: "rgba(255, 255, 255, 0.35)",
+              textAlign: "center",
+              lineHeight: 1.5,
+            }}
+          >
+            {t("chat.noResponse")}
+          </span>
+        </div>
       )}
 
       <div ref={bottomRef} />
