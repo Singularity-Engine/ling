@@ -47,6 +47,9 @@
   --ling-bubble-ai-bg: var(--ling-surface);
   --ling-bubble-user-border: var(--ling-purple-25);
   --ling-bubble-ai-border: var(--ling-surface-border);
+  --ling-bubble-ai-text: rgba(255, 255, 255, 0.88);
+  --ling-chat-timestamp: rgba(255, 255, 255, 0.5);
+  --ling-chat-label: var(--ling-purple-60);
 
   /* 代码块 */
   --ling-code-text: #c4b5fd;
@@ -112,6 +115,9 @@
   --ling-bubble-ai-bg: var(--ling-surface);
   --ling-bubble-user-border: var(--ling-purple-25);
   --ling-bubble-ai-border: var(--ling-surface-border);
+  --ling-bubble-ai-text: rgba(0, 0, 0, 0.8);
+  --ling-chat-timestamp: rgba(0, 0, 0, 0.4);
+  --ling-chat-label: var(--ling-purple-60);
 
   /* 代码块 */
   --ling-code-text: #6d28d9;
@@ -418,6 +424,8 @@ canvas {
   }
   .landing-text-line:first-child {
     font-size: 26px !important;
+    min-height: 2.5rem !important; /* override inline 4.5rem — proportional to 26px mobile font */
+    letter-spacing: 0.08em !important; /* tighter than desktop 0.12em */
   }
   .landing-text-line:nth-child(2) {
     font-size: 17px !important;
