@@ -214,6 +214,14 @@ ShimmerBar.displayName = "ShimmerBar";
 
 const ERROR_COLORS = { bg: "rgba(248, 113, 113, 0.06)", border: "rgba(248, 113, 113, 0.2)", accent: "#f87171" };
 
+const CARD_COLORS: Record<string, { bg: string; border: string; accent: string }> = {
+  search: { bg: "rgba(96, 165, 250, 0.08)", border: "rgba(96, 165, 250, 0.2)", accent: "#60a5fa" },
+  weather: { bg: "rgba(250, 204, 21, 0.08)", border: "rgba(250, 204, 21, 0.2)", accent: "#facc15" },
+  memory: { bg: "rgba(167, 139, 250, 0.08)", border: "rgba(167, 139, 250, 0.2)", accent: "#a78bfa" },
+  code: { bg: "rgba(16, 185, 129, 0.08)", border: "rgba(16, 185, 129, 0.2)", accent: "#10b981" },
+  generic: { bg: "rgba(139, 92, 246, 0.08)", border: "rgba(139, 92, 246, 0.15)", accent: "#8b5cf6" },
+};
+
 export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCardProps) => {
   const { t } = useTranslation();
   const category = useMemo(() => getToolCategory(toolName), [toolName]);
@@ -237,17 +245,9 @@ export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCar
     if (hasContent) setCollapsed(c => !c);
   }, [hasContent]);
 
-  const cardColors: Record<string, { bg: string; border: string; accent: string }> = {
-    search: { bg: "rgba(96, 165, 250, 0.08)", border: "rgba(96, 165, 250, 0.2)", accent: "#60a5fa" },
-    weather: { bg: "rgba(250, 204, 21, 0.08)", border: "rgba(250, 204, 21, 0.2)", accent: "#facc15" },
-    memory: { bg: "rgba(167, 139, 250, 0.08)", border: "rgba(167, 139, 250, 0.2)", accent: "#a78bfa" },
-    code: { bg: "rgba(16, 185, 129, 0.08)", border: "rgba(16, 185, 129, 0.2)", accent: "#10b981" },
-    generic: { bg: "rgba(139, 92, 246, 0.08)", border: "rgba(139, 92, 246, 0.15)", accent: "#8b5cf6" },
-  };
-
   const colors = isError
     ? ERROR_COLORS
-    : cardColors[hasCode ? "code" : category] || cardColors.generic;
+    : CARD_COLORS[hasCode ? "code" : category] || CARD_COLORS.generic;
 
   // Truncated text for collapsed view
   const displayText = collapsed && isLongText
@@ -312,6 +312,8 @@ export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCar
                 fontSize: "13px",
                 color: isError ? "rgba(248, 113, 113, 0.85)" : "rgba(255,255,255,0.75)",
                 whiteSpace: "pre-wrap",
+                overflowWrap: "break-word",
+                wordBreak: "break-word",
                 lineHeight: 1.6,
               }}
             >
@@ -332,6 +334,8 @@ export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCar
               fontSize: "12px",
               color: "rgba(255,255,255,0.4)",
               lineHeight: 1.5,
+              overflowWrap: "break-word",
+              wordBreak: "break-word",
             }}
           >
             {displayText}

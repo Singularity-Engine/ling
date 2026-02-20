@@ -422,9 +422,9 @@ canvas {
 
 /* === 移动端触摸优化 === */
 @media (max-width: 768px) {
-  /* 更小的间距 */
-  .chat-bubble {
-    max-width: 85%;
+  /* 长文本气泡在移动端更宽，避免 500+ 字消息过窄过高 */
+  .chat-msg-inner {
+    max-width: 90% !important;
   }
 
   /* 禁止长按选择 */

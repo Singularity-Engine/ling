@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import { TypingIndicator } from "./TypingIndicator";
@@ -20,6 +20,33 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   `;
   document.head.appendChild(style);
 }
+
+// ─── Static style constants (avoid per-render allocation during ~60fps streaming) ───
+
+const S_OUTER: CSSProperties = {
+  display: "flex", justifyContent: "flex-start", marginBottom: "12px",
+  padding: "0 16px", animation: "thinkingBubbleIn 0.3s ease-out",
+};
+const S_INNER: CSSProperties = { maxWidth: "78%", minWidth: 0 };
+const S_NAME: CSSProperties = {
+  display: "block", fontSize: "11px", color: "rgba(139, 92, 246, 0.6)",
+  marginBottom: "4px", marginLeft: "4px", fontWeight: 500, letterSpacing: "0.5px",
+};
+const S_BUBBLE: CSSProperties = {
+  padding: "10px 16px", borderRadius: "18px 18px 18px 4px",
+  background: "rgba(255, 255, 255, 0.06)", border: "1px solid rgba(255, 255, 255, 0.08)",
+  backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
+  boxShadow: "0 1px 8px rgba(0, 0, 0, 0.1)",
+  transition: "box-shadow 0.2s ease, background 0.2s ease",
+  overflow: "hidden", minHeight: "20px", position: "relative",
+};
+const S_MD: CSSProperties = { fontSize: "14px", color: "rgba(255,255,255,0.88)", lineHeight: 1.7, letterSpacing: "0.3px" };
+const S_MD_FADE: CSSProperties = { ...S_MD, animation: "textFadeIn 0.3s ease-out" };
+const S_CURSOR: CSSProperties = {
+  display: "inline-block", width: "2px", height: "14px", background: "#8b5cf6",
+  marginLeft: "2px", verticalAlign: "text-bottom", borderRadius: "1px",
+  animation: "streamingCursor 1s ease-in-out infinite",
+};
 
 interface ThinkingBubbleProps {
   content: string;
@@ -54,73 +81,17 @@ export const ThinkingBubble = memo(({ content, isThinking, isStreaming }: Thinki
   }, [isThinking, isStreaming]);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "flex-start",
-        marginBottom: "12px",
-        padding: "0 16px",
-        animation: "thinkingBubbleIn 0.3s ease-out",
-      }}
-    >
-      <div style={{ maxWidth: "78%", minWidth: 0 }}>
-        <span
-          style={{
-            display: "block",
-            fontSize: "11px",
-            color: "rgba(139, 92, 246, 0.6)",
-            marginBottom: "4px",
-            marginLeft: "4px",
-            fontWeight: 500,
-            letterSpacing: "0.5px",
-          }}
-        >
-          {t("chat.characterName")}
-        </span>
-        <div
-          style={{
-            padding: "10px 16px",
-            borderRadius: "18px 18px 18px 4px",
-            background: "rgba(255, 255, 255, 0.06)",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
-            backdropFilter: "blur(10px)",
-            WebkitBackdropFilter: "blur(10px)",
-            boxShadow: "0 1px 8px rgba(0, 0, 0, 0.1)",
-            transition: "box-shadow 0.2s ease, background 0.2s ease",
-            minHeight: "20px",
-            position: "relative",
-          }}
-        >
-          {/* Thinking dots — visible when thinking, fading out on transition */}
+    <div style={S_OUTER}>
+      <div style={S_INNER}>
+        <span style={S_NAME}>{t("chat.characterName")}</span>
+        <div style={S_BUBBLE}>
           {(isThinking || showDotsExit) && (
             <TypingIndicator fadeOut={showDotsExit} />
           )}
-
-          {/* Streaming text — fades in when content arrives */}
           {isStreaming && content && (
-            <div
-              className="md-content"
-              style={{
-                fontSize: "14px",
-                color: "rgba(255,255,255,0.88)",
-                lineHeight: 1.7,
-                letterSpacing: "0.3px",
-                animation: showDotsExit ? "textFadeIn 0.3s ease-out" : undefined,
-              }}
-            >
+            <div className="md-content" style={showDotsExit ? S_MD_FADE : S_MD}>
               {renderedMarkdown}
-              <span
-                style={{
-                  display: "inline-block",
-                  width: "2px",
-                  height: "14px",
-                  background: "#8b5cf6",
-                  marginLeft: "2px",
-                  verticalAlign: "text-bottom",
-                  borderRadius: "1px",
-                  animation: "streamingCursor 1s ease-in-out infinite",
-                }}
-              />
+              <span style={S_CURSOR} />
             </div>
           )}
         </div>

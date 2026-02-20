@@ -126,6 +126,7 @@ export const ChatArea = memo(() => {
   const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const rafScrollRef = useRef(0);
 
   // Throttle the rapidly-updating fullResponse to ~display refresh rate
   const displayResponse = useThrottledValue(fullResponse);
@@ -144,19 +145,29 @@ export const ChatArea = memo(() => {
   const wasStreamingRef = useRef(false);
 
   const checkNearBottom = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const near = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
-    isNearBottomRef.current = near;
-    setIsNearBottom(near);
-    if (near) setHasNewMessage(false);
+    if (rafScrollRef.current) return;
+    rafScrollRef.current = requestAnimationFrame(() => {
+      rafScrollRef.current = 0;
+      const el = scrollRef.current;
+      if (!el) return;
+      const near = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+      isNearBottomRef.current = near;
+      setIsNearBottom((prev) => (prev === near ? prev : near));
+      if (near) setHasNewMessage(false);
+    });
   }, []);
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     el.addEventListener("scroll", checkNearBottom, { passive: true });
-    return () => el.removeEventListener("scroll", checkNearBottom);
+    return () => {
+      el.removeEventListener("scroll", checkNearBottom);
+      if (rafScrollRef.current) {
+        cancelAnimationFrame(rafScrollRef.current);
+        rafScrollRef.current = 0;
+      }
+    };
   }, [checkNearBottom]);
 
   // During active streaming use instant scroll to keep up with rapid updates;
@@ -164,17 +175,17 @@ export const ChatArea = memo(() => {
   const isStreaming = displayResponse.length > 0;
 
   useEffect(() => {
-    if (isNearBottomRef.current) {
-      const el = bottomRef.current;
-      if (!el) return;
-      if (displayResponse.length > 0) {
-        // Instant scroll during streaming — avoids "smooth" animation lag
-        el.scrollIntoView({ behavior: "instant" });
-      } else {
-        el.scrollIntoView({ behavior: "smooth" });
-      }
-    } else {
+    if (!isNearBottomRef.current) {
       setHasNewMessage(true);
+      return;
+    }
+    const container = scrollRef.current;
+    if (!container) return;
+    if (displayResponse.length > 0) {
+      // Streaming: assign scrollTop directly (cheaper than scrollIntoView)
+      container.scrollTop = container.scrollHeight;
+    } else {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }
     // Only re-run when actual content changes, NOT on scroll-position changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -266,6 +277,10 @@ export const ChatArea = memo(() => {
           msg.timestamp &&
           prev.timestamp &&
           shouldShowSeparator(prev.timestamp, msg.timestamp);
+        // Skip entry animation on the AI bubble that just transitioned from
+        // streaming ThinkingBubble — wasStreamingRef is still true during this
+        // render (useEffect hasn't flushed yet), avoiding a redundant fade-in.
+        const isLastAi = i === dedupedMessages.length - 1 && msg.role === "ai" && msg.type !== "tool_call_status";
         return (
           <div key={msg.id} className="chat-msg-item">
             {showSep && <TimeSeparator timestamp={msg.timestamp} />}
@@ -277,6 +292,7 @@ export const ChatArea = memo(() => {
               toolName={msg.tool_name}
               toolStatus={msg.status}
               isGreeting={i === 0 && msg.role === "ai" && isGreeting}
+              skipEntryAnimation={isLastAi && wasStreamingRef.current || undefined}
             />
           </div>
         );

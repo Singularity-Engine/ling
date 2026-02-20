@@ -167,7 +167,6 @@ interface ChatBubbleProps {
   isToolCall?: boolean;
   toolName?: string;
   toolStatus?: string;
-  staggerIndex?: number;
   isGreeting?: boolean;
   skipEntryAnimation?: boolean;
 }
@@ -254,7 +253,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
 
   return (
     <div style={outerStyle}>
-      <div style={S_INNER} className={!isUser ? "chat-bubble-wrap" : undefined}>
+      <div style={S_INNER} className={isUser ? "chat-msg-inner" : "chat-bubble-wrap chat-msg-inner"}>
         {!isUser && (
           <span style={S_NAME}>
             {t("chat.characterName")}
