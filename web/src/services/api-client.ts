@@ -4,6 +4,8 @@
  * 统一处理 token 注入、401 自动跳转登录、请求/响应封装。
  */
 
+import i18next from 'i18next';
+
 function getApiBase(): string {
   // 开发模式：Vite proxy 会把 /api 转发到后端，无需指定地址
   // 生产模式：使用实际后端域名
@@ -83,7 +85,7 @@ class ApiClient {
       if (!window.location.pathname.startsWith('/login')) {
         window.location.href = '/login';
       }
-      throw new Error('认证已过期');
+      throw new Error(i18next.t('error.authExpired'));
     }
 
     if (!res.ok) {

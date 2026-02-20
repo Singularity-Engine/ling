@@ -2528,7 +2528,14 @@ class WebSocketHandler:
                     
             except Exception as decode_error:
                 logger.error(f"❌ JWT token解码失败: {decode_error}")
-                # 保持使用默认用户
+                # Reject invalid token — notify client and keep as guest
+                try:
+                    await websocket.send_text(json.dumps({
+                        "type": "error",
+                        "message": "Authentication failed. Please log in again.",
+                    }))
+                except Exception:
+                    pass
                 
         except Exception as e:
             logger.error(f"处理用户认证时出错: {e}")

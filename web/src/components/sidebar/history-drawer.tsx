@@ -1,5 +1,6 @@
 import { Box, Button } from '@chakra-ui/react';
 import { FiTrash2 } from 'react-icons/fi';
+import i18next from 'i18next';
 import { format, isToday, isYesterday, isThisYear } from 'date-fns';
 import { zhCN, enUS } from 'date-fns/locale';
 import { memo } from 'react';
@@ -41,9 +42,7 @@ function formatTimestamp(timestamp: string, lang: string): string {
     return format(date, 'HH:mm', { locale });
   }
   if (isYesterday(date)) {
-    return lang === 'zh'
-      ? `昨天 ${format(date, 'HH:mm', { locale })}`
-      : `Yesterday ${format(date, 'HH:mm', { locale })}`;
+    return `${i18next.t('time.yesterday')} ${format(date, 'HH:mm', { locale })}`;
   }
   if (isThisYear(date)) {
     return lang === 'zh'

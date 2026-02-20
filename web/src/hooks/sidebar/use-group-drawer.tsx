@@ -9,7 +9,7 @@ export const useGroupDrawer = () => {
 
   const showUnsupported = useCallback(() => {
     toaster.create({
-      title: '群组功能暂不可用',
+      title: t('group.featureUnavailable'),
       type: 'info',
       duration: 2000,
     });

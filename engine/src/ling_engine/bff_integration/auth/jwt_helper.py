@@ -153,66 +153,8 @@ def decode_session_token(session_token: str) -> Optional[Dict[str, Any]]:
         return user_info
         
     except jwt.ExpiredSignatureError:
-        logger.warning("⚠️ Session token已过期，尝试不验证时间的解码...")
-        
-        # 尝试在不验证时间的情况下解码过期的令牌
-        try:
-            # SECURITY WARNING: verify_signature=False 仅用于内部 session 解码（已过期令牌的用户信息提取）。
-            # 此处不面向外部请求，且后续会通过数据库验证用户存在性。
-            # TODO(Phase 1): 迁移到自签 HS256 JWT 后，应始终验证签名，移除此 fallback。
-            payload = jwt.decode(session_token, options={"verify_signature": False, "verify_exp": False})
-            
-            # 提取用户信息
-            user_id = payload.get("sub") or payload.get("user_id")
-            username = payload.get("username")
-            email = payload.get("email")
-            roles = payload.get("roles", [])
-            
-            # 如果用户名为空，尝试从邮箱生成
-            if not username and email:
-                username = email.split('@')[0]
-                
-            if not username and user_id:
-                username = f"user_{user_id[-8:]}"
-
-            # 检查用户是否在数据库中存在（过期token也需要验证）
-            try:
-                from ..database.user_repository import UserRepository
-                user_repo = UserRepository()
-                db_user = user_repo.find_by_user_id(user_id)
-
-                if not db_user:
-                    logger.warning(f"⚠️ 过期token中的用户 {user_id} 在数据库中不存在，拒绝认证")
-                    return None
-
-                logger.info(f"✅ 过期token中的用户 {user_id} 在数据库中存在，验证通过")
-
-            except Exception as e:
-                logger.error(f"❌ 过期token的数据库用户验证失败: {e}")
-                # 如果数据库连接失败，为了系统稳定性，暂时允许JWT用户通过
-                logger.warning("⚠️ 数据库连接失败，跳过过期token的用户存在性检查")
-
-            user_info = {
-                "user_id": user_id,
-                "username": username or "unknown",
-                "email": email,
-                "roles": roles,
-                "raw_payload": payload,
-                "expired": True  # 标记为过期令牌
-            }
-            
-            logger.info(f"✅ 从过期token中提取用户信息成功!")
-            logger.info(f"   👤 用户ID: {user_info['user_id']}")
-            logger.info(f"   📝 用户名: {user_info['username']}")
-            logger.info(f"   📧 邮箱: {user_info['email']}")
-            logger.info(f"   🏷️ 角色: {user_info['roles']}")
-            logger.warning(f"   ⚠️ 注意：此令牌已过期，建议用户重新登录")
-            
-            return user_info
-            
-        except Exception as fallback_e:
-            logger.error(f"💥 从过期token提取用户信息也失败: {str(fallback_e)}")
-            return None
+        logger.warning("⚠️ Session token已过期，拒绝认证（用户需要重新登录）")
+        return None
             
     except jwt.InvalidTokenError as e:
         logger.warning(f"❌ Session token无效: {str(e)}")

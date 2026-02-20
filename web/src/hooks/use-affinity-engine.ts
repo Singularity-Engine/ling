@@ -10,6 +10,7 @@
  */
 
 import { useEffect, useRef } from 'react';
+import i18next from 'i18next';
 import { gatewayAdapter } from '@/services/gateway-message-adapter';
 
 // ─── Constants ────────────────────────────────────────────────────
@@ -56,14 +57,10 @@ function getLevel(affinity: number): string {
 
 // ─── Milestone messages ───────────────────────────────────────────
 
-const LEVEL_MILESTONES: Record<string, string> = {
-  hostile:     '灵对你还有些警惕...',
-  indifferent: '灵开始注意到你了',
-  neutral:     '灵对你的态度变得平和了',
-  friendly:    '灵觉得你是个不错的人！',
-  close:       '灵觉得和你越来越亲近了...',
-  devoted:     '灵对你全心全意 💕',
-};
+function getLevelMilestone(level: string): string {
+  const key = `affinity.milestone${level.charAt(0).toUpperCase()}${level.slice(1)}`;
+  return i18next.t(key, { defaultValue: '' });
+}
 
 // ─── Persisted state shape ────────────────────────────────────────
 
@@ -147,7 +144,7 @@ export function useAffinityEngine({ updateAffinity, showMilestone, showPointGain
 
       // Level change → milestone
       if (newLevel !== prevLevel) {
-        const msg = LEVEL_MILESTONES[newLevel];
+        const msg = getLevelMilestone(newLevel);
         if (msg && !newState.reachedLevels.includes(newLevel)) {
           newState.reachedLevels.push(newLevel);
           // Delay milestone slightly so the bar animates first

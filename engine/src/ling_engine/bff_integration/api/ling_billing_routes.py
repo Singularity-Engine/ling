@@ -16,6 +16,7 @@ from ..auth.ling_deps import get_current_user, get_optional_user
 from ..auth.plan_gates import (
     is_privileged,
     check_daily_messages,
+    check_and_record_daily_message,
     record_message_sent,
     should_deduct_credits,
     check_tool_quota,
@@ -53,15 +54,15 @@ def create_ling_billing_router(repo: LingUserRepository) -> APIRouter:
                 "daily_limit": -1,
             }
 
-        # Check daily message limit
-        allowed, current_count, daily_limit = check_daily_messages(user_id, user)
+        # Atomic check + increment daily message limit (prevents race condition)
+        allowed, new_count, daily_limit = check_and_record_daily_message(user_id, user)
         if not allowed:
             return {
                 "allowed": False,
                 "reason": "daily_limit_reached",
                 "message": f"You've reached today's limit ({daily_limit} messages). Upgrade for more!",
                 "credits_balance": float(user.get("credits_balance", 0)),
-                "daily_count": current_count,
+                "daily_count": new_count,
                 "daily_limit": daily_limit,
             }
 
@@ -79,15 +80,12 @@ def create_ling_billing_router(repo: LingUserRepository) -> APIRouter:
                     "reason": "insufficient_credits",
                     "message": "You're running low on credits. Top up to keep chatting!",
                     "credits_balance": float(user.get("credits_balance", 0)),
-                    "daily_count": current_count,
+                    "daily_count": new_count,
                     "daily_limit": daily_limit,
                 }
             credits_balance = float(balance_after)
         else:
             credits_balance = float(user.get("credits_balance", 0))
-
-        # Record message sent
-        new_count = record_message_sent(user_id)
 
         return {
             "allowed": True,

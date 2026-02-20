@@ -53,7 +53,7 @@ class JWTHandler:
             self.webhook_secret = os.getenv('CLERK_WEBHOOK_SECRET')
 
         # 初始化Clerk JWT处理器
-        clerk_publishable_key = os.getenv('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY', 'pk_test_cmVhbC1lbGVwaGFudC0zNS5jbGVyay5hY2NvdW50cy5kZXYk')
+        clerk_publishable_key = os.getenv('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY', '')
         self.clerk_jwt_handler = None
         try:
             from .clerk_jwt_handler import ClerkJWTHandler
@@ -271,8 +271,8 @@ class JWTHandler:
             return False
 
         if not self.webhook_secret:
-            logger.warning("🔐 ⚠️ 未配置CLERK_WEBHOOK_SECRET，跳过webhook认证")
-            return True  # 如果未配置密钥，则跳过验证
+            logger.warning("🔐 ⚠️ 未配置CLERK_WEBHOOK_SECRET，拒绝webhook请求")
+            return False
 
         token = auth_header[7:]  # 移除"Bearer "前缀
         logger.info(f"🔐 提取的token长度: {len(token)}")

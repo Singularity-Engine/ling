@@ -226,7 +226,7 @@ def check_feature(user: dict, feature: str) -> bool:
 
 
 def check_daily_messages(user_id: str, user: dict) -> tuple[bool, int, int]:
-    """检查每日消息上限。
+    """检查每日消息上限（仅读取，不递增）。
 
     Returns:
         (allowed, current_count, daily_limit)
@@ -245,6 +245,29 @@ def check_daily_messages(user_id: str, user: dict) -> tuple[bool, int, int]:
         return False, current, limit
 
     return True, current, limit
+
+
+def check_and_record_daily_message(user_id: str, user: dict) -> tuple[bool, int, int]:
+    """原子性检查并递增每日消息计数，防止并发竞态。
+
+    先 INCR 再判断是否超限。超限时计数器多 1 不影响（当日过期）。
+
+    Returns:
+        (allowed, new_count, daily_limit)
+    """
+    if is_privileged(user):
+        return True, 0, -1
+
+    plan = user.get("plan", "free")
+    limit = PLAN_FEATURES.get(plan, PLAN_FEATURES["free"])["daily_messages"]
+    if limit == -1:
+        return True, 0, -1
+
+    new_count = _increment_daily_count(user_id)
+    if new_count > limit:
+        return False, new_count, limit
+
+    return True, new_count, limit
 
 
 def record_message_sent(user_id: str) -> int:

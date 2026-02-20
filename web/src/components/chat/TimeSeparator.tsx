@@ -1,4 +1,5 @@
 import { memo } from "react";
+import i18next from "i18next";
 
 function formatSeparatorTime(iso: string): string {
   const d = new Date(iso);
@@ -13,13 +14,12 @@ function formatSeparatorTime(iso: string): string {
   const msgDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
   if (msgDay.getTime() === today.getTime()) {
-    // 今天：上午/下午 HH:MM
     const hour = d.getHours();
-    const period = hour < 12 ? "上午" : "下午";
+    const period = hour < 12 ? i18next.t("time.am") : i18next.t("time.pm");
     return `${period} ${time}`;
   }
   if (msgDay.getTime() === yesterday.getTime()) {
-    return `昨天 ${time}`;
+    return `${i18next.t("time.yesterday")} ${time}`;
   }
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");

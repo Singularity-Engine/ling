@@ -1,4 +1,5 @@
 import { useState, useEffect, memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLive2DConfig } from '@/context/live2d-config-context';
 import { useWebSocket } from '@/context/websocket-context';
 
@@ -8,6 +9,7 @@ import { useWebSocket } from '@/context/websocket-context';
  * Sits above the Live2D canvas layer and fades out once model + WS are ready.
  */
 export const ModelLoadingOverlay = memo(function ModelLoadingOverlay() {
+  const { t } = useTranslation();
   const { modelInfo } = useLive2DConfig();
   const { wsState } = useWebSocket();
 
@@ -116,7 +118,7 @@ export const ModelLoadingOverlay = memo(function ModelLoadingOverlay() {
             letterSpacing: '0.05em',
           }}
         >
-          灵
+          {t('loading.glyph')}
         </div>
       </div>
 
@@ -138,7 +140,7 @@ export const ModelLoadingOverlay = memo(function ModelLoadingOverlay() {
             animation: 'modelLoadTextFade 2s ease-in-out infinite',
           }}
         >
-          正在唤醒
+          {t('loading.awakening')}
         </span>
         <div
           style={{

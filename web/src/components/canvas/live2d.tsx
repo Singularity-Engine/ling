@@ -2,6 +2,7 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { memo, useRef, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useLive2DConfig } from "@/context/live2d-config-context";
 import { useIpcHandlers } from "@/hooks/utils/use-ipc-handlers";
 import { useInterrupt } from "@/hooks/utils/use-interrupt";
@@ -27,6 +28,7 @@ export const Live2D = memo(
     const { aiState } = useAiState();
     const { resetExpression } = useLive2DExpression();
     const { wsState, reconnect } = useWebSocket();
+    const { t } = useTranslation();
     const [showRetry, setShowRetry] = useState(false);
     const isPet = mode === 'pet';
 
@@ -167,7 +169,7 @@ export const Live2D = memo(
                     fontSize: 14,
                   }}
                 >
-                  正在唤醒灵...
+                  {t('loading.awakeningLing')}
                 </span>
                 <style>{`@keyframes live2d-spin{to{transform:rotate(360deg)}}`}</style>
               </>
@@ -180,7 +182,7 @@ export const Live2D = memo(
                     marginBottom: 12,
                   }}
                 >
-                  连接中断，请重试
+                  {t('loading.connectionInterrupted')}
                 </span>
                 <button
                   type="button"
@@ -198,7 +200,7 @@ export const Live2D = memo(
                     cursor: "pointer",
                   }}
                 >
-                  重新连接
+                  {t('loading.reconnect')}
                 </button>
               </>
             )}

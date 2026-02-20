@@ -91,6 +91,7 @@
     "yourUuid": "Your UUID",
     "inviteMember": "Invite Member",
     "enterMemberUuid": "Enter member UUID",
+    "featureUnavailable": "Group feature is currently unavailable",
     "invite": "Invite",
     "members": "Members",
     "you": "You",
@@ -144,6 +145,7 @@
     "cannotDeleteCurrentHistory": "Cannot delete current chat history",
     "failedCapture": "Failed to capture {{source}} frame",
     "failedParseWebSocket": "Failed to parse WebSocket message",
+    "authExpired": "Authentication expired",
     "websocketNotOpen": "WebSocket is not open.",
     "vadMisfire": "Voice detected but too brief. Try speaking louder/longer, or adjust settings (lower speech threshold, lower negative threshold, reduce redemption frames).",
     "pageCrashTitle": "Something went wrong",
@@ -208,7 +210,13 @@
     "neutral": "Neutral",
     "friendly": "Friendly",
     "close": "Close",
-    "devoted": "Devoted"
+    "devoted": "Devoted",
+    "milestoneHostile": "Ling is still a bit wary of you...",
+    "milestoneIndifferent": "Ling is starting to notice you",
+    "milestoneNeutral": "Ling's attitude has become calm",
+    "milestoneFriendly": "Ling thinks you're a nice person!",
+    "milestoneClose": "Ling feels closer to you...",
+    "milestoneDevoted": "Ling is devoted to you 💕"
   },
   "capability": {
     "search": "Search",
@@ -232,6 +240,18 @@
     "running": "Running...",
     "waiting": "Waiting for result...",
     "clickToView": "Click for details →"
+  },
+  "loading": {
+    "glyph": "灵",
+    "awakening": "Awakening",
+    "awakeningLing": "Awakening Ling...",
+    "connectionInterrupted": "Connection interrupted, please retry",
+    "reconnect": "Reconnect"
+  },
+  "time": {
+    "am": "AM",
+    "pm": "PM",
+    "yesterday": "Yesterday"
   },
   "landing": {
     "heroName": "Ling",
@@ -293,6 +313,28 @@
     "freeExpiry": "Free plan: memories expire after 7 days. <bold>Upgrade to keep them forever.</bold>",
     "stardustExpiry": "Stardust plan: memories kept for 90 days.",
     "permanentMemory": "Your memories are permanent."
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "updated": "Last updated: February 2026",
+    "s1Title": "1. Service Description",
+    "s1Body": "Ling is an AI digital companion platform. By using this service, you agree to the following terms.",
+    "s2Title": "2. User Responsibilities",
+    "s2Items": [
+      "You must be at least 16 years old to use this service",
+      "You are responsible for your account security",
+      "You may not use this service to generate harmful, illegal, or infringing content",
+      "You may not attempt to bypass service limitations or engage in abuse"
+    ],
+    "s3Title": "3. AI-Generated Content Disclaimer",
+    "s3Body": "Ling is an AI system. Its responses are for reference only and do not constitute professional advice. Ling does not provide medical, legal, or financial advice. AI-generated content may not be fully accurate — please use your own judgment.",
+    "s4Title": "4. Payments & Refunds",
+    "s4Body": "Paid subscriptions are processed through Stripe. Credit purchases are one-time and generally non-refundable. You may cancel your subscription at any time; access continues through the end of the current billing period.",
+    "s5Title": "5. Data & Privacy",
+    "s5Body": "We value your privacy. You can export or delete your data at any time from your account settings. Please refer to our Privacy Policy for details.",
+    "s6Title": "6. Changes to Service",
+    "s6Body": "We reserve the right to modify the service and these terms at any time. Significant changes will be communicated via your registered email.",
+    "backHome": "Back to Home"
   },
   "about": {
     "name": "Ling",

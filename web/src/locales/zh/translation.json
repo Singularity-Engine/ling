@@ -91,6 +91,7 @@
     "yourUuid": "您的UUID",
     "inviteMember": "邀请成员",
     "enterMemberUuid": "输入成员UUID",
+    "featureUnavailable": "群组功能暂不可用",
     "invite": "邀请",
     "members": "成员",
     "you": "您",
@@ -144,6 +145,7 @@
     "cannotDeleteCurrentHistory": "无法删除当前聊天记录",
     "failedCapture": "捕获{{source}}帧失败",
     "failedParseWebSocket": "解析WebSocket消息失败",
+    "authExpired": "认证已过期",
     "websocketNotOpen": "WebSocket未连接",
     "vadMisfire": "检测到语音但过于简短，请尝试提高音量或说得更久一些，或调整识别设置（降低语音识别阈值、降低负面语音阈值、减少验证帧数）",
     "pageCrashTitle": "页面出了点问题",
@@ -208,7 +210,13 @@
     "neutral": "中立",
     "friendly": "友好",
     "close": "亲密",
-    "devoted": "挚爱"
+    "devoted": "挚爱",
+    "milestoneHostile": "灵对你还有些警惕...",
+    "milestoneIndifferent": "灵开始注意到你了",
+    "milestoneNeutral": "灵对你的态度变得平和了",
+    "milestoneFriendly": "灵觉得你是个不错的人！",
+    "milestoneClose": "灵觉得和你越来越亲近了...",
+    "milestoneDevoted": "灵对你全心全意 💕"
   },
   "capability": {
     "search": "搜索",
@@ -232,6 +240,18 @@
     "running": "执行中...",
     "waiting": "等待结果...",
     "clickToView": "点击查看详情 →"
+  },
+  "loading": {
+    "glyph": "灵",
+    "awakening": "正在唤醒",
+    "awakeningLing": "正在唤醒灵...",
+    "connectionInterrupted": "连接中断，请重试",
+    "reconnect": "重新连接"
+  },
+  "time": {
+    "am": "上午",
+    "pm": "下午",
+    "yesterday": "昨天"
   },
   "landing": {
     "heroName": "灵",
@@ -293,6 +313,28 @@
     "freeExpiry": "免费方案：记忆 7 天后过期。<bold>升级以永久保存。</bold>",
     "stardustExpiry": "星尘方案：记忆保留 90 天。",
     "permanentMemory": "你的记忆是永久的。"
+  },
+  "terms": {
+    "title": "使用条款",
+    "updated": "最后更新: 2026 年 2 月",
+    "s1Title": "1. 服务说明",
+    "s1Body": "灵（Ling）是一个 AI 数字人对话平台。使用本服务即表示您同意以下条款。",
+    "s2Title": "2. 用户责任",
+    "s2Items": [
+      "您必须年满 16 周岁方可使用本服务",
+      "您需对自己的账户安全负责",
+      "禁止使用本服务生成有害、违法或侵权内容",
+      "禁止尝试绕过服务限制或进行滥用"
+    ],
+    "s3Title": "3. AI 生成内容免责",
+    "s3Body": "灵是 AI 系统，其回复仅供参考，不构成专业建议。灵不提供医疗、法律或财务建议。AI 生成的内容可能不完全准确，请自行判断。",
+    "s4Title": "4. 付费与退款",
+    "s4Body": "付费订阅通过 Stripe 处理。积分购买为一次性消费，原则上不支持退款。订阅可随时取消，取消后当前周期内仍可使用。",
+    "s5Title": "5. 数据与隐私",
+    "s5Body": "我们重视您的隐私。您可以随时在账户设置中导出或删除您的数据。详细隐私政策请参见我们的隐私声明。",
+    "s6Title": "6. 服务变更",
+    "s6Body": "我们保留随时修改服务内容和条款的权利。重大变更会通过注册邮箱通知。",
+    "backHome": "返回首页"
   },
   "about": {
     "name": "灵 · Ling",
