@@ -14,7 +14,6 @@ export const useLive2DExpression = () => {
   const setExpression = useCallback((
     expressionValue: string | number,
     lappAdapter: any,
-    logMessage?: string,
   ) => {
     try {
       if (typeof expressionValue === 'string') {
@@ -26,9 +25,6 @@ export const useLive2DExpression = () => {
         if (expressionName) {
           lappAdapter.setExpression(expressionName);
         }
-      }
-      if (logMessage) {
-        console.log(logMessage);
       }
     } catch (error) {
       console.error('Failed to set expression:', error);
@@ -50,7 +46,6 @@ export const useLive2DExpression = () => {
       // Check if model is loaded and has expressions
       const model = lappAdapter.getModel();
       if (!model || !model._modelSetting) {
-        console.log('Model or model settings not loaded yet, skipping expression reset');
         return;
       }
 
@@ -59,7 +54,6 @@ export const useLive2DExpression = () => {
         setExpression(
           modelInfo.defaultEmotion,
           lappAdapter,
-          `Reset expression to default: ${modelInfo.defaultEmotion}`,
         );
       } else {
         // Check if model has any expressions before trying to get the first one
@@ -75,7 +69,7 @@ export const useLive2DExpression = () => {
         }
       }
     } catch (error) {
-      console.log('Failed to reset expression:', error);
+      if (import.meta.env.DEV) console.warn('Failed to reset expression:', error);
     }
   }, [setExpression]);
 

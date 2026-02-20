@@ -168,11 +168,11 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
    */
   const updateHistoryList = useCallback(
     (uid: string, latestMessage: Message | null) => {
-      if (!uid) {
-        console.error('updateHistoryList: uid is null');
+      if (import.meta.env.DEV && !uid) {
+        console.warn('[ChatHistory] updateHistoryList: uid is null');
       }
-      if (!currentHistoryUid) {
-        console.error('updateHistoryList: currentHistoryUid is null');
+      if (import.meta.env.DEV && !currentHistoryUid) {
+        console.warn('[ChatHistory] updateHistoryList: currentHistoryUid is null');
       }
 
       setHistoryList((prevList) => prevList.map((history) => {
