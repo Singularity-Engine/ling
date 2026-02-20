@@ -301,7 +301,10 @@
     "insufficientCreditsMessage": "积分即将用完，充值以继续使用高级功能。",
     "affinityUpgradeMessage": "灵现在很喜欢你哦！升级解锁更深入的 Opus 对话。",
     "viewPlans": "查看方案",
-    "maybeLater": "以后再说"
+    "maybeLater": "以后再说",
+    "guestLimitTitle": "聊得开心吗？",
+    "guestLimitMessage": "免费注册即可继续和灵聊天——解锁记忆、更深度的对话，以及更多功能。",
+    "registerFree": "免费注册"
   },
   "memory": {
     "title": "记忆",
@@ -312,7 +315,10 @@
     "loading": "正在加载记忆...",
     "freeExpiry": "免费方案：记忆 7 天后过期。<bold>升级以永久保存。</bold>",
     "stardustExpiry": "星尘方案：记忆保留 90 天。",
-    "permanentMemory": "你的记忆是永久的。"
+    "permanentMemory": "你的记忆是永久的。",
+    "guestTitle": "解锁记忆",
+    "guestDesc": "注册后，灵会记住你——你的名字、兴趣和你在乎的事。",
+    "registerToUnlock": "注册解锁"
   },
   "terms": {
     "title": "使用条款",
@@ -341,7 +347,10 @@
     "tagline": "你的 AI 伙伴，一直在这里。",
     "version": "版本",
     "github": "GitHub",
-    "docs": "文档"
+    "docs": "文档",
+    "guestPrompt": "登录解锁记忆、更深度的对话和更多功能。",
+    "loginButton": "登录",
+    "registerButton": "注册"
   },
   "network": {
     "offline": "网络已断开",
@@ -357,5 +366,50 @@
     "showHelp": "显示快捷键帮助",
     "closeOverlay": "关闭弹窗",
     "tip": "按 Shift+? 随时查看"
+  },
+  "constellation": {
+    "open": "展开能力星座",
+    "close": "收起",
+    "emptyHint": "和灵对话，发现她的能力",
+    "newSkill": "发现新能力！",
+    "prompt": {
+      "search": "帮我搜索一下",
+      "create": "帮我画一幅画",
+      "memory": "你还记得我之前说过什么吗",
+      "writing": "帮我写一段文字",
+      "weather": "今天天气怎么样",
+      "places": "附近有什么好地方",
+      "code": "帮我写一段代码",
+      "github": "帮我看看 GitHub 上的项目",
+      "docs": "帮我分析这份文档",
+      "reason": "帮我分析一下这个问题",
+      "listen": "听听我说的话",
+      "notion": "帮我整理 Notion 笔记"
+    }
+  },
+  "onboarding": {
+    "welcome": "你好，我是灵 ✦",
+    "welcomeSub": "我不只是聊天机器人 — 我有记忆、有情感、有真正的能力",
+    "start": "开始了解 →",
+    "aboutYou": "先认识一下你？",
+    "aboutYouSub": "选择你感兴趣的领域（可多选）",
+    "interests": {
+      "creative": "创意设计",
+      "tech": "技术开发",
+      "learning": "学习研究",
+      "work": "工作商务",
+      "fun": "休闲娱乐",
+      "life": "生活旅行"
+    },
+    "goals": "你最想让我帮你做什么？",
+    "goalsSub": "最多选 3 个，之后随时可以发现更多",
+    "memoryNote": "我会记住你说的话 — 这是我最重要的能力",
+    "ready": "准备好了 ✦",
+    "readySub": "这些是我为你准备的能力",
+    "readyHint": "随着我们的对话，你会发现更多星星",
+    "begin": "开始对话",
+    "skip": "跳过",
+    "next": "下一步",
+    "maxGoals": "最多选 {{max}} 个"
   }
-} 
+}

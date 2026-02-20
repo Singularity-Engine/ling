@@ -162,6 +162,7 @@ body {
 /* === 滚动条 === */
 ::-webkit-scrollbar {
   width: 4px;
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -510,6 +511,19 @@ canvas {
   background: transparent;
   padding: 10px 14px;
   overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ling-purple-40) transparent;
+}
+.md-content .code-block-wrap pre::-webkit-scrollbar {
+  height: 6px;
+}
+.md-content .code-block-wrap pre::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 3px;
+}
+.md-content .code-block-wrap pre::-webkit-scrollbar-thumb {
+  background: var(--ling-purple-40);
+  border-radius: 3px;
 }
 /* Standalone pre (no wrapper) — fallback */
 .md-content pre:not(.code-block-wrap pre) {

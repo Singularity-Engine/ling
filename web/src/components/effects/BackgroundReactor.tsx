@@ -1,7 +1,63 @@
-import { memo, useMemo, useRef, useState, useEffect } from 'react';
+import { memo, useMemo, useRef, useState, useEffect, type CSSProperties } from 'react';
 import { useToolState } from '../../context/tool-state-context';
 import { useAiState } from '../../context/ai-state-context';
 import { useAffinity } from '../../context/affinity-context';
+
+// ── Module-level keyframe injection (runs once, avoids re-inject on every render) ──
+const KEYFRAMES_ID = 'bg-reactor-keyframes';
+if (typeof document !== 'undefined' && !document.getElementById(KEYFRAMES_ID)) {
+  const style = document.createElement('style');
+  style.id = KEYFRAMES_ID;
+  style.textContent = `
+    @keyframes bgThinkingPulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 0.7; }
+    }
+    @keyframes bgWorkingFlow {
+      0%, 100% { opacity: 0.55; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.02); }
+    }
+    @keyframes bgAiThinkingBreathe {
+      0%, 100% { opacity: 0.35; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.01); }
+    }
+    @keyframes bgWorkingSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes bgPresentingRays {
+      0% { opacity: 0; transform: scale(0.8); }
+      30% { opacity: 0.6; transform: scale(1.05); }
+      100% { opacity: 0.3; transform: scale(1.2); }
+    }
+    @keyframes completionBloom {
+      0% { opacity: 0; transform: scale(0.5); }
+      20% { opacity: 0.8; transform: scale(1); }
+      100% { opacity: 0; transform: scale(1.5); }
+    }
+    @keyframes completionFlash {
+      0% { opacity: 0; }
+      15% { opacity: 0.8; }
+      100% { opacity: 0; }
+    }
+    @keyframes bgAffinityBreathe {
+      0%, 100% { opacity: var(--affinity-idle-opacity, 0.1); }
+      50% { opacity: calc(var(--affinity-idle-opacity, 0.1) * var(--affinity-breathe-amp, 1.6)); }
+    }
+    @keyframes bgGainPulse {
+      0% { opacity: 0; transform: scale(0.85); }
+      25% { opacity: 0.4; transform: scale(1); }
+      100% { opacity: 0; transform: scale(1.08); }
+    }
+    @keyframes bgLevelBloom {
+      0% { opacity: 0; transform: scale(0.6); }
+      20% { opacity: 0.65; transform: scale(1); }
+      55% { opacity: 0.3; transform: scale(1.15); }
+      100% { opacity: 0; transform: scale(1.3); }
+    }
+  `;
+  document.head.appendChild(style);
+}
 
 // Stage-specific colors: thinking=blue, working=cyan, presenting=gold, ai-thinking=purple
 const PHASE_COLORS = {
@@ -112,7 +168,7 @@ export const BackgroundReactor = memo(() => {
           : isWorking
             ? `radial-gradient(ellipse 70% 60% at 50% 40%, ${phaseColor}55 0%, ${phaseColor}22 40%, transparent 75%)`
             : `radial-gradient(ellipse 65% 55% at 50% 40%, ${phaseColor}44 0%, ${phaseColor}1a 45%, transparent 70%)`,
-      willChange: 'opacity',
+      willChange: (isActive || isPresenting) ? 'opacity' : 'auto',
       animation: isActive ? `${activeAnimation} ${isAiThinking ? '4s' : '3s'} ease-in-out infinite` : 'none',
     }),
     [isActive, isPresenting, isWorking, isAiThinking, phaseColor, activeAnimation, tint.activeBoost, emotionBoost],
@@ -125,7 +181,9 @@ export const BackgroundReactor = memo(() => {
       inset: 0,
       pointerEvents: 'none' as const,
       transition: 'opacity 1s ease',
-      opacity: isActive ? (isAiThinking ? 0.25 : 0.4) : isPresenting ? 0.5 : 0,
+      // Use 0 opacity during thinking-only phase so that when working starts,
+      // the conic-gradient fades in smoothly (CSS can't transition between gradients).
+      opacity: isWorking ? 0.4 : isAiThinking ? 0.25 : isPresenting ? 0.5 : 0,
       background: isAiThinking
         ? `radial-gradient(ellipse 50% 40% at 50% 38%, ${phaseColor}1a 0%, transparent 55%)`
         : isWorking
@@ -138,8 +196,9 @@ export const BackgroundReactor = memo(() => {
         : isPresenting
           ? 'bgPresentingRays 2s ease-out forwards'
           : 'none',
+      willChange: (isWorking || isPresenting || isAiThinking) ? 'opacity, transform' : 'auto',
     }),
-    [isActive, isPresenting, isWorking, isAiThinking, phaseColor],
+    [isPresenting, isWorking, isAiThinking, phaseColor],
   );
 
   const vignetteStyle = useMemo(
@@ -158,7 +217,10 @@ export const BackgroundReactor = memo(() => {
   // hatred/hostile = warm danger tint, close/devoted = warm pink/purple glow
   // Note: CSS cannot transition between radial-gradient() values, so we use
   // background-color (which CAN transition) + mask-image for the gradient shape.
-  const tintMask = `radial-gradient(ellipse ${tint.gradientSpread} at 50% 45%, rgba(0,0,0,0.267) 0%, rgba(0,0,0,0.094) 40%, transparent 70%)`;
+  const tintMask = useMemo(
+    () => `radial-gradient(ellipse ${tint.gradientSpread} at 50% 45%, rgba(0,0,0,0.267) 0%, rgba(0,0,0,0.094) 40%, transparent 70%)`,
+    [tint.gradientSpread],
+  );
   const affinityTintStyle = useMemo(
     () => ({
       position: 'absolute' as const,
@@ -178,54 +240,7 @@ export const BackgroundReactor = memo(() => {
 
   return (
     <>
-      <style>{`
-        @keyframes bgThinkingPulse {
-          0%, 100% { opacity: 0.5; }
-          50% { opacity: 0.7; }
-        }
-        @keyframes bgWorkingFlow {
-          0%, 100% { opacity: 0.55; transform: scale(1); }
-          50% { opacity: 0.7; transform: scale(1.02); }
-        }
-        @keyframes bgAiThinkingBreathe {
-          0%, 100% { opacity: 0.35; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(1.01); }
-        }
-        @keyframes bgWorkingSpin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes bgPresentingRays {
-          0% { opacity: 0; transform: scale(0.8); }
-          30% { opacity: 0.6; transform: scale(1.05); }
-          100% { opacity: 0.3; transform: scale(1.2); }
-        }
-        @keyframes completionBloom {
-          0% { opacity: 0; transform: scale(0.5); }
-          20% { opacity: 0.8; transform: scale(1); }
-          100% { opacity: 0; transform: scale(1.5); }
-        }
-        @keyframes completionFlash {
-          0% { opacity: 0; }
-          15% { opacity: 0.8; }
-          100% { opacity: 0; }
-        }
-        @keyframes bgAffinityBreathe {
-          0%, 100% { opacity: var(--affinity-idle-opacity, 0.1); }
-          50% { opacity: calc(var(--affinity-idle-opacity, 0.1) * var(--affinity-breathe-amp, 1.6)); }
-        }
-        @keyframes bgGainPulse {
-          0% { opacity: 0; transform: scale(0.85); }
-          25% { opacity: 0.4; transform: scale(1); }
-          100% { opacity: 0; transform: scale(1.08); }
-        }
-        @keyframes bgLevelBloom {
-          0% { opacity: 0; transform: scale(0.6); }
-          20% { opacity: 0.65; transform: scale(1); }
-          55% { opacity: 0.3; transform: scale(1.15); }
-          100% { opacity: 0; transform: scale(1.3); }
-        }
-      `}</style>
+      {/* Keyframes injected at module level — no inline <style> needed */}
       <div style={glowStyle} />
       <div style={ambientStyle} />
       <div style={vignetteStyle} />

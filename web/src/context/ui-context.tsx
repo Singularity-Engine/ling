@@ -16,7 +16,7 @@ import {
 
 export interface BillingModalState {
   open: boolean;
-  reason?: 'insufficient_credits' | 'daily_limit_reached' | 'tool_quota_reached';
+  reason?: 'insufficient_credits' | 'daily_limit_reached' | 'tool_quota_reached' | 'guest_limit';
   message?: string;
 }
 

@@ -1,45 +1,77 @@
 /**
- * Expression Preset System
+ * Expression Preset Configuration System
  *
- * Defines baseline (idle) expressions per affinity level.
- * When AI enters IDLE state, the model shows the expression mapped to the
- * current affinity level instead of always reverting to neutral.
+ * Based on T705 Live2D expression research:
+ * - Model has 9 expressions, all using single-parameter Add mode (Param35~Param54)
+ * - Each expression controls a different parameter → naturally stackable
+ * - Expressions: kaixin, shangxin, haixiu, heilian, tuosai, chayao, shuijiao, weixiao, jingya
  *
- * Available expressions for Ling (mao_pro model):
- *   kaixin  (开心)  — happy / smiling
- *   shangxin(伤心)  — sad
- *   haixiu  (害羞)  — shy / blushing
- *   heilian (黑脸)  — angry / cold face
- *   tuosai  (拓塞)  — thinking / pondering
- *   chayao  (茶腰)  — confident
- *   shuijiao(困)    — sleepy
- *   0               — neutral (first expression / default)
+ * This file provides:
+ * 1. Full expression catalog with metadata
+ * 2. Affinity level → idle expression mapping
+ * 3. Emotion keyword → expression mapping (EN/ZH)
+ * 4. Expression transition helpers
  */
 
-// ─── Types ───────────────────────────────────────────────────────
+// ─── Expression Catalog ─────────────────────────────────────────
 
-/** Expression identifier: a named expression string or a numeric index */
-export type ExpressionId = string | number;
-
-/** Preset for a single affinity level */
-export interface AffinityExpressionPreset {
-  /** Expression to show when idle at this affinity level. `null` = keep model default. */
-  idle: ExpressionId | null;
+export interface ExpressionMeta {
+  /** Live2D expression name (matches .exp3.json) */
+  name: string;
+  /** Display label (Chinese) */
+  label: string;
+  /** Description */
+  description: string;
+  /** Controlling parameter (from T705 research) */
+  param: string;
+  /** Whether this expression supports blending with others */
+  stackable: boolean;
 }
 
-/** Full preset map keyed by affinity level name */
+/**
+ * Complete expression catalog for the Ling model (mao_pro).
+ * All use single-parameter Add mode → stackable = true.
+ */
+export const EXPRESSION_CATALOG: ExpressionMeta[] = [
+  { name: 'kaixin',   label: '开心', description: 'Happy / smiling',       param: 'Param35', stackable: true },
+  { name: 'shangxin', label: '伤心', description: 'Sad',                   param: 'Param37', stackable: true },
+  { name: 'haixiu',   label: '害羞', description: 'Shy / blushing',        param: 'Param39', stackable: true },
+  { name: 'heilian',  label: '黑脸', description: 'Angry / cold face',     param: 'Param41', stackable: true },
+  { name: 'tuosai',   label: '托腮', description: 'Thinking / pondering',  param: 'Param43', stackable: true },
+  { name: 'chayao',   label: '叉腰', description: 'Confident / hands on hips', param: 'Param45', stackable: true },
+  { name: 'shuijiao', label: '困',   description: 'Sleepy',                param: 'Param47', stackable: true },
+  { name: 'weixiao',  label: '微笑', description: 'Gentle smile',          param: 'Param49', stackable: true },
+  { name: 'jingya',   label: '惊讶', description: 'Surprised',             param: 'Param54', stackable: true },
+];
+
+/** Quick lookup by expression name */
+export const EXPRESSION_MAP = new Map(
+  EXPRESSION_CATALOG.map(e => [e.name, e])
+);
+
+// ─── Types ──────────────────────────────────────────────────────
+
+export type ExpressionId = string | number;
+
+export interface AffinityExpressionPreset {
+  /** Primary idle expression. `null` = model default (neutral). */
+  idle: ExpressionId | null;
+  /** Optional secondary expression to blend (stackable). */
+  blend?: ExpressionId | null;
+}
+
 export type AffinityExpressionPresetMap = Record<string, AffinityExpressionPreset>;
 
-// ─── Preset Data ─────────────────────────────────────────────────
+// ─── Affinity → Idle Expression Presets ─────────────────────────
 
 /**
- * Maps each affinity level to its baseline idle expression.
+ * Maps each affinity level to its baseline idle expression(s).
  *
- * Design rationale (from Live2D expression research):
+ * Design rationale:
  * - hatred / hostile  → heilian (cold face) — visual hostility
- * - indifferent       → null (neutral default) — no particular feeling
+ * - indifferent       → null (neutral default)
  * - neutral           → null (neutral default)
- * - friendly          → kaixin (happy) — warm and open
+ * - friendly          → weixiao (gentle smile) — approachable warmth
  * - close             → haixiu (shy/blushing) — affectionate closeness
  * - devoted           → kaixin (happy) — beaming with devotion
  */
@@ -48,12 +80,41 @@ export const AFFINITY_EXPRESSION_PRESETS: AffinityExpressionPresetMap = {
   hostile:     { idle: 'heilian' },
   indifferent: { idle: null },
   neutral:     { idle: null },
-  friendly:    { idle: 'kaixin' },
+  friendly:    { idle: 'weixiao' },
   close:       { idle: 'haixiu' },
   devoted:     { idle: 'kaixin' },
 };
 
-// ─── Helpers ─────────────────────────────────────────────────────
+// ─── Emotion Keyword → Expression Mapping ───────────────────────
+
+/**
+ * Resolves emotion keywords (from AI or Gateway) to Live2D expression names.
+ * Supports both English and Chinese keywords.
+ */
+export const EMOTION_EXPRESSION_MAP: Record<string, string> = {
+  // English
+  happy: 'kaixin',
+  sad: 'shangxin',
+  shy: 'haixiu',
+  angry: 'heilian',
+  thinking: 'tuosai',
+  confident: 'chayao',
+  sleepy: 'shuijiao',
+  smile: 'weixiao',
+  surprised: 'jingya',
+  // Chinese
+  开心: 'kaixin',
+  伤心: 'shangxin',
+  害羞: 'haixiu',
+  生气: 'heilian',
+  思考: 'tuosai',
+  自信: 'chayao',
+  困: 'shuijiao',
+  微笑: 'weixiao',
+  惊讶: 'jingya',
+};
+
+// ─── Helpers ────────────────────────────────────────────────────
 
 /**
  * Look up the idle expression for a given affinity level.
@@ -62,3 +123,28 @@ export const AFFINITY_EXPRESSION_PRESETS: AffinityExpressionPresetMap = {
 export function getIdleExpression(level: string): ExpressionId | null {
   return AFFINITY_EXPRESSION_PRESETS[level]?.idle ?? null;
 }
+
+/**
+ * Look up the blend expression for a given affinity level.
+ * Returns `null` when no blending is desired.
+ */
+export function getBlendExpression(level: string): ExpressionId | null {
+  return AFFINITY_EXPRESSION_PRESETS[level]?.blend ?? null;
+}
+
+/**
+ * Resolve an emotion keyword to a Live2D expression name.
+ * Returns the keyword itself if it's already a valid expression name.
+ */
+export function resolveEmotionExpression(keyword: string): string | null {
+  if (EXPRESSION_MAP.has(keyword)) return keyword;
+  return EMOTION_EXPRESSION_MAP[keyword] ?? null;
+}
+
+/** Transition timing presets (ms) */
+export const EXPRESSION_TRANSITION = {
+  /** Delay before overriding idle expression (must fire after live2d.tsx resetExpression) */
+  idleOverrideDelay: 150,
+  /** Fade duration for smooth expression blending */
+  fadeDuration: 300,
+} as const;

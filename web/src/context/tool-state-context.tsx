@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useRef, useEffect, ReactNode } from "react";
+import { getSkillKey } from "../config/skill-registry";
 
 export type ToolCategory = 'search' | 'code' | 'memory' | 'weather' | 'generic';
 
@@ -19,6 +20,7 @@ interface ToolStateContextType {
   recentResults: ToolCall[];
   currentPhase: 'idle' | 'thinking' | 'working' | 'presenting';
   dominantCategory: ToolCategory | null;
+  activeToolName: string | null;
 
   startTool: (tool: Omit<ToolCall, 'id' | 'startTime' | 'status'> & { id?: string; status?: ToolCall['status'] }) => void;
   updateTool: (id: string, update: Partial<ToolCall>) => void;
@@ -31,13 +33,16 @@ const ToolStateContext = createContext<ToolStateContextType | null>(null);
 
 let toolIdCounter = 0;
 
+const KEY_TO_CATEGORY: Record<string, ToolCategory> = {
+  search: 'search', create: 'generic', memory: 'memory',
+  writing: 'generic', weather: 'weather', places: 'generic',
+  code: 'code', github: 'code', docs: 'generic',
+  reason: 'generic', listen: 'generic', notion: 'generic',
+};
+
 export function categorize(toolName: string): ToolCategory {
-  const name = toolName.toLowerCase();
-  if (/search|brave|web|google/.test(name)) return 'search';
-  if (/weather/.test(name)) return 'weather';
-  if (/memory|remember|recall|evermem/.test(name)) return 'memory';
-  if (/code|exec|run|python|node/.test(name)) return 'code';
-  return 'generic';
+  const key = getSkillKey(toolName);
+  return KEY_TO_CATEGORY[key] || 'generic';
 }
 
 export function ToolStateProvider({ children }: { children: ReactNode }) {
@@ -179,6 +184,7 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const dominantCategory = computeDominant(activeTools);
+  const activeToolName = activeTools.length > 0 ? activeTools[0].name : null;
 
   // Demo trigger: window.__triggerToolDemo('search') in browser console
   useEffect(() => {
@@ -206,6 +212,7 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
       recentResults,
       currentPhase,
       dominantCategory,
+      activeToolName,
       startTool,
       updateTool,
       completeTool,

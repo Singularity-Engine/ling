@@ -151,7 +151,37 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
             </div>
           )}
 
-          {!loading && !error && memories.length === 0 && (
+          {!user && (
+            <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.5 }}>
+                {'\uD83D\uDD12'}
+              </div>
+              <h4 style={{ color: 'rgba(255,255,255,0.6)', fontSize: '16px', fontWeight: 600, margin: '0 0 8px' }}>
+                {t('memory.guestTitle')}
+              </h4>
+              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px', lineHeight: 1.6, marginBottom: '16px' }}>
+                {t('memory.guestDesc')}
+              </p>
+              <a
+                href="/register"
+                style={{
+                  display: 'inline-block',
+                  padding: '8px 20px',
+                  borderRadius: '10px',
+                  background: 'rgba(139, 92, 246, 0.5)',
+                  color: '#fff',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  transition: 'opacity 0.2s',
+                }}
+              >
+                {t('memory.registerToUnlock')}
+              </a>
+            </div>
+          )}
+
+          {user && !loading && !error && memories.length === 0 && (
             <div style={{ textAlign: 'center', padding: '60px 20px' }}>
               <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.5 }}>
                 {'\uD83E\uDDE0'}

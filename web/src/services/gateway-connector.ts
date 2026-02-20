@@ -96,6 +96,11 @@ class GatewayConnector {
   /** Current reconnect attempt (0 = not reconnecting) */
   readonly reconnectAttempt$ = new ReplaySubject<number>(1);
 
+  /** Whether reconnect is paused because browser is offline */
+  readonly offline$ = new BehaviorSubject<boolean>(
+    typeof navigator !== 'undefined' ? !navigator.onLine : false,
+  );
+
   // ── Public API ──────────────────────────────────────────────────
 
   /**
@@ -113,6 +118,7 @@ class GatewayConnector {
   /** Disconnect and stop reconnecting */
   disconnect() {
     this.clearReconnectTimer();
+    this.stopIdleRetry();
     this.stopHeartbeatMonitor();
     this.removeVisibilityHandler();
     this.reconnectAttempts = RECONNECT_MAX_RETRIES; // prevent reconnect
@@ -466,12 +472,21 @@ class GatewayConnector {
 
   private scheduleReconnect() {
     if (this.reconnectAttempts >= RECONNECT_MAX_RETRIES) {
-      if (import.meta.env.DEV) console.log('[GatewayConnector] Max reconnect attempts reached');
+      if (import.meta.env.DEV) console.log('[GatewayConnector] Max reconnect attempts reached, starting idle retry every 60s');
       this.setState('DISCONNECTED');
+      this.startIdleRetry();
       return;
     }
 
     this.setState('RECONNECTING');
+
+    // If browser reports offline, don't burn retry budget — wait for `online`
+    // event (handled in websocket-handler.tsx) which calls retryNow().
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      if (import.meta.env.DEV) console.log('[GatewayConnector] Browser offline — preserving retry budget, waiting for network');
+      return;
+    }
+
     const base = Math.min(
       RECONNECT_BASE_MS * Math.pow(2, this.reconnectAttempts),
       RECONNECT_MAX_MS,
@@ -505,6 +520,30 @@ class GatewayConnector {
     this.pendingRequests.clear();
   }
 
+  // ── Idle retry (after max reconnect attempts exhausted) ─────────
+
+  private startIdleRetry() {
+    this.stopIdleRetry();
+    this.idleRetryTimer = setTimeout(() => {
+      if (this.state !== 'DISCONNECTED' || this.authFailed) return;
+      if (import.meta.env.DEV) console.log('[GatewayConnector] Idle retry — attempting reconnect');
+      // Reset to 1 (not 0) so hello-ok handler detects this as a reconnection
+      this.reconnectAttempts = 1;
+      this.doConnect().catch((err) => {
+        console.error('[GatewayConnector] Idle retry failed:', err.message);
+        // Schedule next idle retry
+        this.startIdleRetry();
+      });
+    }, IDLE_RETRY_MS);
+  }
+
+  private stopIdleRetry() {
+    if (this.idleRetryTimer) {
+      clearTimeout(this.idleRetryTimer);
+      this.idleRetryTimer = null;
+    }
+  }
+
   // ── Heartbeat monitor ───────────────────────────────────────────
 
   private startHeartbeatMonitor() {
@@ -530,11 +569,18 @@ class GatewayConnector {
   private setupVisibilityHandler() {
     this.removeVisibilityHandler();
     this.onVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && this.state === 'CONNECTED') {
-        // Tab became visible — check if connection went stale while hidden
-        if (this.lastTickAt > 0 && Date.now() - this.lastTickAt > HEARTBEAT_TIMEOUT_MS) {
-          console.warn('[GatewayConnector] Stale connection detected on tab focus, reconnecting...');
-          this.ws?.close(4001, 'Stale after tab resume');
+      if (document.visibilityState === 'visible') {
+        if (this.state === 'CONNECTED') {
+          // Tab became visible — check if connection went stale while hidden
+          if (this.lastTickAt > 0 && Date.now() - this.lastTickAt > HEARTBEAT_TIMEOUT_MS) {
+            console.warn('[GatewayConnector] Stale connection detected on tab focus, reconnecting...');
+            this.ws?.close(4001, 'Stale after tab resume');
+          }
+        } else if (this.state === 'DISCONNECTED' || this.state === 'RECONNECTING') {
+          // Tab returned while not connected — immediately retry instead of
+          // waiting for the next scheduled reconnect or idle retry timer.
+          // Especially important on mobile where tabs are frequently backgrounded.
+          this.retryNow();
         }
       }
     };

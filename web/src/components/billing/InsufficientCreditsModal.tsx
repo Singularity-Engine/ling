@@ -16,18 +16,23 @@ const InsufficientCreditsModal: React.FC = () => {
 
   const isDailyLimit = billingModal.reason === 'daily_limit_reached';
   const isToolQuota = billingModal.reason === 'tool_quota_reached';
+  const isGuestLimit = billingModal.reason === 'guest_limit';
 
-  const icon = isDailyLimit ? '\u23F0' : '\u2726'; // clock or sparkle
-  const title = isDailyLimit
-    ? t('billing.dailyLimitTitle')
-    : isToolQuota
-      ? t('billing.toolQuotaTitle')
-      : t('billing.insufficientCreditsTitle');
-  const defaultMessage = isDailyLimit
-    ? t('billing.dailyLimitMessage')
-    : isToolQuota
-      ? t('billing.toolQuotaMessage')
-      : t('billing.insufficientCreditsMessage');
+  const icon = isGuestLimit ? '\u2728' : isDailyLimit ? '\u23F0' : '\u2726';
+  const title = isGuestLimit
+    ? t('billing.guestLimitTitle')
+    : isDailyLimit
+      ? t('billing.dailyLimitTitle')
+      : isToolQuota
+        ? t('billing.toolQuotaTitle')
+        : t('billing.insufficientCreditsTitle');
+  const defaultMessage = isGuestLimit
+    ? t('billing.guestLimitMessage')
+    : isDailyLimit
+      ? t('billing.dailyLimitMessage')
+      : isToolQuota
+        ? t('billing.toolQuotaMessage')
+        : t('billing.insufficientCreditsMessage');
 
   return (
     <div
@@ -89,25 +94,46 @@ const InsufficientCreditsModal: React.FC = () => {
             justifyContent: 'center',
           }}
         >
-          <button
-            onClick={() => {
-              closeBillingModal();
-              setPricingOpen(true);
-            }}
-            style={{
-              padding: '12px 24px',
-              borderRadius: '12px',
-              border: 'none',
-              background: 'rgba(139, 92, 246, 0.6)',
-              color: '#fff',
-              fontSize: '14px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-          >
-            {t('billing.viewPlans')}
-          </button>
+          {isGuestLimit ? (
+            <a
+              href="/register"
+              onClick={() => closeBillingModal()}
+              style={{
+                padding: '12px 24px',
+                borderRadius: '12px',
+                border: 'none',
+                background: 'rgba(139, 92, 246, 0.6)',
+                color: '#fff',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                textDecoration: 'none',
+              }}
+            >
+              {t('billing.registerFree')}
+            </a>
+          ) : (
+            <button
+              onClick={() => {
+                closeBillingModal();
+                setPricingOpen(true);
+              }}
+              style={{
+                padding: '12px 24px',
+                borderRadius: '12px',
+                border: 'none',
+                background: 'rgba(139, 92, 246, 0.6)',
+                color: '#fff',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+            >
+              {t('billing.viewPlans')}
+            </button>
+          )}
           <button
             onClick={closeBillingModal}
             style={{

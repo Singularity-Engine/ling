@@ -99,8 +99,8 @@ function SuggestionChips({
           className="welcome-chip"
           onClick={() => onChipClick(chip)}
           style={{
-            background: "rgba(139, 92, 246, 0.12)",
-            border: "1px solid rgba(139, 92, 246, 0.2)",
+            background: "rgba(139, 92, 246, 0.18)",
+            border: "1px solid rgba(139, 92, 246, 0.28)",
             borderRadius: "20px",
             padding: "8px 16px",
             color: "rgba(226, 212, 255, 0.8)",
@@ -281,9 +281,9 @@ export const ChatArea = memo(() => {
           {/* Glassmorphism welcome card */}
           <div
             style={{
-              background: "rgba(255, 255, 255, 0.04)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
+              background: "rgba(255, 255, 255, 0.08)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
               border: "1px solid rgba(255, 255, 255, 0.06)",
               borderRadius: "16px",
               padding: "20px 24px",

@@ -9,10 +9,10 @@ export function TermsPage() {
   return (
     <div style={styles.page}>
       <Helmet>
-        <title>服务条款 — 灵 Ling</title>
-        <meta name="description" content="灵 Ling AI 数字人平台服务条款与使用协议。" />
-        <meta property="og:title" content="服务条款 — 灵 Ling" />
-        <meta property="og:description" content="灵 Ling AI 数字人平台服务条款与使用协议。" />
+        <title>服务条款 — 灵 - AI 数字人</title>
+        <meta name="description" content="灵 AI 数字人平台服务条款与使用协议。" />
+        <meta property="og:title" content="服务条款 — 灵 - AI 数字人" />
+        <meta property="og:description" content="灵 AI 数字人平台服务条款与使用协议。" />
         <meta property="og:image" content="https://sngxai.com/og-image.png" />
         <link rel="canonical" href="https://sngxai.com/terms" />
       </Helmet>

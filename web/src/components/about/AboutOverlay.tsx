@@ -242,7 +242,7 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
         />
 
         {/* Account section */}
-        {user && (
+        {user ? (
           <div
             style={{
               marginBottom: "18px",
@@ -329,6 +329,61 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
               >
                 Sign Out
               </button>
+            </div>
+          </div>
+        ) : (
+          <div
+            style={{
+              marginBottom: "18px",
+              padding: "12px 16px",
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              borderRadius: "12px",
+              textAlign: "center",
+            }}
+          >
+            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "13px", margin: "0 0 10px" }}>
+              {t("about.guestPrompt")}
+            </p>
+            <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
+              <a
+                href="/login"
+                style={{
+                  flex: 1,
+                  padding: "8px 16px",
+                  borderRadius: "8px",
+                  border: "none",
+                  background: "rgba(139, 92, 246, 0.5)",
+                  color: "#fff",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  textDecoration: "none",
+                  textAlign: "center",
+                  transition: "opacity 0.2s",
+                }}
+              >
+                {t("about.loginButton")}
+              </a>
+              <a
+                href="/register"
+                style={{
+                  flex: 1,
+                  padding: "8px 16px",
+                  borderRadius: "8px",
+                  border: "1px solid rgba(139, 92, 246, 0.4)",
+                  background: "transparent",
+                  color: "rgba(196, 181, 253, 0.8)",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  textDecoration: "none",
+                  textAlign: "center",
+                  transition: "opacity 0.2s",
+                }}
+              >
+                {t("about.registerButton")}
+              </a>
             </div>
           </div>
         )}

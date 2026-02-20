@@ -301,7 +301,10 @@
     "insufficientCreditsMessage": "You're running low on credits. Top up to continue using premium features.",
     "affinityUpgradeMessage": "Ling really likes you now! Upgrade to unlock deeper conversations with Opus.",
     "viewPlans": "View Plans",
-    "maybeLater": "Maybe Later"
+    "maybeLater": "Maybe Later",
+    "guestLimitTitle": "Enjoying the conversation?",
+    "guestLimitMessage": "Sign up for free to continue chatting with Ling — unlock memories, deeper conversations, and more.",
+    "registerFree": "Sign Up Free"
   },
   "memory": {
     "title": "Memories",
@@ -312,7 +315,10 @@
     "loading": "Loading memories...",
     "freeExpiry": "Free plan: memories expire after 7 days. <bold>Upgrade to keep them forever.</bold>",
     "stardustExpiry": "Stardust plan: memories kept for 90 days.",
-    "permanentMemory": "Your memories are permanent."
+    "permanentMemory": "Your memories are permanent.",
+    "guestTitle": "Unlock Memories",
+    "guestDesc": "Sign up to let Ling remember you — your name, interests, and what matters to you.",
+    "registerToUnlock": "Sign Up to Unlock"
   },
   "terms": {
     "title": "Terms of Service",
@@ -341,7 +347,10 @@
     "tagline": "Your AI companion, always here for you.",
     "version": "Version",
     "github": "GitHub",
-    "docs": "Docs"
+    "docs": "Docs",
+    "guestPrompt": "Sign in to unlock memories, deeper conversations, and more.",
+    "loginButton": "Sign In",
+    "registerButton": "Sign Up"
   },
   "network": {
     "offline": "Network disconnected",
@@ -357,5 +366,50 @@
     "showHelp": "Show shortcuts help",
     "closeOverlay": "Close overlay",
     "tip": "Press Shift+? anytime to view"
+  },
+  "constellation": {
+    "open": "Open ability constellation",
+    "close": "Close",
+    "emptyHint": "Chat with Ling to discover her abilities",
+    "newSkill": "New ability discovered!",
+    "prompt": {
+      "search": "Help me search for something",
+      "create": "Help me create an image",
+      "memory": "Do you remember what I said before?",
+      "writing": "Help me write something",
+      "weather": "How's the weather today?",
+      "places": "Any good places nearby?",
+      "code": "Help me write some code",
+      "github": "Help me check a GitHub project",
+      "docs": "Help me analyze this document",
+      "reason": "Help me analyze this problem",
+      "listen": "Listen to what I'm saying",
+      "notion": "Help me organize my Notion notes"
+    }
+  },
+  "onboarding": {
+    "welcome": "Hey, I'm Ling ✦",
+    "welcomeSub": "I'm not just a chatbot — I have memory, emotions, and real abilities",
+    "start": "Get to know me →",
+    "aboutYou": "Tell me about yourself",
+    "aboutYouSub": "Pick your areas of interest (multiple choice)",
+    "interests": {
+      "creative": "Creative Design",
+      "tech": "Tech & Dev",
+      "learning": "Learning & Research",
+      "work": "Work & Business",
+      "fun": "Fun & Games",
+      "life": "Life & Travel"
+    },
+    "goals": "What would you like me to help with?",
+    "goalsSub": "Pick up to 3 — you can discover more later",
+    "memoryNote": "I'll remember what you tell me — it's my most important ability",
+    "ready": "All set ✦",
+    "readySub": "These are the abilities I've prepared for you",
+    "readyHint": "As we chat, you'll discover more stars",
+    "begin": "Start chatting",
+    "skip": "Skip",
+    "next": "Next",
+    "maxGoals": "Up to {{max}} selections"
   }
-} 
+}

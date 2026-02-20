@@ -43,10 +43,10 @@ export function RegisterPage() {
   return (
     <div style={styles.page}>
       <Helmet>
-        <title>注册 — 灵 Ling</title>
-        <meta name="description" content="注册灵 Ling 账号，拥有你的 AI 数字人伴侣。" />
-        <meta property="og:title" content="注册 — 灵 Ling" />
-        <meta property="og:description" content="注册灵 Ling 账号，拥有你的 AI 数字人伴侣。" />
+        <title>注册 — 灵 - AI 数字人</title>
+        <meta name="description" content="注册灵账号，拥有你的 AI 数字人伴侣。" />
+        <meta property="og:title" content="注册 — 灵 - AI 数字人" />
+        <meta property="og:description" content="注册灵账号，拥有你的 AI 数字人伴侣。" />
         <meta property="og:image" content="https://sngxai.com/og-image.png" />
         <link rel="canonical" href="https://sngxai.com/register" />
       </Helmet>

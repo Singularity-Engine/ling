@@ -34,7 +34,7 @@ import { BackgroundReactor } from "./components/effects/BackgroundReactor";
 import { ThoughtHalo } from "./components/effects/ThoughtHalo";
 import { AudioVisualizer } from "./components/effects/AudioVisualizer";
 import { CrystalField } from "./components/crystal/CrystalField";
-import { CapabilityRing } from "./components/ability/CapabilityRing";
+import { Constellation } from "./components/ability/Constellation";
 import { LoadingSkeleton } from "./components/loading/LoadingSkeleton";
 import { ModelLoadingOverlay } from "./components/loading/ModelLoadingOverlay";
 import { Toaster, toaster } from "./components/ui/toaster";
@@ -53,7 +53,7 @@ import { TermsPage } from "./pages/TermsPage";
 import CreditsDisplay from "./components/billing/CreditsDisplay";
 import PricingOverlay from "./components/billing/PricingOverlay";
 import InsufficientCreditsModal from "./components/billing/InsufficientCreditsModal";
-import { OnboardingTutorial, shouldShowOnboarding } from "./components/onboarding/OnboardingTutorial";
+import { PersonalizedOnboarding, shouldShowOnboarding } from "./components/onboarding/PersonalizedOnboarding";
 import { MemoryPanel } from "./components/memory/MemoryPanel";
 import "./index.css";
 
@@ -260,6 +260,13 @@ function MainContent(): JSX.Element {
       {/* ===== Layer 1: 工具结果水晶 ===== */}
       <CrystalField />
 
+      {/* ===== Layer 1.8: 底部渐变遮罩 (Ground Plane) ===== */}
+      <div style={{
+        position: "absolute", bottom: 0, left: 0, right: 0,
+        height: "45dvh", zIndex: 22, pointerEvents: "none",
+        background: "linear-gradient(to bottom, transparent 0%, rgba(10,0,21,0.15) 30%, rgba(10,0,21,0.45) 60%, rgba(10,0,21,0.65) 100%)",
+      }} />
+
       {/* ===== Layer 1.5: 右侧工具栏 ===== */}
       <div
         style={{
@@ -387,10 +394,6 @@ function MainContent(): JSX.Element {
           <ChatArea />
         </div>
 
-        <div style={{ pointerEvents: "auto" }}>
-          {!isMobile && <CapabilityRing />}
-        </div>
-
         {!chatExpanded && !isMobile && (
           <div
             role="button"
@@ -412,17 +415,27 @@ function MainContent(): JSX.Element {
           </div>
         )}
 
-        <div
-          style={{
-            flexShrink: 0,
-            pointerEvents: "auto",
-            background: "rgba(10, 0, 21, 0.25)",
+        <div style={{ flexShrink: 0, pointerEvents: "auto", position: "relative" }}>
+          {/* 星座 — 浮在 InputBar 左上方 */}
+          {!isMobile && (
+            <div style={{
+              position: "absolute",
+              bottom: "calc(100% + 12px)",
+              left: 16,
+              zIndex: 26,
+              pointerEvents: "auto",
+            }}>
+              <Constellation />
+            </div>
+          )}
+          <div style={{
+            background: "rgba(10, 0, 21, 0.5)",
             backdropFilter: "blur(16px)",
             WebkitBackdropFilter: "blur(16px)",
-            borderTop: "1px solid rgba(139, 92, 246, 0.1)",
-          }}
-        >
-          <InputBar />
+            borderTop: "1px solid rgba(139, 92, 246, 0.15)",
+          }}>
+            <InputBar />
+          </div>
         </div>
 
         <div style={{ flexShrink: 0, pointerEvents: "auto" }}>
@@ -517,6 +530,14 @@ function MainApp() {
 
   return (
     <>
+      <Helmet>
+        <title>灵 Ling — AI 数字人 · Singularity Engine</title>
+        <meta name="description" content="有灵魂、能干活的 AI 数字人。记忆、情感、工具，三位一体。" />
+        <meta property="og:title" content="灵 - AI 数字人" />
+        <meta property="og:description" content="有灵魂、能干活的 AI 数字人。记忆、情感、工具，三位一体。" />
+        <meta property="og:image" content="https://sngxai.com/og-image.png" />
+        <link rel="canonical" href="https://sngxai.com/" />
+      </Helmet>
       <UIProvider>
       <ThemeProvider>
       <ModeProvider>
@@ -569,7 +590,7 @@ function MainApp() {
       <PricingOverlay />
       <InsufficientCreditsModal />
       {showOnboarding && (
-        <OnboardingTutorial onComplete={() => setShowOnboarding(false)} />
+        <PersonalizedOnboarding onComplete={() => setShowOnboarding(false)} />
       )}
       </UIProvider>
 
@@ -589,11 +610,7 @@ function App(): JSX.Element {
             <Route path="/login" element={<GuestOnly><LoginPage /></GuestOnly>} />
             <Route path="/register" element={<GuestOnly><RegisterPage /></GuestOnly>} />
             <Route path="/terms" element={<TermsPage />} />
-            <Route path="/*" element={
-              <RequireAuth>
-                <MainApp />
-              </RequireAuth>
-            } />
+            <Route path="/*" element={<MainApp />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>

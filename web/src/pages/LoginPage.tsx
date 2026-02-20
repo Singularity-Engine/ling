@@ -29,10 +29,10 @@ export function LoginPage() {
   return (
     <div style={styles.page}>
       <Helmet>
-        <title>登录 — 灵 Ling</title>
-        <meta name="description" content="登录灵 Ling，开始与你的 AI 数字人对话。" />
-        <meta property="og:title" content="登录 — 灵 Ling" />
-        <meta property="og:description" content="登录灵 Ling，开始与你的 AI 数字人对话。" />
+        <title>登录 — 灵 - AI 数字人</title>
+        <meta name="description" content="登录灵，开始与你的 AI 数字人对话。" />
+        <meta property="og:title" content="登录 — 灵 - AI 数字人" />
+        <meta property="og:description" content="登录灵，开始与你的 AI 数字人对话。" />
         <meta property="og:image" content="https://sngxai.com/og-image.png" />
         <link rel="canonical" href="https://sngxai.com/login" />
       </Helmet>

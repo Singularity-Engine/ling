@@ -271,6 +271,10 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Guest message counter — tracks how many messages a guest has sent
+  const guestMessageCountRef = useRef(0);
+  const GUEST_MESSAGE_LIMIT = 5;
+
   // Guard: only send auto-greeting once per page load
   const greetingSentRef = useRef(false);
 
@@ -407,11 +411,16 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           });
           const toolStatus = message.status as string;
           if (toolStatus === 'running') {
+            // Emit constellation skill event
+            window.dispatchEvent(new CustomEvent('constellation-skill-used', {
+              detail: { toolName: message.tool_name },
+            }));
             startTool({
               id: message.tool_id,
               name: message.tool_name,
               category: categorize(message.tool_name),
               arguments: message.content || '',
+              status: 'running',
             });
           } else if (toolStatus === 'completed') {
             completeTool(message.tool_id, message.content || '');
@@ -503,38 +512,53 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       // Resolve the default session so Gateway knows which agent to route to
       gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId())
         .then(() => {
-          // Auto-greeting: AI welcomes the user on page load
-          // If Landing animation is still showing, defer greeting until it completes
-          // to avoid the response arriving before the user sees the chat area.
-          if (!greetingSentRef.current) {
-            const sendGreeting = () => {
-              if (greetingSentRef.current) return;
-              greetingSentRef.current = true;
-              // Show thinking indicator immediately — avoids empty-state flash
-              // while waiting for Gateway's conversation-chain-start event
-              setAiState('thinking-speaking');
-              gatewayConnector.sendChat(sessionKeyRef.current, '[greeting]').catch((err) => {
-                if (import.meta.env.DEV) console.error('[WebSocketHandler] Auto-greeting failed:', err);
-                setAiState('idle');
-              });
-            };
-
-            if (sessionStorage.getItem('ling-visited')) {
-              // Return visit — no Landing, send immediately
-              sendGreeting();
-              // Model may still be loading — longer delay
-              setGreetingExpression(2000);
-            } else {
-              // First visit — wait for Landing to complete
-              const onLandingComplete = () => {
-                sendGreeting();
-                // Model has had time to load during Landing animation
-                setGreetingExpression(800);
-                window.removeEventListener('ling-landing-complete', onLandingComplete);
+          // Helper: send auto-greeting (used when no previous history exists)
+          const sendGreetingIfNeeded = () => {
+            if (!greetingSentRef.current) {
+              const sendGreeting = () => {
+                if (greetingSentRef.current) return;
+                greetingSentRef.current = true;
+                setAiState('thinking-speaking');
+                const prefs = localStorage.getItem('ling-user-preferences');
+                const greetingMsg = prefs ? `[greeting:context]${prefs}` : '[greeting]';
+                gatewayConnector.sendChat(sessionKeyRef.current, greetingMsg).catch((err) => {
+                  if (import.meta.env.DEV) console.error('[WebSocketHandler] Auto-greeting failed:', err);
+                  setAiState('idle');
+                });
               };
-              window.addEventListener('ling-landing-complete', onLandingComplete);
+
+              if (sessionStorage.getItem('ling-visited')) {
+                sendGreeting();
+                setGreetingExpression(2000);
+              } else {
+                const onLandingComplete = () => {
+                  sendGreeting();
+                  setGreetingExpression(800);
+                  window.removeEventListener('ling-landing-complete', onLandingComplete);
+                };
+                window.addEventListener('ling-landing-complete', onLandingComplete);
+              }
             }
-          }
+          };
+
+          // Try to restore chat history from previous session
+          gatewayConnector.getChatHistory(sessionKeyRef.current)
+            .then((res) => {
+              const payload = res.payload as any;
+              if (payload?.messages?.length > 0) {
+                // Restore previous messages — skip auto-greeting
+                setMessagesRef.current(payload.messages);
+                greetingSentRef.current = true;
+                if (import.meta.env.DEV) console.log(`[WebSocketHandler] Restored ${payload.messages.length} messages from previous session`);
+                return;
+              }
+              // No existing history — send auto-greeting
+              sendGreetingIfNeeded();
+            })
+            .catch(() => {
+              // History fetch failed — still send greeting for a clean start
+              sendGreetingIfNeeded();
+            });
         })
         .catch((err) => {
           console.error('[WebSocketHandler] resolveSession failed:', err);
@@ -669,7 +693,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       });
       // Notify user
       toaster.create({
-        title: 'Connection restored',
+        title: i18next.t('notification.connectionRestored'),
         type: 'success',
         duration: 3000,
       });
@@ -809,6 +833,18 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       case 'text-input':
         if (msg.text) {
           const text = msg.text;
+          // Guest message limit check
+          if (!apiClient.getToken()) {
+            guestMessageCountRef.current++;
+            if (guestMessageCountRef.current > GUEST_MESSAGE_LIMIT) {
+              setBillingModalRef.current({
+                open: true,
+                reason: 'guest_limit' as any,
+                message: i18next.t('billing.guestLimitMessage'),
+              });
+              return;
+            }
+          }
           // Billing check before sending
           checkBilling().then((allowed) => {
             if (!allowed) return;
@@ -969,7 +1005,9 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           // immediately to avoid empty-state flash (same as initial page load path)
           setAiStateRef.current('thinking-speaking');
           setGreetingExpression(200); // Model is already loaded
-          gatewayConnector.sendChat(newSessionKey, '[greeting]').catch((err) => {
+          const newPrefs = localStorage.getItem('ling-user-preferences');
+          const newGreetingMsg = newPrefs ? `[greeting:context]${newPrefs}` : '[greeting]';
+          gatewayConnector.sendChat(newSessionKey, newGreetingMsg).catch((err) => {
             if (import.meta.env.DEV) console.error('[WebSocketHandler] New session greeting failed:', err);
             setAiStateRef.current('idle');
           });
