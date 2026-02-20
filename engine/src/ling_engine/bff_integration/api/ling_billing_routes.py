@@ -8,9 +8,12 @@ POST /api/billing/check-tool        — 检查特定工具配额
 
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from loguru import logger
+
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from ..auth.ling_deps import get_current_user, get_optional_user
 from ..auth.plan_gates import (
@@ -28,6 +31,8 @@ from ..database.ling_user_repository import LingUserRepository
 
 CREDIT_PER_MESSAGE = Decimal("1.0")
 
+limiter = Limiter(key_func=get_remote_address)
+
 
 class ToolCheckRequest(BaseModel):
     tool: str
@@ -37,7 +42,8 @@ def create_ling_billing_router(repo: LingUserRepository) -> APIRouter:
     router = APIRouter(prefix="/api/billing", tags=["billing"])
 
     @router.post("/check-and-deduct")
-    async def check_and_deduct(user: dict = Depends(get_current_user)):
+    @limiter.limit("60/minute")
+    async def check_and_deduct(request: Request, user: dict = Depends(get_current_user)):
         """Check quota and deduct credits (called before each message send)."""
         user_id = str(user["id"])
 
@@ -94,7 +100,8 @@ def create_ling_billing_router(repo: LingUserRepository) -> APIRouter:
         }
 
     @router.get("/balance")
-    async def get_balance(user: dict = Depends(get_current_user)):
+    @limiter.limit("30/minute")
+    async def get_balance(request: Request, user: dict = Depends(get_current_user)):
         """Get current user balance and plan information."""
         user_id = str(user["id"])
         limits = get_plan_limits(user)
@@ -106,7 +113,9 @@ def create_ling_billing_router(repo: LingUserRepository) -> APIRouter:
         }
 
     @router.post("/check-tool")
+    @limiter.limit("30/minute")
     async def check_tool(
+        request: Request,
         body: ToolCheckRequest,
         user: dict = Depends(get_current_user),
     ):

@@ -50,6 +50,8 @@ import { TermsPage } from "./pages/TermsPage";
 import CreditsDisplay from "./components/billing/CreditsDisplay";
 import PricingOverlay from "./components/billing/PricingOverlay";
 import InsufficientCreditsModal from "./components/billing/InsufficientCreditsModal";
+import { OnboardingTutorial, shouldShowOnboarding } from "./components/onboarding/OnboardingTutorial";
+import { MemoryPanel } from "./components/memory/MemoryPanel";
 import "./index.css";
 
 // Error Boundary
@@ -102,6 +104,7 @@ function MainContent(): JSX.Element {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [memoryOpen, setMemoryOpen] = useState(false);
   const [kbOffset, setKbOffset] = useState(0);
 
   // Contexts for keyboard shortcuts
@@ -207,7 +210,7 @@ function MainContent(): JSX.Element {
     {
       key: "escape",
       labelKey: "shortcuts.closeOverlay",
-      action: () => { setShortcutsOpen(false); setAboutOpen(false); },
+      action: () => { setShortcutsOpen(false); setAboutOpen(false); setMemoryOpen(false); },
       allowInInput: true,
     },
   ], [micOn, startMic, stopMic, createNewChat, t]);
@@ -292,6 +295,35 @@ function MainContent(): JSX.Element {
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+        </button>
+        <button
+          onClick={() => setMemoryOpen(true)}
+          aria-label="Memories"
+          title="Memories"
+          style={{
+            width: isMobile ? "44px" : "42px",
+            height: isMobile ? "44px" : "42px",
+            borderRadius: "50%",
+            background: memoryOpen ? "rgba(139, 92, 246, 0.4)" : "rgba(255, 255, 255, 0.08)",
+            border: memoryOpen ? "1px solid rgba(139, 92, 246, 0.6)" : "1px solid rgba(255, 255, 255, 0.12)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            padding: 0,
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.58-3.25 3.93" />
+            <path d="M8.24 4.47A4 4 0 0 1 12 2" />
+            <path d="M12 9v1" />
+            <path d="M4.93 4.93l.7.7" />
+            <path d="M19.07 4.93l-.7.7" />
+            <path d="M12 22c-4.97 0-9-2.69-9-6v-2c0-3.31 4.03-6 9-6s9 2.69 9 6v2c0 3.31-4.03 6-9 6z" />
           </svg>
         </button>
         <button
@@ -397,6 +429,7 @@ function MainContent(): JSX.Element {
       {/* ===== Layer 99: 快捷键帮助浮层 ===== */}
       <ShortcutsOverlay open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
       <AboutOverlay open={aboutOpen} onClose={() => setAboutOpen(false)} />
+      <MemoryPanel open={memoryOpen} onClose={() => setMemoryOpen(false)} />
     </div>
   );
 }
@@ -459,6 +492,10 @@ function MainApp() {
     return !sessionStorage.getItem('ling-visited');
   });
   const [landingExiting, setLandingExiting] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    // If landing is skipped (returning visitor), check onboarding immediately
+    return sessionStorage.getItem('ling-visited') ? shouldShowOnboarding() : false;
+  });
   useCheckoutCallback();
 
   const handleLandingComplete = useCallback(() => {
@@ -467,6 +504,10 @@ function MainApp() {
     window.dispatchEvent(new Event('ling-landing-complete'));
     setTimeout(() => {
       setShowLanding(false);
+      // After landing animation, check if onboarding should show
+      if (shouldShowOnboarding()) {
+        setShowOnboarding(true);
+      }
     }, 700);
   }, []);
 
@@ -523,6 +564,9 @@ function MainApp() {
 
       <PricingOverlay />
       <InsufficientCreditsModal />
+      {showOnboarding && (
+        <OnboardingTutorial onComplete={() => setShowOnboarding(false)} />
+      )}
       </UIProvider>
 
       <NetworkStatusBanner />

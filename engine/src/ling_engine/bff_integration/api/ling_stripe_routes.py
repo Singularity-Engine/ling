@@ -14,6 +14,9 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from loguru import logger
 
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
 from ..auth.ling_deps import get_current_user
 from ..database.ling_user_repository import LingUserRepository
 
@@ -82,13 +85,18 @@ def _get_or_create_customer(user: dict, repo: LingUserRepository) -> str:
 
 # ── 路由 ─────────────────────────────────────────────────────────
 
+limiter = Limiter(key_func=get_remote_address)
+
+
 def create_ling_stripe_router(repo: LingUserRepository) -> APIRouter:
     router = APIRouter(prefix="/api/stripe", tags=["stripe"])
 
     # ── 创建 Checkout Session ────────────────────────────────
 
     @router.post("/create-checkout")
+    @limiter.limit("10/minute")
     async def create_checkout(
+        request: Request,
         req: CreateCheckoutRequest,
         user: dict = Depends(get_current_user),
     ):
@@ -192,7 +200,8 @@ def create_ling_stripe_router(repo: LingUserRepository) -> APIRouter:
     # ── Customer Portal ──────────────────────────────────────
 
     @router.get("/portal")
-    async def customer_portal(user: dict = Depends(get_current_user)):
+    @limiter.limit("5/minute")
+    async def customer_portal(request: Request, user: dict = Depends(get_current_user)):
         if not user.get("stripe_customer_id"):
             raise HTTPException(400, "No Stripe account linked")
 

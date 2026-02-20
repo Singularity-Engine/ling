@@ -15,6 +15,9 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, EmailStr, field_validator
 from loguru import logger
 
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
 from ..auth.ling_auth import (
     hash_password,
     verify_password,
@@ -38,14 +41,14 @@ class RegisterRequest(BaseModel):
     @classmethod
     def validate_username(cls, v: str) -> str:
         if not re.match(r"^[a-zA-Z0-9_]{3,30}$", v):
-            raise ValueError("用户名需 3-30 个字符，仅含字母、数字、下划线")
+            raise ValueError("Username must be 3-30 characters, letters/numbers/underscore only")
         return v
 
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
         if len(v) < 8:
-            raise ValueError("密码至少 8 个字符")
+            raise ValueError("Password must be at least 8 characters")
         return v
 
 
@@ -111,6 +114,9 @@ def _tokens_for_user(user: dict) -> tuple[str, str]:
 
 # ── 路由 ─────────────────────────────────────────────────────────
 
+limiter = Limiter(key_func=get_remote_address)
+
+
 def create_ling_auth_router(db_manager=None) -> APIRouter:
     router = APIRouter(prefix="/api/auth", tags=["auth"])
     repo = LingUserRepository(db_manager)
@@ -119,12 +125,13 @@ def create_ling_auth_router(db_manager=None) -> APIRouter:
     # ── 注册 ─────────────────────────────────────────────────
 
     @router.post("/register", response_model=AuthResponse)
+    @limiter.limit("5/minute")
     async def register(req: RegisterRequest, request: Request):
         # 唯一性检查
         if repo.get_user_by_email(req.email):
-            raise HTTPException(status_code=409, detail="该邮箱已被注册")
+            raise HTTPException(status_code=409, detail="This email is already registered")
         if repo.get_user_by_username(req.username):
-            raise HTTPException(status_code=409, detail="该用户名已被使用")
+            raise HTTPException(status_code=409, detail="This username is already taken")
 
         password_hash = hash_password(req.password)
         user = repo.create_user(
@@ -141,13 +148,14 @@ def create_ling_auth_router(db_manager=None) -> APIRouter:
     # ── 登录 ─────────────────────────────────────────────────
 
     @router.post("/login", response_model=AuthResponse)
+    @limiter.limit("10/minute")
     async def login(req: LoginRequest, request: Request):
         user = repo.get_user_by_identifier(req.identifier)
         if not user:
-            raise HTTPException(status_code=401, detail="用户名/邮箱或密码错误")
+            raise HTTPException(status_code=401, detail="Invalid credentials")
 
         if not verify_password(req.password, user["password_hash"]):
-            raise HTTPException(status_code=401, detail="用户名/邮箱或密码错误")
+            raise HTTPException(status_code=401, detail="Invalid credentials")
 
         repo.update_last_login(str(user["id"]))
 
@@ -160,7 +168,7 @@ def create_ling_auth_router(db_manager=None) -> APIRouter:
     @router.post("/logout")
     async def logout():
         # JWT 无状态，客户端清除 token 即可
-        return {"message": "已登出"}
+        return {"message": "Logged out"}
 
     # ── 当前用户 ─────────────────────────────────────────────
 
@@ -171,14 +179,15 @@ def create_ling_auth_router(db_manager=None) -> APIRouter:
     # ── 刷新 token ───────────────────────────────────────────
 
     @router.post("/refresh", response_model=AuthResponse)
-    async def refresh(req: RefreshRequest):
+    @limiter.limit("10/minute")
+    async def refresh(req: RefreshRequest, request: Request):
         payload = verify_jwt_token(req.refresh_token)
         if not payload or payload.get("type") != "refresh":
-            raise HTTPException(status_code=401, detail="无效的 refresh token")
+            raise HTTPException(status_code=401, detail="Invalid refresh token")
 
         user = repo.get_user_by_id(payload["sub"])
         if not user:
-            raise HTTPException(status_code=401, detail="用户不存在")
+            raise HTTPException(status_code=401, detail="User not found")
 
         access, refresh = _tokens_for_user(user)
         return AuthResponse(token=access, refresh_token=refresh, user=_user_response(user))
@@ -198,13 +207,13 @@ def create_ling_auth_router(db_manager=None) -> APIRouter:
         user: dict = Depends(get_current_user),
     ):
         if user.get("role") == "owner":
-            raise HTTPException(status_code=403, detail="owner 账户不能删除")
+            raise HTTPException(status_code=403, detail="Owner account cannot be deleted")
 
         if not verify_password(req.password, user["password_hash"]):
-            raise HTTPException(status_code=401, detail="密码错误")
+            raise HTTPException(status_code=401, detail="Incorrect password")
 
         repo.delete_user(str(user["id"]))
         logger.info(f"用户删除账号: {user['username']} ({user['id']})")
-        return {"message": "账号已删除"}
+        return {"message": "Account deleted"}
 
     return router

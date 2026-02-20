@@ -1,5 +1,8 @@
-import { memo, useEffect, useCallback } from "react";
+import { memo, useEffect, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/context/auth-context";
+import { useUI } from "@/context/ui-context";
+import { apiClient } from "@/services/api-client";
 import packageJson from "../../../package.json";
 
 interface AboutOverlayProps {
@@ -31,8 +34,49 @@ const LINKS = [
 
 const TECH_STACK = "React + Vite + Chakra UI + Live2D";
 
+const PLAN_LABELS: Record<string, string> = {
+  free: "Spark (Free)",
+  stardust: "Stardust",
+  resonance: "Resonance",
+  eternal: "Eternal",
+};
+
+const PLAN_COLORS: Record<string, string> = {
+  free: "rgba(255,255,255,0.4)",
+  stardust: "#a78bfa",
+  resonance: "#7c3aed",
+  eternal: "#f59e0b",
+};
+
 export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
   const { t } = useTranslation();
+  const { user, logout } = useAuth();
+  const { setPricingOpen } = useUI();
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  const handleManageSubscription = useCallback(async () => {
+    setPortalLoading(true);
+    try {
+      const data = await apiClient.getPortalUrl();
+      window.open(data.portal_url, "_blank");
+    } catch {
+      // If no Stripe account linked, just open pricing
+      setPricingOpen(true);
+      onClose();
+    } finally {
+      setPortalLoading(false);
+    }
+  }, [setPricingOpen, onClose]);
+
+  const handleUpgrade = useCallback(() => {
+    setPricingOpen(true);
+    onClose();
+  }, [setPricingOpen, onClose]);
+
+  const handleLogout = useCallback(() => {
+    logout();
+    onClose();
+  }, [logout, onClose]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -196,6 +240,98 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
             marginBottom: "18px",
           }}
         />
+
+        {/* Account section */}
+        {user && (
+          <div
+            style={{
+              marginBottom: "18px",
+              padding: "12px 16px",
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              borderRadius: "12px",
+              textAlign: "left",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+              <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "13px", fontWeight: 600 }}>
+                {user.display_name || user.username}
+              </span>
+              <span
+                style={{
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "1px",
+                  color: PLAN_COLORS[user.plan] || PLAN_COLORS.free,
+                  background: `${PLAN_COLORS[user.plan] || PLAN_COLORS.free}15`,
+                  padding: "2px 8px",
+                  borderRadius: "6px",
+                }}
+              >
+                {PLAN_LABELS[user.plan] || "Free"}
+              </span>
+            </div>
+            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)", marginBottom: "10px" }}>
+              {user.email}
+            </div>
+            <div style={{ display: "flex", gap: "8px" }}>
+              {user.plan === "free" ? (
+                <button
+                  onClick={handleUpgrade}
+                  style={{
+                    flex: 1,
+                    padding: "6px 12px",
+                    borderRadius: "8px",
+                    border: "none",
+                    background: "rgba(139, 92, 246, 0.5)",
+                    color: "#fff",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "opacity 0.2s",
+                  }}
+                >
+                  Upgrade
+                </button>
+              ) : (
+                <button
+                  onClick={handleManageSubscription}
+                  disabled={portalLoading}
+                  style={{
+                    flex: 1,
+                    padding: "6px 12px",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: "transparent",
+                    color: "rgba(255,255,255,0.6)",
+                    fontSize: "12px",
+                    cursor: "pointer",
+                    transition: "opacity 0.2s",
+                    opacity: portalLoading ? 0.5 : 1,
+                  }}
+                >
+                  {portalLoading ? "..." : "Manage Subscription"}
+                </button>
+              )}
+              <button
+                onClick={handleLogout}
+                style={{
+                  padding: "6px 12px",
+                  borderRadius: "8px",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "transparent",
+                  color: "rgba(255,255,255,0.35)",
+                  fontSize: "12px",
+                  cursor: "pointer",
+                  transition: "opacity 0.2s",
+                }}
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Links */}
         <div

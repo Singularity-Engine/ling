@@ -20,13 +20,13 @@ interface AffinityTint {
 }
 
 const AFFINITY_TINTS: Record<string, AffinityTint> = {
-  hatred:      { color: '#ef4444', idleOpacity: 0.12, activeBoost: 0.8  },
-  hostile:     { color: '#f97316', idleOpacity: 0.08, activeBoost: 0.9  },
-  indifferent: { color: '#a3a3a3', idleOpacity: 0,    activeBoost: 1.0  },
-  neutral:     { color: '#8b5cf6', idleOpacity: 0,    activeBoost: 1.0  },
-  friendly:    { color: '#a78bfa', idleOpacity: 0.06, activeBoost: 1.05 },
-  close:       { color: '#c084fc', idleOpacity: 0.10, activeBoost: 1.1  },
-  devoted:     { color: '#f472b6', idleOpacity: 0.14, activeBoost: 1.15 },
+  hatred:      { color: '#dc2626', idleOpacity: 0.15, activeBoost: 0.75 },  // deep crimson
+  hostile:     { color: '#ea580c', idleOpacity: 0.10, activeBoost: 0.85 },  // burnt orange
+  indifferent: { color: '#78716c', idleOpacity: 0.04, activeBoost: 1.0  },  // cool gray
+  neutral:     { color: '#818cf8', idleOpacity: 0.05, activeBoost: 1.0  },  // soft indigo
+  friendly:    { color: '#60a5fa', idleOpacity: 0.09, activeBoost: 1.08 },  // sky blue
+  close:       { color: '#d946ef', idleOpacity: 0.14, activeBoost: 1.15 },  // vivid fuchsia
+  devoted:     { color: '#fb7185', idleOpacity: 0.18, activeBoost: 1.22 },  // warm rose
 };
 
 const DEFAULT_TINT: AffinityTint = AFFINITY_TINTS.neutral;
