@@ -111,7 +111,25 @@
     "newConversation": "New Conversation Started",
     "newChatHistory": "New chat history created",
     "historyDeleteSuccess": "History deleted successfully",
-    "historyDeleteFail": "Failed to delete history"
+    "historyDeleteFail": "Failed to delete history",
+    "connectionFailed": "Connection failed: {{error}}",
+    "connectionLost": "Connection lost, reconnecting...",
+    "reconnectFailed": "Reconnect failed. Tap the status icon to retry.",
+    "responseTimeout": "Response timed out. Try sending again.",
+    "connectionRestored": "Connection restored",
+    "voiceSynthUnavailable": "Voice synthesis temporarily unavailable",
+    "sendFailed": "Send failed: {{error}}",
+    "stopFailed": "Stop failed, please try again",
+    "voiceSendFailed": "Voice send failed: {{error}}",
+    "noSpeechDetected": "No speech detected, please try again",
+    "proactiveSpeakFailed": "Proactive speak failed",
+    "sessionLoaded": "Session loaded",
+    "loadSessionFailed": "Failed to load session: {{error}}",
+    "newConversationCreated": "New conversation created",
+    "createConversationFailed": "Failed to create conversation",
+    "loadSessionsFailed": "Failed to load sessions",
+    "sessionDeleted": "Session deleted",
+    "affinityReached": "Affinity reached {{milestone}}!"
   },
   "error": {
     "cameraApiNotSupported": "Camera API is not supported on this device",
@@ -127,7 +145,14 @@
     "failedCapture": "Failed to capture {{source}} frame",
     "failedParseWebSocket": "Failed to parse WebSocket message",
     "websocketNotOpen": "WebSocket is not open.",
-    "vadMisfire": "Voice detected but too brief. Try speaking louder/longer, or adjust settings (lower speech threshold, lower negative threshold, reduce redemption frames)."
+    "vadMisfire": "Voice detected but too brief. Try speaking louder/longer, or adjust settings (lower speech threshold, lower negative threshold, reduce redemption frames).",
+    "pageCrashTitle": "Something went wrong",
+    "pageCrashLine1": "Don't worry, a refresh usually fixes it.",
+    "pageCrashLine2": "If the problem persists, try clearing the cache.",
+    "refreshPage": "Refresh Page",
+    "clearCacheRefresh": "Clear Cache & Refresh",
+    "hideDetails": "Hide Details",
+    "showErrorDetails": "Show Error Details"
   },
   "aiState": {
     "idle": "idle",
@@ -243,7 +268,31 @@
     "welcomeChips": ["Hello!", "Tell me about yourself", "How's your day?", "Tell me a joke"],
     "postGreetingChips": ["What's new today?", "Help me brainstorm", "How's your day?", "Tell me a joke"],
     "scrollToLatest": "Scroll to latest",
-    "newMessages": "New messages"
+    "newMessages": "New messages",
+    "collapseChat": "Collapse chat",
+    "expandChat": "Expand chat"
+  },
+  "billing": {
+    "dailyLimitTitle": "You've reached today's limit",
+    "toolQuotaTitle": "Tool quota reached",
+    "insufficientCreditsTitle": "Insufficient credits",
+    "dailyLimitMessage": "We had such a great chat today! Upgrade your plan and I'll remember you forever.",
+    "toolQuotaMessage": "Upgrade your plan to use this tool more.",
+    "insufficientCreditsMessage": "You're running low on credits. Top up to continue using premium features.",
+    "affinityUpgradeMessage": "Ling really likes you now! Upgrade to unlock deeper conversations with Opus.",
+    "viewPlans": "View Plans",
+    "maybeLater": "Maybe Later"
+  },
+  "memory": {
+    "title": "Memories",
+    "subtitle": "Things I remember about you",
+    "noMemoriesTitle": "No memories yet",
+    "noMemoriesDesc": "As we chat, I'll remember the important things you tell me — your name, interests, and what matters to you.",
+    "loadError": "Could not load memories",
+    "loading": "Loading memories...",
+    "freeExpiry": "Free plan: memories expire after 7 days. <bold>Upgrade to keep them forever.</bold>",
+    "stardustExpiry": "Stardust plan: memories kept for 90 days.",
+    "permanentMemory": "Your memories are permanent."
   },
   "about": {
     "name": "Ling",

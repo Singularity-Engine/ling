@@ -111,7 +111,25 @@
     "newConversation": "新对话已开始",
     "newChatHistory": "新聊天历史已创建",
     "historyDeleteSuccess": "历史记录删除成功",
-    "historyDeleteFail": "删除历史记录失败"
+    "historyDeleteFail": "删除历史记录失败",
+    "connectionFailed": "连接失败: {{error}}",
+    "connectionLost": "连接断开，正在重连…",
+    "reconnectFailed": "重连失败，请点击右上角状态图标手动重试",
+    "responseTimeout": "AI 响应似乎已超时，可以尝试重新发送",
+    "connectionRestored": "连接已恢复",
+    "voiceSynthUnavailable": "语音合成暂时不可用",
+    "sendFailed": "发送失败: {{error}}",
+    "stopFailed": "停止失败，请重试",
+    "voiceSendFailed": "语音发送失败: {{error}}",
+    "noSpeechDetected": "未识别到语音，请重试",
+    "proactiveSpeakFailed": "主动发言失败",
+    "sessionLoaded": "会话已加载",
+    "loadSessionFailed": "加载会话失败: {{error}}",
+    "newConversationCreated": "新对话已创建",
+    "createConversationFailed": "创建新对话失败",
+    "loadSessionsFailed": "加载会话列表失败",
+    "sessionDeleted": "会话已删除",
+    "affinityReached": "好感度达到 {{milestone}}！"
   },
   "error": {
     "cameraApiNotSupported": "此设备不支持摄像头API",
@@ -127,7 +145,14 @@
     "failedCapture": "捕获{{source}}帧失败",
     "failedParseWebSocket": "解析WebSocket消息失败",
     "websocketNotOpen": "WebSocket未连接",
-    "vadMisfire": "检测到语音但过于简短，请尝试提高音量或说得更久一些，或调整识别设置（降低语音识别阈值、降低负面语音阈值、减少验证帧数）"
+    "vadMisfire": "检测到语音但过于简短，请尝试提高音量或说得更久一些，或调整识别设置（降低语音识别阈值、降低负面语音阈值、减少验证帧数）",
+    "pageCrashTitle": "页面出了点问题",
+    "pageCrashLine1": "别担心，刷新一下通常就好了。",
+    "pageCrashLine2": "如果问题持续出现，可以尝试清除缓存。",
+    "refreshPage": "刷新页面",
+    "clearCacheRefresh": "清除缓存并刷新",
+    "hideDetails": "收起详情",
+    "showErrorDetails": "查看错误详情"
   },
   "aiState": {
     "idle": "空闲",
@@ -243,7 +268,31 @@
     "welcomeChips": ["你好！", "介绍一下你自己", "今天心情怎么样", "讲个笑话吧"],
     "postGreetingChips": ["今天有什么新鲜事？", "帮我想个创意", "今天心情怎么样", "讲个笑话吧"],
     "scrollToLatest": "滚动到最新消息",
-    "newMessages": "新消息"
+    "newMessages": "新消息",
+    "collapseChat": "收起对话",
+    "expandChat": "展开对话"
+  },
+  "billing": {
+    "dailyLimitTitle": "今日聊天次数已用完",
+    "toolQuotaTitle": "工具配额已用完",
+    "insufficientCreditsTitle": "积分不足",
+    "dailyLimitMessage": "今天聊得真开心！升级方案，我会永远记住你。",
+    "toolQuotaMessage": "升级方案以使用更多此工具。",
+    "insufficientCreditsMessage": "积分即将用完，充值以继续使用高级功能。",
+    "affinityUpgradeMessage": "灵现在很喜欢你哦！升级解锁更深入的 Opus 对话。",
+    "viewPlans": "查看方案",
+    "maybeLater": "以后再说"
+  },
+  "memory": {
+    "title": "记忆",
+    "subtitle": "我记住的关于你的事",
+    "noMemoriesTitle": "还没有记忆",
+    "noMemoriesDesc": "随着我们的聊天，我会记住你告诉我的重要事情——你的名字、兴趣和你在乎的事。",
+    "loadError": "无法加载记忆",
+    "loading": "正在加载记忆...",
+    "freeExpiry": "免费方案：记忆 7 天后过期。<bold>升级以永久保存。</bold>",
+    "stardustExpiry": "星尘方案：记忆保留 90 天。",
+    "permanentMemory": "你的记忆是永久的。"
   },
   "about": {
     "name": "灵 · Ling",

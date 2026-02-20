@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, Component, ErrorInfo, ReactNode } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import i18next from "i18next";
 import { LandingAnimation } from "./components/landing/LandingAnimation";
 import { AiStateProvider } from "./context/ai-state-context";
 import { Live2DConfigProvider } from "./context/live2d-config-context";
@@ -67,23 +68,23 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
         <div style={{ width: '100vw', height: '100vh', background: '#0a0015', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}>
           <div style={{ maxWidth: 440, textAlign: 'center', padding: 32 }}>
             <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.8 }}>:(</div>
-            <h2 style={{ color: '#c4b5fd', marginBottom: 8, fontSize: 20, fontWeight: 600 }}>页面出了点问题</h2>
+            <h2 style={{ color: '#c4b5fd', marginBottom: 8, fontSize: 20, fontWeight: 600 }}>{i18next.t('error.pageCrashTitle')}</h2>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, marginBottom: 24, lineHeight: 1.6 }}>
-              别担心，刷新一下通常就好了。<br />如果问题持续出现，可以尝试清除缓存。
+              {i18next.t('error.pageCrashLine1')}<br />{i18next.t('error.pageCrashLine2')}
             </p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
               <button onClick={() => window.location.reload()} style={{ ...btnBase, background: 'rgba(139,92,246,0.5)', color: '#fff' }}>
-                刷新页面
+                {i18next.t('error.refreshPage')}
               </button>
               <button onClick={() => { localStorage.clear(); window.location.reload(); }} style={{ ...btnBase, background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                清除缓存并刷新
+                {i18next.t('error.clearCacheRefresh')}
               </button>
             </div>
             <button
               onClick={() => this.setState({ showDetail: !this.state.showDetail })}
               style={{ marginTop: 20, background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: 12, cursor: 'pointer' }}
             >
-              {this.state.showDetail ? '收起详情' : '查看错误详情'}
+              {this.state.showDetail ? i18next.t('error.hideDetails') : i18next.t('error.showErrorDetails')}
             </button>
             {this.state.showDetail && (
               <pre style={{ marginTop: 12, textAlign: 'left', color: 'rgba(255,107,107,0.7)', fontSize: 11, fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all', maxHeight: 200, overflow: 'auto', background: 'rgba(0,0,0,0.3)', padding: 12, borderRadius: 8 }}>
@@ -274,9 +275,9 @@ function MainContent(): JSX.Element {
         <ConnectionStatus />
         <button
           onClick={toggleChat}
-          aria-label={chatExpanded ? "收起对话" : "展开对话"}
+          aria-label={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}
           aria-pressed={chatExpanded}
-          title={chatExpanded ? "收起对话" : "展开对话"}
+          title={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}
           style={{
             width: isMobile ? "44px" : "42px",
             height: isMobile ? "44px" : "42px",
@@ -391,7 +392,7 @@ function MainContent(): JSX.Element {
           <div
             role="button"
             tabIndex={0}
-            aria-label="展开对话"
+            aria-label={t("ui.expandChat")}
             style={{
               pointerEvents: "auto",
               display: "flex",

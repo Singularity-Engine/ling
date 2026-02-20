@@ -33,11 +33,11 @@ def create_ling_tts_router() -> APIRouter:
     @router.post("/generate")
     async def generate_tts(req: TTSRequest, user: dict | None = Depends(get_optional_user)):
         if not FISH_TTS_API_KEY:
-            raise HTTPException(500, "TTS 服务未配置")
+            raise HTTPException(500, "TTS service not configured")
 
         # 功能门控：voice 功能检查
         if user and not check_feature(user, "voice"):
-            raise HTTPException(403, "当前方案不支持语音功能，请升级")
+            raise HTTPException(403, "Voice is not available on your plan. Please upgrade.")
 
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
@@ -57,7 +57,7 @@ def create_ling_tts_router() -> APIRouter:
 
                 if resp.status_code != 200:
                     logger.error(f"Fish Audio API 错误: {resp.status_code} {resp.text[:200]}")
-                    raise HTTPException(502, "TTS 服务暂不可用")
+                    raise HTTPException(502, "TTS service unavailable")
 
                 content_type = resp.headers.get("content-type", "audio/mpeg")
                 return Response(
@@ -67,7 +67,7 @@ def create_ling_tts_router() -> APIRouter:
                 )
 
         except httpx.TimeoutException:
-            raise HTTPException(504, "TTS 服务超时")
+            raise HTTPException(504, "TTS service timeout")
         except HTTPException:
             raise
         except Exception as e:

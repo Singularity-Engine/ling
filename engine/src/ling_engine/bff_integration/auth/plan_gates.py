@@ -11,6 +11,7 @@ owner/admin 跳过所有限制。
 - 记忆深度分层
 """
 
+import datetime
 import os
 import time
 from decimal import Decimal
@@ -109,18 +110,39 @@ CREDIT_COSTS: dict[str, int] = {
     "code_exec": 2,       # claude_code execution
 }
 
-# ── 内存计数器（后续可迁移到 Redis） ────────────────────────────
+# ── Redis-backed counters with in-memory fallback ────────────────
 
-_daily_counters: dict[str, tuple[str, int]] = {}  # user_id -> (date_str, count)
-_tool_counters: dict[str, dict[str, tuple[str, int]]] = {}  # user_id -> {tool -> (date_str, count)}
+_daily_counters: dict[str, tuple[str, int]] = {}  # fallback: user_id -> (date_str, count)
+_tool_counters: dict[str, dict[str, tuple[str, int]]] = {}  # fallback: user_id -> {tool -> (date_str, count)}
+
+_DAY_SECONDS = 86400
 
 
 def _today() -> str:
-    import datetime
     return datetime.date.today().isoformat()
 
 
+def _get_redis():
+    """Try to get RedisManager; return None if unavailable."""
+    try:
+        from ...database.pgsql.database_manager import get_redis_manager
+        rds = get_redis_manager()
+        rds.client.ping()
+        return rds
+    except Exception:
+        return None
+
+
 def _get_daily_count(user_id: str) -> int:
+    rds = _get_redis()
+    if rds:
+        try:
+            key = f"ling:gates:daily:{user_id}:{_today()}"
+            val = rds.client.get(key)
+            return int(val) if val else 0
+        except Exception:
+            pass
+    # fallback
     entry = _daily_counters.get(user_id)
     if not entry or entry[0] != _today():
         return 0
@@ -128,6 +150,16 @@ def _get_daily_count(user_id: str) -> int:
 
 
 def _increment_daily_count(user_id: str) -> int:
+    rds = _get_redis()
+    if rds:
+        try:
+            key = f"ling:gates:daily:{user_id}:{_today()}"
+            new_val = rds.client.incr(key)
+            rds.client.expire(key, _DAY_SECONDS)
+            return int(new_val)
+        except Exception:
+            pass
+    # fallback
     today = _today()
     entry = _daily_counters.get(user_id)
     if not entry or entry[0] != today:
@@ -139,6 +171,15 @@ def _increment_daily_count(user_id: str) -> int:
 
 
 def _get_tool_count(user_id: str, tool: str) -> int:
+    rds = _get_redis()
+    if rds:
+        try:
+            key = f"ling:gates:tool:{user_id}:{tool}:{_today()}"
+            val = rds.client.get(key)
+            return int(val) if val else 0
+        except Exception:
+            pass
+    # fallback
     user_tools = _tool_counters.get(user_id, {})
     entry = user_tools.get(tool)
     if not entry or entry[0] != _today():
@@ -147,6 +188,16 @@ def _get_tool_count(user_id: str, tool: str) -> int:
 
 
 def _increment_tool_count(user_id: str, tool: str) -> int:
+    rds = _get_redis()
+    if rds:
+        try:
+            key = f"ling:gates:tool:{user_id}:{tool}:{_today()}"
+            new_val = rds.client.incr(key)
+            rds.client.expire(key, _DAY_SECONDS)
+            return int(new_val)
+        except Exception:
+            pass
+    # fallback
     today = _today()
     if user_id not in _tool_counters:
         _tool_counters[user_id] = {}

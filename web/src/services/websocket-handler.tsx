@@ -32,6 +32,7 @@ import { isMobileViewport } from '@/constants/breakpoints';
 import { useAuth } from '@/context/auth-context';
 import { useUI } from '@/context/ui-context';
 import { apiClient } from '@/services/api-client';
+import i18next from 'i18next';
 
 // ─── Gateway configuration ──────────────────────────────────────
 
@@ -188,7 +189,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const affinityContext = useAffinity();
   const { startTool, updateTool, completeTool, failTool } = useToolState();
   const { markSynthStart, markSynthDone, markSynthError, markPlayStart, markPlayDone, reset: resetTTSState } = useTTSState();
-  const { updateCredits } = useAuth();
+  const { updateCredits, user } = useAuth();
   const { setBillingModal } = useUI();
 
   useEffect(() => {
@@ -233,6 +234,9 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const sessionKeyRef = useRef(getVisitorSessionKey());
 
   // ─── Billing check ──────────────────────────────────────────
+  const userRef = useRef(user);
+  useEffect(() => { userRef.current = user; }, [user]);
+
   const billingInFlightRef = useRef(false);
   const updateCreditsRef = useRef(updateCredits);
   useEffect(() => { updateCreditsRef.current = updateCredits; }, [updateCredits]);
@@ -427,7 +431,20 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       case 'affinity-milestone':
         if (affinityContext) {
           const mMsg = message as GatewayMessageEvent;
-          affinityContext.showMilestone(message.content || `好感度达到 ${mMsg.milestone}！`);
+          affinityContext.showMilestone(message.content || i18next.t('notification.affinityReached', { milestone: mMsg.milestone }));
+          // Upgrade prompt for free users at 'friendly' milestone
+          if ((mMsg as any).level === 'friendly' || mMsg.milestone === 'friendly') {
+            const currentUser = userRef.current;
+            if (currentUser && (currentUser as any).plan === 'free') {
+              setTimeout(() => {
+                setBillingModalRef.current({
+                  open: true,
+                  reason: 'affinity_milestone' as any,
+                  message: i18next.t('billing.affinityUpgradeMessage'),
+                });
+              }, 3000);
+            }
+          }
         }
         break;
       case 'emotion-expression':
@@ -534,7 +551,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     }).catch((err) => {
       console.error('[WebSocketHandler] Gateway connection failed:', err);
       toaster.create({
-        title: `Gateway 连接失败: ${err.message}`,
+        title: i18next.t('notification.connectionFailed', { error: err.message }),
         type: 'error',
         duration: 5000,
       });
@@ -559,7 +576,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       // Issue 1: Notify user when connection drops and auto-reconnect starts
       if (state === 'RECONNECTING' && prevGwState === 'CONNECTED') {
         toaster.create({
-          title: '连接断开，正在重连…',
+          title: i18next.t('notification.connectionLost'),
           type: 'warning',
           duration: 4000,
         });
@@ -568,7 +585,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       // Issue 2: Notify user when all reconnect attempts are exhausted
       if (state === 'DISCONNECTED' && prevGwState === 'RECONNECTING') {
         toaster.create({
-          title: '重连失败，请点击右上角状态图标手动重试',
+          title: i18next.t('notification.reconnectFailed'),
           type: 'error',
           duration: 8000,
         });
@@ -595,7 +612,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       if (lastActivity > 0 && Date.now() - lastActivity > RESPONSE_TIMEOUT_MS) {
         lastActivity = 0; // Don't re-fire
         toaster.create({
-          title: 'AI 响应似乎已超时，可以尝试重新发送',
+          title: i18next.t('notification.responseTimeout'),
           type: 'warning',
           duration: 5000,
         });
@@ -652,7 +669,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       });
       // Notify user
       toaster.create({
-        title: '连接已恢复',
+        title: 'Connection restored',
         type: 'success',
         duration: 3000,
       });
@@ -748,7 +765,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
               if (!ttsErrorShownRef.current) {
                 ttsErrorShownRef.current = true;
                 toaster.create({
-                  title: '语音合成暂时不可用',
+                  title: i18next.t('notification.voiceSynthUnavailable'),
                   type: 'warning',
                   duration: 4000,
                 });
@@ -795,7 +812,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             gatewayConnector.sendChat(sessionKeyRef.current, text).catch((err) => {
               console.error('[Gateway] sendChat failed:', err);
               toaster.create({
-                title: `发送失败: ${err.message}`,
+                title: i18next.t('notification.sendFailed', { error: err.message }),
                 type: 'error',
                 duration: 3000,
               });
@@ -816,7 +833,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           gatewayConnector.abortRun(runId).catch((err) => {
             console.error('[Gateway] abortRun failed:', err);
             toaster.create({
-              title: '停止失败，请重试',
+              title: i18next.t('notification.stopFailed'),
               type: 'error',
               duration: 3000,
             });
@@ -845,7 +862,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             gatewayConnector.sendChat(sessionKeyRef.current, trimmed).catch((err) => {
               console.error('[Gateway] sendChat (ASR) failed:', err);
               toaster.create({
-                title: `语音发送失败: ${err.message}`,
+                title: i18next.t('notification.voiceSendFailed', { error: err.message }),
                 type: 'error',
                 duration: 3000,
               });
@@ -855,7 +872,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         } else {
           console.warn('[ASR] No transcript available from speech recognition');
           toaster.create({
-            title: '未识别到语音，请重试',
+            title: i18next.t('notification.noSpeechDetected'),
             type: 'info',
             duration: 3000,
           });
@@ -873,7 +890,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         ).catch((err) => {
           console.error('[Gateway] proactive speak failed:', err);
           toaster.create({
-            title: '主动发言失败',
+            title: i18next.t('notification.proactiveSpeakFailed'),
             type: 'error',
             duration: 3000,
           });
@@ -896,14 +913,14 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
               setMessagesRef.current([]);
             }
             toaster.create({
-              title: '会话已加载',
+              title: i18next.t('notification.sessionLoaded'),
               type: 'success',
               duration: 2000,
             });
           }).catch((err) => {
             console.error('[Gateway] getChatHistory failed:', err);
             toaster.create({
-              title: `加载会话失败: ${err.message}`,
+              title: i18next.t('notification.loadSessionFailed', { error: err.message }),
               type: 'error',
               duration: 2000,
             });
@@ -927,7 +944,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           setAiStateRef.current('idle');
           setSubtitleTextRef.current('');
           toaster.create({
-            title: '新对话已创建',
+            title: i18next.t('notification.newConversationCreated'),
             type: 'success',
             duration: 2000,
           });
@@ -942,7 +959,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         }).catch((err) => {
           console.error('[Gateway] resolveSession failed:', err);
           toaster.create({
-            title: '创建新对话失败',
+            title: i18next.t('notification.createConversationFailed'),
             type: 'error',
             duration: 3000,
           });
@@ -964,7 +981,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         }).catch((err) => {
           console.error('[Gateway] listSessions failed:', err);
           toaster.create({
-            title: '加载会话列表失败',
+            title: i18next.t('notification.loadSessionsFailed'),
             type: 'error',
             duration: 3000,
           });
@@ -978,7 +995,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             prev.filter((h: HistoryInfo) => h.uid !== msg.history_uid)
           );
           toaster.create({
-            title: '会话已删除',
+            title: i18next.t('notification.sessionDeleted'),
             type: 'success',
             duration: 2000,
           });
@@ -1035,14 +1052,14 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           console.error('[WebSocketHandler] Manual reconnect resolveSession failed:', err);
         });
         toaster.create({
-          title: '连接已恢复',
+          title: i18next.t('notification.connectionRestored'),
           type: 'success',
           duration: 3000,
         });
       }).catch((err) => {
         console.error('[WebSocketHandler] Manual reconnect failed:', err);
         toaster.create({
-          title: `重连失败: ${err.message}`,
+          title: i18next.t('notification.connectionFailed', { error: err.message }),
           type: 'error',
           duration: 5000,
         });

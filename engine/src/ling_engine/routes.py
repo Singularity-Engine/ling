@@ -109,6 +109,12 @@ async def create_routes(default_context_cache: ServiceContext) -> APIRouter:
         ling_billing_router = create_ling_billing_router(_get_repo())
         router.include_router(ling_billing_router)
         logger.info("✅ 灵计费路由已注册 (/api/billing/*)")
+
+        # 记忆路由 (EverMemOS proxy)
+        from .bff_integration.api.ling_memory_routes import create_ling_memory_router
+        ling_memory_router = create_ling_memory_router()
+        router.include_router(ling_memory_router)
+        logger.info("✅ 灵记忆路由已注册 (/api/memory/*)")
     except Exception as e:
         logger.error(f"❌ 注册灵路由失败: {e}")
         import traceback

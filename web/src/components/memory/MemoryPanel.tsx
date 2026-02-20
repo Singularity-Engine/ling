@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiClient } from '@/services/api-client';
 import { useAuth } from '@/context/auth-context';
 
@@ -22,6 +23,7 @@ interface MemoryPanelProps {
 }
 
 export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [memories, setMemories] = useState<MemoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -32,13 +34,10 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
     setLoading(true);
     setError('');
     try {
-      const data = await apiClient.get<{ memories: MemoryEntry[] }>(
-        '/api/billing/balance', // Reuse balance endpoint for now — we'll add a memory endpoint later
-      );
-      // For now, show a placeholder until memory API is available
-      setMemories([]);
+      const data = await apiClient.get<{ memories: MemoryEntry[] }>('/api/memory/list');
+      setMemories(data.memories || []);
     } catch (err) {
-      setError('Could not load memories');
+      setError(t('memory.loadError'));
     } finally {
       setLoading(false);
     }
@@ -110,10 +109,10 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
         >
           <div>
             <h3 style={{ color: '#fff', fontSize: '16px', fontWeight: 700, margin: 0 }}>
-              Memories
+              {t('memory.title')}
             </h3>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '4px 0 0' }}>
-              Things I remember about you
+              {t('memory.subtitle')}
             </p>
           </div>
           <button
@@ -142,7 +141,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
         >
           {loading && (
             <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.3)' }}>
-              Loading memories...
+              {t('memory.loading')}
             </div>
           )}
 
@@ -158,10 +157,10 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
                 {'\uD83E\uDDE0'}
               </div>
               <h4 style={{ color: 'rgba(255,255,255,0.6)', fontSize: '16px', fontWeight: 600, margin: '0 0 8px' }}>
-                No memories yet
+                {t('memory.noMemoriesTitle')}
               </h4>
               <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px', lineHeight: 1.6 }}>
-                As we chat, I'll remember the important things you tell me — your name, interests, and what matters to you.
+                {t('memory.noMemoriesDesc')}
               </p>
             </div>
           )}
@@ -205,10 +204,14 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
         >
           <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '11px' }}>
             {user?.plan === 'free'
-              ? 'Free plan: memories expire after 7 days. Upgrade to keep them forever.'
+              ? <>{t('memory.freeExpiry', { interpolation: { escapeValue: false } }).split('<bold>').map((part, i) => {
+                  if (i === 0) return part;
+                  const [bold, rest] = part.split('</bold>');
+                  return <span key={i}><strong style={{ color: 'rgba(196, 181, 253, 0.6)' }}>{bold}</strong>{rest}</span>;
+                })}</>
               : user?.plan === 'stardust'
-                ? 'Stardust plan: memories kept for 90 days.'
-                : 'Your memories are permanent.'}
+                ? t('memory.stardustExpiry')
+                : t('memory.permanentMemory')}
           </span>
         </div>
       </div>

@@ -215,6 +215,16 @@ export const ChatArea = memo(() => {
   const isGreeting = dedupedMessages.length === 1 && dedupedMessages[0].role === "ai";
 
   const welcomeChips = t("ui.welcomeChips", { returnObjects: true }) as string[];
+  const postGreetingChips = t("ui.postGreetingChips", { returnObjects: true }) as string[];
+
+  // Time-based welcome title
+  const welcomeTitle = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return t("ui.welcomeTitleMorning");
+    if (hour >= 12 && hour < 18) return t("ui.welcomeTitleAfternoon");
+    if (hour >= 18 && hour < 23) return t("ui.welcomeTitleEvening");
+    return t("ui.welcomeTitle");
+  }, [t]);
 
   const isConnected = wsState === "OPEN";
 
@@ -294,7 +304,7 @@ export const ChatArea = memo(() => {
                 lineHeight: "1.5",
               }}
             >
-              {t("ui.welcomeTitle")}
+              {welcomeTitle}
             </span>
             <span
               style={{

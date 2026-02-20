@@ -5,9 +5,11 @@
  * CTA 按钮引导用户查看定价页面。
  */
 
+import { useTranslation } from 'react-i18next';
 import { useUI, type BillingModalState } from '@/context/ui-context';
 
 const InsufficientCreditsModal: React.FC = () => {
+  const { t } = useTranslation();
   const { billingModal, closeBillingModal, setPricingOpen } = useUI();
 
   if (!billingModal.open) return null;
@@ -17,15 +19,15 @@ const InsufficientCreditsModal: React.FC = () => {
 
   const icon = isDailyLimit ? '\u23F0' : '\u2726'; // clock or sparkle
   const title = isDailyLimit
-    ? "You've reached today's limit"
+    ? t('billing.dailyLimitTitle')
     : isToolQuota
-      ? 'Tool quota reached'
-      : 'Insufficient credits';
+      ? t('billing.toolQuotaTitle')
+      : t('billing.insufficientCreditsTitle');
   const defaultMessage = isDailyLimit
-    ? "We had a great chat today! Upgrade to keep talking — and I'll remember you forever."
+    ? t('billing.dailyLimitMessage')
     : isToolQuota
-      ? 'Upgrade your plan to use this tool more.'
-      : "You're running low on credits. Top up to continue using premium features.";
+      ? t('billing.toolQuotaMessage')
+      : t('billing.insufficientCreditsMessage');
 
   return (
     <div
@@ -104,7 +106,7 @@ const InsufficientCreditsModal: React.FC = () => {
               transition: 'all 0.2s',
             }}
           >
-            View Plans
+            {t('billing.viewPlans')}
           </button>
           <button
             onClick={closeBillingModal}
@@ -120,7 +122,7 @@ const InsufficientCreditsModal: React.FC = () => {
               transition: 'all 0.2s',
             }}
           >
-            Maybe Later
+            {t('billing.maybeLater')}
           </button>
         </div>
       </div>
