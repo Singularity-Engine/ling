@@ -70,7 +70,7 @@ function useThrottledValue(source: string): string {
 }
 
 // Reusable suggestion chips strip
-function SuggestionChips({
+const SuggestionChips = memo(function SuggestionChips({
   chips,
   onChipClick,
   centered,
@@ -115,7 +115,8 @@ function SuggestionChips({
       ))}
     </div>
   );
-}
+});
+SuggestionChips.displayName = "SuggestionChips";
 
 export const ChatArea = memo(() => {
   const { messages, fullResponse, appendHumanMessage } = useChatHistory();
@@ -180,7 +181,15 @@ export const ChatArea = memo(() => {
     setHasNewMessage(false);
   }, []);
 
-  const showTyping = isThinkingSpeaking && !isStreaming;
+  // Bridge the gap between "message sent" and "AI starts thinking":
+  // show typing dots immediately when the last message is from the user.
+  const awaitingReply = useMemo(() => {
+    if (isThinkingSpeaking || isStreaming || !isConnected) return false;
+    const lastMsg = dedupedMessages[dedupedMessages.length - 1];
+    return lastMsg?.role === "human";
+  }, [dedupedMessages, isThinkingSpeaking, isStreaming, isConnected]);
+
+  const showTyping = (isThinkingSpeaking || awaitingReply) && !isStreaming;
 
   // Memoize dedup so it only recalculates when messages change, not on every streaming delta
   const dedupedMessages = useMemo(
@@ -235,6 +244,36 @@ export const ChatArea = memo(() => {
       sendMessage({ type: "text-input", text, images: [] });
     },
     [appendHumanMessage, sendMessage, isConnected]
+  );
+
+  // Memoize the message list so .map() is skipped during streaming.
+  // displayResponse changes ~60fps triggering ChatArea re-renders,
+  // but dedupedMessages is unchanged — this avoids recreating 200 VDOM nodes per frame.
+  const messageElements = useMemo(
+    () =>
+      dedupedMessages.map((msg, i) => {
+        const prev = dedupedMessages[i - 1];
+        const showSep =
+          prev &&
+          msg.timestamp &&
+          prev.timestamp &&
+          shouldShowSeparator(prev.timestamp, msg.timestamp);
+        return (
+          <div key={msg.id}>
+            {showSep && <TimeSeparator timestamp={msg.timestamp} />}
+            <ChatBubble
+              role={msg.role === "human" ? "user" : "assistant"}
+              content={msg.content}
+              timestamp={msg.timestamp}
+              isToolCall={msg.type === "tool_call_status"}
+              toolName={msg.tool_name}
+              toolStatus={msg.status}
+              isGreeting={i === 0 && msg.role === "ai" && isGreeting}
+            />
+          </div>
+        );
+      }),
+    [dedupedMessages, isGreeting]
   );
 
   return (
@@ -320,24 +359,7 @@ export const ChatArea = memo(() => {
           <SuggestionChips chips={welcomeChips} onChipClick={handleChipClick} centered />
         </div>
       )}
-      {dedupedMessages.map((msg, i) => {
-        const prev = dedupedMessages[i - 1];
-        const showSep = prev && msg.timestamp && prev.timestamp && shouldShowSeparator(prev.timestamp, msg.timestamp);
-        return (
-          <div key={msg.id}>
-            {showSep && <TimeSeparator timestamp={msg.timestamp} />}
-            <ChatBubble
-              role={msg.role === "human" ? "user" : "assistant"}
-              content={msg.content}
-              timestamp={msg.timestamp}
-              isToolCall={msg.type === "tool_call_status"}
-              toolName={msg.tool_name}
-              toolStatus={msg.status}
-              isGreeting={i === 0 && msg.role === "ai" && isGreeting}
-            />
-          </div>
-        );
-      })}
+      {messageElements}
       {/* Suggestion chips: stay visible after greeting until user sends first message */}
       {isGreeting && !emptyExiting && (
         <SuggestionChips chips={welcomeChips} onChipClick={handleChipClick} baseDelay={0.2} />

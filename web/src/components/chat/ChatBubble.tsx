@@ -1,4 +1,4 @@
-import { memo, useState, useCallback, useRef, type ReactNode } from "react";
+import { memo, useMemo, useState, useCallback, useRef, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -45,7 +45,7 @@ function extractTextContent(node: ReactNode): string {
   return "";
 }
 
-function CodeBlockHeader({ lang, code }: { lang: string | null; code: string }) {
+const CodeBlockHeader = memo(function CodeBlockHeader({ lang, code }: { lang: string | null; code: string }) {
   const [copied, setCopied] = useState(false);
   const label = lang ? (LANG_LABELS[lang.toLowerCase()] || lang) : null;
 
@@ -68,7 +68,8 @@ function CodeBlockHeader({ lang, code }: { lang: string | null; code: string }) 
       </button>
     </div>
   );
-}
+});
+CodeBlockHeader.displayName = "CodeBlockHeader";
 
 function CodeBlock({ children, ...props }: React.HTMLAttributes<HTMLPreElement> & { children?: ReactNode }) {
   const lang = extractLang(children);
@@ -162,6 +163,17 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
     });
   }, [content, t]);
 
+  // Memoize markdown rendering — ReactMarkdown + plugins are expensive.
+  // Avoids re-parsing when only non-content props (isStreaming, etc.) change.
+  const renderedMarkdown = useMemo(
+    () => (
+      <ReactMarkdown remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins} components={mdComponents}>
+        {content}
+      </ReactMarkdown>
+    ),
+    [content]
+  );
+
   if (isToolCall && toolName) {
     return (
       <div style={{ padding: "0 16px", marginBottom: "10px", maxWidth: "90%" }}>
@@ -234,7 +246,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
               </span>
             ) : (
               <div className="md-content" style={{ fontSize: "14px", color: "rgba(255,255,255,0.88)", lineHeight: 1.7, letterSpacing: "0.3px" }}>
-                <ReactMarkdown remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins} components={mdComponents}>{content}</ReactMarkdown>
+                {renderedMarkdown}
                 {isStreaming && (
                   <span
                     style={{

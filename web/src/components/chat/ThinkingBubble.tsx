@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import { TypingIndicator } from "./TypingIndicator";
@@ -34,6 +34,12 @@ export const ThinkingBubble = memo(({ content, isThinking, isStreaming }: Thinki
   // so we can play the dots fade-out animation
   const wasThinkingRef = useRef(false);
   const [showDotsExit, setShowDotsExit] = useState(false);
+
+  // Memoize markdown rendering — avoids re-parsing when only isThinking/showDotsExit change
+  const renderedMarkdown = useMemo(
+    () => <ReactMarkdown>{content}</ReactMarkdown>,
+    [content]
+  );
 
   useEffect(() => {
     if (isThinking) {
@@ -102,7 +108,7 @@ export const ThinkingBubble = memo(({ content, isThinking, isStreaming }: Thinki
                 animation: showDotsExit ? "textFadeIn 0.3s ease-out" : undefined,
               }}
             >
-              <ReactMarkdown>{content}</ReactMarkdown>
+              {renderedMarkdown}
               <span
                 style={{
                   display: "inline-block",
