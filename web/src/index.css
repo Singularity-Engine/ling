@@ -226,9 +226,7 @@ body {
   50% { opacity: 1; }
 }
 
-.landing-start-btn {
-  will-change: transform;
-}
+.landing-start-btn {}
 .landing-start-btn::after {
   content: '';
   position: absolute;
@@ -274,6 +272,7 @@ body {
   --ling-purple-40: rgba(139, 92, 246, 0.4);
   --ling-purple-60: rgba(139, 92, 246, 0.6);
   --ling-text-secondary: rgba(255, 255, 255, 0.75);
+  --ling-purple-25: rgba(139, 92, 246, 0.25);
   --ling-text-tertiary: rgba(255, 255, 255, 0.4);
   --ling-text-muted: rgba(255, 255, 255, 0.2);
 }
@@ -314,11 +313,28 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: textShimmer 6s ease-in-out 1s infinite;
+  animation: textShimmer 6s ease-in-out 1s infinite both;
 }
 @keyframes textShimmer {
   0%, 35% { background-position: 100% center; }
   65%, 100% { background-position: -100% center; }
+}
+
+/* Landing feature pills */
+.landing-feature-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.landing-feature-pill {
+  padding: 4px 14px;
+  font-size: 0.7rem;
+  color: var(--ling-text-tertiary);
+  border: 1px solid var(--ling-purple-20);
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
 @keyframes btnPress {

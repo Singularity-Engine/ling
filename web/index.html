@@ -172,10 +172,9 @@
         background: linear-gradient(90deg,#fff 0%,#e2d4ff 15%,#c4b5fd 30%,#a78bfa 45%,#fff 50%,#a78bfa 55%,#c4b5fd 70%,#e2d4ff 85%,#fff 100%);
         background-size: 200% 100%;
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        background-clip: text; animation: textShimmer 6s ease-in-out 1s infinite;
+        background-clip: text; animation: textShimmer 6s ease-in-out 1s infinite both;
       }
       .landing-title-glow { text-shadow: 0 0 40px var(--ling-purple-40), 0 0 80px var(--ling-purple-20); }
-      .landing-start-btn { will-change: transform; }
     </style>
     <script>
       window.onerror = function(msg, url, line, col, error) {
