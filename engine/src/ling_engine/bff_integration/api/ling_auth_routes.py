@@ -15,9 +15,6 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, EmailStr, field_validator
 from loguru import logger
 
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-
 from ..auth.ling_auth import (
     hash_password,
     verify_password,
@@ -114,7 +111,7 @@ def _tokens_for_user(user: dict) -> tuple[str, str]:
 
 # ── 路由 ─────────────────────────────────────────────────────────
 
-limiter = Limiter(key_func=get_remote_address)
+from ..auth.rate_limit import limiter
 
 
 def create_ling_auth_router(db_manager=None) -> APIRouter:

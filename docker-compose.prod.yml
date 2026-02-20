@@ -1,0 +1,115 @@
+# Ling Production Stack
+# Usage: docker compose -f docker-compose.prod.yml up -d
+
+services:
+  # ── Ling Engine (BFF + WebSocket) ──────────────
+  ling-engine:
+    build:
+      context: ./engine
+      dockerfile: Dockerfile
+    container_name: ling-engine
+    restart: unless-stopped
+    ports:
+      - "12393:12393"
+    env_file: .env
+    volumes:
+      - engine-data:/app/engine/chat_history
+      - engine-cache:/app/engine/cache
+      - engine-affinity:/app/engine/affinity_data
+    networks:
+      - ling-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:12393/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── Ling Web (Vite frontend) ───────────────────
+  ling-web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: ling-web
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    networks:
+      - ling-net
+
+  # ── TTS Proxy (standalone Fish Audio proxy) ────
+  ling-tts-proxy:
+    build:
+      context: ./tts-proxy
+      dockerfile: Dockerfile
+    container_name: ling-tts-proxy
+    restart: unless-stopped
+    ports:
+      - "12394:12394"
+    environment:
+      - FISH_TTS_API_KEY=${FISH_TTS_API_KEY}
+      - FISH_TTS_REFERENCE_ID=${FISH_TTS_REFERENCE_ID:-9dec9671824543b4a4f9f382dbf15748}
+      - TTS_RATE_LIMIT=30
+      - TTS_MAX_TEXT_LENGTH=500
+      - CORS_ORIGINS=https://sngxai.com,https://www.sngxai.com,https://lain.sngxai.com
+    networks:
+      - ling-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:12394/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ── PostgreSQL ─────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: ling-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ling}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-ling}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - ling-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ling}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Redis ──────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: ling-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - ling-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
+  redis-data:
+  engine-data:
+  engine-cache:
+  engine-affinity:
+
+networks:
+  ling-net:
+    driver: bridge

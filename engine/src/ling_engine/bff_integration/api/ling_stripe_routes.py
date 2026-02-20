@@ -14,9 +14,6 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from loguru import logger
 
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-
 from ..auth.ling_deps import get_current_user
 from ..database.ling_user_repository import LingUserRepository
 
@@ -85,7 +82,7 @@ def _get_or_create_customer(user: dict, repo: LingUserRepository) -> str:
 
 # ── 路由 ─────────────────────────────────────────────────────────
 
-limiter = Limiter(key_func=get_remote_address)
+from ..auth.rate_limit import limiter
 
 
 def create_ling_stripe_router(repo: LingUserRepository) -> APIRouter:

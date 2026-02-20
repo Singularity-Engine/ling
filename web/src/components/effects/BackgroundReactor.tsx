@@ -14,19 +14,22 @@ const PHASE_COLORS = {
 
 // Affinity-level tint applied to idle/ambient background
 interface AffinityTint {
-  color: string;        // hex color for idle ambient tint
-  idleOpacity: number;  // base idle ambient opacity (0 = invisible)
-  activeBoost: number;  // opacity multiplier when tools/AI active (1.0 = no boost)
+  color: string;           // hex color for idle ambient tint
+  idleOpacity: number;     // base idle ambient opacity (0 = invisible)
+  activeBoost: number;     // opacity multiplier when tools/AI active (1.0 = no boost)
+  breatheSpeed: number;    // seconds per breathing cycle — faster = more agitated
+  breatheAmplitude: number; // peak opacity multiplier (1.2 = barely moves, 2.2 = dramatic)
+  gradientSpread: string;  // ellipse radii — compact for tense, expansive for warm
 }
 
 const AFFINITY_TINTS: Record<string, AffinityTint> = {
-  hatred:      { color: '#dc2626', idleOpacity: 0.15, activeBoost: 0.75 },  // deep crimson
-  hostile:     { color: '#ea580c', idleOpacity: 0.10, activeBoost: 0.85 },  // burnt orange
-  indifferent: { color: '#78716c', idleOpacity: 0.04, activeBoost: 1.0  },  // cool gray
-  neutral:     { color: '#818cf8', idleOpacity: 0.05, activeBoost: 1.0  },  // soft indigo
-  friendly:    { color: '#60a5fa', idleOpacity: 0.09, activeBoost: 1.08 },  // sky blue
-  close:       { color: '#d946ef', idleOpacity: 0.14, activeBoost: 1.15 },  // vivid fuchsia
-  devoted:     { color: '#fb7185', idleOpacity: 0.18, activeBoost: 1.22 },  // warm rose
+  hatred:      { color: '#dc2626', idleOpacity: 0.18, activeBoost: 0.75, breatheSpeed: 3,   breatheAmplitude: 2.2, gradientSpread: '55% 50%' },  // deep crimson — fast, aggressive pulse
+  hostile:     { color: '#ea580c', idleOpacity: 0.12, activeBoost: 0.85, breatheSpeed: 4,   breatheAmplitude: 1.8, gradientSpread: '60% 55%' },  // burnt orange — tense, tight
+  indifferent: { color: '#78716c', idleOpacity: 0.03, activeBoost: 1.0,  breatheSpeed: 8,   breatheAmplitude: 1.2, gradientSpread: '65% 55%' },  // cool gray — barely moves
+  neutral:     { color: '#818cf8', idleOpacity: 0.06, activeBoost: 1.0,  breatheSpeed: 6,   breatheAmplitude: 1.4, gradientSpread: '70% 60%' },  // soft indigo — calm baseline
+  friendly:    { color: '#60a5fa', idleOpacity: 0.12, activeBoost: 1.08, breatheSpeed: 5,   breatheAmplitude: 1.6, gradientSpread: '75% 65%' },  // sky blue — lively, open
+  close:       { color: '#d946ef', idleOpacity: 0.18, activeBoost: 1.15, breatheSpeed: 4.5, breatheAmplitude: 1.9, gradientSpread: '80% 70%' },  // vivid fuchsia — intimate, warm
+  devoted:     { color: '#fb7185', idleOpacity: 0.24, activeBoost: 1.22, breatheSpeed: 4,   breatheAmplitude: 2.0, gradientSpread: '85% 75%' },  // warm rose — deep, expansive glow
 };
 
 const DEFAULT_TINT: AffinityTint = AFFINITY_TINTS.neutral;
@@ -150,7 +153,7 @@ export const BackgroundReactor = memo(() => {
   // hatred/hostile = warm danger tint, close/devoted = warm pink/purple glow
   // Note: CSS cannot transition between radial-gradient() values, so we use
   // background-color (which CAN transition) + mask-image for the gradient shape.
-  const TINT_MASK = 'radial-gradient(ellipse 70% 60% at 50% 45%, rgba(0,0,0,0.267) 0%, rgba(0,0,0,0.094) 40%, transparent 70%)';
+  const tintMask = `radial-gradient(ellipse ${tint.gradientSpread} at 50% 45%, rgba(0,0,0,0.267) 0%, rgba(0,0,0,0.094) 40%, transparent 70%)`;
   const affinityTintStyle = useMemo(
     () => ({
       position: 'absolute' as const,
@@ -159,11 +162,11 @@ export const BackgroundReactor = memo(() => {
       transition: 'opacity 1.5s ease, background-color 1.5s ease',
       opacity: tint.idleOpacity,
       backgroundColor: tint.color,
-      WebkitMaskImage: TINT_MASK,
-      maskImage: TINT_MASK,
-      animation: tint.idleOpacity > 0 ? 'bgAffinityBreathe 6s ease-in-out infinite' : 'none',
+      WebkitMaskImage: tintMask,
+      maskImage: tintMask,
+      animation: tint.idleOpacity > 0 ? `bgAffinityBreathe ${tint.breatheSpeed}s ease-in-out infinite` : 'none',
     }),
-    [tint.color, tint.idleOpacity],
+    [tint.color, tint.idleOpacity, tint.breatheSpeed, tintMask],
   );
 
   return (
@@ -202,7 +205,7 @@ export const BackgroundReactor = memo(() => {
         }
         @keyframes bgAffinityBreathe {
           0%, 100% { opacity: var(--affinity-idle-opacity, 0.1); }
-          50% { opacity: calc(var(--affinity-idle-opacity, 0.1) * 1.6); }
+          50% { opacity: calc(var(--affinity-idle-opacity, 0.1) * var(--affinity-breathe-amp, 1.6)); }
         }
         @keyframes bgGainPulse {
           0% { opacity: 0; transform: scale(0.85); }

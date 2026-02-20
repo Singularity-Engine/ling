@@ -8,11 +8,12 @@
 
 // ─── Configuration ───────────────────────────────────────────────
 
-// TTS proxy URL — standalone TTS service (port 12394) with Engine BFF fallback
+// TTS proxy URL — standalone TTS service (port 12394) with Engine BFF fallback (12393)
 function getTTSProxyUrl(): string {
   const hostname = window.location.hostname;
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return 'http://127.0.0.1:12394/api/tts/generate';
+    // Dev: try standalone TTS proxy first, Engine BFF as fallback
+    return 'http://127.0.0.1:12393/api/tts/generate';
   }
   // Production: Nginx routes /api/tts/ to the standalone TTS proxy
   return 'https://lain.sngxai.com/api/tts/generate';

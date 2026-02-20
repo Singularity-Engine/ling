@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main, rebrand/ling]
+  pull_request:
+    branches: [main]
+
+jobs:
+  web-build:
+    name: Web — Lint & Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - run: npm ci
+
+      - name: TypeScript check
+        run: npx tsc --noEmit --skipLibCheck
+        continue-on-error: true
+
+      - name: Vite build
+        run: npx vite build
+
+  engine-lint:
+    name: Engine — Python Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: engine
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Ruff check
+        run: ruff check src/ --select E,F,W --ignore E501
+        continue-on-error: true
+
+  tts-proxy-lint:
+    name: TTS Proxy — Python Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tts-proxy
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Ruff check
+        run: ruff check main.py --select E,F,W --ignore E501
+
+  docker-build:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+    needs: [web-build, engine-lint, tts-proxy-lint]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build TTS Proxy image
+        run: docker build -t ling-tts-proxy:ci tts-proxy/

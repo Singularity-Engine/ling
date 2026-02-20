@@ -9,10 +9,10 @@ from starlette.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import Response
 
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
 
+from .bff_integration.auth.rate_limit import limiter as shared_limiter
 from .routes import create_routes
 from .service_context import ServiceContext
 from .config_manager.utils import Config
@@ -44,9 +44,8 @@ class WebSocketServer:
 
         self.app = FastAPI()
 
-        # 限速中间件
-        limiter = Limiter(key_func=get_remote_address)
-        self.app.state.limiter = limiter
+        # 限速中间件 — 使用共享 limiter 实例
+        self.app.state.limiter = shared_limiter
         self.app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
         # CORS 配置 — 从环境变量读取允许的域名

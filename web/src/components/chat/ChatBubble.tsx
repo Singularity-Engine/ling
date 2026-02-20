@@ -114,6 +114,7 @@ interface ChatBubbleProps {
   toolStatus?: string;
   staggerIndex?: number;
   isGreeting?: boolean;
+  skipEntryAnimation?: boolean;
 }
 
 function formatTime(ts: string): string {
@@ -125,10 +126,19 @@ function formatTime(ts: string): string {
   }
 }
 
-export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolCall, toolName, toolStatus, isGreeting }: ChatBubbleProps) => {
+export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolCall, toolName, toolStatus, isGreeting, skipEntryAnimation }: ChatBubbleProps) => {
   const { t } = useTranslation();
   const isUser = role === "user";
   const [copied, setCopied] = useState(false);
+
+  // Capture entry animation once at mount — prevents re-animation when
+  // isGreeting changes (user sends first message) and avoids the flash
+  // when transitioning from streaming ThinkingBubble to finalized ChatBubble.
+  const [entryAnimation] = useState(() => {
+    if (skipEntryAnimation) return "none";
+    if (isGreeting) return "greetingBubbleIn 0.5s ease-out";
+    return "bubbleFadeInUp 0.3s ease-out";
+  });
 
   const [flashing, setFlashing] = useState(false);
   const bubbleRef = useRef<HTMLDivElement>(null);
@@ -166,7 +176,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
         justifyContent: isUser ? "flex-end" : "flex-start",
         marginBottom: "12px",
         padding: "0 16px",
-        animation: isGreeting ? "greetingBubbleIn 0.5s ease-out" : "bubbleFadeInUp 0.3s ease-out",
+        animation: entryAnimation,
       }}
     >
       <div style={{ maxWidth: "78%", minWidth: 0 }} className={!isUser ? "chat-bubble-wrap" : undefined}>

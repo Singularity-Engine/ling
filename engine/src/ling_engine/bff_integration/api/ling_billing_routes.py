@@ -12,9 +12,6 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from loguru import logger
 
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-
 from ..auth.ling_deps import get_current_user, get_optional_user
 from ..auth.plan_gates import (
     is_privileged,
@@ -29,9 +26,9 @@ from ..auth.plan_gates import (
 from ..database.ling_user_repository import LingUserRepository
 
 
-CREDIT_PER_MESSAGE = Decimal("1.0")
+from ..auth.rate_limit import limiter
 
-limiter = Limiter(key_func=get_remote_address)
+CREDIT_PER_MESSAGE = Decimal("1.0")
 
 
 class ToolCheckRequest(BaseModel):
