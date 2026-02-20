@@ -74,7 +74,7 @@ export const useAudioTask = () => {
 
     // Skip if already interrupted
     if (currentAiState === 'interrupted') {
-      console.warn('Audio playback blocked by interruption state.');
+      if (import.meta.env.DEV) console.warn('Audio playback blocked by interruption state.');
       resolve();
       return;
     }
@@ -116,7 +116,6 @@ export const useAudioTask = () => {
           setExpression(
             expressions[0],
             lappAdapter,
-            `Set expression to: ${expressions[0]}`,
           );
         }
 

@@ -15,8 +15,8 @@ function getTTSProxyUrl(): string {
     // Dev: try standalone TTS proxy first, Engine BFF as fallback
     return 'http://127.0.0.1:12393/api/tts/generate';
   }
-  // Production: Nginx routes /api/tts/ to the standalone TTS proxy
-  return 'https://lain.sngxai.com/api/tts/generate';
+  // Production: Cloudflare tunnel routes tts.sngxai.com to localhost:14201
+  return 'https://tts.sngxai.com/api/tts/generate';
 }
 
 const TTS_PROXY_URL = getTTSProxyUrl();
@@ -176,7 +176,7 @@ class TTSService {
       const audioBuffer = await ctx.decodeAudioData(arrayBuffer.slice(0));
       return this.computeLipSyncData(audioBuffer);
     } catch (err) {
-      console.warn('[TTSService] Lip sync extraction failed:', err);
+      console.error('[TTSService] Lip sync extraction failed:', err);
       return { volumes: [], mouthForms: [] };
     }
   }

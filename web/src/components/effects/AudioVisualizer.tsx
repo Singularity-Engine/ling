@@ -81,7 +81,7 @@ export const AudioVisualizer = memo(() => {
         connectedAudioRef.current = audio;
         setActive(true);
       } catch (e) {
-        console.warn('[AudioVisualizer] Failed to connect analyser:', e);
+        console.error('[AudioVisualizer] Failed to connect analyser:', e);
       }
     });
 

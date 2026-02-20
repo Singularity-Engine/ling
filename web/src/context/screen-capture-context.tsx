@@ -60,7 +60,7 @@ export function ScreenCaptureProvider({ children }: { children: ReactNode }) {
         type: 'error',
         duration: 2000,
       });
-      console.error(err);
+      console.error('[ScreenCapture] Failed to start capture:', err);
     }
   };
 

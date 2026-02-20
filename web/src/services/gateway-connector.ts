@@ -76,6 +76,7 @@ class GatewayConnector {
   private lastTickAt = 0;
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
   private idleRetryTimer: ReturnType<typeof setTimeout> | null = null;
+  private inIdleRetry = false;
   private onVisibilityChange: (() => void) | null = null;
 
   /** Debug counters */
@@ -111,6 +112,9 @@ class GatewayConnector {
     this.options = options;
     this.reconnectAttempts = 0;
     this.authFailed = false;
+    this.inIdleRetry = false;
+    this.clearReconnectTimer();
+    this.stopIdleRetry();
     this.setupVisibilityHandler();
     return this.doConnect();
   }
@@ -122,6 +126,7 @@ class GatewayConnector {
     this.stopHeartbeatMonitor();
     this.removeVisibilityHandler();
     this.reconnectAttempts = RECONNECT_MAX_RETRIES; // prevent reconnect
+    this.inIdleRetry = false;
     if (this.ws) {
       this.ws.close(1000, 'client disconnect');
       this.ws = null;
@@ -191,7 +196,7 @@ class GatewayConnector {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
     } else {
-      console.warn('[GatewayConnector] Cannot send, WS not open');
+      if (import.meta.env.DEV) console.warn('[GatewayConnector] Cannot send, WS not open');
     }
   }
 
@@ -327,8 +332,10 @@ class GatewayConnector {
         // ── Hello OK ──
         if (frame.type === 'res' && frame.ok === true && (frame.payload as any)?.type === 'hello-ok') {
           this.connId = (frame.payload as any)?.server?.connId || null;
-          const wasReconnecting = this.reconnectAttempts > 0;
+          const wasReconnecting = this.reconnectAttempts > 0 || this.inIdleRetry;
           this.reconnectAttempts = 0;
+          this.inIdleRetry = false;
+          this.stopIdleRetry();
           this.reconnectAttempt$.next(0);
           this.lastTickAt = Date.now();
           this.startHeartbeatMonitor();
@@ -524,6 +531,7 @@ class GatewayConnector {
 
   private startIdleRetry() {
     this.stopIdleRetry();
+    this.inIdleRetry = true;
     this.idleRetryTimer = setTimeout(() => {
       if (this.state !== 'DISCONNECTED' || this.authFailed) return;
       if (import.meta.env.DEV) console.log('[GatewayConnector] Idle retry — attempting reconnect');
@@ -551,7 +559,7 @@ class GatewayConnector {
     this.heartbeatTimer = setInterval(() => {
       if (this.state !== 'CONNECTED') return;
       if (this.lastTickAt > 0 && Date.now() - this.lastTickAt > HEARTBEAT_TIMEOUT_MS) {
-        console.warn(`[GatewayConnector] Heartbeat timeout — no tick in ${HEARTBEAT_TIMEOUT_MS}ms, closing`);
+        console.error(`[GatewayConnector] Heartbeat timeout — no tick in ${HEARTBEAT_TIMEOUT_MS}ms, closing`);
         this.ws?.close(4001, 'Heartbeat timeout');
       }
     }, HEARTBEAT_CHECK_MS);
@@ -573,7 +581,7 @@ class GatewayConnector {
         if (this.state === 'CONNECTED') {
           // Tab became visible — check if connection went stale while hidden
           if (this.lastTickAt > 0 && Date.now() - this.lastTickAt > HEARTBEAT_TIMEOUT_MS) {
-            console.warn('[GatewayConnector] Stale connection detected on tab focus, reconnecting...');
+            console.error('[GatewayConnector] Stale connection detected on tab focus, reconnecting...');
             this.ws?.close(4001, 'Stale after tab resume');
           }
         } else if (this.state === 'DISCONNECTED' || this.state === 'RECONNECTING') {

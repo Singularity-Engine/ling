@@ -35,7 +35,7 @@ export const applyScale = (scale: number) => {
     // @ts-ignore
     model._modelMatrix.scale(scale, scale);
   } catch (error) {
-    console.debug('Model not ready for scaling yet');
+    // Model not ready for scaling yet — silent fallthrough
   }
 };
 
@@ -189,10 +189,10 @@ export const useLive2DResize = ({
       prevSidebarStateRef.current = showSidebar;
 
       if (!containerBounds && !isPet) {
-        console.warn('[Resize] Container bounds not available in window mode.');
+        if (import.meta.env.DEV) console.warn('[Resize] Container bounds not available in window mode.');
       }
       if (width === 0 || height === 0) {
-        console.warn('[Resize] Width or Height is zero, skipping canvas/delegate update.');
+        if (import.meta.env.DEV) console.warn('[Resize] Width or Height is zero, skipping canvas/delegate update.');
         isResizingRef.current = false;
         return;
       }
@@ -210,7 +210,7 @@ export const useLive2DResize = ({
       if (delegate) {
         delegate.onResize();
       } else {
-        console.warn('[Resize] LAppDelegate instance not found.');
+        if (import.meta.env.DEV) console.warn('[Resize] LAppDelegate instance not found.');
       }
 
       isResizingRef.current = false;
@@ -326,6 +326,6 @@ export const setModelScale = (
   kScale: string | number | undefined,
 ) => {
   if (!model || kScale === undefined) return;
-  console.warn("setModelScale is potentially deprecated; scaling is primarily handled by view matrix now.");
+  if (import.meta.env.DEV) console.warn("setModelScale is potentially deprecated; scaling is primarily handled by view matrix now.");
 };
 

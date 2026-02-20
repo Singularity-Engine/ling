@@ -23,7 +23,7 @@ class ASRService {
   start() {
     if (this.isListening) return;
     if (!this.isSupported) {
-      console.warn('[ASRService] SpeechRecognition not supported');
+      if (import.meta.env.DEV) console.warn('[ASRService] SpeechRecognition not supported');
       return;
     }
 
@@ -60,7 +60,7 @@ class ASRService {
 
     this.recognition.onerror = (event: any) => {
       if (event.error === 'no-speech' || event.error === 'aborted') return;
-      console.warn('[ASRService] Error:', event.error);
+      console.error('[ASRService] Error:', event.error);
     };
 
     try {

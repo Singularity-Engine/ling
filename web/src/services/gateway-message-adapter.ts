@@ -51,7 +51,7 @@ class GatewayMessageAdapter {
         this.handleLifecycleEvent(event);
         break;
       default:
-        console.warn('[GatewayAdapter] Unknown stream:', event.stream);
+        if (import.meta.env.DEV) console.warn('[GatewayAdapter] Unknown stream:', event.stream);
     }
   }
 
@@ -269,7 +269,7 @@ class GatewayMessageAdapter {
       }
 
       default:
-        console.warn('[GatewayAdapter] Unknown lifecycle phase:', phase);
+        if (import.meta.env.DEV) console.warn('[GatewayAdapter] Unknown lifecycle phase:', phase);
     }
   }
 

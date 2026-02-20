@@ -46,7 +46,7 @@ export function useAffinityIdleExpression() {
         }
         if (import.meta.env.DEV) console.log(`[Affinity] Idle expression set to "${expression}" (level: ${level})`);
       } catch (e) {
-        console.warn('[Affinity] Failed to set idle expression:', e);
+        console.error('[Affinity] Failed to set idle expression:', e);
       }
     }, EXPRESSION_TRANSITION.idleOverrideDelay);
 

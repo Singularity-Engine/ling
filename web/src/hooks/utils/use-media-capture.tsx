@@ -54,13 +54,13 @@ export function useMediaCapture() {
 
   const captureFrame = useCallback(async (stream: MediaStream | null, source: 'camera' | 'screen') => {
     if (!stream) {
-      console.warn(`No ${source} stream available`);
+      if (import.meta.env.DEV) console.warn(`No ${source} stream available`);
       return null;
     }
 
     const videoTrack = stream.getVideoTracks()[0];
     if (!videoTrack) {
-      console.warn(`No video track in ${source} stream`);
+      if (import.meta.env.DEV) console.warn(`No video track in ${source} stream`);
       return null;
     }
 
@@ -124,8 +124,6 @@ export function useMediaCapture() {
         });
       }
     }
-
-    console.log("images: ", images);
 
     return images;
   }, [cameraStream, screenStream, captureFrame]);

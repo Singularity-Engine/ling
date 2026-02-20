@@ -61,7 +61,7 @@ class AudioManager {
           console.error('[AudioManager] Error stopping/resetting wavFileHandler:', e);
         }
       } else if (model) {
-        console.warn('[AudioManager] Current model does not have _wavFileHandler to stop/reset.');
+        if (import.meta.env.DEV) console.warn('[AudioManager] Current model does not have _wavFileHandler to stop/reset.');
       } else {
         if (import.meta.env.DEV) console.log('[AudioManager] No associated model found to stop lip sync.');
       }

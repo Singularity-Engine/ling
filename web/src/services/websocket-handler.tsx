@@ -87,9 +87,13 @@ function mapGatewayState(state: GatewayState): string {
 
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
+const modelBaseUrl = typeof window !== 'undefined'
+  ? `${window.location.origin}/live2d-models/001`
+  : '/live2d-models/001';
+
 const LING_MODEL_INFO: ModelInfo = {
   name: '灵 (Ling)',
-  url: 'https://lain.sngxai.com/live2d-models/001/0A-原档整理(1).model3.json',
+  url: `${modelBaseUrl}/0A-原档整理(1).model3.json`,
   kScale: 1.0,
   initialXshift: 0,
   initialYshift: isMobile ? 0 : -100,
@@ -335,7 +339,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         }));
         break;
       default:
-        console.warn('Unknown control command:', controlText);
+        if (import.meta.env.DEV) console.warn('Unknown control command:', controlText);
     }
   }, [setAiState, clearResponse, setForceNewMessage, startMic, stopMic]);
 
@@ -662,8 +666,20 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       }
     });
 
-    // Network recovery: immediately retry if in RECONNECTING state
-    const onOnline = () => gatewayConnector.retryNow();
+    // Network status: update offline$ and handle recovery
+    const onOffline = () => {
+      gatewayConnector.offline$.next(true);
+      toaster.create({
+        title: i18next.t('notification.networkOffline'),
+        type: 'warning',
+        duration: 4000,
+      });
+    };
+    const onOnline = () => {
+      gatewayConnector.offline$.next(false);
+      gatewayConnector.retryNow();
+    };
+    window.addEventListener('offline', onOffline);
     window.addEventListener('online', onOnline);
 
     // Post-reconnect recovery: reset stale state & re-resolve session
@@ -687,10 +703,19 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       resetTTSStateRef.current();
       // Reset response timeout tracker — prevents stale timeout firing after recovery
       lastActivity = 0;
-      // Re-resolve session so Gateway knows which agent to route to
-      gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId()).catch((err) => {
-        console.error('[WebSocketHandler] Post-reconnect resolveSession failed:', err);
-      });
+      // Re-resolve session and restore chat history (captures responses completed during disconnect)
+      gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId())
+        .then(() => gatewayConnector.getChatHistory(sessionKeyRef.current))
+        .then((res) => {
+          const payload = res.payload as any;
+          if (payload?.messages?.length > 0) {
+            setMessagesRef.current(payload.messages);
+            if (import.meta.env.DEV) console.log(`[WebSocketHandler] Post-reconnect: restored ${payload.messages.length} messages`);
+          }
+        })
+        .catch((err) => {
+          console.error('[WebSocketHandler] Post-reconnect session recovery failed:', err);
+        });
       // Notify user
       toaster.create({
         title: i18next.t('notification.connectionRestored'),
@@ -701,6 +726,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
     return () => {
       clearInterval(responseCheckTimer);
+      window.removeEventListener('offline', onOffline);
       window.removeEventListener('online', onOnline);
       stateSub.unsubscribe();
       agentSub.unsubscribe();
@@ -923,7 +949,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             });
           });
         } else {
-          console.warn('[ASR] No transcript available from speech recognition');
+          if (import.meta.env.DEV) console.warn('[ASR] No transcript available from speech recognition');
           toaster.create({
             title: i18next.t('notification.noSpeechDetected'),
             type: 'info',

@@ -121,7 +121,7 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
   const appendOrUpdateToolCallMessage = useCallback((toolMessageData: Partial<Message>) => {
     // Ensure required fields for a tool call are present
     if (!toolMessageData.tool_id || !toolMessageData.tool_name || !toolMessageData.status || !toolMessageData.timestamp) {
-      console.error('Incomplete tool message data received:', toolMessageData);
+      console.error('[ChatHistory] Incomplete tool message data, missing fields for tool_id:', toolMessageData.tool_id);
       return;
     }
 
