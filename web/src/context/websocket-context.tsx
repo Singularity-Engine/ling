@@ -24,17 +24,12 @@ function getDefaultUrls() {
 
 const { wsUrl: DEFAULT_WS_URL, baseUrl: DEFAULT_BASE_URL } = getDefaultUrls();
 
-// 强制迁移：清除旧的缓存地址
+// 强制迁移：清除旧的缓存地址（一次性）
 if (typeof window !== 'undefined') {
   const cached = localStorage.getItem('wsUrl');
   if (cached && (cached.includes('classic.sngxai.com') || cached.includes('127.0.0.1'))) {
     localStorage.removeItem('wsUrl');
     localStorage.removeItem('baseUrl');
-  }
-  // 清除旧 Gateway URL 缓存
-  const gwCached = localStorage.getItem('gwUrl');
-  if (gwCached && (gwCached.includes('ws.sngxai.com') || gwCached.includes('18789'))) {
-    localStorage.removeItem('gwUrl');
   }
 }
 

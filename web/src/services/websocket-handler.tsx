@@ -3,7 +3,7 @@
 // eslint-disable-next-line object-curly-newline
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MessageEvent, wsService } from '@/services/websocket-service';
+import { MessageEvent } from '@/services/websocket-service';
 import {
   WebSocketContext, HistoryInfo, defaultBaseUrl,
 } from '@/context/websocket-context';
@@ -23,7 +23,8 @@ import { useInterrupt } from '@/hooks/utils/use-interrupt';
 import { useBrowser } from '@/context/browser-context';
 import { useAffinity } from '@/context/affinity-context';
 import { useToolState, categorize } from '@/context/tool-state-context';
-// Gateway imports removed — using direct Engine WebSocket
+import { gatewayConnector, GatewayState } from '@/services/gateway-connector';
+import { gatewayAdapter, GatewayMessageEvent } from '@/services/gateway-message-adapter';
 import { ttsService } from '@/services/tts-service';
 import { asrService } from '@/services/asr-service';
 import { useTTSState } from '@/context/tts-state-context';
@@ -33,14 +34,53 @@ import { useUI } from '@/context/ui-context';
 import { apiClient } from '@/services/api-client';
 import i18next from 'i18next';
 
-// ─── WebSocket configuration ──────────────────────────────────────
+// ─── Gateway configuration ──────────────────────────────────────
 
-function getDefaultWsUrl(): string {
+const GATEWAY_TOKEN = import.meta.env.VITE_GATEWAY_TOKEN || '';
+
+/** Per-visitor session key — each browser gets its own isolated session */
+/** Public site uses restricted agent; local dev uses full agent */
+function getAgentId(): string {
   const hostname = window.location.hostname;
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return 'ws://127.0.0.1:12393/client-ws';
+    return 'avatar';
   }
-  return 'wss://lain.sngxai.com/client-ws';
+  return 'avatar-public';
+}
+
+/** Per-visitor session key in Gateway's agent-scoped format: agent:<agentId>:<uuid> */
+function getVisitorSessionKey(): string {
+  const agentId = getAgentId();
+  const STORAGE_KEY = `ling-sk-${agentId}`;
+  // Purge old key formats that didn't use agent: prefix
+  localStorage.removeItem('ling-visitor-session-key');
+  localStorage.removeItem(`ling-session-${agentId}`);
+  let key = localStorage.getItem(STORAGE_KEY);
+  if (!key || !key.startsWith('agent:')) {
+    key = `agent:${agentId}:${crypto.randomUUID()}`;
+    localStorage.setItem(STORAGE_KEY, key);
+  }
+  return key;
+}
+
+function getDefaultGatewayUrl(): string {
+  const hostname = window.location.hostname;
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'ws://127.0.0.1:18789';
+  }
+  return 'wss://ws.sngxai.com';
+}
+
+/** Map Gateway state to the legacy WS state strings the rest of the app expects */
+function mapGatewayState(state: GatewayState): string {
+  switch (state) {
+    case 'CONNECTED': return 'OPEN';
+    case 'CONNECTING':
+    case 'HANDSHAKING': return 'CONNECTING';
+    case 'RECONNECTING': return 'CONNECTING';
+    case 'DISCONNECTED': return 'CLOSED';
+    default: return 'CLOSED';
+  }
 }
 
 // ─── Default model info for 灵 (Ling) — no longer fetched from backend ─
@@ -101,14 +141,37 @@ function setGreetingExpression(delayMs = 200) {
   }, delayMs);
 }
 
-// Debug panel removed (Gateway-specific)
+// ─── Debug overlay ──────────────────────────────────────────────
+
+function GatewayDebugPanel() {
+  const [info, setInfo] = useState({ rawFrames: 0, agentEvents: 0, ticks: 0, lastEvent: '', messageCount: 0, state: 'CLOSED' });
+  useEffect(() => {
+    const msgCounter = { count: 0 };
+    const msgSub = gatewayAdapter.message$.subscribe((msg) => {
+      msgCounter.count++;
+      if (import.meta.env.DEV) console.log('[DebugPanel] message$ event:', msg.type, msg);
+    });
+    const timer = setInterval(() => {
+      const c = gatewayConnector.debugCounters;
+      setInfo({ rawFrames: c.rawFrames, agentEvents: c.agentEvents, ticks: c.ticks, lastEvent: c.lastEvent, messageCount: msgCounter.count, state: gatewayConnector.getState() });
+    }, 500);
+    return () => { clearInterval(timer); msgSub.unsubscribe(); };
+  }, []);
+  return (
+    <div style={{ position: 'fixed', bottom: 8, left: 8, zIndex: 99999, background: 'rgba(0,0,0,0.85)', color: '#0f0', padding: '6px 10px', borderRadius: 6, fontSize: 11, fontFamily: 'monospace', pointerEvents: 'none', lineHeight: 1.5 }}>
+      <div>GW: {info.state} | Frames: {info.rawFrames} | Ticks: {info.ticks}</div>
+      <div>Agent: {info.agentEvents} | Msg$: {info.messageCount}</div>
+      <div style={{ maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Last: {info.lastEvent || 'none'}</div>
+    </div>
+  );
+}
 
 // ─── Component ──────────────────────────────────────────────────
 
 function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const [wsState, setWsState] = useState<string>('CLOSED');
-  const [gwUrl, setGwUrl] = useLocalStorage<string>('gwUrl', getDefaultWsUrl());
+  const [gwUrl, setGwUrl] = useLocalStorage<string>('gwUrl', getDefaultGatewayUrl());
   const [baseUrl, setBaseUrl] = useLocalStorage<string>('baseUrl', defaultBaseUrl);
   const { aiState, setAiState, backendSynthComplete, setBackendSynthComplete } = useAiState();
   const { setModelInfo } = useLive2DConfig();
@@ -168,7 +231,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   useEffect(() => { clearResponseRef.current = clearResponse; }, [clearResponse]);
 
   // Per-visitor session key (stable across renders)
-  const sessionKeyRef = useRef(crypto.randomUUID());
+  const sessionKeyRef = useRef(getVisitorSessionKey());
 
   // ─── Billing check ──────────────────────────────────────────
   const userRef = useRef(user);
@@ -361,13 +424,13 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       // ── Phase 7: Affinity & emotion ──
       case 'affinity-update':
         if (affinityContext) {
-          const aMsg = message as any;
+          const aMsg = message as GatewayMessageEvent;
           affinityContext.updateAffinity(aMsg.affinity, aMsg.level);
         }
         break;
       case 'affinity-milestone':
         if (affinityContext) {
-          const mMsg = message as any;
+          const mMsg = message as GatewayMessageEvent;
           affinityContext.showMilestone(message.content || i18next.t('notification.affinityReached', { milestone: mMsg.milestone }));
           // Upgrade prompt for free users at 'friendly' milestone
           if ((mMsg as any).level === 'friendly' || mMsg.milestone === 'friendly') {
@@ -386,47 +449,26 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         break;
       case 'emotion-expression':
         if (affinityContext) {
-          const eMsg = message as any;
+          const eMsg = message as GatewayMessageEvent;
           affinityContext.setExpression(eMsg.expression, eMsg.intensity || 0.5);
         }
         break;
 
-      // ── Engine direct-mode message types ──
+      // ── Legacy message types (no longer received from Gateway) ──
+      // Kept as fallback — these are dead code in Gateway mode but
+      // won't cause errors if somehow triggered.
       case 'set-model-and-conf':
-        // Model info is hardcoded in LING_MODEL_INFO, ignore engine's
-        break;
       case 'config-files':
       case 'background-files':
-        // Pre-populated locally on connect
-        break;
       case 'audio':
-        // Engine sends server-side TTS audio — ignored since we use client-side TTS
-        break;
       case 'history-data':
-        if (message.messages) {
-          setMessages(message.messages);
-        }
-        break;
       case 'new-history-created':
-        if (message.history_uid) {
-          setCurrentHistoryUid(message.history_uid);
-          setMessages([]);
-        }
-        break;
       case 'history-deleted':
-        break;
       case 'history-list':
-        if (message.histories) {
-          setHistoryList(message.histories);
-        }
-        break;
       case 'user-input-transcription':
-        if (message.text) {
-          appendHumanMessage(message.text);
-        }
-        break;
       case 'group-update':
       case 'group-operation-result':
+        // No-op in Gateway mode
         break;
 
       default:
@@ -435,25 +477,88 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     }
   }, [aiState, appendHumanMessage, appendAIMessage, baseUrl, bgUrlContext, setAiState, setConfName, setConfUid, setConfigFiles, setCurrentHistoryUid, setHistoryList, setMessages, setModelInfo, setSubtitleText, setFullResponse, startMic, stopMic, setSelfUid, setGroupMembers, setIsOwner, backendSynthComplete, setBackendSynthComplete, clearResponse, handleControlMessage, appendOrUpdateToolCallMessage, interrupt, setBrowserViewData, t, affinityContext]);
 
-  // ─── Connect to Engine WebSocket on mount / URL change ─────────
+  // ─── Connect to Gateway on mount / URL change ─────────────────
 
   useEffect(() => {
-    // Connect directly to Ling Engine WebSocket
-    wsService.connect(gwUrl);
+    // Connect to Gateway
+    gatewayConnector.connect({
+      url: gwUrl,
+      token: GATEWAY_TOKEN,
+      clientId: 'webchat-ui',
+      displayName: '灵 Avatar',
+    }).then(() => {
+      if (import.meta.env.DEV) console.log('[WebSocketHandler] Gateway connected!');
 
-    // Initialize: set model info directly (no backend fetch needed)
-    setConfName('灵 (Ling)');
-    setConfUid('ling-default');
-    setSelfUid(crypto.randomUUID());
-    setPendingModelInfo(LING_MODEL_INFO);
-    setAiState('idle');
+      // Initialize: set model info directly (no backend fetch needed)
+      setConfName('灵 (Ling)');
+      setConfUid('ling-default');
+      setSelfUid(crypto.randomUUID());
+      setPendingModelInfo(LING_MODEL_INFO);
+      setAiState('idle');
 
-    // Pre-populate config files and backgrounds locally
-    setConfigFiles(DEFAULT_CONFIG_FILES);
-    bgUrlContext?.setBackgroundFiles(DEFAULT_BACKGROUNDS);
+      // Phase 6: Pre-populate config files and backgrounds locally
+      setConfigFiles(DEFAULT_CONFIG_FILES);
+      bgUrlContext?.setBackgroundFiles(DEFAULT_BACKGROUNDS);
+
+      // Resolve the default session so Gateway knows which agent to route to
+      gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId())
+        .then(() => {
+          // Auto-greeting: AI welcomes the user on page load
+          // If Landing animation is still showing, defer greeting until it completes
+          // to avoid the response arriving before the user sees the chat area.
+          if (!greetingSentRef.current) {
+            const sendGreeting = () => {
+              if (greetingSentRef.current) return;
+              greetingSentRef.current = true;
+              // Show thinking indicator immediately — avoids empty-state flash
+              // while waiting for Gateway's conversation-chain-start event
+              setAiState('thinking-speaking');
+              gatewayConnector.sendChat(sessionKeyRef.current, '[greeting]').catch((err) => {
+                if (import.meta.env.DEV) console.error('[WebSocketHandler] Auto-greeting failed:', err);
+                setAiState('idle');
+              });
+            };
+
+            if (sessionStorage.getItem('ling-visited')) {
+              // Return visit — no Landing, send immediately
+              sendGreeting();
+              // Model may still be loading — longer delay
+              setGreetingExpression(2000);
+            } else {
+              // First visit — wait for Landing to complete
+              const onLandingComplete = () => {
+                sendGreeting();
+                // Model has had time to load during Landing animation
+                setGreetingExpression(800);
+                window.removeEventListener('ling-landing-complete', onLandingComplete);
+              };
+              window.addEventListener('ling-landing-complete', onLandingComplete);
+            }
+          }
+        })
+        .catch((err) => {
+          console.error('[WebSocketHandler] resolveSession failed:', err);
+        });
+
+      // Create a default session
+      setCurrentHistoryUid(sessionKeyRef.current);
+      setMessages([]);
+      setHistoryList([{
+        uid: sessionKeyRef.current,
+        latest_message: null,
+        timestamp: new Date().toISOString(),
+      }]);
+    }).catch((err) => {
+      console.error('[WebSocketHandler] Gateway connection failed:', err);
+      toaster.create({
+        title: i18next.t('notification.connectionFailed', { error: err.message }),
+        type: 'error',
+        duration: 5000,
+      });
+    });
 
     return () => {
-      wsService.disconnect();
+      gatewayConnector.disconnect();
     };
   }, [gwUrl]);
 
@@ -463,24 +568,49 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   useEffect(() => { handleWebSocketMessageRef.current = handleWebSocketMessage; }, [handleWebSocketMessage]);
 
   useEffect(() => {
-    // Subscribe to Engine WebSocket state changes
-    const stateSub = wsService.onStateChange((state) => {
-      setWsState(state);
-      if (state === 'CLOSED') {
+    // Subscribe to Gateway state changes — track transitions for user notifications
+    let prevGwState: GatewayState | null = null;
+    const stateSub = gatewayConnector.state$.subscribe((state) => {
+      setWsState(mapGatewayState(state));
+
+      // Issue 1: Notify user when connection drops and auto-reconnect starts
+      if (state === 'RECONNECTING' && prevGwState === 'CONNECTED') {
         toaster.create({
           title: i18next.t('notification.connectionLost'),
           type: 'warning',
           duration: 4000,
         });
       }
+
+      // Issue 2: Notify user when all reconnect attempts are exhausted
+      if (state === 'DISCONNECTED' && prevGwState === 'RECONNECTING') {
+        toaster.create({
+          title: i18next.t('notification.reconnectFailed'),
+          type: 'error',
+          duration: 8000,
+        });
+      }
+
+      prevGwState = state;
+    });
+
+    // Subscribe to agent events (via adapter → MessageEvent format)
+    const agentSub = gatewayConnector.agentEvent$.subscribe((event) => {
+      gatewayAdapter.handleAgentEvent(event);
+    });
+
+    // Subscribe to raw frames (for affinity, emotion, etc.)
+    const rawSub = gatewayConnector.rawFrame$.subscribe((frame) => {
+      gatewayAdapter.handleRawFrame(frame);
     });
 
     // ── Response timeout: detect when AI hangs mid-response ──
+    // Track last activity timestamp; if >60s with no events while AI is thinking, warn user
     const RESPONSE_TIMEOUT_MS = 60_000;
     let lastActivity = 0;
     const responseCheckTimer = setInterval(() => {
       if (lastActivity > 0 && Date.now() - lastActivity > RESPONSE_TIMEOUT_MS) {
-        lastActivity = 0;
+        lastActivity = 0; // Don't re-fire
         toaster.create({
           title: i18next.t('notification.responseTimeout'),
           type: 'warning',
@@ -491,8 +621,9 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       }
     }, 10_000);
 
-    // Subscribe to Engine messages directly (no adapter needed — engine sends MessageEvent format)
-    const messageSub = wsService.onMessage((msg) => {
+    // Subscribe to adapted messages → feed into existing message handler
+    // Uses ref to always call the latest handler without tearing down subscriptions
+    const messageSub = gatewayAdapter.message$.subscribe((msg) => {
       handleWebSocketMessageRef.current(msg);
       // Track activity for response timeout
       if (msg.type === 'control' && msg.text === 'conversation-chain-start') {
@@ -507,15 +638,51 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       }
     });
 
-    // Network recovery: reconnect when browser comes back online
-    const onOnline = () => wsService.connect(getDefaultWsUrl());
+    // Network recovery: immediately retry if in RECONNECTING state
+    const onOnline = () => gatewayConnector.retryNow();
     window.addEventListener('online', onOnline);
+
+    // Post-reconnect recovery: reset stale state & re-resolve session
+    const reconnectSub = gatewayConnector.reconnected$.subscribe(() => {
+      // Clear stale adapter runs from interrupted generation
+      gatewayAdapter.reset();
+      // Reset AI state — may be stuck in 'thinking-speaking' if disconnect mid-run
+      setAiStateRef.current('idle');
+      // Clear any leftover subtitle from interrupted generation
+      setSubtitleTextRef.current('');
+      // Clear partial streaming response from interrupted generation
+      clearResponseRef.current();
+      // Clear stale audio tasks from interrupted TTS pipeline
+      audioTaskQueue.clearQueue();
+      // Reset pending-new-chat flag (may be stuck true if disconnect mid-send)
+      pendingNewChatRef.current = false;
+      // Reset TTS tracking so reconnected conversation starts clean
+      lastTtsTextRef.current = '';
+      synthesizedRef.current.clear();
+      ttsErrorShownRef.current = false;
+      resetTTSStateRef.current();
+      // Reset response timeout tracker — prevents stale timeout firing after recovery
+      lastActivity = 0;
+      // Re-resolve session so Gateway knows which agent to route to
+      gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId()).catch((err) => {
+        console.error('[WebSocketHandler] Post-reconnect resolveSession failed:', err);
+      });
+      // Notify user
+      toaster.create({
+        title: 'Connection restored',
+        type: 'success',
+        duration: 3000,
+      });
+    });
 
     return () => {
       clearInterval(responseCheckTimer);
       window.removeEventListener('online', onOnline);
       stateSub.unsubscribe();
+      agentSub.unsubscribe();
+      rawSub.unsubscribe();
       messageSub.unsubscribe();
+      reconnectSub.unsubscribe();
     };
   }, []); // Empty deps: subscribe once, never tear down
 
@@ -551,7 +718,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   useEffect(() => { currentExpressionRef.current = affinityContext.currentExpression; }, [affinityContext.currentExpression]);
 
   useEffect(() => {
-    const sub = wsService.onMessage((msg) => {
+    const sub = gatewayAdapter.message$.subscribe((msg) => {
       if (msg.type === 'full-text' && msg.text) {
         const fullText = msg.text;
         const prevText = lastTtsTextRef.current;
@@ -632,50 +799,95 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     return () => sub.unsubscribe();
   }, []); // Stable: never tears down
 
-  // ─── sendMessage: forward to Engine WebSocket directly ──────────
+  // ─── sendMessage: intercept ALL legacy message types ──────────
 
   const sendMessage = useCallback((message: object) => {
     const msg = message as any;
 
     switch (msg.type) {
-      // ── Text input (with billing check) ──
+      // ── Phase 2: Text input → Gateway chat.send (with billing check) ──
       case 'text-input':
         if (msg.text) {
+          const text = msg.text;
+          // Billing check before sending
           checkBilling().then((allowed) => {
             if (!allowed) return;
+            // Mark pending to suppress stale conversation-chain-end idle transition
             pendingNewChatRef.current = true;
             ttsGenerationRef.current++;
             audioTaskQueue.clearQueue();
+            // Optimistic: show thinking indicator immediately instead of
+            // waiting for Gateway's conversation-chain-start lifecycle event
             clearResponseRef.current();
             setAiStateRef.current('thinking-speaking');
-            wsService.sendMessage(message);
+            gatewayConnector.sendChat(sessionKeyRef.current, text).catch((err) => {
+              console.error('[Gateway] sendChat failed:', err);
+              toaster.create({
+                title: i18next.t('notification.sendFailed', { error: err.message }),
+                type: 'error',
+                duration: 3000,
+              });
+              pendingNewChatRef.current = false;
+              setAiStateRef.current('idle');
+            });
           });
         }
         return;
 
-      // ── Interrupt ──
-      case 'interrupt-signal':
+      // ── Phase 5: Interrupt → Gateway abort ──
+      case 'interrupt-signal': {
+        // Stop local TTS pipeline immediately — discard in-flight synthesis
         ttsGenerationRef.current++;
         audioTaskQueue.clearQueue();
-        wsService.sendMessage(message);
+        const runId = gatewayAdapter.getActiveRunId();
+        if (runId) {
+          gatewayConnector.abortRun(runId).catch((err) => {
+            console.error('[Gateway] abortRun failed:', err);
+            toaster.create({
+              title: i18next.t('notification.stopFailed'),
+              type: 'error',
+              duration: 3000,
+            });
+          });
+        }
+        return;
+      }
+
+      // ── Phase 5: Voice input — ASR handled separately ──
+      case 'mic-audio-data':
+        // Drop: raw audio not sent to Gateway; ASR runs alongside VAD
         return;
 
-      // ── Voice input ──
       case 'mic-audio-end': {
+        // Harvest ASR transcript and send as text
         const transcript = asrService.stop();
         if (transcript.trim()) {
           const trimmed = transcript.trim();
+          // Billing check before sending voice message
           checkBilling().then((allowed) => {
             if (!allowed) return;
+            // Mark pending to suppress stale conversation-chain-end idle transition
             pendingNewChatRef.current = true;
+            // Increment TTS generation to discard any stale in-flight synthesis
             ttsGenerationRef.current++;
             audioTaskQueue.clearQueue();
             appendHumanMessageRef.current(trimmed);
+            // Optimistic: show thinking indicator immediately
             clearResponseRef.current();
             setAiStateRef.current('thinking-speaking');
-            wsService.sendMessage({ type: 'text-input', text: trimmed });
+            gatewayConnector.sendChat(sessionKeyRef.current, trimmed).catch((err) => {
+              console.error('[Gateway] sendChat (ASR) failed:', err);
+              toaster.create({
+                title: i18next.t('notification.voiceSendFailed', { error: err.message }),
+                type: 'error',
+                duration: 3000,
+              });
+              pendingNewChatRef.current = false;
+              setAiStateRef.current('idle');
+            });
           });
         } else {
+          console.warn('[ASR] No transcript available from speech recognition');
           toaster.create({
             title: i18next.t('notification.noSpeechDetected'),
             type: 'info',
@@ -683,21 +895,158 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           });
           setAiStateRef.current('idle');
         }
+        // Restart ASR if mic is still on (will be re-started by micOn effect)
         return;
       }
 
-      // ── Proactive speak ──
+      // ── Phase 5: Proactive speak → Gateway chat.send ──
       case 'ai-speak-signal':
-        wsService.sendMessage({ type: 'text-input', text: '[proactive-speak]' });
+        gatewayConnector.sendChat(
+          sessionKeyRef.current,
+          '[proactive-speak]',
+        ).catch((err) => {
+          console.error('[Gateway] proactive speak failed:', err);
+          toaster.create({
+            title: i18next.t('notification.proactiveSpeakFailed'),
+            type: 'error',
+            duration: 3000,
+          });
+          setAiStateRef.current('idle');
+        });
         return;
 
-      // ── Drop raw audio (ASR runs client-side) ──
-      case 'mic-audio-data':
+      // ── Phase 6: Session management ──
+      case 'fetch-and-set-history':
+        if (msg.history_uid) {
+          // Sync sessionKeyRef so subsequent sendChat uses the selected session
+          sessionKeyRef.current = msg.history_uid;
+          setCurrentHistoryUidRef.current(msg.history_uid);
+          gatewayConnector.getChatHistory(msg.history_uid).then((res) => {
+            const payload = res.payload as any;
+            if (payload?.messages) {
+              setMessagesRef.current(payload.messages);
+            } else {
+              // Gateway may return empty or different format
+              setMessagesRef.current([]);
+            }
+            toaster.create({
+              title: i18next.t('notification.sessionLoaded'),
+              type: 'success',
+              duration: 2000,
+            });
+          }).catch((err) => {
+            console.error('[Gateway] getChatHistory failed:', err);
+            toaster.create({
+              title: i18next.t('notification.loadSessionFailed', { error: err.message }),
+              type: 'error',
+              duration: 2000,
+            });
+          });
+        }
         return;
 
-      // ── All other types: pass through to engine directly ──
+      case 'create-new-history': {
+        const newSessionKey = `agent:${getAgentId()}:${crypto.randomUUID()}`;
+        gatewayConnector.resolveSession(newSessionKey, getAgentId()).then(() => {
+          // Sync sessionKeyRef so subsequent sendChat uses the new session
+          sessionKeyRef.current = newSessionKey;
+          setCurrentHistoryUidRef.current(newSessionKey);
+          setMessagesRef.current([]);
+          const newHistory: HistoryInfo = {
+            uid: newSessionKey,
+            latest_message: null,
+            timestamp: new Date().toISOString(),
+          };
+          setHistoryListRef.current((prev: HistoryInfo[]) => [newHistory, ...prev]);
+          setAiStateRef.current('idle');
+          setSubtitleTextRef.current('');
+          toaster.create({
+            title: i18next.t('notification.newConversationCreated'),
+            type: 'success',
+            duration: 2000,
+          });
+          // Auto-greeting for the new session — show thinking indicator
+          // immediately to avoid empty-state flash (same as initial page load path)
+          setAiStateRef.current('thinking-speaking');
+          setGreetingExpression(200); // Model is already loaded
+          gatewayConnector.sendChat(newSessionKey, '[greeting]').catch((err) => {
+            if (import.meta.env.DEV) console.error('[WebSocketHandler] New session greeting failed:', err);
+            setAiStateRef.current('idle');
+          });
+        }).catch((err) => {
+          console.error('[Gateway] resolveSession failed:', err);
+          toaster.create({
+            title: i18next.t('notification.createConversationFailed'),
+            type: 'error',
+            duration: 3000,
+          });
+        });
+        return;
+      }
+
+      case 'fetch-history-list':
+        gatewayConnector.listSessions().then((res) => {
+          const payload = res.payload as any;
+          if (payload?.sessions) {
+            const historyList: HistoryInfo[] = payload.sessions.map((s: any) => ({
+              uid: s.key || s.id,
+              latest_message: s.lastMessage || null,
+              timestamp: s.updatedAt || s.createdAt || new Date().toISOString(),
+            }));
+            setHistoryListRef.current(historyList);
+          }
+        }).catch((err) => {
+          console.error('[Gateway] listSessions failed:', err);
+          toaster.create({
+            title: i18next.t('notification.loadSessionsFailed'),
+            type: 'error',
+            duration: 3000,
+          });
+        });
+        return;
+
+      case 'delete-history':
+        if (msg.history_uid) {
+          // Remove from local list (Gateway may not support delete)
+          setHistoryListRef.current((prev: HistoryInfo[]) =>
+            prev.filter((h: HistoryInfo) => h.uid !== msg.history_uid)
+          );
+          toaster.create({
+            title: i18next.t('notification.sessionDeleted'),
+            type: 'success',
+            duration: 2000,
+          });
+        }
+        return;
+
+      // ── Phase 6: Config/background — handled locally ──
+      case 'switch-config':
+        // In Gateway mode, character switching is handled locally
+        // The model info is set directly without backend involvement
+        if (import.meta.env.DEV) console.log('[Gateway] switch-config intercepted, handled locally');
+        return;
+
+      case 'fetch-configs':
+      case 'fetch-backgrounds':
+        // Already populated on connect — no-op
+        return;
+
+      // ── Phase 3: Audio notifications — not needed for Gateway ──
+      case 'audio-play-start':
+      case 'frontend-playback-complete':
+        // Gateway doesn't need audio playback notifications
+        return;
+
+      // ── Phase 7: Group operations — not supported by Gateway ──
+      case 'request-group-info':
+      case 'add-client-to-group':
+      case 'remove-client-from-group':
+        // Gateway doesn't support group functionality
+        return;
+
       default:
-        wsService.sendMessage(message);
+        // Unknown message type — log for debugging
+        if (import.meta.env.DEV) console.log('[Gateway] Unhandled sendMessage type:', msg.type);
         return;
     }
   }, []);
@@ -706,9 +1055,32 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     sendMessage,
     wsState,
     reconnect: () => {
-      wsService.disconnect();
+      gatewayConnector.disconnect();
+      gatewayAdapter.reset();
       setAiState('idle');
-      wsService.connect(gwUrl);
+      gatewayConnector.connect({
+        url: gwUrl,
+        token: GATEWAY_TOKEN,
+        clientId: 'webchat-ui',
+        displayName: '灵 Avatar',
+      }).then(() => {
+        // Re-resolve session after manual reconnect
+        gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId()).catch((err) => {
+          console.error('[WebSocketHandler] Manual reconnect resolveSession failed:', err);
+        });
+        toaster.create({
+          title: i18next.t('notification.connectionRestored'),
+          type: 'success',
+          duration: 3000,
+        });
+      }).catch((err) => {
+        console.error('[WebSocketHandler] Manual reconnect failed:', err);
+        toaster.create({
+          title: i18next.t('notification.connectionFailed', { error: err.message }),
+          type: 'error',
+          duration: 5000,
+        });
+      });
     },
     wsUrl: gwUrl,
     setWsUrl: setGwUrl,
@@ -718,7 +1090,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
   return (
     <WebSocketContext.Provider value={webSocketContextValue}>
-      {/* Debug panel removed */}
+      {import.meta.env.DEV && <GatewayDebugPanel />}
       {children}
     </WebSocketContext.Provider>
   );

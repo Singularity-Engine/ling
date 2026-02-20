@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useRef } from 'react';
 import { useToolState, ToolCategory } from '../../context/tool-state-context';
 import { useAiState } from '../../context/ai-state-context';
 import { useAffinity } from '../../context/affinity-context';
@@ -38,6 +38,11 @@ export const ThoughtHalo = memo(() => {
   // Show a softer halo during normal AI thinking (no tool calls)
   const isAiThinking = isThinkingSpeaking && !isToolActive;
   const isActive = isToolActive || isAiThinking;
+
+  // Track whether halo has ever been active to avoid exit-animation flicker on mount
+  const hasBeenActive = useRef(false);
+  if (isActive) hasBeenActive.current = true;
+  const exitAnim = hasBeenActive.current ? 'thoughtHaloExit 0.3s ease-in forwards' : 'none';
 
   // AI thinking color now follows affinity level
   const affinityColor = AFFINITY_HALO_COLORS[level] || AFFINITY_HALO_COLORS.neutral;
@@ -128,9 +133,10 @@ export const ThoughtHalo = memo(() => {
           pointerEvents: 'none',
           animation: isActive
             ? `thoughtHaloEnter 0.5s ease-out forwards, innerGlowPulse 2s ease-in-out 0.5s infinite`
-            : 'thoughtHaloExit 0.3s ease-in forwards',
+            : exitAnim,
           opacity: isActive ? undefined : 0,
           filter: 'blur(6px)',
+          transition: 'background 0.5s ease',
           willChange: 'opacity',
         }}
       />
@@ -150,8 +156,9 @@ export const ThoughtHalo = memo(() => {
           pointerEvents: 'none',
           animation: isActive
             ? `thoughtHaloEnter 0.5s ease-out forwards, ringPulse 2.5s ease-in-out 0.5s infinite`
-            : 'thoughtHaloExit 0.3s ease-in forwards',
+            : exitAnim,
           opacity: isActive ? undefined : 0,
+          transition: 'border-color 0.5s ease, box-shadow 0.5s ease',
           willChange: 'transform, opacity',
         }}
       />
@@ -168,7 +175,7 @@ export const ThoughtHalo = memo(() => {
           pointerEvents: 'none',
           animation: isActive
             ? `thoughtHaloEnter 0.5s ease-out forwards, thoughtHaloRotateReverse ${innerRotationSpeed} linear 0.5s infinite`
-            : 'thoughtHaloExit 0.3s ease-in forwards',
+            : exitAnim,
           opacity: isActive ? undefined : 0,
           willChange: 'transform, opacity',
         }}
@@ -211,7 +218,7 @@ export const ThoughtHalo = memo(() => {
           pointerEvents: 'none',
           animation: isActive
             ? `thoughtHaloEnter 0.5s ease-out forwards, thoughtHaloRotate ${rotationSpeed} linear 0.5s infinite`
-            : 'thoughtHaloExit 0.3s ease-in forwards',
+            : exitAnim,
           opacity: isActive ? undefined : 0,
           willChange: 'transform, opacity',
         }}
