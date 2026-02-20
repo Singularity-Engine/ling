@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, Component, ErrorInfo, ReactNode } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
 import { LandingAnimation } from "./components/landing/LandingAnimation";

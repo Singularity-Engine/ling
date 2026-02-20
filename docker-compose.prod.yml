@@ -19,6 +19,7 @@ services:
       - engine-models:/app/models
     networks:
       - ling-net
+      - mcp_appnet
     depends_on:
       postgres:
         condition: service_healthy
@@ -44,6 +45,7 @@ services:
       - "3001:3001"
     networks:
       - ling-net
+      - mcp_appnet
 
   # ── TTS Proxy (standalone Fish Audio proxy) ────
   ling-tts-proxy:
@@ -137,3 +139,6 @@ volumes:
 networks:
   ling-net:
     driver: bridge
+  mcp_appnet:
+    external: true
+    name: mcp_appnet
