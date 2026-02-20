@@ -107,6 +107,7 @@ export const InputBar = memo(() => {
     setInputText("");
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
+      textareaRef.current.focus();
     }
     // Debounce: prevent rapid-fire sends
     setTimeout(() => setIsSending(false), 500);
