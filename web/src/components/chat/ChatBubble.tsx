@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useCallback, useRef, type ReactNode } from "react";
+import { memo, useMemo, useState, useCallback, useRef, type ReactNode, type CSSProperties } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -106,6 +106,59 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   document.head.appendChild(style);
 }
 
+// ─── Static style constants (avoid per-render allocation across 50+ messages) ───
+
+const S_OUTER_USER: CSSProperties = { display: "flex", justifyContent: "flex-end", marginBottom: "12px", padding: "0 16px" };
+const S_OUTER_AI: CSSProperties = { display: "flex", justifyContent: "flex-start", marginBottom: "12px", padding: "0 16px" };
+
+const S_BUBBLE_USER: CSSProperties = {
+  padding: "10px 16px", borderRadius: "18px 18px 4px 18px",
+  background: "linear-gradient(135deg, rgba(139, 92, 246, 0.45), rgba(109, 40, 217, 0.4))",
+  border: "1px solid rgba(139, 92, 246, 0.35)",
+  backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
+  overflow: "hidden", transition: "all 0.2s ease",
+  boxShadow: "0 2px 12px rgba(139, 92, 246, 0.2)",
+};
+const S_BUBBLE_AI: CSSProperties = {
+  padding: "10px 16px", borderRadius: "18px 18px 18px 4px",
+  background: "rgba(255, 255, 255, 0.08)",
+  border: "1px solid rgba(255, 255, 255, 0.1)",
+  backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
+  overflow: "hidden", transition: "all 0.2s ease",
+  boxShadow: "0 1px 8px rgba(0, 0, 0, 0.1)",
+};
+const S_BUBBLE_AI_ACTIVE: CSSProperties = { ...S_BUBBLE_AI, cursor: "default" };
+
+const S_USER_TEXT: CSSProperties = {
+  fontSize: "14px", color: "rgba(255,255,255,0.95)", whiteSpace: "pre-wrap",
+  overflowWrap: "break-word", wordBreak: "break-word", lineHeight: 1.7, letterSpacing: "0.3px",
+};
+const S_AI_MD: CSSProperties = { fontSize: "14px", color: "rgba(255,255,255,0.88)", lineHeight: 1.7, letterSpacing: "0.3px" };
+
+const S_NAME: CSSProperties = {
+  display: "block", fontSize: "11px", color: "rgba(139, 92, 246, 0.6)",
+  marginBottom: "4px", marginLeft: "4px", fontWeight: 500, letterSpacing: "0.5px",
+};
+const S_TS_USER: CSSProperties = { display: "block", fontSize: "10px", color: "rgba(255, 255, 255, 0.5)", marginTop: "3px", textAlign: "right", marginRight: "4px" };
+const S_TS_AI: CSSProperties = { display: "block", fontSize: "10px", color: "rgba(255, 255, 255, 0.5)", marginTop: "3px", textAlign: "left", marginLeft: "4px" };
+
+const S_COPY: CSSProperties = {
+  position: "absolute", top: "6px", right: "-32px", width: "24px", height: "24px",
+  display: "flex", alignItems: "center", justifyContent: "center",
+  background: "transparent", border: "none", borderRadius: "4px",
+  cursor: "pointer", padding: 0, transition: "all 0.2s ease", color: "rgba(255,255,255,0.3)",
+};
+const S_COPY_DONE: CSSProperties = { ...S_COPY, color: "rgba(34,197,94,0.8)" };
+
+const S_TOOL_WRAP: CSSProperties = { padding: "0 16px", marginBottom: "10px", maxWidth: "90%" };
+const S_INNER: CSSProperties = { maxWidth: "78%", minWidth: 0 };
+const S_REL: CSSProperties = { position: "relative" };
+const S_CURSOR: CSSProperties = {
+  display: "inline-block", width: "2px", height: "14px", background: "#8b5cf6",
+  marginLeft: "2px", verticalAlign: "text-bottom", borderRadius: "1px",
+  animation: "streamingCursor 1s ease-in-out infinite",
+};
+
 interface ChatBubbleProps {
   role: "user" | "assistant";
   content: string;
@@ -174,93 +227,53 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
     [content]
   );
 
+  // Pre-compute styles from module-level constants; only creates new objects
+  // when entry animation or flash is active (rare). Avoids ~12 object
+  // allocations per render — significant for 50+ messages.
+  const outerStyle = useMemo<CSSProperties>(
+    () => {
+      const base = isUser ? S_OUTER_USER : S_OUTER_AI;
+      return entryAnimation === "none" ? base : { ...base, animation: entryAnimation };
+    },
+    [isUser, entryAnimation]
+  );
+
+  const bubbleStyle = useMemo<CSSProperties>(() => {
+    if (isUser) return S_BUBBLE_USER;
+    const base = !isStreaming && content ? S_BUBBLE_AI_ACTIVE : S_BUBBLE_AI;
+    return flashing ? { ...base, animation: "bubbleCopyFlash 0.35s ease-out" } : base;
+  }, [isUser, isStreaming, content, flashing]);
+
   if (isToolCall && toolName) {
     return (
-      <div style={{ padding: "0 16px", marginBottom: "10px", maxWidth: "90%" }}>
+      <div style={S_TOOL_WRAP}>
         <ToolResultCard toolName={toolName} content={content} status={toolStatus || "running"} />
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: isUser ? "flex-end" : "flex-start",
-        marginBottom: "12px",
-        padding: "0 16px",
-        animation: entryAnimation,
-      }}
-    >
-      <div style={{ maxWidth: "78%", minWidth: 0 }} className={!isUser ? "chat-bubble-wrap" : undefined}>
+    <div style={outerStyle}>
+      <div style={S_INNER} className={!isUser ? "chat-bubble-wrap" : undefined}>
         {!isUser && (
-          <span
-            style={{
-              display: "block",
-              fontSize: "11px",
-              color: "rgba(139, 92, 246, 0.6)",
-              marginBottom: "4px",
-              marginLeft: "4px",
-              fontWeight: 500,
-              letterSpacing: "0.5px",
-            }}
-          >
+          <span style={S_NAME}>
             {t("chat.characterName")}
           </span>
         )}
-        <div style={{ position: "relative" }}>
+        <div style={S_REL}>
           <div
             ref={bubbleRef}
             onDoubleClick={!isUser && !isStreaming && content ? handleDoubleClick : undefined}
-            style={{
-              padding: "10px 16px",
-              borderRadius: isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
-              background: isUser
-                ? "linear-gradient(135deg, rgba(139, 92, 246, 0.45), rgba(109, 40, 217, 0.4))"
-                : "rgba(255, 255, 255, 0.08)",
-              border: isUser ? "1px solid rgba(139, 92, 246, 0.35)" : "1px solid rgba(255, 255, 255, 0.1)",
-              backdropFilter: "blur(10px)",
-              WebkitBackdropFilter: "blur(10px)",
-              overflow: "visible",
-              transition: "all 0.2s ease",
-              boxShadow: isUser
-                ? "0 2px 12px rgba(139, 92, 246, 0.2)"
-                : "0 1px 8px rgba(0, 0, 0, 0.1)",
-              cursor: !isUser && !isStreaming && content ? "default" : undefined,
-              animation: flashing ? "bubbleCopyFlash 0.35s ease-out" : undefined,
-            }}
+            style={bubbleStyle}
           >
             {isUser ? (
-              <span
-                style={{
-                  fontSize: "14px",
-                  color: "rgba(255,255,255,0.95)",
-                  whiteSpace: "pre-wrap",
-                  overflowWrap: "break-word",
-                  wordBreak: "break-word",
-                  lineHeight: 1.7,
-                  letterSpacing: "0.3px",
-                }}
-              >
+              <span style={S_USER_TEXT}>
                 {content}
               </span>
             ) : (
-              <div className="md-content" style={{ fontSize: "14px", color: "rgba(255,255,255,0.88)", lineHeight: 1.7, letterSpacing: "0.3px" }}>
+              <div className="md-content" style={S_AI_MD}>
                 {renderedMarkdown}
-                {isStreaming && (
-                  <span
-                    style={{
-                      display: "inline-block",
-                      width: "2px",
-                      height: "14px",
-                      background: "#8b5cf6",
-                      marginLeft: "2px",
-                      verticalAlign: "text-bottom",
-                      borderRadius: "1px",
-                      animation: "streamingCursor 1s ease-in-out infinite",
-                    }}
-                  />
-                )}
+                {isStreaming && <span style={S_CURSOR} />}
               </div>
             )}
           </div>
@@ -270,23 +283,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
               className="chat-copy-btn"
               aria-label={copied ? t("chat.copied") : t("chat.copy")}
               title={copied ? t("chat.copied") : t("chat.copy")}
-              style={{
-                position: "absolute",
-                top: "6px",
-                right: "-32px",
-                width: "24px",
-                height: "24px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "transparent",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                padding: 0,
-                color: copied ? "rgba(34,197,94,0.8)" : "rgba(255,255,255,0.3)",
-                transition: "all 0.2s ease",
-              }}
+              style={copied ? S_COPY_DONE : S_COPY}
             >
               {copied ? (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -297,17 +294,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
           )}
         </div>
         {timestamp && (
-          <span
-            style={{
-              display: "block",
-              fontSize: "10px",
-              color: "rgba(255, 255, 255, 0.5)",
-              marginTop: "3px",
-              textAlign: isUser ? "right" : "left",
-              marginLeft: isUser ? undefined : "4px",
-              marginRight: isUser ? "4px" : undefined,
-            }}
-          >
+          <span style={isUser ? S_TS_USER : S_TS_AI}>
             {formatTime(timestamp)}
           </span>
         )}

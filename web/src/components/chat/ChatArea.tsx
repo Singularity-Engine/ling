@@ -139,6 +139,9 @@ export const ChatArea = memo(() => {
   // Ref mirrors isNearBottom so the auto-scroll effect can read the latest
   // value without depending on it (avoids re-firing on scroll-position changes).
   const isNearBottomRef = useRef(true);
+  // true during the render immediately after streaming ends — lets us skip
+  // the entry animation on the just-committed AI bubble (avoids a blink).
+  const wasStreamingRef = useRef(false);
 
   const checkNearBottom = useCallback(() => {
     const el = scrollRef.current;
@@ -200,6 +203,10 @@ export const ChatArea = memo(() => {
     const lastAiMsg = dedupedMessages.findLast(m => m.role === 'ai');
     return !(lastAiMsg && lastAiMsg.content && displayResponse.startsWith(lastAiMsg.content));
   }, [isStreaming, dedupedMessages, displayResponse]);
+
+  // Mirror showStreaming into a ref so the memoized message list can read it
+  // without adding a dependency (avoids re-rendering all messages each frame).
+  useEffect(() => { wasStreamingRef.current = showStreaming; }, [showStreaming]);
 
   // Bridge the gap between "message sent" and "AI starts thinking":
   // show typing dots immediately when the last message is from the user.

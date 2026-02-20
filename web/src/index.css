@@ -471,8 +471,9 @@ canvas {
 .md-content strong { color: var(--ling-text-primary); }
 .md-content em { color: var(--ling-md-em); }
 .md-content del { color: var(--ling-text-tertiary); }
-.md-content a { color: var(--ling-purple-light); text-decoration: none; border-bottom: 1px solid rgba(167,139,250,0.3); transition: border-color 0.2s; }
+.md-content a { color: var(--ling-purple-light); text-decoration: none; border-bottom: 1px solid rgba(167,139,250,0.3); transition: border-color 0.2s; overflow-wrap: anywhere; }
 .md-content a:hover { border-color: var(--ling-purple-light); }
+.md-content img { max-width: 100%; height: auto; }
 .md-content code {
   background: var(--ling-purple-15);
   color: var(--ling-code-text);
