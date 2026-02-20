@@ -27,6 +27,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     .welcome-chip { transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease; }
     .welcome-chip:hover { background: rgba(139, 92, 246, 0.25) !important; border-color: rgba(139, 92, 246, 0.35) !important; transform: translateY(-1px); }
     .welcome-chip:active { transform: scale(0.97); }
+    .chat-msg-item { content-visibility: auto; contain-intrinsic-size: auto 80px; }
   `;
   document.head.appendChild(style);
 }
@@ -181,15 +182,7 @@ export const ChatArea = memo(() => {
     setHasNewMessage(false);
   }, []);
 
-  // Bridge the gap between "message sent" and "AI starts thinking":
-  // show typing dots immediately when the last message is from the user.
-  const awaitingReply = useMemo(() => {
-    if (isThinkingSpeaking || isStreaming || !isConnected) return false;
-    const lastMsg = dedupedMessages[dedupedMessages.length - 1];
-    return lastMsg?.role === "human";
-  }, [dedupedMessages, isThinkingSpeaking, isStreaming, isConnected]);
-
-  const showTyping = (isThinkingSpeaking || awaitingReply) && !isStreaming;
+  const isConnected = wsState === "OPEN";
 
   // Memoize dedup so it only recalculates when messages change, not on every streaming delta
   const dedupedMessages = useMemo(
@@ -207,6 +200,16 @@ export const ChatArea = memo(() => {
     const lastAiMsg = dedupedMessages.findLast(m => m.role === 'ai');
     return !(lastAiMsg && lastAiMsg.content && displayResponse.startsWith(lastAiMsg.content));
   }, [isStreaming, dedupedMessages, displayResponse]);
+
+  // Bridge the gap between "message sent" and "AI starts thinking":
+  // show typing dots immediately when the last message is from the user.
+  const awaitingReply = useMemo(() => {
+    if (isThinkingSpeaking || isStreaming || !isConnected) return false;
+    const lastMsg = dedupedMessages[dedupedMessages.length - 1];
+    return lastMsg?.role === "human";
+  }, [dedupedMessages, isThinkingSpeaking, isStreaming, isConnected]);
+
+  const showTyping = (isThinkingSpeaking || awaitingReply) && !isStreaming;
 
   const isEmpty = dedupedMessages.length === 0 && !showStreaming && !showTyping;
 
@@ -235,8 +238,6 @@ export const ChatArea = memo(() => {
     return t("ui.welcomeTitle");
   }, [t]);
 
-  const isConnected = wsState === "OPEN";
-
   const handleChipClick = useCallback(
     (text: string) => {
       if (!isConnected) return;
@@ -259,7 +260,7 @@ export const ChatArea = memo(() => {
           prev.timestamp &&
           shouldShowSeparator(prev.timestamp, msg.timestamp);
         return (
-          <div key={msg.id}>
+          <div key={msg.id} className="chat-msg-item">
             {showSep && <TimeSeparator timestamp={msg.timestamp} />}
             <ChatBubble
               role={msg.role === "human" ? "user" : "assistant"}
