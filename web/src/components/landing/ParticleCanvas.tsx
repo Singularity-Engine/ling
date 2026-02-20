@@ -23,6 +23,8 @@ interface Particle {
   floatAngle: number;
   floatSpeed: number;
   floatRadius: number;
+  /** Fixed angle for deterministic converge path */
+  convergeAngle: number;
 }
 
 /**
@@ -70,6 +72,7 @@ function createParticles(
       floatAngle: Math.random() * Math.PI * 2,
       floatSpeed: Math.random() * 0.008 + 0.004,
       floatRadius: Math.random() * 40 + 20,
+      convergeAngle: Math.random() * Math.PI * 2,
     });
   }
   return particles;

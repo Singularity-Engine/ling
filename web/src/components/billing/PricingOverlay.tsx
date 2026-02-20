@@ -32,7 +32,7 @@ const PLANS = [
   {
     name: 'Stardust',
     subtitle: 'Daily companion',
-    price: '$9.99',
+    price: '$14.99',
     period: '/mo',
     key: 'stardust_monthly',
     features: [
@@ -51,7 +51,7 @@ const PLANS = [
   {
     name: 'Resonance',
     subtitle: 'Deep connection',
-    price: '$24.99',
+    price: '$39.99',
     period: '/mo',
     key: 'resonance_monthly',
     features: [
@@ -69,16 +69,16 @@ const PLANS = [
   },
   {
     name: 'Eternal',
-    subtitle: 'Lifetime bond',
-    price: '$499.99',
-    period: ' one-time',
+    subtitle: 'Best value',
+    price: '$299.99',
+    period: '/yr',
     key: 'eternal_yearly',
     features: [
       'Everything in Resonance',
       'Full API access',
       'Custom characters',
       'Priority support',
-      'Lifetime updates',
+      'Save $179.89 vs monthly',
     ],
     color: '#4f46e5',
     popular: false,

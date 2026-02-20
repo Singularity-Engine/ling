@@ -274,7 +274,13 @@ def _handle_invoice_paid(invoice: dict, repo: LingUserRepository):
     if not user_id:
         return
 
-    # 查找 price → plan → credits
+    # 首次订阅的积分已在 checkout.session.completed 中发放，跳过避免双倍
+    billing_reason = invoice.get("billing_reason", "")
+    if billing_reason == "subscription_create":
+        logger.info(f"跳过首次订阅 invoice 积分（已在 checkout 中发放）: {user_id}")
+        return
+
+    # 续费：查找 price → plan → credits
     lines = invoice.get("lines", {}).get("data", [])
     for line in lines:
         price_id = line.get("price", {}).get("id")
