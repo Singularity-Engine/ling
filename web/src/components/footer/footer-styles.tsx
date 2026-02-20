@@ -29,7 +29,7 @@ export const footerStyles: {
         : { base: 'none', md: '1px solid rgba(139, 92, 246, 0.15)' },
       borderTopRadius: isCollapsed ? 'none' : { base: 'none', md: '16px' },
       transform: isCollapsed ? 'translateY(calc(100% - 24px))' : 'translateY(0)',
-      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, border-radius 0.3s ease, backdrop-filter 0.3s ease',
       height: '100%',
       position: 'relative',
       overflow: isCollapsed ? 'visible' : 'hidden',

@@ -118,7 +118,7 @@ export const TTSStatus = memo(() => {
           backdropFilter: 'blur(12px)',
           borderRadius: '16px',
           border: `1px solid ${isError ? 'rgba(248, 113, 113, 0.3)' : 'rgba(255,255,255,0.06)'}`,
-          transition: 'all 0.4s ease',
+          transition: 'border-color 0.4s ease, opacity 0.4s ease',
           animation: fading ? 'ttsFadeOut 0.3s ease-out forwards' : 'ttsFadeIn 0.3s ease-out',
         }}
         title={isError && lastError ? lastError : undefined}

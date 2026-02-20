@@ -80,7 +80,7 @@ export const ThinkingBubble = memo(({ content, isThinking, isStreaming }: Thinki
             backdropFilter: "blur(10px)",
             WebkitBackdropFilter: "blur(10px)",
             boxShadow: "0 1px 8px rgba(0, 0, 0, 0.1)",
-            transition: "all 0.2s ease",
+            transition: "box-shadow 0.2s ease, background 0.2s ease",
             minHeight: "20px",
             position: "relative",
           }}

@@ -31,12 +31,10 @@ import { TTSStateProvider } from "./context/tts-state-context";
 import { StarField } from "./components/background/StarField";
 import { MOBILE_BREAKPOINT } from "./constants/breakpoints";
 import { BackgroundReactor } from "./components/effects/BackgroundReactor";
-import { ThoughtHalo } from "./components/effects/ThoughtHalo";
 import { AudioVisualizer } from "./components/effects/AudioVisualizer";
 import { CrystalField } from "./components/crystal/CrystalField";
 import { Constellation } from "./components/ability/Constellation";
 import { LoadingSkeleton } from "./components/loading/LoadingSkeleton";
-import { ModelLoadingOverlay } from "./components/loading/ModelLoadingOverlay";
 import { Toaster, toaster } from "./components/ui/toaster";
 import { useWebSocket } from "./context/websocket-context";
 import { useKeyboardShortcuts, ShortcutDef } from "./hooks/use-keyboard-shortcuts";
@@ -245,17 +243,15 @@ function MainContent(): JSX.Element {
       <TapParticles />
 
       {/* ===== Layer 0.5: 工具状态反馈层 ===== */}
-      <div style={{ position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none" }}>
+      <div style={{ position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none", overflow: "hidden" }}>
         <BackgroundReactor />
-        <ThoughtHalo />
         <AudioVisualizer />
       </div>
 
       {/* ===== Layer 0.8: 加载骨架屏 ===== */}
       <LoadingSkeleton />
 
-      {/* ===== Layer 0.9: Live2D 模型加载覆盖层 ===== */}
-      <ModelLoadingOverlay />
+      {/* Live2D 已有内置 loading overlay (live2d.tsx)，不需要额外的 */}
 
       {/* ===== Layer 1: 工具结果水晶 ===== */}
       <CrystalField />
@@ -369,14 +365,15 @@ function MainContent(): JSX.Element {
       <div
         style={{
           position: "absolute",
-          bottom: kbOffset,
+          bottom: 0,
           left: 0,
           right: 0,
           zIndex: 25,
           display: "flex",
           flexDirection: "column",
           pointerEvents: "none",
-          transition: kbOffset > 0 ? "none" : "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+          transform: kbOffset > 0 ? `translateY(-${kbOffset}px)` : "none",
+          transition: kbOffset > 0 ? "none" : "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
         }}
       >
         <div
@@ -384,9 +381,10 @@ function MainContent(): JSX.Element {
             overflow: "hidden",
             position: "relative",
             pointerEvents: "auto",
-            transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+            transition: "max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
             maxHeight: chatExpanded ? (isMobile ? "35dvh" : "40dvh") : "0px",
             opacity: chatExpanded ? 1 : 0,
+            willChange: "max-height, opacity",
             maskImage: "linear-gradient(to bottom, transparent 0%, black 15%)",
             WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 15%)",
           }}

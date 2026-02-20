@@ -24,7 +24,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     @keyframes scrollBtnPulse { 0%, 100% { box-shadow: 0 2px 12px rgba(139, 92, 246, 0.3); } 50% { box-shadow: 0 2px 20px rgba(139, 92, 246, 0.5); } }
     @keyframes chipFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes greetingBubbleIn { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
-    .welcome-chip { transition: all 0.2s ease; }
+    .welcome-chip { transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease; }
     .welcome-chip:hover { background: rgba(139, 92, 246, 0.25) !important; border-color: rgba(139, 92, 246, 0.35) !important; transform: translateY(-1px); }
     .welcome-chip:active { transform: scale(0.97); }
   `;
