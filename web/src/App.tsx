@@ -212,10 +212,21 @@ function MainContent(): JSX.Element {
     {
       key: "escape",
       labelKey: "shortcuts.closeOverlay",
-      action: () => { setShortcutsOpen(false); setAboutOpen(false); setMemoryOpen(false); },
+      action: () => {
+        // Cascade: close overlays first, then collapse chat panel
+        if (shortcutsOpen || aboutOpen || memoryOpen) {
+          setShortcutsOpen(false);
+          setAboutOpen(false);
+          setMemoryOpen(false);
+        } else if (chatExpanded) {
+          setChatExpanded(false);
+          // Blur textarea so focus doesn't remain on hidden input
+          (document.activeElement as HTMLElement)?.blur?.();
+        }
+      },
       allowInInput: true,
     },
-  ], [micOn, startMic, stopMic, createNewChat, t]);
+  ], [micOn, startMic, stopMic, createNewChat, t, shortcutsOpen, aboutOpen, memoryOpen, chatExpanded]);
 
   useKeyboardShortcuts(shortcuts);
   useAffinityIdleExpression();
