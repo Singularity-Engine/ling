@@ -336,9 +336,12 @@ export const ChatArea = memo(() => {
       setAwaitingTimedOut(false);
       return;
     }
+    // Reset on every new message so the timer restarts when the user
+    // sends again after a previous timeout (awaitingReply stays true).
+    setAwaitingTimedOut(false);
     const timer = setTimeout(() => setAwaitingTimedOut(true), 15_000);
     return () => clearTimeout(timer);
-  }, [awaitingReply]);
+  }, [awaitingReply, messages.length]);
 
   const showTyping = (isThinkingSpeaking || (awaitingReply && !awaitingTimedOut)) && !isStreaming;
 
@@ -379,8 +382,11 @@ export const ChatArea = memo(() => {
 
   // ── Render windowing: only mount the last RENDER_WINDOW messages ──
   // Keeps the DOM small in long conversations while all messages remain in state.
-  const [showAll, setShowAll] = useState(false);
-  const hiddenCount = showAll ? 0 : Math.max(0, dedupedMessages.length - RENDER_WINDOW);
+  // Progressive loading: each "Load more" click reveals another batch instead
+  // of dumping all hidden messages into the DOM at once (which causes jank).
+  const [extraBatches, setExtraBatches] = useState(0);
+  const renderLimit = RENDER_WINDOW + extraBatches * RENDER_WINDOW;
+  const hiddenCount = Math.max(0, dedupedMessages.length - renderLimit);
   // Memoize so the reference stays stable during streaming (~30fps re-renders).
   // Without this, .slice() creates a new array every frame when >80 messages,
   // invalidating the messageElements useMemo below.
@@ -393,7 +399,7 @@ export const ChatArea = memo(() => {
   const handleLoadMore = useCallback(() => {
     const el = scrollRef.current;
     const prevHeight = el?.scrollHeight ?? 0;
-    setShowAll(true);
+    setExtraBatches((n) => n + 1);
     // After React commits the new DOM, adjust scrollTop so the viewport
     // stays on the same message the user was looking at.
     requestAnimationFrame(() => {
@@ -403,7 +409,7 @@ export const ChatArea = memo(() => {
 
   // Reset windowing when conversation is cleared (new session)
   useEffect(() => {
-    if (dedupedMessages.length <= RENDER_WINDOW) setShowAll(false);
+    if (dedupedMessages.length <= RENDER_WINDOW) setExtraBatches(0);
   }, [dedupedMessages.length]);
 
   // Memoize the message list so .map() is skipped during streaming.
