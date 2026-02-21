@@ -47,27 +47,35 @@ function useThrottledValue(source: string): string {
   latestRef.current = source;
 
   useEffect(() => {
-    // Fast path: source cleared → flush immediately
+    // Fast path: source cleared → flush immediately & cancel pending rAF
     if (source === '') {
       setDisplay('');
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = 0;
+      }
       return;
     }
 
-    // Schedule an rAF to batch rapid updates
+    // Only schedule if no rAF is pending — avoids cancel+reschedule on every
+    // token during streaming.  The rAF reads latestRef so it always gets the
+    // most recent value even if many source updates arrive within one frame.
     if (!rafRef.current) {
       rafRef.current = requestAnimationFrame(() => {
         rafRef.current = 0;
         setDisplay(latestRef.current);
       });
     }
-
-    return () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = 0;
-      }
-    };
+    // No per-change cleanup: let the scheduled rAF naturally coalesce rapid updates.
   }, [source]);
+
+  // Cancel pending rAF only on unmount.
+  useEffect(() => () => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+    }
+  }, []);
 
   return display;
 }
