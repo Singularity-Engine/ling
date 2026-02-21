@@ -8,7 +8,7 @@ const S_OUTER: CSSProperties = {
   alignItems: "center",
   gap: "12px",
   padding: "8px 24px",
-  margin: "4px 0",
+  margin: "4px 0 8px",
 };
 const S_LINE: CSSProperties = {
   flex: 1,

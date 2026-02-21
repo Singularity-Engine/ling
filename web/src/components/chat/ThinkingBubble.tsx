@@ -30,21 +30,21 @@ const S_OUTER: CSSProperties = {
 };
 const S_INNER: CSSProperties = { maxWidth: "78%", minWidth: 0 };
 const S_NAME: CSSProperties = {
-  display: "block", fontSize: "11px", color: "rgba(139, 92, 246, 0.6)",
+  display: "block", fontSize: "11px", color: "var(--ling-chat-label)",
   marginBottom: "4px", marginLeft: "4px", fontWeight: 500, letterSpacing: "0.5px",
 };
 const S_BUBBLE: CSSProperties = {
   padding: "10px 16px", borderRadius: "18px 18px 18px 4px",
-  background: "rgba(255, 255, 255, 0.06)", border: "1px solid rgba(255, 255, 255, 0.08)",
+  background: "var(--ling-bubble-ai-bg)", border: "1px solid var(--ling-bubble-ai-border)",
   backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
-  boxShadow: "0 1px 8px rgba(0, 0, 0, 0.1)",
+  boxShadow: "0 1px 8px var(--ling-bubble-ai-shadow)",
   transition: "box-shadow 0.2s ease, background 0.2s ease",
   overflow: "hidden", minHeight: "20px", position: "relative",
 };
-const S_MD: CSSProperties = { fontSize: "14px", color: "rgba(255,255,255,0.88)", lineHeight: 1.7, letterSpacing: "0.3px" };
+const S_MD: CSSProperties = { fontSize: "14px", color: "var(--ling-bubble-ai-text)", lineHeight: 1.7, letterSpacing: "0.3px" };
 const S_MD_FADE: CSSProperties = { ...S_MD, animation: "textFadeIn 0.3s ease-out" };
 const S_CURSOR: CSSProperties = {
-  display: "inline-block", width: "2px", height: "14px", background: "#8b5cf6",
+  display: "inline-block", width: "2px", height: "14px", background: "var(--ling-purple)",
   marginLeft: "2px", verticalAlign: "text-bottom", borderRadius: "1px",
   animation: "streamingCursor 1s ease-in-out infinite",
 };

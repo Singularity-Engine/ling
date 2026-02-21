@@ -177,7 +177,7 @@ const S_TOGGLE_BTN: CSSProperties = {
 };
 const S_TOGGLE_ARROW: CSSProperties = { fontSize: "10px" };
 
-const S_TOOL_WRAP: CSSProperties = { padding: "0 16px", marginBottom: "10px", maxWidth: "90%" };
+const S_TOOL_WRAP: CSSProperties = { padding: "0 16px", marginBottom: "12px", maxWidth: "90%" };
 const S_INNER: CSSProperties = { maxWidth: "78%", minWidth: 0 };
 const S_REL: CSSProperties = { position: "relative" };
 const S_CURSOR: CSSProperties = {
