@@ -18,6 +18,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     .ling-textarea { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; color: white; font-size: 14px; padding: 10px 16px; min-height: 42px; max-height: 96px; resize: none; flex: 1; outline: none; font-family: inherit; line-height: 1.5; }
     .ling-textarea::placeholder { color: rgba(255, 255, 255, 0.4); }
     .ling-textarea:focus { border-color: rgba(139, 92, 246, 0.6); box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.4); }
+    .ling-textarea:disabled { opacity: 0.45; cursor: not-allowed; }
   `;
   document.head.appendChild(style);
 }
@@ -95,6 +96,7 @@ export const InputBar = memo(() => {
   useEffect(() => {
     const handler = (e: Event) => {
       const text = (e as CustomEvent).detail?.text;
+      setIsSending(false);
       if (typeof text === 'string' && !inputText) {
         setInputText(text.slice(0, MAX_LENGTH));
         setTimeout(() => {
@@ -246,6 +248,7 @@ export const InputBar = memo(() => {
           onKeyDown={handleKeyDown}
           onCompositionStart={() => { isComposingRef.current = true; }}
           onCompositionEnd={() => { isComposingRef.current = false; }}
+          disabled={!isConnected}
           placeholder={!isConnected ? t("chat.placeholderDisconnected") : micOn ? t("chat.placeholderListening") : t("chat.placeholder")}
           aria-label={t("chat.inputLabel")}
           rows={1}
