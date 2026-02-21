@@ -29,7 +29,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     .welcome-chip { transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease; }
     .welcome-chip:hover { background: rgba(139, 92, 246, 0.25) !important; border-color: rgba(139, 92, 246, 0.35) !important; transform: translateY(-1px); }
     .welcome-chip:active { transform: scale(0.97); }
-    .chat-msg-item { content-visibility: auto; contain-intrinsic-size: auto 80px; }
+    .chat-msg-item { contain: layout style; }
   `;
   document.head.appendChild(style);
 }
