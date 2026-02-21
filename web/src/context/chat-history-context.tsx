@@ -16,6 +16,7 @@ interface ChatHistoryState {
   appendHumanMessage: (content: string) => void;
   appendAIMessage: (content: string, name?: string, avatar?: string) => void;
   appendOrUpdateToolCallMessage: (toolMessageData: Partial<Message>) => void;
+  popLastHumanMessage: () => void;
   setMessages: (messages: Message[]) => void;
   setHistoryList: (
     value: HistoryInfo[] | ((prev: HistoryInfo[]) => HistoryInfo[])
@@ -114,6 +115,16 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
       timestamp: new Date().toISOString(),
     };
     setMessages((prevMessages) => trimMessages([...prevMessages, newMessage]));
+  }, []);
+
+  /** Remove the last message if it's a human message (undo optimistic update on send failure). */
+  const popLastHumanMessage = useCallback(() => {
+    setMessages((prev) => {
+      if (prev.length > 0 && prev[prev.length - 1].role === 'human') {
+        return prev.slice(0, -1);
+      }
+      return prev;
+    });
   }, []);
 
   const appendAIMessage = useCallback((content: string, name?: string, avatar?: string) => {
@@ -233,6 +244,7 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
       appendHumanMessage,
       appendAIMessage,
       appendOrUpdateToolCallMessage,
+      popLastHumanMessage,
       setMessages,
       setHistoryList,
       setCurrentHistoryUid,
@@ -245,6 +257,7 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
       appendHumanMessage,
       appendAIMessage,
       appendOrUpdateToolCallMessage,
+      popLastHumanMessage,
       updateHistoryList,
     ],
   );

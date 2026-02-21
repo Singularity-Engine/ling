@@ -72,7 +72,7 @@ export const InputBar = memo(() => {
   const [isSending, setIsSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const wsContext = useWebSocket();
-  const { appendHumanMessage } = useChatMessages();
+  const { appendHumanMessage, popLastHumanMessage } = useChatMessages();
   const { aiState } = useAiState();
   const { interrupt } = useInterrupt();
   const { micOn, startMic, stopMic } = useVAD();

@@ -865,12 +865,16 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
                 reason: 'guest_limit' as any,
                 message: i18next.t('billing.guestLimitMessage'),
               });
+              window.dispatchEvent(new CustomEvent('send-failed', { detail: { text } }));
               return;
             }
           }
           // Billing check before sending
           checkBilling().then((allowed) => {
-            if (!allowed) return;
+            if (!allowed) {
+              window.dispatchEvent(new CustomEvent('send-failed', { detail: { text } }));
+              return;
+            }
             // Mark pending to suppress stale conversation-chain-end idle transition
             pendingNewChatRef.current = true;
             ttsGenerationRef.current++;

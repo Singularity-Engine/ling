@@ -29,6 +29,17 @@ const LONG_PRESS_MS = 500;
  */
 const SIDEBAR_RENDER_WINDOW = 60;
 
+// Static style constant for load-more button (avoid per-render allocation)
+const S_LOAD_MORE_BTN: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.06)',
+  border: '1px solid rgba(255,255,255,0.1)',
+  borderRadius: '12px',
+  padding: '4px 12px',
+  color: 'rgba(255,255,255,0.4)',
+  fontSize: '11px',
+  cursor: 'pointer',
+};
+
 // Main component
 const ChatHistoryPanel = memo(function ChatHistoryPanel(): JSX.Element {
   const { t } = useTranslation();

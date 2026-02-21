@@ -380,8 +380,10 @@ export const ChatArea = memo(() => {
       }),
     [messages]
   );
-  // Ref mirror lets the Virtuoso itemContent callback read the latest array
-  // without depending on it, keeping the callback reference stable.
+  // Ref mirrors let the Virtuoso itemContent callback read the latest values
+  // without depending on them, keeping the callback reference fully stable.
+  // This prevents Virtuoso from re-invoking itemContent for all visible items
+  // (~15-20) on every new message once the conversation exceeds RENDER_WINDOW.
   const dedupedRef = useRef(dedupedMessages);
   dedupedRef.current = dedupedMessages;
 
@@ -504,9 +506,17 @@ export const ChatArea = memo(() => {
     if (dedupedMessages.length <= RENDER_WINDOW) setExtraBatches(0);
   }, [dedupedMessages.length]);
 
+  // Ref mirrors for values used inside itemContent — reading from refs keeps
+  // the callback reference fully stable, preventing Virtuoso from re-invoking
+  // itemContent for all ~15-20 visible items whenever hiddenCount/isGreeting change.
+  const hiddenCountRef = useRef(hiddenCount);
+  hiddenCountRef.current = hiddenCount;
+  const isGreetingRef = useRef(isGreeting);
+  isGreetingRef.current = isGreeting;
+
   // Virtuoso item renderer — only called for visible items (~15-20 in viewport + overscan).
-  // Reads dedupedMessages via ref so the callback stays referentially stable when new
-  // messages arrive; Virtuoso can then skip re-invoking it for existing visible items.
+  // Reads all mutable values via refs so the callback stays referentially stable;
+  // Virtuoso can then skip re-invoking it for existing visible items.
   // Stable key extractor — avoids creating a new function reference on each
   // streaming frame (~30fps) which would force Virtuoso to re-reconcile all items.
   const computeItemKey = useCallback((_: number, msg: Message) => msg.id, []);
@@ -514,7 +524,7 @@ export const ChatArea = memo(() => {
   const itemContent = useCallback(
     (index: number, msg: Message) => {
       const allMsgs = dedupedRef.current;
-      const origIdx = index + hiddenCount;
+      const origIdx = index + hiddenCountRef.current;
       const prev = allMsgs[origIdx - 1];
       const showSep =
         prev &&
@@ -535,7 +545,7 @@ export const ChatArea = memo(() => {
             isToolCall={msg.type === "tool_call_status"}
             toolName={msg.tool_name}
             toolStatus={msg.status}
-            isGreeting={origIdx === 0 && msg.role === "ai" && isGreeting}
+            isGreeting={origIdx === 0 && msg.role === "ai" && isGreetingRef.current}
             skipEntryAnimation={
               (isLastAi && wasStreamingRef.current) || undefined
             }
@@ -543,7 +553,10 @@ export const ChatArea = memo(() => {
         </div>
       );
     },
-    [hiddenCount, isGreeting],
+    // Fully stable: all mutable values read via refs (dedupedRef, hiddenCountRef,
+    // isGreetingRef, wasStreamingRef). This is critical for 80+ message conversations.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   );
 
   return (

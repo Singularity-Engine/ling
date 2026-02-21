@@ -1,4 +1,4 @@
-import { memo, useState, useMemo, useCallback } from "react";
+import { memo, useState, useMemo, useCallback, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 
 // Inject scrollbar + animation styles once
@@ -29,6 +29,58 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
 const COLLAPSE_CHAR_THRESHOLD = 200;
 const COLLAPSE_LINE_THRESHOLD = 8;
 const CODE_PREVIEW_LINES = 5;
+
+// ─── Static style constants (avoid per-render allocation in tool-heavy conversations) ───
+
+// CodeBlock
+const S_CB_OUTER: CSSProperties = {
+  background: "rgba(0, 0, 0, 0.6)",
+  borderRadius: "8px",
+  overflow: "hidden",
+  marginTop: "8px",
+  border: "1px solid rgba(255,255,255,0.08)",
+};
+const S_CB_HEADER: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: "6px 12px",
+  background: "rgba(255,255,255,0.04)",
+  borderBottom: "1px solid rgba(255,255,255,0.06)",
+};
+const S_CB_LANG: CSSProperties = { fontSize: "11px", color: "rgba(139, 92, 246, 0.8)", fontFamily: "monospace" };
+const S_CB_COPY: CSSProperties = {
+  fontSize: "11px", color: "rgba(255,255,255,0.4)", cursor: "pointer",
+  transition: "color 0.2s", background: "none", border: "none", padding: 0,
+};
+const S_CB_SCROLL: CSSProperties = { padding: "10px 12px", overflowX: "auto" };
+const S_CB_PRE: CSSProperties = {
+  fontSize: "12px", fontFamily: "'SF Mono', 'Fira Code', 'JetBrains Mono', monospace",
+  color: "#e2e8f0", whiteSpace: "pre", lineHeight: 1.6, margin: 0,
+};
+const S_CB_EXPAND: CSSProperties = {
+  display: "block", width: "100%", padding: "5px 12px", fontSize: "11px",
+  color: "rgba(139, 92, 246, 0.8)", background: "rgba(255,255,255,0.02)",
+  border: "none", borderTop: "1px solid rgba(255,255,255,0.06)",
+  cursor: "pointer", textAlign: "center", transition: "background 0.2s",
+};
+
+// StatusIndicator
+const S_SI_DOTS: CSSProperties = { display: "inline-flex", gap: "3px", alignItems: "center" };
+const S_SI_DONE: CSSProperties = { fontSize: "12px", animation: "toolStatusPop 0.3s ease-out" };
+const S_SI_ERROR: CSSProperties = { fontSize: "12px", color: "#f87171", animation: "toolStatusPop 0.3s ease-out" };
+
+// ShimmerBar
+const S_SHIMMER: CSSProperties = { height: "2px", overflow: "hidden", position: "relative", background: "rgba(255,255,255,0.04)" };
+
+// ToolResultCard
+const S_TC_ICON: CSSProperties = { fontSize: "14px" };
+const S_TC_CONTENT: CSSProperties = { padding: "10px 14px" };
+const S_TC_COLLAPSED_WRAP: CSSProperties = { padding: "6px 14px 8px" };
+const S_TC_COLLAPSED_TEXT: CSSProperties = {
+  fontSize: "12px", color: "rgba(255,255,255,0.4)", lineHeight: 1.5,
+  overflowWrap: "break-word", wordBreak: "break-word",
+};
 
 interface ToolResultCardProps {
   toolName: string;
@@ -72,86 +124,30 @@ const CodeBlock = memo(({ lang, code, defaultCollapsed }: { lang: string; code: 
   const isLong = totalLines > COLLAPSE_LINE_THRESHOLD;
   const displayCode = collapsed && isLong ? lines.slice(0, CODE_PREVIEW_LINES).join("\n") : code;
 
-  const handleCopy = () => {
+  const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(code);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
+  }, [code]);
 
   return (
-    <div
-      style={{
-        background: "rgba(0, 0, 0, 0.6)",
-        borderRadius: "8px",
-        overflow: "hidden",
-        marginTop: "8px",
-        border: "1px solid rgba(255,255,255,0.08)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "6px 12px",
-          background: "rgba(255,255,255,0.04)",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-        }}
-      >
-        <span style={{ fontSize: "11px", color: "rgba(139, 92, 246, 0.8)", fontFamily: "monospace" }}>
-          {lang}
-        </span>
+    <div style={S_CB_OUTER}>
+      <div style={S_CB_HEADER}>
+        <span style={S_CB_LANG}>{lang}</span>
         <button
           onClick={handleCopy}
           aria-label={copied ? t("chat.codeCopied") : t("chat.copyCode")}
           title={t("chat.copyCode")}
-          style={{
-            fontSize: "11px",
-            color: "rgba(255,255,255,0.4)",
-            cursor: "pointer",
-            transition: "color 0.2s",
-            background: "none",
-            border: "none",
-            padding: 0,
-          }}
+          style={S_CB_COPY}
         >
           {copied ? `✓ ${t("chat.copied")}` : t("chat.copy")}
         </button>
       </div>
-      <div
-        className="tool-code-scroll"
-        style={{ padding: "10px 12px", overflowX: "auto" }}
-      >
-        <pre
-          style={{
-            fontSize: "12px",
-            fontFamily: "'SF Mono', 'Fira Code', 'JetBrains Mono', monospace",
-            color: "#e2e8f0",
-            whiteSpace: "pre",
-            lineHeight: 1.6,
-            margin: 0,
-          }}
-        >
-          {displayCode}
-        </pre>
+      <div className="tool-code-scroll" style={S_CB_SCROLL}>
+        <pre style={S_CB_PRE}>{displayCode}</pre>
       </div>
       {isLong && (
-        <button
-          onClick={() => setCollapsed(c => !c)}
-          style={{
-            display: "block",
-            width: "100%",
-            padding: "5px 12px",
-            fontSize: "11px",
-            color: "rgba(139, 92, 246, 0.8)",
-            background: "rgba(255,255,255,0.02)",
-            border: "none",
-            borderTop: "1px solid rgba(255,255,255,0.06)",
-            cursor: "pointer",
-            textAlign: "center",
-            transition: "background 0.2s",
-          }}
-        >
+        <button onClick={() => setCollapsed(c => !c)} style={S_CB_EXPAND}>
           {collapsed
             ? t("chat.toolExpandLines", { count: totalLines - CODE_PREVIEW_LINES })
             : t("chat.toolCollapse")}
@@ -166,14 +162,12 @@ CodeBlock.displayName = "CodeBlock";
 const StatusIndicator = memo(({ status, accent }: { status: string; accent: string }) => {
   if (status === "running") {
     return (
-      <span style={{ display: "inline-flex", gap: "3px", alignItems: "center" }}>
+      <span style={S_SI_DOTS}>
         {[0, 1, 2].map(i => (
           <span
             key={i}
             style={{
-              width: "4px",
-              height: "4px",
-              borderRadius: "50%",
+              width: "4px", height: "4px", borderRadius: "50%",
               background: accent,
               animation: `toolPulse 1s ease-in-out ${i * 0.2}s infinite`,
             }}
@@ -183,27 +177,18 @@ const StatusIndicator = memo(({ status, accent }: { status: string; accent: stri
     );
   }
   if (status === "completed") {
-    return (
-      <span style={{ fontSize: "12px", animation: "toolStatusPop 0.3s ease-out" }}>✓</span>
-    );
+    return <span style={S_SI_DONE}>✓</span>;
   }
-  // error
-  return (
-    <span style={{ fontSize: "12px", color: "#f87171", animation: "toolStatusPop 0.3s ease-out" }}>✕</span>
-  );
+  return <span style={S_SI_ERROR}>✕</span>;
 });
 StatusIndicator.displayName = "StatusIndicator";
 
 /* Shimmer bar for running state */
 const ShimmerBar = memo(({ accent }: { accent: string }) => (
-  <div style={{ height: "2px", overflow: "hidden", position: "relative", background: "rgba(255,255,255,0.04)" }}>
+  <div style={S_SHIMMER}>
     <div
       style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "50%",
-        height: "100%",
+        position: "absolute", top: 0, left: 0, width: "50%", height: "100%",
         background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
         animation: "toolShimmer 1.5s ease-in-out infinite",
       }}
