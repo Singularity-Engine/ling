@@ -28,6 +28,7 @@ import { gatewayAdapter, GatewayMessageEvent } from '@/services/gateway-message-
 import { ttsService } from '@/services/tts-service';
 import { asrService } from '@/services/asr-service';
 import { useTTSState } from '@/context/tts-state-context';
+import { BRAND_NAME_SHORT, BRAND_NAME_DISPLAY, BRAND_AVATAR_NAME } from '@/constants/brand';
 import { isMobileViewport } from '@/constants/breakpoints';
 import { useAuth } from '@/context/auth-context';
 import { useUI } from '@/context/ui-context';
@@ -92,7 +93,7 @@ const modelBaseUrl = typeof window !== 'undefined'
   : '/live2d-models/001';
 
 const LING_MODEL_INFO: ModelInfo = {
-  name: '灵 (Ling)',
+  name: BRAND_NAME_DISPLAY,
   url: `${modelBaseUrl}/0A-原档整理(1).model3.json`,
   kScale: 1.0,
   initialXshift: 0,
@@ -129,7 +130,7 @@ const DEFAULT_BACKGROUNDS = [
 // ─── Default config files (no longer fetched from backend) ───────
 
 const DEFAULT_CONFIG_FILES = [
-  { filename: 'ling_pro_zh.yaml', name: '灵 (Ling)' },
+  { filename: 'ling_pro_zh.yaml', name: BRAND_NAME_DISPLAY },
 ];
 
 // ─── Greeting expression helper ─────────────────────────────────
@@ -499,12 +500,12 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       url: gwUrl,
       token: GATEWAY_TOKEN,
       clientId: 'webchat-ui',
-      displayName: '灵 Avatar',
+      displayName: BRAND_AVATAR_NAME,
     }).then(() => {
       if (import.meta.env.DEV) console.log('[WebSocketHandler] Gateway connected!');
 
       // Initialize: set model info directly (no backend fetch needed)
-      setConfName('灵 (Ling)');
+      setConfName(BRAND_NAME_DISPLAY);
       setConfUid('ling-default');
       setSelfUid(crypto.randomUUID());
       setPendingModelInfo(LING_MODEL_INFO);
@@ -800,7 +801,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
                   audioBase64: result.audioBase64,
                   volumes: result.volumes,
                   sliceLength: result.sliceLength,
-                  displayText: { text: sentence, name: '灵', avatar: '' },
+                  displayText: { text: sentence, name: BRAND_NAME_SHORT, avatar: '' },
                   expressions: expr ? [expr] : null,
                   forwarded: false,
                 });
@@ -1133,7 +1134,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         url: gwUrl,
         token: GATEWAY_TOKEN,
         clientId: 'webchat-ui',
-        displayName: '灵 Avatar',
+        displayName: BRAND_AVATAR_NAME,
       }).then(() => {
         // Re-resolve session after manual reconnect
         gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId()).catch((err) => {

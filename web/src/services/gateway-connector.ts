@@ -13,6 +13,7 @@
  */
 
 import { Subject, ReplaySubject, BehaviorSubject } from 'rxjs';
+import { BRAND_AVATAR_NAME } from '@/constants/brand';
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -311,7 +312,7 @@ class GatewayConnector {
               maxProtocol: 3,
               client: {
                 id: this.options?.clientId || 'cli',
-                displayName: this.options?.displayName || '灵 Avatar',
+                displayName: this.options?.displayName || BRAND_AVATAR_NAME,
                 version: '1.0.0',
                 platform: 'web',
                 mode: 'webchat',

@@ -30,6 +30,7 @@ import { ToolStateProvider } from "./context/tool-state-context";
 import { TTSStateProvider } from "./context/tts-state-context";
 import { StarField } from "./components/background/StarField";
 import { MOBILE_BREAKPOINT } from "./constants/breakpoints";
+import { SEO_HOME_TITLE, SEO_HOME_DESC, SEO_HOME_OG_TITLE } from "./constants/brand";
 import { BackgroundReactor } from "./components/effects/BackgroundReactor";
 import { AudioVisualizer } from "./components/effects/AudioVisualizer";
 import { CrystalField } from "./components/crystal/CrystalField";
@@ -529,10 +530,10 @@ function MainApp() {
   return (
     <>
       <Helmet>
-        <title>灵 Ling — AI 数字人 · Singularity Engine</title>
-        <meta name="description" content="有灵魂、能干活的 AI 数字人。记忆、情感、工具，三位一体。" />
-        <meta property="og:title" content="灵 - AI 数字人" />
-        <meta property="og:description" content="有灵魂、能干活的 AI 数字人。记忆、情感、工具，三位一体。" />
+        <title>{SEO_HOME_TITLE}</title>
+        <meta name="description" content={SEO_HOME_DESC} />
+        <meta property="og:title" content={SEO_HOME_OG_TITLE} />
+        <meta property="og:description" content={SEO_HOME_DESC} />
         <meta property="og:image" content="https://sngxai.com/og-image.png" />
         <link rel="canonical" href="https://sngxai.com/" />
       </Helmet>
