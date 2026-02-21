@@ -149,6 +149,14 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
   const setAiStateRef = useRef(setAiState);
 
   const isProcessingRef = useRef(false);
+  const settingsRestartTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  // Cleanup settings restart timer on unmount
+  useEffect(() => {
+    return () => {
+      if (settingsRestartTimer.current) clearTimeout(settingsRestartTimer.current);
+    };
+  }, []);
 
   // Update refs when dependencies change
   useEffect(() => {
@@ -266,7 +274,8 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
     setSettings(newSettings);
     if (vadRef.current) {
       stopMic();
-      setTimeout(() => {
+      if (settingsRestartTimer.current) clearTimeout(settingsRestartTimer.current);
+      settingsRestartTimer.current = setTimeout(() => {
         startMic();
       }, 100);
     }

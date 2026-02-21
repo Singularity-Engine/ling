@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useRef, useMemo, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useRef, useMemo, useEffect, ReactNode } from "react";
 import { useAffinityEngine } from "@/hooks/use-affinity-engine";
 
 export interface PointGain {
@@ -37,6 +37,16 @@ export function AffinityProvider({ children }: { children: ReactNode }) {
   const milestoneTimer = useRef<ReturnType<typeof setTimeout>>();
   const expressionDecayTimer = useRef<ReturnType<typeof setTimeout>>();
   const pointGainIdRef = useRef(0);
+  const pointGainTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+
+  // Cleanup all timers on unmount
+  useEffect(() => {
+    return () => {
+      if (milestoneTimer.current) clearTimeout(milestoneTimer.current);
+      if (expressionDecayTimer.current) clearTimeout(expressionDecayTimer.current);
+      pointGainTimers.current.forEach(t => clearTimeout(t));
+    };
+  }, []);
 
   const updateAffinity = useCallback((affinity: number, level: string) => {
     setState(prev => ({ ...prev, affinity, level }));
@@ -53,9 +63,11 @@ export function AffinityProvider({ children }: { children: ReactNode }) {
   const showPointGain = useCallback((delta: number, streak: boolean) => {
     const id = ++pointGainIdRef.current;
     setState(prev => ({ ...prev, pointGains: [...prev.pointGains, { id, delta, streak }] }));
-    setTimeout(() => {
+    const timer = setTimeout(() => {
+      pointGainTimers.current.delete(timer);
       setState(prev => ({ ...prev, pointGains: prev.pointGains.filter(p => p.id !== id) }));
     }, 1500);
+    pointGainTimers.current.add(timer);
   }, []);
 
   const setExpression = useCallback((expression: string, intensity: number) => {
