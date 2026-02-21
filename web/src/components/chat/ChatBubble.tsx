@@ -139,7 +139,7 @@ const S_BUBBLE_AI_ACTIVE_COLLAPSED: CSSProperties = { ...S_BUBBLE_AI_ACTIVE, max
 
 const S_USER_TEXT: CSSProperties = {
   fontSize: "14px", color: "var(--ling-text-primary)", whiteSpace: "pre-wrap",
-  overflowWrap: "anywhere", lineHeight: 1.7, letterSpacing: "0.3px",
+  wordBreak: "break-word", overflowWrap: "anywhere", lineHeight: 1.7, letterSpacing: "0.3px",
 };
 const S_AI_MD: CSSProperties = { fontSize: "14px", color: "var(--ling-bubble-ai-text)", lineHeight: 1.7, letterSpacing: "0.3px" };
 

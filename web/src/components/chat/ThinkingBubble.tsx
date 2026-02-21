@@ -25,7 +25,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
 // ─── Static style constants (avoid per-render allocation during ~60fps streaming) ───
 
 const S_OUTER: CSSProperties = {
-  display: "flex", justifyContent: "flex-start", marginBottom: "12px",
+  display: "flex", justifyContent: "flex-start", marginBottom: "14px",
   padding: "0 16px", animation: "thinkingBubbleIn 0.3s ease-out",
 };
 const S_INNER: CSSProperties = { maxWidth: "78%", minWidth: 0 };
@@ -36,6 +36,7 @@ const S_NAME: CSSProperties = {
 const S_BUBBLE: CSSProperties = {
   padding: "10px 16px", borderRadius: "18px 18px 18px 4px",
   background: "var(--ling-bubble-ai-bg)", border: "1px solid var(--ling-bubble-ai-border)",
+  borderLeft: "2.5px solid var(--ling-bubble-ai-accent)",
   backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
   boxShadow: "0 1px 8px var(--ling-bubble-ai-shadow)",
   transition: "box-shadow 0.2s ease, background 0.2s ease",
