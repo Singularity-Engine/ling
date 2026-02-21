@@ -28,6 +28,17 @@ const LONG_PRESS_MS = 500;
  */
 const SIDEBAR_RENDER_WINDOW = 60;
 
+// CSS containment for off-screen sidebar messages — skips paint & layout
+// for the ~45-50 messages outside the viewport (out of SIDEBAR_RENDER_WINDOW=60).
+const S_MSG_CONTAIN: React.CSSProperties = {
+  contentVisibility: 'auto',
+  containIntrinsicSize: '0 80px',
+};
+const S_TOOL_CONTAIN: React.CSSProperties = {
+  contentVisibility: 'auto',
+  containIntrinsicSize: '0 40px',
+};
+
 // Static style constant for load-more button (avoid per-render allocation)
 const S_LOAD_MORE_BTN: React.CSSProperties = {
   background: 'rgba(255,255,255,0.06)',
@@ -128,6 +139,7 @@ const ChatHistoryPanel = memo(function ChatHistoryPanel(): JSX.Element {
               key={msg.id}
               {...sidebarStyles.toolCallIndicator.container}
               alignItems="center"
+              style={S_TOOL_CONTAIN}
             >
               <Icon
                 as={FaTools}
@@ -166,6 +178,7 @@ const ChatHistoryPanel = memo(function ChatHistoryPanel(): JSX.Element {
             onTouchEnd={handleTouchEnd}
             onTouchMove={handleTouchMove}
             css={{ WebkitTouchCallout: 'none' }}
+            style={S_MSG_CONTAIN}
           >
             <ChatMessage
               model={{

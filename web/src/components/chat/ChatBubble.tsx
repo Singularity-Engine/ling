@@ -47,7 +47,7 @@ function linkifyText(text: string): ReactNode {
     if (i % 2 === 1) {
       const href = part.startsWith("www.") ? `https://${part}` : part;
       return (
-        <a key={i} href={href} target="_blank" rel="noopener noreferrer" className="user-msg-link">
+        <a key={href} href={href} target="_blank" rel="noopener noreferrer" className="user-msg-link">
           {part}
         </a>
       );
