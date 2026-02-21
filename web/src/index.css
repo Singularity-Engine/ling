@@ -466,6 +466,8 @@ canvas {
   font-size: 0.9em;
   font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', monospace;
   overflow-wrap: anywhere;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 /* Code block wrapper — full-bleed to bubble edges for more code space */
 .md-content .code-block-wrap {
