@@ -66,6 +66,12 @@
   --ling-code-text: #c4b5fd;
   --ling-code-bg: rgba(10, 0, 21, 0.6);
 
+  /* 微透明叠加（代码块头、表格斑马纹、滚动条轨道等） */
+  --ling-overlay-4: rgba(255, 255, 255, 0.04);
+  --ling-overlay-8: rgba(255, 255, 255, 0.08);
+  --ling-overlay-12: rgba(255, 255, 255, 0.12);
+  --ling-stripe-bg: rgba(255, 255, 255, 0.02);
+
   /* 全局背景（供 body 引用） */
   --ling-body-bg: linear-gradient(180deg, var(--ling-bg-deep) 0%, var(--ling-bg-mid) 50%, var(--ling-bg-warm) 100%);
   --ling-body-color: #ffffff;
@@ -144,6 +150,12 @@
   /* 代码块 */
   --ling-code-text: #6d28d9;
   --ling-code-bg: rgba(124, 58, 237, 0.08);
+
+  /* 微透明叠加 */
+  --ling-overlay-4: rgba(0, 0, 0, 0.04);
+  --ling-overlay-8: rgba(0, 0, 0, 0.06);
+  --ling-overlay-12: rgba(0, 0, 0, 0.08);
+  --ling-stripe-bg: rgba(0, 0, 0, 0.03);
 
   /* 全局背景 */
   --ling-body-bg: linear-gradient(180deg, var(--ling-bg-deep) 0%, var(--ling-bg-mid) 50%, var(--ling-bg-warm) 100%);
@@ -472,7 +484,7 @@ canvas {
   align-items: center;
   justify-content: space-between;
   padding: 4px 12px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--ling-overlay-4);
   border-bottom: 1px solid var(--ling-purple-15);
   min-height: 28px;
 }
@@ -500,12 +512,12 @@ canvas {
 }
 .md-content .code-block-copy:hover {
   color: var(--ling-text-secondary);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--ling-overlay-8);
 }
 .md-content .code-block-copy:active {
   transform: scale(0.88);
   color: var(--ling-text-secondary);
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--ling-overlay-12);
 }
 .md-content .code-block-wrap pre {
   margin: 0;
@@ -524,7 +536,7 @@ canvas {
   width: 6px;
 }
 .md-content .code-block-wrap pre::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--ling-overlay-4);
   border-radius: 3px;
 }
 .md-content .code-block-wrap pre::-webkit-scrollbar-thumb {
@@ -618,7 +630,7 @@ canvas {
   scrollbar-color: var(--ling-purple-40) transparent;
 }
 .md-content table::-webkit-scrollbar { height: 6px; }
-.md-content table::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.04); border-radius: 3px; }
+.md-content table::-webkit-scrollbar-track { background: var(--ling-overlay-4); border-radius: 3px; }
 .md-content table::-webkit-scrollbar-thumb { background: var(--ling-purple-40); border-radius: 3px; }
 .md-content th, .md-content td {
   padding: 6px 12px;
@@ -628,13 +640,13 @@ canvas {
   overflow-wrap: break-word;
 }
 .md-content th {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--ling-overlay-4);
   font-weight: 600;
   color: var(--ling-md-heading-color);
   white-space: nowrap;
 }
 .md-content tr:nth-child(even) {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--ling-stripe-bg);
 }
 
 /* === 主题 color-scheme === */
