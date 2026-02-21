@@ -450,7 +450,7 @@ canvas {
   overflow-wrap: anywhere;
   min-width: 0;
 }
-.md-content p { margin: 0 0 0.75em; }
+.md-content p { margin: 0 0 0.85em; }
 .md-content p:last-child { margin-bottom: 0; }
 .md-content strong { color: var(--ling-text-primary); }
 .md-content em { color: var(--ling-md-em); }
@@ -566,7 +566,7 @@ canvas {
   overflow: visible;
 }
 .md-content ul, .md-content ol { margin: 0.6em 0; padding-left: 1.5em; }
-.md-content li { margin-bottom: 0.3em; }
+.md-content li { margin-bottom: 0.35em; }
 .md-content blockquote {
   margin: 0.75em 0;
   padding: 6px 14px;
@@ -575,11 +575,12 @@ canvas {
 }
 .md-content h1, .md-content h2, .md-content h3,
 .md-content h4, .md-content h5, .md-content h6 {
-  margin: 1em 0 0.4em;
+  margin: 1em 0 0.5em;
   color: var(--ling-md-heading-color);
   font-weight: 600;
 }
 .md-content > :first-child { margin-top: 0; }
+.md-content > :last-child { margin-bottom: 0; }
 .md-content h1 { font-size: 1.3em; }
 .md-content h2 { font-size: 1.15em; }
 .md-content h3 { font-size: 1.05em; }
