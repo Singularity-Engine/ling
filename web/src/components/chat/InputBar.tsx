@@ -101,6 +101,8 @@ export const InputBar = memo(() => {
     const handler = (e: Event) => {
       const text = (e as CustomEvent).detail?.text;
       setIsSending(false);
+      // Roll back the optimistic human message that appendHumanMessage added
+      popLastHumanMessage();
       if (typeof text === 'string' && !inputText) {
         setInputText(text.slice(0, MAX_LENGTH));
         setTimeout(() => {
@@ -115,7 +117,7 @@ export const InputBar = memo(() => {
     };
     window.addEventListener('send-failed', handler);
     return () => window.removeEventListener('send-failed', handler);
-  }, [inputText]);
+  }, [inputText, popLastHumanMessage]);
 
   const trimmed = inputText.trim();
   const hasText = trimmed.length > 0;

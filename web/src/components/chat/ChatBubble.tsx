@@ -102,6 +102,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     .chat-bubble-wrap:hover .chat-copy-btn { opacity: 1; }
     .chat-copy-btn:hover { color: rgba(255,255,255,0.7) !important; background: rgba(255,255,255,0.08) !important; }
     @media (hover: none) { .chat-copy-btn { opacity: 0.5; } }
+    @media (max-width: 480px) { .chat-copy-btn { right: 4px !important; left: auto !important; top: -20px !important; } }
   `;
   document.head.appendChild(style);
 }
