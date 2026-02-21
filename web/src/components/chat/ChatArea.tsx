@@ -716,6 +716,7 @@ export const ChatArea = memo(() => {
           ref={virtuosoRef}
           customScrollParent={scrollParent}
           data={visibleMessages}
+          defaultItemHeight={64}
           increaseViewportBy={400}
           computeItemKey={computeItemKey}
           itemContent={itemContent}
