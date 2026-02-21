@@ -597,6 +597,7 @@ export const ChatArea = memo(() => {
 
           {/* Glassmorphism welcome card */}
           <div
+            className="ling-welcome-card"
             style={{
               background: "rgba(255, 255, 255, 0.08)",
               backdropFilter: "blur(16px)",

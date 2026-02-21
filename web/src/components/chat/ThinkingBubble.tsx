@@ -82,7 +82,7 @@ export const ThinkingBubble = memo(({ content, isThinking, isStreaming }: Thinki
   }, [isThinking, isStreaming]);
 
   return (
-    <div style={S_OUTER}>
+    <div className="ling-msg-row" style={S_OUTER}>
       <div style={S_INNER}>
         <span style={S_NAME}>{t("chat.characterName")}</span>
         <div style={S_BUBBLE}>

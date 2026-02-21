@@ -255,7 +255,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
   }
 
   return (
-    <div style={outerStyle}>
+    <div className="ling-msg-row" style={outerStyle}>
       <div style={S_INNER} className="chat-bubble-wrap chat-msg-inner">
         {!isUser && (
           <span style={S_NAME}>

@@ -58,7 +58,7 @@ export function shouldShowSeparator(
 }
 
 export const TimeSeparator = memo(({ timestamp }: { timestamp: string }) => (
-  <div style={S_OUTER}>
+  <div className="ling-time-sep" style={S_OUTER}>
     <div style={S_LINE} />
     <span style={S_LABEL}>
       {formatSeparatorTime(timestamp)}

@@ -485,6 +485,15 @@ class GatewayConnector {
       return;
     }
 
+    // If we were in idle-retry mode and the single probe failed, go back to
+    // idle retry instead of entering the full exponential backoff sequence.
+    if (this.inIdleRetry) {
+      if (import.meta.env.DEV) console.log('[GatewayConnector] Idle retry probe failed, scheduling next idle retry');
+      this.setState('DISCONNECTED');
+      this.startIdleRetry();
+      return;
+    }
+
     this.setState('RECONNECTING');
 
     // If browser reports offline, don't burn retry budget — wait for `online`
