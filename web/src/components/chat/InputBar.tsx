@@ -16,9 +16,11 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     @keyframes inputPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
     @keyframes micPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); } }
     @keyframes sendSpin { to { transform: rotate(360deg); } }
-    .ling-textarea { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; color: white; font-size: 14px; padding: 10px 16px; min-height: 42px; max-height: 96px; resize: none; flex: 1; outline: none; font-family: inherit; line-height: 1.5; }
-    .ling-textarea::placeholder { color: rgba(255, 255, 255, 0.4); }
-    .ling-textarea:focus { border-color: rgba(139, 92, 246, 0.6); box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.4); }
+    .ling-textarea { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; color: white; font-size: 14px; padding: 10px 16px; min-height: 42px; max-height: 96px; resize: none; flex: 1; outline: none; font-family: inherit; line-height: 1.5; transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease; }
+    .ling-textarea::placeholder { color: rgba(255, 255, 255, 0.4); transition: color 0.2s ease; }
+    .ling-textarea:hover:not(:focus):not(:disabled) { border-color: rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.08); }
+    .ling-textarea:focus { border-color: rgba(139, 92, 246, 0.5); box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.25), 0 0 16px rgba(139, 92, 246, 0.12); background: rgba(255, 255, 255, 0.08); }
+    .ling-textarea:focus::placeholder { color: rgba(255, 255, 255, 0.3); }
     .ling-textarea:disabled { opacity: 0.45; cursor: not-allowed; }
     .ling-send-btn:not(:disabled):hover { filter: brightness(1.15); }
     .ling-send-btn:not(:disabled):active { transform: scale(0.88); }
@@ -92,18 +94,19 @@ const S_SEND_READY: CSSProperties = {
   background: "linear-gradient(135deg, #8b5cf6, #6d28d9)",
   border: "none",
   cursor: "pointer",
+  boxShadow: "0 0 14px rgba(139, 92, 246, 0.35), 0 0 4px rgba(139, 92, 246, 0.2)",
 };
 const S_SEND_OVERLIMIT: CSSProperties = {
   ...S_SEND_BASE,
   background: "rgba(255,255,255,0.06)",
-  border: "none",
+  border: "1px solid rgba(255,255,255,0.06)",
   opacity: 0.4,
   cursor: "not-allowed",
 };
 const S_SEND_IDLE: CSSProperties = {
   ...S_SEND_BASE,
   background: "rgba(255,255,255,0.06)",
-  border: "none",
+  border: "1px solid rgba(255,255,255,0.08)",
   cursor: "not-allowed",
 };
 
