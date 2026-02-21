@@ -139,7 +139,7 @@ const S_OUTER_USER: CSSProperties = { display: "flex", justifyContent: "flex-end
 const S_OUTER_AI: CSSProperties = { display: "flex", justifyContent: "flex-start", marginBottom: "14px", padding: "0 16px" };
 
 const S_BUBBLE_USER: CSSProperties = {
-  padding: "10px 16px", borderRadius: "18px 18px 4px 18px",
+  padding: "10px 16px", borderRadius: "18px 18px 2px 18px",
   background: "var(--ling-bubble-user-bg)",
   border: "1px solid var(--ling-bubble-user-border)",
   backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
@@ -147,7 +147,7 @@ const S_BUBBLE_USER: CSSProperties = {
   boxShadow: "0 2px 12px var(--ling-bubble-user-shadow)",
 };
 const S_BUBBLE_AI: CSSProperties = {
-  padding: "10px 16px", borderRadius: "18px 18px 18px 4px",
+  padding: "10px 16px", borderRadius: "18px 18px 18px 2px",
   background: "var(--ling-bubble-ai-bg)",
   border: "1px solid var(--ling-bubble-ai-border)",
   borderLeft: "3px solid var(--ling-bubble-ai-accent)",
@@ -163,7 +163,7 @@ const S_BUBBLE_AI_COLLAPSED: CSSProperties = { ...S_BUBBLE_AI, maxHeight: COLLAP
 const S_BUBBLE_AI_ACTIVE_COLLAPSED: CSSProperties = { ...S_BUBBLE_AI_ACTIVE, maxHeight: COLLAPSED_MAX_HEIGHT, position: "relative" };
 
 const S_USER_TEXT: CSSProperties = {
-  fontSize: "14px", color: "var(--ling-text-primary)", whiteSpace: "pre-wrap",
+  fontSize: "14px", color: "var(--ling-bubble-user-text)", whiteSpace: "pre-wrap",
   wordBreak: "break-word", overflowWrap: "anywhere", lineHeight: 1.7, letterSpacing: "0.3px",
 };
 const S_AI_MD: CSSProperties = { fontSize: "14px", color: "var(--ling-bubble-ai-text)", lineHeight: 1.7, letterSpacing: "0.3px" };
@@ -171,6 +171,11 @@ const S_AI_MD: CSSProperties = { fontSize: "14px", color: "var(--ling-bubble-ai-
 const S_NAME: CSSProperties = {
   display: "block", fontSize: "11px", color: "var(--ling-chat-label)",
   marginBottom: "4px", marginLeft: "4px", fontWeight: 500, letterSpacing: "0.5px",
+};
+const S_NAME_USER: CSSProperties = {
+  display: "block", fontSize: "11px", color: "var(--ling-chat-label)",
+  marginBottom: "4px", marginRight: "4px", fontWeight: 500, letterSpacing: "0.5px",
+  textAlign: "right",
 };
 const S_TS_USER: CSSProperties = { display: "block", fontSize: "10px", color: "var(--ling-chat-timestamp)", marginTop: "3px", textAlign: "right", marginRight: "4px" };
 const S_TS_AI: CSSProperties = { display: "block", fontSize: "10px", color: "var(--ling-chat-timestamp)", marginTop: "3px", textAlign: "left", marginLeft: "4px" };
@@ -364,7 +369,11 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
   return (
     <div className="ling-msg-row" style={outerStyle}>
       <div style={S_INNER} className="chat-bubble-wrap chat-msg-inner">
-        {!isUser && (
+        {isUser ? (
+          <span style={S_NAME_USER}>
+            {t("chat.you")}
+          </span>
+        ) : (
           <span style={S_NAME}>
             {t("chat.characterName")}
           </span>
