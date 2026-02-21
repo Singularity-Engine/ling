@@ -602,12 +602,12 @@ canvas {
 .md-content th, .md-content td {
   padding: 6px 12px;
   border: 1px solid var(--ling-purple-25);
-  white-space: nowrap;
 }
 .md-content th {
   background: rgba(255, 255, 255, 0.04);
   font-weight: 600;
   color: var(--ling-md-heading-color);
+  white-space: nowrap;
 }
 .md-content tr:nth-child(even) {
   background: rgba(255, 255, 255, 0.02);

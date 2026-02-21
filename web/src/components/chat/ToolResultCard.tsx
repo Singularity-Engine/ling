@@ -320,8 +320,8 @@ export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCar
               {displayText}
             </span>
           )}
-          {codeBlocks.map((block, i) => (
-            <CodeBlock key={i} lang={block.lang} code={block.code} defaultCollapsed={block.code.split("\n").length > COLLAPSE_LINE_THRESHOLD} />
+          {codeBlocks.map((block) => (
+            <CodeBlock key={`${block.lang}:${block.code.slice(0, 48)}`} lang={block.lang} code={block.code} defaultCollapsed={block.code.split("\n").length > COLLAPSE_LINE_THRESHOLD} />
           ))}
         </div>
       )}
