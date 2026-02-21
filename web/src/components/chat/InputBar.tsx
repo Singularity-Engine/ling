@@ -5,7 +5,7 @@ import { useChatMessages } from "@/context/chat-history-context";
 import { useAiState } from "@/context/ai-state-context";
 import { useInterrupt } from "@/components/canvas/live2d";
 import { useVAD } from "@/context/vad-context";
-import { toaster } from "@/components/ui/toaster";
+
 
 // Inject styles once
 const STYLE_ID = "input-bar-styles";
@@ -95,11 +95,13 @@ const S_SEND_OVERLIMIT: CSSProperties = {
   background: "rgba(255,255,255,0.06)",
   border: "none",
   opacity: 0.4,
+  cursor: "not-allowed",
 };
 const S_SEND_IDLE: CSSProperties = {
   ...S_SEND_BASE,
   background: "rgba(255,255,255,0.06)",
   border: "none",
+  cursor: "not-allowed",
 };
 
 const S_HINTS_ROW: CSSProperties = {
