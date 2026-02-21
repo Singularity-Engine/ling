@@ -125,7 +125,7 @@ const CodeBlock = memo(({ lang, code, defaultCollapsed }: { lang: string; code: 
         <pre
           style={{
             fontSize: "12px",
-            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            fontFamily: "'SF Mono', 'Fira Code', 'JetBrains Mono', monospace",
             color: "#e2e8f0",
             whiteSpace: "pre",
             lineHeight: 1.6,

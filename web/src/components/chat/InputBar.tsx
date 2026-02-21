@@ -77,7 +77,14 @@ export const InputBar = memo(() => {
       const text = (e as CustomEvent).detail?.text;
       if (typeof text === 'string') {
         setInputText(text.slice(0, MAX_LENGTH));
-        setTimeout(() => textareaRef.current?.focus(), 0);
+        setTimeout(() => {
+          const el = textareaRef.current;
+          if (el) {
+            el.focus();
+            el.style.height = "auto";
+            el.style.height = Math.min(el.scrollHeight, 96) + "px";
+          }
+        }, 0);
       }
     };
     window.addEventListener('fill-input', handler);
@@ -90,7 +97,14 @@ export const InputBar = memo(() => {
       const text = (e as CustomEvent).detail?.text;
       if (typeof text === 'string' && !inputText) {
         setInputText(text.slice(0, MAX_LENGTH));
-        setTimeout(() => textareaRef.current?.focus(), 0);
+        setTimeout(() => {
+          const el = textareaRef.current;
+          if (el) {
+            el.focus();
+            el.style.height = "auto";
+            el.style.height = Math.min(el.scrollHeight, 96) + "px";
+          }
+        }, 0);
       }
     };
     window.addEventListener('send-failed', handler);
