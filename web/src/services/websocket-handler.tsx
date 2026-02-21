@@ -984,9 +984,13 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       case 'fetch-and-set-history':
         if (msg.history_uid) {
           // Sync sessionKeyRef so subsequent sendChat uses the selected session
-          sessionKeyRef.current = msg.history_uid;
-          setCurrentHistoryUidRef.current(msg.history_uid);
-          gatewayConnector.getChatHistory(msg.history_uid).then((res) => {
+          const targetUid = msg.history_uid;
+          sessionKeyRef.current = targetUid;
+          setCurrentHistoryUidRef.current(targetUid);
+          gatewayConnector.getChatHistory(targetUid).then((res) => {
+            // Stale-check: if the user switched sessions again before this
+            // resolved, discard the result to avoid overwriting the new session.
+            if (sessionKeyRef.current !== targetUid) return;
             const payload = res.payload as any;
             if (payload?.messages) {
               setMessagesRef.current(payload.messages);
