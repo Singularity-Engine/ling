@@ -110,8 +110,8 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
 
 // ─── Static style constants (avoid per-render allocation across 50+ messages) ───
 
-const S_OUTER_USER: CSSProperties = { display: "flex", justifyContent: "flex-end", marginBottom: "12px", padding: "0 16px" };
-const S_OUTER_AI: CSSProperties = { display: "flex", justifyContent: "flex-start", marginBottom: "12px", padding: "0 16px" };
+const S_OUTER_USER: CSSProperties = { display: "flex", justifyContent: "flex-end", marginBottom: "14px", padding: "0 16px" };
+const S_OUTER_AI: CSSProperties = { display: "flex", justifyContent: "flex-start", marginBottom: "14px", padding: "0 16px" };
 
 const S_BUBBLE_USER: CSSProperties = {
   padding: "10px 16px", borderRadius: "18px 18px 4px 18px",
@@ -125,6 +125,7 @@ const S_BUBBLE_AI: CSSProperties = {
   padding: "10px 16px", borderRadius: "18px 18px 18px 4px",
   background: "var(--ling-bubble-ai-bg)",
   border: "1px solid var(--ling-bubble-ai-border)",
+  borderLeft: "2.5px solid var(--ling-bubble-ai-accent)",
   backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
   overflow: "hidden", transition: "all 0.2s ease",
   boxShadow: "0 1px 8px var(--ling-bubble-ai-shadow)",
