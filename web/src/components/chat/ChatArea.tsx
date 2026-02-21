@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { ChatBubble } from "./ChatBubble";
 import { ThinkingBubble } from "./ThinkingBubble";
 import { TimeSeparator, shouldShowSeparator } from "./TimeSeparator";
@@ -125,6 +125,91 @@ SuggestionChips.displayName = "SuggestionChips";
  * Messages beyond this window still exist in state (up to MAX_MESSAGES=200).
  */
 const RENDER_WINDOW = 80;
+
+// ─── Static style constants (avoid per-render allocation during ~30fps streaming) ───
+
+const S_CONTAINER: CSSProperties = {
+  height: "100%",
+  overflowY: "auto",
+  padding: "12px 0",
+  position: "relative",
+};
+
+const S_LOAD_MORE_WRAP: CSSProperties = {
+  display: "flex", justifyContent: "center", padding: "8px 0 12px",
+};
+
+const S_LOAD_MORE_BTN: CSSProperties = {
+  background: "rgba(255, 255, 255, 0.06)",
+  border: "1px solid rgba(255, 255, 255, 0.1)",
+  borderRadius: "16px",
+  padding: "6px 16px",
+  color: "rgba(255, 255, 255, 0.5)",
+  fontSize: "12px",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+};
+
+const S_SCROLL_WRAP: CSSProperties = {
+  position: "sticky",
+  bottom: "12px",
+  display: "flex",
+  justifyContent: "center",
+  pointerEvents: "none",
+};
+
+const S_SCROLL_BTN: CSSProperties = {
+  pointerEvents: "auto",
+  width: "36px",
+  height: "36px",
+  borderRadius: "50%",
+  background: "rgba(139, 92, 246, 0.85)",
+  color: "rgba(255,255,255,0.95)",
+  fontSize: "16px",
+  lineHeight: 1,
+  border: "1px solid rgba(139, 92, 246, 0.4)",
+  backdropFilter: "blur(12px)",
+  WebkitBackdropFilter: "blur(12px)",
+  boxShadow: "0 2px 12px rgba(139, 92, 246, 0.3)",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+  animation: "scrollBtnIn 0.25s ease-out",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  position: "relative",
+};
+
+const S_SCROLL_BTN_PULSE: CSSProperties = {
+  ...S_SCROLL_BTN,
+  animation: "scrollBtnIn 0.25s ease-out, scrollBtnPulse 2s ease-in-out infinite",
+};
+
+const S_NEW_DOT: CSSProperties = {
+  position: "absolute",
+  top: "-2px",
+  right: "-2px",
+  width: "10px",
+  height: "10px",
+  borderRadius: "50%",
+  background: "#ef4444",
+  border: "2px solid rgba(15, 15, 20, 0.9)",
+  animation: "chatFadeInUp 0.2s ease-out",
+};
+
+const S_TIMEOUT_WRAP: CSSProperties = {
+  display: "flex",
+  justifyContent: "center",
+  padding: "8px 16px 12px",
+  animation: "chatFadeInUp 0.3s ease-out",
+};
+
+const S_TIMEOUT_TEXT: CSSProperties = {
+  fontSize: "12px",
+  color: "rgba(255, 255, 255, 0.35)",
+  textAlign: "center",
+  lineHeight: 1.5,
+};
 
 export const ChatArea = memo(() => {
   const { messages, fullResponse, appendHumanMessage } = useChatHistory();
@@ -273,7 +358,6 @@ export const ChatArea = memo(() => {
   const isGreeting = dedupedMessages.length === 1 && dedupedMessages[0].role === "ai";
 
   const welcomeChips = t("ui.welcomeChips", { returnObjects: true }) as string[];
-  const postGreetingChips = t("ui.postGreetingChips", { returnObjects: true }) as string[];
 
   // Time-based welcome title
   const welcomeTitle = useMemo(() => {
@@ -297,7 +381,13 @@ export const ChatArea = memo(() => {
   // Keeps the DOM small in long conversations while all messages remain in state.
   const [showAll, setShowAll] = useState(false);
   const hiddenCount = showAll ? 0 : Math.max(0, dedupedMessages.length - RENDER_WINDOW);
-  const visibleMessages = hiddenCount > 0 ? dedupedMessages.slice(hiddenCount) : dedupedMessages;
+  // Memoize so the reference stays stable during streaming (~30fps re-renders).
+  // Without this, .slice() creates a new array every frame when >80 messages,
+  // invalidating the messageElements useMemo below.
+  const visibleMessages = useMemo(
+    () => hiddenCount > 0 ? dedupedMessages.slice(hiddenCount) : dedupedMessages,
+    [dedupedMessages, hiddenCount],
+  );
 
   // Preserve scroll position when revealing older messages
   const handleLoadMore = useCallback(() => {
@@ -360,12 +450,7 @@ export const ChatArea = memo(() => {
       role="log"
       aria-label={t("ui.chatMessages")}
       aria-live="polite"
-      style={{
-        height: "100%",
-        overflowY: "auto",
-        padding: "12px 0",
-        position: "relative",
-      }}
+      style={S_CONTAINER}
     >
       {(isEmpty || emptyExiting) && (
         <div
@@ -437,20 +522,8 @@ export const ChatArea = memo(() => {
         </div>
       )}
       {hiddenCount > 0 && (
-        <div style={{ display: "flex", justifyContent: "center", padding: "8px 0 12px" }}>
-          <button
-            onClick={handleLoadMore}
-            style={{
-              background: "rgba(255, 255, 255, 0.06)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
-              borderRadius: "16px",
-              padding: "6px 16px",
-              color: "rgba(255, 255, 255, 0.5)",
-              fontSize: "12px",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-          >
+        <div style={S_LOAD_MORE_WRAP}>
+          <button onClick={handleLoadMore} style={S_LOAD_MORE_BTN}>
             {t("chat.loadOlder", { count: hiddenCount })}
           </button>
         </div>
@@ -471,82 +544,22 @@ export const ChatArea = memo(() => {
 
       {/* Hint when typing indicator timed out — silent disappearance is confusing */}
       {awaitingTimedOut && !isStreaming && !showTyping && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            padding: "8px 16px 12px",
-            animation: "chatFadeInUp 0.3s ease-out",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "12px",
-              color: "rgba(255, 255, 255, 0.35)",
-              textAlign: "center",
-              lineHeight: 1.5,
-            }}
-          >
-            {t("chat.noResponse")}
-          </span>
+        <div style={S_TIMEOUT_WRAP}>
+          <span style={S_TIMEOUT_TEXT}>{t("chat.noResponse")}</span>
         </div>
       )}
 
       <div ref={bottomRef} />
 
       {!isNearBottom && (
-        <div
-          style={{
-            position: "sticky",
-            bottom: "12px",
-            display: "flex",
-            justifyContent: "center",
-            pointerEvents: "none",
-          }}
-        >
+        <div style={S_SCROLL_WRAP}>
           <button
             onClick={scrollToBottom}
             aria-label={t("ui.scrollToLatest")}
-            style={{
-              pointerEvents: "auto",
-              width: "36px",
-              height: "36px",
-              borderRadius: "50%",
-              background: "rgba(139, 92, 246, 0.85)",
-              color: "rgba(255,255,255,0.95)",
-              fontSize: "16px",
-              lineHeight: 1,
-              border: "1px solid rgba(139, 92, 246, 0.4)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-              boxShadow: "0 2px 12px rgba(139, 92, 246, 0.3)",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-              animation: hasNewMessage
-                ? "scrollBtnIn 0.25s ease-out, scrollBtnPulse 2s ease-in-out infinite"
-                : "scrollBtnIn 0.25s ease-out",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              position: "relative",
-            }}
+            style={hasNewMessage ? S_SCROLL_BTN_PULSE : S_SCROLL_BTN}
           >
             ↓
-            {hasNewMessage && (
-              <span
-                style={{
-                  position: "absolute",
-                  top: "-2px",
-                  right: "-2px",
-                  width: "10px",
-                  height: "10px",
-                  borderRadius: "50%",
-                  background: "#ef4444",
-                  border: "2px solid rgba(15, 15, 20, 0.9)",
-                  animation: "chatFadeInUp 0.2s ease-out",
-                }}
-              />
-            )}
+            {hasNewMessage && <span style={S_NEW_DOT} />}
           </button>
         </div>
       )}

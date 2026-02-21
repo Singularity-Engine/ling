@@ -14,6 +14,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   style.textContent = `
     @keyframes inputPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
     @keyframes micPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); } }
+    @keyframes sendSpin { to { transform: rotate(360deg); } }
     .ling-textarea { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; color: white; font-size: 14px; padding: 10px 16px; min-height: 42px; max-height: 96px; resize: none; flex: 1; outline: none; font-family: inherit; line-height: 1.5; }
     .ling-textarea::placeholder { color: rgba(255, 255, 255, 0.4); }
     .ling-textarea:focus { border-color: rgba(139, 92, 246, 0.6); box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.4); }
@@ -34,6 +35,12 @@ const SendIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="22" y1="2" x2="11" y2="13" />
     <polygon points="22 2 15 22 11 13 2 9 22 2" />
+  </svg>
+);
+
+const LoadingIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" style={{ animation: "sendSpin 0.8s linear infinite" }}>
+    <path d="M12 2a10 10 0 0 1 10 10" />
   </svg>
 );
 
@@ -76,6 +83,19 @@ export const InputBar = memo(() => {
     window.addEventListener('fill-input', handler);
     return () => window.removeEventListener('fill-input', handler);
   }, []);
+
+  // Restore input text when send fails (dispatched by websocket-handler)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const text = (e as CustomEvent).detail?.text;
+      if (typeof text === 'string' && !inputText) {
+        setInputText(text.slice(0, MAX_LENGTH));
+        setTimeout(() => textareaRef.current?.focus(), 0);
+      }
+    };
+    window.addEventListener('send-failed', handler);
+    return () => window.removeEventListener('send-failed', handler);
+  }, [inputText]);
 
   const trimmed = inputText.trim();
   const hasText = trimmed.length > 0;
@@ -228,21 +248,23 @@ export const InputBar = memo(() => {
             borderRadius: "50%",
             background: isAiSpeaking
               ? "rgba(239, 68, 68, 0.2)"
-              : canSend
-                ? "linear-gradient(135deg, #8b5cf6, #6d28d9)"
-                : "rgba(255,255,255,0.06)",
+              : isSending
+                ? "linear-gradient(135deg, #7c3aed, #5b21b6)"
+                : canSend
+                  ? "linear-gradient(135deg, #8b5cf6, #6d28d9)"
+                  : "rgba(255,255,255,0.06)",
             border: isAiSpeaking ? "1px solid rgba(239, 68, 68, 0.3)" : "none",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            cursor: canSend || isAiSpeaking ? "pointer" : "default",
-            opacity: !isAiSpeaking && !canSend && hasText ? 0.4 : 1,
+            cursor: canSend || isAiSpeaking ? "pointer" : "not-allowed",
+            opacity: isSending ? 0.7 : !isAiSpeaking && !canSend && hasText ? 0.4 : 1,
             transition: "all 0.2s ease",
             flexShrink: 0,
             padding: 0,
           }}
         >
-          {isAiSpeaking ? <StopIcon /> : <SendIcon />}
+          {isAiSpeaking ? <StopIcon /> : isSending ? <LoadingIcon /> : <SendIcon />}
         </button>
       </div>
       <div style={{ maxWidth: "720px", margin: "2px auto 0", paddingLeft: "52px", display: "flex", justifyContent: "space-between" }}>
