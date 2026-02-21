@@ -6,22 +6,33 @@ import { Message } from '@/services/websocket-service';
 import { HistoryInfo } from './websocket-context';
 
 /**
- * Chat history context state interface
- * @interface ChatHistoryState
+ * Chat history context — messages, history list, session management.
+ * Separated from streaming response to avoid cascade re-renders:
+ * fullResponse changes ~60x/sec during streaming; keeping it in the same
+ * context forced ALL 14 consumers to re-render even if they only need messages.
  */
 interface ChatHistoryState {
-  messages: Message[]; // Use the unified Message type
+  messages: Message[];
   historyList: HistoryInfo[];
   currentHistoryUid: string | null;
   appendHumanMessage: (content: string) => void;
   appendAIMessage: (content: string, name?: string, avatar?: string) => void;
-  appendOrUpdateToolCallMessage: (toolMessageData: Partial<Message>) => void; // Accept partial data
-  setMessages: (messages: Message[]) => void; // Use the unified Message type
+  appendOrUpdateToolCallMessage: (toolMessageData: Partial<Message>) => void;
+  setMessages: (messages: Message[]) => void;
   setHistoryList: (
     value: HistoryInfo[] | ((prev: HistoryInfo[]) => HistoryInfo[])
   ) => void;
   setCurrentHistoryUid: (uid: string | null) => void;
-  updateHistoryList: (uid: string, latestMessage: Message | null) => void; // Use the unified Message type
+  updateHistoryList: (uid: string, latestMessage: Message | null) => void;
+}
+
+/**
+ * Streaming response context — the rapidly-changing fullResponse string
+ * and its mutators. Only components that render streaming output (ChatArea,
+ * interrupt hook, audio task) subscribe here, so sidebar / InputBar / App
+ * are shielded from ~60 fps re-renders during AI streaming.
+ */
+interface StreamingResponseState {
   fullResponse: string;
   setFullResponse: (text: string) => void;
   appendResponse: (text: string) => void;
@@ -46,10 +57,8 @@ const DEFAULT_HISTORY = {
   fullResponse: '',
 };
 
-/**
- * Create the chat history context
- */
 export const ChatHistoryContext = createContext<ChatHistoryState | null>(null);
+export const StreamingResponseContext = createContext<StreamingResponseState | null>(null);
 
 /**
  * Chat History Provider Component

@@ -481,7 +481,7 @@ canvas {
   border-radius: 4px;
   font-size: 0.9em;
   font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
-  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 /* Code block wrapper (language label + copy button + pre) */
 .md-content .code-block-wrap {
@@ -563,6 +563,7 @@ canvas {
   font-size: 0.85em;
   color: var(--ling-md-pre-code);
   word-break: normal;
+  overflow: visible;
 }
 .md-content ul, .md-content ol { margin: 0.4em 0; padding-left: 1.5em; }
 .md-content li { margin-bottom: 0.2em; }
