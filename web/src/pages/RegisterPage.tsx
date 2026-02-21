@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/auth-context';
 import { ApiError } from '@/services/api-client';
 
 export function RegisterPage() {
+  const { t } = useTranslation();
   const { register } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -20,12 +22,12 @@ export function RegisterPage() {
     setError('');
 
     if (!ageConfirm) {
-      setError('Please confirm you are 16 or older');
+      setError(t('auth.ageConfirmRequired'));
       return;
     }
 
     if (password !== confirm) {
-      setError('Passwords do not match');
+      setError(t('auth.passwordMismatch'));
       return;
     }
 
@@ -34,7 +36,7 @@ export function RegisterPage() {
       await register(email, username, password);
       navigate('/');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Registration failed. Please try again.');
+      setError(err instanceof ApiError ? err.message : t('auth.registerFailed'));
     } finally {
       setLoading(false);
     }
@@ -43,21 +45,21 @@ export function RegisterPage() {
   return (
     <div style={styles.page}>
       <Helmet>
-        <title>注册 — 灵 - AI 数字人</title>
-        <meta name="description" content="注册灵账号，拥有你的 AI 数字人伴侣。" />
-        <meta property="og:title" content="注册 — 灵 - AI 数字人" />
-        <meta property="og:description" content="注册灵账号，拥有你的 AI 数字人伴侣。" />
+        <title>{t('auth.metaRegisterTitle')}</title>
+        <meta name="description" content={t('auth.metaRegisterDesc')} />
+        <meta property="og:title" content={t('auth.metaRegisterTitle')} />
+        <meta property="og:description" content={t('auth.metaRegisterDesc')} />
         <meta property="og:image" content="https://sngxai.com/og-image.png" />
         <link rel="canonical" href="https://sngxai.com/register" />
       </Helmet>
       <div style={styles.card}>
         <h1 style={styles.title}>Ling</h1>
-        <p style={styles.subtitle}>Create your account</p>
+        <p style={styles.subtitle}>{t('auth.registerTitle')}</p>
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <input
             type="email"
-            placeholder="Email"
+            placeholder={t('auth.placeholderEmail')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -66,7 +68,7 @@ export function RegisterPage() {
           />
           <input
             type="text"
-            placeholder="Username (3-30 chars, letters/numbers/underscore)"
+            placeholder={t('auth.placeholderUsername')}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
@@ -75,7 +77,7 @@ export function RegisterPage() {
           />
           <input
             type="password"
-            placeholder="Password (min 8 characters)"
+            placeholder={t('auth.placeholderPassword')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -85,7 +87,7 @@ export function RegisterPage() {
           />
           <input
             type="password"
-            placeholder="Confirm password"
+            placeholder={t('auth.placeholderConfirmPassword')}
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             required
@@ -101,9 +103,9 @@ export function RegisterPage() {
               style={styles.checkbox}
             />
             <span>
-              I am 16 or older and agree to the{' '}
+              {t('auth.ageConfirm')}{' '}
               <Link to="/terms" target="_blank" style={styles.link}>
-                Terms of Service
+                {t('auth.termsLink')}
               </Link>
             </span>
           </label>
@@ -111,14 +113,14 @@ export function RegisterPage() {
           {error && <p style={styles.error}>{error}</p>}
 
           <button type="submit" disabled={loading} style={styles.button}>
-            {loading ? 'Creating account...' : 'Create Account'}
+            {loading ? t('auth.registerSubmitting') : t('auth.registerSubmit')}
           </button>
         </form>
 
         <p style={styles.footer}>
-          Already have an account?{' '}
+          {t('auth.registerFooter')}{' '}
           <Link to="/login" style={styles.link}>
-            Sign in
+            {t('auth.registerFooterLink')}
           </Link>
         </p>
       </div>

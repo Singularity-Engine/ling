@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/auth-context';
 import { ApiError } from '@/services/api-client';
 
 export function LoginPage() {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
   const [identifier, setIdentifier] = useState('');
@@ -20,7 +22,7 @@ export function LoginPage() {
       await login(identifier, password);
       navigate('/');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Login failed. Please try again.');
+      setError(err instanceof ApiError ? err.message : t('auth.loginFailed'));
     } finally {
       setLoading(false);
     }
@@ -29,21 +31,21 @@ export function LoginPage() {
   return (
     <div style={styles.page}>
       <Helmet>
-        <title>登录 — 灵 - AI 数字人</title>
-        <meta name="description" content="登录灵，开始与你的 AI 数字人对话。" />
-        <meta property="og:title" content="登录 — 灵 - AI 数字人" />
-        <meta property="og:description" content="登录灵，开始与你的 AI 数字人对话。" />
+        <title>{t('auth.metaLoginTitle')}</title>
+        <meta name="description" content={t('auth.metaLoginDesc')} />
+        <meta property="og:title" content={t('auth.metaLoginTitle')} />
+        <meta property="og:description" content={t('auth.metaLoginDesc')} />
         <meta property="og:image" content="https://sngxai.com/og-image.png" />
         <link rel="canonical" href="https://sngxai.com/login" />
       </Helmet>
       <div style={styles.card}>
         <h1 style={styles.title}>Ling</h1>
-        <p style={styles.subtitle}>Sign in to your account</p>
+        <p style={styles.subtitle}>{t('auth.loginTitle')}</p>
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <input
             type="text"
-            placeholder="Email or username"
+            placeholder={t('auth.placeholderEmailOrUsername')}
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             required
@@ -52,7 +54,7 @@ export function LoginPage() {
           />
           <input
             type="password"
-            placeholder="Password"
+            placeholder={t('auth.placeholderPassword')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -63,14 +65,14 @@ export function LoginPage() {
           {error && <p style={styles.error}>{error}</p>}
 
           <button type="submit" disabled={loading} style={styles.button}>
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? t('auth.loginSubmitting') : t('auth.loginSubmit')}
           </button>
         </form>
 
         <p style={styles.footer}>
-          Don't have an account?{' '}
+          {t('auth.loginFooter')}{' '}
           <Link to="/register" style={styles.link}>
-            Create one
+            {t('auth.loginFooterLink')}
           </Link>
         </p>
       </div>

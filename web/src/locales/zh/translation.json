@@ -394,6 +394,33 @@
       "notion": "帮我整理 Notion 笔记"
     }
   },
+  "auth": {
+    "loginTitle": "登录你的账号",
+    "loginSubmit": "登录",
+    "loginSubmitting": "登录中...",
+    "loginFailed": "登录失败，请重试。",
+    "loginFooter": "还没有账号？",
+    "loginFooterLink": "立即注册",
+    "registerTitle": "创建你的账号",
+    "registerSubmit": "注册",
+    "registerSubmitting": "注册中...",
+    "registerFailed": "注册失败，请重试。",
+    "registerFooter": "已有账号？",
+    "registerFooterLink": "立即登录",
+    "placeholderEmail": "邮箱",
+    "placeholderEmailOrUsername": "邮箱或用户名",
+    "placeholderUsername": "用户名（3-30位，字母/数字/下划线）",
+    "placeholderPassword": "密码（至少8位）",
+    "placeholderConfirmPassword": "确认密码",
+    "passwordMismatch": "两次密码不一致",
+    "ageConfirm": "我已年满16周岁，并同意",
+    "ageConfirmRequired": "请确认你已年满16周岁",
+    "termsLink": "服务条款",
+    "metaLoginTitle": "登录 — 灵 - AI 数字人",
+    "metaLoginDesc": "登录灵，开始与你的 AI 数字人对话。",
+    "metaRegisterTitle": "注册 — 灵 - AI 数字人",
+    "metaRegisterDesc": "注册灵账号，拥有你的 AI 数字人伴侣。"
+  },
   "onboarding": {
     "welcome": "你好，我是灵 ✦",
     "welcomeSub": "我不只是聊天机器人 — 我有记忆、有情感、有真正的能力",

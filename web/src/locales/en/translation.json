@@ -394,6 +394,33 @@
       "notion": "Help me organize my Notion notes"
     }
   },
+  "auth": {
+    "loginTitle": "Sign in to your account",
+    "loginSubmit": "Sign In",
+    "loginSubmitting": "Signing in...",
+    "loginFailed": "Login failed. Please try again.",
+    "loginFooter": "Don't have an account?",
+    "loginFooterLink": "Create one",
+    "registerTitle": "Create your account",
+    "registerSubmit": "Create Account",
+    "registerSubmitting": "Creating account...",
+    "registerFailed": "Registration failed. Please try again.",
+    "registerFooter": "Already have an account?",
+    "registerFooterLink": "Sign in",
+    "placeholderEmail": "Email",
+    "placeholderEmailOrUsername": "Email or username",
+    "placeholderUsername": "Username (3-30 chars, letters/numbers/underscore)",
+    "placeholderPassword": "Password (min 8 characters)",
+    "placeholderConfirmPassword": "Confirm password",
+    "passwordMismatch": "Passwords do not match",
+    "ageConfirm": "I am 16 or older and agree to the",
+    "ageConfirmRequired": "Please confirm you are 16 or older",
+    "termsLink": "Terms of Service",
+    "metaLoginTitle": "Sign In — Ling",
+    "metaLoginDesc": "Sign in to Ling to start chatting with your AI companion.",
+    "metaRegisterTitle": "Sign Up — Ling",
+    "metaRegisterDesc": "Create your Ling account and meet your AI companion."
+  },
   "onboarding": {
     "welcome": "Hey, I'm Ling ✦",
     "welcomeSub": "I'm not just a chatbot — I have memory, emotions, and real abilities",
