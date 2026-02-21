@@ -1,4 +1,4 @@
-import { memo, useEffect, useCallback, useState } from "react";
+import { memo, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/auth-context";
 import { useUI } from "@/context/ui-context";
@@ -78,21 +78,7 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
     onClose();
   }, [logout, onClose]);
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    },
-    [onClose]
-  );
-
-  useEffect(() => {
-    if (!open) return;
-    window.addEventListener("keydown", handleKeyDown, true);
-    return () => window.removeEventListener("keydown", handleKeyDown, true);
-  }, [open, handleKeyDown]);
+  // ESC to close — handled globally by useKeyboardShortcuts in App.tsx
 
   if (!open) return null;
 

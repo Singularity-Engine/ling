@@ -47,15 +47,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
     if (open) fetchMemories();
   }, [open, fetchMemories]);
 
-  // ESC to close
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [open, onClose]);
+  // ESC to close — handled globally by useKeyboardShortcuts in App.tsx
 
   if (!open) return null;
 

@@ -1,4 +1,4 @@
-import { memo, useEffect, useCallback } from "react";
+import { memo } from "react";
 import { useTranslation } from "react-i18next";
 
 interface ShortcutsOverlayProps {
@@ -22,21 +22,7 @@ const SHORTCUT_GROUPS = [
 export const ShortcutsOverlay = memo(({ open, onClose }: ShortcutsOverlayProps) => {
   const { t } = useTranslation();
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    },
-    [onClose]
-  );
-
-  useEffect(() => {
-    if (!open) return;
-    window.addEventListener("keydown", handleKeyDown, true);
-    return () => window.removeEventListener("keydown", handleKeyDown, true);
-  }, [open, handleKeyDown]);
+  // ESC to close — handled globally by useKeyboardShortcuts in App.tsx
 
   if (!open) return null;
 
