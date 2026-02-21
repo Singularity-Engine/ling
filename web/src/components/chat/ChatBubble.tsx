@@ -230,8 +230,8 @@ const S_TOGGLE_BTN: CSSProperties = {
 };
 const S_TOGGLE_ARROW: CSSProperties = { fontSize: "10px" };
 
-const S_TOOL_WRAP: CSSProperties = { padding: "0 16px", marginBottom: "12px", maxWidth: "90%" };
-const S_INNER: CSSProperties = { maxWidth: "78%", minWidth: 0 };
+const S_TOOL_WRAP: CSSProperties = { padding: "0 16px", marginBottom: "12px", maxWidth: "min(90%, 620px)" };
+const S_INNER: CSSProperties = { maxWidth: "min(78%, 560px)", minWidth: 0 };
 const S_REL: CSSProperties = { position: "relative" };
 const S_CURSOR: CSSProperties = {
   display: "inline-block", width: "2px", height: "14px", background: "var(--ling-purple)",

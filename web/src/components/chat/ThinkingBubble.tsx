@@ -35,7 +35,7 @@ const S_AVATAR_AI: CSSProperties = {
   letterSpacing: "0.3px", userSelect: "none", marginTop: "1px",
   background: "var(--ling-avatar-ai-bg)", color: "var(--ling-avatar-ai-color)",
 };
-const S_INNER: CSSProperties = { maxWidth: "78%", minWidth: 0 };
+const S_INNER: CSSProperties = { maxWidth: "min(78%, 560px)", minWidth: 0 };
 const S_NAME: CSSProperties = {
   display: "block", fontSize: "11px", color: "var(--ling-chat-label)",
   marginBottom: "4px", marginLeft: "4px", fontWeight: 500, letterSpacing: "0.5px",
