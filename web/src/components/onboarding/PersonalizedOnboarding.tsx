@@ -192,7 +192,6 @@ export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingPro
           {step === 1 && (
             <StepInterests
               t={t}
-              lang={lang}
               selected={selectedInterests}
               onToggle={toggleInterest}
             />
@@ -209,7 +208,6 @@ export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingPro
           {step === 3 && (
             <StepReady
               t={t}
-              lang={lang}
               goals={[...new Set([alwaysIncluded, ...selectedGoals])]}
             />
           )}
@@ -323,10 +321,9 @@ function StepWelcome({ t, onNext }: { t: (k: string) => string; onNext: () => vo
 
 // ── Step 1: Interests ───────────────────────────────────────────
 function StepInterests({
-  t, lang, selected, onToggle,
+  t, selected, onToggle,
 }: {
   t: (k: string) => string;
-  lang: string;
   selected: string[];
   onToggle: (tag: string) => void;
 }) {
@@ -523,10 +520,9 @@ function StepGoals({
 
 // ── Step 3: Ready ───────────────────────────────────────────────
 function StepReady({
-  t, lang, goals,
+  t, goals,
 }: {
   t: (k: string, opts?: Record<string, string>) => string;
-  lang: string;
   goals: string[];
 }) {
   return (

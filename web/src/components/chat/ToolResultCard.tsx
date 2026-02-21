@@ -261,7 +261,6 @@ const CARD_COLORS: Record<string, { bg: string; border: string; accent: string }
 };
 
 export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCardProps) => {
-  const { t } = useTranslation();
   const category = useMemo(() => getToolCategory(toolName), [toolName]);
   const codeBlocks = useMemo(() => extractCodeBlocks(content), [content]);
   const hasCode = codeBlocks.length > 0;

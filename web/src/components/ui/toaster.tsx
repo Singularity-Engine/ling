@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { createRoot } from 'react-dom/client';
+import { useState, useEffect } from 'react';
 
 // 简单的 toast 系统，不依赖 Chakra UI
 interface ToastItem {

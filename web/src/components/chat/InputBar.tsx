@@ -163,8 +163,6 @@ export const InputBar = memo(() => {
   // Synchronous mirror — prevents double-send when rapid Enter events fire
   // before React re-renders (state reads via closure can be stale).
   const isSendingRef = useRef(false);
-  const [shaking, setShaking] = useState(false);
-  const shakingRef = useRef(false);
   // Tracks whether AI was already busy when we sent (interrupt-then-send case).
   // Prevents premature isSending reset when isAiBusy is true at send time.
   const sentWhileBusyRef = useRef(false);

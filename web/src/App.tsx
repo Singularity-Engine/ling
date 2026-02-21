@@ -29,7 +29,6 @@ import { AffinityProvider } from "./context/affinity-context";
 import { ToolStateProvider } from "./context/tool-state-context";
 import { TTSStateProvider } from "./context/tts-state-context";
 import { StarField } from "./components/background/StarField";
-import { MOBILE_BREAKPOINT } from "./constants/breakpoints";
 import { SEO_HOME_TITLE, SEO_HOME_DESC, SEO_HOME_OG_TITLE } from "./constants/brand";
 import { BackgroundReactor } from "./components/effects/BackgroundReactor";
 import { AudioVisualizer } from "./components/effects/AudioVisualizer";
@@ -45,7 +44,7 @@ import { NetworkStatusBanner } from "./components/effects/NetworkStatusBanner";
 import { TapParticles } from "./components/effects/TapParticles";
 import { useAffinityIdleExpression } from "./hooks/use-affinity-idle-expression";
 import { AuthProvider, useAuth } from "./context/auth-context";
-import { UIProvider, useUI } from "./context/ui-context";
+import { UIProvider } from "./context/ui-context";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { TermsPage } from "./pages/TermsPage";
@@ -467,14 +466,6 @@ function DismissFallback() {
     }
   }, [isLoading]);
   return null;
-}
-
-/** 需要认证时包裹子组件，未登录跳转 /login */
-function RequireAuth({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
-  if (isLoading) return null; // 初始化中不闪屏
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
-  return <>{children}</>;
 }
 
 /** 已登录时阻止访问 login/register */

@@ -13,9 +13,6 @@ import { DisplayText } from '@/services/websocket-service';
 import { useLive2DExpression } from '@/hooks/canvas/use-live2d-expression';
 import * as LAppDefine from '../../../WebSDK/src/lappdefine';
 
-// Simple type alias for Live2D model
-type Live2DModel = any;
-
 interface AudioTaskOptions {
   audioBase64: string
   volumes: number[]

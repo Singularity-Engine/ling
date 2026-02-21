@@ -29,7 +29,6 @@ import { ttsService } from '@/services/tts-service';
 import { asrService } from '@/services/asr-service';
 import { useTTSState } from '@/context/tts-state-context';
 import { BRAND_NAME_SHORT, BRAND_NAME_DISPLAY, BRAND_AVATAR_NAME } from '@/constants/brand';
-import { isMobileViewport } from '@/constants/breakpoints';
 import { useAuth } from '@/context/auth-context';
 import { useUI } from '@/context/ui-context';
 import { apiClient } from '@/services/api-client';
@@ -193,7 +192,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const { interrupt } = useInterrupt();
   const { setBrowserViewData } = useBrowser();
   const affinityContext = useAffinity();
-  const { startTool, updateTool, completeTool, failTool } = useToolState();
+  const { startTool, completeTool, failTool } = useToolState();
   const { markSynthStart, markSynthDone, markSynthError, markPlayStart, markPlayDone, reset: resetTTSState } = useTTSState();
   const { updateCredits, user } = useAuth();
   const { setBillingModal } = useUI();

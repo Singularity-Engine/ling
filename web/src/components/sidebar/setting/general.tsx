@@ -6,7 +6,6 @@ import { settingStyles } from "./setting-styles";
 import { useConfig } from "@/context/character-config-context";
 import { useGeneralSettings } from "@/hooks/sidebar/setting/use-general-settings";
 import { useWebSocket } from "@/context/websocket-context";
-import { useTheme, type ThemeMode } from "@/context/theme-context";
 import { SelectField, SwitchField, InputField } from "./common";
 
 interface GeneralProps {
@@ -62,7 +61,6 @@ function General({ onSave, onCancel }: GeneralProps): JSX.Element {
   const bgUrlContext = useBgUrl();
   const { confName, setConfName } = useConfig();
   const { wsUrl, setWsUrl, baseUrl, setBaseUrl } = useWebSocket();
-  const { mode: themeMode, setMode: setThemeMode } = useTheme();
   const collections = useCollections(t);
 
   const {

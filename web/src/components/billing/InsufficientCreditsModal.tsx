@@ -6,7 +6,7 @@
  */
 
 import { useTranslation } from 'react-i18next';
-import { useUI, type BillingModalState } from '@/context/ui-context';
+import { useUI } from '@/context/ui-context';
 
 const InsufficientCreditsModal: React.FC = () => {
   const { t } = useTranslation();

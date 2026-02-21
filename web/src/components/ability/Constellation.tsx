@@ -107,7 +107,6 @@ function StarButton({
 // ── Main Constellation component ────────────────────────────────
 export const Constellation = memo(() => {
   const { t, i18n } = useTranslation();
-  const lang = i18n.language?.startsWith("zh") ? "zh" : "en";
   const { discovered, isNew, newSkillKey, clearNewFlag } = useConstellation();
   const { activeToolName } = useToolState();
   const [isOpen, setIsOpen] = useState(false);
