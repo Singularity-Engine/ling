@@ -43,13 +43,13 @@
   --ling-purple-85: rgba(139, 92, 246, 0.85);
 
   /* 气泡 */
-  --ling-bubble-user-bg: linear-gradient(135deg, rgba(139, 92, 246, 0.52), rgba(109, 40, 217, 0.46));
-  --ling-bubble-ai-bg: rgba(255, 255, 255, 0.09);
+  --ling-bubble-user-bg: linear-gradient(135deg, rgba(139, 92, 246, 0.56), rgba(109, 40, 217, 0.50));
+  --ling-bubble-ai-bg: rgba(255, 255, 255, 0.13);
   --ling-bubble-user-border: rgba(139, 92, 246, 0.4);
-  --ling-bubble-ai-border: rgba(255, 255, 255, 0.14);
-  --ling-bubble-ai-accent: rgba(139, 92, 246, 0.6);
+  --ling-bubble-ai-border: rgba(255, 255, 255, 0.18);
+  --ling-bubble-ai-accent: rgba(139, 92, 246, 0.7);
   --ling-bubble-user-shadow: rgba(139, 92, 246, 0.25);
-  --ling-bubble-ai-shadow: rgba(0, 0, 0, 0.15);
+  --ling-bubble-ai-shadow: rgba(0, 0, 0, 0.22);
   --ling-bubble-ai-text: rgba(255, 255, 255, 0.92);
   --ling-chat-timestamp: rgba(255, 255, 255, 0.5);
   --ling-chat-label: var(--ling-purple-60);
