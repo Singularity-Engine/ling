@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 
 interface GroupContextState {
   selfUid: string;
@@ -18,10 +18,10 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
   const [groupMembers, setGroupMembers] = useState<string[]>([]);
   const [isOwner, setIsOwner] = useState(false);
 
-  const resetGroupState = () => {
+  const resetGroupState = useCallback(() => {
     setGroupMembers([]);
     setIsOwner(false);
-  };
+  }, []);
 
   const sortedGroupMembers = useMemo(() => {
     if (!groupMembers.includes(selfUid)) return groupMembers;
@@ -32,19 +32,13 @@ export function GroupProvider({ children }: { children: React.ReactNode }) {
     ];
   }, [groupMembers, selfUid]);
 
+  const contextValue = useMemo(
+    () => ({ selfUid, groupMembers, isOwner, setSelfUid, setGroupMembers, setIsOwner, sortedGroupMembers, resetGroupState }),
+    [selfUid, groupMembers, isOwner, sortedGroupMembers, resetGroupState],
+  );
+
   return (
-    // eslint-disable-next-line react/jsx-no-constructed-context-values
-    <GroupContext.Provider value={{
-      selfUid,
-      groupMembers,
-      isOwner,
-      setSelfUid,
-      setGroupMembers,
-      setIsOwner,
-      sortedGroupMembers,
-      resetGroupState,
-    }}
-    >
+    <GroupContext.Provider value={contextValue}>
       {children}
     </GroupContext.Provider>
   );

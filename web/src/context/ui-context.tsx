@@ -9,6 +9,7 @@ import {
   useContext,
   useState,
   useCallback,
+  useMemo,
   type ReactNode,
 } from 'react';
 
@@ -44,16 +45,13 @@ export function UIProvider({ children }: { children: ReactNode }) {
     setBillingModal({ open: false });
   }, []);
 
+  const contextValue = useMemo(
+    () => ({ pricingOpen, setPricingOpen, billingModal, setBillingModal, closeBillingModal }),
+    [pricingOpen, billingModal, closeBillingModal],
+  );
+
   return (
-    <UIContext.Provider
-      value={{
-        pricingOpen,
-        setPricingOpen,
-        billingModal,
-        setBillingModal,
-        closeBillingModal,
-      }}
-    >
+    <UIContext.Provider value={contextValue}>
       {children}
     </UIContext.Provider>
   );

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useRef, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useRef, useMemo, ReactNode } from "react";
 import { useAffinityEngine } from "@/hooks/use-affinity-engine";
 
 export interface PointGain {
@@ -70,8 +70,13 @@ export function AffinityProvider({ children }: { children: ReactNode }) {
   // Frontend affinity engine — auto-computes affinity from chat events
   useAffinityEngine({ updateAffinity, showMilestone, showPointGain });
 
+  const contextValue = useMemo(
+    () => ({ ...state, updateAffinity, showMilestone, showPointGain, setExpression }),
+    [state, updateAffinity, showMilestone, showPointGain, setExpression],
+  );
+
   return (
-    <AffinityContext.Provider value={{ ...state, updateAffinity, showMilestone, showPointGain, setExpression }}>
+    <AffinityContext.Provider value={contextValue}>
       {children}
     </AffinityContext.Provider>
   );
