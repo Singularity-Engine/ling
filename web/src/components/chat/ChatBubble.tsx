@@ -125,7 +125,7 @@ const S_BUBBLE_AI: CSSProperties = {
   padding: "10px 16px", borderRadius: "18px 18px 18px 4px",
   background: "var(--ling-bubble-ai-bg)",
   border: "1px solid var(--ling-bubble-ai-border)",
-  borderLeft: "2.5px solid var(--ling-bubble-ai-accent)",
+  borderLeft: "3px solid var(--ling-bubble-ai-accent)",
   backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
   overflow: "hidden", transition: "all 0.2s ease",
   boxShadow: "0 1px 8px var(--ling-bubble-ai-shadow)",
