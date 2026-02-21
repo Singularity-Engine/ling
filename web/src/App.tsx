@@ -201,13 +201,13 @@ function MainContent(): JSX.Element {
       key: "shift+i",
       labelKey: "shortcuts.showAbout",
       action: () => setAboutOpen(prev => !prev),
-      allowInInput: true,
+      // No allowInInput — conflicts with typing uppercase "I"
     },
     {
       key: "shift+?",
       labelKey: "shortcuts.showHelp",
       action: () => setShortcutsOpen(prev => !prev),
-      allowInInput: true,
+      // No allowInInput — conflicts with typing "?"
     },
     {
       key: "escape",
