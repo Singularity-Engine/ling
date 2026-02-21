@@ -34,6 +34,27 @@ function extractLang(children: ReactNode): string | null {
   return match ? match[1] : null;
 }
 
+// URL regex for linkifying plain-text user messages.
+// Matches http(s) URLs and www. prefixed URLs.
+// Capturing group in split → odd-indexed parts are matched URLs.
+const URL_RE = /(https?:\/\/[^\s<>)"']+|www\.[^\s<>)"']+)/g;
+
+function linkifyText(text: string): ReactNode {
+  const parts = text.split(URL_RE);
+  if (parts.length === 1) return text;
+  return parts.map((part, i) => {
+    if (i % 2 === 1) {
+      const href = part.startsWith("www.") ? `https://${part}` : part;
+      return (
+        <a key={i} href={href} target="_blank" rel="noopener noreferrer" className="user-msg-link">
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+}
+
 function extractTextContent(node: ReactNode): string {
   if (typeof node === "string") return node;
   if (typeof node === "number") return String(node);
@@ -327,7 +348,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
           >
             {isUser ? (
               <span style={S_USER_TEXT}>
-                {content}
+                {linkifyText(content)}
               </span>
             ) : (
               <div className="md-content" style={S_AI_MD}>
