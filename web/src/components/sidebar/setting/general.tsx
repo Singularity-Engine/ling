@@ -1,4 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Stack, createListCollection } from "@chakra-ui/react";
 import { useBgUrl } from "@/context/bgurl-context";
@@ -82,9 +83,12 @@ function General({ onSave, onCancel }: GeneralProps): JSX.Element {
     onCancel,
   });
 
-  if (settings.language[0] !== i18n.language) {
-    handleSettingChange("language", [i18n.language]);
-  }
+  // Sync settings.language with i18n — must be in useEffect, not render phase
+  useEffect(() => {
+    if (settings.language[0] !== i18n.language) {
+      handleSettingChange("language", [i18n.language]);
+    }
+  }, [i18n.language]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Stack {...settingStyles.common.container}>
