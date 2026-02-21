@@ -1,9 +1,10 @@
 import { useTranslation } from "react-i18next";
-import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MutableRefObject } from "react";
 import { ChatBubble } from "./ChatBubble";
 import { ThinkingBubble } from "./ThinkingBubble";
 import { TimeSeparator, shouldShowSeparator } from "./TimeSeparator";
 import { useChatHistory } from "@/context/chat-history-context";
+import type { Message } from "@/services/websocket-service";
 
 import { useAiState } from "@/context/ai-state-context";
 import { useWebSocket } from "@/context/websocket-context";
@@ -327,7 +328,7 @@ export const ChatArea = memo(() => {
   const showStreaming = useMemo(() => {
     if (!isStreaming) return false;
     const lastAiMsg = dedupedMessages.findLast(m => m.role === 'ai');
-    return !(lastAiMsg && lastAiMsg.content && displayResponse.startsWith(lastAiMsg.content));
+    return !(lastAiMsg && lastAiMsg.content && displayResponse === lastAiMsg.content);
   }, [isStreaming, dedupedMessages, displayResponse]);
 
   // Mirror showStreaming into a ref so the memoized message list can read it

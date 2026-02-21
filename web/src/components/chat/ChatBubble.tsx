@@ -142,13 +142,16 @@ const S_NAME: CSSProperties = {
 const S_TS_USER: CSSProperties = { display: "block", fontSize: "10px", color: "rgba(255, 255, 255, 0.5)", marginTop: "3px", textAlign: "right", marginRight: "4px" };
 const S_TS_AI: CSSProperties = { display: "block", fontSize: "10px", color: "rgba(255, 255, 255, 0.5)", marginTop: "3px", textAlign: "left", marginLeft: "4px" };
 
-const S_COPY: CSSProperties = {
-  position: "absolute", top: "6px", right: "-32px", width: "24px", height: "24px",
+const S_COPY_BASE: CSSProperties = {
+  position: "absolute", top: "6px", width: "24px", height: "24px",
   display: "flex", alignItems: "center", justifyContent: "center",
   background: "transparent", border: "none", borderRadius: "4px",
   cursor: "pointer", padding: 0, transition: "all 0.2s ease", color: "rgba(255,255,255,0.3)",
 };
-const S_COPY_DONE: CSSProperties = { ...S_COPY, color: "rgba(34,197,94,0.8)" };
+const S_COPY_AI: CSSProperties = { ...S_COPY_BASE, right: "-32px" };
+const S_COPY_USER: CSSProperties = { ...S_COPY_BASE, left: "-32px" };
+const S_COPY_AI_DONE: CSSProperties = { ...S_COPY_AI, color: "rgba(34,197,94,0.8)" };
+const S_COPY_USER_DONE: CSSProperties = { ...S_COPY_USER, color: "rgba(34,197,94,0.8)" };
 
 const S_TOOL_WRAP: CSSProperties = { padding: "0 16px", marginBottom: "10px", maxWidth: "90%" };
 const S_INNER: CSSProperties = { maxWidth: "78%", minWidth: 0 };
@@ -253,7 +256,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
 
   return (
     <div style={outerStyle}>
-      <div style={S_INNER} className={isUser ? "chat-msg-inner" : "chat-bubble-wrap chat-msg-inner"}>
+      <div style={S_INNER} className="chat-bubble-wrap chat-msg-inner">
         {!isUser && (
           <span style={S_NAME}>
             {t("chat.characterName")}
@@ -262,7 +265,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
         <div style={S_REL}>
           <div
             ref={bubbleRef}
-            onDoubleClick={!isUser && !isStreaming && content ? handleDoubleClick : undefined}
+            onDoubleClick={!isStreaming && content ? handleDoubleClick : undefined}
             style={bubbleStyle}
           >
             {isUser ? (
@@ -276,13 +279,15 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
               </div>
             )}
           </div>
-          {!isUser && !isStreaming && content && (
+          {!isStreaming && content && (
             <button
               onClick={handleCopy}
               className="chat-copy-btn"
               aria-label={copied ? t("chat.copied") : t("chat.copy")}
               title={copied ? t("chat.copied") : t("chat.copy")}
-              style={copied ? S_COPY_DONE : S_COPY}
+              style={isUser
+                ? (copied ? S_COPY_USER_DONE : S_COPY_USER)
+                : (copied ? S_COPY_AI_DONE : S_COPY_AI)}
             >
               {copied ? (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
