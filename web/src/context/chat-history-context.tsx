@@ -1,6 +1,6 @@
 /* eslint-disable no-else-return */
 import {
-  createContext, useContext, useState, useMemo, useCallback, useRef,
+  createContext, useContext, useState, useMemo, useCallback, useRef, type ReactNode,
 } from 'react';
 import { Message } from '@/services/websocket-service';
 import { HistoryInfo } from './websocket-context';
@@ -86,7 +86,7 @@ const StreamingRefContext = createContext<StreamingRefState | null>(null);
 const trimMessages = (msgs: Message[]): Message[] =>
   msgs.length > MAX_MESSAGES ? msgs.slice(-MAX_MESSAGES) : msgs;
 
-export function ChatHistoryProvider({ children }: { children: React.ReactNode }) {
+export function ChatHistoryProvider({ children }: { children: ReactNode }) {
   // ── Messages & history state ──
   const [messages, setMessagesRaw] = useState<Message[]>(DEFAULT_HISTORY.messages);
   const [historyList, setHistoryList] = useState<HistoryInfo[]>(
@@ -206,12 +206,17 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
     });
   }, []);
 
+  // Ref mirror so the callback can read currentHistoryUid for DEV warnings
+  // without depending on it — keeps the callback stable across session switches.
+  const currentHistoryUidRef = useRef(currentHistoryUid);
+  currentHistoryUidRef.current = currentHistoryUid;
+
   const updateHistoryList = useCallback(
     (uid: string, latestMessage: Message | null) => {
       if (import.meta.env.DEV && !uid) {
         console.warn('[ChatHistory] updateHistoryList: uid is null');
       }
-      if (import.meta.env.DEV && !currentHistoryUid) {
+      if (import.meta.env.DEV && !currentHistoryUidRef.current) {
         console.warn('[ChatHistory] updateHistoryList: currentHistoryUid is null');
       }
 
@@ -232,7 +237,7 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
         return history;
       }));
     },
-    [currentHistoryUid],
+    [],
   );
 
   const appendResponse = useCallback((text: string) => {
@@ -299,7 +304,9 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
     <ChatHistoryContext.Provider value={chatValue}>
       <StreamingSetterContext.Provider value={streamSetters}>
         <StreamingValueContext.Provider value={streamValue}>
-          {children}
+          <StreamingRefContext.Provider value={streamRefValue}>
+            {children}
+          </StreamingRefContext.Provider>
         </StreamingValueContext.Provider>
       </StreamingSetterContext.Provider>
     </ChatHistoryContext.Provider>
@@ -329,6 +336,13 @@ export function useStreamingValue() {
 export function useStreamingSetters() {
   const ctx = useContext(StreamingSetterContext);
   if (!ctx) throw new Error('useStreamingSetters must be used within ChatHistoryProvider');
+  return ctx;
+}
+
+/** Non-reactive ref getter — never triggers re-renders from streaming updates. */
+export function useStreamingRef() {
+  const ctx = useContext(StreamingRefContext);
+  if (!ctx) throw new Error('useStreamingRef must be used within ChatHistoryProvider');
   return ctx;
 }
 
