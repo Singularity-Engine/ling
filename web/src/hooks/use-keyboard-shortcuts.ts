@@ -5,8 +5,8 @@ export interface ShortcutDef {
   key: string;
   /** i18n key for the label */
   labelKey: string;
-  /** Action to execute */
-  action: () => void;
+  /** Action to execute. Return false to let the event propagate (not handled). */
+  action: () => void | false;
   /** Whether this shortcut should work when an input/textarea is focused */
   allowInInput?: boolean;
 }
@@ -63,9 +63,11 @@ export function useKeyboardShortcuts(shortcuts: ShortcutDef[]) {
     for (const shortcut of shortcutsRef.current) {
       if (isInput && !shortcut.allowInInput) continue;
       if (matchesCombo(e, shortcut.key)) {
-        e.preventDefault();
-        e.stopPropagation();
-        shortcut.action();
+        const result = shortcut.action();
+        if (result !== false) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
         return;
       }
     }

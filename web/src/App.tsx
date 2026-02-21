@@ -213,6 +213,8 @@ function MainContent(): JSX.Element {
       key: "escape",
       labelKey: "shortcuts.closeOverlay",
       action: () => {
+        // Let context menus handle their own Escape
+        if (document.querySelector('[role="menu"]')) return false;
         // Cascade: close overlays first, then collapse chat panel
         if (shortcutsOpen || aboutOpen || memoryOpen) {
           setShortcutsOpen(false);
@@ -222,6 +224,8 @@ function MainContent(): JSX.Element {
           setChatExpanded(false);
           // Blur textarea so focus doesn't remain on hidden input
           (document.activeElement as HTMLElement)?.blur?.();
+        } else {
+          return false; // nothing to close, let event propagate
         }
       },
       allowInInput: true,
