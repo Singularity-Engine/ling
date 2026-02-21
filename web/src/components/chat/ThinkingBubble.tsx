@@ -41,7 +41,7 @@ const S_NAME: CSSProperties = {
   marginBottom: "4px", marginLeft: "4px", fontWeight: 500, letterSpacing: "0.5px",
 };
 const S_BUBBLE: CSSProperties = {
-  padding: "10px 16px", borderRadius: "18px 18px 18px 4px",
+  padding: "10px 16px", borderRadius: "18px 18px 18px 2px",
   background: "var(--ling-bubble-ai-bg)", border: "1px solid var(--ling-bubble-ai-border)",
   borderLeft: "3px solid var(--ling-bubble-ai-accent)",
   backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",

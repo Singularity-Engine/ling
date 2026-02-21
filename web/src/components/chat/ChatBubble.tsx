@@ -211,11 +211,12 @@ const S_COPY_USER_DONE: CSSProperties = { ...S_COPY_USER, color: "var(--ling-suc
 const S_COLLAPSE_MASK: CSSProperties = {
   position: "absolute", bottom: 0, left: 0, right: 0, height: "64px",
   background: "var(--ling-collapse-mask-ai)",
-  pointerEvents: "none", borderRadius: "0 0 18px 18px",
+  pointerEvents: "none", borderRadius: "0 0 18px 2px",
 };
 const S_COLLAPSE_MASK_USER: CSSProperties = {
   ...S_COLLAPSE_MASK,
   background: "var(--ling-collapse-mask-user)",
+  borderRadius: "0 0 2px 18px",
 };
 const S_TOGGLE_BTN: CSSProperties = {
   display: "flex", alignItems: "center", justifyContent: "center", gap: "4px",
