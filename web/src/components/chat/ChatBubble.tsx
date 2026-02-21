@@ -207,22 +207,29 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
   const bubbleRef = useRef<HTMLDivElement>(null);
 
   const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(content).then(() => {
+    navigator.clipboard.writeText(contentRef.current).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     });
-  }, [content]);
+  }, []);
+
+  const contentRef = useRef(content);
+  contentRef.current = content;
+  const isStreamingRef = useRef(isStreaming);
+  isStreamingRef.current = isStreaming;
 
   const handleDoubleClick = useCallback(() => {
+    // Guard: no-op while streaming or when empty
+    if (isStreamingRef.current || !contentRef.current) return;
     // Skip if user is selecting text
     const sel = window.getSelection();
     if (sel && sel.toString().length > 0) return;
-    navigator.clipboard.writeText(content).then(() => {
+    navigator.clipboard.writeText(contentRef.current).then(() => {
       setFlashing(true);
       toaster.create({ title: t("chat.textCopied"), type: "success", duration: 1500 });
       setTimeout(() => setFlashing(false), 350);
     });
-  }, [content, t]);
+  }, [t]);
 
   // Memoize markdown rendering — ReactMarkdown + plugins are expensive.
   // Avoids re-parsing when only non-content props (isStreaming, etc.) change.
@@ -271,7 +278,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
         <div style={S_REL}>
           <div
             ref={bubbleRef}
-            onDoubleClick={!isStreaming && content ? handleDoubleClick : undefined}
+            onDoubleClick={handleDoubleClick}
             style={bubbleStyle}
           >
             {isUser ? (

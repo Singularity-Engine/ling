@@ -462,6 +462,7 @@ canvas {
 
 /* === Markdown 内容（AI 气泡） === */
 .md-content {
+  word-break: break-word; /* fallback for older WebViews that lack overflow-wrap:anywhere */
   overflow-wrap: anywhere;
   min-width: 0;
 }
