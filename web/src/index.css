@@ -601,7 +601,12 @@ canvas {
   border-collapse: collapse;
   margin: 0.5em 0;
   font-size: 0.9em;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ling-purple-40) transparent;
 }
+.md-content table::-webkit-scrollbar { height: 6px; }
+.md-content table::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.04); border-radius: 3px; }
+.md-content table::-webkit-scrollbar-thumb { background: var(--ling-purple-40); border-radius: 3px; }
 .md-content th, .md-content td {
   padding: 6px 12px;
   border: 1px solid var(--ling-purple-25);

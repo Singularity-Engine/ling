@@ -72,6 +72,35 @@ function useThrottledValue(source: string): string {
   return display;
 }
 
+// ─── SuggestionChips style constants (avoid per-render allocation) ───
+
+const S_CHIPS_CENTERED: CSSProperties = {
+  display: "flex",
+  flexWrap: "wrap",
+  justifyContent: "center",
+  gap: "8px",
+  maxWidth: "340px",
+};
+
+const S_CHIPS_LEFT: CSSProperties = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "8px",
+  maxWidth: "340px",
+  padding: "4px 16px 12px",
+};
+
+const S_CHIP_BASE: CSSProperties = {
+  background: "rgba(139, 92, 246, 0.18)",
+  border: "1px solid rgba(139, 92, 246, 0.28)",
+  borderRadius: "20px",
+  padding: "8px 16px",
+  color: "rgba(226, 212, 255, 0.8)",
+  fontSize: "13px",
+  cursor: "pointer",
+  lineHeight: "1.4",
+};
+
 // Reusable suggestion chips strip
 const SuggestionChips = memo(function SuggestionChips({
   chips,
@@ -86,31 +115,15 @@ const SuggestionChips = memo(function SuggestionChips({
 }) {
   if (!Array.isArray(chips) || chips.length === 0) return null;
   return (
-    <div
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        justifyContent: centered ? "center" : undefined,
-        gap: "8px",
-        maxWidth: "340px",
-        ...(centered ? {} : { padding: "4px 16px 12px" }),
-      }}
-    >
+    <div style={centered ? S_CHIPS_CENTERED : S_CHIPS_LEFT}>
       {chips.map((chip, i) => (
         <button
           key={chip}
           className="welcome-chip"
           onClick={() => onChipClick(chip)}
           style={{
-            background: "rgba(139, 92, 246, 0.18)",
-            border: "1px solid rgba(139, 92, 246, 0.28)",
-            borderRadius: "20px",
-            padding: "8px 16px",
-            color: "rgba(226, 212, 255, 0.8)",
-            fontSize: "13px",
-            cursor: "pointer",
+            ...S_CHIP_BASE,
             animation: `chipFadeIn 0.4s ease-out ${baseDelay + i * 0.08}s both`,
-            lineHeight: "1.4",
           }}
         >
           {chip}
