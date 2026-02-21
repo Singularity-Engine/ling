@@ -117,14 +117,40 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
           </div>
           <button
             onClick={onClose}
+            aria-label={t('common.close')}
             style={{
               background: 'none',
               border: 'none',
               color: 'rgba(255,255,255,0.4)',
               fontSize: '24px',
               cursor: 'pointer',
-              padding: '4px',
+              padding: '10px',
+              minWidth: '44px',
+              minHeight: '44px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '8px',
+              transition: 'all 0.15s ease',
               lineHeight: 1,
+            }}
+            onPointerDown={(e) => {
+              const btn = e.currentTarget;
+              btn.style.background = 'rgba(255,255,255,0.08)';
+              btn.style.color = 'rgba(255,255,255,0.7)';
+              btn.style.transform = 'scale(0.9)';
+            }}
+            onPointerUp={(e) => {
+              const btn = e.currentTarget;
+              btn.style.background = 'none';
+              btn.style.color = 'rgba(255,255,255,0.4)';
+              btn.style.transform = '';
+            }}
+            onPointerLeave={(e) => {
+              const btn = e.currentTarget;
+              btn.style.background = 'none';
+              btn.style.color = 'rgba(255,255,255,0.4)';
+              btn.style.transform = '';
             }}
           >
             ×

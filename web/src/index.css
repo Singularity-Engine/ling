@@ -475,20 +475,25 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   margin-left: auto;
   background: transparent;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   padding: 0;
   color: var(--ling-text-tertiary);
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.15s, background 0.15s, transform 0.15s;
 }
 .md-content .code-block-copy:hover {
   color: var(--ling-text-secondary);
   background: rgba(255, 255, 255, 0.08);
+}
+.md-content .code-block-copy:active {
+  transform: scale(0.88);
+  color: var(--ling-text-secondary);
+  background: rgba(255, 255, 255, 0.12);
 }
 .md-content .code-block-wrap pre {
   margin: 0;

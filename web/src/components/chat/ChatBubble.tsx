@@ -123,10 +123,11 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     .chat-copy-btn { opacity: 0; }
     .chat-bubble-wrap:hover .chat-copy-btn { opacity: 1; }
     .chat-copy-btn:hover { color: var(--ling-text-secondary) !important; background: var(--ling-surface) !important; }
+    .chat-copy-btn:active { transform: scale(0.88); color: var(--ling-text-secondary) !important; background: var(--ling-surface-hover) !important; }
     .chat-bubble-ts { opacity: 0; transition: opacity 0.2s ease; }
     .ling-msg-row:hover .chat-bubble-ts { opacity: 1; }
     @media (hover: none) { .chat-copy-btn { opacity: 0.5; } .chat-bubble-ts { opacity: 0.7; } }
-    @media (max-width: 768px) { .chat-copy-btn { right: 4px !important; left: auto !important; top: -20px !important; } }
+    @media (max-width: 768px) { .chat-copy-btn { right: 4px !important; left: auto !important; top: -24px !important; } }
   `;
   document.head.appendChild(style);
 }
@@ -174,13 +175,13 @@ const S_TS_USER: CSSProperties = { display: "block", fontSize: "10px", color: "v
 const S_TS_AI: CSSProperties = { display: "block", fontSize: "10px", color: "var(--ling-chat-timestamp)", marginTop: "3px", textAlign: "left", marginLeft: "4px" };
 
 const S_COPY_BASE: CSSProperties = {
-  position: "absolute", top: "6px", width: "24px", height: "24px",
+  position: "absolute", top: "2px", width: "32px", height: "32px",
   display: "flex", alignItems: "center", justifyContent: "center",
-  background: "transparent", border: "none", borderRadius: "4px",
+  background: "transparent", border: "none", borderRadius: "6px",
   cursor: "pointer", padding: 0, transition: "all 0.2s ease", color: "var(--ling-text-tertiary)",
 };
-const S_COPY_AI: CSSProperties = { ...S_COPY_BASE, right: "-32px" };
-const S_COPY_USER: CSSProperties = { ...S_COPY_BASE, left: "-32px" };
+const S_COPY_AI: CSSProperties = { ...S_COPY_BASE, right: "-36px" };
+const S_COPY_USER: CSSProperties = { ...S_COPY_BASE, left: "-36px" };
 const S_COPY_AI_DONE: CSSProperties = { ...S_COPY_AI, color: "var(--ling-success)" };
 const S_COPY_USER_DONE: CSSProperties = { ...S_COPY_USER, color: "var(--ling-success)" };
 
@@ -195,9 +196,10 @@ const S_COLLAPSE_MASK_USER: CSSProperties = {
 };
 const S_TOGGLE_BTN: CSSProperties = {
   display: "flex", alignItems: "center", justifyContent: "center", gap: "4px",
-  width: "100%", padding: "6px 0 2px", border: "none", background: "transparent",
+  width: "100%", minHeight: "44px", padding: "10px 0 4px", border: "none", background: "transparent",
   color: "var(--ling-purple-85)", fontSize: "12px", fontWeight: 500,
-  cursor: "pointer", letterSpacing: "0.3px", transition: "color 0.2s ease",
+  cursor: "pointer", letterSpacing: "0.3px", transition: "all 0.2s ease",
+  borderRadius: "0 0 14px 14px",
 };
 const S_TOGGLE_ARROW: CSSProperties = { fontSize: "10px" };
 

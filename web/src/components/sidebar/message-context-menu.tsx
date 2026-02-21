@@ -16,14 +16,16 @@ interface MessageContextMenuProps {
 
 const menuItemStyle = {
   px: 3,
-  py: 2,
+  py: 2.5,
+  minH: '44px',
   cursor: 'pointer',
   display: 'flex',
   alignItems: 'center',
   gap: 2.5,
   borderRadius: 'md',
-  transition: 'background 0.15s',
+  transition: 'background 0.15s, transform 0.1s',
   _hover: { bg: 'whiteAlpha.200' },
+  _active: { bg: 'whiteAlpha.300', transform: 'scale(0.97)' },
 };
 
 export function MessageContextMenu({ message, position, onClose }: MessageContextMenuProps) {

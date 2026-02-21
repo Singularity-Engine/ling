@@ -40,7 +40,7 @@ export const sidebarStyles = {
       width: 'min(440px, 100vw)',
       bg: 'gray.900',
       transform: isCollapsed
-        ? 'translateX(calc(-100% + 24px))'
+        ? 'translateX(calc(-100% + 32px))'
         : 'translateX(0)',
       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       display: 'flex',
@@ -53,7 +53,8 @@ export const sidebarStyles = {
       position: 'absolute',
       right: 0,
       top: 0,
-      width: '24px',
+      width: '32px',
+      minW: '32px',
       height: '100%',
       display: 'flex',
       alignItems: 'center',
@@ -61,6 +62,7 @@ export const sidebarStyles = {
       cursor: 'pointer',
       color: 'whiteAlpha.700',
       _hover: { color: 'white' },
+      _active: { color: 'white', bg: 'whiteAlpha.100' },
       bg: 'transparent',
       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       zIndex: 1,
@@ -187,6 +189,10 @@ export const sidebarStyles = {
         borderColor: 'whiteAlpha.200',
         transform: 'translateX(2px)',
       },
+      _active: {
+        bg: 'whiteAlpha.150',
+        transform: 'scale(0.98)',
+      },
     },
     historyItemSelected: {
       bg: 'whiteAlpha.150',
@@ -209,12 +215,12 @@ export const sidebarStyles = {
     },
     deleteButton: {
       variant: 'ghost' as const,
-      size: 'xs' as const,
+      size: 'sm' as const,
       color: 'whiteAlpha.400',
-      minW: '24px',
-      h: '24px',
+      minW: '36px',
+      h: '36px',
       borderRadius: 'md',
-      opacity: 0,
+      opacity: { base: 0.6, md: 0 },
       transition: 'all 0.15s ease',
       _groupHover: {
         opacity: 1,
@@ -222,6 +228,11 @@ export const sidebarStyles = {
       _hover: {
         color: 'red.300',
         bg: 'whiteAlpha.200',
+      },
+      _active: {
+        color: 'red.400',
+        bg: 'whiteAlpha.300',
+        transform: 'scale(0.9)',
       },
     },
     messagePreview: {
@@ -275,9 +286,15 @@ export const sidebarStyles = {
         borderColor: 'whiteAlpha.300',
         variant: 'outline' as const,
         size: 'sm' as const,
+        minH: '44px',
         _hover: {
           color: 'white',
           borderColor: 'whiteAlpha.500',
+        },
+        _active: {
+          color: 'white',
+          bg: 'whiteAlpha.100',
+          transform: 'scale(0.96)',
         },
       },
     },
@@ -565,7 +582,7 @@ export const chatPanelStyles = css`
   .cs-main-container {
     border: none !important;
     background: transparent !important;
-    width: calc(100% - 24px) !important;
+    width: calc(100% - 32px) !important;
     margin-left: 0 !important;
   }
 

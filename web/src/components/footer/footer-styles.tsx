@@ -28,7 +28,7 @@ export const footerStyles: {
         ? 'none'
         : { base: 'none', md: '1px solid rgba(139, 92, 246, 0.15)' },
       borderTopRadius: isCollapsed ? 'none' : { base: 'none', md: '16px' },
-      transform: isCollapsed ? 'translateY(calc(100% - 24px))' : 'translateY(0)',
+      transform: isCollapsed ? 'translateY(calc(100% - 44px))' : 'translateY(0)',
       transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, border-radius 0.3s ease, backdrop-filter 0.3s ease',
       height: '100%',
       position: 'relative',
@@ -36,7 +36,8 @@ export const footerStyles: {
       pb: '4',
     }),
     toggleButton: {
-      height: '24px',
+      height: '44px',
+      minH: '44px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -45,6 +46,10 @@ export const footerStyles: {
       _hover: {
         color: 'whiteAlpha.900',
         filter: 'drop-shadow(0 0 4px rgba(139, 92, 246, 0.5))',
+      },
+      _active: {
+        color: 'whiteAlpha.900',
+        transform: 'scale(0.92)',
       },
       bg: 'transparent',
       transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -102,10 +107,16 @@ export const footerStyles: {
       transform: 'translateY(-50%)',
       color: 'whiteAlpha.500',
       zIndex: 2,
+      minW: '44px',
+      minH: '44px',
       _hover: {
         bg: 'transparent',
         color: 'whiteAlpha.900',
         filter: 'drop-shadow(0 0 4px rgba(139, 92, 246, 0.4))',
+      },
+      _active: {
+        color: 'whiteAlpha.900',
+        transform: 'translateY(-50%) scale(0.9)',
       },
       transition: 'all 0.2s ease',
     },

@@ -51,7 +51,8 @@ const S_CB_HEADER: CSSProperties = {
 const S_CB_LANG: CSSProperties = { fontSize: "11px", color: "rgba(139, 92, 246, 0.8)", fontFamily: "monospace" };
 const S_CB_COPY: CSSProperties = {
   fontSize: "11px", color: "rgba(255,255,255,0.4)", cursor: "pointer",
-  transition: "color 0.2s", background: "none", border: "none", padding: 0,
+  transition: "color 0.2s, transform 0.15s", background: "none", border: "none",
+  padding: "6px 8px", minHeight: "32px", borderRadius: "4px",
 };
 const S_CB_SCROLL: CSSProperties = { padding: "10px 12px", overflowX: "auto" };
 const S_CB_PRE: CSSProperties = {
@@ -59,10 +60,10 @@ const S_CB_PRE: CSSProperties = {
   color: "#e2e8f0", whiteSpace: "pre", lineHeight: 1.6, margin: 0,
 };
 const S_CB_EXPAND: CSSProperties = {
-  display: "block", width: "100%", padding: "5px 12px", fontSize: "11px",
+  display: "block", width: "100%", padding: "8px 12px", minHeight: "36px", fontSize: "11px",
   color: "rgba(139, 92, 246, 0.8)", background: "rgba(255,255,255,0.02)",
   border: "none", borderTop: "1px solid rgba(255,255,255,0.06)",
-  cursor: "pointer", textAlign: "center", transition: "background 0.2s",
+  cursor: "pointer", textAlign: "center", transition: "background 0.2s, transform 0.15s",
 };
 
 // StatusIndicator
@@ -132,7 +133,7 @@ function buildCategoryStyles(colors: { bg: string; border: string; accent: strin
   };
   const headerBase = {
     display: "flex" as const, alignItems: "center" as const, gap: "8px",
-    padding: "8px 14px", userSelect: "none" as const, transition: "background 0.2s",
+    padding: "10px 14px", minHeight: "44px", userSelect: "none" as const, transition: "background 0.2s",
   };
   const headerExpanded: CSSProperties = { ...headerBase, borderBottom: `1px solid ${colors.border}`, cursor: "pointer" };
   const headerCollapsed: CSSProperties = { ...headerBase, borderBottom: "none", cursor: "pointer" };
