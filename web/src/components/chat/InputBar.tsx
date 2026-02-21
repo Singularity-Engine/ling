@@ -334,7 +334,7 @@ export const InputBar = memo(() => {
           {t("chat.markdownHint")}
         </span>
         {charCount > 0 && (
-          <span style={{ fontSize: "10px", color: isOverLimit ? "#ef4444" : charCount > MAX_LENGTH * 0.9 ? "rgba(251, 191, 36, 0.7)" : "rgba(255,255,255,0.25)", transition: "color 0.2s" }}>
+          <span style={isOverLimit ? S_CHAR_OVER : charCount > MAX_LENGTH * 0.9 ? S_CHAR_WARN : S_CHAR_NORMAL}>
             {charCount}/{MAX_LENGTH}
           </span>
         )}
