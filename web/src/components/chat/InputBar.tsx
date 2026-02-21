@@ -24,6 +24,8 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     .ling-send-btn:not(:disabled):active { transform: scale(0.88); }
     .ling-mic-btn:hover { filter: brightness(1.15); }
     .ling-mic-btn:active { transform: scale(0.88); }
+    @keyframes inputShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 50% { transform: translateX(4px); } 75% { transform: translateX(-2px); } }
+    .ling-textarea.ling-shake { animation: inputShake 0.35s ease; border-color: rgba(239, 68, 68, 0.4) !important; box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important; }
   `;
   document.head.appendChild(style);
 }
@@ -162,6 +164,11 @@ export const InputBar = memo(() => {
   // Synchronous mirror — prevents double-send when rapid Enter events fire
   // before React re-renders (state reads via closure can be stale).
   const isSendingRef = useRef(false);
+  const [shaking, setShaking] = useState(false);
+  const shakingRef = useRef(false);
+  // Tracks whether AI was already busy when we sent (interrupt-then-send case).
+  // Prevents premature isSending reset when isAiBusy is true at send time.
+  const sentWhileBusyRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const wsContext = useWebSocket();
   const { appendHumanMessage, popLastHumanMessage } = useChatMessages();
@@ -217,6 +224,13 @@ export const InputBar = memo(() => {
     return () => window.removeEventListener('send-failed', handler);
   }, [popLastHumanMessage]);
 
+  // Auto-focus on mount and reconnect (skip touch devices to avoid keyboard popup)
+  useEffect(() => {
+    if (window.matchMedia("(hover: hover)").matches && isConnected) {
+      textareaRef.current?.focus();
+    }
+  }, [isConnected]);
+
   const trimmed = inputText.trim();
   const hasText = trimmed.length > 0;
   const isAiBusy = aiState === "thinking-speaking" || aiState === "loading";
@@ -236,6 +250,7 @@ export const InputBar = memo(() => {
       interrupt();
     }
 
+    sentWhileBusyRef.current = isAiBusy;
     isSendingRef.current = true;
     setIsSending(true);
     appendHumanMessage(text);
@@ -253,13 +268,27 @@ export const InputBar = memo(() => {
     // isSending reset is driven by aiState effect + send-failed listener
   }, [inputText, wsContext, aiState, interrupt, appendHumanMessage, isSending]);
 
-  // Reset isSending when AI starts processing, connection drops, or safety timeout
+  // Reset isSending when AI starts processing, connection drops, or safety timeout.
+  // Handles the interrupt-then-send case: if AI was already busy when we sent,
+  // wait for it to cycle through idle before resetting.
   useEffect(() => {
     if (!isSending) return;
-    if (isAiBusy || !isConnected) {
+    if (!isConnected) {
       isSendingRef.current = false;
       setIsSending(false);
       return;
+    }
+    if (isAiBusy) {
+      if (!sentWhileBusyRef.current) {
+        // Normal case: AI just became busy processing our message → reset
+        isSendingRef.current = false;
+        setIsSending(false);
+        return;
+      }
+      // Interrupt case: AI was already busy when we sent → wait for it to cycle
+    } else if (sentWhileBusyRef.current) {
+      // AI went idle after interrupt → ready for next busy transition
+      sentWhileBusyRef.current = false;
     }
     const timer = setTimeout(() => {
       isSendingRef.current = false;

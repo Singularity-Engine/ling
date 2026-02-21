@@ -242,20 +242,21 @@ const S_TIMEOUT_WRAP: CSSProperties = {
 
 const S_TIMEOUT_TEXT: CSSProperties = {
   fontSize: "12px",
-  color: "rgba(255, 255, 255, 0.35)",
+  color: "rgba(255, 255, 255, 0.5)",
   textAlign: "center",
   lineHeight: 1.5,
 };
 
 const S_RETRY_BTN: CSSProperties = {
-  background: "rgba(139, 92, 246, 0.15)",
-  border: "1px solid rgba(139, 92, 246, 0.3)",
+  background: "rgba(139, 92, 246, 0.2)",
+  border: "1px solid rgba(139, 92, 246, 0.35)",
   borderRadius: "14px",
-  padding: "5px 16px",
-  color: "rgba(167, 139, 250, 0.85)",
+  padding: "6px 20px",
+  color: "rgba(167, 139, 250, 0.9)",
   fontSize: "12px",
   cursor: "pointer",
   transition: "all 0.2s ease",
+  fontWeight: 500,
 };
 
 // ─── Empty-state style constants ───
@@ -692,11 +693,15 @@ export const ChatArea = memo(() => {
           {/* Glassmorphism welcome card */}
           <div className="ling-welcome-card" style={S_WELCOME_CARD}>
             <span style={S_WELCOME_TITLE}>{welcomeTitle}</span>
-            <span style={S_WELCOME_SUB}>{t("ui.emptySubHint")}</span>
+            <span style={S_WELCOME_SUB}>
+              {isConnected ? t("ui.emptySubHint") : t("ui.emptySubHintDisconnected")}
+            </span>
           </div>
 
-          {/* Suggestion chips */}
-          <SuggestionChips chips={welcomeChips} onChipClick={handleChipClick} centered />
+          {/* Suggestion chips — hidden while disconnected */}
+          {isConnected && (
+            <SuggestionChips chips={welcomeChips} onChipClick={handleChipClick} centered />
+          )}
         </div>
       )}
       {hiddenCount > 0 && (
