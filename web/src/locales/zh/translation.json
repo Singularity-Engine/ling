@@ -292,6 +292,8 @@
     "emptyHint": "我在这里，随时可以聊",
     "emptySubHint": "说话或选个话题，我一直在",
     "emptySubHints": ["说话或选个话题，我一直在", "随便聊聊，我听着呢", "打字、说话、或点个话题都行", "我在这里，你随时开口"],
+    "emptyTagline": "你的 AI 伙伴",
+    "emptyKeyboardHint": "Enter 发送 · Shift+Enter 换行",
     "emptySubHintDisconnected": "正在连接灵...",
     "welcomeTitle": "嗨，有什么想聊的？",
     "welcomeTitleMorning": "早上好，有什么想聊的？",

@@ -323,6 +323,13 @@ const S_WELCOME_SUB: CSSProperties = {
   color: "var(--ling-text-muted)",
 };
 
+const S_TAGLINE: CSSProperties = {
+  fontSize: "13px",
+  color: "var(--ling-text-muted)",
+  letterSpacing: "1px",
+  marginTop: "-12px",
+};
+
 const S_CAPS_ROW: CSSProperties = {
   display: "flex",
   gap: "8px",
@@ -337,6 +344,13 @@ const S_CAP_TAG: CSSProperties = {
   border: "1px solid var(--ling-purple-15)",
   borderRadius: "12px",
   padding: "4px 12px",
+  letterSpacing: "0.3px",
+};
+
+const S_KEYBOARD_HINT: CSSProperties = {
+  fontSize: "11px",
+  color: "var(--ling-text-muted)",
+  opacity: 0.6,
   letterSpacing: "0.3px",
 };
 
@@ -729,6 +743,7 @@ export const ChatArea = memo(() => {
       {(isEmpty || emptyExiting) && (
         <div style={emptyExiting ? S_EMPTY_WRAP_EXIT : S_EMPTY_WRAP}>
           <span style={S_EMPTY_GLYPH}>{t("loading.glyph")}</span>
+          <span style={S_TAGLINE}>{t("ui.emptyTagline")}</span>
 
           {/* Glassmorphism welcome card */}
           <div className="ling-welcome-card" style={S_WELCOME_CARD}>
@@ -750,6 +765,11 @@ export const ChatArea = memo(() => {
           {/* Suggestion chips — hidden while disconnected */}
           {isConnected && (
             <SuggestionChips chips={welcomeChips} onChipClick={handleChipClick} centered />
+          )}
+
+          {/* Keyboard shortcut hint */}
+          {isConnected && (
+            <span style={S_KEYBOARD_HINT}>{t("ui.emptyKeyboardHint")}</span>
           )}
         </div>
       )}
