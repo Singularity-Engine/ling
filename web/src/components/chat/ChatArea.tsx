@@ -20,6 +20,8 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     .chat-area-scroll::-webkit-scrollbar-track { background: transparent; }
     .chat-area-scroll::-webkit-scrollbar-thumb { background: var(--ling-purple-30); border-radius: 2px; }
     @keyframes chatFadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes emptyItemFadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes emptyHintFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 0.6; transform: translateY(0); } }
     @keyframes emptyStateFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
     @keyframes emptyStateFadeOut { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(-12px) scale(0.96); } }
     @keyframes scrollBtnIn { from { opacity: 0; transform: translateY(12px) scale(0.8); } to { opacity: 1; transform: translateY(0) scale(1); } }
@@ -273,7 +275,6 @@ const _S_EMPTY_BASE: CSSProperties = {
 
 const S_EMPTY_WRAP: CSSProperties = {
   ..._S_EMPTY_BASE,
-  animation: "chatFadeInUp 0.6s ease-out",
 };
 
 const S_EMPTY_WRAP_EXIT: CSSProperties = {
@@ -290,7 +291,7 @@ const S_EMPTY_GLYPH: CSSProperties = {
   fontWeight: 700,
   color: "var(--ling-purple-light)",
   textShadow: "0 0 24px var(--ling-purple-40), 0 0 48px var(--ling-purple-15)",
-  animation: "emptyStateFloat 3s ease-in-out infinite",
+  animation: "emptyItemFadeIn 0.5s ease-out both, emptyStateFloat 3s ease-in-out infinite",
   letterSpacing: "2px",
   userSelect: "none",
 };
@@ -308,6 +309,7 @@ const S_WELCOME_CARD: CSSProperties = {
   display: "flex",
   flexDirection: "column",
   gap: "8px",
+  animation: "chatFadeInUp 0.5s ease-out 0.2s both",
 };
 
 const S_WELCOME_TITLE: CSSProperties = {
@@ -328,6 +330,7 @@ const S_TAGLINE: CSSProperties = {
   color: "var(--ling-text-muted)",
   letterSpacing: "1px",
   marginTop: "-12px",
+  animation: "chatFadeInUp 0.5s ease-out 0.1s both",
 };
 
 const S_CAPS_ROW: CSSProperties = {
@@ -335,6 +338,7 @@ const S_CAPS_ROW: CSSProperties = {
   gap: "8px",
   justifyContent: "center",
   flexWrap: "wrap",
+  animation: "chatFadeInUp 0.5s ease-out 0.35s both",
 };
 
 const S_CAP_TAG: CSSProperties = {
@@ -350,8 +354,8 @@ const S_CAP_TAG: CSSProperties = {
 const S_KEYBOARD_HINT: CSSProperties = {
   fontSize: "11px",
   color: "var(--ling-text-muted)",
-  opacity: 0.6,
   letterSpacing: "0.3px",
+  animation: "emptyHintFadeIn 0.5s ease-out 0.55s both",
 };
 
 // ─── StreamingFooter: owns streaming subscription so ChatArea avoids ~30fps re-renders ───
@@ -764,7 +768,7 @@ export const ChatArea = memo(() => {
 
           {/* Suggestion chips — hidden while disconnected */}
           {isConnected && (
-            <SuggestionChips chips={welcomeChips} onChipClick={handleChipClick} centered />
+            <SuggestionChips chips={welcomeChips} onChipClick={handleChipClick} centered baseDelay={0.45} />
           )}
 
           {/* Keyboard shortcut hint */}
