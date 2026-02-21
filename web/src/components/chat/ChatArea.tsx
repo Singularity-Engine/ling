@@ -279,6 +279,23 @@ export const ChatArea = memo(() => {
     };
   }, [checkNearBottom]);
 
+  // Scroll to bottom when the chat panel transitions from collapsed (0 height)
+  // to expanded. Without this, reopening the panel shows old messages at the top.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let wasCollapsed = el.clientHeight < 20;
+    const ro = new ResizeObserver(() => {
+      const collapsed = el.clientHeight < 20;
+      if (wasCollapsed && !collapsed) {
+        requestAnimationFrame(() => { el.scrollTop = el.scrollHeight; });
+      }
+      wasCollapsed = collapsed;
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   // During active streaming use instant scroll to keep up with rapid updates;
   // for normal new messages use smooth scroll.
   const isStreaming = displayResponse.length > 0;
