@@ -159,6 +159,9 @@ export const InputBar = memo(() => {
   const [inputText, setInputText] = useState("");
   const isComposingRef = useRef(false);
   const [isSending, setIsSending] = useState(false);
+  // Synchronous mirror — prevents double-send when rapid Enter events fire
+  // before React re-renders (state reads via closure can be stale).
+  const isSendingRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const wsContext = useWebSocket();
   const { appendHumanMessage, popLastHumanMessage } = useChatMessages();
@@ -194,6 +197,7 @@ export const InputBar = memo(() => {
   useEffect(() => {
     const handler = (e: Event) => {
       const text = (e as CustomEvent).detail?.text;
+      isSendingRef.current = false;
       setIsSending(false);
       // Roll back the optimistic human message that appendHumanMessage added
       popLastHumanMessage();
@@ -226,12 +230,13 @@ export const InputBar = memo(() => {
 
   const handleSend = useCallback(() => {
     const text = inputText.trim();
-    if (!text || text.length > MAX_LENGTH || isSending || !isConnected) return;
+    if (!text || text.length > MAX_LENGTH || isSendingRef.current || !isConnected) return;
 
     if (aiState === "thinking-speaking") {
       interrupt();
     }
 
+    isSendingRef.current = true;
     setIsSending(true);
     appendHumanMessage(text);
     wsContext.sendMessage({
@@ -252,10 +257,14 @@ export const InputBar = memo(() => {
   useEffect(() => {
     if (!isSending) return;
     if (isAiBusy || !isConnected) {
+      isSendingRef.current = false;
       setIsSending(false);
       return;
     }
-    const timer = setTimeout(() => setIsSending(false), 10_000);
+    const timer = setTimeout(() => {
+      isSendingRef.current = false;
+      setIsSending(false);
+    }, 10_000);
     return () => clearTimeout(timer);
   }, [isSending, isAiBusy, isConnected]);
 

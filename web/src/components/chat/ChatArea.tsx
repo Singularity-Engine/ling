@@ -551,45 +551,7 @@ export const ChatArea = memo(() => {
   const dedupedRef = useRef(dedupedMessages);
   dedupedRef.current = dedupedMessages;
 
-  const showStreaming = useMemo(() => {
-    if (!isStreaming) return false;
-    const lastAiMsg = dedupedMessages.findLast(m => m.role === 'ai');
-    return !(lastAiMsg && lastAiMsg.content && displayResponse === lastAiMsg.content);
-  }, [isStreaming, dedupedMessages, displayResponse]);
-
-  // Mirror showStreaming into a ref so the memoized message list can read it
-  // without adding a dependency (avoids re-rendering all messages each frame).
-  useEffect(() => { wasStreamingRef.current = showStreaming; }, [showStreaming]);
-
-  // Bridge the gap between "message sent" and "AI starts thinking":
-  // show typing dots immediately when the last message is from the user.
-  const awaitingReply = useMemo(() => {
-    if (isThinkingSpeaking || isStreaming || !isConnected) return false;
-    const lastMsg = dedupedMessages[dedupedMessages.length - 1];
-    return lastMsg?.role === "human";
-  }, [dedupedMessages, isThinkingSpeaking, isStreaming, isConnected]);
-
-  // Safety timeout: if awaitingReply stays true for 15s (billing block,
-  // sendChat failure, or server not responding), stop showing typing dots.
-  const [awaitingTimedOut, setAwaitingTimedOut] = useState(false);
-  // Counter to force-restart the timeout timer on retry (messages.length
-  // doesn't change on retry, so we need a separate trigger).
-  const [retryCount, setRetryCount] = useState(0);
-  useEffect(() => {
-    if (!awaitingReply) {
-      setAwaitingTimedOut(false);
-      return;
-    }
-    // Reset on every new message so the timer restarts when the user
-    // sends again after a previous timeout (awaitingReply stays true).
-    setAwaitingTimedOut(false);
-    const timer = setTimeout(() => setAwaitingTimedOut(true), 15_000);
-    return () => clearTimeout(timer);
-  }, [awaitingReply, messages.length, retryCount]);
-
-  const showTyping = (isThinkingSpeaking || (awaitingReply && !awaitingTimedOut)) && !isStreaming;
-
-  const isEmpty = dedupedMessages.length === 0 && !showStreaming && !showTyping;
+  const isEmpty = dedupedMessages.length === 0 && !isThinkingSpeaking;
 
   // Detect isEmpty going from true → false, trigger exit animation
   useEffect(() => {
@@ -628,15 +590,6 @@ export const ChatArea = memo(() => {
     },
     [appendHumanMessage, sendMessage, isConnected]
   );
-
-  const handleRetry = useCallback(() => {
-    const lastHuman = dedupedMessages.findLast(m => m.role === "human");
-    if (lastHuman?.content && isConnected) {
-      setAwaitingTimedOut(false);
-      setRetryCount(c => c + 1);
-      sendMessage({ type: "text-input", text: lastHuman.content, images: [] });
-    }
-  }, [dedupedMessages, sendMessage, isConnected]);
 
   // ── Render windowing: only mount the last RENDER_WINDOW messages ──
   // Keeps the DOM small in long conversations while all messages remain in state.
@@ -768,23 +721,12 @@ export const ChatArea = memo(() => {
         <SuggestionChips chips={postGreetingChips} onChipClick={handleChipClick} baseDelay={0.2} />
       )}
 
-      {(showStreaming || showTyping) && (
-        <ThinkingBubble
-          content={displayResponse}
-          isThinking={showTyping}
-          isStreaming={showStreaming}
-        />
-      )}
-
-      {/* Hint when typing indicator timed out — silent disappearance is confusing */}
-      {awaitingTimedOut && !isStreaming && !showTyping && (
-        <div style={S_TIMEOUT_WRAP}>
-          <span style={S_TIMEOUT_TEXT}>{t("chat.noResponse")}</span>
-          <button onClick={handleRetry} style={S_RETRY_BTN}>
-            {t("chat.retry")}
-          </button>
-        </div>
-      )}
+      <StreamingFooter
+        scrollRef={scrollRef}
+        isNearBottomRef={isNearBottomRef}
+        wasStreamingRef={wasStreamingRef}
+        dedupedMessages={dedupedMessages}
+      />
 
       <div ref={bottomRef} />
 
