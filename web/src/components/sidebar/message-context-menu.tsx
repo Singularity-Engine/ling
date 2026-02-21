@@ -39,11 +39,12 @@ export function MessageContextMenu({ message, position, onClose }: MessageContex
         onClose();
       }
     };
-    document.addEventListener('mousedown', handler, true);
-    document.addEventListener('touchstart', handler, true);
+    const opts: AddEventListenerOptions = { capture: true, passive: true };
+    document.addEventListener('mousedown', handler, opts);
+    document.addEventListener('touchstart', handler, opts);
     return () => {
-      document.removeEventListener('mousedown', handler, true);
-      document.removeEventListener('touchstart', handler, true);
+      document.removeEventListener('mousedown', handler, opts);
+      document.removeEventListener('touchstart', handler, opts);
     };
   }, [onClose]);
 
