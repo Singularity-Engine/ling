@@ -223,6 +223,8 @@ export const InputBar = memo(() => {
     return () => window.removeEventListener('send-failed', handler);
   }, [popLastHumanMessage]);
 
+  const isConnected = wsContext?.wsState === "OPEN";
+
   // Auto-focus on mount and reconnect (skip touch devices to avoid keyboard popup)
   useEffect(() => {
     if (window.matchMedia("(hover: hover)").matches && isConnected) {
@@ -234,7 +236,6 @@ export const InputBar = memo(() => {
   const hasText = trimmed.length > 0;
   const isAiBusy = aiState === "thinking-speaking" || aiState === "loading";
   const isAiSpeaking = aiState === "thinking-speaking";
-  const isConnected = wsContext?.wsState === "OPEN";
   const stateKey = AI_STATE_KEYS[aiState] || "";
   const stateText = isSending && !stateKey ? t("chat.sending") : stateKey ? t(stateKey) : "";
   const charCount = trimmed.length;
