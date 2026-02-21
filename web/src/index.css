@@ -536,12 +536,14 @@ canvas {
   border-radius: 0;
   background: transparent;
   padding: 10px 14px;
-  overflow-x: auto;
+  overflow: auto;
+  max-height: 500px;
   scrollbar-width: thin;
   scrollbar-color: var(--ling-purple-40) transparent;
 }
 .md-content .code-block-wrap pre::-webkit-scrollbar {
   height: 6px;
+  width: 6px;
 }
 .md-content .code-block-wrap pre::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.04);
@@ -557,7 +559,8 @@ canvas {
   border: 1px solid var(--ling-purple-25);
   border-radius: 8px;
   padding: 10px 14px;
-  overflow-x: auto;
+  overflow: auto;
+  max-height: 500px;
   margin: 0.5em 0;
 }
 .md-content pre code {
@@ -602,6 +605,10 @@ canvas {
 .md-content th, .md-content td {
   padding: 6px 12px;
   border: 1px solid var(--ling-purple-25);
+}
+.md-content td {
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 .md-content th {
   background: rgba(255, 255, 255, 0.04);

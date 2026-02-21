@@ -1,5 +1,27 @@
-import { memo } from "react";
+import { memo, type CSSProperties } from "react";
 import i18next from "i18next";
+
+// ─── Static style constants (avoid per-mount allocation in Virtuoso list) ───
+
+const S_OUTER: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
+  padding: "8px 24px",
+  margin: "4px 0",
+};
+const S_LINE: CSSProperties = {
+  flex: 1,
+  height: "1px",
+  background: "linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent)",
+};
+const S_LABEL: CSSProperties = {
+  fontSize: "11px",
+  color: "rgba(255, 255, 255, 0.3)",
+  whiteSpace: "nowrap",
+  letterSpacing: "0.5px",
+  userSelect: "none",
+};
 
 function formatSeparatorTime(iso: string): string {
   const d = new Date(iso);
@@ -36,40 +58,12 @@ export function shouldShowSeparator(
 }
 
 export const TimeSeparator = memo(({ timestamp }: { timestamp: string }) => (
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      gap: "12px",
-      padding: "8px 24px",
-      margin: "4px 0",
-    }}
-  >
-    <div
-      style={{
-        flex: 1,
-        height: "1px",
-        background: "linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent)",
-      }}
-    />
-    <span
-      style={{
-        fontSize: "11px",
-        color: "rgba(255, 255, 255, 0.3)",
-        whiteSpace: "nowrap",
-        letterSpacing: "0.5px",
-        userSelect: "none",
-      }}
-    >
+  <div style={S_OUTER}>
+    <div style={S_LINE} />
+    <span style={S_LABEL}>
       {formatSeparatorTime(timestamp)}
     </span>
-    <div
-      style={{
-        flex: 1,
-        height: "1px",
-        background: "linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent)",
-      }}
-    />
+    <div style={S_LINE} />
   </div>
 ));
 
