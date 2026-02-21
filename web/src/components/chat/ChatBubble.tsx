@@ -348,13 +348,22 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
     [content]
   );
 
+  // Memoize linkified user text — avoids re-running URL regex split and
+  // re-creating <a> elements on re-render (e.g. when copied/flashing state changes).
+  const linkified = useMemo(() => isUser ? linkifyText(content) : null, [isUser, content]);
+
   // Determine if the message is long enough to warrant collapsing.
   // Skip during streaming — always show full content while AI is typing.
+  // Uses charCode scan with early exit instead of split() to avoid
+  // allocating a temporary array for long messages.
   const needsCollapse = useMemo(() => {
     if (isStreaming) return false;
     if (content.length > COLLAPSE_CHAR_THRESHOLD) return true;
-    const lineCount = content.split("\n").length;
-    return lineCount > COLLAPSE_LINE_THRESHOLD;
+    let lines = 1;
+    for (let i = 0; i < content.length; i++) {
+      if (content.charCodeAt(i) === 10 && ++lines > COLLAPSE_LINE_THRESHOLD) return true;
+    }
+    return false;
   }, [content, isStreaming]);
 
   const toggleExpand = useCallback(() => setIsExpanded(prev => !prev), []);
@@ -413,7 +422,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
           >
             {isUser ? (
               <span style={S_USER_TEXT}>
-                {linkifyText(content)}
+                {linkified}
               </span>
             ) : (
               <div className="md-content" style={S_AI_MD}>
