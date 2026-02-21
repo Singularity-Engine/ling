@@ -691,6 +691,7 @@ export const ChatArea = memo(() => {
         origIdx === allMsgs.length - 1 &&
         msg.role === "ai" &&
         msg.type !== "tool_call_status";
+      const senderChanged = prev && ((msg.role === "human") !== (prev.role === "human"));
       return (
         <div className="chat-msg-item">
           {showSep && <TimeSeparator timestamp={msg.timestamp} />}
@@ -705,6 +706,7 @@ export const ChatArea = memo(() => {
             skipEntryAnimation={
               (isLastAi && wasStreamingRef.current) || undefined
             }
+            senderChanged={senderChanged || undefined}
           />
         </div>
       );

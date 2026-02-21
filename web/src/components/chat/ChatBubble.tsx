@@ -138,11 +138,14 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
 
 const S_OUTER_USER: CSSProperties = { display: "flex", justifyContent: "flex-end", alignItems: "flex-start", gap: "8px", marginBottom: "14px", padding: "0 16px" };
 const S_OUTER_AI: CSSProperties = { display: "flex", justifyContent: "flex-start", alignItems: "flex-start", gap: "8px", marginBottom: "14px", padding: "0 16px" };
+// Extra top gap when speaker changes — creates visual "turn separation"
+const S_OUTER_USER_GAP: CSSProperties = { ...S_OUTER_USER, marginTop: "8px" };
+const S_OUTER_AI_GAP: CSSProperties = { ...S_OUTER_AI, marginTop: "8px" };
 
 const S_AVATAR: CSSProperties = {
-  width: "24px", height: "24px", borderRadius: "50%",
+  width: "28px", height: "28px", borderRadius: "50%",
   display: "flex", alignItems: "center", justifyContent: "center",
-  fontSize: "12px", fontWeight: 600, flexShrink: 0,
+  fontSize: "13px", fontWeight: 600, flexShrink: 0,
   letterSpacing: "0.3px", userSelect: "none", marginTop: "1px",
 };
 const S_AVATAR_AI: CSSProperties = { ...S_AVATAR, background: "var(--ling-avatar-ai-bg)", color: "var(--ling-avatar-ai-color)" };
@@ -150,13 +153,13 @@ const S_AVATAR_USER: CSSProperties = { ...S_AVATAR, background: "var(--ling-avat
 
 // Static person-silhouette icon for user avatar — shared across all instances.
 const USER_ICON = (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
   </svg>
 );
 
 const S_BUBBLE_USER: CSSProperties = {
-  padding: "10px 16px", borderRadius: "18px 18px 2px 18px",
+  padding: "12px 18px", borderRadius: "18px 18px 2px 18px",
   background: "var(--ling-bubble-user-bg)",
   border: "1px solid var(--ling-bubble-user-border)",
   backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
@@ -164,7 +167,7 @@ const S_BUBBLE_USER: CSSProperties = {
   boxShadow: "0 2px 12px var(--ling-bubble-user-shadow)",
 };
 const S_BUBBLE_AI: CSSProperties = {
-  padding: "10px 16px", borderRadius: "18px 18px 18px 2px",
+  padding: "12px 18px", borderRadius: "18px 18px 18px 2px",
   background: "var(--ling-bubble-ai-bg)",
   border: "1px solid var(--ling-bubble-ai-border)",
   borderLeft: "3px solid var(--ling-bubble-ai-accent)",
@@ -255,6 +258,7 @@ interface ChatBubbleProps {
   toolStatus?: string;
   isGreeting?: boolean;
   skipEntryAnimation?: boolean;
+  senderChanged?: boolean;
 }
 
 function formatTime(ts: string): string {
@@ -290,7 +294,7 @@ function formatTime(ts: string): string {
   }
 }
 
-export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolCall, toolName, toolStatus, isGreeting, skipEntryAnimation }: ChatBubbleProps) => {
+export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolCall, toolName, toolStatus, isGreeting, skipEntryAnimation, senderChanged }: ChatBubbleProps) => {
   const { t } = useTranslation();
   const isUser = role === "user";
   const [copied, setCopied] = useState(false);
@@ -360,10 +364,12 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
   // allocations per render — significant for 50+ messages.
   const outerStyle = useMemo<CSSProperties>(
     () => {
-      const base = isUser ? S_OUTER_USER : S_OUTER_AI;
+      const base = isUser
+        ? (senderChanged ? S_OUTER_USER_GAP : S_OUTER_USER)
+        : (senderChanged ? S_OUTER_AI_GAP : S_OUTER_AI);
       return entryAnimation === "none" ? base : { ...base, animation: entryAnimation };
     },
-    [isUser, entryAnimation]
+    [isUser, entryAnimation, senderChanged]
   );
 
   const hasContent = !!content;

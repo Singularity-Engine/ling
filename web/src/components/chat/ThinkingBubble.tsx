@@ -29,9 +29,9 @@ const S_OUTER: CSSProperties = {
   marginBottom: "14px", padding: "0 16px", animation: "thinkingBubbleIn 0.3s ease-out",
 };
 const S_AVATAR_AI: CSSProperties = {
-  width: "24px", height: "24px", borderRadius: "50%",
+  width: "28px", height: "28px", borderRadius: "50%",
   display: "flex", alignItems: "center", justifyContent: "center",
-  fontSize: "12px", fontWeight: 600, flexShrink: 0,
+  fontSize: "13px", fontWeight: 600, flexShrink: 0,
   letterSpacing: "0.3px", userSelect: "none", marginTop: "1px",
   background: "var(--ling-avatar-ai-bg)", color: "var(--ling-avatar-ai-color)",
 };
@@ -41,7 +41,7 @@ const S_NAME: CSSProperties = {
   marginBottom: "4px", marginLeft: "4px", fontWeight: 500, letterSpacing: "0.5px",
 };
 const S_BUBBLE: CSSProperties = {
-  padding: "10px 16px", borderRadius: "18px 18px 18px 2px",
+  padding: "12px 18px", borderRadius: "18px 18px 18px 2px",
   background: "var(--ling-bubble-ai-bg)", border: "1px solid var(--ling-bubble-ai-border)",
   borderLeft: "3px solid var(--ling-bubble-ai-accent)",
   backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
