@@ -601,6 +601,13 @@ export const ChatArea = memo(() => {
   }, [t]);
   const postGreetingChips = useMemo(() => t("ui.postGreetingChips", { returnObjects: true }) as string[], [t]);
 
+  // Randomized subtitle hint
+  const welcomeSub = useMemo(() => {
+    const pool = t("ui.emptySubHints", { returnObjects: true }) as string[];
+    if (!Array.isArray(pool) || pool.length === 0) return t("ui.emptySubHint");
+    return pool[Math.floor(Math.random() * pool.length)];
+  }, [t]);
+
   // Time-based welcome title
   const welcomeTitle = useMemo(() => {
     const hour = new Date().getHours();
@@ -725,7 +732,7 @@ export const ChatArea = memo(() => {
           <div className="ling-welcome-card" style={S_WELCOME_CARD}>
             <span style={S_WELCOME_TITLE}>{welcomeTitle}</span>
             <span style={S_WELCOME_SUB}>
-              {isConnected ? t("ui.emptySubHint") : t("ui.emptySubHintDisconnected")}
+              {isConnected ? welcomeSub : t("ui.emptySubHintDisconnected")}
             </span>
           </div>
 
