@@ -5,7 +5,7 @@
 /* eslint-disable import/order */
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable react/require-default-props */
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { Box, Spinner, Flex, Text, Icon } from '@chakra-ui/react';
 import { sidebarStyles, chatPanelStyles } from './sidebar-styles';
 import { MainContainer, ChatContainer, MessageList as ChatMessageList, Message as ChatMessage, Avatar as ChatAvatar } from '@chatscope/chat-ui-kit-react';
@@ -23,6 +23,12 @@ import { toaster } from '@/components/ui/toaster';
 // Long-press threshold in ms
 const LONG_PRESS_MS = 500;
 
+/**
+ * Max messages to render in the sidebar at once.
+ * Older ones are hidden behind a "load more" button to prevent DOM bloat.
+ */
+const SIDEBAR_RENDER_WINDOW = 60;
+
 // Main component
 function ChatHistoryPanel(): JSX.Element {
   const { t } = useTranslation();
@@ -36,6 +42,8 @@ function ChatHistoryPanel(): JSX.Element {
     message: Message;
     position: { x: number; y: number };
   } | null>(null);
+
+  const [extraBatches, setExtraBatches] = useState(0);
 
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressFired = useRef(false);
@@ -77,11 +85,27 @@ function ChatHistoryPanel(): JSX.Element {
     }
   }, []);
 
-  const validMessages = messages.filter((msg) => msg.content ||
-     (msg.type === 'tool_call_status' && msg.status === 'running') ||
-     (msg.type === 'tool_call_status' && msg.status === 'completed') ||
-     (msg.type === 'tool_call_status' && msg.status === 'error'),
+  const validMessages = useMemo(
+    () => messages.filter((msg) => msg.content ||
+       (msg.type === 'tool_call_status' && msg.status === 'running') ||
+       (msg.type === 'tool_call_status' && msg.status === 'completed') ||
+       (msg.type === 'tool_call_status' && msg.status === 'error')),
+    [messages],
   );
+
+  // Render windowing: only mount the last SIDEBAR_RENDER_WINDOW messages
+  const renderLimit = SIDEBAR_RENDER_WINDOW + extraBatches * SIDEBAR_RENDER_WINDOW;
+  const hiddenCount = Math.max(0, validMessages.length - renderLimit);
+  const visibleMessages = useMemo(
+    () => hiddenCount > 0 ? validMessages.slice(hiddenCount) : validMessages,
+    [validMessages, hiddenCount],
+  );
+
+  useEffect(() => {
+    if (validMessages.length <= SIDEBAR_RENDER_WINDOW) setExtraBatches(0);
+  }, [validMessages.length]);
+
+  const handleLoadMore = useCallback(() => setExtraBatches((n) => n + 1), []);
 
   return (
     <Box
@@ -105,7 +129,26 @@ function ChatHistoryPanel(): JSX.Element {
                 {t('sidebar.noMessages')}
               </Box>
             ) : (
-              validMessages.map((msg) => {
+              <>
+              {hiddenCount > 0 && (
+                <Flex justify="center" py={2}>
+                  <button
+                    onClick={handleLoadMore}
+                    style={{
+                      background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '12px',
+                      padding: '4px 12px',
+                      color: 'rgba(255,255,255,0.4)',
+                      fontSize: '11px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {t('chat.loadOlder', { count: hiddenCount })}
+                  </button>
+                </Flex>
+              )}
+              {visibleMessages.map((msg) => {
                 // Tool call indicator — no context menu
                 if (msg.type === 'tool_call_status') {
                   return (
@@ -191,7 +234,8 @@ function ChatHistoryPanel(): JSX.Element {
                     </ChatMessage>
                   </Box>
                 );
-              })
+              })}
+              </>
             )}
           </ChatMessageList>
         </ChatContainer>

@@ -131,6 +131,7 @@ const RENDER_WINDOW = 80;
 const S_CONTAINER: CSSProperties = {
   height: "100%",
   overflowY: "auto",
+  overflowX: "hidden",
   padding: "12px 0",
   position: "relative",
 };
