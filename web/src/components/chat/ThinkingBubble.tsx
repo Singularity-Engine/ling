@@ -2,7 +2,7 @@ import { memo, useEffect, useMemo, useRef, useState, type CSSProperties } from "
 import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import { TypingIndicator } from "./TypingIndicator";
-import { remarkPlugins, rehypePlugins, mdComponents } from "./ChatBubble";
+import { remarkPlugins, mdComponents } from "./ChatBubble";
 
 // Inject transition styles once
 const STYLE_ID = "thinking-bubble-styles";
@@ -49,6 +49,31 @@ const S_CURSOR: CSSProperties = {
   animation: "streamingCursor 1s ease-in-out infinite",
 };
 
+/**
+ * Coarser throttle: caps ReactMarkdown re-parses at ~8fps (125ms interval)
+ * during streaming.  Between ticks the component still re-renders (props
+ * change at ~30fps) but the useMemo keyed on mdContent returns cached VDOM
+ * — essentially free reconciliation.
+ * Outside streaming the value passes through immediately.
+ */
+function useMdThrottle(content: string, active: boolean): string {
+  const [snap, setSnap] = useState(content);
+  const ref = useRef(content);
+  ref.current = content;
+
+  useEffect(() => {
+    if (!active) { setSnap(ref.current); return; }
+    setSnap(ref.current);                       // flush on activation
+    const id = setInterval(() => setSnap(ref.current), 125);
+    return () => clearInterval(id);
+  }, [active]);
+
+  // When deactivated, pass through content changes immediately
+  useEffect(() => { if (!active) setSnap(content); }, [active, content]);
+
+  return snap;
+}
+
 interface ThinkingBubbleProps {
   content: string;
   isThinking: boolean;
@@ -63,10 +88,14 @@ export const ThinkingBubble = memo(({ content, isThinking, isStreaming }: Thinki
   const wasThinkingRef = useRef(false);
   const [showDotsExit, setShowDotsExit] = useState(false);
 
-  // Memoize markdown rendering — avoids re-parsing when only isThinking/showDotsExit change
+  // Throttle markdown re-parse: ~8fps during streaming instead of ~30fps.
+  // Also skip rehype-highlight — syntax coloring is expensive and the final
+  // ChatBubble render applies it once the message is committed.
+  const mdContent = useMdThrottle(content, isStreaming);
+
   const renderedMarkdown = useMemo(
-    () => <ReactMarkdown remarkPlugins={remarkPlugins} rehypePlugins={rehypePlugins} components={mdComponents}>{content}</ReactMarkdown>,
-    [content]
+    () => <ReactMarkdown remarkPlugins={remarkPlugins} components={mdComponents}>{mdContent}</ReactMarkdown>,
+    [mdContent]
   );
 
   useEffect(() => {
@@ -89,7 +118,7 @@ export const ThinkingBubble = memo(({ content, isThinking, isStreaming }: Thinki
           {(isThinking || showDotsExit) && (
             <TypingIndicator fadeOut={showDotsExit} />
           )}
-          {isStreaming && content && (
+          {isStreaming && mdContent && (
             <div className="md-content" style={showDotsExit ? S_MD_FADE : S_MD}>
               {renderedMarkdown}
               <span style={S_CURSOR} />
