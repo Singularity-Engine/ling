@@ -54,10 +54,10 @@
   --ling-bubble-ai-text: rgba(255, 255, 255, 0.92);
   --ling-chat-timestamp: rgba(255, 255, 255, 0.5);
   --ling-chat-label: var(--ling-purple-60);
-  --ling-chat-label-user: rgba(255, 255, 255, 0.48);
-  --ling-avatar-user-bg: rgba(139, 92, 246, 0.32);
+  --ling-chat-label-user: rgba(255, 255, 255, 0.58);
+  --ling-avatar-user-bg: rgba(139, 92, 246, 0.38);
   --ling-avatar-user-color: rgba(255, 255, 255, 0.9);
-  --ling-avatar-ai-bg: rgba(139, 92, 246, 0.16);
+  --ling-avatar-ai-bg: rgba(139, 92, 246, 0.25);
   --ling-avatar-ai-color: rgba(167, 139, 250, 0.9);
   --ling-collapse-mask-ai: linear-gradient(transparent, rgba(255, 255, 255, 0.06));
   --ling-collapse-mask-user: linear-gradient(transparent, rgba(109, 40, 217, 0.5));
@@ -123,9 +123,9 @@
 
   /* 气泡 */
   --ling-bubble-user-bg: linear-gradient(135deg, rgba(124, 58, 237, 0.52), rgba(109, 40, 217, 0.42));
-  --ling-bubble-ai-bg: rgba(255, 255, 255, 0.55);
+  --ling-bubble-ai-bg: rgba(255, 255, 255, 0.68);
   --ling-bubble-user-border: rgba(124, 58, 237, 0.45);
-  --ling-bubble-ai-border: rgba(124, 58, 237, 0.12);
+  --ling-bubble-ai-border: rgba(124, 58, 237, 0.18);
   --ling-bubble-ai-accent: rgba(124, 58, 237, 0.5);
   --ling-bubble-user-shadow: rgba(124, 58, 237, 0.22);
   --ling-bubble-user-text: rgba(255, 255, 255, 0.97);
@@ -133,10 +133,10 @@
   --ling-bubble-ai-text: rgba(0, 0, 0, 0.85);
   --ling-chat-timestamp: rgba(0, 0, 0, 0.4);
   --ling-chat-label: var(--ling-purple-60);
-  --ling-chat-label-user: rgba(0, 0, 0, 0.42);
-  --ling-avatar-user-bg: rgba(124, 58, 237, 0.25);
+  --ling-chat-label-user: rgba(0, 0, 0, 0.50);
+  --ling-avatar-user-bg: rgba(124, 58, 237, 0.30);
   --ling-avatar-user-color: rgba(255, 255, 255, 0.95);
-  --ling-avatar-ai-bg: rgba(124, 58, 237, 0.1);
+  --ling-avatar-ai-bg: rgba(124, 58, 237, 0.18);
   --ling-avatar-ai-color: rgba(124, 58, 237, 0.75);
   --ling-collapse-mask-ai: linear-gradient(transparent, rgba(255, 255, 255, 0.6));
   --ling-collapse-mask-user: linear-gradient(transparent, rgba(124, 58, 237, 0.32));
