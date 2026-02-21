@@ -5,7 +5,7 @@
 /* eslint-disable import/order */
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable react/require-default-props */
-import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import React, { memo, useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { Box, Spinner, Flex, Text, Icon } from '@chakra-ui/react';
 import { sidebarStyles, chatPanelStyles } from './sidebar-styles';
 import { MainContainer, ChatContainer, MessageList as ChatMessageList, Message as ChatMessage, Avatar as ChatAvatar } from '@chatscope/chat-ui-kit-react';
@@ -30,7 +30,7 @@ const LONG_PRESS_MS = 500;
 const SIDEBAR_RENDER_WINDOW = 60;
 
 // Main component
-function ChatHistoryPanel(): JSX.Element {
+const ChatHistoryPanel = memo(function ChatHistoryPanel(): JSX.Element {
   const { t } = useTranslation();
   const { messages } = useChatMessages();
   const { confName } = useConfig();
@@ -257,6 +257,6 @@ function ChatHistoryPanel(): JSX.Element {
       )}
     </Box>
   );
-}
+});
 
 export default ChatHistoryPanel;
