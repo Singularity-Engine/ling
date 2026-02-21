@@ -198,7 +198,9 @@
     "loadOlder": "Load {{count}} older messages",
     "sending": "Sending...",
     "noResponse": "Ling doesn't seem to be responding — try sending again?",
-    "retry": "Retry"
+    "retry": "Retry",
+    "showMore": "Show more",
+    "showLess": "Show less"
   },
   "connection": {
     "connected": "Connected",

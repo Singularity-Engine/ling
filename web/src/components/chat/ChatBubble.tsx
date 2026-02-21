@@ -253,11 +253,12 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
     [isUser, entryAnimation]
   );
 
+  const hasContent = !!content;
   const bubbleStyle = useMemo<CSSProperties>(() => {
     if (isUser) return S_BUBBLE_USER;
-    const base = !isStreaming && content ? S_BUBBLE_AI_ACTIVE : S_BUBBLE_AI;
+    const base = !isStreaming && hasContent ? S_BUBBLE_AI_ACTIVE : S_BUBBLE_AI;
     return flashing ? { ...base, animation: "bubbleCopyFlash 0.35s ease-out" } : base;
-  }, [isUser, isStreaming, content, flashing]);
+  }, [isUser, isStreaming, hasContent, flashing]);
 
   if (isToolCall && toolName) {
     return (
