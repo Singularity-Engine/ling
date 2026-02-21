@@ -116,18 +116,18 @@
   --ling-purple-85: rgba(124, 58, 237, 0.75);
 
   /* 气泡 */
-  --ling-bubble-user-bg: linear-gradient(135deg, rgba(124, 58, 237, 0.28), rgba(109, 40, 217, 0.22));
-  --ling-bubble-ai-bg: rgba(0, 0, 0, 0.045);
-  --ling-bubble-user-border: rgba(124, 58, 237, 0.35);
-  --ling-bubble-ai-border: rgba(0, 0, 0, 0.1);
+  --ling-bubble-user-bg: linear-gradient(135deg, rgba(124, 58, 237, 0.36), rgba(109, 40, 217, 0.28));
+  --ling-bubble-ai-bg: rgba(255, 255, 255, 0.55);
+  --ling-bubble-user-border: rgba(124, 58, 237, 0.4);
+  --ling-bubble-ai-border: rgba(124, 58, 237, 0.12);
   --ling-bubble-ai-accent: rgba(124, 58, 237, 0.5);
   --ling-bubble-user-shadow: rgba(124, 58, 237, 0.22);
-  --ling-bubble-ai-shadow: rgba(0, 0, 0, 0.05);
+  --ling-bubble-ai-shadow: rgba(0, 0, 0, 0.06);
   --ling-bubble-ai-text: rgba(0, 0, 0, 0.85);
   --ling-chat-timestamp: rgba(0, 0, 0, 0.4);
   --ling-chat-label: var(--ling-purple-60);
-  --ling-collapse-mask-ai: linear-gradient(transparent, rgba(0, 0, 0, 0.06));
-  --ling-collapse-mask-user: linear-gradient(transparent, rgba(124, 58, 237, 0.18));
+  --ling-collapse-mask-ai: linear-gradient(transparent, rgba(255, 255, 255, 0.6));
+  --ling-collapse-mask-user: linear-gradient(transparent, rgba(124, 58, 237, 0.24));
 
   /* 代码块 */
   --ling-code-text: #6d28d9;
