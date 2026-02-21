@@ -390,9 +390,21 @@ export const ChatArea = memo(() => {
       if (!isConnected) return;
       appendHumanMessage(text);
       sendMessage({ type: "text-input", text, images: [] });
+      // Focus textarea so the user is ready to type when AI responds
+      setTimeout(() => {
+        (document.querySelector(".ling-textarea") as HTMLElement)?.focus();
+      }, 0);
     },
     [appendHumanMessage, sendMessage, isConnected]
   );
+
+  const handleRetry = useCallback(() => {
+    const lastHuman = [...dedupedMessages].reverse().find(m => m.role === "human");
+    if (lastHuman?.content && isConnected) {
+      setAwaitingTimedOut(false);
+      sendMessage({ type: "text-input", text: lastHuman.content, images: [] });
+    }
+  }, [dedupedMessages, sendMessage, isConnected]);
 
   // ── Render windowing: only mount the last RENDER_WINDOW messages ──
   // Keeps the DOM small in long conversations while all messages remain in state.
@@ -566,6 +578,9 @@ export const ChatArea = memo(() => {
       {awaitingTimedOut && !isStreaming && !showTyping && (
         <div style={S_TIMEOUT_WRAP}>
           <span style={S_TIMEOUT_TEXT}>{t("chat.noResponse")}</span>
+          <button onClick={handleRetry} style={S_RETRY_BTN}>
+            {t("chat.retry")}
+          </button>
         </div>
       )}
 
