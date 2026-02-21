@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import { useTranslation } from "react-i18next";
+import i18next from "i18next";
 import { toaster } from "@/components/ui/toaster";
 import { ToolResultCard } from "./ToolResultCard";
 
@@ -236,9 +237,31 @@ interface ChatBubbleProps {
 function formatTime(ts: string): string {
   try {
     const d = new Date(ts);
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
+    const diffMin = Math.floor(diffMs / 60_000);
+    const diffHr = Math.floor(diffMs / 3_600_000);
+
     const hh = String(d.getHours()).padStart(2, "0");
     const mm = String(d.getMinutes()).padStart(2, "0");
-    return `${hh}:${mm}`;
+    const time = `${hh}:${mm}`;
+
+    // Future or just now (< 1 min)
+    if (diffMin < 1) return i18next.t("time.justNow");
+    // < 60 min
+    if (diffMin < 60) return i18next.t("time.minutesAgo", { count: diffMin });
+    // < 6 hours — show relative hours
+    if (diffHr < 6) return i18next.t("time.hoursAgo", { count: diffHr });
+    // Same day — show absolute time
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (d.getTime() >= today.getTime()) return time;
+    // Yesterday
+    const yesterday = new Date(today.getTime() - 86_400_000);
+    if (d.getTime() >= yesterday.getTime()) return `${i18next.t("time.yesterday")} ${time}`;
+    // Older — MM/DD HH:MM
+    const mo = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${mo}/${dd} ${time}`;
   } catch {
     return "";
   }
