@@ -83,6 +83,7 @@ const S_SEND_LOADING: CSSProperties = {
   background: "linear-gradient(135deg, #7c3aed, #5b21b6)",
   border: "none",
   opacity: 0.7,
+  cursor: "not-allowed",
 };
 const S_SEND_READY: CSSProperties = {
   ...S_SEND_BASE,
@@ -130,8 +131,9 @@ const SendIcon = () => (
   </svg>
 );
 
+const S_LOADING_SPIN: CSSProperties = { animation: "sendSpin 0.8s linear infinite" };
 const LoadingIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" style={{ animation: "sendSpin 0.8s linear infinite" }}>
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" style={S_LOADING_SPIN}>
     <path d="M12 2a10 10 0 0 1 10 10" />
   </svg>
 );
@@ -183,6 +185,11 @@ export const InputBar = memo(() => {
     return () => window.removeEventListener('fill-input', handler);
   }, []);
 
+  // Ref mirror so the send-failed handler reads latest inputText without
+  // re-attaching the listener on every keystroke.
+  const inputTextRef = useRef(inputText);
+  inputTextRef.current = inputText;
+
   // Restore input text when send fails (dispatched by websocket-handler)
   useEffect(() => {
     const handler = (e: Event) => {
@@ -190,7 +197,7 @@ export const InputBar = memo(() => {
       setIsSending(false);
       // Roll back the optimistic human message that appendHumanMessage added
       popLastHumanMessage();
-      if (typeof text === 'string' && !inputText) {
+      if (typeof text === 'string' && !inputTextRef.current) {
         setInputText(text.slice(0, MAX_LENGTH));
         setTimeout(() => {
           const el = textareaRef.current;
@@ -204,7 +211,7 @@ export const InputBar = memo(() => {
     };
     window.addEventListener('send-failed', handler);
     return () => window.removeEventListener('send-failed', handler);
-  }, [inputText, popLastHumanMessage]);
+  }, [popLastHumanMessage]);
 
   const trimmed = inputText.trim();
   const hasText = trimmed.length > 0;
