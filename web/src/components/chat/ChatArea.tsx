@@ -466,7 +466,7 @@ export const ChatArea = memo(() => {
   );
 
   const handleRetry = useCallback(() => {
-    const lastHuman = [...dedupedMessages].reverse().find(m => m.role === "human");
+    const lastHuman = dedupedMessages.findLast(m => m.role === "human");
     if (lastHuman?.content && isConnected) {
       setAwaitingTimedOut(false);
       setRetryCount(c => c + 1);

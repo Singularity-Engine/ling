@@ -1,4 +1,4 @@
-import { memo, useState, useRef, useCallback, useEffect, type CSSProperties } from "react";
+import { memo, useState, useRef, useCallback, useMemo, useEffect, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { useWebSocket } from "@/context/websocket-context";
 import { useChatMessages } from "@/context/chat-history-context";
@@ -26,6 +26,56 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   `;
   document.head.appendChild(style);
 }
+
+// ─── Static style constants (avoid per-render allocation during typing) ───
+
+const S_BAR_WRAP: CSSProperties = {
+  padding: "10px 16px",
+  background: "rgba(255, 255, 255, 0.03)",
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
+  borderTop: "1px solid rgba(255, 255, 255, 0.06)",
+  paddingBottom: "calc(10px + env(safe-area-inset-bottom, 0px))",
+};
+
+const S_STATE_ROW: CSSProperties = { display: "flex", justifyContent: "center", marginBottom: "6px" };
+const S_STATE_TEXT: CSSProperties = {
+  fontSize: "11px", color: "rgba(139, 92, 246, 0.7)",
+  animation: "inputPulse 1.5s ease-in-out infinite",
+};
+
+const S_INPUT_ROW: CSSProperties = {
+  display: "flex", alignItems: "flex-end", gap: "8px",
+  maxWidth: "720px", margin: "0 auto",
+};
+
+const S_MIC_BASE: CSSProperties = {
+  width: "44px", height: "44px", borderRadius: "50%",
+  display: "flex", alignItems: "center", justifyContent: "center",
+  cursor: "pointer", transition: "all 0.2s ease", flexShrink: 0, padding: 0,
+};
+const S_MIC_OFF: CSSProperties = {
+  ...S_MIC_BASE,
+  background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)",
+  color: "rgba(255,255,255,0.5)", animation: "none",
+};
+const S_MIC_ON: CSSProperties = {
+  ...S_MIC_BASE,
+  background: "rgba(239, 68, 68, 0.2)", border: "1px solid rgba(239, 68, 68, 0.4)",
+  color: "#ef4444", animation: "micPulse 1.5s ease-in-out infinite",
+};
+
+const S_SEND_BASE: CSSProperties = {
+  width: "44px", height: "44px", borderRadius: "50%",
+  display: "flex", alignItems: "center", justifyContent: "center",
+  transition: "all 0.2s ease", flexShrink: 0, padding: 0,
+};
+
+const S_HINTS_ROW: CSSProperties = {
+  maxWidth: "720px", margin: "2px auto 0", paddingLeft: "52px",
+  display: "flex", justifyContent: "space-between",
+};
+const S_MD_HINT: CSSProperties = { fontSize: "10px", color: "rgba(255,255,255,0.2)" };
 
 const MicIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
