@@ -6,10 +6,8 @@ import { Message } from '@/services/websocket-service';
 import { HistoryInfo } from './websocket-context';
 
 /**
- * Chat history context — messages, history list, session management.
- * Separated from streaming response to avoid cascade re-renders:
- * fullResponse changes ~60x/sec during streaming; keeping it in the same
- * context forced ALL 14 consumers to re-render even if they only need messages.
+ * Context 1 — Chat messages, history list, session management.
+ * Changes only when a message is added/removed or history changes.
  */
 interface ChatHistoryState {
   messages: Message[];
@@ -27,13 +25,22 @@ interface ChatHistoryState {
 }
 
 /**
- * Streaming response context — the rapidly-changing fullResponse string
- * and its mutators. Only components that render streaming output (ChatArea,
- * interrupt hook, audio task) subscribe here, so sidebar / InputBar / App
- * are shielded from ~60 fps re-renders during AI streaming.
+ * Context 2 — Streaming response VALUE.
+ * Changes ~60fps during AI streaming. Only ChatArea and interrupt hook
+ * subscribe here; sidebar / InputBar / App are shielded.
  */
-interface StreamingResponseState {
+interface StreamingValueState {
   fullResponse: string;
+}
+
+/**
+ * Context 3 — Streaming response SETTERS.
+ * All callbacks are stable (useCallback with empty deps / React setState),
+ * so this context value never changes after mount. Consumers that only
+ * need to WRITE streaming state (e.g. websocket-handler) subscribe here
+ * without incurring ~60fps re-renders.
+ */
+interface StreamingSetterState {
   setFullResponse: (text: string) => void;
   appendResponse: (text: string) => void;
   clearResponse: () => void;
@@ -47,9 +54,6 @@ interface StreamingResponseState {
  */
 const MAX_MESSAGES = 200;
 
-/**
- * Default values and constants
- */
 const DEFAULT_HISTORY = {
   messages: [] as Message[],
   historyList: [] as HistoryInfo[],
@@ -58,15 +62,15 @@ const DEFAULT_HISTORY = {
 };
 
 export const ChatHistoryContext = createContext<ChatHistoryState | null>(null);
-export const StreamingResponseContext = createContext<StreamingResponseState | null>(null);
+const StreamingValueContext = createContext<StreamingValueState | null>(null);
+const StreamingSetterContext = createContext<StreamingSetterState | null>(null);
 
 /**
- * Chat History Provider Component
- * @param {Object} props - Provider props
- * @param {React.ReactNode} props.children - Child components
+ * Combined provider — wraps three granular contexts so App.tsx only
+ * needs a single <ChatHistoryProvider>.
  */
 export function ChatHistoryProvider({ children }: { children: React.ReactNode }) {
-  // State management
+  // ── Messages & history state ──
   const [messages, setMessages] = useState<Message[]>(DEFAULT_HISTORY.messages);
   const [historyList, setHistoryList] = useState<HistoryInfo[]>(
     DEFAULT_HISTORY.historyList,
@@ -74,6 +78,8 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
   const [currentHistoryUid, setCurrentHistoryUid] = useState<string | null>(
     DEFAULT_HISTORY.currentHistoryUid,
   );
+
+  // ── Streaming state ──
   const [fullResponse, setFullResponse] = useState(DEFAULT_HISTORY.fullResponse);
   const forceNewMessageRef = useRef<boolean>(false);
 
@@ -85,10 +91,6 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
   const trimMessages = (msgs: Message[]): Message[] =>
     msgs.length > MAX_MESSAGES ? msgs.slice(-MAX_MESSAGES) : msgs;
 
-  /**
-   * Append a human message to the chat history
-   * @param content - Message content
-   */
   const appendHumanMessage = useCallback((content: string) => {
     const newMessage: Message = {
       id: Date.now().toString(),
@@ -100,10 +102,6 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
     setMessages((prevMessages) => trimMessages([...prevMessages, newMessage]));
   }, []);
 
-  /**
-   * Append or update an AI message in the chat history
-   * @param content - Message content
-   */
   const appendAIMessage = useCallback((content: string, name?: string, avatar?: string) => {
     setMessages((prevMessages) => {
       const lastMessage = prevMessages[prevMessages.length - 1];
@@ -134,12 +132,7 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
     });
   }, []);
 
-  /**
-   * Append or update a Tool Call message using its tool_id
-   * @param toolMessageData - The partial tool call message data from WebSocket
-   */
   const appendOrUpdateToolCallMessage = useCallback((toolMessageData: Partial<Message>) => {
-    // Ensure required fields for a tool call are present
     if (!toolMessageData.tool_id || !toolMessageData.tool_name || !toolMessageData.status || !toolMessageData.timestamp) {
       console.error('[ChatHistory] Incomplete tool message data, missing fields for tool_id:', toolMessageData.tool_id);
       return;
@@ -151,41 +144,33 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
       );
 
       if (existingMessageIndex !== -1) {
-        // Update existing tool call message status and content
         const updatedMessages = [...prevMessages];
         const existingMsg = updatedMessages[existingMessageIndex];
         updatedMessages[existingMessageIndex] = {
           ...existingMsg,
-          status: toolMessageData.status, // Update status
+          status: toolMessageData.status,
           name: toolMessageData.name || existingMsg.name,
-          content: toolMessageData.content || existingMsg.content, // Update content (result/error or keep input)
-          timestamp: toolMessageData.timestamp!, // Update timestamp
+          content: toolMessageData.content || existingMsg.content,
+          timestamp: toolMessageData.timestamp!,
         };
         return updatedMessages;
       } else {
-        // Append new tool call message
         const newToolMessage: Message = {
-          id: toolMessageData.tool_id!, // Use tool_id as the main ID for uniqueness
+          id: toolMessageData.tool_id!,
           role: 'ai',
           type: 'tool_call_status',
           name: toolMessageData.name || '',
           tool_id: toolMessageData.tool_id,
           tool_name: toolMessageData.tool_name,
           status: toolMessageData.status,
-          content: toolMessageData.content || '', // Initial content (input)
+          content: toolMessageData.content || '',
           timestamp: toolMessageData.timestamp!,
-          // name/avatar could potentially be added if needed
         };
         return [...prevMessages, newToolMessage];
       }
     });
   }, []);
 
-  /**
-   * Update the history list with the latest message
-   * @param uid - History unique identifier
-   * @param latestMessage - Latest message to update with
-   */
   const updateHistoryList = useCallback(
     (uid: string, latestMessage: Message | null) => {
       if (import.meta.env.DEV && !uid) {
@@ -223,24 +208,21 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
     setFullResponse(DEFAULT_HISTORY.fullResponse);
   }, []);
 
-  // Memoized context value
-  const contextValue = useMemo(
+  // ── Context values ──
+
+  // Context 1: messages & history — changes only on message/history updates
+  const chatValue = useMemo(
     () => ({
       messages,
       historyList,
       currentHistoryUid,
       appendHumanMessage,
       appendAIMessage,
-      appendOrUpdateToolCallMessage, // Add to context value
+      appendOrUpdateToolCallMessage,
       setMessages,
       setHistoryList,
       setCurrentHistoryUid,
       updateHistoryList,
-      fullResponse,
-      setFullResponse,
-      appendResponse,
-      clearResponse,
-      setForceNewMessage,
     }),
     [
       messages,
@@ -248,32 +230,81 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
       currentHistoryUid,
       appendHumanMessage,
       appendAIMessage,
-      appendOrUpdateToolCallMessage, // Add dependency
+      appendOrUpdateToolCallMessage,
       updateHistoryList,
-      fullResponse,
-      appendResponse,
-      clearResponse,
-      setForceNewMessage,
     ],
   );
 
+  // Context 2: streaming VALUE — changes ~60fps during streaming
+  const streamValue = useMemo(
+    () => ({ fullResponse }),
+    [fullResponse],
+  );
+
+  // Context 3: streaming SETTERS — stable after mount (all callbacks have [] deps)
+  const streamSetters = useMemo(
+    () => ({
+      setFullResponse,
+      appendResponse,
+      clearResponse,
+      setForceNewMessage,
+    }),
+    [appendResponse, clearResponse, setForceNewMessage],
+  );
+
   return (
-    <ChatHistoryContext.Provider value={contextValue}>
-      {children}
+    <ChatHistoryContext.Provider value={chatValue}>
+      <StreamingSetterContext.Provider value={streamSetters}>
+        <StreamingValueContext.Provider value={streamValue}>
+          {children}
+        </StreamingValueContext.Provider>
+      </StreamingSetterContext.Provider>
     </ChatHistoryContext.Provider>
   );
 }
 
+// ─── Hooks ──────────────────────────────────────────────────────────
+
 /**
- * Custom hook to use the chat history context
- * @throws {Error} If used outside of ChatHistoryProvider
+ * Messages & history only — shielded from streaming re-renders.
+ * Prefer this over useChatHistory() when you don't need fullResponse.
+ */
+export function useChatMessages() {
+  const ctx = useContext(ChatHistoryContext);
+  if (!ctx) throw new Error('useChatMessages must be used within ChatHistoryProvider');
+  return ctx;
+}
+
+/** Streaming response VALUE — subscribes to ~60fps updates during streaming. */
+export function useStreamingValue() {
+  const ctx = useContext(StreamingValueContext);
+  if (!ctx) throw new Error('useStreamingValue must be used within ChatHistoryProvider');
+  return ctx;
+}
+
+/** Streaming response SETTERS only — stable, never triggers re-renders. */
+export function useStreamingSetters() {
+  const ctx = useContext(StreamingSetterContext);
+  if (!ctx) throw new Error('useStreamingSetters must be used within ChatHistoryProvider');
+  return ctx;
+}
+
+/**
+ * Backward-compatible hook — merges all three contexts.
+ * ⚠️ Subscribes to streaming VALUE, so consumers re-render ~60fps during streaming.
+ * Prefer useChatMessages() + useStreamingSetters()/useStreamingValue() for new code.
  */
 export function useChatHistory() {
-  const context = useContext(ChatHistoryContext);
+  const chat = useContext(ChatHistoryContext);
+  const streamVal = useContext(StreamingValueContext);
+  const streamSet = useContext(StreamingSetterContext);
 
-  if (!context) {
+  if (!chat || !streamVal || !streamSet) {
     throw new Error('useChatHistory must be used within a ChatHistoryProvider');
   }
 
-  return context;
+  return useMemo(
+    () => ({ ...chat, ...streamVal, ...streamSet }),
+    [chat, streamVal, streamSet],
+  );
 }

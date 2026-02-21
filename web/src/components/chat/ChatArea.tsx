@@ -393,6 +393,7 @@ export const ChatArea = memo(() => {
   const isGreeting = dedupedMessages.length === 1 && dedupedMessages[0].role === "ai";
 
   const welcomeChips = t("ui.welcomeChips", { returnObjects: true }) as string[];
+  const postGreetingChips = t("ui.postGreetingChips", { returnObjects: true }) as string[];
 
   // Time-based welcome title
   const welcomeTitle = useMemo(() => {

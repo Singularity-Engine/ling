@@ -196,7 +196,8 @@
     "textCopied": "Text copied",
     "regenerating": "Regenerating...",
     "loadOlder": "Load {{count}} older messages",
-    "noResponse": "Ling doesn't seem to be responding — try sending again?"
+    "noResponse": "Ling doesn't seem to be responding — try sending again?",
+    "retry": "Retry"
   },
   "connection": {
     "connected": "Connected",

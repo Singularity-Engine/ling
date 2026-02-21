@@ -196,7 +196,8 @@
     "textCopied": "文本已复制",
     "regenerating": "正在重新生成...",
     "loadOlder": "加载更早的 {{count}} 条消息",
-    "noResponse": "灵似乎暂时没有回应，试试重新发送？"
+    "noResponse": "灵似乎暂时没有回应，试试重新发送？",
+    "retry": "重试"
   },
   "connection": {
     "connected": "已连接",
