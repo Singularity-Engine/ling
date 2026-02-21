@@ -293,7 +293,7 @@
     "welcomeTitleMorning": "早上好，有什么想聊的？",
     "welcomeTitleAfternoon": "下午好，有什么想聊的？",
     "welcomeTitleEvening": "晚上好，有什么想聊的？",
-    "welcomeChips": ["你好！", "介绍一下你自己", "今天心情怎么样", "讲个笑话吧"],
+    "welcomeChips": ["你好！", "你能做什么？", "帮我搜索一下", "讲个笑话吧"],
     "postGreetingChips": ["今天有什么新鲜事？", "帮我想个创意", "今天心情怎么样", "讲个笑话吧"],
     "scrollToLatest": "滚动到最新消息",
     "newMessages": "新消息",

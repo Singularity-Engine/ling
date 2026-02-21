@@ -293,7 +293,7 @@
     "welcomeTitleMorning": "Good morning, what's on your mind?",
     "welcomeTitleAfternoon": "Good afternoon, what's on your mind?",
     "welcomeTitleEvening": "Good evening, what's on your mind?",
-    "welcomeChips": ["Hello!", "Tell me about yourself", "How's your day?", "Tell me a joke"],
+    "welcomeChips": ["Hello!", "What can you do?", "Help me search", "Tell me a joke"],
     "postGreetingChips": ["What's new today?", "Help me brainstorm", "How's your day?", "Tell me a joke"],
     "scrollToLatest": "Scroll to latest",
     "newMessages": "New messages",

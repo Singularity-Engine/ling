@@ -285,9 +285,14 @@ const S_EMPTY_WRAP_EXIT: CSSProperties = {
   zIndex: 10,
 };
 
-const S_EMPTY_ICON: CSSProperties = {
-  fontSize: "32px",
+const S_EMPTY_GLYPH: CSSProperties = {
+  fontSize: "36px",
+  fontWeight: 700,
+  color: "rgba(167, 139, 250, 0.85)",
+  textShadow: "0 0 24px rgba(139, 92, 246, 0.4), 0 0 48px rgba(139, 92, 246, 0.15)",
   animation: "emptyStateFloat 3s ease-in-out infinite",
+  letterSpacing: "2px",
+  userSelect: "none",
 };
 
 const S_WELCOME_CARD: CSSProperties = {
@@ -316,6 +321,23 @@ const S_WELCOME_TITLE: CSSProperties = {
 const S_WELCOME_SUB: CSSProperties = {
   fontSize: "12px",
   color: "rgba(255, 255, 255, 0.25)",
+};
+
+const S_CAPS_ROW: CSSProperties = {
+  display: "flex",
+  gap: "8px",
+  justifyContent: "center",
+  flexWrap: "wrap",
+};
+
+const S_CAP_TAG: CSSProperties = {
+  fontSize: "11px",
+  color: "rgba(167, 139, 250, 0.7)",
+  background: "rgba(139, 92, 246, 0.1)",
+  border: "1px solid rgba(139, 92, 246, 0.15)",
+  borderRadius: "12px",
+  padding: "4px 12px",
+  letterSpacing: "0.3px",
 };
 
 // ─── StreamingFooter: owns streaming subscription so ChatArea avoids ~30fps re-renders ───
@@ -688,7 +710,7 @@ export const ChatArea = memo(() => {
     >
       {(isEmpty || emptyExiting) && (
         <div style={emptyExiting ? S_EMPTY_WRAP_EXIT : S_EMPTY_WRAP}>
-          <span style={S_EMPTY_ICON}>✦</span>
+          <span style={S_EMPTY_GLYPH}>{t("loading.glyph")}</span>
 
           {/* Glassmorphism welcome card */}
           <div className="ling-welcome-card" style={S_WELCOME_CARD}>
@@ -697,6 +719,15 @@ export const ChatArea = memo(() => {
               {isConnected ? t("ui.emptySubHint") : t("ui.emptySubHintDisconnected")}
             </span>
           </div>
+
+          {/* Capability tags */}
+          {isConnected && (
+            <div style={S_CAPS_ROW}>
+              <span style={S_CAP_TAG}>{t("landing.featureMemory")}</span>
+              <span style={S_CAP_TAG}>{t("landing.featureVoice")}</span>
+              <span style={S_CAP_TAG}>{t("landing.featureAvatar")}</span>
+            </div>
+          )}
 
           {/* Suggestion chips — hidden while disconnected */}
           {isConnected && (
