@@ -589,7 +589,16 @@ export const ChatArea = memo(() => {
   // True when this is the first AI message (greeting bubble)
   const isGreeting = dedupedMessages.length === 1 && dedupedMessages[0].role === "ai";
 
-  const welcomeChips = useMemo(() => t("ui.welcomeChips", { returnObjects: true }) as string[], [t]);
+  const welcomeChips = useMemo(() => {
+    const pool = t("ui.welcomeChips", { returnObjects: true }) as string[];
+    if (!Array.isArray(pool) || pool.length <= 4) return pool;
+    const shuffled = [...pool];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled.slice(0, 4);
+  }, [t]);
   const postGreetingChips = useMemo(() => t("ui.postGreetingChips", { returnObjects: true }) as string[], [t]);
 
   // Time-based welcome title
