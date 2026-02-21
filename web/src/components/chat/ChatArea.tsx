@@ -199,8 +199,10 @@ const S_NEW_DOT: CSSProperties = {
 
 const S_TIMEOUT_WRAP: CSSProperties = {
   display: "flex",
-  justifyContent: "center",
+  flexDirection: "column",
+  alignItems: "center",
   padding: "8px 16px 12px",
+  gap: "8px",
   animation: "chatFadeInUp 0.3s ease-out",
 };
 
@@ -209,6 +211,17 @@ const S_TIMEOUT_TEXT: CSSProperties = {
   color: "rgba(255, 255, 255, 0.35)",
   textAlign: "center",
   lineHeight: 1.5,
+};
+
+const S_RETRY_BTN: CSSProperties = {
+  background: "rgba(139, 92, 246, 0.15)",
+  border: "1px solid rgba(139, 92, 246, 0.3)",
+  borderRadius: "14px",
+  padding: "5px 16px",
+  color: "rgba(167, 139, 250, 0.85)",
+  fontSize: "12px",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
 };
 
 export const ChatArea = memo(() => {

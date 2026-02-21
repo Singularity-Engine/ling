@@ -1,4 +1,4 @@
-import { memo, useState, useRef, useCallback, useEffect } from "react";
+import { memo, useState, useRef, useCallback, useEffect, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { useWebSocket } from "@/context/websocket-context";
 import { useChatHistory } from "@/context/chat-history-context";
