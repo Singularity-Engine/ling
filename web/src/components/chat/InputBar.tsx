@@ -1,10 +1,11 @@
-import { memo, useState, useRef, useCallback, useMemo, useEffect, type CSSProperties } from "react";
+import { memo, useState, useRef, useCallback, useEffect, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { useWebSocket } from "@/context/websocket-context";
 import { useChatMessages } from "@/context/chat-history-context";
 import { useAiState } from "@/context/ai-state-context";
 import { useInterrupt } from "@/components/canvas/live2d";
 import { useVAD } from "@/context/vad-context";
+import { toaster } from "@/components/ui/toaster";
 
 // Inject styles once
 const STYLE_ID = "input-bar-styles";
@@ -69,6 +70,36 @@ const S_SEND_BASE: CSSProperties = {
   width: "44px", height: "44px", borderRadius: "50%",
   display: "flex", alignItems: "center", justifyContent: "center",
   transition: "all 0.2s ease", flexShrink: 0, padding: 0,
+};
+
+const S_SEND_SPEAKING: CSSProperties = {
+  ...S_SEND_BASE,
+  background: "rgba(239, 68, 68, 0.2)",
+  border: "1px solid rgba(239, 68, 68, 0.3)",
+  cursor: "pointer",
+};
+const S_SEND_LOADING: CSSProperties = {
+  ...S_SEND_BASE,
+  background: "linear-gradient(135deg, #7c3aed, #5b21b6)",
+  border: "none",
+  opacity: 0.7,
+};
+const S_SEND_READY: CSSProperties = {
+  ...S_SEND_BASE,
+  background: "linear-gradient(135deg, #8b5cf6, #6d28d9)",
+  border: "none",
+  cursor: "pointer",
+};
+const S_SEND_OVERLIMIT: CSSProperties = {
+  ...S_SEND_BASE,
+  background: "rgba(255,255,255,0.06)",
+  border: "none",
+  opacity: 0.4,
+};
+const S_SEND_IDLE: CSSProperties = {
+  ...S_SEND_BASE,
+  background: "rgba(255,255,255,0.06)",
+  border: "none",
 };
 
 const S_HINTS_ROW: CSSProperties = {
@@ -248,61 +279,21 @@ export const InputBar = memo(() => {
   }, [interrupt]);
 
   return (
-    <div
-      style={{
-        padding: "10px 16px",
-        background: "rgba(255, 255, 255, 0.03)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderTop: "1px solid rgba(255, 255, 255, 0.06)",
-        paddingBottom: "calc(10px + env(safe-area-inset-bottom, 0px))",
-      }}
-    >
+    <div style={S_BAR_WRAP}>
       {stateText && (
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: "6px" }}>
-          <span
-            style={{
-              fontSize: "11px",
-              color: "rgba(139, 92, 246, 0.7)",
-              animation: "inputPulse 1.5s ease-in-out infinite",
-            }}
-          >
-            {stateText}
-          </span>
+        <div style={S_STATE_ROW}>
+          <span style={S_STATE_TEXT}>{stateText}</span>
         </div>
       )}
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-end",
-          gap: "8px",
-          maxWidth: "720px",
-          margin: "0 auto",
-        }}
-      >
+      <div style={S_INPUT_ROW}>
         <button
           className="ling-mic-btn"
           onClick={handleMicToggle}
           aria-label={micOn ? t("chat.micOn") : t("chat.micOff")}
           aria-pressed={micOn}
           title={micOn ? t("chat.micOn") : t("chat.micOff")}
-          style={{
-            width: "44px",
-            height: "44px",
-            borderRadius: "50%",
-            background: micOn ? "rgba(239, 68, 68, 0.2)" : "rgba(255,255,255,0.06)",
-            border: micOn ? "1px solid rgba(239, 68, 68, 0.4)" : "1px solid rgba(255,255,255,0.08)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            transition: "all 0.2s ease",
-            flexShrink: 0,
-            color: micOn ? "#ef4444" : "rgba(255,255,255,0.5)",
-            animation: micOn ? "micPulse 1.5s ease-in-out infinite" : "none",
-            padding: 0,
-          }}
+          style={micOn ? S_MIC_ON : S_MIC_OFF}
         >
           <MicIcon />
         </button>
@@ -327,33 +318,13 @@ export const InputBar = memo(() => {
           disabled={!isAiSpeaking && !canSend}
           aria-label={isAiSpeaking ? t("chat.stopReply") : !isConnected ? t("chat.sendDisconnected") : t("chat.sendMessage")}
           title={isAiSpeaking ? t("chat.stopReply") : !isConnected ? t("chat.sendDisconnected") : t("chat.sendMessage")}
-          style={{
-            width: "44px",
-            height: "44px",
-            borderRadius: "50%",
-            background: isAiSpeaking
-              ? "rgba(239, 68, 68, 0.2)"
-              : isSending
-                ? "linear-gradient(135deg, #7c3aed, #5b21b6)"
-                : canSend
-                  ? "linear-gradient(135deg, #8b5cf6, #6d28d9)"
-                  : "rgba(255,255,255,0.06)",
-            border: isAiSpeaking ? "1px solid rgba(239, 68, 68, 0.3)" : "none",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: canSend || isAiSpeaking ? "pointer" : "not-allowed",
-            opacity: isSending ? 0.7 : !isAiSpeaking && !canSend && hasText ? 0.4 : 1,
-            transition: "all 0.2s ease",
-            flexShrink: 0,
-            padding: 0,
-          }}
+          style={isAiSpeaking ? S_SEND_SPEAKING : isSending ? S_SEND_LOADING : canSend ? S_SEND_READY : hasText ? S_SEND_OVERLIMIT : S_SEND_IDLE}
         >
           {isAiSpeaking ? <StopIcon /> : isSending ? <LoadingIcon /> : <SendIcon />}
         </button>
       </div>
-      <div style={{ maxWidth: "720px", margin: "2px auto 0", paddingLeft: "52px", display: "flex", justifyContent: "space-between" }}>
-        <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.2)" }}>
+      <div style={S_HINTS_ROW}>
+        <span style={S_MD_HINT}>
           {t("chat.markdownHint")}
         </span>
         {charCount > 0 && (
