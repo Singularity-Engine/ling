@@ -250,6 +250,65 @@ const S_RETRY_BTN: CSSProperties = {
   transition: "all 0.2s ease",
 };
 
+// ─── Empty-state style constants ───
+
+const _S_EMPTY_BASE: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  height: "100%",
+  padding: "24px 16px",
+  gap: "20px",
+};
+
+const S_EMPTY_WRAP: CSSProperties = {
+  ..._S_EMPTY_BASE,
+  animation: "chatFadeInUp 0.6s ease-out",
+};
+
+const S_EMPTY_WRAP_EXIT: CSSProperties = {
+  ..._S_EMPTY_BASE,
+  animation: "emptyStateFadeOut 0.35s ease-in forwards",
+  pointerEvents: "none",
+  position: "absolute",
+  inset: 0,
+  zIndex: 10,
+};
+
+const S_EMPTY_ICON: CSSProperties = {
+  fontSize: "32px",
+  animation: "emptyStateFloat 3s ease-in-out infinite",
+};
+
+const S_WELCOME_CARD: CSSProperties = {
+  background: "rgba(255, 255, 255, 0.08)",
+  backdropFilter: "blur(16px)",
+  WebkitBackdropFilter: "blur(16px)",
+  border: "1px solid rgba(255, 255, 255, 0.06)",
+  borderRadius: "16px",
+  padding: "20px 24px",
+  maxWidth: "320px",
+  width: "100%",
+  textAlign: "center",
+  display: "flex",
+  flexDirection: "column",
+  gap: "8px",
+};
+
+const S_WELCOME_TITLE: CSSProperties = {
+  fontSize: "15px",
+  color: "rgba(226, 212, 255, 0.85)",
+  fontWeight: 500,
+  letterSpacing: "0.3px",
+  lineHeight: "1.5",
+};
+
+const S_WELCOME_SUB: CSSProperties = {
+  fontSize: "12px",
+  color: "rgba(255, 255, 255, 0.25)",
+};
+
 export const ChatArea = memo(() => {
   const { messages, appendHumanMessage } = useChatMessages();
   const { fullResponse } = useStreamingValue();
@@ -579,69 +638,13 @@ export const ChatArea = memo(() => {
       style={S_CONTAINER}
     >
       {(isEmpty || emptyExiting) && (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            height: "100%",
-            padding: "24px 16px",
-            gap: "20px",
-            animation: emptyExiting
-              ? "emptyStateFadeOut 0.35s ease-in forwards"
-              : "chatFadeInUp 0.6s ease-out",
-            pointerEvents: emptyExiting ? "none" : undefined,
-            // During exit: overlay so incoming content isn't pushed below viewport
-            ...(emptyExiting ? { position: "absolute" as const, inset: 0, zIndex: 10 } : {}),
-          }}
-        >
-          <span
-            style={{
-              fontSize: "32px",
-              animation: "emptyStateFloat 3s ease-in-out infinite",
-            }}
-          >
-            ✦
-          </span>
+        <div style={emptyExiting ? S_EMPTY_WRAP_EXIT : S_EMPTY_WRAP}>
+          <span style={S_EMPTY_ICON}>✦</span>
 
           {/* Glassmorphism welcome card */}
-          <div
-            className="ling-welcome-card"
-            style={{
-              background: "rgba(255, 255, 255, 0.08)",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
-              border: "1px solid rgba(255, 255, 255, 0.06)",
-              borderRadius: "16px",
-              padding: "20px 24px",
-              maxWidth: "320px",
-              width: "100%",
-              textAlign: "center",
-              display: "flex",
-              flexDirection: "column",
-              gap: "8px",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "15px",
-                color: "rgba(226, 212, 255, 0.85)",
-                fontWeight: 500,
-                letterSpacing: "0.3px",
-                lineHeight: "1.5",
-              }}
-            >
-              {welcomeTitle}
-            </span>
-            <span
-              style={{
-                fontSize: "12px",
-                color: "rgba(255, 255, 255, 0.25)",
-              }}
-            >
-              {t("ui.emptySubHint")}
-            </span>
+          <div className="ling-welcome-card" style={S_WELCOME_CARD}>
+            <span style={S_WELCOME_TITLE}>{welcomeTitle}</span>
+            <span style={S_WELCOME_SUB}>{t("ui.emptySubHint")}</span>
           </div>
 
           {/* Suggestion chips */}
