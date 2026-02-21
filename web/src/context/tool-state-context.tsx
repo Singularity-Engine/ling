@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useRef, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useRef, useEffect, useMemo, ReactNode } from "react";
 import { getSkillKey } from "../config/skill-registry";
 
 export type ToolCategory = 'search' | 'code' | 'memory' | 'weather' | 'generic';
@@ -183,8 +183,8 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
     removalTimers.current.clear();
   }, []);
 
-  const dominantCategory = computeDominant(activeTools);
-  const activeToolName = activeTools.length > 0 ? activeTools[0].name : null;
+  const dominantCategory = useMemo(() => computeDominant(activeTools), [computeDominant, activeTools]);
+  const activeToolName = useMemo(() => activeTools.length > 0 ? activeTools[0].name : null, [activeTools]);
 
   // Demo trigger: window.__triggerToolDemo('search') in browser console
   useEffect(() => {
@@ -206,19 +206,22 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
     return () => { delete (window as any).__triggerToolDemo; };
   }, [startTool, completeTool]);
 
+  const value = useMemo(() => ({
+    activeTools,
+    recentResults,
+    currentPhase,
+    dominantCategory,
+    activeToolName,
+    startTool,
+    updateTool,
+    completeTool,
+    failTool,
+    clearResults,
+  }), [activeTools, recentResults, currentPhase, dominantCategory, activeToolName,
+       startTool, updateTool, completeTool, failTool, clearResults]);
+
   return (
-    <ToolStateContext.Provider value={{
-      activeTools,
-      recentResults,
-      currentPhase,
-      dominantCategory,
-      activeToolName,
-      startTool,
-      updateTool,
-      completeTool,
-      failTool,
-      clearResults,
-    }}>
+    <ToolStateContext.Provider value={value}>
       {children}
     </ToolStateContext.Provider>
   );

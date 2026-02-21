@@ -52,7 +52,9 @@ const S_WRAP_OUT: CSSProperties = {
   animation: "thinkingFadeOut 0.25s ease-out forwards",
 };
 
-const S_DOTS: CSSProperties[] = [0, 1, 2].map((i) => ({
+const DOT_INDICES = [0, 1, 2] as const;
+
+const S_DOTS: CSSProperties[] = DOT_INDICES.map((i) => ({
   width: "8px",
   height: "8px",
   borderRadius: "50%",
@@ -69,7 +71,7 @@ interface TypingIndicatorProps {
 export const TypingIndicator = memo(({ fadeOut }: TypingIndicatorProps) => {
   return (
     <div style={fadeOut ? S_WRAP_OUT : S_WRAP_IN}>
-      {[0, 1, 2].map((i) => (
+      {DOT_INDICES.map((i) => (
         <div key={i} style={S_DOTS[i]} />
       ))}
     </div>

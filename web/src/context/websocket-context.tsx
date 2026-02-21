@@ -1,5 +1,4 @@
-/* eslint-disable react/jsx-no-constructed-context-values */
-import React, { useContext, useCallback } from 'react';
+import React, { useContext, useCallback, useMemo } from 'react';
 import { wsService } from '@/services/websocket-service';
 import { useLocalStorage } from '@/hooks/utils/use-local-storage';
 
@@ -82,15 +81,15 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     wsService.connect(url);
   }, [setWsUrl]);
 
-  const value = {
+  const value = useMemo(() => ({
     sendMessage: wsService.sendMessage.bind(wsService),
-    wsState: 'CLOSED',
+    wsState: 'CLOSED' as const,
     reconnect: () => wsService.connect(wsUrl),
     wsUrl,
     setWsUrl: handleSetWsUrl,
     baseUrl,
     setBaseUrl,
-  };
+  }), [wsUrl, handleSetWsUrl, baseUrl, setBaseUrl]);
 
   return (
     <WebSocketContext.Provider value={value}>
