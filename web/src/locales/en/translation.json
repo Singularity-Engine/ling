@@ -130,7 +130,8 @@
     "createConversationFailed": "Failed to create conversation",
     "loadSessionsFailed": "Failed to load sessions",
     "sessionDeleted": "Session deleted",
-    "affinityReached": "Affinity reached {{milestone}}!"
+    "affinityReached": "Affinity reached {{milestone}}!",
+    "networkOffline": "Network offline, waiting to reconnect…"
   },
   "error": {
     "cameraApiNotSupported": "Camera API is not supported on this device",

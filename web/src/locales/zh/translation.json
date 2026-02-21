@@ -130,7 +130,8 @@
     "createConversationFailed": "创建新对话失败",
     "loadSessionsFailed": "加载会话列表失败",
     "sessionDeleted": "会话已删除",
-    "affinityReached": "好感度达到 {{milestone}}！"
+    "affinityReached": "好感度达到 {{milestone}}！",
+    "networkOffline": "网络已断开，等待恢复…"
   },
   "error": {
     "cameraApiNotSupported": "此设备不支持摄像头API",
