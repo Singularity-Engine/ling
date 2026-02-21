@@ -5,12 +5,23 @@
  * CTA 按钮引导用户查看定价页面。
  */
 
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUI } from '@/context/ui-context';
 
 const InsufficientCreditsModal: React.FC = () => {
   const { t } = useTranslation();
   const { billingModal, closeBillingModal, setPricingOpen } = useUI();
+
+  // ESC to close
+  useEffect(() => {
+    if (!billingModal.open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeBillingModal();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [billingModal.open, closeBillingModal]);
 
   if (!billingModal.open) return null;
 
