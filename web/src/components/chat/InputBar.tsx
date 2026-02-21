@@ -149,9 +149,19 @@ export const InputBar = memo(() => {
       textareaRef.current.style.height = "auto";
       textareaRef.current.focus();
     }
-    // Debounce: prevent rapid-fire sends
-    setTimeout(() => setIsSending(false), 300);
+    // isSending reset is driven by aiState effect + send-failed listener
   }, [inputText, wsContext, aiState, interrupt, appendHumanMessage, isSending]);
+
+  // Reset isSending when AI starts processing, connection drops, or safety timeout
+  useEffect(() => {
+    if (!isSending) return;
+    if (isAiBusy || !isConnected) {
+      setIsSending(false);
+      return;
+    }
+    const timer = setTimeout(() => setIsSending(false), 10_000);
+    return () => clearTimeout(timer);
+  }, [isSending, isAiBusy, isConnected]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
