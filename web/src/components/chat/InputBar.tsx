@@ -109,6 +109,10 @@ const S_HINTS_ROW: CSSProperties = {
   display: "flex", justifyContent: "space-between",
 };
 const S_MD_HINT: CSSProperties = { fontSize: "10px", color: "rgba(255,255,255,0.2)" };
+const S_CHAR_BASE: CSSProperties = { fontSize: "10px", transition: "color 0.2s" };
+const S_CHAR_NORMAL: CSSProperties = { ...S_CHAR_BASE, color: "rgba(255,255,255,0.25)" };
+const S_CHAR_WARN: CSSProperties = { ...S_CHAR_BASE, color: "rgba(251, 191, 36, 0.7)" };
+const S_CHAR_OVER: CSSProperties = { ...S_CHAR_BASE, color: "#ef4444" };
 
 const MicIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -208,7 +212,7 @@ export const InputBar = memo(() => {
   const isAiSpeaking = aiState === "thinking-speaking";
   const isConnected = wsContext?.wsState === "OPEN";
   const stateKey = AI_STATE_KEYS[aiState] || "";
-  const stateText = stateKey ? t(stateKey) : "";
+  const stateText = isSending && !stateKey ? t("chat.sending") : stateKey ? t(stateKey) : "";
   const charCount = trimmed.length;
   const isOverLimit = charCount > MAX_LENGTH;
   const canSend = hasText && !isOverLimit && !isSending && isConnected;

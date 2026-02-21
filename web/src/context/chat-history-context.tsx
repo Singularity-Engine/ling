@@ -191,7 +191,7 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
           content: toolMessageData.content || '',
           timestamp: toolMessageData.timestamp!,
         };
-        return [...prevMessages, newToolMessage];
+        return trimMessages([...prevMessages, newToolMessage]);
       }
     });
   }, []);

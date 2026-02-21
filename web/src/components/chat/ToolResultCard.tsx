@@ -70,6 +70,37 @@ const S_SI_DOTS: CSSProperties = { display: "inline-flex", gap: "3px", alignItem
 const S_SI_DONE: CSSProperties = { fontSize: "12px", animation: "toolStatusPop 0.3s ease-out" };
 const S_SI_ERROR: CSSProperties = { fontSize: "12px", color: "#f87171", animation: "toolStatusPop 0.3s ease-out" };
 
+// Lazily-cached pulse-dot styles keyed by accent color — avoids creating 3 new
+// objects inside .map() on every StatusIndicator render.
+const _dotCache = new Map<string, CSSProperties[]>();
+function getDotStyles(accent: string): CSSProperties[] {
+  let s = _dotCache.get(accent);
+  if (!s) {
+    s = [0, 1, 2].map(i => ({
+      width: "4px", height: "4px", borderRadius: "50%",
+      background: accent,
+      animation: `toolPulse 1s ease-in-out ${i * 0.2}s infinite`,
+    } as CSSProperties));
+    _dotCache.set(accent, s);
+  }
+  return s;
+}
+
+// Lazily-cached shimmer inner-bar style keyed by accent color.
+const _shimmerCache = new Map<string, CSSProperties>();
+function getShimmerInnerStyle(accent: string): CSSProperties {
+  let s = _shimmerCache.get(accent);
+  if (!s) {
+    s = {
+      position: "absolute", top: 0, left: 0, width: "50%", height: "100%",
+      background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
+      animation: "toolShimmer 1.5s ease-in-out infinite",
+    };
+    _shimmerCache.set(accent, s);
+  }
+  return s;
+}
+
 // ShimmerBar
 const S_SHIMMER: CSSProperties = { height: "2px", overflow: "hidden", position: "relative", background: "rgba(255,255,255,0.04)" };
 
@@ -81,6 +112,39 @@ const S_TC_COLLAPSED_TEXT: CSSProperties = {
   fontSize: "12px", color: "rgba(255,255,255,0.4)", lineHeight: 1.5,
   overflowWrap: "break-word", wordBreak: "break-word",
 };
+const S_TC_TEXT: CSSProperties = {
+  display: "block", fontSize: "13px", color: "rgba(255,255,255,0.75)",
+  whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word", lineHeight: 1.6,
+};
+const S_TC_TEXT_ERROR: CSSProperties = { ...S_TC_TEXT, color: "rgba(248, 113, 113, 0.85)" };
+const S_CHEVRON_OPEN: CSSProperties = {
+  fontSize: "10px", color: "rgba(255,255,255,0.3)", transition: "transform 0.2s ease",
+  transform: "rotate(180deg)", lineHeight: 1,
+};
+const S_CHEVRON_CLOSED: CSSProperties = { ...S_CHEVRON_OPEN, transform: "rotate(0deg)" };
+const S_NAME_FLEX: CSSProperties = { fontSize: "12px", fontWeight: 600, flex: 1 };
+
+// Precompute per-category card & header styles — avoids creating new objects in render
+function buildCategoryStyles(colors: { bg: string; border: string; accent: string }) {
+  const card: CSSProperties = {
+    background: colors.bg, border: `1px solid ${colors.border}`,
+    borderRadius: "12px", overflow: "hidden", transition: "all 0.3s ease",
+  };
+  const headerBase = {
+    display: "flex" as const, alignItems: "center" as const, gap: "8px",
+    padding: "8px 14px", userSelect: "none" as const, transition: "background 0.2s",
+  };
+  const headerExpanded: CSSProperties = { ...headerBase, borderBottom: `1px solid ${colors.border}`, cursor: "pointer" };
+  const headerCollapsed: CSSProperties = { ...headerBase, borderBottom: "none", cursor: "pointer" };
+  const headerNoContent: CSSProperties = { ...headerBase, borderBottom: "none", cursor: "default" };
+  const name: CSSProperties = { ...S_NAME_FLEX, color: colors.accent };
+  return { card, headerExpanded, headerCollapsed, headerNoContent, name };
+}
+
+const CATEGORY_CARD_STYLES = Object.fromEntries(
+  Object.entries(CARD_COLORS).map(([cat, c]) => [cat, buildCategoryStyles(c)])
+) as Record<string, ReturnType<typeof buildCategoryStyles>>;
+const ERROR_CARD_STYLES = buildCategoryStyles(ERROR_COLORS);
 
 interface ToolResultCardProps {
   toolName: string;
@@ -161,17 +225,11 @@ CodeBlock.displayName = "CodeBlock";
 /* Status indicator with animation */
 const StatusIndicator = memo(({ status, accent }: { status: string; accent: string }) => {
   if (status === "running") {
+    const dots = getDotStyles(accent);
     return (
       <span style={S_SI_DOTS}>
-        {[0, 1, 2].map(i => (
-          <span
-            key={i}
-            style={{
-              width: "4px", height: "4px", borderRadius: "50%",
-              background: accent,
-              animation: `toolPulse 1s ease-in-out ${i * 0.2}s infinite`,
-            }}
-          />
+        {dots.map((dotStyle, i) => (
+          <span key={i} style={dotStyle} />
         ))}
       </span>
     );
@@ -186,13 +244,7 @@ StatusIndicator.displayName = "StatusIndicator";
 /* Shimmer bar for running state */
 const ShimmerBar = memo(({ accent }: { accent: string }) => (
   <div style={S_SHIMMER}>
-    <div
-      style={{
-        position: "absolute", top: 0, left: 0, width: "50%", height: "100%",
-        background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
-        animation: "toolShimmer 1.5s ease-in-out infinite",
-      }}
-    />
+    <div style={getShimmerInnerStyle(accent)} />
   </div>
 ));
 ShimmerBar.displayName = "ShimmerBar";
@@ -230,57 +282,28 @@ export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCar
     if (hasContent) setCollapsed(c => !c);
   }, [hasContent]);
 
-  const colors = isError
-    ? ERROR_COLORS
-    : CARD_COLORS[hasCode ? "code" : category] || CARD_COLORS.generic;
+  const colorKey = hasCode ? "code" : category;
+  const colors = isError ? ERROR_COLORS : (CARD_COLORS[colorKey] || CARD_COLORS.generic);
+  const styles = isError ? ERROR_CARD_STYLES : (CATEGORY_CARD_STYLES[colorKey] || CATEGORY_CARD_STYLES.generic);
 
   // Truncated text for collapsed view
   const displayText = collapsed && isLongText
     ? textContent.slice(0, COLLAPSE_CHAR_THRESHOLD) + "…"
     : textContent;
 
+  const headerStyle = !hasContent
+    ? styles.headerNoContent
+    : (!collapsed ? styles.headerExpanded : styles.headerCollapsed);
+
   return (
-    <div
-      style={{
-        background: colors.bg,
-        border: `1px solid ${colors.border}`,
-        borderRadius: "12px",
-        overflow: "hidden",
-        transition: "all 0.3s ease",
-      }}
-    >
+    <div style={styles.card}>
       {/* Header — clickable to toggle collapse */}
-      <div
-        onClick={toggleCollapsed}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          padding: "8px 14px",
-          borderBottom: (!collapsed && hasContent) ? `1px solid ${colors.border}` : "none",
-          cursor: hasContent ? "pointer" : "default",
-          userSelect: "none",
-          transition: "background 0.2s",
-        }}
-      >
-        <span style={{ fontSize: "14px" }}>{icon}</span>
-        <span style={{ fontSize: "12px", color: colors.accent, fontWeight: 600, flex: 1 }}>
-          {toolName}
-        </span>
+      <div onClick={toggleCollapsed} style={headerStyle}>
+        <span style={S_TC_ICON}>{icon}</span>
+        <span style={styles.name}>{toolName}</span>
         <StatusIndicator status={status} accent={colors.accent} />
-        {/* Chevron */}
         {hasContent && (
-          <span
-            style={{
-              fontSize: "10px",
-              color: "rgba(255,255,255,0.3)",
-              transition: "transform 0.2s ease",
-              transform: collapsed ? "rotate(0deg)" : "rotate(180deg)",
-              lineHeight: 1,
-            }}
-          >
-            ▼
-          </span>
+          <span style={collapsed ? S_CHEVRON_CLOSED : S_CHEVRON_OPEN}>▼</span>
         )}
       </div>
 
@@ -289,21 +312,9 @@ export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCar
 
       {/* Content — hidden when collapsed */}
       {!collapsed && hasContent && (
-        <div style={{ padding: "10px 14px" }}>
+        <div style={S_TC_CONTENT}>
           {textContent && (
-            <span
-              style={{
-                display: "block",
-                fontSize: "13px",
-                color: isError ? "rgba(248, 113, 113, 0.85)" : "rgba(255,255,255,0.75)",
-                whiteSpace: "pre-wrap",
-                overflowWrap: "break-word",
-                wordBreak: "break-word",
-                lineHeight: 1.6,
-              }}
-            >
-              {displayText}
-            </span>
+            <span style={isError ? S_TC_TEXT_ERROR : S_TC_TEXT}>{displayText}</span>
           )}
           {codeBlocks.map((block) => (
             <CodeBlock key={`${block.lang}:${block.code.slice(0, 48)}`} lang={block.lang} code={block.code} defaultCollapsed={block.code.split("\n").length > COLLAPSE_LINE_THRESHOLD} />
@@ -313,18 +324,8 @@ export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCar
 
       {/* Collapsed summary line */}
       {collapsed && hasContent && (
-        <div style={{ padding: "6px 14px 8px" }}>
-          <span
-            style={{
-              fontSize: "12px",
-              color: "rgba(255,255,255,0.4)",
-              lineHeight: 1.5,
-              overflowWrap: "break-word",
-              wordBreak: "break-word",
-            }}
-          >
-            {displayText}
-          </span>
+        <div style={S_TC_COLLAPSED_WRAP}>
+          <span style={S_TC_COLLAPSED_TEXT}>{displayText}</span>
         </div>
       )}
     </div>

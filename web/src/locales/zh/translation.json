@@ -196,6 +196,7 @@
     "textCopied": "文本已复制",
     "regenerating": "正在重新生成...",
     "loadOlder": "加载更早的 {{count}} 条消息",
+    "sending": "发送中...",
     "noResponse": "灵似乎暂时没有回应，试试重新发送？",
     "retry": "重试"
   },
@@ -284,6 +285,7 @@
     "chatMessages": "聊天消息",
     "emptyHint": "我在这里，随时可以聊",
     "emptySubHint": "语音或点击下方话题开始",
+    "emptySubHintDisconnected": "正在连接灵...",
     "welcomeTitle": "嗨，有什么想聊的？",
     "welcomeTitleMorning": "早上好，有什么想聊的？",
     "welcomeTitleAfternoon": "下午好，有什么想聊的？",

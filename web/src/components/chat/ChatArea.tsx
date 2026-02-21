@@ -101,6 +101,19 @@ const S_CHIP_BASE: CSSProperties = {
   lineHeight: "1.4",
 };
 
+// Lazily-cached chip styles keyed by "baseDelay:index" — avoids spreading
+// S_CHIP_BASE + computing animation on every SuggestionChips render.
+const _chipCache = new Map<string, CSSProperties>();
+function getChipStyle(baseDelay: number, index: number): CSSProperties {
+  const key = `${baseDelay}:${index}`;
+  let s = _chipCache.get(key);
+  if (!s) {
+    s = { ...S_CHIP_BASE, animation: `chipFadeIn 0.4s ease-out ${baseDelay + index * 0.08}s both` };
+    _chipCache.set(key, s);
+  }
+  return s;
+}
+
 // Reusable suggestion chips strip
 const SuggestionChips = memo(function SuggestionChips({
   chips,
@@ -121,10 +134,7 @@ const SuggestionChips = memo(function SuggestionChips({
           key={chip}
           className="welcome-chip"
           onClick={() => onChipClick(chip)}
-          style={{
-            ...S_CHIP_BASE,
-            animation: `chipFadeIn 0.4s ease-out ${baseDelay + i * 0.08}s both`,
-          }}
+          style={getChipStyle(baseDelay, i)}
         >
           {chip}
         </button>
