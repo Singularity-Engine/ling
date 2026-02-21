@@ -462,8 +462,7 @@ canvas {
 
 /* === Markdown 内容（AI 气泡） === */
 .md-content {
-  overflow-wrap: break-word;
-  word-break: break-word;
+  overflow-wrap: anywhere;
   min-width: 0;
 }
 .md-content p { margin: 0 0 0.5em; }
@@ -538,6 +537,7 @@ canvas {
   padding: 10px 14px;
   overflow: auto;
   max-height: 500px;
+  line-height: 1.5;
   scrollbar-width: thin;
   scrollbar-color: var(--ling-purple-40) transparent;
 }
@@ -561,6 +561,7 @@ canvas {
   padding: 10px 14px;
   overflow: auto;
   max-height: 500px;
+  line-height: 1.5;
   margin: 0.5em 0;
 }
 .md-content pre code {
@@ -569,6 +570,7 @@ canvas {
   font-size: 0.85em;
   color: var(--ling-md-pre-code);
   word-break: normal;
+  overflow-wrap: normal;
   overflow: visible;
 }
 .md-content ul, .md-content ol { margin: 0.4em 0; padding-left: 1.5em; }
@@ -613,7 +615,6 @@ canvas {
 }
 .md-content td {
   overflow-wrap: break-word;
-  word-break: break-word;
 }
 .md-content th {
   background: rgba(255, 255, 255, 0.04);

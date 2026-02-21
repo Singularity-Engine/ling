@@ -131,7 +131,7 @@ const S_BUBBLE_AI_ACTIVE: CSSProperties = { ...S_BUBBLE_AI, cursor: "default" };
 
 const S_USER_TEXT: CSSProperties = {
   fontSize: "14px", color: "rgba(255,255,255,0.95)", whiteSpace: "pre-wrap",
-  overflowWrap: "break-word", wordBreak: "break-word", lineHeight: 1.7, letterSpacing: "0.3px",
+  overflowWrap: "anywhere", lineHeight: 1.7, letterSpacing: "0.3px",
 };
 const S_AI_MD: CSSProperties = { fontSize: "14px", color: "rgba(255,255,255,0.88)", lineHeight: 1.7, letterSpacing: "0.3px" };
 
