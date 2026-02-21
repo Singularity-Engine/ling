@@ -885,6 +885,8 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
                 type: 'error',
                 duration: 3000,
               });
+              // Restore the input text so the user doesn't have to retype
+              window.dispatchEvent(new CustomEvent('send-failed', { detail: { text } }));
               pendingNewChatRef.current = false;
               setAiStateRef.current('idle');
             });
