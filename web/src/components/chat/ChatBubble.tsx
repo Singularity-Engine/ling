@@ -110,7 +110,7 @@ export const mdComponents = {
 // ─── Long-message collapse thresholds ───
 const COLLAPSE_CHAR_THRESHOLD = 500;
 const COLLAPSE_LINE_THRESHOLD = 12;
-const COLLAPSED_MAX_HEIGHT = 288; // ~12 lines at 14px * 1.7 line-height
+const COLLAPSED_MAX_HEIGHT = 320; // ~12 lines at 14px * 1.7 line-height + paragraph gaps
 
 // Inject animation styles once
 const STYLE_ID = "chat-bubble-styles";
