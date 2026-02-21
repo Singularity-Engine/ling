@@ -36,9 +36,8 @@ PLAN_PRICES: dict[str, str] = {
 
 # 积分充值包 (积分数 → 价格 cents)
 CREDIT_PACKAGES: dict[int, int] = {
-    100: 499,     # 100 积分 = $4.99
-    500: 1999,    # 500 积分 = $19.99
-    2000: 6999,   # 2000 积分 = $69.99
+    10000: 499,     # 10,000 积分 = $4.99
+    50000: 1999,    # 50,000 积分 = $19.99
 }
 
 # Price ID → (plan_name, credits_per_period)
@@ -50,11 +49,11 @@ def _init_price_map():
         if not price_id:
             continue
         if "stardust" in key:
-            PRICE_TO_PLAN[price_id] = ("stardust", 100)
+            PRICE_TO_PLAN[price_id] = ("stardust", 10000)
         elif "resonance" in key:
-            PRICE_TO_PLAN[price_id] = ("resonance", 500)
+            PRICE_TO_PLAN[price_id] = ("resonance", 50000)
         elif "eternal" in key:
-            PRICE_TO_PLAN[price_id] = ("eternal", 2000)
+            PRICE_TO_PLAN[price_id] = ("eternal", 50000)
 
 
 _init_price_map()
@@ -300,9 +299,9 @@ def _handle_checkout_completed(session: dict, repo: LingUserRepository):
     # 订阅激活
     plan_key = metadata.get("plan", "")
     plan_info = {
-        "stardust_monthly": ("stardust", 100),
-        "resonance_monthly": ("resonance", 500),
-        "eternal_yearly": ("eternal", 2000),
+        "stardust_monthly": ("stardust", 10000),
+        "resonance_monthly": ("resonance", 50000),
+        "eternal_yearly": ("eternal", 50000),
     }
 
     if plan_key in plan_info:

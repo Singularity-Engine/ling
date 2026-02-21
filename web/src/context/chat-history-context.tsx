@@ -6,18 +6,28 @@ import { Message } from '@/services/websocket-service';
 import { HistoryInfo } from './websocket-context';
 
 /**
- * Context 1 — Chat messages, history list, session management.
- * Changes only when a message is added/removed or history changes.
+ * Context 1a — Chat messages & message mutators.
+ * Changes only when a message is added/removed/replaced.
+ * Chat-rendering components (ChatArea, InputBar, etc.) subscribe here
+ * and are shielded from historyList changes.
  */
-interface ChatHistoryState {
+interface MessagesState {
   messages: Message[];
-  historyList: HistoryInfo[];
-  currentHistoryUid: string | null;
   appendHumanMessage: (content: string) => void;
   appendAIMessage: (content: string, name?: string, avatar?: string) => void;
   appendOrUpdateToolCallMessage: (toolMessageData: Partial<Message>) => void;
   popLastHumanMessage: () => void;
   setMessages: (messages: Message[]) => void;
+}
+
+/**
+ * Context 1b — History list & session management.
+ * Changes when sidebar history preview updates (updateHistoryList) or
+ * the active conversation switches.  Only sidebar / App subscribe here.
+ */
+interface HistoryListState {
+  historyList: HistoryInfo[];
+  currentHistoryUid: string | null;
   setHistoryList: (
     value: HistoryInfo[] | ((prev: HistoryInfo[]) => HistoryInfo[])
   ) => void;
@@ -73,7 +83,8 @@ const DEFAULT_HISTORY = {
   fullResponse: '',
 };
 
-export const ChatHistoryContext = createContext<ChatHistoryState | null>(null);
+const MessagesContext = createContext<MessagesState | null>(null);
+const HistoryListContext = createContext<HistoryListState | null>(null);
 const StreamingValueContext = createContext<StreamingValueState | null>(null);
 const StreamingSetterContext = createContext<StreamingSetterState | null>(null);
 const StreamingRefContext = createContext<StreamingRefState | null>(null);
@@ -250,29 +261,37 @@ export function ChatHistoryProvider({ children }: { children: ReactNode }) {
 
   // ── Context values ──
 
-  // Context 1: messages & history — changes only on message/history updates
-  const chatValue = useMemo(
+  // Context 1a: messages only — changes on message add/remove/replace
+  const messagesValue = useMemo(
     () => ({
       messages,
-      historyList,
-      currentHistoryUid,
       appendHumanMessage,
       appendAIMessage,
       appendOrUpdateToolCallMessage,
       popLastHumanMessage,
       setMessages,
+    }),
+    [
+      messages,
+      appendHumanMessage,
+      appendAIMessage,
+      appendOrUpdateToolCallMessage,
+      popLastHumanMessage,
+    ],
+  );
+
+  // Context 1b: history list — changes on sidebar preview / session switch
+  const historyValue = useMemo(
+    () => ({
+      historyList,
+      currentHistoryUid,
       setHistoryList,
       setCurrentHistoryUid,
       updateHistoryList,
     }),
     [
-      messages,
       historyList,
       currentHistoryUid,
-      appendHumanMessage,
-      appendAIMessage,
-      appendOrUpdateToolCallMessage,
-      popLastHumanMessage,
       updateHistoryList,
     ],
   );
@@ -301,27 +320,39 @@ export function ChatHistoryProvider({ children }: { children: ReactNode }) {
   );
 
   return (
-    <ChatHistoryContext.Provider value={chatValue}>
-      <StreamingSetterContext.Provider value={streamSetters}>
-        <StreamingValueContext.Provider value={streamValue}>
-          <StreamingRefContext.Provider value={streamRefValue}>
-            {children}
-          </StreamingRefContext.Provider>
-        </StreamingValueContext.Provider>
-      </StreamingSetterContext.Provider>
-    </ChatHistoryContext.Provider>
+    <MessagesContext.Provider value={messagesValue}>
+      <HistoryListContext.Provider value={historyValue}>
+        <StreamingSetterContext.Provider value={streamSetters}>
+          <StreamingValueContext.Provider value={streamValue}>
+            <StreamingRefContext.Provider value={streamRefValue}>
+              {children}
+            </StreamingRefContext.Provider>
+          </StreamingValueContext.Provider>
+        </StreamingSetterContext.Provider>
+      </HistoryListContext.Provider>
+    </MessagesContext.Provider>
   );
 }
 
 // ─── Hooks ──────────────────────────────────────────────────────────
 
 /**
- * Messages & history only — shielded from streaming re-renders.
- * Prefer this over useChatHistory() when you don't need fullResponse.
+ * Messages only — shielded from both streaming AND historyList re-renders.
+ * Prefer this for chat-rendering components (ChatArea, InputBar, etc.).
  */
 export function useChatMessages() {
-  const ctx = useContext(ChatHistoryContext);
+  const ctx = useContext(MessagesContext);
   if (!ctx) throw new Error('useChatMessages must be used within ChatHistoryProvider');
+  return ctx;
+}
+
+/**
+ * History list & session management — sidebar, App, and history drawer.
+ * Shielded from message changes and streaming re-renders.
+ */
+export function useHistoryList() {
+  const ctx = useContext(HistoryListContext);
+  if (!ctx) throw new Error('useHistoryList must be used within ChatHistoryProvider');
   return ctx;
 }
 
@@ -347,21 +378,23 @@ export function useStreamingRef() {
 }
 
 /**
- * Backward-compatible hook — merges all three contexts.
- * ⚠️ Subscribes to streaming VALUE, so consumers re-render ~60fps during streaming.
- * Prefer useChatMessages() + useStreamingSetters()/useStreamingValue() for new code.
+ * Backward-compatible hook — merges all contexts.
+ * ⚠️ Subscribes to streaming VALUE + messages + historyList, so consumers
+ * re-render on ALL changes (~60fps during streaming).
+ * Prefer useChatMessages() + useHistoryList() + useStreamingSetters() for new code.
  */
 export function useChatHistory() {
-  const chat = useContext(ChatHistoryContext);
+  const msgs = useContext(MessagesContext);
+  const hist = useContext(HistoryListContext);
   const streamVal = useContext(StreamingValueContext);
   const streamSet = useContext(StreamingSetterContext);
 
-  if (!chat || !streamVal || !streamSet) {
+  if (!msgs || !hist || !streamVal || !streamSet) {
     throw new Error('useChatHistory must be used within a ChatHistoryProvider');
   }
 
   return useMemo(
-    () => ({ ...chat, ...streamVal, ...streamSet }),
-    [chat, streamVal, streamSet],
+    () => ({ ...msgs, ...hist, ...streamVal, ...streamSet }),
+    [msgs, hist, streamVal, streamSet],
   );
 }

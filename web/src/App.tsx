@@ -10,7 +10,7 @@ import { SubtitleProvider } from "./context/subtitle-context";
 import { BgUrlProvider } from "./context/bgurl-context";
 import WebSocketHandler from "./services/websocket-handler";
 import { CameraProvider } from "./context/camera-context";
-import { ChatHistoryProvider, useChatMessages } from "./context/chat-history-context";
+import { ChatHistoryProvider, useChatMessages, useHistoryList } from "./context/chat-history-context";
 import { CharacterConfigProvider } from "./context/character-config-context";
 import { VADProvider, useVAD } from "./context/vad-context";
 import { Live2D, useInterrupt } from "./components/canvas/live2d";
@@ -113,7 +113,8 @@ function MainContent(): JSX.Element {
   const { micOn, startMic, stopMic } = useVAD();
   const { sendMessage } = useWebSocket();
   const { interrupt } = useInterrupt();
-  const { currentHistoryUid, messages, updateHistoryList } = useChatMessages();
+  const { messages } = useChatMessages();
+  const { currentHistoryUid, updateHistoryList } = useHistoryList();
 
   useEffect(() => {
     const handleResize = () => {

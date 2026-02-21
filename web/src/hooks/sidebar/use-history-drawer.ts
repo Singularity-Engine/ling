@@ -1,20 +1,20 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useChatMessages } from '@/context/chat-history-context';
+import { useChatMessages, useHistoryList } from '@/context/chat-history-context';
 import { useWebSocket, HistoryInfo } from '@/context/websocket-context';
 import { toaster } from '@/components/ui/toaster';
 
 export const useHistoryDrawer = () => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const { messages } = useChatMessages();
   const {
     historyList,
     currentHistoryUid,
     setCurrentHistoryUid,
     setHistoryList,
-    messages,
     updateHistoryList,
-  } = useChatMessages();
+  } = useHistoryList();
   const { sendMessage } = useWebSocket();
 
   const fetchAndSetHistory = (uid: string) => {
