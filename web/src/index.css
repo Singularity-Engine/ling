@@ -49,7 +49,7 @@
   --ling-bubble-ai-border: rgba(255, 255, 255, 0.1);
   --ling-bubble-user-shadow: rgba(139, 92, 246, 0.2);
   --ling-bubble-ai-shadow: rgba(0, 0, 0, 0.1);
-  --ling-bubble-ai-text: rgba(255, 255, 255, 0.88);
+  --ling-bubble-ai-text: rgba(255, 255, 255, 0.92);
   --ling-chat-timestamp: rgba(255, 255, 255, 0.5);
   --ling-chat-label: var(--ling-purple-60);
   --ling-collapse-mask-ai: linear-gradient(transparent, rgba(255, 255, 255, 0.06));
@@ -121,7 +121,7 @@
   --ling-bubble-ai-border: rgba(0, 0, 0, 0.1);
   --ling-bubble-user-shadow: rgba(124, 58, 237, 0.15);
   --ling-bubble-ai-shadow: rgba(0, 0, 0, 0.06);
-  --ling-bubble-ai-text: rgba(0, 0, 0, 0.8);
+  --ling-bubble-ai-text: rgba(0, 0, 0, 0.85);
   --ling-chat-timestamp: rgba(0, 0, 0, 0.4);
   --ling-chat-label: var(--ling-purple-60);
   --ling-collapse-mask-ai: linear-gradient(transparent, rgba(0, 0, 0, 0.06));
@@ -599,6 +599,39 @@ canvas {
 .md-content h1 { font-size: 1.3em; }
 .md-content h2 { font-size: 1.15em; }
 .md-content h3 { font-size: 1.05em; }
+/* GFM task list (checkbox) */
+.md-content input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--ling-purple-40);
+  border-radius: 3px;
+  background: transparent;
+  vertical-align: middle;
+  margin: 0 6px 0 0;
+  position: relative;
+  cursor: default;
+}
+.md-content input[type="checkbox"]:checked {
+  background: var(--ling-purple);
+  border-color: var(--ling-purple);
+}
+.md-content input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 0.5px;
+  width: 5px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+}
+.md-content li:has(> input[type="checkbox"]) {
+  list-style: none;
+  margin-left: -1.5em;
+}
 .md-content hr {
   border: none;
   border-top: 1px solid var(--ling-purple-15);

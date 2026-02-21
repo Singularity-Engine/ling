@@ -8,7 +8,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   style.id = STYLE_ID;
   style.textContent = `
     .tool-code-scroll::-webkit-scrollbar { height: 3px; }
-    .tool-code-scroll::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.3); border-radius: 2px; }
+    .tool-code-scroll::-webkit-scrollbar-thumb { background: var(--ling-purple-30); border-radius: 2px; }
     @keyframes toolShimmer {
       0% { transform: translateX(-100%); }
       100% { transform: translateX(200%); }
