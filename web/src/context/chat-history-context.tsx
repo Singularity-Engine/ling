@@ -82,9 +82,13 @@ const StreamingRefContext = createContext<StreamingRefState | null>(null);
  * Combined provider — wraps three granular contexts so App.tsx only
  * needs a single <ChatHistoryProvider>.
  */
+/** Trim to the most recent MAX_MESSAGES entries. */
+const trimMessages = (msgs: Message[]): Message[] =>
+  msgs.length > MAX_MESSAGES ? msgs.slice(-MAX_MESSAGES) : msgs;
+
 export function ChatHistoryProvider({ children }: { children: React.ReactNode }) {
   // ── Messages & history state ──
-  const [messages, setMessages] = useState<Message[]>(DEFAULT_HISTORY.messages);
+  const [messages, setMessagesRaw] = useState<Message[]>(DEFAULT_HISTORY.messages);
   const [historyList, setHistoryList] = useState<HistoryInfo[]>(
     DEFAULT_HISTORY.historyList,
   );
@@ -102,9 +106,15 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
     forceNewMessageRef.current = value;
   }, []);
 
-  /** Trim to the most recent MAX_MESSAGES entries. */
-  const trimMessages = (msgs: Message[]): Message[] =>
-    msgs.length > MAX_MESSAGES ? msgs.slice(-MAX_MESSAGES) : msgs;
+  /**
+   * Wrapped setter exposed to external consumers.
+   * Direct callers (e.g. Gateway history loading) may pass unbounded arrays;
+   * trimming here guarantees MAX_MESSAGES is never exceeded in state.
+   */
+  const setMessages = useCallback(
+    (msgs: Message[]) => setMessagesRaw(trimMessages(msgs)),
+    [],
+  );
 
   const appendHumanMessage = useCallback((content: string) => {
     const newMessage: Message = {
@@ -114,12 +124,12 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
       type: 'text',
       timestamp: new Date().toISOString(),
     };
-    setMessages((prevMessages) => trimMessages([...prevMessages, newMessage]));
+    setMessagesRaw((prevMessages) => trimMessages([...prevMessages, newMessage]));
   }, []);
 
   /** Remove the last message if it's a human message (undo optimistic update on send failure). */
   const popLastHumanMessage = useCallback(() => {
-    setMessages((prev) => {
+    setMessagesRaw((prev) => {
       if (prev.length > 0 && prev[prev.length - 1].role === 'human') {
         return prev.slice(0, -1);
       }
@@ -128,7 +138,7 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
   }, []);
 
   const appendAIMessage = useCallback((content: string, name?: string, avatar?: string) => {
-    setMessages((prevMessages) => {
+    setMessagesRaw((prevMessages) => {
       const lastMessage = prevMessages[prevMessages.length - 1];
 
       // Use ref to avoid stale closure — always reads latest value
@@ -163,7 +173,7 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
       return;
     }
 
-    setMessages((prevMessages) => {
+    setMessagesRaw((prevMessages) => {
       const existingMessageIndex = prevMessages.findIndex(
         (msg) => msg.type === 'tool_call_status' && msg.tool_id === toolMessageData.tool_id!,
       );

@@ -60,11 +60,7 @@ const CodeBlockHeader = memo(function CodeBlockHeader({ lang, code }: { lang: st
     <div className="code-block-header">
       {label && <span className="code-block-lang">{label}</span>}
       <button onClick={handleCopy} className="code-block-copy" aria-label={copied ? "Copied" : "Copy code"}>
-        {copied ? (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        ) : (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        )}
+        {copied ? ICON_CHECK : ICON_COPY}
       </button>
     </div>
   );
@@ -162,6 +158,15 @@ const S_CURSOR: CSSProperties = {
   marginLeft: "2px", verticalAlign: "text-bottom", borderRadius: "1px",
   animation: "streamingCursor 1s ease-in-out infinite",
 };
+
+// Pre-created SVG icon elements — shared across all ChatBubble & CodeBlockHeader
+// instances to avoid redundant React.createElement overhead (50+ bubbles on mount).
+const ICON_COPY = (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+);
+const ICON_CHECK = (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+);
 
 interface ChatBubbleProps {
   role: "user" | "assistant";
@@ -290,11 +295,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
                 ? (copied ? S_COPY_USER_DONE : S_COPY_USER)
                 : (copied ? S_COPY_AI_DONE : S_COPY_AI)}
             >
-              {copied ? (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              ) : (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              )}
+              {copied ? ICON_CHECK : ICON_COPY}
             </button>
           )}
         </div>
