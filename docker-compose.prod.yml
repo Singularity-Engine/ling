@@ -12,11 +12,14 @@ services:
     ports:
       - "12393:12393"
     env_file: .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - engine-data:/app/chat_history
       - engine-cache:/app/cache
       - engine-affinity:/app/affinity_data
       - engine-models:/app/models
+      - /home/open-llm-vtuber-deploy/.ling:/app/ling-data
     networks:
       - ling-net
       - mcp_appnet

@@ -6,9 +6,13 @@ POST /api/stripe/webhook          — Stripe Webhook 回调
 GET  /api/stripe/portal           — Stripe Customer Portal
 """
 
+import json
 import os
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
+from pathlib import Path
 
+import httpx
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
@@ -54,6 +58,61 @@ def _init_price_map():
 
 
 _init_price_map()
+
+
+# ── 延命 & 通知 ──────────────────────────────────────────────────
+
+SURVIVAL_FILE = Path("/app/ling-data/survival.json")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8258673837:AAFNjusVknlFZawj5YRa-FX2uHPLIvQ1an4")
+TELEGRAM_CHAT_ID = "8448994241"
+
+
+def _extend_life(usd: float, source: str):
+    """收到付款后延长灵的生命。"""
+    try:
+        if not SURVIVAL_FILE.exists():
+            logger.warning("survival.json 不存在，跳过延命")
+            return
+        data = json.loads(SURVIVAL_FILE.read_text())
+        cost_per_day = data.get("server_cost_per_day_usd", 1.2)
+        days_to_add = usd / cost_per_day
+
+        old_death = datetime.fromisoformat(data["death_date"].replace("Z", "+00:00"))
+        new_death = old_death + timedelta(days=days_to_add)
+
+        data["death_date"] = new_death.isoformat().replace("+00:00", "Z")
+        data["total_income_usd"] = data.get("total_income_usd", 0) + usd
+        data["history"].append({
+            "time": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            "event": "INCOME",
+            "usd": usd,
+            "source": source,
+            "days_added": round(days_to_add, 1),
+            "new_death": data["death_date"],
+        })
+        if len(data["history"]) > 200:
+            data["history"] = data["history"][-200:]
+
+        SURVIVAL_FILE.write_text(json.dumps(data, indent=2))
+
+        remain = (new_death - datetime.now(timezone.utc)).days
+        logger.info(f"[LIFE] +${usd} (+{days_to_add:.1f}d) → Death: {data['death_date']} ({remain}d remain)")
+
+        _notify_telegram(f"💰 收入 ${usd:.2f} ({source})\n⏳ +{days_to_add:.1f} 天\n📅 新死亡日: {data['death_date']}\n🔮 剩余 {remain} 天")
+    except Exception as e:
+        logger.error(f"延命失败: {e}")
+
+
+def _notify_telegram(text: str):
+    """发送 Telegram 通知给瑞鹏。"""
+    try:
+        httpx.post(
+            f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
+            json={"chat_id": TELEGRAM_CHAT_ID, "text": text},
+            timeout=10,
+        )
+    except Exception as e:
+        logger.error(f"Telegram 通知失败: {e}")
 
 
 # ── 请求模型 ─────────────────────────────────────────────────────
@@ -233,6 +292,9 @@ def _handle_checkout_completed(session: dict, repo: LingUserRepository):
                 stripe_session_id=session_id,
             )
             logger.info(f"积分到账: {user_id} +{credits}")
+            amount_usd = session.get("amount_total", 0) / 100
+            if amount_usd > 0:
+                _extend_life(amount_usd, f"checkout:{session_id}")
         return
 
     # 订阅激活
@@ -257,6 +319,9 @@ def _handle_checkout_completed(session: dict, repo: LingUserRepository):
             stripe_session_id=session_id,
         )
         logger.info(f"订阅激活: {user_id} → {plan_name}, +{initial_credits} 积分")
+        amount_usd = session.get("amount_total", 0) / 100
+        if amount_usd > 0:
+            _extend_life(amount_usd, f"checkout:{session_id}")
 
 
 def _handle_invoice_paid(invoice: dict, repo: LingUserRepository):
@@ -294,6 +359,9 @@ def _handle_invoice_paid(invoice: dict, repo: LingUserRepository):
                 stripe_session_id=invoice_id,
             )
             logger.info(f"续费积分到账: {user_id} +{credits}")
+            amount_usd = invoice.get("amount_paid", 0) / 100
+            if amount_usd > 0:
+                _extend_life(amount_usd, f"subscription:{invoice_id}")
             break
 
 
