@@ -4,7 +4,7 @@ import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
 import { ChatBubble } from "./ChatBubble";
 import { ThinkingBubble } from "./ThinkingBubble";
 import { TimeSeparator, shouldShowSeparator } from "./TimeSeparator";
-import { useChatMessages, useStreamingValue } from "@/context/chat-history-context";
+import { useChatMessages, useStreamingValue, useStreamingRef } from "@/context/chat-history-context";
 import type { Message } from "@/services/websocket-service";
 
 import { useAiState } from "@/context/ai-state-context";
@@ -317,9 +317,102 @@ const S_WELCOME_SUB: CSSProperties = {
   color: "rgba(255, 255, 255, 0.25)",
 };
 
+// ─── StreamingFooter: owns streaming subscription so ChatArea avoids ~30fps re-renders ───
+
+interface StreamingFooterProps {
+  scrollRef: { current: HTMLDivElement | null };
+  isNearBottomRef: { current: boolean };
+  wasStreamingRef: { current: boolean };
+  dedupedMessages: Message[];
+}
+
+const StreamingFooter = memo(function StreamingFooter({
+  scrollRef,
+  isNearBottomRef,
+  wasStreamingRef,
+  dedupedMessages,
+}: StreamingFooterProps) {
+  const { fullResponse } = useStreamingValue();
+  const { isThinkingSpeaking } = useAiState();
+  const { sendMessage, wsState } = useWebSocket();
+  const { t } = useTranslation();
+
+  const displayResponse = useThrottledValue(fullResponse);
+  const isStreaming = displayResponse.length > 0;
+  const isConnected = wsState === "OPEN";
+
+  const showStreaming = useMemo(() => {
+    if (!isStreaming) return false;
+    const lastAiMsg = dedupedMessages.findLast(m => m.role === 'ai');
+    return !(lastAiMsg && lastAiMsg.content && displayResponse === lastAiMsg.content);
+  }, [isStreaming, dedupedMessages, displayResponse]);
+
+  // Mirror into parent ref so ChatArea's itemContent can read it for skipEntryAnimation
+  useEffect(() => { wasStreamingRef.current = showStreaming; }, [showStreaming, wasStreamingRef]);
+
+  const awaitingReply = useMemo(() => {
+    if (isThinkingSpeaking || isStreaming || !isConnected) return false;
+    const lastMsg = dedupedMessages[dedupedMessages.length - 1];
+    return lastMsg?.role === "human";
+  }, [dedupedMessages, isThinkingSpeaking, isStreaming, isConnected]);
+
+  const [awaitingTimedOut, setAwaitingTimedOut] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  useEffect(() => {
+    if (!awaitingReply) {
+      setAwaitingTimedOut(false);
+      return;
+    }
+    setAwaitingTimedOut(false);
+    const timer = setTimeout(() => setAwaitingTimedOut(true), 15_000);
+    return () => clearTimeout(timer);
+  }, [awaitingReply, dedupedMessages.length, retryCount]);
+
+  const showTyping = (isThinkingSpeaking || (awaitingReply && !awaitingTimedOut)) && !isStreaming;
+
+  // Streaming auto-scroll: keep viewport pinned to bottom during rapid updates
+  useEffect(() => {
+    if (!displayResponse) return;
+    if (!isNearBottomRef.current) return;
+    const container = scrollRef.current;
+    if (container) container.scrollTop = container.scrollHeight;
+  }, [displayResponse, scrollRef, isNearBottomRef]);
+
+  const handleRetry = useCallback(() => {
+    const lastHuman = dedupedMessages.findLast(m => m.role === "human");
+    if (lastHuman?.content && isConnected) {
+      setAwaitingTimedOut(false);
+      setRetryCount(c => c + 1);
+      sendMessage({ type: "text-input", text: lastHuman.content, images: [] });
+    }
+  }, [dedupedMessages, sendMessage, isConnected]);
+
+  return (
+    <>
+      {(showStreaming || showTyping) && (
+        <ThinkingBubble
+          content={displayResponse}
+          isThinking={showTyping}
+          isStreaming={showStreaming}
+        />
+      )}
+
+      {awaitingTimedOut && !isStreaming && !showTyping && (
+        <div style={S_TIMEOUT_WRAP}>
+          <span style={S_TIMEOUT_TEXT}>{t("chat.noResponse")}</span>
+          <button onClick={handleRetry} style={S_RETRY_BTN}>
+            {t("chat.retry")}
+          </button>
+        </div>
+      )}
+    </>
+  );
+});
+StreamingFooter.displayName = "StreamingFooter";
+
 export const ChatArea = memo(() => {
   const { messages, appendHumanMessage } = useChatMessages();
-  const { fullResponse } = useStreamingValue();
+  const { getFullResponse } = useStreamingRef();
   const { isThinkingSpeaking } = useAiState();
   const { sendMessage, wsState } = useWebSocket();
   const { t } = useTranslation();
@@ -335,9 +428,6 @@ export const ChatArea = memo(() => {
   const lastMsgCountRef = useRef(messages.length);
   // Track first message ID to detect conversation switches (full message replacement)
   const prevFirstMsgIdRef = useRef<string | undefined>(undefined);
-
-  // Throttle the rapidly-updating fullResponse to ~display refresh rate
-  const displayResponse = useThrottledValue(fullResponse);
 
   // Track empty-state exit animation: keep showing for 350ms with fade-out
   const [emptyExiting, setEmptyExiting] = useState(false);
@@ -395,10 +485,6 @@ export const ChatArea = memo(() => {
     return () => ro.disconnect();
   }, []);
 
-  // During active streaming use instant scroll to keep up with rapid updates;
-  // for normal new messages use smooth scroll.
-  const isStreaming = displayResponse.length > 0;
-
   useEffect(() => {
     // Detect conversation switch: messages array fully replaced (different first message).
     // Always scroll to bottom so the user sees the latest messages of the loaded conversation.
@@ -430,15 +516,16 @@ export const ChatArea = memo(() => {
     }
     const container = scrollRef.current;
     if (!container) return;
-    if (displayResponse.length > 0) {
-      // Streaming: assign scrollTop directly (cheaper than scrollIntoView)
+    // getFullResponse() reads streaming state at call-time without subscribing.
+    // Streaming auto-scroll is handled by StreamingFooter; this is only for
+    // new-message scroll (decides instant vs smooth based on active streaming).
+    if (getFullResponse()) {
       container.scrollTop = container.scrollHeight;
     } else {
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-    // Only re-run when actual content changes, NOT on scroll-position changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages, displayResponse]);
+  }, [messages, getFullResponse]);
 
   const scrollToBottom = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });

@@ -85,6 +85,11 @@ export const mdComponents = {
   pre: CodeBlock,
 };
 
+// ─── Long-message collapse thresholds ───
+const COLLAPSE_CHAR_THRESHOLD = 500;
+const COLLAPSE_LINE_THRESHOLD = 12;
+const COLLAPSED_MAX_HEIGHT = 288; // ~12 lines at 14px * 1.7 line-height
+
 // Inject animation styles once
 const STYLE_ID = "chat-bubble-styles";
 if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
@@ -126,6 +131,11 @@ const S_BUBBLE_AI: CSSProperties = {
 };
 const S_BUBBLE_AI_ACTIVE: CSSProperties = { ...S_BUBBLE_AI, cursor: "default" };
 
+// Collapsed variants — cap height so Virtuoso handles shorter items in long conversations.
+const S_BUBBLE_USER_COLLAPSED: CSSProperties = { ...S_BUBBLE_USER, maxHeight: COLLAPSED_MAX_HEIGHT, position: "relative" };
+const S_BUBBLE_AI_COLLAPSED: CSSProperties = { ...S_BUBBLE_AI, maxHeight: COLLAPSED_MAX_HEIGHT, position: "relative" };
+const S_BUBBLE_AI_ACTIVE_COLLAPSED: CSSProperties = { ...S_BUBBLE_AI_ACTIVE, maxHeight: COLLAPSED_MAX_HEIGHT, position: "relative" };
+
 const S_USER_TEXT: CSSProperties = {
   fontSize: "14px", color: "rgba(255,255,255,0.95)", whiteSpace: "pre-wrap",
   overflowWrap: "anywhere", lineHeight: 1.7, letterSpacing: "0.3px",
@@ -149,6 +159,23 @@ const S_COPY_AI: CSSProperties = { ...S_COPY_BASE, right: "-32px" };
 const S_COPY_USER: CSSProperties = { ...S_COPY_BASE, left: "-32px" };
 const S_COPY_AI_DONE: CSSProperties = { ...S_COPY_AI, color: "rgba(34,197,94,0.8)" };
 const S_COPY_USER_DONE: CSSProperties = { ...S_COPY_USER, color: "rgba(34,197,94,0.8)" };
+
+const S_COLLAPSE_MASK: CSSProperties = {
+  position: "absolute", bottom: 0, left: 0, right: 0, height: "64px",
+  background: "linear-gradient(transparent, rgba(255, 255, 255, 0.06))",
+  pointerEvents: "none", borderRadius: "0 0 18px 18px",
+};
+const S_COLLAPSE_MASK_USER: CSSProperties = {
+  ...S_COLLAPSE_MASK,
+  background: "linear-gradient(transparent, rgba(109, 40, 217, 0.5))",
+};
+const S_TOGGLE_BTN: CSSProperties = {
+  display: "flex", alignItems: "center", justifyContent: "center", gap: "4px",
+  width: "100%", padding: "6px 0 2px", border: "none", background: "transparent",
+  color: "rgba(139, 92, 246, 0.8)", fontSize: "12px", fontWeight: 500,
+  cursor: "pointer", letterSpacing: "0.3px", transition: "color 0.2s ease",
+};
+const S_TOGGLE_ARROW: CSSProperties = { fontSize: "10px" };
 
 const S_TOOL_WRAP: CSSProperties = { padding: "0 16px", marginBottom: "10px", maxWidth: "90%" };
 const S_INNER: CSSProperties = { maxWidth: "78%", minWidth: 0 };
@@ -193,6 +220,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
   const { t } = useTranslation();
   const isUser = role === "user";
   const [copied, setCopied] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Capture entry animation once at mount — prevents re-animation when
   // isGreeting changes (user sends first message) and avoids the flash
@@ -242,6 +270,17 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
     [content]
   );
 
+  // Determine if the message is long enough to warrant collapsing.
+  // Skip during streaming — always show full content while AI is typing.
+  const needsCollapse = useMemo(() => {
+    if (isStreaming) return false;
+    if (content.length > COLLAPSE_CHAR_THRESHOLD) return true;
+    const lineCount = content.split("\n").length;
+    return lineCount > COLLAPSE_LINE_THRESHOLD;
+  }, [content, isStreaming]);
+
+  const toggleExpand = useCallback(() => setIsExpanded(prev => !prev), []);
+
   // Pre-compute styles from module-level constants; only creates new objects
   // when entry animation or flash is active (rare). Avoids ~12 object
   // allocations per render — significant for 50+ messages.
@@ -254,11 +293,14 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
   );
 
   const hasContent = !!content;
+  const isCollapsed = needsCollapse && !isExpanded;
   const bubbleStyle = useMemo<CSSProperties>(() => {
-    if (isUser) return S_BUBBLE_USER;
-    const base = !isStreaming && hasContent ? S_BUBBLE_AI_ACTIVE : S_BUBBLE_AI;
+    if (isUser) return isCollapsed ? S_BUBBLE_USER_COLLAPSED : S_BUBBLE_USER;
+    const base = !isStreaming && hasContent
+      ? (isCollapsed ? S_BUBBLE_AI_ACTIVE_COLLAPSED : S_BUBBLE_AI_ACTIVE)
+      : (isCollapsed ? S_BUBBLE_AI_COLLAPSED : S_BUBBLE_AI);
     return flashing ? { ...base, animation: "bubbleCopyFlash 0.35s ease-out" } : base;
-  }, [isUser, isStreaming, hasContent, flashing]);
+  }, [isUser, isStreaming, hasContent, flashing, isCollapsed]);
 
   if (isToolCall && toolName) {
     return (
@@ -292,7 +334,16 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
                 {isStreaming && <span style={S_CURSOR} />}
               </div>
             )}
+            {isCollapsed && (
+              <div style={isUser ? S_COLLAPSE_MASK_USER : S_COLLAPSE_MASK} />
+            )}
           </div>
+          {needsCollapse && (
+            <button onClick={toggleExpand} style={S_TOGGLE_BTN}>
+              {isExpanded ? t("chat.showLess") : t("chat.showMore")}
+              <span style={S_TOGGLE_ARROW}>{isExpanded ? "▲" : "▼"}</span>
+            </button>
+          )}
           {!isStreaming && content && (
             <button
               onClick={handleCopy}
