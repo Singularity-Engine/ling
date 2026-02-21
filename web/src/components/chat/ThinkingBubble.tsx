@@ -25,8 +25,15 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
 // ─── Static style constants (avoid per-render allocation during ~60fps streaming) ───
 
 const S_OUTER: CSSProperties = {
-  display: "flex", justifyContent: "flex-start", marginBottom: "14px",
-  padding: "0 16px", animation: "thinkingBubbleIn 0.3s ease-out",
+  display: "flex", justifyContent: "flex-start", alignItems: "flex-start", gap: "8px",
+  marginBottom: "14px", padding: "0 16px", animation: "thinkingBubbleIn 0.3s ease-out",
+};
+const S_AVATAR_AI: CSSProperties = {
+  width: "24px", height: "24px", borderRadius: "50%",
+  display: "flex", alignItems: "center", justifyContent: "center",
+  fontSize: "12px", fontWeight: 600, flexShrink: 0,
+  letterSpacing: "0.3px", userSelect: "none", marginTop: "1px",
+  background: "var(--ling-avatar-ai-bg)", color: "var(--ling-avatar-ai-color)",
 };
 const S_INNER: CSSProperties = { maxWidth: "78%", minWidth: 0 };
 const S_NAME: CSSProperties = {
@@ -111,8 +118,11 @@ export const ThinkingBubble = memo(({ content, isThinking, isStreaming }: Thinki
     }
   }, [isThinking, isStreaming]);
 
+  const aiInitial = t("chat.characterName").charAt(0);
+
   return (
     <div className="ling-msg-row" style={S_OUTER}>
+      <div className="ling-avatar" style={S_AVATAR_AI}>{aiInitial}</div>
       <div style={S_INNER} className="chat-msg-inner">
         <span style={S_NAME}>{t("chat.characterName")}</span>
         <div style={S_BUBBLE}>

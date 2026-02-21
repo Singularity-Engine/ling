@@ -129,14 +129,31 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     .ling-msg-row:hover .chat-bubble-ts { opacity: 1; }
     @media (hover: none) { .chat-copy-btn { opacity: 0.5; } .chat-bubble-ts { opacity: 0.7; } }
     @media (max-width: 768px) { .chat-copy-btn { right: 4px !important; left: auto !important; top: -24px !important; } }
+    @media (max-width: 480px) { .ling-avatar { display: none !important; } }
   `;
   document.head.appendChild(style);
 }
 
 // ─── Static style constants (avoid per-render allocation across 50+ messages) ───
 
-const S_OUTER_USER: CSSProperties = { display: "flex", justifyContent: "flex-end", marginBottom: "14px", padding: "0 16px" };
-const S_OUTER_AI: CSSProperties = { display: "flex", justifyContent: "flex-start", marginBottom: "14px", padding: "0 16px" };
+const S_OUTER_USER: CSSProperties = { display: "flex", justifyContent: "flex-end", alignItems: "flex-start", gap: "8px", marginBottom: "14px", padding: "0 16px" };
+const S_OUTER_AI: CSSProperties = { display: "flex", justifyContent: "flex-start", alignItems: "flex-start", gap: "8px", marginBottom: "14px", padding: "0 16px" };
+
+const S_AVATAR: CSSProperties = {
+  width: "24px", height: "24px", borderRadius: "50%",
+  display: "flex", alignItems: "center", justifyContent: "center",
+  fontSize: "12px", fontWeight: 600, flexShrink: 0,
+  letterSpacing: "0.3px", userSelect: "none", marginTop: "1px",
+};
+const S_AVATAR_AI: CSSProperties = { ...S_AVATAR, background: "var(--ling-avatar-ai-bg)", color: "var(--ling-avatar-ai-color)" };
+const S_AVATAR_USER: CSSProperties = { ...S_AVATAR, background: "var(--ling-avatar-user-bg)", color: "var(--ling-avatar-user-color)" };
+
+// Static person-silhouette icon for user avatar — shared across all instances.
+const USER_ICON = (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+  </svg>
+);
 
 const S_BUBBLE_USER: CSSProperties = {
   padding: "10px 16px", borderRadius: "18px 18px 2px 18px",
@@ -173,7 +190,7 @@ const S_NAME: CSSProperties = {
   marginBottom: "4px", marginLeft: "4px", fontWeight: 500, letterSpacing: "0.5px",
 };
 const S_NAME_USER: CSSProperties = {
-  display: "block", fontSize: "11px", color: "var(--ling-chat-label)",
+  display: "block", fontSize: "11px", color: "var(--ling-chat-label-user)",
   marginBottom: "4px", marginRight: "4px", fontWeight: 500, letterSpacing: "0.5px",
   textAlign: "right",
 };
@@ -366,8 +383,11 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
     );
   }
 
+  const aiInitial = !isUser ? t("chat.characterName").charAt(0) : "";
+
   return (
     <div className="ling-msg-row" style={outerStyle}>
+      {!isUser && <div className="ling-avatar" style={S_AVATAR_AI}>{aiInitial}</div>}
       <div style={S_INNER} className="chat-bubble-wrap chat-msg-inner">
         {isUser ? (
           <span style={S_NAME_USER}>
@@ -424,6 +444,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
           </span>
         )}
       </div>
+      {isUser && <div className="ling-avatar" style={S_AVATAR_USER}>{USER_ICON}</div>}
     </div>
   );
 });
