@@ -117,7 +117,9 @@ const S_CHAR_NORMAL: CSSProperties = { ...S_CHAR_BASE, color: "rgba(255,255,255,
 const S_CHAR_WARN: CSSProperties = { ...S_CHAR_BASE, color: "rgba(251, 191, 36, 0.7)" };
 const S_CHAR_OVER: CSSProperties = { ...S_CHAR_BASE, color: "#ef4444" };
 
-const MicIcon = () => (
+// Pre-created SVG icon elements — shared across all renders to avoid
+// redundant React.createElement overhead (matches ChatBubble ICON_COPY pattern).
+const ICON_MIC = (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
     <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
@@ -125,22 +127,19 @@ const MicIcon = () => (
     <line x1="8" y1="23" x2="16" y2="23" />
   </svg>
 );
-
-const SendIcon = () => (
+const ICON_SEND = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="22" y1="2" x2="11" y2="13" />
     <polygon points="22 2 15 22 11 13 2 9 22 2" />
   </svg>
 );
-
 const S_LOADING_SPIN: CSSProperties = { animation: "sendSpin 0.8s linear infinite" };
-const LoadingIcon = () => (
+const ICON_LOADING = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" style={S_LOADING_SPIN}>
     <path d="M12 2a10 10 0 0 1 10 10" />
   </svg>
 );
-
-const StopIcon = () => (
+const ICON_STOP = (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
     <rect x="6" y="6" width="12" height="12" rx="2" />
   </svg>
@@ -346,7 +345,7 @@ export const InputBar = memo(() => {
           title={micOn ? t("chat.micOn") : t("chat.micOff")}
           style={micOn ? S_MIC_ON : S_MIC_OFF}
         >
-          <MicIcon />
+          {ICON_MIC}
         </button>
 
         <textarea
@@ -371,7 +370,7 @@ export const InputBar = memo(() => {
           title={isAiSpeaking ? t("chat.stopReply") : !isConnected ? t("chat.sendDisconnected") : t("chat.sendMessage")}
           style={isAiSpeaking ? S_SEND_SPEAKING : isSending ? S_SEND_LOADING : canSend ? S_SEND_READY : hasText ? S_SEND_OVERLIMIT : S_SEND_IDLE}
         >
-          {isAiSpeaking ? <StopIcon /> : isSending ? <LoadingIcon /> : <SendIcon />}
+          {isAiSpeaking ? ICON_STOP : isSending ? ICON_LOADING : ICON_SEND}
         </button>
       </div>
       <div style={S_HINTS_ROW}>
