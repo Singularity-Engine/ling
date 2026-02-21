@@ -393,6 +393,9 @@ export const ChatArea = memo(() => {
   // Safety timeout: if awaitingReply stays true for 15s (billing block,
   // sendChat failure, or server not responding), stop showing typing dots.
   const [awaitingTimedOut, setAwaitingTimedOut] = useState(false);
+  // Counter to force-restart the timeout timer on retry (messages.length
+  // doesn't change on retry, so we need a separate trigger).
+  const [retryCount, setRetryCount] = useState(0);
   useEffect(() => {
     if (!awaitingReply) {
       setAwaitingTimedOut(false);
@@ -403,7 +406,7 @@ export const ChatArea = memo(() => {
     setAwaitingTimedOut(false);
     const timer = setTimeout(() => setAwaitingTimedOut(true), 15_000);
     return () => clearTimeout(timer);
-  }, [awaitingReply, messages.length]);
+  }, [awaitingReply, messages.length, retryCount]);
 
   const showTyping = (isThinkingSpeaking || (awaitingReply && !awaitingTimedOut)) && !isStreaming;
 
@@ -451,6 +454,7 @@ export const ChatArea = memo(() => {
     const lastHuman = [...dedupedMessages].reverse().find(m => m.role === "human");
     if (lastHuman?.content && isConnected) {
       setAwaitingTimedOut(false);
+      setRetryCount(c => c + 1);
       sendMessage({ type: "text-input", text: lastHuman.content, images: [] });
     }
   }, [dedupedMessages, sendMessage, isConnected]);

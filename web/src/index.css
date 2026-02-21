@@ -483,12 +483,15 @@ canvas {
   font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
   overflow-wrap: anywhere;
 }
-/* Code block wrapper (language label + copy button + pre) */
+/* Code block wrapper — full-bleed to bubble edges for more code space */
 .md-content .code-block-wrap {
   position: relative;
-  margin: 0.5em 0;
-  border: 1px solid var(--ling-purple-25);
-  border-radius: 8px;
+  margin: 0.5em -16px;
+  border-top: 1px solid var(--ling-purple-25);
+  border-bottom: 1px solid var(--ling-purple-25);
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
   overflow: hidden;
   background: var(--ling-code-bg);
 }
