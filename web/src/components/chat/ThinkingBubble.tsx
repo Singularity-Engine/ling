@@ -2,6 +2,7 @@ import { memo, useEffect, useMemo, useRef, useState, type CSSProperties } from "
 import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import { TypingIndicator } from "./TypingIndicator";
+import { remarkPlugins, mdComponents } from "./ChatBubble";
 
 // Inject transition styles once
 const STYLE_ID = "thinking-bubble-styles";
@@ -64,7 +65,7 @@ export const ThinkingBubble = memo(({ content, isThinking, isStreaming }: Thinki
 
   // Memoize markdown rendering — avoids re-parsing when only isThinking/showDotsExit change
   const renderedMarkdown = useMemo(
-    () => <ReactMarkdown>{content}</ReactMarkdown>,
+    () => <ReactMarkdown remarkPlugins={remarkPlugins} components={mdComponents}>{content}</ReactMarkdown>,
     [content]
   );
 

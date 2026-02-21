@@ -13,7 +13,7 @@ import { audioTaskQueue } from '@/utils/task-queue';
 import { useAudioTask } from '@/components/canvas/live2d';
 import { useBgUrl } from '@/context/bgurl-context';
 import { useConfig } from '@/context/character-config-context';
-import { useChatHistory } from '@/context/chat-history-context';
+import { useChatMessages, useStreamingSetters } from '@/context/chat-history-context';
 import { toaster } from '@/components/ui/toaster';
 import { useVAD } from '@/context/vad-context';
 import { AiState, useAiState } from "@/context/ai-state-context";
@@ -180,7 +180,8 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const { aiState, setAiState, backendSynthComplete, setBackendSynthComplete } = useAiState();
   const { setModelInfo } = useLive2DConfig();
   const { setSubtitleText } = useSubtitle();
-  const { clearResponse, setForceNewMessage, appendHumanMessage, appendAIMessage, appendOrUpdateToolCallMessage, setFullResponse } = useChatHistory();
+  const { appendHumanMessage, appendAIMessage, appendOrUpdateToolCallMessage } = useChatMessages();
+  const { clearResponse, setForceNewMessage, setFullResponse } = useStreamingSetters();
   const { addAudioTask } = useAudioTask();
   const bgUrlContext = useBgUrl();
   const { confUid, setConfName, setConfUid, setConfigFiles } = useConfig();
@@ -209,7 +210,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
   const {
     setCurrentHistoryUid, setMessages, setHistoryList,
-  } = useChatHistory();
+  } = useChatMessages();
 
   // ─── Refs for sendMessage access (avoids closure dependency) ──
 

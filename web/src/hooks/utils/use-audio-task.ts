@@ -5,7 +5,7 @@ import { useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAiState } from '@/context/ai-state-context';
 import { useSubtitle } from '@/context/subtitle-context';
-import { useChatHistory } from '@/context/chat-history-context';
+import { useChatMessages, useStreamingSetters } from '@/context/chat-history-context';
 import { audioTaskQueue } from '@/utils/task-queue';
 import { audioManager } from '@/utils/audio-manager';
 import { toaster } from '@/components/ui/toaster';
@@ -34,7 +34,8 @@ export const useAudioTask = () => {
   const { t } = useTranslation();
   const { aiState, backendSynthComplete, setBackendSynthComplete } = useAiState();
   const { setSubtitleText } = useSubtitle();
-  const { appendResponse, appendAIMessage } = useChatHistory();
+  const { appendAIMessage } = useChatMessages();
+  const { appendResponse } = useStreamingSetters();
   const { setExpression } = useLive2DExpression();
 
   // State refs to avoid stale closures

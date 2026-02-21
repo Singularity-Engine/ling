@@ -48,6 +48,17 @@ interface StreamingSetterState {
 }
 
 /**
+ * Context 4 — Non-reactive ref to latest fullResponse.
+ * Value is a stable getter (never changes after mount), so subscribing
+ * components NEVER re-render from streaming updates. Use when you need
+ * to READ fullResponse at call-time (e.g. interrupt signal) but don't
+ * need to re-render on every streaming delta.
+ */
+interface StreamingRefState {
+  getFullResponse: () => string;
+}
+
+/**
  * Keep at most this many messages in memory.
  * Oldest messages are trimmed when the limit is exceeded to prevent
  * unbounded DOM growth and state-update slowdowns in long conversations.
@@ -64,6 +75,7 @@ const DEFAULT_HISTORY = {
 export const ChatHistoryContext = createContext<ChatHistoryState | null>(null);
 const StreamingValueContext = createContext<StreamingValueState | null>(null);
 const StreamingSetterContext = createContext<StreamingSetterState | null>(null);
+const StreamingRefContext = createContext<StreamingRefState | null>(null);
 
 /**
  * Combined provider — wraps three granular contexts so App.tsx only
@@ -81,6 +93,8 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
 
   // ── Streaming state ──
   const [fullResponse, setFullResponse] = useState(DEFAULT_HISTORY.fullResponse);
+  const fullResponseRef = useRef(DEFAULT_HISTORY.fullResponse);
+  fullResponseRef.current = fullResponse;
   const forceNewMessageRef = useRef<boolean>(false);
 
   const setForceNewMessage = useCallback((value: boolean) => {
@@ -250,6 +264,12 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
       setForceNewMessage,
     }),
     [appendResponse, clearResponse, setForceNewMessage],
+  );
+
+  // Context 4: streaming REF — stable getter, never triggers re-renders
+  const streamRefValue = useMemo<StreamingRefState>(
+    () => ({ getFullResponse: () => fullResponseRef.current }),
+    [],
   );
 
   return (

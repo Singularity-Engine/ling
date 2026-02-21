@@ -1,8 +1,8 @@
 import { useRef, useCallback } from 'react';
-import { useChatHistory } from '@/context/chat-history-context';
+import { useChatMessages } from '@/context/chat-history-context';
 
 export function useChatHistoryPanel() {
-  const { messages } = useChatHistory();
+  const { messages } = useChatMessages();
   const messageListRef = useRef<HTMLDivElement>(null);
 
   const handleMessageUpdate = useCallback(() => {

@@ -1,7 +1,7 @@
 import { memo, useState, useRef, useCallback, useEffect, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { useWebSocket } from "@/context/websocket-context";
-import { useChatHistory } from "@/context/chat-history-context";
+import { useChatMessages } from "@/context/chat-history-context";
 import { useAiState } from "@/context/ai-state-context";
 import { useInterrupt } from "@/components/canvas/live2d";
 import { useVAD } from "@/context/vad-context";
@@ -19,6 +19,10 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     .ling-textarea::placeholder { color: rgba(255, 255, 255, 0.4); }
     .ling-textarea:focus { border-color: rgba(139, 92, 246, 0.6); box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.4); }
     .ling-textarea:disabled { opacity: 0.45; cursor: not-allowed; }
+    .ling-send-btn:not(:disabled):hover { filter: brightness(1.15); }
+    .ling-send-btn:not(:disabled):active { transform: scale(0.88); }
+    .ling-mic-btn:hover { filter: brightness(1.15); }
+    .ling-mic-btn:active { transform: scale(0.88); }
   `;
   document.head.appendChild(style);
 }
@@ -68,7 +72,7 @@ export const InputBar = memo(() => {
   const [isSending, setIsSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const wsContext = useWebSocket();
-  const { appendHumanMessage } = useChatHistory();
+  const { appendHumanMessage } = useChatMessages();
   const { aiState } = useAiState();
   const { interrupt } = useInterrupt();
   const { micOn, startMic, stopMic } = useVAD();
@@ -146,7 +150,7 @@ export const InputBar = memo(() => {
       textareaRef.current.focus();
     }
     // Debounce: prevent rapid-fire sends
-    setTimeout(() => setIsSending(false), 500);
+    setTimeout(() => setIsSending(false), 300);
   }, [inputText, wsContext, aiState, interrupt, appendHumanMessage, isSending]);
 
   const handleKeyDown = useCallback(
@@ -216,6 +220,7 @@ export const InputBar = memo(() => {
         }}
       >
         <button
+          className="ling-mic-btn"
           onClick={handleMicToggle}
           aria-label={micOn ? t("chat.micOn") : t("chat.micOff")}
           aria-pressed={micOn}
@@ -255,6 +260,7 @@ export const InputBar = memo(() => {
         />
 
         <button
+          className="ling-send-btn"
           onClick={isAiSpeaking ? handleInterrupt : handleSend}
           disabled={!isAiSpeaking && !canSend}
           aria-label={isAiSpeaking ? t("chat.stopReply") : !isConnected ? t("chat.sendDisconnected") : t("chat.sendMessage")}

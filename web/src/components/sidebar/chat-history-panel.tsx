@@ -10,7 +10,7 @@ import { Box, Spinner, Flex, Text, Icon } from '@chakra-ui/react';
 import { sidebarStyles, chatPanelStyles } from './sidebar-styles';
 import { MainContainer, ChatContainer, MessageList as ChatMessageList, Message as ChatMessage, Avatar as ChatAvatar } from '@chatscope/chat-ui-kit-react';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
-import { useChatHistory } from '@/context/chat-history-context';
+import { useChatMessages } from '@/context/chat-history-context';
 import { Global } from '@emotion/react';
 import { useConfig } from '@/context/character-config-context';
 import { useWebSocket } from '@/context/websocket-context';
@@ -32,7 +32,7 @@ const SIDEBAR_RENDER_WINDOW = 60;
 // Main component
 function ChatHistoryPanel(): JSX.Element {
   const { t } = useTranslation();
-  const { messages } = useChatHistory();
+  const { messages } = useChatMessages();
   const { confName } = useConfig();
   const { baseUrl } = useWebSocket();
   const userName = "Me";
@@ -107,6 +107,98 @@ function ChatHistoryPanel(): JSX.Element {
 
   const handleLoadMore = useCallback(() => setExtraBatches((n) => n + 1), []);
 
+  // Memoize the message list so .map() is skipped when parent re-renders
+  // without message changes (e.g. menu open/close, config changes).
+  const messageElements = useMemo(
+    () =>
+      visibleMessages.map((msg) => {
+        if (msg.type === 'tool_call_status') {
+          return (
+            <Flex
+              key={msg.id}
+              {...sidebarStyles.toolCallIndicator.container}
+              alignItems="center"
+            >
+              <Icon
+                as={FaTools}
+                {...sidebarStyles.toolCallIndicator.icon}
+              />
+              <Text {...sidebarStyles.toolCallIndicator.text}>
+                {msg.status === "running" ? `${msg.name} is using tool ${msg.tool_name}` : `${msg.name} used tool ${msg.tool_name}`}
+              </Text>
+              {msg.status === "running" && (
+                <Spinner
+                  size="xs"
+                  color={sidebarStyles.toolCallIndicator.spinner.color}
+                  ml={sidebarStyles.toolCallIndicator.spinner.ml}
+                />
+              )}
+              {msg.status === "completed" && (
+                <Icon
+                  as={FaCheck}
+                  {...sidebarStyles.toolCallIndicator.completedIcon}
+                />
+              )}
+              {msg.status === "error" && (
+                <Icon
+                  as={FaTimes}
+                  {...sidebarStyles.toolCallIndicator.errorIcon}
+                />
+              )}
+            </Flex>
+          );
+        }
+        return (
+          <Box
+            key={msg.id}
+            onContextMenu={(e: React.MouseEvent) => handleContextMenu(e, msg)}
+            onTouchStart={(e: React.TouchEvent) => handleTouchStart(e, msg)}
+            onTouchEnd={handleTouchEnd}
+            onTouchMove={handleTouchMove}
+            css={{ WebkitTouchCallout: 'none' }}
+          >
+            <ChatMessage
+              model={{
+                message: msg.content,
+                sentTime: msg.timestamp,
+                sender: msg.role === 'ai'
+                  ? (msg.name || confName || 'AI')
+                  : userName,
+                direction: msg.role === 'ai' ? 'incoming' : 'outgoing',
+                position: 'single',
+              }}
+              avatarPosition={msg.role === 'ai' ? 'tl' : 'tr'}
+              avatarSpacer={false}
+            >
+              <ChatAvatar>
+                {msg.role === 'ai' ? (
+                  msg.avatar ? (
+                    <img
+                      src={`${baseUrl}/avatars/${msg.avatar}`}
+                      alt="avatar"
+                      style={{ width: '100%', height: '100%', borderRadius: '50%' }}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        const fallbackName = msg.name || confName || 'A';
+                        target.outerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 50%; background-color: var(--chakra-colors-blue-500); color: white; font-size: 14px;">${fallbackName[0].toUpperCase()}</div>`;
+                      }}
+                    />
+                  ) : (
+                    (msg.name && msg.name[0].toUpperCase()) ||
+                      (confName && confName[0].toUpperCase()) ||
+                      'A'
+                  )
+                ) : (
+                  userName[0].toUpperCase()
+                )}
+              </ChatAvatar>
+            </ChatMessage>
+          </Box>
+        );
+      }),
+    [visibleMessages, confName, baseUrl, userName, handleContextMenu, handleTouchStart, handleTouchEnd, handleTouchMove],
+  );
+
   return (
     <Box
       h="full"
@@ -148,93 +240,7 @@ function ChatHistoryPanel(): JSX.Element {
                   </button>
                 </Flex>
               )}
-              {visibleMessages.map((msg) => {
-                // Tool call indicator — no context menu
-                if (msg.type === 'tool_call_status') {
-                  return (
-                    <Flex
-                      key={msg.id}
-                      {...sidebarStyles.toolCallIndicator.container}
-                      alignItems="center"
-                    >
-                      <Icon
-                        as={FaTools}
-                        {...sidebarStyles.toolCallIndicator.icon}
-                      />
-                      <Text {...sidebarStyles.toolCallIndicator.text}>
-                        {msg.status === "running" ? `${msg.name} is using tool ${msg.tool_name}` : `${msg.name} used tool ${msg.tool_name}`}
-                      </Text>
-                      {msg.status === "running" && (
-                        <Spinner
-                          size="xs"
-                          color={sidebarStyles.toolCallIndicator.spinner.color}
-                          ml={sidebarStyles.toolCallIndicator.spinner.ml}
-                        />
-                      )}
-                      {msg.status === "completed" && (
-                        <Icon
-                          as={FaCheck}
-                          {...sidebarStyles.toolCallIndicator.completedIcon}
-                        />
-                      )}
-                      {msg.status === "error" && (
-                        <Icon
-                          as={FaTimes}
-                          {...sidebarStyles.toolCallIndicator.errorIcon}
-                        />
-                      )}
-                    </Flex>
-                  );
-                }
-                // Standard chat message — with context menu
-                return (
-                  <Box
-                    key={msg.id}
-                    onContextMenu={(e) => handleContextMenu(e, msg)}
-                    onTouchStart={(e) => handleTouchStart(e, msg)}
-                    onTouchEnd={handleTouchEnd}
-                    onTouchMove={handleTouchMove}
-                    css={{ WebkitTouchCallout: 'none' }}
-                  >
-                    <ChatMessage
-                      model={{
-                        message: msg.content,
-                        sentTime: msg.timestamp,
-                        sender: msg.role === 'ai'
-                          ? (msg.name || confName || 'AI')
-                          : userName,
-                        direction: msg.role === 'ai' ? 'incoming' : 'outgoing',
-                        position: 'single',
-                      }}
-                      avatarPosition={msg.role === 'ai' ? 'tl' : 'tr'}
-                      avatarSpacer={false}
-                    >
-                      <ChatAvatar>
-                        {msg.role === 'ai' ? (
-                          msg.avatar ? (
-                            <img
-                              src={`${baseUrl}/avatars/${msg.avatar}`}
-                              alt="avatar"
-                              style={{ width: '100%', height: '100%', borderRadius: '50%' }}
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                const fallbackName = msg.name || confName || 'A';
-                                target.outerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 50%; background-color: var(--chakra-colors-blue-500); color: white; font-size: 14px;">${fallbackName[0].toUpperCase()}</div>`;
-                              }}
-                            />
-                          ) : (
-                            (msg.name && msg.name[0].toUpperCase()) ||
-                              (confName && confName[0].toUpperCase()) ||
-                              'A'
-                          )
-                        ) : (
-                          userName[0].toUpperCase()
-                        )}
-                      </ChatAvatar>
-                    </ChatMessage>
-                  </Box>
-                );
-              })}
+              {messageElements}
               </>
             )}
           </ChatMessageList>

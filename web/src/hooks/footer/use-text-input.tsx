@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useWebSocket } from '@/context/websocket-context';
 import { useAiState } from '@/context/ai-state-context';
 import { useInterrupt } from '@/components/canvas/live2d';
-import { useChatHistory } from '@/context/chat-history-context';
+import { useChatMessages } from '@/context/chat-history-context';
 import { useVAD } from '@/context/vad-context';
 import { useMediaCapture } from '@/hooks/utils/use-media-capture';
 
@@ -12,7 +12,7 @@ export function useTextInput() {
   const wsContext = useWebSocket();
   const { aiState } = useAiState();
   const { interrupt } = useInterrupt();
-  const { appendHumanMessage } = useChatHistory();
+  const { appendHumanMessage } = useChatMessages();
   const { stopMic, autoStopMic } = useVAD();
   const { captureAllMedia } = useMediaCapture();
 

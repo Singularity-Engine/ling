@@ -1,9 +1,10 @@
 import { useTranslation } from "react-i18next";
-import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MutableRefObject } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
 import { ChatBubble } from "./ChatBubble";
 import { ThinkingBubble } from "./ThinkingBubble";
 import { TimeSeparator, shouldShowSeparator } from "./TimeSeparator";
-import { useChatHistory } from "@/context/chat-history-context";
+import { useChatMessages, useStreamingValue } from "@/context/chat-history-context";
 import type { Message } from "@/services/websocket-service";
 
 import { useAiState } from "@/context/ai-state-context";
@@ -227,15 +228,23 @@ const S_RETRY_BTN: CSSProperties = {
 };
 
 export const ChatArea = memo(() => {
-  const { messages, fullResponse, appendHumanMessage } = useChatHistory();
+  const { messages, appendHumanMessage } = useChatMessages();
+  const { fullResponse } = useStreamingValue();
   const { isThinkingSpeaking } = useAiState();
   const { sendMessage, wsState } = useWebSocket();
   const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const rafScrollRef = useRef(0);
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
+  // Virtuoso needs a mounted DOM element as customScrollParent.
+  // useLayoutEffect sets it before paint so the second render includes Virtuoso.
+  const [scrollParent, setScrollParent] = useState<HTMLElement | null>(null);
+  useLayoutEffect(() => { setScrollParent(scrollRef.current); }, []);
   // Track message count so we can detect newly-added human messages
   const lastMsgCountRef = useRef(messages.length);
+  // Track first message ID to detect conversation switches (full message replacement)
+  const prevFirstMsgIdRef = useRef<string | undefined>(undefined);
 
   // Throttle the rapidly-updating fullResponse to ~display refresh rate
   const displayResponse = useThrottledValue(fullResponse);
@@ -259,7 +268,7 @@ export const ChatArea = memo(() => {
       rafScrollRef.current = 0;
       const el = scrollRef.current;
       if (!el) return;
-      const near = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+      const near = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
       isNearBottomRef.current = near;
       setIsNearBottom((prev) => (prev === near ? prev : near));
       if (near) setHasNewMessage(false);
@@ -301,6 +310,23 @@ export const ChatArea = memo(() => {
   const isStreaming = displayResponse.length > 0;
 
   useEffect(() => {
+    // Detect conversation switch: messages array fully replaced (different first message).
+    // Always scroll to bottom so the user sees the latest messages of the loaded conversation.
+    const firstId = messages[0]?.id;
+    const isConversationSwitch = prevFirstMsgIdRef.current !== undefined
+      && firstId !== prevFirstMsgIdRef.current;
+    prevFirstMsgIdRef.current = firstId;
+
+    if (isConversationSwitch) {
+      lastMsgCountRef.current = messages.length;
+      setHasNewMessage(false);
+      const container = scrollRef.current;
+      if (container) {
+        requestAnimationFrame(() => { container.scrollTop = container.scrollHeight; });
+      }
+      return;
+    }
+
     // Detect newly-added human message → always scroll to show it,
     // even if the user had scrolled up to read history.
     const isNewMsg = messages.length !== lastMsgCountRef.current;
@@ -341,6 +367,10 @@ export const ChatArea = memo(() => {
       }),
     [messages]
   );
+  // Ref mirror lets the Virtuoso itemContent callback read the latest array
+  // without depending on it, keeping the callback reference stable.
+  const dedupedRef = useRef(dedupedMessages);
+  dedupedRef.current = dedupedMessages;
 
   const showStreaming = useMemo(() => {
     if (!isStreaming) return false;
@@ -392,8 +422,8 @@ export const ChatArea = memo(() => {
   // True when this is the first AI message (greeting bubble)
   const isGreeting = dedupedMessages.length === 1 && dedupedMessages[0].role === "ai";
 
-  const welcomeChips = t("ui.welcomeChips", { returnObjects: true }) as string[];
-  const postGreetingChips = t("ui.postGreetingChips", { returnObjects: true }) as string[];
+  const welcomeChips = useMemo(() => t("ui.welcomeChips", { returnObjects: true }) as string[], [t]);
+  const postGreetingChips = useMemo(() => t("ui.postGreetingChips", { returnObjects: true }) as string[], [t]);
 
   // Time-based welcome title
   const welcomeTitle = useMemo(() => {
@@ -457,41 +487,46 @@ export const ChatArea = memo(() => {
     if (dedupedMessages.length <= RENDER_WINDOW) setExtraBatches(0);
   }, [dedupedMessages.length]);
 
-  // Memoize the message list so .map() is skipped during streaming.
-  // displayResponse changes ~60fps triggering ChatArea re-renders,
-  // but dedupedMessages is unchanged — this avoids recreating 200 VDOM nodes per frame.
-  const messageElements = useMemo(
-    () =>
-      visibleMessages.map((msg, i) => {
-        // Compute the original index in dedupedMessages for separator logic
-        const origIdx = i + hiddenCount;
-        const prev = dedupedMessages[origIdx - 1];
-        const showSep =
-          prev &&
-          msg.timestamp &&
-          prev.timestamp &&
-          shouldShowSeparator(prev.timestamp, msg.timestamp);
-        // Skip entry animation on the AI bubble that just transitioned from
-        // streaming ThinkingBubble — wasStreamingRef is still true during this
-        // render (useEffect hasn't flushed yet), avoiding a redundant fade-in.
-        const isLastAi = origIdx === dedupedMessages.length - 1 && msg.role === "ai" && msg.type !== "tool_call_status";
-        return (
-          <div key={msg.id} className="chat-msg-item">
-            {showSep && <TimeSeparator timestamp={msg.timestamp} />}
-            <ChatBubble
-              role={msg.role === "human" ? "user" : "assistant"}
-              content={msg.content}
-              timestamp={msg.timestamp}
-              isToolCall={msg.type === "tool_call_status"}
-              toolName={msg.tool_name}
-              toolStatus={msg.status}
-              isGreeting={origIdx === 0 && msg.role === "ai" && isGreeting}
-              skipEntryAnimation={isLastAi && wasStreamingRef.current || undefined}
-            />
-          </div>
-        );
-      }),
-    [visibleMessages, hiddenCount, dedupedMessages, isGreeting]
+  // Virtuoso item renderer — only called for visible items (~15-20 in viewport + overscan).
+  // Reads dedupedMessages via ref so the callback stays referentially stable when new
+  // messages arrive; Virtuoso can then skip re-invoking it for existing visible items.
+  // Stable key extractor — avoids creating a new function reference on each
+  // streaming frame (~30fps) which would force Virtuoso to re-reconcile all items.
+  const computeItemKey = useCallback((_: number, msg: Message) => msg.id, []);
+
+  const itemContent = useCallback(
+    (index: number, msg: Message) => {
+      const allMsgs = dedupedRef.current;
+      const origIdx = index + hiddenCount;
+      const prev = allMsgs[origIdx - 1];
+      const showSep =
+        prev &&
+        msg.timestamp &&
+        prev.timestamp &&
+        shouldShowSeparator(prev.timestamp, msg.timestamp);
+      const isLastAi =
+        origIdx === allMsgs.length - 1 &&
+        msg.role === "ai" &&
+        msg.type !== "tool_call_status";
+      return (
+        <div className="chat-msg-item">
+          {showSep && <TimeSeparator timestamp={msg.timestamp} />}
+          <ChatBubble
+            role={msg.role === "human" ? "user" : "assistant"}
+            content={msg.content}
+            timestamp={msg.timestamp}
+            isToolCall={msg.type === "tool_call_status"}
+            toolName={msg.tool_name}
+            toolStatus={msg.status}
+            isGreeting={origIdx === 0 && msg.role === "ai" && isGreeting}
+            skipEntryAnimation={
+              (isLastAi && wasStreamingRef.current) || undefined
+            }
+          />
+        </div>
+      );
+    },
+    [hiddenCount, isGreeting],
   );
 
   return (
@@ -579,10 +614,19 @@ export const ChatArea = memo(() => {
           </button>
         </div>
       )}
-      {messageElements}
+      {scrollParent && (
+        <Virtuoso
+          ref={virtuosoRef}
+          customScrollParent={scrollParent}
+          data={visibleMessages}
+          increaseViewportBy={400}
+          computeItemKey={computeItemKey}
+          itemContent={itemContent}
+        />
+      )}
       {/* Suggestion chips: stay visible after greeting until user sends first message */}
       {isGreeting && !emptyExiting && (
-        <SuggestionChips chips={welcomeChips} onChipClick={handleChipClick} baseDelay={0.2} />
+        <SuggestionChips chips={postGreetingChips} onChipClick={handleChipClick} baseDelay={0.2} />
       )}
 
       {(showStreaming || showTyping) && (

@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { toaster } from "@/components/ui/toaster";
 import { ToolResultCard } from "./ToolResultCard";
 
-const remarkPlugins = [remarkGfm];
+export const remarkPlugins = [remarkGfm];
 const rehypePlugins = [rehypeHighlight];
 
 // Language display names
@@ -82,7 +82,7 @@ function CodeBlock({ children, ...props }: React.HTMLAttributes<HTMLPreElement> 
   );
 }
 
-const mdComponents = {
+export const mdComponents = {
   a: ({ ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a {...props} target="_blank" rel="noopener noreferrer" />
   ),

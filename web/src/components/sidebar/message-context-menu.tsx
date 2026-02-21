@@ -1,11 +1,11 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { memo, useEffect, useRef, useCallback } from 'react';
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import { FaCopy, FaRedo, FaVolumeUp } from 'react-icons/fa';
 import { Message } from '@/services/websocket-service';
 import { ttsService } from '@/services/tts-service';
 import { useWebSocket } from '@/context/websocket-context';
-import { useChatHistory } from '@/context/chat-history-context';
+import { useChatMessages } from '@/context/chat-history-context';
 import { toaster } from '@/components/ui/toaster';
 
 interface MessageContextMenuProps {
@@ -30,7 +30,7 @@ export function MessageContextMenu({ message, position, onClose }: MessageContex
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
   const { sendMessage } = useWebSocket();
-  const { messages } = useChatHistory();
+  const { messages } = useChatMessages();
 
   // Close on click outside
   useEffect(() => {
