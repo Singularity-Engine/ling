@@ -50,7 +50,6 @@ export const CrystalField = memo(() => {
             tool={tool}
             position={isMobile ? "left" : i % 2 === 0 ? "left" : "right"}
             index={i}
-            compact={isMobile}
           />
         </div>
       ))}
