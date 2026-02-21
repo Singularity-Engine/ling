@@ -37,7 +37,7 @@ export const sidebarStyles = {
       left: 0,
       top: 0,
       height: '100%',
-      width: '440px',
+      width: 'min(440px, 100vw)',
       bg: 'gray.900',
       transform: isCollapsed
         ? 'translateX(calc(-100% + 24px))'
@@ -258,7 +258,7 @@ export const sidebarStyles = {
     drawer: {
       content: {
         background: 'var(--chakra-colors-gray-900)',
-        maxWidth: '440px',
+        maxWidth: 'min(440px, 100vw)',
         marginTop: isElectron ? '30px' : '0',
         height: isElectron ? 'calc(100vh - 30px)' : '100vh',
       },

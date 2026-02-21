@@ -147,9 +147,9 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
           background: "rgba(20, 8, 40, 0.95)",
           border: "1px solid rgba(139, 92, 246, 0.3)",
           borderRadius: "16px",
-          padding: "32px 36px",
-          minWidth: "300px",
-          maxWidth: "380px",
+          padding: "28px clamp(20px, 5vw, 36px)",
+          width: "100%",
+          maxWidth: "min(380px, calc(100vw - 32px))",
           boxShadow:
             "0 24px 80px rgba(0, 0, 0, 0.5), 0 0 40px rgba(139, 92, 246, 0.1)",
           animation: "aboutSlideIn 0.25s ease-out",

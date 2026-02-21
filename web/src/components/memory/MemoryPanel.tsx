@@ -88,7 +88,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
         style={{
           position: 'relative',
           width: '100%',
-          maxWidth: '380px',
+          maxWidth: 'min(380px, 100vw)',
           height: '100%',
           background: 'rgba(20, 8, 40, 0.98)',
           borderLeft: '1px solid rgba(139, 92, 246, 0.2)',

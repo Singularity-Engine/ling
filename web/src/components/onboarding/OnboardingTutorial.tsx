@@ -90,7 +90,7 @@ export function OnboardingTutorial({ onComplete }: OnboardingTutorialProps) {
       <div
         key={step}
         style={{
-          maxWidth: '420px',
+          maxWidth: 'min(420px, 100%)',
           width: '100%',
           textAlign: 'center',
           animation: 'fadeInUp 0.4s ease-out',

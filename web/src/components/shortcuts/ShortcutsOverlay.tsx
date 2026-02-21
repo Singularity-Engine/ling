@@ -72,9 +72,9 @@ export const ShortcutsOverlay = memo(({ open, onClose }: ShortcutsOverlayProps) 
           background: "rgba(20, 8, 40, 0.95)",
           border: "1px solid rgba(139, 92, 246, 0.3)",
           borderRadius: "16px",
-          padding: "28px 32px",
-          minWidth: "320px",
-          maxWidth: "400px",
+          padding: "24px 20px",
+          width: "100%",
+          maxWidth: "min(400px, calc(100vw - 32px))",
           boxShadow: "0 24px 80px rgba(0, 0, 0, 0.5), 0 0 40px rgba(139, 92, 246, 0.1)",
           animation: "shortcutsSlideIn 0.25s ease-out",
         }}

@@ -83,7 +83,7 @@ export const settingStyles = {
     drawerContent: {
       bg: 'rgba(15, 15, 20, 0.85)',
       backdropFilter: 'blur(24px) saturate(180%)',
-      maxWidth: '440px',
+      maxWidth: 'min(440px, 100vw)',
       height: isElectron ? 'calc(100vh - 30px)' : '100vh',
       borderRight: '1px solid',
       borderColor: 'whiteAlpha.100',

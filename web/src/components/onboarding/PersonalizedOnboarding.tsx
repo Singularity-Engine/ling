@@ -348,7 +348,7 @@ function StepInterests({
         display: "grid",
         gridTemplateColumns: "repeat(3, 1fr)",
         gap: "12px",
-        maxWidth: "400px",
+        maxWidth: "min(400px, 100%)",
         margin: "0 auto",
       }}>
         {INTERESTS.map(({ tag, icon: Icon, color }) => {
@@ -439,7 +439,7 @@ function StepGoals({
         flexWrap: "wrap",
         gap: "10px",
         justifyContent: "center",
-        maxWidth: "440px",
+        maxWidth: "min(440px, 100%)",
         margin: "0 auto",
       }}>
         {/* Memory — always included, not toggleable */}
