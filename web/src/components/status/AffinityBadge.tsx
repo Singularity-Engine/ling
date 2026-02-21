@@ -1,4 +1,4 @@
-import { memo, useState, useMemo } from "react";
+import { memo, useState, useId, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useAffinity } from "@/context/affinity-context";
 
@@ -30,9 +30,8 @@ const LEVEL_CONFIG: Record<string, { i18nKey: string; color: string; heartColor:
   devoted: { i18nKey: "affinity.devoted", color: "#f472b6", heartColor: "#f472b6", beatSpeed: "0.8s" },
 };
 
-let heartIdCounter = 0;
 const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPercent: number; size?: number }) => {
-  const gradientId = useMemo(() => `heartFill-${++heartIdCounter}`, []);
+  const gradientId = useId();
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>

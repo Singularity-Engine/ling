@@ -64,9 +64,11 @@ export const TTSStatus = memo(() => {
   const [visible, setVisible] = useState(false);
   const [fading, setFading] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const fadeTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
+    if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
 
     if (phase === 'idle') {
       // fade out
@@ -83,7 +85,7 @@ export const TTSStatus = memo(() => {
       // auto-hide error after 3s
       timerRef.current = setTimeout(() => {
         setFading(true);
-        setTimeout(() => {
+        fadeTimerRef.current = setTimeout(() => {
           setVisible(false);
           setFading(false);
         }, 300);
@@ -95,6 +97,7 @@ export const TTSStatus = memo(() => {
 
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
+      if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
     };
   }, [phase]);
 
