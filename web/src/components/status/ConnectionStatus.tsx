@@ -51,10 +51,10 @@ export const ConnectionStatus = memo(() => {
   if (isOpen && !showConnected) return null;
 
   const dotColor = isOpen
-    ? "#4ade80"
+    ? "var(--ling-success)"
     : isConnecting
-      ? "#fbbf24"
-      : "#f87171";
+      ? "var(--ling-warning)"
+      : "var(--ling-error)";
 
   const label = isOpen
     ? t("connection.connected")
@@ -79,7 +79,7 @@ export const ConnectionStatus = memo(() => {
           background: "rgba(0, 0, 0, 0.35)",
           backdropFilter: "blur(12px)",
           borderRadius: "16px",
-          border: `1px solid ${isClosed ? "rgba(248, 113, 113, 0.3)" : "rgba(255,255,255,0.06)"}`,
+          border: `1px solid ${isClosed ? "var(--ling-error-border)" : "rgba(255,255,255,0.06)"}`,
           cursor: isClosed ? "pointer" : "default",
           transition: "all 0.4s ease",
           opacity: isOpen ? 0.7 : 1,
@@ -91,14 +91,14 @@ export const ConnectionStatus = memo(() => {
           if (isClosed) {
             const el = e.currentTarget as HTMLElement;
             el.style.background = "rgba(0, 0, 0, 0.55)";
-            el.style.borderColor = "rgba(248, 113, 113, 0.5)";
+            el.style.borderColor = "var(--ling-error)";
           }
         }}
         onMouseLeave={(e) => {
           if (isClosed) {
             const el = e.currentTarget as HTMLElement;
             el.style.background = "rgba(0, 0, 0, 0.35)";
-            el.style.borderColor = "rgba(248, 113, 113, 0.3)";
+            el.style.borderColor = "var(--ling-error-border)";
           }
         }}
       >
@@ -120,7 +120,7 @@ export const ConnectionStatus = memo(() => {
           <span
             style={{
               fontSize: "11px",
-              color: isClosed ? "rgba(248, 113, 113, 0.9)" : "rgba(251, 191, 36, 0.9)",
+              color: isClosed ? "var(--ling-error)" : "var(--ling-warning)",
               fontWeight: 500,
               whiteSpace: "nowrap",
               lineHeight: 1,

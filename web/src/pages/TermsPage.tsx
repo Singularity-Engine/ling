@@ -78,7 +78,7 @@ const styles: Record<string, React.CSSProperties> = {
   title: {
     fontSize: 28,
     fontWeight: 700,
-    color: '#c4b5fd',
+    color: 'var(--ling-purple-lighter)',
     marginBottom: 4,
   },
   updated: {
@@ -107,5 +107,5 @@ const styles: Record<string, React.CSSProperties> = {
     margin: 0,
   },
   back: { marginTop: 40, textAlign: 'center' },
-  link: { color: '#c4b5fd', textDecoration: 'none', fontSize: 14 },
+  link: { color: 'var(--ling-purple-lighter)', textDecoration: 'none', fontSize: 14 },
 };

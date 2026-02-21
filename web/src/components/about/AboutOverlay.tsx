@@ -124,7 +124,7 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
         .about-link:hover {
           background: rgba(139, 92, 246, 0.2);
           border-color: rgba(139, 92, 246, 0.4);
-          color: #c4b5fd;
+          color: var(--ling-purple-lighter);
         }
       `}</style>
       <div

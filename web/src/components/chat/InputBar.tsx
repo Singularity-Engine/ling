@@ -65,7 +65,7 @@ const S_MIC_OFF: CSSProperties = {
 const S_MIC_ON: CSSProperties = {
   ...S_MIC_BASE,
   background: "rgba(239, 68, 68, 0.2)", border: "1px solid rgba(239, 68, 68, 0.4)",
-  color: "#ef4444", animation: "micPulse 1.5s ease-in-out infinite",
+  color: "var(--ling-error)", animation: "micPulse 1.5s ease-in-out infinite",
 };
 
 const S_SEND_BASE: CSSProperties = {
@@ -115,7 +115,7 @@ const S_MD_HINT: CSSProperties = { fontSize: "10px", color: "rgba(255,255,255,0.
 const S_CHAR_BASE: CSSProperties = { fontSize: "10px", transition: "color 0.2s" };
 const S_CHAR_NORMAL: CSSProperties = { ...S_CHAR_BASE, color: "rgba(255,255,255,0.25)" };
 const S_CHAR_WARN: CSSProperties = { ...S_CHAR_BASE, color: "rgba(251, 191, 36, 0.7)" };
-const S_CHAR_OVER: CSSProperties = { ...S_CHAR_BASE, color: "#ef4444" };
+const S_CHAR_OVER: CSSProperties = { ...S_CHAR_BASE, color: "var(--ling-error)" };
 
 // Pre-created SVG icon elements — shared across all renders to avoid
 // redundant React.createElement overhead (matches ChatBubble ICON_COPY pattern).

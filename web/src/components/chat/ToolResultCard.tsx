@@ -69,7 +69,7 @@ const S_CB_EXPAND: CSSProperties = {
 // StatusIndicator
 const S_SI_DOTS: CSSProperties = { display: "inline-flex", gap: "3px", alignItems: "center" };
 const S_SI_DONE: CSSProperties = { fontSize: "12px", animation: "toolStatusPop 0.3s ease-out" };
-const S_SI_ERROR: CSSProperties = { fontSize: "12px", color: "#f87171", animation: "toolStatusPop 0.3s ease-out" };
+const S_SI_ERROR: CSSProperties = { fontSize: "12px", color: "var(--ling-error)", animation: "toolStatusPop 0.3s ease-out" };
 
 // Lazily-cached pulse-dot styles keyed by accent color — avoids creating 3 new
 // objects inside .map() on every StatusIndicator render.
@@ -250,7 +250,7 @@ const ShimmerBar = memo(({ accent }: { accent: string }) => (
 ));
 ShimmerBar.displayName = "ShimmerBar";
 
-const ERROR_COLORS = { bg: "rgba(248, 113, 113, 0.06)", border: "rgba(248, 113, 113, 0.2)", accent: "#f87171" };
+const ERROR_COLORS = { bg: "var(--ling-error-bg)", border: "var(--ling-error-border)", accent: "var(--ling-error)" };
 
 const CARD_COLORS: Record<string, { bg: string; border: string; accent: string }> = {
   search: { bg: "rgba(96, 165, 250, 0.08)", border: "rgba(96, 165, 250, 0.2)", accent: "#60a5fa" },

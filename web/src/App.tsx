@@ -68,7 +68,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
         <div style={{ width: '100vw', height: '100vh', background: '#0a0015', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}>
           <div style={{ maxWidth: 'min(440px, calc(100vw - 32px))', textAlign: 'center', padding: '32px 16px' }}>
             <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.8 }}>:(</div>
-            <h2 style={{ color: '#c4b5fd', marginBottom: 8, fontSize: 20, fontWeight: 600 }}>{i18next.t('error.pageCrashTitle')}</h2>
+            <h2 style={{ color: 'var(--ling-purple-lighter)', marginBottom: 8, fontSize: 20, fontWeight: 600 }}>{i18next.t('error.pageCrashTitle')}</h2>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, marginBottom: 24, lineHeight: 1.6 }}>
               {i18next.t('error.pageCrashLine1')}<br />{i18next.t('error.pageCrashLine2')}
             </p>

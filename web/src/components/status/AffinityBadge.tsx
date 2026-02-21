@@ -21,7 +21,7 @@ const keyframesStyle = `
 `;
 
 const LEVEL_CONFIG: Record<string, { i18nKey: string; color: string; heartColor: string; beatSpeed: string }> = {
-  hatred: { i18nKey: "affinity.hatred", color: "#ef4444", heartColor: "#4a1515", beatSpeed: "3s" },
+  hatred: { i18nKey: "affinity.hatred", color: "#f87171", heartColor: "#4a1515", beatSpeed: "3s" },
   hostile: { i18nKey: "affinity.hostile", color: "#f97316", heartColor: "#6b3a1a", beatSpeed: "2.5s" },
   indifferent: { i18nKey: "affinity.indifferent", color: "#a3a3a3", heartColor: "#525252", beatSpeed: "2.2s" },
   neutral: { i18nKey: "affinity.neutral", color: "#60a5fa", heartColor: "#60a5fa", beatSpeed: "2s" },

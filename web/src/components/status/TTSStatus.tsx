@@ -40,12 +40,12 @@ const phaseConfig: Record<Exclude<TTSPhase, 'idle'>, {
     animate: true,
   },
   playing: {
-    dotColor: '#4ade80',
+    dotColor: 'var(--ling-success)',
     i18nKey: 'tts.playing',
     animate: false,
   },
   error: {
-    dotColor: '#f87171',
+    dotColor: 'var(--ling-error)',
     i18nKey: 'tts.error',
     animate: false,
   },

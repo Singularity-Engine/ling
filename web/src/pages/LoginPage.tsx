@@ -84,7 +84,7 @@ const styles: Record<string, React.CSSProperties> = {
   page: {
     width: '100vw',
     height: '100dvh',
-    background: '#0a0015',
+    background: 'var(--ling-bg-deep)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -99,7 +99,7 @@ const styles: Record<string, React.CSSProperties> = {
   title: {
     fontSize: 40,
     fontWeight: 700,
-    color: '#c4b5fd',
+    color: 'var(--ling-purple-lighter)',
     margin: '0 0 4px',
     letterSpacing: 2,
   },
@@ -128,7 +128,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '12px 0',
     borderRadius: 8,
     border: 'none',
-    background: 'rgba(139, 92, 246, 0.6)',
+    background: 'var(--ling-purple-60)',
     color: '#fff',
     fontSize: 15,
     fontWeight: 600,
@@ -136,7 +136,7 @@ const styles: Record<string, React.CSSProperties> = {
     transition: 'opacity 0.2s',
   },
   error: {
-    color: '#ff6b6b',
+    color: 'var(--ling-error)',
     fontSize: 13,
     margin: 0,
   },
@@ -146,7 +146,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 13,
   },
   link: {
-    color: '#c4b5fd',
+    color: 'var(--ling-purple-lighter)',
     textDecoration: 'none',
   },
 };

@@ -21,7 +21,7 @@ const slideUpKeyframes = `
 `;
 
 const LEVEL_CONFIG: Record<string, { i18nKey: string; color: string; icon: string }> = {
-  hatred: { i18nKey: "affinity.hatred", color: "#ef4444", icon: "💔" },
+  hatred: { i18nKey: "affinity.hatred", color: "#f87171", icon: "💔" },
   hostile: { i18nKey: "affinity.hostile", color: "#f97316", icon: "❄️" },
   indifferent: { i18nKey: "affinity.indifferent", color: "#a3a3a3", icon: "😐" },
   neutral: { i18nKey: "affinity.neutral", color: "#60a5fa", icon: "💙" },

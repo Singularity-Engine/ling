@@ -18,16 +18,16 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   style.textContent = `
     .chat-area-scroll::-webkit-scrollbar { width: 4px; }
     .chat-area-scroll::-webkit-scrollbar-track { background: transparent; }
-    .chat-area-scroll::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 2px; }
+    .chat-area-scroll::-webkit-scrollbar-thumb { background: var(--ling-purple-30); border-radius: 2px; }
     @keyframes chatFadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes emptyStateFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
     @keyframes emptyStateFadeOut { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(-12px) scale(0.96); } }
     @keyframes scrollBtnIn { from { opacity: 0; transform: translateY(12px) scale(0.8); } to { opacity: 1; transform: translateY(0) scale(1); } }
-    @keyframes scrollBtnPulse { 0%, 100% { box-shadow: 0 2px 12px rgba(139, 92, 246, 0.3); } 50% { box-shadow: 0 2px 20px rgba(139, 92, 246, 0.5); } }
+    @keyframes scrollBtnPulse { 0%, 100% { box-shadow: 0 2px 12px var(--ling-purple-30); } 50% { box-shadow: 0 2px 20px var(--ling-purple-50); } }
     @keyframes chipFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes greetingBubbleIn { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
     .welcome-chip { transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease; }
-    .welcome-chip:hover { background: rgba(139, 92, 246, 0.25) !important; border-color: rgba(139, 92, 246, 0.35) !important; transform: translateY(-1px); }
+    .welcome-chip:hover { background: var(--ling-purple-25) !important; border-color: var(--ling-purple-30) !important; transform: translateY(-1px); }
     .welcome-chip:active { transform: scale(0.97); }
     .chat-msg-item { contain: layout style; }
   `;
@@ -99,11 +99,11 @@ const S_CHIPS_LEFT: CSSProperties = {
 };
 
 const S_CHIP_BASE: CSSProperties = {
-  background: "rgba(139, 92, 246, 0.18)",
-  border: "1px solid rgba(139, 92, 246, 0.28)",
+  background: "var(--ling-purple-15)",
+  border: "1px solid var(--ling-purple-25)",
   borderRadius: "20px",
   padding: "8px 16px",
-  color: "rgba(226, 212, 255, 0.8)",
+  color: "var(--ling-purple-text)",
   fontSize: "13px",
   cursor: "pointer",
   lineHeight: "1.4",
@@ -174,11 +174,11 @@ const S_LOAD_MORE_WRAP: CSSProperties = {
 };
 
 const S_LOAD_MORE_BTN: CSSProperties = {
-  background: "rgba(255, 255, 255, 0.06)",
-  border: "1px solid rgba(255, 255, 255, 0.1)",
+  background: "var(--ling-surface)",
+  border: "1px solid var(--ling-surface-hover)",
   borderRadius: "16px",
   padding: "6px 16px",
-  color: "rgba(255, 255, 255, 0.5)",
+  color: "var(--ling-text-secondary)",
   fontSize: "12px",
   cursor: "pointer",
   transition: "all 0.2s ease",
@@ -197,14 +197,14 @@ const S_SCROLL_BTN: CSSProperties = {
   width: "36px",
   height: "36px",
   borderRadius: "50%",
-  background: "rgba(139, 92, 246, 0.85)",
-  color: "rgba(255,255,255,0.95)",
+  background: "var(--ling-purple-85)",
+  color: "var(--ling-text-primary)",
   fontSize: "16px",
   lineHeight: 1,
-  border: "1px solid rgba(139, 92, 246, 0.4)",
+  border: "1px solid var(--ling-purple-40)",
   backdropFilter: "blur(12px)",
   WebkitBackdropFilter: "blur(12px)",
-  boxShadow: "0 2px 12px rgba(139, 92, 246, 0.3)",
+  boxShadow: "0 2px 12px var(--ling-purple-30)",
   cursor: "pointer",
   transition: "all 0.2s ease",
   animation: "scrollBtnIn 0.25s ease-out",
@@ -226,7 +226,7 @@ const S_NEW_DOT: CSSProperties = {
   width: "10px",
   height: "10px",
   borderRadius: "50%",
-  background: "#ef4444",
+  background: "var(--ling-error)",
   border: "2px solid rgba(15, 15, 20, 0.9)",
   animation: "chatFadeInUp 0.2s ease-out",
 };
@@ -242,17 +242,17 @@ const S_TIMEOUT_WRAP: CSSProperties = {
 
 const S_TIMEOUT_TEXT: CSSProperties = {
   fontSize: "12px",
-  color: "rgba(255, 255, 255, 0.5)",
+  color: "var(--ling-text-secondary)",
   textAlign: "center",
   lineHeight: 1.5,
 };
 
 const S_RETRY_BTN: CSSProperties = {
-  background: "rgba(139, 92, 246, 0.2)",
-  border: "1px solid rgba(139, 92, 246, 0.35)",
+  background: "var(--ling-purple-20)",
+  border: "1px solid var(--ling-purple-30)",
   borderRadius: "14px",
   padding: "6px 20px",
-  color: "rgba(167, 139, 250, 0.9)",
+  color: "var(--ling-purple-light)",
   fontSize: "12px",
   cursor: "pointer",
   transition: "all 0.2s ease",
@@ -288,18 +288,18 @@ const S_EMPTY_WRAP_EXIT: CSSProperties = {
 const S_EMPTY_GLYPH: CSSProperties = {
   fontSize: "36px",
   fontWeight: 700,
-  color: "rgba(167, 139, 250, 0.85)",
-  textShadow: "0 0 24px rgba(139, 92, 246, 0.4), 0 0 48px rgba(139, 92, 246, 0.15)",
+  color: "var(--ling-purple-light)",
+  textShadow: "0 0 24px var(--ling-purple-40), 0 0 48px var(--ling-purple-15)",
   animation: "emptyStateFloat 3s ease-in-out infinite",
   letterSpacing: "2px",
   userSelect: "none",
 };
 
 const S_WELCOME_CARD: CSSProperties = {
-  background: "rgba(255, 255, 255, 0.08)",
+  background: "var(--ling-surface)",
   backdropFilter: "blur(16px)",
   WebkitBackdropFilter: "blur(16px)",
-  border: "1px solid rgba(255, 255, 255, 0.06)",
+  border: "1px solid var(--ling-surface-border)",
   borderRadius: "16px",
   padding: "20px 24px",
   maxWidth: "320px",
@@ -312,7 +312,7 @@ const S_WELCOME_CARD: CSSProperties = {
 
 const S_WELCOME_TITLE: CSSProperties = {
   fontSize: "15px",
-  color: "rgba(226, 212, 255, 0.85)",
+  color: "var(--ling-purple-text)",
   fontWeight: 500,
   letterSpacing: "0.3px",
   lineHeight: "1.5",
@@ -320,7 +320,7 @@ const S_WELCOME_TITLE: CSSProperties = {
 
 const S_WELCOME_SUB: CSSProperties = {
   fontSize: "12px",
-  color: "rgba(255, 255, 255, 0.25)",
+  color: "var(--ling-text-muted)",
 };
 
 const S_CAPS_ROW: CSSProperties = {
@@ -332,9 +332,9 @@ const S_CAPS_ROW: CSSProperties = {
 
 const S_CAP_TAG: CSSProperties = {
   fontSize: "11px",
-  color: "rgba(167, 139, 250, 0.7)",
-  background: "rgba(139, 92, 246, 0.1)",
-  border: "1px solid rgba(139, 92, 246, 0.15)",
+  color: "var(--ling-purple-light)",
+  background: "var(--ling-purple-15)",
+  border: "1px solid var(--ling-purple-15)",
   borderRadius: "12px",
   padding: "4px 12px",
   letterSpacing: "0.3px",

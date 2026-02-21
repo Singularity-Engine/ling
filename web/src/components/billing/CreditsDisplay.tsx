@@ -43,7 +43,7 @@ const CreditsDisplay: React.FC = () => {
         style={{
           fontSize: '12px',
           fontWeight: 600,
-          color: isLow ? '#ef4444' : 'rgba(168, 85, 247, 0.9)',
+          color: isLow ? 'var(--ling-error)' : 'rgba(168, 85, 247, 0.9)',
         }}
       >
         ✦
@@ -52,7 +52,7 @@ const CreditsDisplay: React.FC = () => {
         style={{
           fontSize: '12px',
           fontWeight: 600,
-          color: isLow ? '#ef4444' : 'rgba(255, 255, 255, 0.8)',
+          color: isLow ? 'var(--ling-error)' : 'rgba(255, 255, 255, 0.8)',
         }}
       >
         {Math.floor(balance)}

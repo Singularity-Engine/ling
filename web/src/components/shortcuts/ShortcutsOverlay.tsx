@@ -67,7 +67,7 @@ export const ShortcutsOverlay = memo(({ open, onClose }: ShortcutsOverlayProps) 
       >
         <h2
           style={{
-            color: "#c4b5fd",
+            color: "var(--ling-purple-lighter)",
             fontSize: "16px",
             fontWeight: 600,
             marginBottom: "20px",
