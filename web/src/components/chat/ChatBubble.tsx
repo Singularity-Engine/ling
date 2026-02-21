@@ -123,7 +123,9 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     .chat-copy-btn { opacity: 0; }
     .chat-bubble-wrap:hover .chat-copy-btn { opacity: 1; }
     .chat-copy-btn:hover { color: var(--ling-text-secondary) !important; background: var(--ling-surface) !important; }
-    @media (hover: none) { .chat-copy-btn { opacity: 0.5; } }
+    .chat-bubble-ts { opacity: 0; transition: opacity 0.2s ease; }
+    .ling-msg-row:hover .chat-bubble-ts { opacity: 1; }
+    @media (hover: none) { .chat-copy-btn { opacity: 0.5; } .chat-bubble-ts { opacity: 0.7; } }
     @media (max-width: 768px) { .chat-copy-btn { right: 4px !important; left: auto !important; top: -20px !important; } }
   `;
   document.head.appendChild(style);
@@ -232,7 +234,9 @@ interface ChatBubbleProps {
 function formatTime(ts: string): string {
   try {
     const d = new Date(ts);
-    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mm = String(d.getMinutes()).padStart(2, "0");
+    return `${hh}:${mm}`;
   } catch {
     return "";
   }
@@ -381,7 +385,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
           )}
         </div>
         {timestamp && (
-          <span style={isUser ? S_TS_USER : S_TS_AI}>
+          <span className="chat-bubble-ts" style={isUser ? S_TS_USER : S_TS_AI}>
             {formatTime(timestamp)}
           </span>
         )}
