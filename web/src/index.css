@@ -43,13 +43,17 @@
   --ling-purple-85: rgba(139, 92, 246, 0.85);
 
   /* 气泡 */
-  --ling-bubble-user-bg: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(109, 40, 217, 0.25));
-  --ling-bubble-ai-bg: var(--ling-surface);
-  --ling-bubble-user-border: var(--ling-purple-25);
-  --ling-bubble-ai-border: var(--ling-surface-border);
+  --ling-bubble-user-bg: linear-gradient(135deg, rgba(139, 92, 246, 0.45), rgba(109, 40, 217, 0.4));
+  --ling-bubble-ai-bg: rgba(255, 255, 255, 0.08);
+  --ling-bubble-user-border: rgba(139, 92, 246, 0.35);
+  --ling-bubble-ai-border: rgba(255, 255, 255, 0.1);
+  --ling-bubble-user-shadow: rgba(139, 92, 246, 0.2);
+  --ling-bubble-ai-shadow: rgba(0, 0, 0, 0.1);
   --ling-bubble-ai-text: rgba(255, 255, 255, 0.88);
   --ling-chat-timestamp: rgba(255, 255, 255, 0.5);
   --ling-chat-label: var(--ling-purple-60);
+  --ling-collapse-mask-ai: linear-gradient(transparent, rgba(255, 255, 255, 0.06));
+  --ling-collapse-mask-user: linear-gradient(transparent, rgba(109, 40, 217, 0.5));
 
   /* 代码块 */
   --ling-code-text: #c4b5fd;
@@ -111,13 +115,17 @@
   --ling-purple-85: rgba(124, 58, 237, 0.75);
 
   /* 气泡 */
-  --ling-bubble-user-bg: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(109, 40, 217, 0.12));
-  --ling-bubble-ai-bg: var(--ling-surface);
-  --ling-bubble-user-border: var(--ling-purple-25);
-  --ling-bubble-ai-border: var(--ling-surface-border);
+  --ling-bubble-user-bg: linear-gradient(135deg, rgba(124, 58, 237, 0.18), rgba(109, 40, 217, 0.14));
+  --ling-bubble-ai-bg: rgba(0, 0, 0, 0.04);
+  --ling-bubble-user-border: rgba(124, 58, 237, 0.25);
+  --ling-bubble-ai-border: rgba(0, 0, 0, 0.1);
+  --ling-bubble-user-shadow: rgba(124, 58, 237, 0.15);
+  --ling-bubble-ai-shadow: rgba(0, 0, 0, 0.06);
   --ling-bubble-ai-text: rgba(0, 0, 0, 0.8);
   --ling-chat-timestamp: rgba(0, 0, 0, 0.4);
   --ling-chat-label: var(--ling-purple-60);
+  --ling-collapse-mask-ai: linear-gradient(transparent, rgba(0, 0, 0, 0.06));
+  --ling-collapse-mask-user: linear-gradient(transparent, rgba(124, 58, 237, 0.18));
 
   /* 代码块 */
   --ling-code-text: #6d28d9;

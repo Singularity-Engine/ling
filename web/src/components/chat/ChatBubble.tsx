@@ -101,7 +101,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     @keyframes bubbleCopyFlash { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.97); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
     .chat-copy-btn { opacity: 0; }
     .chat-bubble-wrap:hover .chat-copy-btn { opacity: 1; }
-    .chat-copy-btn:hover { color: rgba(255,255,255,0.7) !important; background: rgba(255,255,255,0.08) !important; }
+    .chat-copy-btn:hover { color: var(--ling-text-secondary) !important; background: var(--ling-surface) !important; }
     @media (hover: none) { .chat-copy-btn { opacity: 0.5; } }
     @media (max-width: 768px) { .chat-copy-btn { right: 4px !important; left: auto !important; top: -20px !important; } }
   `;
@@ -115,19 +115,19 @@ const S_OUTER_AI: CSSProperties = { display: "flex", justifyContent: "flex-start
 
 const S_BUBBLE_USER: CSSProperties = {
   padding: "10px 16px", borderRadius: "18px 18px 4px 18px",
-  background: "linear-gradient(135deg, rgba(139, 92, 246, 0.45), rgba(109, 40, 217, 0.4))",
-  border: "1px solid rgba(139, 92, 246, 0.35)",
+  background: "var(--ling-bubble-user-bg)",
+  border: "1px solid var(--ling-bubble-user-border)",
   backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
   overflow: "hidden", transition: "all 0.2s ease",
-  boxShadow: "0 2px 12px rgba(139, 92, 246, 0.2)",
+  boxShadow: "0 2px 12px var(--ling-bubble-user-shadow)",
 };
 const S_BUBBLE_AI: CSSProperties = {
   padding: "10px 16px", borderRadius: "18px 18px 18px 4px",
-  background: "rgba(255, 255, 255, 0.08)",
-  border: "1px solid rgba(255, 255, 255, 0.1)",
+  background: "var(--ling-bubble-ai-bg)",
+  border: "1px solid var(--ling-bubble-ai-border)",
   backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
   overflow: "hidden", transition: "all 0.2s ease",
-  boxShadow: "0 1px 8px rgba(0, 0, 0, 0.1)",
+  boxShadow: "0 1px 8px var(--ling-bubble-ai-shadow)",
 };
 const S_BUBBLE_AI_ACTIVE: CSSProperties = { ...S_BUBBLE_AI, cursor: "default" };
 
@@ -137,42 +137,42 @@ const S_BUBBLE_AI_COLLAPSED: CSSProperties = { ...S_BUBBLE_AI, maxHeight: COLLAP
 const S_BUBBLE_AI_ACTIVE_COLLAPSED: CSSProperties = { ...S_BUBBLE_AI_ACTIVE, maxHeight: COLLAPSED_MAX_HEIGHT, position: "relative" };
 
 const S_USER_TEXT: CSSProperties = {
-  fontSize: "14px", color: "rgba(255,255,255,0.95)", whiteSpace: "pre-wrap",
+  fontSize: "14px", color: "var(--ling-text-primary)", whiteSpace: "pre-wrap",
   overflowWrap: "anywhere", lineHeight: 1.7, letterSpacing: "0.3px",
 };
-const S_AI_MD: CSSProperties = { fontSize: "14px", color: "rgba(255,255,255,0.88)", lineHeight: 1.7, letterSpacing: "0.3px" };
+const S_AI_MD: CSSProperties = { fontSize: "14px", color: "var(--ling-bubble-ai-text)", lineHeight: 1.7, letterSpacing: "0.3px" };
 
 const S_NAME: CSSProperties = {
-  display: "block", fontSize: "11px", color: "rgba(139, 92, 246, 0.6)",
+  display: "block", fontSize: "11px", color: "var(--ling-chat-label)",
   marginBottom: "4px", marginLeft: "4px", fontWeight: 500, letterSpacing: "0.5px",
 };
-const S_TS_USER: CSSProperties = { display: "block", fontSize: "10px", color: "rgba(255, 255, 255, 0.5)", marginTop: "3px", textAlign: "right", marginRight: "4px" };
-const S_TS_AI: CSSProperties = { display: "block", fontSize: "10px", color: "rgba(255, 255, 255, 0.5)", marginTop: "3px", textAlign: "left", marginLeft: "4px" };
+const S_TS_USER: CSSProperties = { display: "block", fontSize: "10px", color: "var(--ling-chat-timestamp)", marginTop: "3px", textAlign: "right", marginRight: "4px" };
+const S_TS_AI: CSSProperties = { display: "block", fontSize: "10px", color: "var(--ling-chat-timestamp)", marginTop: "3px", textAlign: "left", marginLeft: "4px" };
 
 const S_COPY_BASE: CSSProperties = {
   position: "absolute", top: "6px", width: "24px", height: "24px",
   display: "flex", alignItems: "center", justifyContent: "center",
   background: "transparent", border: "none", borderRadius: "4px",
-  cursor: "pointer", padding: 0, transition: "all 0.2s ease", color: "rgba(255,255,255,0.3)",
+  cursor: "pointer", padding: 0, transition: "all 0.2s ease", color: "var(--ling-text-tertiary)",
 };
 const S_COPY_AI: CSSProperties = { ...S_COPY_BASE, right: "-32px" };
 const S_COPY_USER: CSSProperties = { ...S_COPY_BASE, left: "-32px" };
-const S_COPY_AI_DONE: CSSProperties = { ...S_COPY_AI, color: "rgba(34,197,94,0.8)" };
-const S_COPY_USER_DONE: CSSProperties = { ...S_COPY_USER, color: "rgba(34,197,94,0.8)" };
+const S_COPY_AI_DONE: CSSProperties = { ...S_COPY_AI, color: "var(--ling-success)" };
+const S_COPY_USER_DONE: CSSProperties = { ...S_COPY_USER, color: "var(--ling-success)" };
 
 const S_COLLAPSE_MASK: CSSProperties = {
   position: "absolute", bottom: 0, left: 0, right: 0, height: "64px",
-  background: "linear-gradient(transparent, rgba(255, 255, 255, 0.06))",
+  background: "var(--ling-collapse-mask-ai)",
   pointerEvents: "none", borderRadius: "0 0 18px 18px",
 };
 const S_COLLAPSE_MASK_USER: CSSProperties = {
   ...S_COLLAPSE_MASK,
-  background: "linear-gradient(transparent, rgba(109, 40, 217, 0.5))",
+  background: "var(--ling-collapse-mask-user)",
 };
 const S_TOGGLE_BTN: CSSProperties = {
   display: "flex", alignItems: "center", justifyContent: "center", gap: "4px",
   width: "100%", padding: "6px 0 2px", border: "none", background: "transparent",
-  color: "rgba(139, 92, 246, 0.8)", fontSize: "12px", fontWeight: 500,
+  color: "var(--ling-purple-85)", fontSize: "12px", fontWeight: 500,
   cursor: "pointer", letterSpacing: "0.3px", transition: "color 0.2s ease",
 };
 const S_TOGGLE_ARROW: CSSProperties = { fontSize: "10px" };
@@ -181,7 +181,7 @@ const S_TOOL_WRAP: CSSProperties = { padding: "0 16px", marginBottom: "10px", ma
 const S_INNER: CSSProperties = { maxWidth: "78%", minWidth: 0 };
 const S_REL: CSSProperties = { position: "relative" };
 const S_CURSOR: CSSProperties = {
-  display: "inline-block", width: "2px", height: "14px", background: "#8b5cf6",
+  display: "inline-block", width: "2px", height: "14px", background: "var(--ling-purple)",
   marginLeft: "2px", verticalAlign: "text-bottom", borderRadius: "1px",
   animation: "streamingCursor 1s ease-in-out infinite",
 };
