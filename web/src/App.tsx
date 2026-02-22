@@ -321,6 +321,8 @@ function MainContent(): JSX.Element {
           border: "1px solid rgba(255, 255, 255, 0.06)",
         }}>
           <button
+            className="ling-action-btn"
+            data-active={chatExpanded}
             onClick={toggleChat}
             aria-label={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}
             aria-pressed={chatExpanded}
@@ -341,11 +343,13 @@ function MainContent(): JSX.Element {
               padding: 0,
             }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
           </button>
           <button
+            className="ling-action-btn"
+            data-active={memoryOpen}
             onClick={() => setMemoryOpen(true)}
             aria-label="Memories"
             title="Memories"
@@ -375,6 +379,8 @@ function MainContent(): JSX.Element {
             </svg>
           </button>
           <button
+            className="ling-action-btn"
+            data-active={aboutOpen}
             onClick={() => setAboutOpen(true)}
             aria-label={t("shortcuts.showAbout")}
             title={t("shortcuts.showAbout")}
@@ -382,13 +388,13 @@ function MainContent(): JSX.Element {
               width: isMobile ? "44px" : "42px",
               height: isMobile ? "44px" : "42px",
               borderRadius: "50%",
-              background: "rgba(255, 255, 255, 0.08)",
-              border: "1px solid rgba(255, 255, 255, 0.12)",
+              background: aboutOpen ? "rgba(139, 92, 246, 0.4)" : "rgba(255, 255, 255, 0.08)",
+              border: aboutOpen ? "1px solid rgba(139, 92, 246, 0.6)" : "1px solid rgba(255, 255, 255, 0.12)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               cursor: "pointer",
-              transition: "all 0.3s ease",
+              transition: "background 0.3s ease, border-color 0.3s ease",
               backdropFilter: "blur(8px)",
               WebkitBackdropFilter: "blur(8px)",
               padding: 0,

@@ -230,6 +230,27 @@ body {
   to { opacity: 0; transform: translateX(20px); }
 }
 
+/* Memory panel custom scrollbar */
+.ling-memory-scroll::-webkit-scrollbar { width: 4px; }
+.ling-memory-scroll::-webkit-scrollbar-track { background: transparent; }
+.ling-memory-scroll::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.25);
+  border-radius: 4px;
+}
+.ling-memory-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.4);
+}
+
+/* Right toolbar action buttons hover */
+.ling-action-btn:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+.ling-action-btn[data-active="true"]:hover {
+  background: rgba(139, 92, 246, 0.5) !important;
+  border-color: rgba(139, 92, 246, 0.7) !important;
+}
+
 @keyframes landingBtnSpin {
   to { transform: rotate(360deg); }
 }

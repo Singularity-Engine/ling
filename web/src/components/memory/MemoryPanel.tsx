@@ -180,10 +180,14 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
 
         {/* Content */}
         <div
+          className="ling-memory-scroll"
           style={{
             flex: 1,
             overflowY: 'auto',
             padding: '20px 24px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
           }}
         >
           {loading && (
@@ -252,7 +256,6 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
                 border: '1px solid rgba(255,255,255,0.08)',
                 borderLeft: '3px solid rgba(139,92,246,0.4)',
                 borderRadius: '10px',
-                marginBottom: '12px',
                 transition: 'background 0.2s ease, border-color 0.2s ease',
                 cursor: 'default',
               }}
