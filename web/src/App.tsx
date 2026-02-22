@@ -277,7 +277,7 @@ function MainContent(): JSX.Element {
       <div style={{
         position: "absolute", bottom: 0, left: 0, right: 0,
         height: "42dvh", zIndex: 22, pointerEvents: "none",
-        background: "linear-gradient(to bottom, transparent 0%, rgba(10,0,21,0.18) 30%, rgba(10,0,21,0.50) 60%, rgba(10,0,21,0.78) 100%)",
+        background: "linear-gradient(to bottom, transparent 0%, rgba(10,0,21,0.10) 20%, rgba(10,0,21,0.28) 40%, rgba(10,0,21,0.50) 60%, rgba(10,0,21,0.70) 80%, rgba(10,0,21,0.80) 100%)",
       }} />
 
       {/* ===== Layer 1.5: 右侧工具栏 ===== */}
@@ -296,6 +296,14 @@ function MainContent(): JSX.Element {
         <CreditsDisplay />
         <AffinityBadge />
         <ConnectionStatus />
+        {/* Divider: status indicators above, action buttons below */}
+        <div style={{
+          width: "24px",
+          height: "1px",
+          background: "rgba(255, 255, 255, 0.08)",
+          margin: "2px 0",
+          alignSelf: "center",
+        }} />
         <button
           onClick={toggleChat}
           aria-label={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}

@@ -39,7 +39,7 @@ export const AffinityBar = memo(() => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          gap: "10px",
+          gap: "12px",
           position: "relative",
           borderTop: "1px solid rgba(255,255,255,0.06)",
         }}
@@ -52,7 +52,7 @@ export const AffinityBar = memo(() => {
         </span>
         <div
           style={{
-            width: "100px",
+            width: "130px",
             height: "6px",
             background: "rgba(255,255,255,0.12)",
             borderRadius: "3px",
@@ -74,7 +74,7 @@ export const AffinityBar = memo(() => {
             }}
           />
         </div>
-        <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", fontFamily: "monospace", minWidth: "20px", textAlign: "right" }}>
+        <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)", fontFamily: "monospace", minWidth: "22px", textAlign: "right" }}>
           {affinity}
         </span>
 

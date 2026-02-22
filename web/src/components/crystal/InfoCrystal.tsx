@@ -245,14 +245,14 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
       <div
         style={{
           position: "relative",
-          width: "220px",
+          width: "240px",
           minHeight: "80px",
           maxHeight: "200px",
           background: "rgba(10, 0, 21, var(--c-bg-alpha))",
           backdropFilter: "blur(var(--c-blur))",
           border: `1px solid ${borderHex}`,
           borderRadius: "16px",
-          padding: "12px 14px",
+          padding: "14px 16px",
           color: "white",
           cursor: "pointer",
           overflow: "hidden",
@@ -306,11 +306,11 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
         </div>
 
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px" }}>
-          <span style={{ fontSize: "14px", lineHeight: 1 }}>{icon}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+          <span style={{ fontSize: "15px", lineHeight: 1 }}>{icon}</span>
           <span
             style={{
-              fontSize: "14px",
+              fontSize: "15px",
               fontWeight: 600,
               letterSpacing: "0.2px",
               flex: 1,
@@ -330,7 +330,7 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
           style={{
             fontSize: "11.5px",
             lineHeight: 1.6,
-            color: "rgba(255, 255, 255, 0.55)",
+            color: "rgba(255, 255, 255, 0.62)",
             overflow: "hidden",
             textOverflow: "ellipsis",
             display: "-webkit-box",
@@ -344,9 +344,9 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
         {/* Footer */}
         <span
           style={{
-            fontSize: "10px",
+            fontSize: "11px",
             color: `${color}99`,
-            marginTop: "8px",
+            marginTop: "10px",
             textAlign: "right",
             display: "block",
           }}
