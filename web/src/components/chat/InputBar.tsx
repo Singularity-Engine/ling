@@ -5,14 +5,13 @@ import { useChatMessages } from "@/context/chat-history-context";
 import { useAiState } from "@/context/ai-state-context";
 import { useInterrupt } from "@/components/canvas/live2d";
 import { useVAD } from "@/context/vad-context";
+import { createStyleInjector } from "@/utils/style-injection";
 
 
-// Inject styles once
-const STYLE_ID = "input-bar-styles";
-if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
-  const style = document.createElement("style");
-  style.id = STYLE_ID;
-  style.textContent = `
+// ── Deferred style injection (avoids module-level side effects) ──
+const ensureInputBarStyles = createStyleInjector({
+  id: "input-bar-styles",
+  css: `
     @keyframes inputPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
     @keyframes micPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); } }
     @keyframes sendSpin { to { transform: rotate(360deg); } }
@@ -28,9 +27,8 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     .ling-mic-btn:active { transform: scale(0.88); }
     @keyframes inputShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 50% { transform: translateX(4px); } 75% { transform: translateX(-2px); } }
     .ling-textarea.ling-shake { animation: inputShake 0.35s ease; border-color: rgba(239, 68, 68, 0.4) !important; box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important; }
-  `;
-  document.head.appendChild(style);
-}
+  `,
+});
 
 // ─── Static style constants (avoid per-render allocation during typing) ───
 
@@ -157,6 +155,7 @@ const AI_STATE_KEYS: Record<string, string> = {
 const MAX_LENGTH = 2000;
 
 export const InputBar = memo(() => {
+  useEffect(ensureInputBarStyles, []);
   const { t } = useTranslation();
   const [inputText, setInputText] = useState("");
   const isComposingRef = useRef(false);

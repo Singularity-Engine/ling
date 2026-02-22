@@ -1,9 +1,10 @@
-import { memo, useState, useCallback, type CSSProperties } from "react";
+import { memo, useState, useEffect, useCallback, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/auth-context";
 import { useUI } from "@/context/ui-context";
 import { apiClient } from "@/services/api-client";
 import packageJson from "../../../package.json";
+import { createStyleInjector } from "@/utils/style-injection";
 
 // ─── Inject keyframes + hover styles once (same pattern as ChatArea/ChatBubble) ───
 

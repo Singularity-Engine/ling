@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import i18next from "i18next";
 import { toaster } from "@/components/ui/toaster";
 import { ToolResultCard } from "./ToolResultCard";
+import { createStyleInjector } from "@/utils/style-injection";
 
 export const remarkPlugins = [remarkGfm];
 const rehypePlugins = [rehypeHighlight];
@@ -112,12 +113,10 @@ const COLLAPSE_CHAR_THRESHOLD = 500;
 const COLLAPSE_LINE_THRESHOLD = 12;
 const COLLAPSED_MAX_HEIGHT = 320; // ~12 lines at 14px * 1.7 line-height + paragraph gaps
 
-// Inject animation styles once
-const STYLE_ID = "chat-bubble-styles";
-if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
-  const style = document.createElement("style");
-  style.id = STYLE_ID;
-  style.textContent = `
+// ── Deferred style injection (avoids module-level side effects) ──
+const ensureBubbleStyles = createStyleInjector({
+  id: "chat-bubble-styles",
+  css: `
     @keyframes bubbleFadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes streamingCursor { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
     @keyframes bubbleCopyFlash { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.97); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
@@ -130,9 +129,8 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     @media (hover: none) { .chat-copy-btn { opacity: 0.5; } .chat-bubble-ts { opacity: 0.7; } }
     @media (max-width: 768px) { .chat-copy-btn { right: 4px !important; left: auto !important; top: -24px !important; } }
     @media (max-width: 480px) { .ling-avatar { display: none !important; } }
-  `;
-  document.head.appendChild(style);
-}
+  `,
+});
 
 // ─── Static style constants (avoid per-render allocation across 50+ messages) ───
 
@@ -322,6 +320,7 @@ const RelativeTime = memo(({ timestamp, style }: { timestamp: string; style: CSS
 RelativeTime.displayName = "RelativeTime";
 
 export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolCall, toolName, toolStatus, isGreeting, skipEntryAnimation, senderChanged }: ChatBubbleProps) => {
+  useEffect(ensureBubbleStyles, []);
   const { t } = useTranslation();
   const isUser = role === "user";
   const [copied, setCopied] = useState(false);

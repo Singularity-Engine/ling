@@ -3,13 +3,12 @@ import { useToolState } from '../../context/tool-state-context';
 import { useAiState } from '../../context/ai-state-context';
 import { useAffinity } from '../../context/affinity-context';
 import { AFFINITY_AMBIENT_TINTS, DEFAULT_LEVEL, type AffinityAmbientTint } from '../../config/affinity-palette';
+import { createStyleInjector } from '@/utils/style-injection';
 
-// ── Module-level keyframe injection (runs once, avoids re-inject on every render) ──
-const KEYFRAMES_ID = 'bg-reactor-keyframes';
-if (typeof document !== 'undefined' && !document.getElementById(KEYFRAMES_ID)) {
-  const style = document.createElement('style');
-  style.id = KEYFRAMES_ID;
-  style.textContent = `
+// ── Deferred style injection (avoids module-level side effects) ──
+const ensureBgReactorStyles = createStyleInjector({
+  id: 'bg-reactor-keyframes',
+  css: `
     @keyframes bgThinkingPulse {
       0%, 100% { opacity: calc(0.5 * var(--bg-glow-boost, 1)); }
       50% { opacity: calc(0.7 * var(--bg-glow-boost, 1)); }
@@ -56,9 +55,8 @@ if (typeof document !== 'undefined' && !document.getElementById(KEYFRAMES_ID)) {
       55% { opacity: 0.3; transform: scale(1.15); }
       100% { opacity: 0; transform: scale(1.3); }
     }
-  `;
-  document.head.appendChild(style);
-}
+  `,
+});
 
 // Stage-specific colors: thinking=blue, working=cyan, presenting=gold, ai-thinking=purple
 const PHASE_COLORS = {
@@ -106,6 +104,7 @@ const LEVEL_BLOOM_BASE: CSSProperties = {
 };
 
 export const BackgroundReactor = memo(() => {
+  useEffect(ensureBgReactorStyles, []);
   const { currentPhase } = useToolState();
   const { isThinkingSpeaking } = useAiState();
   const { level, pointGains, expressionIntensity } = useAffinity();

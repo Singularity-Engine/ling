@@ -3,13 +3,12 @@ import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import { TypingIndicator } from "./TypingIndicator";
 import { remarkPlugins, mdComponents } from "./ChatBubble";
+import { createStyleInjector } from "@/utils/style-injection";
 
-// Inject transition styles once
-const STYLE_ID = "thinking-bubble-styles";
-if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
-  const style = document.createElement("style");
-  style.id = STYLE_ID;
-  style.textContent = `
+// ── Deferred style injection (avoids module-level side effects) ──
+const ensureThinkingStyles = createStyleInjector({
+  id: "thinking-bubble-styles",
+  css: `
     @keyframes thinkingBubbleIn {
       from { opacity: 0; transform: translateY(8px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -18,9 +17,8 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
       from { opacity: 0; }
       to   { opacity: 1; }
     }
-  `;
-  document.head.appendChild(style);
-}
+  `,
+});
 
 // ─── Static style constants (avoid per-render allocation during ~60fps streaming) ───
 
@@ -89,6 +87,7 @@ interface ThinkingBubbleProps {
 }
 
 export const ThinkingBubble = memo(({ content, isThinking, isStreaming }: ThinkingBubbleProps) => {
+  useEffect(ensureThinkingStyles, []);
   const { t } = useTranslation();
 
   // Track whether we just transitioned from thinking to streaming
