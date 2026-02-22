@@ -5,7 +5,7 @@ import {
 import { BsMicFill, BsMicMuteFill, BsPaperclip } from 'react-icons/bs';
 import { IoHandRightSharp } from 'react-icons/io5';
 import { FiChevronDown } from 'react-icons/fi';
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { InputGroup } from '@/components/ui/input-group';
 import { footerStyles } from './footer-styles';
@@ -44,6 +44,9 @@ const S_TOGGLE_COLLAPSED: React.CSSProperties = { transform: 'rotate(180deg)' };
 // Reusable components
 const ToggleButton = memo(({ isCollapsed, onToggle }: ToggleButtonProps) => {
   const { t } = useTranslation();
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle?.(); }
+  }, [onToggle]);
   return (
   <Box
     {...footerStyles.footer.toggleButton}
@@ -53,7 +56,7 @@ const ToggleButton = memo(({ isCollapsed, onToggle }: ToggleButtonProps) => {
     aria-expanded={!isCollapsed}
     title={isCollapsed ? t('ui.expandFooter') : t('ui.collapseFooter')}
     onClick={onToggle}
-    onKeyDown={(e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle?.(); } }}
+    onKeyDown={handleKeyDown}
     style={isCollapsed ? S_TOGGLE_COLLAPSED : S_TOGGLE_OPEN}
   >
     <FiChevronDown />

@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState, useCallback } from 'react';
+import { memo, useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { canvasStyles } from './canvas-styles';
 import { useCamera } from '@/context/camera-context';
 import { useBgUrl } from '@/context/bgurl-context';
@@ -12,6 +12,18 @@ const Background = memo(({ children }: { children?: React.ReactNode }) => {
   const [bgLoaded, setBgLoaded] = useState(false);
 
   const handleBgLoad = useCallback(() => setBgLoaded(true), []);
+
+  const videoStyle = useMemo(() => ({
+    ...canvasStyles.background.video,
+    display: isBackgroundStreaming ? 'block' as const : 'none' as const,
+    transform: 'scaleX(-1)',
+  }), [isBackgroundStreaming]);
+
+  const imgStyle = useMemo(() => ({
+    ...canvasStyles.background.image,
+    opacity: bgLoaded ? 1 : 0,
+    transition: 'opacity 0.4s ease-in',
+  }), [bgLoaded]);
 
   // Reset loaded state when URL changes
   useEffect(() => { setBgLoaded(false); }, [backgroundUrl]);
@@ -38,19 +50,11 @@ const Background = memo(({ children }: { children?: React.ReactNode }) => {
           autoPlay
           playsInline
           muted
-          style={{
-            ...canvasStyles.background.video,
-            display: isBackgroundStreaming ? 'block' : 'none',
-            transform: 'scaleX(-1)',
-          }}
+          style={videoStyle}
         />
       ) : (
         <img
-          style={{
-            ...canvasStyles.background.image,
-            opacity: bgLoaded ? 1 : 0,
-            transition: 'opacity 0.4s ease-in',
-          }}
+          style={imgStyle}
           src={backgroundUrl}
           alt="background"
           decoding="async"

@@ -21,7 +21,7 @@ interface HelpIconProps {
   content: string;
 }
 
-function HelpIcon({ content }: HelpIconProps): JSX.Element {
+const HelpIcon = memo(function HelpIcon({ content }: HelpIconProps): JSX.Element {
   const [isHovering, setIsHovering] = useState(false);
 
   const handleMouseEnter = () => setIsHovering(true);
@@ -51,7 +51,7 @@ function HelpIcon({ content }: HelpIconProps): JSX.Element {
       />
     </Tooltip>
   );
-}
+});
 
 // Common Props Types
 interface SelectFieldProps {
