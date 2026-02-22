@@ -1,25 +1,33 @@
-import { memo, useState, useId, useMemo } from "react";
+import { memo, useState, useId, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAffinity } from "@/context/affinity-context";
 import { AFFINITY_LEVELS, DEFAULT_LEVEL } from "@/config/affinity-palette";
 
-const keyframesStyle = `
-@keyframes heartbeat {
-  0%, 100% { transform: scale(1); }
-  14% { transform: scale(1.1); }
-  28% { transform: scale(1); }
-  42% { transform: scale(1.08); }
-  70% { transform: scale(1); }
+// ── Module-level keyframe injection (consistent with ThoughtHalo, BackgroundReactor) ──
+const BADGE_STYLE_ID = "affinity-badge-keyframes";
+function ensureBadgeStyles() {
+  if (typeof document === "undefined" || document.getElementById(BADGE_STYLE_ID)) return;
+  const el = document.createElement("style");
+  el.id = BADGE_STYLE_ID;
+  el.textContent = `
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      14% { transform: scale(1.1); }
+      28% { transform: scale(1); }
+      42% { transform: scale(1.08); }
+      70% { transform: scale(1); }
+    }
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.8) translateY(-4px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+  `;
+  document.head.appendChild(el);
 }
-@keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes popIn {
-  from { opacity: 0; transform: scale(0.8) translateY(-4px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-`;
 
 const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPercent: number; size?: number }) => {
   const gradientId = useId();
@@ -51,9 +59,10 @@ export const AffinityBadge = memo(() => {
 
   const config = useMemo(() => AFFINITY_LEVELS[level] || AFFINITY_LEVELS[DEFAULT_LEVEL], [level]);
 
+  useEffect(ensureBadgeStyles, []);
+
   return (
     <>
-      <style>{keyframesStyle}</style>
       <div style={{ position: "relative" }}>
         {/* Heart button */}
         <button
@@ -113,7 +122,7 @@ export const AffinityBadge = memo(() => {
               background: "rgba(10, 0, 21, 0.92)",
               backdropFilter: "blur(24px)",
               borderRadius: "18px",
-              border: `1px solid ${config.color}18`,
+              border: `1px solid ${config.color}28`,
               minWidth: "200px",
               boxShadow: `0 12px 40px rgba(0,0,0,0.5), 0 0 24px ${config.color}15`,
               transition: "box-shadow 0.5s ease, border-color 0.5s ease",
@@ -155,8 +164,8 @@ export const AffinityBadge = memo(() => {
           </div>
         )}
 
-        {/* Milestone popup */}
-        {milestone && (
+        {/* Milestone popup — hidden when expanded panel is open to avoid overlap */}
+        {milestone && !expanded && (
           <div
             style={{
               position: "absolute",

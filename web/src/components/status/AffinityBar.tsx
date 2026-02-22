@@ -1,25 +1,26 @@
-import { memo, useMemo } from "react";
+import { memo, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useAffinity } from "@/context/affinity-context";
 import { AFFINITY_LEVELS, DEFAULT_LEVEL } from "@/config/affinity-palette";
 
-const breatheKeyframes = `
-@keyframes affinityBreathe {
-  0%, 100% { box-shadow: 0 0 8px var(--glow-color); }
-  50% { box-shadow: 0 0 16px var(--glow-color), 0 0 24px var(--glow-color); }
+// ── Module-level keyframe injection (consistent with ThoughtHalo, BackgroundReactor) ──
+const BAR_STYLE_ID = "affinity-bar-keyframes";
+function ensureBarStyles() {
+  if (typeof document === "undefined" || document.getElementById(BAR_STYLE_ID)) return;
+  const el = document.createElement("style");
+  el.id = BAR_STYLE_ID;
+  el.textContent = `
+    @keyframes affinityBreathe {
+      0%, 100% { box-shadow: 0 0 8px var(--glow-color); }
+      50% { box-shadow: 0 0 16px var(--glow-color), 0 0 24px var(--glow-color); }
+    }
+    @keyframes affinitySlideUp {
+      from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+      to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+  `;
+  document.head.appendChild(el);
 }
-@keyframes affinityIconFade {
-  0% { opacity: 0; transform: scale(0.6); }
-  100% { opacity: 1; transform: scale(1); }
-}
-`;
-
-const slideUpKeyframes = `
-@keyframes affinitySlideUp {
-  from { transform: translateX(-50%) translateY(20px); opacity: 0; }
-  to { transform: translateX(-50%) translateY(0); opacity: 1; }
-}
-`;
 
 export const AffinityBar = memo(() => {
   const { affinity, level, milestone } = useAffinity();
@@ -27,9 +28,10 @@ export const AffinityBar = memo(() => {
 
   const config = useMemo(() => AFFINITY_LEVELS[level] || AFFINITY_LEVELS[DEFAULT_LEVEL], [level]);
 
+  useEffect(ensureBarStyles, []);
+
   return (
     <>
-      <style>{breatheKeyframes}{slideUpKeyframes}</style>
       <div
         style={{
           padding: "8px 20px",

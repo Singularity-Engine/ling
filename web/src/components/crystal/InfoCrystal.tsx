@@ -48,6 +48,10 @@ const SHARED_STYLES = `
   0%, 100% { --cf-y: 0px; }
   50%      { --cf-y: var(--cf-range); }
 }
+@keyframes crystalExit {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to   { opacity: 0; transform: scale(0.6) translateY(30px); }
+}
 @keyframes shimmerSweep {
   0%   { transform: translateX(-100%) rotate(25deg); }
   100% { transform: translateX(200%) rotate(25deg); }

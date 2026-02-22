@@ -83,7 +83,7 @@ export const CapabilityRing = memo(() => {
         justifyContent: "center",
         padding: "8px 0",
         pointerEvents: "auto",
-        opacity: containerHovered ? 0.95 : 0.65,
+        opacity: containerHovered ? 1 : 0.75,
         transition: "opacity 0.3s ease",
       }}
       onMouseEnter={() => setContainerHovered(true)}
