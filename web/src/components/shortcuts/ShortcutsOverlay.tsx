@@ -55,7 +55,7 @@ export const ShortcutsOverlay = memo(({ open, onClose }: ShortcutsOverlayProps) 
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: "rgba(20, 8, 40, 0.95)",
+          background: "rgba(10, 0, 21, 0.95)",
           border: "1px solid rgba(139, 92, 246, 0.3)",
           borderRadius: "16px",
           padding: "24px 20px",

@@ -121,7 +121,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
         <div
           style={{
             padding: '20px 24px',
-            borderBottom: '1px solid rgba(139, 92, 246, 0.12)',
+            borderBottom: '1px solid rgba(139, 92, 246, 0.15)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -255,7 +255,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
                 background: 'rgba(255,255,255,0.05)',
                 border: '1px solid rgba(255,255,255,0.08)',
                 borderLeft: '3px solid rgba(139,92,246,0.4)',
-                borderRadius: '10px',
+                borderRadius: '12px',
                 transition: 'background 0.2s ease, border-color 0.2s ease',
                 cursor: 'default',
               }}
@@ -309,7 +309,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
         <div
           style={{
             padding: '12px 24px',
-            borderTop: '1px solid rgba(139, 92, 246, 0.12)',
+            borderTop: '1px solid rgba(139, 92, 246, 0.15)',
             textAlign: 'center',
             background: 'rgba(139, 92, 246, 0.04)',
           }}

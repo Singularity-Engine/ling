@@ -186,7 +186,7 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
             width: "80vw",
             maxWidth: "720px",
             maxHeight: "70vh",
-            background: "rgba(10, 0, 21, 0.90)",
+            background: "rgba(10, 0, 21, 0.92)",
             backdropFilter: "blur(24px)",
             border: `1px solid ${color}66`,
             borderRadius: "16px",
@@ -196,7 +196,7 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
             cursor: "pointer",
             transform: "translate(-50%, -50%)",
             animation: "crystalExpandIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
-            boxShadow: `0 0 40px rgba(${theme.glow}, 0.2), 0 8px 32px rgba(0, 0, 0, 0.5)`,
+            boxShadow: `0 12px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(${theme.glow}, 0.15)`,
           }}
           onClick={handleClick}
         >

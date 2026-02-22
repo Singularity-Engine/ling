@@ -130,7 +130,7 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: "rgba(20, 8, 40, 0.95)",
+          background: "rgba(10, 0, 21, 0.95)",
           border: "1px solid rgba(139, 92, 246, 0.3)",
           borderRadius: "16px",
           padding: "28px clamp(20px, 5vw, 36px)",
@@ -233,8 +233,8 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
             style={{
               marginBottom: "18px",
               padding: "12px 16px",
-              background: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(255,255,255,0.06)",
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.08)",
               borderRadius: "12px",
               textAlign: "left",
             }}
@@ -322,8 +322,8 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
             style={{
               marginBottom: "18px",
               padding: "12px 16px",
-              background: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(255,255,255,0.06)",
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.08)",
               borderRadius: "12px",
               textAlign: "center",
             }}
