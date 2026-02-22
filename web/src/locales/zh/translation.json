@@ -155,7 +155,8 @@
     "refreshPage": "刷新页面",
     "clearCacheRefresh": "清除缓存并刷新",
     "hideDetails": "收起详情",
-    "showErrorDetails": "查看错误详情"
+    "showErrorDetails": "查看错误详情",
+    "chatRenderFailed": "聊天渲染出错，试试发送新消息"
   },
   "aiState": {
     "idle": "空闲",

@@ -44,6 +44,9 @@ import { useAffinityIdleExpression } from "./hooks/use-affinity-idle-expression"
 import { AuthProvider, useAuth } from "./context/auth-context";
 import { UIProvider } from "./context/ui-context";
 import CreditsDisplay from "./components/billing/CreditsDisplay";
+import { ExperimentBar } from "./components/experiment/ExperimentBar";
+import { SectionErrorBoundary } from "./components/error/SectionErrorBoundary";
+import { createLogger } from "./utils/logger";
 import { OVERLAY_COLORS, WHITE_ALPHA, MISC_COLORS } from "./constants/colors";
 import "./index.css";
 
@@ -63,12 +66,14 @@ const TermsPage = lazy(() => import("./pages/TermsPage").then(m => ({ default: m
 // Inlined to avoid eagerly importing the full onboarding module
 const shouldShowOnboarding = () => !sessionStorage.getItem("ling-onboarding-done");
 
+const rootLog = createLogger("App");
+
 // Error Boundary
 interface ErrorBoundaryState { hasError: boolean; error: Error | null; errorInfo: ErrorInfo | null; showDetail: boolean; }
 class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryState> {
   constructor(props: { children: ReactNode }) { super(props); this.state = { hasError: false, error: null, errorInfo: null, showDetail: false }; }
   static getDerivedStateFromError(error: Error) { return { hasError: true, error }; }
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) { this.setState({ errorInfo }); console.error('[ErrorBoundary]', error, errorInfo); }
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) { this.setState({ errorInfo }); rootLog.error('Root crash:', error, errorInfo.componentStack); }
   render() {
     if (this.state.hasError) {
       const btnBase: React.CSSProperties = { padding: '10px 24px', borderRadius: 8, fontSize: 14, cursor: 'pointer', border: 'none', transition: 'opacity 0.2s' };
@@ -125,12 +130,12 @@ const S_GROUND_GRADIENT: CSSProperties = {
 
 // Right toolbar positioning — desktop / mobile variants
 const S_TOOLBAR_D: CSSProperties = {
-  position: "absolute", top: "16px", right: "12px", zIndex: 20,
+  position: "absolute", top: "52px", right: "12px", zIndex: 20,
   display: "flex", flexDirection: "column", alignItems: "center", gap: "12px",
 };
 const S_TOOLBAR_M: CSSProperties = {
   position: "absolute",
-  top: "max(8px, env(safe-area-inset-top, 0px))",
+  top: "max(44px, calc(env(safe-area-inset-top, 0px) + 36px))",
   right: "max(8px, env(safe-area-inset-right, 0px))",
   zIndex: 20,
   display: "flex", flexDirection: "column", alignItems: "center", gap: "8px",
@@ -423,24 +428,31 @@ function MainContent(): JSX.Element {
 
   return (
     <div style={S_ROOT}>
+      {/* ===== Layer -2: 实验状态栏 ===== */}
+      <ExperimentBar />
+
       {/* ===== Layer -1: 星空背景 ===== */}
       <div style={S_LAYER_STARFIELD}>
         <StarField />
       </div>
 
       {/* ===== Layer 0: Live2D 全屏 ===== */}
-      <div style={S_LAYER_LIVE2D}>
-        <Live2D />
-      </div>
+      <SectionErrorBoundary name="Live2D">
+        <div style={S_LAYER_LIVE2D}>
+          <Live2D />
+        </div>
+      </SectionErrorBoundary>
 
       {/* ===== Layer 0+: Live2D 点击粒子 ===== */}
       <TapParticles />
 
       {/* ===== Layer 0.5: 工具状态反馈层 ===== */}
-      <div style={S_LAYER_EFFECTS}>
-        <BackgroundReactor />
-        <AudioVisualizer />
-      </div>
+      <SectionErrorBoundary name="Effects">
+        <div style={S_LAYER_EFFECTS}>
+          <BackgroundReactor />
+          <AudioVisualizer />
+        </div>
+      </SectionErrorBoundary>
 
       {/* ===== Layer 0.8: 加载骨架屏 ===== */}
       <LoadingSkeleton />
@@ -448,7 +460,9 @@ function MainContent(): JSX.Element {
       {/* Live2D 已有内置 loading overlay (live2d.tsx)，不需要额外的 */}
 
       {/* ===== Layer 1: 工具结果水晶 ===== */}
-      <CrystalField />
+      <SectionErrorBoundary name="CrystalField">
+        <CrystalField />
+      </SectionErrorBoundary>
 
       {/* ===== Layer 1.8: 底部渐变遮罩 (Ground Plane) ===== */}
       <div style={S_GROUND_GRADIENT} />
@@ -501,7 +515,13 @@ function MainContent(): JSX.Element {
       {/* ===== Layer 2: 浮动聊天区域 ===== */}
       <div style={chatOuterStyle}>
         <div style={chatInnerStyle(isMobile, chatExpanded)}>
-          <ChatArea />
+          <SectionErrorBoundary name="ChatArea" fallback={
+            <div style={{ padding: "16px", textAlign: "center", color: "rgba(255,255,255,0.4)", fontSize: 13 }}>
+              {t("error.chatRenderFailed")}
+            </div>
+          }>
+            <ChatArea />
+          </SectionErrorBoundary>
         </div>
 
         {!chatExpanded && !isMobile && (
@@ -533,19 +553,25 @@ function MainContent(): JSX.Element {
 
       {/* ===== Layer 99: 快捷键帮助浮层 (lazy-loaded on first open) ===== */}
       {shortcutsOpen && (
-        <Suspense fallback={null}>
-          <ShortcutsOverlay open={shortcutsOpen} onClose={closeShortcuts} />
-        </Suspense>
+        <SectionErrorBoundary name="ShortcutsOverlay">
+          <Suspense fallback={null}>
+            <ShortcutsOverlay open={shortcutsOpen} onClose={closeShortcuts} />
+          </Suspense>
+        </SectionErrorBoundary>
       )}
       {aboutOpen && (
-        <Suspense fallback={null}>
-          <AboutOverlay open={aboutOpen} onClose={closeAbout} />
-        </Suspense>
+        <SectionErrorBoundary name="AboutOverlay">
+          <Suspense fallback={null}>
+            <AboutOverlay open={aboutOpen} onClose={closeAbout} />
+          </Suspense>
+        </SectionErrorBoundary>
       )}
       {memoryOpen && (
-        <Suspense fallback={null}>
-          <MemoryPanel open={memoryOpen} onClose={closeMemory} />
-        </Suspense>
+        <SectionErrorBoundary name="MemoryPanel">
+          <Suspense fallback={null}>
+            <MemoryPanel open={memoryOpen} onClose={closeMemory} />
+          </Suspense>
+        </SectionErrorBoundary>
       )}
     </div>
   );
@@ -677,14 +703,18 @@ function MainApp() {
         <LandingAnimation onComplete={handleLandingComplete} />
       )}
 
-      <Suspense fallback={null}>
-        <PricingOverlay />
-        <InsufficientCreditsModal />
-      </Suspense>
-      {showOnboarding && (
+      <SectionErrorBoundary name="BillingOverlays">
         <Suspense fallback={null}>
-          <PersonalizedOnboarding onComplete={closeOnboarding} />
+          <PricingOverlay />
+          <InsufficientCreditsModal />
         </Suspense>
+      </SectionErrorBoundary>
+      {showOnboarding && (
+        <SectionErrorBoundary name="Onboarding">
+          <Suspense fallback={null}>
+            <PersonalizedOnboarding onComplete={closeOnboarding} />
+          </Suspense>
+        </SectionErrorBoundary>
       )}
       </UIProvider>
 

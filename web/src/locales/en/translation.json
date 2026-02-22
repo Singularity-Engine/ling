@@ -155,7 +155,8 @@
     "refreshPage": "Refresh Page",
     "clearCacheRefresh": "Clear Cache & Refresh",
     "hideDetails": "Hide Details",
-    "showErrorDetails": "Show Error Details"
+    "showErrorDetails": "Show Error Details",
+    "chatRenderFailed": "Chat failed to render. Try sending a new message."
   },
   "aiState": {
     "idle": "idle",
