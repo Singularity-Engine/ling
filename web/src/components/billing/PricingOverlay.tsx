@@ -126,9 +126,9 @@ const PricingOverlay: React.FC = () => {
       } else {
         alert(data.detail || 'Failed to create checkout session');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Checkout error:', err);
-      alert(err.message || 'Network error');
+      alert(err instanceof Error ? err.message : 'Network error');
     } finally {
       setLoading(null);
     }
@@ -140,9 +140,9 @@ const PricingOverlay: React.FC = () => {
       if (data.portal_url) {
         window.open(data.portal_url, '_blank');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Portal error:', err);
-      alert(err.message || 'Network error');
+      alert(err instanceof Error ? err.message : 'Network error');
     }
   };
 

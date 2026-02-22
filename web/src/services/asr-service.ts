@@ -58,7 +58,7 @@ class ASRService {
       }
     };
 
-    this.recognition.onerror = (event: any) => {
+    this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       if (event.error === 'no-speech' || event.error === 'aborted') return;
       console.error('[ASRService] Error:', event.error);
     };

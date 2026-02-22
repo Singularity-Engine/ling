@@ -28,7 +28,7 @@ export const ModeProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Electron-specific mode change
     if (isElectron && window.api) {
-      (window.api as any).setMode(newMode);
+      window.api.setMode(newMode);
     } else {
       setModeState(newMode);
     }
@@ -37,7 +37,7 @@ export const ModeProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Listen for mode changes from main process
   useEffect(() => {
     if (isElectron && window.electron) {
-      const handlePreModeChange = (_event: any, newMode: ModeType) => {
+      const handlePreModeChange = (_event: unknown, newMode: ModeType) => {
         // Use double requestAnimationFrame to ensure UI is ready
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
@@ -47,7 +47,7 @@ export const ModeProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
       };
 
-      const handleModeChanged = (_event: any, newMode: ModeType) => {
+      const handleModeChanged = (_event: unknown, newMode: ModeType) => {
         setModeState(newMode);
         // After mode is set, tell main process the UI has been updated
         requestAnimationFrame(() => {

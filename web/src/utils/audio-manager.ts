@@ -1,12 +1,22 @@
 type AudioEventListener = (audio: HTMLAudioElement | null) => void;
 
+/** Minimal duck-type for the Live2D model parts used by AudioManager */
+interface Live2DModelLike {
+  _wavFileHandler?: {
+    releasePcmData(): void;
+    _lastRms: number;
+    _sampleOffset: number;
+    _userTimeSeconds: number;
+  };
+}
+
 /**
  * Global audio manager for handling audio playback and interruption
  * This ensures all components share the same audio reference
  */
 class AudioManager {
   private currentAudio: HTMLAudioElement | null = null;
-  private currentModel: any | null = null;
+  private currentModel: Live2DModelLike | null = null;
   private listeners: Set<AudioEventListener> = new Set();
 
   /**
@@ -25,7 +35,7 @@ class AudioManager {
   /**
    * Set the current playing audio
    */
-  setCurrentAudio(audio: HTMLAudioElement, model: any) {
+  setCurrentAudio(audio: HTMLAudioElement, model: Live2DModelLike) {
     this.currentAudio = audio;
     this.currentModel = model;
     this.notifyListeners();
