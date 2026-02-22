@@ -110,12 +110,29 @@ const S_LABEL_ERROR: CSSProperties = {
   lineHeight: 1,
 };
 
-// Pre-computed equalizer bar configs with their static style portions
-const EQ_BARS = [
-  { key: 1, baseH: 4, style: (color: string): CSSProperties => ({ width: '2px', height: '4px', background: color, borderRadius: '1px', willChange: 'transform', animation: 'ttsBarBounce1 0.75s ease-in-out infinite' }) },
-  { key: 2, baseH: 6, style: (color: string): CSSProperties => ({ width: '2px', height: '6px', background: color, borderRadius: '1px', willChange: 'transform', animation: 'ttsBarBounce2 0.9s ease-in-out infinite' }) },
-  { key: 3, baseH: 3, style: (color: string): CSSProperties => ({ width: '2px', height: '3px', background: color, borderRadius: '1px', willChange: 'transform', animation: 'ttsBarBounce3 1.05s ease-in-out infinite' }) },
-] as const;
+// Pre-computed equalizer bar styles (playing phase always uses --ling-success)
+const S_EQ_BAR_1: CSSProperties = { width: '2px', height: '4px', background: 'var(--ling-success)', borderRadius: '1px', willChange: 'transform', animation: 'ttsBarBounce1 0.75s ease-in-out infinite' };
+const S_EQ_BAR_2: CSSProperties = { width: '2px', height: '6px', background: 'var(--ling-success)', borderRadius: '1px', willChange: 'transform', animation: 'ttsBarBounce2 0.9s ease-in-out infinite' };
+const S_EQ_BAR_3: CSSProperties = { width: '2px', height: '3px', background: 'var(--ling-success)', borderRadius: '1px', willChange: 'transform', animation: 'ttsBarBounce3 1.05s ease-in-out infinite' };
+
+// Pre-computed dot styles per non-playing phase
+const S_DOT_SYNTHESIZING: CSSProperties = {
+  ...S_DOT_BASE,
+  background: '#a78bfa',
+  boxShadow: '0 0 6px #a78bfa88',
+  animation: 'ttsPulse 1.2s ease-in-out infinite',
+};
+const S_DOT_ERROR: CSSProperties = {
+  ...S_DOT_BASE,
+  background: 'var(--ling-error)',
+  boxShadow: '0 0 6px var(--ling-error)88',
+};
+
+// Pre-computed container + animation composites (2 states × 2 fade directions)
+const S_CONTAINER_NORMAL_IN: CSSProperties = { ...S_CONTAINER_NORMAL, animation: 'ttsFadeIn 0.3s ease-out' };
+const S_CONTAINER_NORMAL_OUT: CSSProperties = { ...S_CONTAINER_NORMAL, animation: 'ttsFadeOut 0.3s ease-out forwards' };
+const S_CONTAINER_ERROR_IN: CSSProperties = { ...S_CONTAINER_ERROR, animation: 'ttsFadeIn 0.3s ease-out' };
+const S_CONTAINER_ERROR_OUT: CSSProperties = { ...S_CONTAINER_ERROR, animation: 'ttsFadeOut 0.3s ease-out forwards' };
 
 /**
  * Minimal TTS status indicator.
@@ -174,30 +191,24 @@ export const TTSStatus = memo(() => {
   const isPlaying = phase === 'playing';
   const isError = phase === 'error';
 
-  const containerStyle = isError ? S_CONTAINER_ERROR : S_CONTAINER_NORMAL;
-  const animation = fading ? 'ttsFadeOut 0.3s ease-out forwards' : 'ttsFadeIn 0.3s ease-out';
+  const containerStyle = isError
+    ? (fading ? S_CONTAINER_ERROR_OUT : S_CONTAINER_ERROR_IN)
+    : (fading ? S_CONTAINER_NORMAL_OUT : S_CONTAINER_NORMAL_IN);
 
   return (
     <div
-      style={{ ...containerStyle, animation }}
+      style={containerStyle}
       title={isError && lastError ? lastError : undefined}
     >
       {/* Indicator: dot for synthesizing/error, equalizer bars for playing */}
       {isPlaying ? (
         <div style={S_EQ_WRAP}>
-          {EQ_BARS.map(bar => (
-            <div key={bar.key} style={bar.style(cfg.dotColor)} />
-          ))}
+          <div style={S_EQ_BAR_1} />
+          <div style={S_EQ_BAR_2} />
+          <div style={S_EQ_BAR_3} />
         </div>
       ) : (
-        <div
-          style={{
-            ...S_DOT_BASE,
-            background: cfg.dotColor,
-            boxShadow: `0 0 6px ${cfg.dotColor}88`,
-            animation: cfg.animate ? 'ttsPulse 1.2s ease-in-out infinite' : undefined,
-          }}
-        />
+        <div style={isError ? S_DOT_ERROR : S_DOT_SYNTHESIZING} />
       )}
 
       {/* Label */}

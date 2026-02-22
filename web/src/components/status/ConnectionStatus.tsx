@@ -64,6 +64,33 @@ const S_DOT_BASE: CSSProperties = {
   flexShrink: 0,
 };
 
+// Pre-computed dot styles for each connection state — no per-render allocation
+const S_DOT_OPEN: CSSProperties = {
+  ...S_DOT_BASE,
+  background: "var(--ling-success)",
+  boxShadow: "0 0 6px var(--ling-success)88",
+};
+
+const S_DOT_CONNECTING: CSSProperties = {
+  ...S_DOT_BASE,
+  background: "var(--ling-warning)",
+  boxShadow: "0 0 6px var(--ling-warning)88",
+  animation: "connPulse 1.2s ease-in-out infinite",
+};
+
+const S_DOT_IDLE_RETRY: CSSProperties = {
+  ...S_DOT_BASE,
+  background: "var(--ling-warning)",
+  boxShadow: "0 0 6px var(--ling-warning)88",
+  animation: "connPulse 2.4s ease-in-out infinite",
+};
+
+const S_DOT_CLOSED: CSSProperties = {
+  ...S_DOT_BASE,
+  background: "var(--ling-error)",
+  boxShadow: "0 0 6px var(--ling-error)88",
+};
+
 const S_LABEL_ERROR: CSSProperties = {
   fontSize: "11px",
   color: "var(--ling-error)",
@@ -137,11 +164,13 @@ export const ConnectionStatus = memo(() => {
 
   if (isOpen && !showConnected) return null;
 
-  const dotColor = isOpen
-    ? "var(--ling-success)"
-    : isConnecting || (isClosed && idleRetry)
-      ? "var(--ling-warning)"
-      : "var(--ling-error)";
+  const dotStyle = isOpen
+    ? S_DOT_OPEN
+    : isConnecting
+      ? S_DOT_CONNECTING
+      : idleRetry
+        ? S_DOT_IDLE_RETRY
+        : S_DOT_CLOSED;
 
   const label = isOpen
     ? t("connection.connected")
@@ -159,12 +188,6 @@ export const ConnectionStatus = memo(() => {
       ? S_CONTAINER_CLOSED
       : S_CONTAINER_CONNECTING;
 
-  const dotAnimation = isConnecting
-    ? "connPulse 1.2s ease-in-out infinite"
-    : isClosed && idleRetry
-      ? "connPulse 2.4s ease-in-out infinite"
-      : undefined;
-
   const Tag = isClosed ? "button" : "div";
 
   return (
@@ -176,14 +199,7 @@ export const ConnectionStatus = memo(() => {
         onMouseLeave={isClosed ? handleMouseLeave : undefined}
       >
         {/* Status dot */}
-        <div
-          style={{
-            ...S_DOT_BASE,
-            background: dotColor,
-            boxShadow: `0 0 6px ${dotColor}88`,
-            animation: dotAnimation,
-          }}
-        />
+        <div style={dotStyle} />
 
         {/* Label */}
         {!isOpen && (
