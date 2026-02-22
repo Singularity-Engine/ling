@@ -139,7 +139,7 @@ const CARD_COLORS: Record<string, { bg: string; border: string; accent: string }
 function buildCategoryStyles(colors: { bg: string; border: string; accent: string }) {
   const card: CSSProperties = {
     background: colors.bg, border: `1px solid ${colors.border}`,
-    borderRadius: "14px", overflow: "hidden", transition: "all 0.3s ease",
+    borderRadius: "14px", overflow: "hidden", transition: "border-color 0.3s ease, background 0.3s ease",
   };
   const headerBase = {
     display: "flex" as const, alignItems: "center" as const, gap: "8px",

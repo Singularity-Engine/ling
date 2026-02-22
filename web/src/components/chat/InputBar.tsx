@@ -54,7 +54,7 @@ const S_INPUT_ROW: CSSProperties = {
 const S_MIC_BASE: CSSProperties = {
   width: "44px", height: "44px", borderRadius: "50%",
   display: "flex", alignItems: "center", justifyContent: "center",
-  cursor: "pointer", transition: "all 0.2s ease", flexShrink: 0, padding: 0,
+  cursor: "pointer", transition: "filter 0.2s ease, transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease", flexShrink: 0, padding: 0,
 };
 const S_MIC_OFF: CSSProperties = {
   ...S_MIC_BASE,
@@ -70,7 +70,7 @@ const S_MIC_ON: CSSProperties = {
 const S_SEND_BASE: CSSProperties = {
   width: "44px", height: "44px", borderRadius: "50%",
   display: "flex", alignItems: "center", justifyContent: "center",
-  transition: "all 0.2s ease", flexShrink: 0, padding: 0,
+  transition: "filter 0.2s ease, transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease", flexShrink: 0, padding: 0,
 };
 
 const S_SEND_SPEAKING: CSSProperties = {

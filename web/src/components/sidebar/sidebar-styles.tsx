@@ -42,7 +42,7 @@ export const sidebarStyles = {
       transform: isCollapsed
         ? 'translateX(calc(-100% + 32px))'
         : 'translateX(0)',
-      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       display: 'flex',
       flexDirection: 'column' as const,
       gap: 4,
@@ -64,7 +64,7 @@ export const sidebarStyles = {
       _hover: { color: 'white' },
       _active: { color: 'white', bg: 'whiteAlpha.100' },
       bg: 'transparent',
-      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      transition: 'color 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       zIndex: 1,
     },
     content: {
@@ -183,7 +183,7 @@ export const sidebarStyles = {
       border: '1px solid',
       borderColor: 'transparent',
       cursor: 'pointer',
-      transition: 'all 0.2s ease',
+      transition: 'background 0.2s ease, border-color 0.2s ease, transform 0.2s ease',
       _hover: {
         bg: 'whiteAlpha.100',
         borderColor: 'whiteAlpha.200',
@@ -221,7 +221,7 @@ export const sidebarStyles = {
       h: '36px',
       borderRadius: 'md',
       opacity: { base: 0.6, md: 0 },
-      transition: 'all 0.15s ease',
+      transition: 'opacity 0.15s ease, color 0.15s ease, background 0.15s ease, transform 0.15s ease',
       _groupHover: {
         opacity: 1,
       },
@@ -322,7 +322,7 @@ export const sidebarStyles = {
       alignItems: 'center',
       justifyContent: 'center',
       overflow: 'hidden',
-      transition: 'all 0.2s',
+      transition: 'background 0.2s, border-color 0.2s',
     },
     video: {
       width: '100%',
@@ -356,7 +356,7 @@ export const sidebarStyles = {
       alignItems: 'center',
       justifyContent: 'center',
       overflow: 'hidden',
-      transition: 'all 0.2s',
+      transition: 'background 0.2s, border-color 0.2s',
     },
     video: {
       width: '100%',
@@ -390,7 +390,7 @@ export const sidebarStyles = {
       alignItems: 'center',
       justifyContent: 'center',
       overflow: 'hidden',
-      transition: 'all 0.2s',
+      transition: 'background 0.2s, border-color 0.2s',
       cursor: 'pointer',
       _hover: {
         bg: 'whiteAlpha.100',

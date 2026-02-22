@@ -98,7 +98,7 @@ const S_CLOSE_BTN: CSSProperties = {
   fontSize: '24px', cursor: 'pointer', padding: '10px',
   minWidth: '44px', minHeight: '44px',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
-  borderRadius: '8px', transition: 'all 0.15s ease', lineHeight: 1,
+  borderRadius: '8px', transition: 'background 0.15s ease, color 0.15s ease, transform 0.15s ease', lineHeight: 1,
 };
 
 const S_CONTENT: CSSProperties = {

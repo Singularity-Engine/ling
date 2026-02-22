@@ -52,7 +52,7 @@ export const footerStyles: {
         transform: 'scale(0.92)',
       },
       bg: 'transparent',
-      transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+      transition: 'color 0.25s cubic-bezier(0.4, 0, 0.2, 1), filter 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
     },
     actionButton: {
       borderRadius: '14px',
@@ -60,7 +60,7 @@ export const footerStyles: {
       height: '50px',
       minW: '50px',
       border: '1px solid rgba(255, 255, 255, 0.1)',
-      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+      transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), filter 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
       _hover: {
         transform: 'scale(1.08)',
         filter: 'brightness(1.15)',
@@ -98,7 +98,7 @@ export const footerStyles: {
       alignItems: 'center',
       paddingTop: '28px',
       lineHeight: '1.4',
-      transition: 'all 0.2s ease',
+      transition: 'border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease',
     },
     attachButton: {
       position: 'absolute',
@@ -118,7 +118,7 @@ export const footerStyles: {
         color: 'whiteAlpha.900',
         transform: 'translateY(-50%) scale(0.9)',
       },
-      transition: 'all 0.2s ease',
+      transition: 'color 0.2s ease, filter 0.2s ease, transform 0.2s ease',
     },
   },
   aiIndicator: {

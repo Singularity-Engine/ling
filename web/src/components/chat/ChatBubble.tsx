@@ -164,7 +164,7 @@ const S_BUBBLE_USER: CSSProperties = {
   background: "var(--ling-bubble-user-bg)",
   border: "1px solid var(--ling-bubble-user-border)",
   backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
-  overflow: "hidden", transition: "all 0.2s ease",
+  overflow: "hidden", transition: "background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
   boxShadow: "0 2px 12px var(--ling-bubble-user-shadow)",
 };
 const S_BUBBLE_AI: CSSProperties = {
@@ -173,7 +173,7 @@ const S_BUBBLE_AI: CSSProperties = {
   border: "1px solid var(--ling-bubble-ai-border)",
   borderLeft: "3px solid var(--ling-bubble-ai-accent)",
   backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
-  overflow: "hidden", transition: "all 0.2s ease",
+  overflow: "hidden", transition: "background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
   boxShadow: "0 1px 8px var(--ling-bubble-ai-shadow)",
 };
 const S_BUBBLE_AI_ACTIVE: CSSProperties = { ...S_BUBBLE_AI, cursor: "default" };
@@ -205,7 +205,7 @@ const S_COPY_BASE: CSSProperties = {
   position: "absolute", top: "2px", width: "32px", height: "32px",
   display: "flex", alignItems: "center", justifyContent: "center",
   background: "transparent", border: "none", borderRadius: "6px",
-  cursor: "pointer", padding: 0, transition: "all 0.2s ease", color: "var(--ling-text-tertiary)",
+  cursor: "pointer", padding: 0, transition: "color 0.2s ease, background 0.2s ease, transform 0.2s ease", color: "var(--ling-text-tertiary)",
 };
 const S_COPY_AI: CSSProperties = { ...S_COPY_BASE, right: "-36px" };
 const S_COPY_USER: CSSProperties = { ...S_COPY_BASE, left: "-36px" };
@@ -226,7 +226,7 @@ const S_TOGGLE_BTN: CSSProperties = {
   display: "flex", alignItems: "center", justifyContent: "center", gap: "4px",
   width: "100%", minHeight: "44px", padding: "10px 0 4px", border: "none", background: "transparent",
   color: "var(--ling-purple-85)", fontSize: "12px", fontWeight: 500,
-  cursor: "pointer", letterSpacing: "0.3px", transition: "all 0.2s ease",
+  cursor: "pointer", letterSpacing: "0.3px", transition: "color 0.2s ease, background 0.2s ease",
   borderRadius: "0 0 16px 16px",
 };
 const S_TOGGLE_ARROW: CSSProperties = { fontSize: "10px" };

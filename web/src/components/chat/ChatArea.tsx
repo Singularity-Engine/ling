@@ -187,7 +187,7 @@ const S_LOAD_MORE_BTN: CSSProperties = {
   color: "var(--ling-text-secondary)",
   fontSize: "12px",
   cursor: "pointer",
-  transition: "all 0.2s ease",
+  transition: "background 0.2s ease, border-color 0.2s ease, color 0.2s ease",
 };
 
 const S_SCROLL_WRAP: CSSProperties = {
@@ -212,7 +212,7 @@ const S_SCROLL_BTN: CSSProperties = {
   WebkitBackdropFilter: "blur(12px)",
   boxShadow: "0 2px 12px var(--ling-purple-30)",
   cursor: "pointer",
-  transition: "all 0.2s ease",
+  transition: "transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease",
   animation: "scrollBtnIn 0.25s ease-out",
   display: "flex",
   alignItems: "center",
@@ -261,7 +261,7 @@ const S_RETRY_BTN: CSSProperties = {
   color: "var(--ling-purple-light)",
   fontSize: "12px",
   cursor: "pointer",
-  transition: "all 0.2s ease",
+  transition: "background 0.2s ease, border-color 0.2s ease, color 0.2s ease",
   fontWeight: 500,
 };
 
