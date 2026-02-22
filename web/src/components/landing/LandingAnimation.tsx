@@ -13,6 +13,139 @@ interface LandingAnimationProps {
 const TYPE_SPEED = 70; // ms per character — 更流畅的打字节奏
 const LINE_DELAY = 500; // pause between lines
 
+/* ── Module-level style constants ─────────────────────────── */
+
+const rootStyleBase: React.CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  zIndex: 9999,
+  background: "linear-gradient(180deg, var(--ling-bg-deep) 0%, var(--ling-bg-mid) 50%, var(--ling-bg-warm) 100%)",
+  overflow: "hidden",
+  transition: "opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
+};
+
+const bgDimStyleBase: React.CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  background: "var(--ling-bg-deep)",
+  transition: "opacity 1s ease",
+  zIndex: 2,
+  pointerEvents: "none",
+};
+
+const flashStyleBase: React.CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  background: "radial-gradient(circle at 50% 50%, var(--ling-purple-lighter) 0%, var(--ling-purple-60) 50%, transparent 80%)",
+  transition: "opacity 0.5s ease-out",
+  zIndex: 3,
+  pointerEvents: "none",
+};
+
+const textWrapperBase: React.CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 4,
+  padding: "0 24px",
+  transition: "opacity 0.6s ease-out",
+};
+
+const textBlockStyle: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: "16px",
+  maxWidth: "min(90vw, 600px)",
+};
+
+// Per-line-index static properties (title / subtitle / tagline)
+const lineStyleBase: React.CSSProperties[] = [
+  { fontSize: "clamp(3rem, 7vw, 4.5rem)", fontWeight: 700, letterSpacing: "0.12em", textAlign: "center", wordBreak: "break-word", minHeight: "4.5rem", marginTop: "0", transition: "opacity 0.5s ease-out, transform 0.5s ease-out" },
+  { fontSize: "1.4rem", fontWeight: 500, letterSpacing: "0.04em", textAlign: "center", wordBreak: "break-word", minHeight: "1.75rem", marginTop: "8px", transition: "opacity 0.5s ease-out, transform 0.5s ease-out" },
+  { fontSize: "1.25rem", fontWeight: 400, letterSpacing: "0.04em", textAlign: "center", wordBreak: "break-word", minHeight: "1.75rem", marginTop: "28px", transition: "opacity 0.5s ease-out, transform 0.5s ease-out" },
+];
+
+const cursorStyleTitle: React.CSSProperties = {
+  display: "inline-block",
+  width: "2px",
+  height: "2rem",
+  background: "var(--ling-purple)",
+  marginLeft: "2px",
+  verticalAlign: "middle",
+  animation: "blink 1s infinite",
+};
+
+const cursorStyleNormal: React.CSSProperties = {
+  display: "inline-block",
+  width: "2px",
+  height: "1.125rem",
+  background: "var(--ling-purple)",
+  marginLeft: "2px",
+  verticalAlign: "middle",
+  animation: "blink 1s infinite",
+};
+
+const buttonContainerBase: React.CSSProperties = {
+  marginTop: "48px",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: "16px",
+  transition: "opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
+};
+
+const startBtnBase: React.CSSProperties = {
+  padding: "16px 48px",
+  fontSize: "1.125rem",
+  fontWeight: 600,
+  color: "#fff",
+  background: "linear-gradient(135deg, var(--ling-purple) 0%, var(--ling-purple-deep) 100%)",
+  border: "1px solid var(--ling-purple-30)",
+  borderRadius: "999px",
+  boxShadow: "0 0 30px var(--ling-purple-40), 0 0 60px var(--ling-purple-20), inset 0 1px 0 rgba(255,255,255,0.15)",
+  transition: "transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease",
+  position: "relative",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "8px",
+};
+
+const spinnerStyle: React.CSSProperties = {
+  display: "inline-block",
+  width: "16px",
+  height: "16px",
+  border: "2px solid rgba(255,255,255,0.3)",
+  borderTopColor: "#fff",
+  borderRadius: "50%",
+  animation: "landingBtnSpin 0.6s linear infinite",
+};
+
+const arrowStyle: React.CSSProperties = { fontSize: "1.1em", opacity: 0.8, transition: "transform 0.25s ease" };
+
+const hintStyle: React.CSSProperties = { fontSize: "0.75rem", color: "var(--ling-text-tertiary)", letterSpacing: "0.04em" };
+
+const skipStyle: React.CSSProperties = {
+  position: "fixed",
+  bottom: "max(16px, env(safe-area-inset-bottom, 0px))",
+  right: "16px",
+  color: "var(--ling-text-tertiary)",
+  fontSize: "0.75rem",
+  zIndex: 5,
+  animation: "fadeInUp 1s ease-out 1s both",
+  cursor: "pointer",
+  minWidth: "48px",
+  minHeight: "48px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "8px 16px",
+};
+
 export function LandingAnimation({ onComplete }: LandingAnimationProps) {
   const { t } = useTranslation();
   const LINES = useMemo(() => [t("landing.line1"), t("landing.line2"), t("landing.line3")], [t]);
@@ -127,75 +260,56 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
     }
   }, [showText, currentLine, displayedChars, LINES]);
 
+  // Dynamic styles — memoized to avoid per-render allocations
+  const rootStyle = useMemo<React.CSSProperties>(
+    () => ({ ...rootStyleBase, opacity: exiting ? 0 : 1, transform: exiting ? "scale(1.04)" : "scale(1)" }),
+    [exiting],
+  );
+
+  const bgDimStyle = useMemo<React.CSSProperties>(
+    () => ({ ...bgDimStyleBase, opacity: bgDim }),
+    [bgDim],
+  );
+
+  const flashStyle = useMemo<React.CSSProperties>(
+    () => ({ ...flashStyleBase, opacity: flashOpacity }),
+    [flashOpacity],
+  );
+
+  const textWrapperStyle = useMemo<React.CSSProperties>(
+    () => ({ ...textWrapperBase, opacity: showText ? 1 : 0, pointerEvents: showText ? "auto" : "none" }),
+    [showText],
+  );
+
+  const btnContainerStyle = useMemo<React.CSSProperties>(
+    () => ({
+      ...buttonContainerBase,
+      opacity: showButton ? 1 : 0,
+      transform: showButton ? "translateY(0) scale(1)" : "translateY(16px) scale(0.96)",
+      pointerEvents: showButton ? "auto" : "none",
+    }),
+    [showButton],
+  );
+
+  const startBtnStyle = useMemo<React.CSSProperties>(
+    () => ({ ...startBtnBase, cursor: exiting ? "default" : "pointer", opacity: exiting ? 0.85 : 1 }),
+    [exiting],
+  );
+
   return (
-    <div
-      data-landing
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 9999,
-        background: "linear-gradient(180deg, var(--ling-bg-deep) 0%, var(--ling-bg-mid) 50%, var(--ling-bg-warm) 100%)",
-        overflow: "hidden",
-        opacity: exiting ? 0 : 1,
-        transform: exiting ? "scale(1.04)" : "scale(1)",
-        transition: "opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
-      }}
-    >
+    <div data-landing style={rootStyle}>
       {/* Particle canvas */}
       <ParticleCanvas phase={particlePhase} phaseProgressRef={phaseProgressRef} />
 
       {/* Background dim overlay */}
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          background: "var(--ling-bg-deep)",
-          opacity: bgDim,
-          transition: "opacity 1s ease",
-          zIndex: 2,
-          pointerEvents: "none",
-        }}
-      />
+      <div style={bgDimStyle} />
 
       {/* Flash overlay */}
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          background: "radial-gradient(circle at 50% 50%, var(--ling-purple-lighter) 0%, var(--ling-purple-60) 50%, transparent 80%)",
-          opacity: flashOpacity,
-          transition: "opacity 0.5s ease-out",
-          zIndex: 3,
-          pointerEvents: "none",
-        }}
-      />
+      <div style={flashStyle} />
 
       {/* Text content — always rendered to avoid FOUC; opacity controls visibility */}
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 4,
-          padding: "0 24px",
-          opacity: showText ? 1 : 0,
-          transition: "opacity 0.6s ease-out",
-          pointerEvents: showText ? "auto" : "none",
-        }}
-      >
-        <div
-          className="landing-text-block"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "16px",
-            maxWidth: "min(90vw, 600px)",
-          }}
-        >
+      <div style={textWrapperStyle}>
+        <div className="landing-text-block" style={textBlockStyle}>
           {LINES.map((line, i) => {
             const isVisible = i <= currentLine;
             const chars =
@@ -210,21 +324,14 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
                 key={i}
                 className={`landing-text-line${i === 0 ? " landing-title-gradient" : ""}${i === 0 && isComplete ? " landing-title-glow" : ""}`}
                 style={{
-                  fontSize: i === 0 ? "clamp(3rem, 7vw, 4.5rem)" : i === 1 ? "1.4rem" : "1.25rem",
-                  fontWeight: i === 0 ? 700 : i === 1 ? 500 : 400,
+                  ...lineStyleBase[i],
                   color: i === 0
                     ? undefined  // handled by .landing-title-gradient
                     : isLastLine
                       ? "var(--ling-purple-lighter)"
                       : "var(--ling-text-secondary)",
-                  letterSpacing: i === 0 ? "0.12em" : "0.04em",
-                  textAlign: "center",
-                  wordBreak: "break-word" as const,
-                  minHeight: i === 0 ? "4.5rem" : "1.75rem",
-                  marginTop: i === 1 ? "8px" : isLastLine ? "28px" : "0",
                   opacity: isVisible ? 1 : 0,
                   transform: isVisible ? "translateY(0)" : "translateY(12px)",
-                  transition: "opacity 0.5s ease-out, transform 0.5s ease-out",
                   textShadow: i === 0
                     ? isComplete
                       ? undefined  // handled by .landing-title-glow animation
@@ -238,17 +345,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
               >
                 {text}
                 {isActive && (
-                  <span
-                    style={{
-                      display: "inline-block",
-                      width: "2px",
-                      height: i === 0 ? "2rem" : "1.125rem",
-                      background: "var(--ling-purple)",
-                      marginLeft: "2px",
-                      verticalAlign: "middle",
-                      animation: "blink 1s infinite",
-                    }}
-                  />
+                  <span style={i === 0 ? cursorStyleTitle : cursorStyleNormal} />
                 )}
               </div>
             );
@@ -256,62 +353,23 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
         </div>
 
         {/* Start button — container always rendered to prevent layout shift */}
-        <div style={{
-          marginTop: "48px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "16px",
-          opacity: showButton ? 1 : 0,
-          transform: showButton ? "translateY(0) scale(1)" : "translateY(16px) scale(0.96)",
-          transition: "opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
-          pointerEvents: showButton ? "auto" : "none",
-        }}>
+        <div style={btnContainerStyle}>
           <button
             onClick={handleSkip}
             className="landing-start-btn"
             disabled={exiting || !showButton}
             tabIndex={showButton ? 0 : -1}
-            style={{
-              padding: "16px 48px",
-              fontSize: "1.125rem",
-              fontWeight: 600,
-              color: "#fff",
-              background: "linear-gradient(135deg, var(--ling-purple) 0%, var(--ling-purple-deep) 100%)",
-              border: "1px solid var(--ling-purple-30)",
-              borderRadius: "999px",
-              cursor: exiting ? "default" : "pointer",
-              boxShadow: "0 0 30px var(--ling-purple-40), 0 0 60px var(--ling-purple-20), inset 0 1px 0 rgba(255,255,255,0.15)",
-              transition: "transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease",
-              position: "relative",
-              opacity: exiting ? 0.85 : 1,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
-            }}
+            style={startBtnStyle}
           >
-            {exiting && (
-              <span
-                style={{
-                  display: "inline-block",
-                  width: "16px",
-                  height: "16px",
-                  border: "2px solid rgba(255,255,255,0.3)",
-                  borderTopColor: "#fff",
-                  borderRadius: "50%",
-                  animation: "landingBtnSpin 0.6s linear infinite",
-                }}
-              />
-            )}
+            {exiting && <span style={spinnerStyle} />}
             {t("landing.startChat")}
             {!exiting && (
-              <span className="landing-btn-arrow" style={{ fontSize: "1.1em", opacity: 0.8, transition: "transform 0.25s ease" }}>
+              <span className="landing-btn-arrow" style={arrowStyle}>
                 {"\u2192"}
               </span>
             )}
           </button>
-          <span style={{ fontSize: "0.75rem", color: "var(--ling-text-tertiary)", letterSpacing: "0.04em" }}>
+          <span style={hintStyle}>
             <span className="landing-hint-mobile">{t("landing.tapHint", "Tap to start")}</span>
             <span className="landing-hint-desktop">Press Enter ↵</span>
           </span>
@@ -327,26 +385,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
       </div>
 
       {/* Skip hint — 移动端友好触摸区域 */}
-      <div
-        onClick={handleSkip}
-        className="landing-skip"
-        style={{
-          position: "fixed",
-          bottom: "max(16px, env(safe-area-inset-bottom, 0px))",
-          right: "16px",
-          color: "var(--ling-text-tertiary)",
-          fontSize: "0.75rem",
-          zIndex: 5,
-          animation: "fadeInUp 1s ease-out 1s both",
-          cursor: "pointer",
-          minWidth: "48px",
-          minHeight: "48px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "8px 16px",
-        }}
-      >
+      <div onClick={handleSkip} className="landing-skip" style={skipStyle}>
         {t("landing.skip")}
       </div>
 
