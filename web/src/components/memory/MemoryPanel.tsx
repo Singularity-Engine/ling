@@ -132,7 +132,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
             <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: 700, margin: 0, letterSpacing: '0.2px' }}>
               {t('memory.title')}
             </h3>
-            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '12px', margin: '4px 0 0' }}>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', margin: '4px 0 0' }}>
               {t('memory.subtitle')}
             </p>
           </div>
@@ -278,7 +278,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
                 paddingTop: '8px',
                 borderTop: '1px solid rgba(255,255,255,0.05)',
               }}>
-                <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px' }}>
+                <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>
                   {new Date(memory.created_at).toLocaleDateString(undefined, {
                     month: 'short',
                     day: 'numeric',
@@ -311,7 +311,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
             background: 'rgba(139, 92, 246, 0.04)',
           }}
         >
-          <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px' }}>
+          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>
             {user?.plan === 'free'
               ? <>{t('memory.freeExpiry', { interpolation: { escapeValue: false } }).split('<bold>').map((part, i) => {
                   if (i === 0) return part;

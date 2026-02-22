@@ -277,7 +277,7 @@ function MainContent(): JSX.Element {
       <div style={{
         position: "absolute", bottom: 0, left: 0, right: 0,
         height: "44dvh", zIndex: 22, pointerEvents: "none",
-        background: "linear-gradient(to bottom, transparent 0%, rgba(10,0,21,0.03) 10%, rgba(10,0,21,0.10) 22%, rgba(10,0,21,0.20) 36%, rgba(10,0,21,0.34) 50%, rgba(10,0,21,0.48) 64%, rgba(10,0,21,0.62) 78%, rgba(10,0,21,0.74) 92%, rgba(10,0,21,0.82) 100%)",
+        background: "linear-gradient(to bottom, transparent 0%, rgba(10,0,21,0.02) 12%, rgba(10,0,21,0.07) 24%, rgba(10,0,21,0.16) 36%, rgba(10,0,21,0.28) 48%, rgba(10,0,21,0.42) 60%, rgba(10,0,21,0.56) 72%, rgba(10,0,21,0.68) 84%, rgba(10,0,21,0.78) 94%, rgba(10,0,21,0.82) 100%)",
       }} />
 
       {/* ===== Layer 1.5: 右侧工具栏 ===== */}
@@ -301,8 +301,8 @@ function MainContent(): JSX.Element {
           gap: isMobile ? "6px" : "8px",
           padding: "6px",
           borderRadius: "20px",
-          background: "rgba(0, 0, 0, 0.15)",
-          border: "1px solid rgba(255, 255, 255, 0.04)",
+          background: "rgba(0, 0, 0, 0.18)",
+          border: "1px solid rgba(255, 255, 255, 0.06)",
         }}>
           <CreditsDisplay />
           <AffinityBadge />
@@ -317,8 +317,8 @@ function MainContent(): JSX.Element {
           gap: isMobile ? "6px" : "8px",
           padding: "6px",
           borderRadius: "20px",
-          background: "rgba(0, 0, 0, 0.15)",
-          border: "1px solid rgba(255, 255, 255, 0.04)",
+          background: "rgba(0, 0, 0, 0.18)",
+          border: "1px solid rgba(255, 255, 255, 0.06)",
         }}>
           <button
             onClick={toggleChat}
@@ -469,9 +469,9 @@ function MainContent(): JSX.Element {
             </div>
           )}
           <div style={{
-            background: "rgba(10, 0, 21, 0.5)",
-            backdropFilter: "blur(16px)",
-            WebkitBackdropFilter: "blur(16px)",
+            background: "rgba(10, 0, 21, 0.55)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
             borderTop: "1px solid rgba(139, 92, 246, 0.15)",
           }}>
             <InputBar />

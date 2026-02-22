@@ -66,6 +66,7 @@ export const StarField = memo(() => {
     if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let prevW = window.innerWidth;
     let prevH = window.innerHeight;
     const resize = () => {
@@ -158,9 +159,11 @@ export const StarField = memo(() => {
 
       // ── Stars with depth ──
       for (const star of starsRef.current) {
-        star.alpha =
-          star.baseAlpha *
-          (0.5 + 0.5 * Math.sin(frame * star.twinkleSpeed + star.twinkleOffset));
+        // Reduced motion: static brightness, no twinkle
+        star.alpha = prefersReducedMotion
+          ? star.baseAlpha * 0.75
+          : star.baseAlpha *
+            (0.5 + 0.5 * Math.sin(frame * star.twinkleSpeed + star.twinkleOffset));
 
         // Layer-based coloring: far=cool white, near=warm purple-white
         const purpleMix = star.layer === 2 ? 40 : star.layer === 1 ? 25 : 10;
@@ -181,8 +184,8 @@ export const StarField = memo(() => {
         }
       }
 
-      // ── Meteors ──
-      if (Math.random() < 0.002 && meteorsRef.current.length < 2) {
+      // ── Meteors (disabled under prefers-reduced-motion) ──
+      if (!prefersReducedMotion && Math.random() < 0.002 && meteorsRef.current.length < 2) {
         meteorsRef.current.push({
           x: Math.random() * w * 0.8,
           y: Math.random() * h * 0.3,

@@ -137,7 +137,7 @@ export const AffinityBadge = memo(() => {
               background: "rgba(10, 0, 21, 0.92)",
               backdropFilter: "blur(24px)",
               borderRadius: "16px",
-              border: `1px solid ${config.color}28`,
+              border: `1px solid ${config.color}38`,
               minWidth: "200px",
               boxShadow: `0 12px 40px rgba(0,0,0,0.5), 0 0 24px ${config.color}15`,
               transition: "box-shadow 0.5s ease, border-color 0.5s ease",

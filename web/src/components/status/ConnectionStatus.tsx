@@ -3,16 +3,23 @@ import { useTranslation } from "react-i18next";
 import { useWebSocket } from "@/context/websocket-context";
 import { gatewayConnector, RECONNECT_MAX_RETRIES } from "@/services/gateway-connector";
 
-const keyframesStyle = `
-@keyframes connFadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 0.7; transform: translateY(0); }
+// ── Module-level keyframe injection (consistent with other components) ──
+const CONN_STYLE_ID = "connection-status-keyframes";
+if (typeof document !== "undefined" && !document.getElementById(CONN_STYLE_ID)) {
+  const style = document.createElement("style");
+  style.id = CONN_STYLE_ID;
+  style.textContent = `
+    @keyframes connFadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 0.7; transform: translateY(0); }
+    }
+    @keyframes connPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+  `;
+  document.head.appendChild(style);
 }
-@keyframes connPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.8); }
-}
-`;
 
 /**
  * Minimal connection status indicator.
@@ -72,7 +79,6 @@ export const ConnectionStatus = memo(() => {
 
   return (
     <>
-      <style>{keyframesStyle}</style>
       <Tag
         onClick={isClosed ? reconnect : undefined}
         style={{

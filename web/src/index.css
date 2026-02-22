@@ -20,8 +20,8 @@
 
   /* 文字 */
   --ling-text-primary: rgba(255, 255, 255, 0.95);
-  --ling-text-secondary: rgba(255, 255, 255, 0.75);
-  --ling-text-tertiary: rgba(255, 255, 255, 0.4);
+  --ling-text-secondary: rgba(255, 255, 255, 0.8);
+  --ling-text-tertiary: rgba(255, 255, 255, 0.45);
   --ling-text-muted: rgba(255, 255, 255, 0.2);
 
   /* 语义色 */
@@ -284,9 +284,9 @@ body {
   --ling-purple-30: rgba(139, 92, 246, 0.3);
   --ling-purple-40: rgba(139, 92, 246, 0.4);
   --ling-purple-60: rgba(139, 92, 246, 0.6);
-  --ling-text-secondary: rgba(255, 255, 255, 0.75);
+  --ling-text-secondary: rgba(255, 255, 255, 0.8);
   --ling-purple-25: rgba(139, 92, 246, 0.25);
-  --ling-text-tertiary: rgba(255, 255, 255, 0.4);
+  --ling-text-tertiary: rgba(255, 255, 255, 0.45);
   --ling-text-muted: rgba(255, 255, 255, 0.2);
 }
 
@@ -329,8 +329,8 @@ body {
   animation: textShimmer 6s ease-in-out 1s infinite both;
 }
 @keyframes textShimmer {
-  0%, 35% { background-position: 100% center; }
-  65%, 100% { background-position: -100% center; }
+  0%, 40% { background-position: 100% center; }
+  60%, 100% { background-position: -100% center; }
 }
 
 /* Landing feature pills */

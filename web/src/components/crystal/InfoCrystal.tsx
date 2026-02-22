@@ -53,8 +53,8 @@ const SHARED_STYLES = `
   to   { opacity: 0; transform: scale(0.6) translateY(30px); }
 }
 @keyframes shimmerSweep {
-  0%   { transform: translateX(-100%) rotate(25deg); }
-  100% { transform: translateX(200%) rotate(25deg); }
+  0%, 60%  { transform: translateX(-100%) rotate(25deg); }
+  80%, 100% { transform: translateX(200%) rotate(25deg); }
 }
 `;
 
