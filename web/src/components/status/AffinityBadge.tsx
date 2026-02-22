@@ -127,7 +127,7 @@ export const AffinityBadge = memo(() => {
                 <span style={{ fontSize: "15px", color: config.color, fontWeight: 700, display: "block", letterSpacing: "0.3px", transition: "color 0.5s ease" }}>
                   {t(config.i18nKey)}
                 </span>
-                <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.48)", display: "block", marginTop: "2px" }}>
+                <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.55)", display: "block", marginTop: "2px" }}>
                   {t("affinity.label")}
                 </span>
               </div>
@@ -137,7 +137,7 @@ export const AffinityBadge = memo(() => {
             </div>
 
             {/* Progress bar */}
-            <div style={{ width: "100%", height: "6px", background: "rgba(255,255,255,0.06)", borderRadius: "3px", overflow: "hidden" }}>
+            <div style={{ width: "100%", height: "6px", background: "rgba(255,255,255,0.09)", borderRadius: "3px", overflow: "hidden" }}>
               <div
                 style={{
                   height: "100%",
