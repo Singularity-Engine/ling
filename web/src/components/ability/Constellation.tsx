@@ -280,6 +280,7 @@ export const Constellation = memo(() => {
         aria-label={tooltipText}
         title={tooltipText}
         animate={isOpen ? { rotate: 45 } : { rotate: 0 }}
+        whileTap={{ scale: 0.9 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
         style={{
           position: "relative",

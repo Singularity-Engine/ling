@@ -117,6 +117,7 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
   const [expanded, setExpanded] = useState(false);
   const { t } = useTranslation();
   const [hovered, setHovered] = useState(false);
+  const [pressed, setPressed] = useState(false);
   const [entered, setEntered] = useState(false);
   const { level } = useAffinity();
 
@@ -208,6 +209,7 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
             <span style={{ fontSize: "20px" }}>{icon}</span>
             <span style={{ fontSize: "16px", fontWeight: 600, flex: 1 }}>{tool.name}</span>
             <span style={{ fontSize: "14px" }}>{statusIcon}</span>
+            <span style={{ fontSize: "18px", color: "rgba(255,255,255,0.35)", cursor: "pointer", marginLeft: "4px", lineHeight: 1 }}>✕</span>
           </div>
           {/* Full content */}
           <span
@@ -235,7 +237,7 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
     : `${color}${Math.round(theme.borderAlpha * 255).toString(16).padStart(2, "0")}`;
 
   const floatDur = 4 + index * 0.5;
-  const currentScale = hovered ? theme.scale * 1.03 : theme.scale;
+  const currentScale = pressed ? theme.scale * 0.97 : hovered ? theme.scale * 1.03 : theme.scale;
   const currentRotateY = hovered ? rotateY * 0.5 : rotateY;
 
   return (
@@ -273,7 +275,9 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
         } as React.CSSProperties}
         onClick={handleClick}
         onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        onMouseLeave={() => { setHovered(false); setPressed(false); }}
+        onMouseDown={() => setPressed(true)}
+        onMouseUp={() => setPressed(false)}
         onAnimationEnd={handleAnimEnd}
       >
         {/* Shimmer highlight — always rendered, visibility via opacity transition */}

@@ -90,7 +90,7 @@ export const CapabilityRing = memo(() => {
         justifyContent: "center",
         padding: "8px 0",
         pointerEvents: "auto",
-        opacity: containerHovered ? 0.95 : 0.55,
+        opacity: containerHovered ? 0.95 : 0.65,
         transition: "opacity 0.3s ease",
       }}
       onMouseEnter={() => setContainerHovered(true)}
@@ -132,6 +132,7 @@ const AbilityButton = memo(({
   x: number; y: number; onClick: () => void;
 }) => {
   const [hovered, setHovered] = useState(false);
+  const [pressed, setPressed] = useState(false);
   const [rippleKey, setRippleKey] = useState(0);
   const [justActivated, setJustActivated] = useState(false);
   const prevActiveRef = useRef(isActive);
@@ -146,7 +147,7 @@ const AbilityButton = memo(({
     prevActiveRef.current = isActive;
   }, [isActive]);
 
-  const scale = hovered ? 1.2 : isActive ? 1.15 : 1;
+  const scale = pressed ? 0.9 : hovered ? 1.2 : isActive ? 1.15 : 1;
   const translateBase = `translate(calc(-50% + ${x}px), calc(${y}px))`;
 
   const handleClick = useCallback(() => {
@@ -195,7 +196,9 @@ const AbilityButton = memo(({
       onClick={handleClick}
       aria-label={label}
       onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseLeave={() => { setHovered(false); setPressed(false); }}
+      onMouseDown={() => setPressed(true)}
+      onMouseUp={() => setPressed(false)}
     >
       <span style={{
         fontSize: "16px",

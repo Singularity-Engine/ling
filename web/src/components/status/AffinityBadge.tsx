@@ -46,6 +46,7 @@ export const AffinityBadge = memo(() => {
   const { affinity, level, milestone } = useAffinity();
   const [expanded, setExpanded] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const [pressed, setPressed] = useState(false);
   const { t } = useTranslation();
 
   const config = useMemo(() => AFFINITY_LEVELS[level] || AFFINITY_LEVELS[DEFAULT_LEVEL], [level]);
@@ -58,19 +59,22 @@ export const AffinityBadge = memo(() => {
         <button
           onClick={() => setExpanded(!expanded)}
           onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
+          onMouseLeave={() => { setHovered(false); setPressed(false); }}
+          onMouseDown={() => setPressed(true)}
+          onMouseUp={() => setPressed(false)}
           style={{
             display: "flex",
             alignItems: "center",
             gap: "6px",
             padding: "10px 12px",
             minHeight: "44px",
-            background: hovered ? "rgba(0, 0, 0, 0.6)" : "rgba(0, 0, 0, 0.4)",
+            background: pressed ? "rgba(0, 0, 0, 0.7)" : hovered ? "rgba(0, 0, 0, 0.6)" : "rgba(0, 0, 0, 0.4)",
             backdropFilter: "blur(12px)",
             borderRadius: "20px",
             border: hovered ? `1px solid ${config.color}44` : "1px solid rgba(255,255,255,0.08)",
             cursor: "pointer",
             transition: "all 0.3s ease",
+            transform: pressed ? "scale(0.95)" : "scale(1)",
             animation: `heartbeat ${config.beatSpeed} ease-in-out infinite`,
             font: "inherit",
             color: "inherit",
