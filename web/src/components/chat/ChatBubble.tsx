@@ -1,7 +1,7 @@
 import { memo, useMemo, useState, useCallback, useRef, useEffect, useReducer, type ReactNode, type CSSProperties } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import rehypeHighlight from "rehype-highlight";
+import rehypeHighlightLite from "@/utils/rehype-highlight-lite";
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
 import { toaster } from "@/components/ui/toaster";
@@ -9,7 +9,7 @@ import { ToolResultCard } from "./ToolResultCard";
 import { createStyleInjector } from "@/utils/style-injection";
 
 export const remarkPlugins = [remarkGfm];
-const rehypePlugins = [rehypeHighlight];
+const rehypePlugins = [rehypeHighlightLite];
 
 // Language display names
 const LANG_LABELS: Record<string, string> = {
