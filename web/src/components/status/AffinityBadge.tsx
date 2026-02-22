@@ -3,33 +3,29 @@ import { useTranslation } from "react-i18next";
 import { useAffinity } from "@/context/affinity-context";
 import { AFFINITY_LEVELS, DEFAULT_LEVEL } from "@/config/affinity-palette";
 import { LEVELS } from "@/hooks/use-affinity-engine";
+import { createStyleInjector } from "@/utils/style-injection";
 
-// ── Module-level keyframe injection (consistent with BackgroundReactor) ──
-const BADGE_STYLE_ID = "affinity-badge-keyframes";
-if (typeof document === "undefined" || !document.getElementById(BADGE_STYLE_ID)) {
-  if (typeof document !== "undefined") {
-    const el = document.createElement("style");
-    el.id = BADGE_STYLE_ID;
-    el.textContent = `
-      @keyframes heartbeat {
-        0%, 100% { transform: scale(1); }
-        14% { transform: scale(1.1); }
-        28% { transform: scale(1); }
-        42% { transform: scale(1.08); }
-        70% { transform: scale(1); }
-      }
-      @keyframes fadeInDown {
-        from { opacity: 0; transform: translateY(-8px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      @keyframes popIn {
-        from { opacity: 0; transform: scale(0.8) translateY(-4px); }
-        to { opacity: 1; transform: scale(1) translateY(0); }
-      }
-    `;
-    document.head.appendChild(el);
-  }
-}
+// ── Deferred style injection (avoids module-level side effects) ──
+const ensureBadgeStyles = createStyleInjector({
+  id: "affinity-badge-keyframes",
+  css: `
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      14% { transform: scale(1.1); }
+      28% { transform: scale(1); }
+      42% { transform: scale(1.08); }
+      70% { transform: scale(1); }
+    }
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.8) translateY(-4px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+  `,
+});
 
 // ── Pre-allocated style constants ──
 const S_WRAPPER: CSSProperties = { position: "relative" };
@@ -146,6 +142,7 @@ const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPerce
 };
 
 export const AffinityBadge = memo(() => {
+  useEffect(ensureBadgeStyles, []);
   const { affinity, level, milestone } = useAffinity();
   const [expanded, setExpanded] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -261,6 +258,7 @@ export const AffinityBadge = memo(() => {
           onMouseLeave={onMouseLeave}
           onMouseDown={onMouseDown}
           onMouseUp={onMouseUp}
+          aria-label={t("affinity.label")}
           style={btnStyle}
         >
           <span style={heartWrapStyle}>

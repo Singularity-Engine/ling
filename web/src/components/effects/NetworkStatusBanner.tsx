@@ -1,13 +1,12 @@
 import { memo, useState, useEffect, useRef, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { useNetworkStatus } from "../../hooks/use-network-status";
+import { createStyleInjector } from "@/utils/style-injection";
 
-// ── Module-level keyframe injection ──
-const NET_STYLE_ID = "network-banner-keyframes";
-if (typeof document !== "undefined" && !document.getElementById(NET_STYLE_ID)) {
-  const el = document.createElement("style");
-  el.id = NET_STYLE_ID;
-  el.textContent = `
+// ── Deferred style injection (avoids module-level side effects) ──
+const ensureNetBannerStyles = createStyleInjector({
+  id: "network-banner-keyframes",
+  css: `
     @keyframes netBannerSlideDown {
       from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
       to   { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -16,9 +15,8 @@ if (typeof document !== "undefined" && !document.getElementById(NET_STYLE_ID)) {
       0%, 70% { opacity: 1; transform: translateX(-50%) translateY(0); }
       100%    { opacity: 0; transform: translateX(-50%) translateY(-10px); }
     }
-  `;
-  document.head.appendChild(el);
-}
+  `,
+});
 
 // ── Pre-allocated style constants ──
 const S_BASE: CSSProperties = {
@@ -58,6 +56,7 @@ const S_RECOVERED: CSSProperties = {
 type Phase = "hidden" | "offline" | "recovered";
 
 export const NetworkStatusBanner = memo(function NetworkStatusBanner() {
+  useEffect(ensureNetBannerStyles, []);
   const { t } = useTranslation();
   const { isOnline } = useNetworkStatus();
   const [phase, setPhase] = useState<Phase>("hidden");

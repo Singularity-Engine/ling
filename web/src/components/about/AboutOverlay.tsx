@@ -6,13 +6,10 @@ import { apiClient } from "@/services/api-client";
 import packageJson from "../../../package.json";
 import { createStyleInjector } from "@/utils/style-injection";
 
-// ─── Inject keyframes + hover styles once (same pattern as ChatArea/ChatBubble) ───
-
-const STYLE_ID = "about-overlay-styles";
-if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
-  const style = document.createElement("style");
-  style.id = STYLE_ID;
-  style.textContent = `
+// ── Deferred style injection (avoids module-level side effects) ──
+const ensureAboutStyles = createStyleInjector({
+  id: "about-overlay-styles",
+  css: `
     @keyframes aboutFadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes aboutSlideIn { from { opacity: 0; transform: translateY(12px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
     .about-link {
@@ -30,9 +27,8 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
       border-color: rgba(139, 92, 246, 0.4);
       color: var(--ling-purple-lighter);
     }
-  `;
-  document.head.appendChild(style);
-}
+  `,
+});
 
 // ─── Static data ───
 
@@ -311,6 +307,7 @@ const S_COPYRIGHT: CSSProperties = {
 // ─── Component ───
 
 export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
+  useEffect(ensureAboutStyles, []);
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const { setPricingOpen } = useUI();

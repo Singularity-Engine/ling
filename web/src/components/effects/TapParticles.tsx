@@ -74,11 +74,11 @@ export const TapParticles = memo(() => {
     };
 
     // Use capture phase so we see the events before the Live2D handler
-    canvas.addEventListener("pointerdown", onDown as EventListener, true);
-    canvas.addEventListener("pointerup", onUp as EventListener, true);
+    canvas.addEventListener("pointerdown", onDown, true);
+    canvas.addEventListener("pointerup", onUp, true);
     return () => {
-      canvas.removeEventListener("pointerdown", onDown as EventListener, true);
-      canvas.removeEventListener("pointerup", onUp as EventListener, true);
+      canvas.removeEventListener("pointerdown", onDown, true);
+      canvas.removeEventListener("pointerup", onUp, true);
     };
   }, [spawn]);
 
