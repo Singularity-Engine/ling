@@ -2,9 +2,9 @@ import { useTranslation } from 'react-i18next';
 import { memo, useState, useEffect, useRef, type CSSProperties } from 'react';
 import { useTTSState, TTSPhase } from '@/context/tts-state-context';
 import { OVERLAY_COLORS } from '@/constants/colors';
+import { createStyleInjector } from '@/utils/style-injection';
 
 // ── Deferred keyframe injection (performance optimization) ──
-const TTS_STYLE_ID = 'tts-status-keyframes';
 const KEYFRAMES_CSS = `
     @keyframes ttsPulse {
       0%, 100% { opacity: 1; transform: scale(1); }
@@ -32,17 +32,10 @@ const KEYFRAMES_CSS = `
     }
   `;
 
-let _stylesInjected = false;
-function ensureKeyframeStyles() {
-  if (_stylesInjected || typeof document === 'undefined') return;
-  if (!document.getElementById(TTS_STYLE_ID)) {
-    const el = document.createElement('style');
-    el.id = TTS_STYLE_ID;
-    el.textContent = KEYFRAMES_CSS;
-    document.head.appendChild(el);
-  }
-  _stylesInjected = true;
-}
+const ensureKeyframeStyles = createStyleInjector({
+  id: 'tts-status-keyframes',
+  css: KEYFRAMES_CSS,
+});
 
 const phaseConfig: Record<Exclude<TTSPhase, 'idle'>, {
   dotColor: string;

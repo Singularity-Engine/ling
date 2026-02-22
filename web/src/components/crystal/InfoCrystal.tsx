@@ -3,6 +3,7 @@ import { memo, useState, useCallback, useMemo, useEffect, type CSSProperties } f
 import { useAffinity } from "@/context/affinity-context";
 import { AFFINITY_CRYSTAL_THEMES, CATEGORY_COLORS, DEFAULT_LEVEL, type AffinityCrystalTheme } from "@/config/affinity-palette";
 import { OVERLAY_COLORS } from "@/constants/colors";
+import { createStyleInjector } from "@/utils/style-injection";
 import type { ToolCategory } from "../../context/tool-state-context";
 
 const DEFAULT_THEME: AffinityCrystalTheme = AFFINITY_CRYSTAL_THEMES[DEFAULT_LEVEL];
@@ -59,15 +60,10 @@ const SHARED_STYLES = `
 }
 `;
 
-let _sharedInjected = false;
-function ensureSharedStyles() {
-  if (_sharedInjected || typeof document === "undefined") return;
-  const el = document.createElement("style");
-  el.setAttribute("data-info-crystal", "");
-  el.textContent = SHARED_STYLES;
-  document.head.appendChild(el);
-  _sharedInjected = true;
-}
+const ensureSharedStyles = createStyleInjector({
+  attribute: "data-info-crystal",
+  css: SHARED_STYLES,
+});
 
 // ─── Static data ─────────────────────────────────────────────────
 

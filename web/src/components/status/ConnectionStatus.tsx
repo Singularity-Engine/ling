@@ -3,9 +3,9 @@ import { useTranslation } from "react-i18next";
 import { useWebSocket } from "@/context/websocket-context";
 import { gatewayConnector, RECONNECT_MAX_RETRIES } from "@/services/gateway-connector";
 import { OVERLAY_COLORS, WHITE_ALPHA } from "@/constants/colors";
+import { createStyleInjector } from "@/utils/style-injection";
 
 // ── Deferred keyframe injection (performance optimization) ──
-const CONN_STYLE_ID = "connection-status-keyframes";
 const KEYFRAMES_CSS = `
     @keyframes connFadeIn {
       from { opacity: 0; transform: translateY(-4px); }
@@ -17,17 +17,10 @@ const KEYFRAMES_CSS = `
     }
   `;
 
-let _stylesInjected = false;
-function ensureKeyframeStyles() {
-  if (_stylesInjected || typeof document === "undefined") return;
-  if (!document.getElementById(CONN_STYLE_ID)) {
-    const style = document.createElement("style");
-    style.id = CONN_STYLE_ID;
-    style.textContent = KEYFRAMES_CSS;
-    document.head.appendChild(style);
-  }
-  _stylesInjected = true;
-}
+const ensureKeyframeStyles = createStyleInjector({
+  id: "connection-status-keyframes",
+  css: KEYFRAMES_CSS,
+});
 
 // ── Pre-allocated style constants — eliminate per-render allocations ──
 const S_CONTAINER_BASE: CSSProperties = {
