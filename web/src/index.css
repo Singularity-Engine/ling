@@ -422,6 +422,11 @@ canvas {
   }
 
 
+  /* 代码块限高——移动端避免出现过高的滚动区 */
+  .md-content .code-block-wrap pre {
+    max-height: 350px;
+  }
+
   /* Landing 动画移动端优化 */
   .landing-text-line {
     font-size: 15px !important;

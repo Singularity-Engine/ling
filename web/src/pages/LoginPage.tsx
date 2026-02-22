@@ -93,8 +93,9 @@ const styles: Record<string, React.CSSProperties> = {
   card: {
     width: '100%',
     maxWidth: 380,
-    padding: 32,
+    padding: '32px 16px',
     textAlign: 'center',
+    boxSizing: 'border-box',
   },
   title: {
     fontSize: 40,
@@ -119,13 +120,14 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid rgba(255,255,255,0.12)',
     background: 'rgba(255,255,255,0.06)',
     color: '#fff',
-    fontSize: 14,
+    fontSize: 16,
     outline: 'none',
     transition: 'border 0.2s',
   },
   button: {
     marginTop: 8,
     padding: '12px 0',
+    minHeight: 48,
     borderRadius: 8,
     border: 'none',
     background: 'var(--ling-purple-60)',

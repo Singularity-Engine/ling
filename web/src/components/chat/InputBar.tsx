@@ -113,6 +113,7 @@ const S_SEND_IDLE: CSSProperties = {
 const S_HINTS_ROW: CSSProperties = {
   maxWidth: "720px", margin: "2px auto 0", paddingLeft: "52px",
   display: "flex", justifyContent: "space-between",
+  boxSizing: "border-box",
 };
 const S_MD_HINT: CSSProperties = { fontSize: "10px", color: "rgba(255,255,255,0.2)" };
 const S_CHAR_BASE: CSSProperties = { fontSize: "10px", transition: "color 0.2s" };
