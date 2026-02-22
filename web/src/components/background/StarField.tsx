@@ -51,6 +51,10 @@ const STAR_LAYERS = [
   { count: 30, sizeMin: 1.0, sizeMax: 2.0, alphaMin: 0.3, alphaMax: 0.7, twinkleMin: 0.008, twinkleMax: 0.018 },
 ];
 
+// Pre-computed star color prefixes per layer (avoids template-string allocation per star per frame)
+// Layer 0 (far): purpleMix=10 → r=210, g=210 | Layer 1 (mid): 25 → 225,225 | Layer 2 (near): 40 → 240,240
+const STAR_RGBA_PREFIX = ["rgba(210,210,255,", "rgba(225,225,255,", "rgba(240,240,255,"];
+
 export const StarField = memo(() => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const starsRef = useRef<Star[]>([]);
@@ -67,8 +71,12 @@ export const StarField = memo(() => {
 
     const dpr = window.devicePixelRatio || 1;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let prevW = window.innerWidth;
-    let prevH = window.innerHeight;
+    // Cached viewport dimensions — updated only on resize, read every frame
+    // without triggering forced layout reflow (avoids 120 layout reads/sec).
+    let cachedW = window.innerWidth;
+    let cachedH = window.innerHeight;
+    let prevW = cachedW;
+    let prevH = cachedH;
     const resize = () => {
       const newW = window.innerWidth;
       const newH = window.innerHeight;
@@ -86,6 +94,8 @@ export const StarField = memo(() => {
       }
       prevW = newW;
       prevH = newH;
+      cachedW = newW;
+      cachedH = newH;
     };
     resize();
     let resizeRaf = 0;
@@ -124,8 +134,8 @@ export const StarField = memo(() => {
 
     const animate = () => {
       frame++;
-      const w = window.innerWidth;
-      const h = window.innerHeight;
+      const w = cachedW;
+      const h = cachedH;
       ctx.clearRect(0, 0, w, h);
 
       // ── Nebula clouds (behind stars, very faint) ──
@@ -170,21 +180,19 @@ export const StarField = memo(() => {
           : star.baseAlpha *
             (0.5 + 0.5 * Math.sin(frame * star.twinkleSpeed + star.twinkleOffset));
 
-        // Layer-based coloring: far=cool white, near=warm purple-white
-        const purpleMix = star.layer === 2 ? 40 : star.layer === 1 ? 25 : 10;
-        const r = 200 + purpleMix;
-        const g = 200 + purpleMix;
+        // Layer-based coloring via pre-computed prefix (avoids template-string per star per frame)
+        const prefix = STAR_RGBA_PREFIX[star.layer];
 
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${r}, ${g}, 255, ${star.alpha})`;
+        ctx.fillStyle = prefix + star.alpha + ")";
         ctx.fill();
 
         // Glow halo on bright near-layer stars
         if (star.layer === 2 && star.alpha > 0.4) {
           ctx.beginPath();
           ctx.arc(star.x, star.y, star.size * 3, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(${r}, ${g}, 255, ${star.alpha * 0.08})`;
+          ctx.fillStyle = prefix + (star.alpha * 0.08) + ")";
           ctx.fill();
         }
       }
