@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { memo, useEffect, useRef, useCallback } from 'react';
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import { FaCopy, FaRedo, FaVolumeUp } from 'react-icons/fa';
@@ -28,7 +28,7 @@ const menuItemStyle = {
   _active: { bg: 'whiteAlpha.300', transform: 'scale(0.97)' },
 };
 
-export function MessageContextMenu({ message, position, onClose }: MessageContextMenuProps) {
+export const MessageContextMenu = memo(function MessageContextMenu({ message, position, onClose }: MessageContextMenuProps) {
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
   const { sendMessage } = useWebSocket();
@@ -175,4 +175,4 @@ export function MessageContextMenu({ message, position, onClose }: MessageContex
       </Flex>
     </Box>
   );
-}
+});
