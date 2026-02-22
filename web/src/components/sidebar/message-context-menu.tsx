@@ -8,6 +8,20 @@ import { useWebSocket } from '@/context/websocket-context';
 import { useChatMessages } from '@/context/chat-history-context';
 import { toaster } from '@/components/ui/toaster';
 
+// ── Module-level keyframe injection (runs once, not on every render) ──
+const CTX_MENU_KEYFRAMES_ID = 'ctx-menu-keyframes';
+if (typeof document !== 'undefined' && !document.getElementById(CTX_MENU_KEYFRAMES_ID)) {
+  const el = document.createElement('style');
+  el.id = CTX_MENU_KEYFRAMES_ID;
+  el.textContent = `
+    @keyframes contextMenuFadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  `;
+  document.head.appendChild(el);
+}
+
 interface MessageContextMenuProps {
   message: Message;
   position: { x: number; y: number };
@@ -147,12 +161,6 @@ export const MessageContextMenu = memo(function MessageContextMenu({ message, po
       backdropFilter="blur(16px) saturate(1.6)"
       boxShadow="0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.06)"
       animation="contextMenuFadeIn 0.12s ease-out"
-      css={{
-        '@keyframes contextMenuFadeIn': {
-          from: { opacity: 0, transform: 'scale(0.95)' },
-          to: { opacity: 1, transform: 'scale(1)' },
-        },
-      }}
     >
       {/* Copy */}
       <Flex {...menuItemStyle} role="menuitem" tabIndex={0} onClick={handleCopy} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCopy(); } }}>
