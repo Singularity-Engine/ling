@@ -229,7 +229,7 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
 
   // Border color modulated by affinity-level opacity
   const borderHex = hovered
-    ? `${color}${Math.round(theme.borderAlpha * 255 * 1.4).toString(16).padStart(2, "0")}`
+    ? `${color}${Math.min(255, Math.round(theme.borderAlpha * 255 * 1.4)).toString(16).padStart(2, "0")}`
     : `${color}${Math.round(theme.borderAlpha * 255).toString(16).padStart(2, "0")}`;
 
   const floatDur = 4 + index * 0.5;

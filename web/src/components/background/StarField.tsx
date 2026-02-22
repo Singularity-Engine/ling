@@ -66,10 +66,25 @@ export const StarField = memo(() => {
     if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
+    let prevW = window.innerWidth;
+    let prevH = window.innerHeight;
     const resize = () => {
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
+      const newW = window.innerWidth;
+      const newH = window.innerHeight;
+      canvas.width = newW * dpr;
+      canvas.height = newH * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // Redistribute stars proportionally so they remain visible after resize
+      if (prevW > 0 && prevH > 0) {
+        const sx = newW / prevW;
+        const sy = newH / prevH;
+        for (const star of starsRef.current) {
+          star.x *= sx;
+          star.y *= sy;
+        }
+      }
+      prevW = newW;
+      prevH = newH;
     };
     resize();
     window.addEventListener("resize", resize);

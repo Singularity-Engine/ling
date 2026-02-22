@@ -258,7 +258,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
                 <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px' }}>
-                  {new Date(memory.created_at).toLocaleDateString('en-US', {
+                  {new Date(memory.created_at).toLocaleDateString(undefined, {
                     month: 'short',
                     day: 'numeric',
                   })}

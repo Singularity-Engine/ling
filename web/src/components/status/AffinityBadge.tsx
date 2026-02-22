@@ -1,4 +1,4 @@
-import { memo, useState, useId, useMemo, useEffect } from "react";
+import { memo, useState, useId, useMemo, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useAffinity } from "@/context/affinity-context";
 import { AFFINITY_LEVELS, DEFAULT_LEVEL } from "@/config/affinity-palette";
@@ -58,12 +58,26 @@ export const AffinityBadge = memo(() => {
   const { t } = useTranslation();
 
   const config = useMemo(() => AFFINITY_LEVELS[level] || AFFINITY_LEVELS[DEFAULT_LEVEL], [level]);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(ensureBadgeStyles, []);
 
+  // Close expanded panel on outside click
+  const handleClickOutside = useCallback((e: MouseEvent) => {
+    if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      setExpanded(false);
+    }
+  }, []);
+  useEffect(() => {
+    if (expanded) {
+      document.addEventListener("pointerdown", handleClickOutside);
+      return () => document.removeEventListener("pointerdown", handleClickOutside);
+    }
+  }, [expanded, handleClickOutside]);
+
   return (
     <>
-      <div style={{ position: "relative" }}>
+      <div ref={containerRef} style={{ position: "relative" }}>
         {/* Heart button */}
         <button
           onClick={() => setExpanded(!expanded)}
@@ -84,12 +98,13 @@ export const AffinityBadge = memo(() => {
             cursor: "pointer",
             transition: "all 0.3s ease",
             transform: pressed ? "scale(0.95)" : "scale(1)",
-            animation: `heartbeat ${config.beatSpeed} ease-in-out infinite`,
             font: "inherit",
             color: "inherit",
           }}
         >
-          <HeartIcon color={config.heartColor} fillPercent={affinity} size={22} />
+          <span style={{ display: "inline-flex", animation: `heartbeat ${config.beatSpeed} ease-in-out infinite` }}>
+            <HeartIcon color={config.heartColor} fillPercent={affinity} size={22} />
+          </span>
           <span style={{ fontSize: "12px", color: `${config.color}cc`, fontWeight: 600, transition: "all 0.3s ease" }}>
             {t(config.i18nKey)}
           </span>
