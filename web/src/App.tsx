@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, Component, ErrorInfo, ReactNode } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
@@ -606,18 +607,37 @@ function MainApp() {
   );
 }
 
+const pageTransition = { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.2, ease: 'easeInOut' },
+} as const;
+
+function AnimatedRoutes(): JSX.Element {
+  const location = useLocation();
+  // Normalize key so all catch-all paths share the same key (avoids spurious re-animation)
+  const pageKey = ['/login', '/register', '/terms'].includes(location.pathname)
+    ? location.pathname
+    : '/';
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div key={pageKey} {...pageTransition} style={{ minHeight: '100dvh' }}>
+        <Routes location={location}>
+          <Route path="/login" element={<GuestOnly><LoginPage /></GuestOnly>} />
+          <Route path="/register" element={<GuestOnly><RegisterPage /></GuestOnly>} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/*" element={<MainApp />} />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 function App(): JSX.Element {
   return (
     <ErrorBoundary>
       <BrowserRouter>
         <AuthProvider>
           <DismissFallback />
-          <Routes>
-            <Route path="/login" element={<GuestOnly><LoginPage /></GuestOnly>} />
-            <Route path="/register" element={<GuestOnly><RegisterPage /></GuestOnly>} />
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="/*" element={<MainApp />} />
-          </Routes>
+          <AnimatedRoutes />
         </AuthProvider>
       </BrowserRouter>
     </ErrorBoundary>
