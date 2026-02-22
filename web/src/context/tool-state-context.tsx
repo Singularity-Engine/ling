@@ -15,13 +15,27 @@ export interface ToolCall {
   endTime?: number;
 }
 
-interface ToolStateContextType {
+/**
+ * Context 1 — Read-only tool state.
+ * Changes when tools are started/completed/failed. Visual components
+ * (BackgroundReactor, CrystalField, Constellation) subscribe here.
+ */
+interface ToolStateReadonly {
   activeTools: ToolCall[];
   recentResults: ToolCall[];
   currentPhase: 'idle' | 'thinking' | 'working' | 'presenting';
   dominantCategory: ToolCategory | null;
   activeToolName: string | null;
+}
 
+/**
+ * Context 2 — Stable action callbacks.
+ * All callbacks are created with useCallback (stable deps), so this
+ * context value never changes after mount. Consumers that only need
+ * to WRITE tool state (e.g. websocket-handler) subscribe here without
+ * incurring re-renders on every tool state change.
+ */
+interface ToolActionsType {
   startTool: (tool: Omit<ToolCall, 'id' | 'startTime' | 'status'> & { id?: string; status?: ToolCall['status'] }) => void;
   updateTool: (id: string, update: Partial<ToolCall>) => void;
   completeTool: (id: string, result: string) => void;
@@ -29,7 +43,8 @@ interface ToolStateContextType {
   clearResults: () => void;
 }
 
-const ToolStateContext = createContext<ToolStateContextType | null>(null);
+const ToolStateContext = createContext<ToolStateReadonly | null>(null);
+const ToolActionsContext = createContext<ToolActionsType | null>(null);
 
 let toolIdCounter = 0;
 
@@ -225,29 +240,50 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
     };
   }, [startTool, completeTool]);
 
-  const value = useMemo(() => ({
+  // Context 1: read-only state — changes on tool start/complete/fail
+  const stateValue = useMemo(() => ({
     activeTools,
     recentResults,
     currentPhase,
     dominantCategory,
     activeToolName,
+  }), [activeTools, recentResults, currentPhase, dominantCategory, activeToolName]);
+
+  // Context 2: stable actions — all callbacks have stable deps, never changes
+  const actionsValue = useMemo(() => ({
     startTool,
     updateTool,
     completeTool,
     failTool,
     clearResults,
-  }), [activeTools, recentResults, currentPhase, dominantCategory, activeToolName,
-       startTool, updateTool, completeTool, failTool, clearResults]);
+  }), [startTool, updateTool, completeTool, failTool, clearResults]);
 
   return (
-    <ToolStateContext.Provider value={value}>
-      {children}
-    </ToolStateContext.Provider>
+    <ToolActionsContext.Provider value={actionsValue}>
+      <ToolStateContext.Provider value={stateValue}>
+        {children}
+      </ToolStateContext.Provider>
+    </ToolActionsContext.Provider>
   );
 }
 
+/**
+ * Read-only tool state — subscribes to tool state changes.
+ * Use for visual components that display tool activity.
+ */
 export function useToolState() {
   const ctx = useContext(ToolStateContext);
   if (!ctx) throw new Error("useToolState must be used within ToolStateProvider");
+  return ctx;
+}
+
+/**
+ * Stable action callbacks — never triggers re-renders.
+ * Use for components that only need to dispatch tool events
+ * (e.g. websocket-handler).
+ */
+export function useToolActions() {
+  const ctx = useContext(ToolActionsContext);
+  if (!ctx) throw new Error("useToolActions must be used within ToolStateProvider");
   return ctx;
 }

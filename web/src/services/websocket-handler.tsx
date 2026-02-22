@@ -22,7 +22,7 @@ import { useGroup } from '@/context/group-context';
 import { useInterrupt } from '@/hooks/utils/use-interrupt';
 import { useBrowser } from '@/context/browser-context';
 import { useAffinity } from '@/context/affinity-context';
-import { useToolState, categorize } from '@/context/tool-state-context';
+import { useToolActions, categorize } from '@/context/tool-state-context';
 import { gatewayConnector, GatewayState } from '@/services/gateway-connector';
 import { gatewayAdapter, GatewayMessageEvent } from '@/services/gateway-message-adapter';
 import { ttsService } from '@/services/tts-service';
@@ -203,7 +203,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const { interrupt } = useInterrupt();
   const { setBrowserViewData } = useBrowser();
   const affinityContext = useAffinity();
-  const { startTool, completeTool, failTool } = useToolState();
+  const { startTool, completeTool, failTool } = useToolActions();
   const { markSynthStart, markSynthDone, markSynthError, markPlayStart, markPlayDone, reset: resetTTSState } = useTTSState();
   const { updateCredits, user } = useAuth();
   const { setBillingModal } = useUI();
