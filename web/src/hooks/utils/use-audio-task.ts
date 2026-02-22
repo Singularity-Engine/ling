@@ -8,10 +8,13 @@ import { useSubtitle } from '@/context/subtitle-context';
 import { useChatMessages, useStreamingSetters } from '@/context/chat-history-context';
 import { audioTaskQueue } from '@/utils/task-queue';
 import { audioManager } from '@/utils/audio-manager';
+import { createLogger } from '@/utils/logger';
 import { toaster } from '@/components/ui/toaster';
 import { DisplayText } from '@/services/websocket-service';
 import { useLive2DExpression } from '@/hooks/canvas/use-live2d-expression';
 import * as LAppDefine from '../../../WebSDK/src/lappdefine';
+
+const log = createLogger('AudioTask');
 
 interface AudioTaskOptions {
   audioBase64: string
@@ -72,7 +75,7 @@ export const useAudioTask = () => {
 
     // Skip if already interrupted
     if (currentAiState === 'interrupted') {
-      if (import.meta.env.DEV) console.warn('Audio playback blocked by interruption state.');
+      log.debug('Audio playback blocked by interruption state.');
       resolve();
       return;
     }
@@ -96,14 +99,14 @@ export const useAudioTask = () => {
         // Get Live2D manager and model
         const live2dManager = window.getLive2DManager?.();
         if (!live2dManager) {
-          console.error('Live2D manager not found');
+          log.error('Live2D manager not found');
           resolve();
           return;
         }
 
         const model = live2dManager.getModel(0);
         if (!model) {
-          console.error('Live2D model not found at index 0');
+          log.error('Live2D model not found at index 0');
           resolve();
           return;
         }
@@ -157,7 +160,7 @@ export const useAudioTask = () => {
           }
 
           audio.play().catch((err) => {
-            console.error("Audio play error:", err);
+            log.error('Audio play error:', err);
             cleanup();
           });
 
@@ -240,7 +243,7 @@ export const useAudioTask = () => {
         });
 
         audio.addEventListener('error', (error) => {
-          console.error("Audio playback error:", error);
+          log.error('Audio playback error:', error);
           cleanup();
         });
 
@@ -249,7 +252,7 @@ export const useAudioTask = () => {
         resolve();
       }
     } catch (error) {
-      console.error('Audio playback setup error:', error);
+      log.error('Audio playback setup error:', error);
       toaster.create({
         title: `${t('error.audioPlayback')}: ${error}`,
         type: "error",
