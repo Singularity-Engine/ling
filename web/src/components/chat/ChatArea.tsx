@@ -611,7 +611,9 @@ export const ChatArea = memo(() => {
   // True when this is the first AI message (greeting bubble)
   const isGreeting = dedupedMessages.length === 1 && dedupedMessages[0].role === "ai";
 
-  const welcomeChips = useMemo(() => {
+  // Randomized once on mount — useState lazy initializers are stable across
+  // StrictMode double-invocations and won't reshuffle on re-render.
+  const [welcomeChips] = useState(() => {
     const pool = t("ui.welcomeChips", { returnObjects: true }) as string[];
     if (!Array.isArray(pool) || pool.length <= 4) return pool;
     const shuffled = [...pool];
@@ -620,15 +622,15 @@ export const ChatArea = memo(() => {
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled.slice(0, 4);
-  }, [t]);
+  });
   const postGreetingChips = useMemo(() => t("ui.postGreetingChips", { returnObjects: true }) as string[], [t]);
 
-  // Randomized subtitle hint
-  const welcomeSub = useMemo(() => {
+  // Randomized subtitle hint — stable across re-renders
+  const [welcomeSub] = useState(() => {
     const pool = t("ui.emptySubHints", { returnObjects: true }) as string[];
     if (!Array.isArray(pool) || pool.length === 0) return t("ui.emptySubHint");
     return pool[Math.floor(Math.random() * pool.length)];
-  }, [t]);
+  });
 
   // Time-based welcome title
   const welcomeTitle = useMemo(() => {

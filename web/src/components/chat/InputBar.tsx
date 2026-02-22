@@ -267,7 +267,7 @@ export const InputBar = memo(() => {
       textareaRef.current.focus();
     }
     // isSending reset is driven by aiState effect + send-failed listener
-  }, [inputText, wsContext, aiState, interrupt, appendHumanMessage, isSending]);
+  }, [inputText, wsContext, aiState, interrupt, appendHumanMessage]);
 
   // Reset isSending when AI starts processing, connection drops, or safety timeout.
   // Handles the interrupt-then-send case: if AI was already busy when we sent,
@@ -326,10 +326,6 @@ export const InputBar = memo(() => {
     }
   }, [micOn, startMic, stopMic]);
 
-  const handleInterrupt = useCallback(() => {
-    interrupt();
-  }, [interrupt]);
-
   return (
     <div style={S_BAR_WRAP}>
       {stateText && (
@@ -366,7 +362,7 @@ export const InputBar = memo(() => {
 
         <button
           className="ling-send-btn"
-          onClick={isAiSpeaking ? handleInterrupt : handleSend}
+          onClick={isAiSpeaking ? interrupt : handleSend}
           disabled={!isAiSpeaking && !canSend}
           aria-label={isAiSpeaking ? t("chat.stopReply") : !isConnected ? t("chat.sendDisconnected") : t("chat.sendMessage")}
           title={isAiSpeaking ? t("chat.stopReply") : !isConnected ? t("chat.sendDisconnected") : t("chat.sendMessage")}

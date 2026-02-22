@@ -266,9 +266,10 @@ export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCar
   const hasCode = codeBlocks.length > 0;
   const icon = TOOL_ICONS[category] || TOOL_ICONS.generic;
 
-  const textContent = hasCode
-    ? content.replace(/```\w*\n?[\s\S]*?```/g, "").trim()
-    : content;
+  const textContent = useMemo(
+    () => hasCode ? content.replace(/```\w*\n?[\s\S]*?```/g, "").trim() : content,
+    [content, hasCode],
+  );
 
   const isLongText = textContent.length > COLLAPSE_CHAR_THRESHOLD;
   const hasContent = !!(textContent || hasCode);
