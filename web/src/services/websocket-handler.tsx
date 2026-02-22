@@ -21,7 +21,7 @@ import { useLocalStorage } from '@/hooks/utils/use-local-storage';
 import { useGroup } from '@/context/group-context';
 import { useInterrupt } from '@/hooks/utils/use-interrupt';
 import { useBrowser } from '@/context/browser-context';
-import { useAffinity } from '@/context/affinity-context';
+import { useAffinityActions } from '@/context/affinity-context';
 import { useToolActions, categorize } from '@/context/tool-state-context';
 import { gatewayConnector, GatewayState } from '@/services/gateway-connector';
 import { gatewayAdapter, GatewayMessageEvent } from '@/services/gateway-message-adapter';
@@ -202,7 +202,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const autoStartMicOnConvEndRef = useRef(autoStartMicOnConvEnd);
   const { interrupt } = useInterrupt();
   const { setBrowserViewData } = useBrowser();
-  const affinityContext = useAffinity();
+  const affinityContext = useAffinityActions();
   const { startTool, completeTool, failTool } = useToolActions();
   const { markSynthStart, markSynthDone, markSynthError, markPlayStart, markPlayDone, reset: resetTTSState } = useTTSState();
   const { updateCredits, user } = useAuth();

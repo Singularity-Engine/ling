@@ -1,7 +1,7 @@
 import { memo, useMemo, useRef, useState, useEffect, type CSSProperties } from 'react';
 import { useToolState } from '../../context/tool-state-context';
 import { useAiState } from '../../context/ai-state-context';
-import { useAffinity } from '../../context/affinity-context';
+import { useAffinityState } from '../../context/affinity-context';
 import { AFFINITY_AMBIENT_TINTS, DEFAULT_LEVEL, type AffinityAmbientTint } from '../../config/affinity-palette';
 import { createStyleInjector } from '@/utils/style-injection';
 
@@ -107,7 +107,7 @@ export const BackgroundReactor = memo(() => {
   useEffect(ensureBgReactorStyles, []);
   const { currentPhase } = useToolState();
   const { isThinkingSpeaking } = useAiState();
-  const { level, pointGains, expressionIntensity } = useAffinity();
+  const { level, pointGains, expressionIntensity } = useAffinityState();
   const tint = AFFINITY_AMBIENT_TINTS[level] || DEFAULT_TINT;
 
   // ── Level transition detection ─────────────────────────────────

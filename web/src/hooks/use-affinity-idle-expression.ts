@@ -12,7 +12,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useAiState, AiStateEnum } from '@/context/ai-state-context';
-import { useAffinity } from '@/context/affinity-context';
+import { useAffinityState } from '@/context/affinity-context';
 import { getIdleExpression, EXPRESSION_TRANSITION } from '@/config/expression-presets';
 import { createLogger } from '@/utils/logger';
 
@@ -20,7 +20,7 @@ const log = createLogger('Affinity');
 
 export function useAffinityIdleExpression() {
   const { aiState } = useAiState();
-  const { level } = useAffinity();
+  const { level } = useAffinityState();
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {

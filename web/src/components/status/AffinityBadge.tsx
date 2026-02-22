@@ -1,6 +1,6 @@
 import { memo, useState, useId, useMemo, useEffect, useRef, useCallback, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
-import { useAffinity } from "@/context/affinity-context";
+import { useAffinityState } from "@/context/affinity-context";
 import { AFFINITY_LEVELS, DEFAULT_LEVEL } from "@/config/affinity-palette";
 import { LEVELS } from "@/hooks/use-affinity-engine";
 import { createStyleInjector } from "@/utils/style-injection";
@@ -144,7 +144,7 @@ const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPerce
 
 export const AffinityBadge = memo(() => {
   useEffect(ensureBadgeStyles, []);
-  const { affinity, level, milestone } = useAffinity();
+  const { affinity, level, milestone } = useAffinityState();
   const [expanded, setExpanded] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [pressed, setPressed] = useState(false);
