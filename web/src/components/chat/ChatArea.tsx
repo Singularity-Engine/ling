@@ -36,6 +36,10 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   document.head.appendChild(style);
 }
 
+// Touch-only device detection (no hover capability = phone/tablet)
+const isTouchDevice =
+  typeof window !== "undefined" && !window.matchMedia("(hover: hover)").matches;
+
 /**
  * Hook: throttle a rapidly-changing string to ~30 fps using rAF.
  * Returns the latest snapshot that the render loop should display.
@@ -760,9 +764,9 @@ export const ChatArea = memo(() => {
           {/* Capability tags */}
           {isConnected && (
             <div style={S_CAPS_ROW}>
-              <span style={S_CAP_TAG}>{t("landing.featureMemory")}</span>
-              <span style={S_CAP_TAG}>{t("landing.featureVoice")}</span>
-              <span style={S_CAP_TAG}>{t("landing.featureAvatar")}</span>
+              <span style={S_CAP_TAG}>{t("ui.capMemory")}</span>
+              <span style={S_CAP_TAG}>{t("ui.capVoice")}</span>
+              <span style={S_CAP_TAG}>{t("ui.capAvatar")}</span>
             </div>
           )}
 
@@ -771,9 +775,11 @@ export const ChatArea = memo(() => {
             <SuggestionChips chips={welcomeChips} onChipClick={handleChipClick} centered baseDelay={0.45} />
           )}
 
-          {/* Keyboard shortcut hint */}
+          {/* Interaction hint — keyboard for pointer devices, tap hint for touch */}
           {isConnected && (
-            <span style={S_KEYBOARD_HINT}>{t("ui.emptyKeyboardHint")}</span>
+            <span style={S_KEYBOARD_HINT}>
+              {isTouchDevice ? t("ui.emptyTouchHint") : t("ui.emptyKeyboardHint")}
+            </span>
           )}
         </div>
       )}
