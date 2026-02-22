@@ -41,21 +41,21 @@ export const AffinityBar = memo(() => {
           justifyContent: "center",
           gap: "10px",
           position: "relative",
-          borderTop: "1px solid rgba(255,255,255,0.04)",
+          borderTop: "1px solid rgba(255,255,255,0.06)",
         }}
       >
         <span style={{ fontSize: "13px", lineHeight: 1 }} aria-label="affinity icon">
           {config.icon}
         </span>
-        <span style={{ fontSize: "12px", color: config.color, fontWeight: 600, transition: "color 0.5s ease", whiteSpace: "nowrap" }}>
+        <span style={{ fontSize: "13px", color: config.color, fontWeight: 600, transition: "color 0.5s ease", whiteSpace: "nowrap" }}>
           {t(config.i18nKey)}
         </span>
         <div
           style={{
             width: "100px",
-            height: "5px",
-            background: "rgba(255,255,255,0.09)",
-            borderRadius: "2.5px",
+            height: "6px",
+            background: "rgba(255,255,255,0.12)",
+            borderRadius: "3px",
             overflow: "hidden",
             position: "relative",
             "--glow-color": `${config.color}33`,
@@ -67,14 +67,14 @@ export const AffinityBar = memo(() => {
               height: "100%",
               width: "100%",
               background: `linear-gradient(90deg, ${config.color}88, ${config.color})`,
-              borderRadius: "2.5px",
+              borderRadius: "3px",
               transformOrigin: "left",
               transform: `scaleX(${affinity / 100})`,
               transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease",
             }}
           />
         </div>
-        <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.55)", fontFamily: "monospace", minWidth: "20px", textAlign: "right" }}>
+        <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", fontFamily: "monospace", minWidth: "20px", textAlign: "right" }}>
           {affinity}
         </span>
 

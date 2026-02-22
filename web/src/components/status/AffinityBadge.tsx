@@ -137,7 +137,7 @@ export const AffinityBadge = memo(() => {
             </div>
 
             {/* Progress bar */}
-            <div style={{ width: "100%", height: "6px", background: "rgba(255,255,255,0.09)", borderRadius: "3px", overflow: "hidden" }}>
+            <div style={{ width: "100%", height: "6px", background: "rgba(255,255,255,0.12)", borderRadius: "3px", overflow: "hidden" }}>
               <div
                 style={{
                   height: "100%",
