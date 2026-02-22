@@ -48,13 +48,22 @@ function getAgentId(): string {
   return 'ling-chat';
 }
 
-/** Per-visitor session key in Gateway's agent-scoped format: agent:<agentId>:<uuid> */
-function getVisitorSessionKey(): string {
+/** Per-visitor session key in Gateway's agent-scoped format: agent:<agentId>:<identifier>
+ *  - Logged-in user: uses user.id for cross-device session continuity
+ *  - Guest: uses a random UUID stored in localStorage */
+function getVisitorSessionKey(userId?: string | null): string {
   const agentId = getAgentId();
-  const STORAGE_KEY = `ling-sk-${agentId}`;
-  // Purge old key formats that didn't use agent: prefix
+  // Purge old key formats
   localStorage.removeItem('ling-visitor-session-key');
   localStorage.removeItem(`ling-session-${agentId}`);
+
+  // Logged-in user: deterministic key based on user ID
+  if (userId) {
+    return `agent:${agentId}:user-${userId}`;
+  }
+
+  // Guest: persistent random UUID in localStorage
+  const STORAGE_KEY = `ling-sk-${agentId}`;
   let key = localStorage.getItem(STORAGE_KEY);
   if (!key || !key.startsWith('agent:')) {
     key = `agent:${agentId}:${crypto.randomUUID()}`;
@@ -236,8 +245,34 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const clearResponseRef = useRef(clearResponse);
   useEffect(() => { clearResponseRef.current = clearResponse; }, [clearResponse]);
 
-  // Per-visitor session key (stable across renders)
-  const sessionKeyRef = useRef(getVisitorSessionKey());
+  // Per-visitor session key — bound to user account when logged in
+  const sessionKeyRef = useRef(getVisitorSessionKey(user?.id));
+
+  // Update session key when user logs in / logs out
+  useEffect(() => {
+    const newKey = getVisitorSessionKey(user?.id);
+    if (newKey !== sessionKeyRef.current) {
+      sessionKeyRef.current = newKey;
+      // Re-resolve session with gateway for the new user identity
+      if (gatewayConnector.getState() === 'CONNECTED') {
+        gatewayConnector.resolveSession(newKey, getAgentId())
+          .then(() => gatewayConnector.getChatHistory(newKey))
+          .then((res) => {
+            const payload = res.payload;
+            if (payload?.messages?.length && payload.messages.length > 0) {
+              setMessagesRef.current(payload.messages);
+            } else {
+              setMessagesRef.current([]);
+            }
+            setCurrentHistoryUidRef.current(newKey);
+          })
+          .catch(() => {
+            setMessagesRef.current([]);
+            setCurrentHistoryUidRef.current(newKey);
+          });
+      }
+    }
+  }, [user?.id]);
 
   // ─── Billing check ──────────────────────────────────────────
   const userRef = useRef(user);
