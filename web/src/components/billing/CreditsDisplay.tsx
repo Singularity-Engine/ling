@@ -30,12 +30,16 @@ const CreditsDisplay: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         gap: '4px',
-        padding: '4px 10px',
-        borderRadius: '9999px',
-        background: 'rgba(255, 255, 255, 0.06)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
+        padding: '5px 10px',
+        borderRadius: '16px',
+        background: 'rgba(0, 0, 0, 0.35)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
         cursor: 'pointer',
-        transition: 'all 0.2s ease',
+        transition: 'all 0.3s ease',
+        font: 'inherit',
+        color: 'inherit',
       }}
       title={`Credits: ${balance}`}
     >

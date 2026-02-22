@@ -2,31 +2,9 @@ import { useTranslation } from "react-i18next";
 import { memo, useState, useCallback, useMemo, useEffect } from "react";
 import type { ToolCategory } from "../../context/tool-state-context";
 import { useAffinity } from "@/context/affinity-context";
+import { AFFINITY_CRYSTAL_THEMES, DEFAULT_LEVEL, type AffinityCrystalTheme } from "@/config/affinity-palette";
 
-// ─── Affinity-level visual theme ─────────────────────────────────
-
-interface LevelTheme {
-  glow: string;        // RGB for box-shadow glow
-  borderAlpha: number; // border opacity multiplier (0–1)
-  breatheIntensity: number; // glow radius multiplier
-  scale: number;       // base scale (higher affinity → slightly larger)
-  floatRange: number;  // px of vertical float animation
-  shimmer: boolean;    // whether to show shimmer highlight
-  bgAlpha: number;     // background panel darkness (higher = more opaque)
-  blur: number;        // backdrop-filter blur in px
-}
-
-const LEVEL_THEMES: Record<string, LevelTheme> = {
-  hatred:      { glow: "239, 68, 68",   borderAlpha: 0.25, breatheIntensity: 0.6, scale: 0.92, floatRange: 1,  shimmer: false, bgAlpha: 0.75, blur: 12 },
-  hostile:     { glow: "249, 115, 22",   borderAlpha: 0.3,  breatheIntensity: 0.7, scale: 0.95, floatRange: 2,  shimmer: false, bgAlpha: 0.70, blur: 14 },
-  indifferent: { glow: "163, 163, 163",  borderAlpha: 0.35, breatheIntensity: 0.8, scale: 0.97, floatRange: 4,  shimmer: false, bgAlpha: 0.65, blur: 16 },
-  neutral:     { glow: "96, 165, 250",   borderAlpha: 0.4,  breatheIntensity: 1.0, scale: 1.0,  floatRange: 5,  shimmer: false, bgAlpha: 0.60, blur: 16 },
-  friendly:    { glow: "167, 139, 250",  borderAlpha: 0.5,  breatheIntensity: 1.2, scale: 1.02, floatRange: 6,  shimmer: true,  bgAlpha: 0.55, blur: 18 },
-  close:       { glow: "192, 132, 252",  borderAlpha: 0.6,  breatheIntensity: 1.4, scale: 1.04, floatRange: 7,  shimmer: true,  bgAlpha: 0.50, blur: 20 },
-  devoted:     { glow: "244, 114, 182",  borderAlpha: 0.75, breatheIntensity: 1.7, scale: 1.06, floatRange: 8,  shimmer: true,  bgAlpha: 0.45, blur: 24 },
-};
-
-const DEFAULT_THEME: LevelTheme = LEVEL_THEMES.neutral;
+const DEFAULT_THEME: AffinityCrystalTheme = AFFINITY_CRYSTAL_THEMES[DEFAULT_LEVEL];
 
 // ─── Shared CSS: @property + static keyframes ───────────────────
 // @property enables smooth CSS variable transitions when affinity
@@ -142,7 +120,7 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
   const [entered, setEntered] = useState(false);
   const { level } = useAffinity();
 
-  const theme = LEVEL_THEMES[level] || DEFAULT_THEME;
+  const theme = AFFINITY_CRYSTAL_THEMES[level] || DEFAULT_THEME;
 
   // Parse glow RGB channels for CSS custom properties
   const [glowR, glowG, glowB] = useMemo(() => {

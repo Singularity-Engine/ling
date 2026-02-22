@@ -1,6 +1,7 @@
 import { memo, useState, useId, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useAffinity } from "@/context/affinity-context";
+import { AFFINITY_LEVELS, DEFAULT_LEVEL } from "@/config/affinity-palette";
 
 const keyframesStyle = `
 @keyframes heartbeat {
@@ -19,16 +20,6 @@ const keyframesStyle = `
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 `;
-
-const LEVEL_CONFIG: Record<string, { i18nKey: string; color: string; heartColor: string; beatSpeed: string }> = {
-  hatred: { i18nKey: "affinity.hatred", color: "#f87171", heartColor: "#4a1515", beatSpeed: "3s" },
-  hostile: { i18nKey: "affinity.hostile", color: "#f97316", heartColor: "#6b3a1a", beatSpeed: "2.5s" },
-  indifferent: { i18nKey: "affinity.indifferent", color: "#a3a3a3", heartColor: "#525252", beatSpeed: "2.2s" },
-  neutral: { i18nKey: "affinity.neutral", color: "#60a5fa", heartColor: "#60a5fa", beatSpeed: "2s" },
-  friendly: { i18nKey: "affinity.friendly", color: "#a78bfa", heartColor: "#a78bfa", beatSpeed: "1.6s" },
-  close: { i18nKey: "affinity.close", color: "#c084fc", heartColor: "#c084fc", beatSpeed: "1.2s" },
-  devoted: { i18nKey: "affinity.devoted", color: "#f472b6", heartColor: "#f472b6", beatSpeed: "0.8s" },
-};
 
 const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPercent: number; size?: number }) => {
   const gradientId = useId();
@@ -57,7 +48,7 @@ export const AffinityBadge = memo(() => {
   const [hovered, setHovered] = useState(false);
   const { t } = useTranslation();
 
-  const config = useMemo(() => LEVEL_CONFIG[level] || LEVEL_CONFIG.neutral, [level]);
+  const config = useMemo(() => AFFINITY_LEVELS[level] || AFFINITY_LEVELS[DEFAULT_LEVEL], [level]);
 
   return (
     <>

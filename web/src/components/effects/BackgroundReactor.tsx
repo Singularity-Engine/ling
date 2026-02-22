@@ -2,6 +2,7 @@ import { memo, useMemo, useRef, useState, useEffect, type CSSProperties } from '
 import { useToolState } from '../../context/tool-state-context';
 import { useAiState } from '../../context/ai-state-context';
 import { useAffinity } from '../../context/affinity-context';
+import { AFFINITY_AMBIENT_TINTS, DEFAULT_LEVEL, type AffinityAmbientTint } from '../../config/affinity-palette';
 
 // ── Module-level keyframe injection (runs once, avoids re-inject on every render) ──
 const KEYFRAMES_ID = 'bg-reactor-keyframes';
@@ -68,33 +69,13 @@ const PHASE_COLORS = {
   aiThinking: '#a78bfa',
 } as const;
 
-// Affinity-level tint applied to idle/ambient background
-interface AffinityTint {
-  color: string;           // hex color for idle ambient tint
-  idleOpacity: number;     // base idle ambient opacity (0 = invisible)
-  activeBoost: number;     // opacity multiplier when tools/AI active (1.0 = no boost)
-  breatheSpeed: number;    // seconds per breathing cycle — faster = more agitated
-  breatheAmplitude: number; // peak opacity multiplier (1.2 = barely moves, 2.2 = dramatic)
-  gradientSpread: string;  // ellipse radii — compact for tense, expansive for warm
-}
-
-const AFFINITY_TINTS: Record<string, AffinityTint> = {
-  hatred:      { color: '#dc2626', idleOpacity: 0.18, activeBoost: 0.75, breatheSpeed: 3,   breatheAmplitude: 2.2, gradientSpread: '55% 50%' },  // deep crimson — fast, aggressive pulse
-  hostile:     { color: '#ea580c', idleOpacity: 0.12, activeBoost: 0.85, breatheSpeed: 4,   breatheAmplitude: 1.8, gradientSpread: '60% 55%' },  // burnt orange — tense, tight
-  indifferent: { color: '#78716c', idleOpacity: 0.03, activeBoost: 1.0,  breatheSpeed: 8,   breatheAmplitude: 1.2, gradientSpread: '65% 55%' },  // cool gray — barely moves
-  neutral:     { color: '#818cf8', idleOpacity: 0.06, activeBoost: 1.0,  breatheSpeed: 6,   breatheAmplitude: 1.4, gradientSpread: '70% 60%' },  // soft indigo — calm baseline
-  friendly:    { color: '#60a5fa', idleOpacity: 0.12, activeBoost: 1.08, breatheSpeed: 5,   breatheAmplitude: 1.6, gradientSpread: '75% 65%' },  // sky blue — lively, open
-  close:       { color: '#d946ef', idleOpacity: 0.18, activeBoost: 1.15, breatheSpeed: 4.5, breatheAmplitude: 1.9, gradientSpread: '80% 70%' },  // vivid fuchsia — intimate, warm
-  devoted:     { color: '#fb7185', idleOpacity: 0.24, activeBoost: 1.22, breatheSpeed: 4,   breatheAmplitude: 2.0, gradientSpread: '85% 75%' },  // warm rose — deep, expansive glow
-};
-
-const DEFAULT_TINT: AffinityTint = AFFINITY_TINTS.neutral;
+const DEFAULT_TINT: AffinityAmbientTint = AFFINITY_AMBIENT_TINTS[DEFAULT_LEVEL];
 
 export const BackgroundReactor = memo(() => {
   const { currentPhase } = useToolState();
   const { isThinkingSpeaking } = useAiState();
   const { level, pointGains, expressionIntensity } = useAffinity();
-  const tint = AFFINITY_TINTS[level] || DEFAULT_TINT;
+  const tint = AFFINITY_AMBIENT_TINTS[level] || DEFAULT_TINT;
 
   // ── Level transition detection ─────────────────────────────────
   const prevLevelRef = useRef(level);

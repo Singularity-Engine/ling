@@ -3,6 +3,7 @@ import { useToolState, ToolCategory } from '../../context/tool-state-context';
 import { useAiState } from '../../context/ai-state-context';
 import { useAffinity } from '../../context/affinity-context';
 import { MOBILE_BREAKPOINT } from '../../constants/breakpoints';
+import { AFFINITY_HALO_COLORS, DEFAULT_LEVEL } from '../../config/affinity-palette';
 
 const CATEGORY_COLORS: Record<ToolCategory, string> = {
   search: '#60a5fa',
@@ -10,17 +11,6 @@ const CATEGORY_COLORS: Record<ToolCategory, string> = {
   memory: '#a78bfa',
   weather: '#facc15',
   generic: '#8b5cf6',
-};
-
-// Affinity-linked colors for AI thinking halo (matches BackgroundReactor tints)
-const AFFINITY_HALO_COLORS: Record<string, string> = {
-  hatred:      '#dc2626',
-  hostile:     '#ea580c',
-  indifferent: '#78716c',
-  neutral:     '#c4b5fd',
-  friendly:    '#60a5fa',
-  close:       '#d946ef',
-  devoted:     '#fb7185',
 };
 
 // Desktop / Mobile geometry
@@ -52,7 +42,7 @@ export const ThoughtHalo = memo(() => {
   const exitAnim = hasBeenActive.current ? 'thoughtHaloExit 0.3s ease-in forwards' : 'none';
 
   // AI thinking color now follows affinity level
-  const affinityColor = AFFINITY_HALO_COLORS[level] || AFFINITY_HALO_COLORS.neutral;
+  const affinityColor = AFFINITY_HALO_COLORS[level] || AFFINITY_HALO_COLORS[DEFAULT_LEVEL];
   const color = isAiThinking ? affinityColor : CATEGORY_COLORS[dominantCategory ?? 'generic'];
 
   // expressionIntensity speeds up rotation: 0 → normal, 1 → ~30% faster
