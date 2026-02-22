@@ -9,12 +9,10 @@ const DESKTOP_POSITIONS: Record<number, React.CSSProperties> = {
   3: { right: "5%", top: "62%" },
 };
 
-// Mobile: stack all on the left to avoid right-side toolbar overlap
+// Mobile: stack on the left to avoid right-side toolbar overlap; wider margin top for safe area
 const MOBILE_POSITIONS: Record<number, React.CSSProperties> = {
-  0: { left: "3%", top: "12%" },
-  1: { left: "3%", top: "32%" },
-  2: { left: "3%", top: "52%" },
-  3: { left: "3%", top: "72%" },
+  0: { left: "3%", top: "14%" },
+  1: { left: "3%", top: "36%" },
 };
 
 const EXIT_DURATION = 500; // ms — matches crystalExit keyframe

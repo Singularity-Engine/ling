@@ -284,13 +284,13 @@ function MainContent(): JSX.Element {
       <div
         style={{
           position: "absolute",
-          top: isMobile ? "8px" : "16px",
-          right: isMobile ? "8px" : "12px",
+          top: isMobile ? "max(8px, env(safe-area-inset-top, 0px))" : "16px",
+          right: isMobile ? "max(8px, env(safe-area-inset-right, 0px))" : "12px",
           zIndex: 20,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: isMobile ? "10px" : "14px",
+          gap: isMobile ? "8px" : "12px",
         }}
       >
         {/* ── Status indicators group ── */}

@@ -2,6 +2,7 @@ import { memo, useState, useId, useMemo, useEffect, useRef, useCallback } from "
 import { useTranslation } from "react-i18next";
 import { useAffinity } from "@/context/affinity-context";
 import { AFFINITY_LEVELS, DEFAULT_LEVEL } from "@/config/affinity-palette";
+import { LEVELS } from "@/hooks/use-affinity-engine";
 
 // ── Module-level keyframe injection (consistent with BackgroundReactor) ──
 const BADGE_STYLE_ID = "affinity-badge-keyframes";
@@ -58,6 +59,16 @@ export const AffinityBadge = memo(() => {
   const { t } = useTranslation();
 
   const config = useMemo(() => AFFINITY_LEVELS[level] || AFFINITY_LEVELS[DEFAULT_LEVEL], [level]);
+
+  // Current & next level info for expanded panel
+  const levelInfo = useMemo(() => {
+    const idx = LEVELS.findIndex(l => l.level === level);
+    const current = idx >= 0 ? LEVELS[idx] : LEVELS[3]; // fallback neutral
+    const next = idx < LEVELS.length - 1 ? LEVELS[idx + 1] : null;
+    const rangeSize = current.max - current.min;
+    const progressInLevel = rangeSize > 0 ? ((affinity - current.min) / rangeSize) * 100 : 100;
+    return { current, next, progressInLevel: Math.min(100, Math.max(0, progressInLevel)) };
+  }, [level, affinity]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(ensureBadgeStyles, []);
@@ -144,42 +155,72 @@ export const AffinityBadge = memo(() => {
             }}
           >
             {/* Header: heart + level info */}
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
               <HeartIcon color={config.heartColor} fillPercent={affinity} size={32} />
               <div style={{ flex: 1 }}>
                 <span style={{ fontSize: "15px", color: config.color, fontWeight: 700, display: "block", letterSpacing: "0.3px", transition: "color 0.5s ease" }}>
                   {t(config.i18nKey)}
                 </span>
-                <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.65)", display: "block", marginTop: "2px" }}>
+                <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)", display: "block", marginTop: "2px" }}>
                   {t("affinity.label")}
                 </span>
               </div>
-              <span style={{ fontSize: "20px", color: config.color, fontWeight: 700, fontFamily: "monospace", letterSpacing: "-0.5px", transition: "color 0.5s ease" }}>
+              <span style={{ fontSize: "22px", color: config.color, fontWeight: 700, fontFamily: "monospace", letterSpacing: "-0.5px", transition: "color 0.5s ease" }}>
                 {affinity}
               </span>
             </div>
 
-            {/* Progress bar */}
-            <div style={{ width: "100%", height: "6px", background: "rgba(255,255,255,0.12)", borderRadius: "3px", overflow: "hidden" }}>
-              <div
-                style={{
-                  height: "100%",
-                  width: "100%",
-                  background: `linear-gradient(90deg, ${config.color}66, ${config.color})`,
-                  borderRadius: "3px",
-                  transformOrigin: "left",
-                  transform: `scaleX(${affinity / 100})`,
-                  transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease",
-                  boxShadow: `0 0 8px ${config.color}33`,
-                }}
-              />
+            {/* Level progress bar — shows progress within current level */}
+            <div style={{ marginBottom: "14px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "6px" }}>
+                <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>
+                  {t("affinity.currentLevel")}
+                </span>
+                <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", fontFamily: "monospace" }}>
+                  {levelInfo.current.min}–{levelInfo.current.max === 101 ? 100 : levelInfo.current.max}
+                </span>
+              </div>
+              <div style={{ width: "100%", height: "6px", background: "rgba(255,255,255,0.1)", borderRadius: "3px", overflow: "hidden" }}>
+                <div
+                  style={{
+                    height: "100%",
+                    width: "100%",
+                    background: `linear-gradient(90deg, ${config.color}66, ${config.color})`,
+                    borderRadius: "3px",
+                    transformOrigin: "left",
+                    transform: `scaleX(${levelInfo.progressInLevel / 100})`,
+                    transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease",
+                    boxShadow: `0 0 8px ${config.color}33`,
+                  }}
+                />
+              </div>
             </div>
 
-            {/* Score range label */}
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "6px" }}>
-              <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", fontFamily: "monospace" }}>0</span>
-              <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", fontFamily: "monospace" }}>100</span>
-            </div>
+            {/* Next level hint */}
+            {levelInfo.next && (() => {
+              const nextConfig = AFFINITY_LEVELS[levelInfo.next.level] || AFFINITY_LEVELS[DEFAULT_LEVEL];
+              return (
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "8px 10px",
+                  background: "rgba(255,255,255,0.04)",
+                  borderRadius: "10px",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                }}>
+                  <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>
+                    {t("affinity.nextLevel")}
+                  </span>
+                  <span style={{ fontSize: "11px", color: nextConfig.color, fontWeight: 600 }}>
+                    {t(nextConfig.i18nKey)}
+                  </span>
+                  <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)", fontFamily: "monospace", marginLeft: "auto" }}>
+                    {levelInfo.next.min}+
+                  </span>
+                </div>
+              );
+            })()}
 
           </div>
         )}

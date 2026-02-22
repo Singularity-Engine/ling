@@ -223,7 +223,9 @@
     "milestoneNeutral": "灵对你的态度变得平和了",
     "milestoneFriendly": "灵觉得你是个不错的人！",
     "milestoneClose": "灵觉得和你越来越亲近了...",
-    "milestoneDevoted": "灵对你全心全意 💕"
+    "milestoneDevoted": "灵对你全心全意 💕",
+    "currentLevel": "当前等级",
+    "nextLevel": "下一级:"
   },
   "capability": {
     "search": "搜索",

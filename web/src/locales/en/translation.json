@@ -223,7 +223,9 @@
     "milestoneNeutral": "Ling's attitude has become calm",
     "milestoneFriendly": "Ling thinks you're a nice person!",
     "milestoneClose": "Ling feels closer to you...",
-    "milestoneDevoted": "Ling is devoted to you 💕"
+    "milestoneDevoted": "Ling is devoted to you 💕",
+    "currentLevel": "Current level",
+    "nextLevel": "Next:"
   },
   "capability": {
     "search": "Search",
