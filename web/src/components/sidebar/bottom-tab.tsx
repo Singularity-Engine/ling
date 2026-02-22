@@ -1,13 +1,14 @@
 /* eslint-disable */
 import { Tabs } from '@chakra-ui/react'
 import { FiCamera, FiMonitor, FiGlobe } from 'react-icons/fi'
+import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { sidebarStyles } from './sidebar-styles'
 import CameraPanel from './camera-panel'
 import ScreenPanel from './screen-panel'
 import BrowserPanel from './browser-panel'
 
-function BottomTab(): JSX.Element {
+const BottomTab = memo(function BottomTab(): JSX.Element {
   const { t } = useTranslation();
   
   return (
@@ -44,6 +45,6 @@ function BottomTab(): JSX.Element {
       </Tabs.Content>
     </Tabs.Root>
   );
-}
+});
 
 export default BottomTab

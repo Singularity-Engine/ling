@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/iframe-has-title */
 import { Box, Text } from "@chakra-ui/react";
 import { FiGlobe } from "react-icons/fi";
-import { useState } from "react";
+import { memo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Tooltip } from "@/components/ui/tooltip";
 import { sidebarStyles } from "./sidebar-styles";
@@ -26,7 +26,7 @@ function BrowserPlaceholder() {
   );
 }
 
-function BrowserPanel(): JSX.Element {
+const BrowserPanel = memo(function BrowserPanel(): JSX.Element {
   const { t } = useTranslation();
   const { browserViewData } = useBrowser();
   const [isHovering, setIsHovering] = useState(false);
@@ -71,6 +71,6 @@ function BrowserPanel(): JSX.Element {
       </Tooltip>
     </Box>
   );
-}
+});
 
 export default BrowserPanel;

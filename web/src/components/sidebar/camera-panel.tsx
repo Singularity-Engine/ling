@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { memo, useEffect } from 'react';
 import { Box, Text } from '@chakra-ui/react';
 import { FiCamera } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
@@ -57,7 +57,7 @@ function VideoStream({
 }
 
 // Main component
-function CameraPanel(): JSX.Element {
+const CameraPanel = memo(function CameraPanel(): JSX.Element {
   const { t } = useTranslation();
   const {
     videoRef,
@@ -116,6 +116,6 @@ function CameraPanel(): JSX.Element {
       </Tooltip>
     </Box>
   );
-}
+});
 
 export default CameraPanel;
