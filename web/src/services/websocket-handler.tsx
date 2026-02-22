@@ -1154,42 +1154,44 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const reconnect = useCallback(() => {
+    gatewayConnector.disconnect();
+    gatewayAdapter.reset();
+    setAiState('idle');
+    gatewayConnector.connect({
+      url: gwUrl,
+      token: GATEWAY_TOKEN,
+      clientId: 'webchat-ui',
+      displayName: BRAND_AVATAR_NAME,
+    }).then(() => {
+      // Re-resolve session after manual reconnect
+      gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId()).catch((err) => {
+        console.error('[WebSocketHandler] Manual reconnect resolveSession failed:', err);
+      });
+      toaster.create({
+        title: i18next.t('notification.connectionRestored'),
+        type: 'success',
+        duration: 3000,
+      });
+    }).catch((err) => {
+      console.error('[WebSocketHandler] Manual reconnect failed:', err);
+      toaster.create({
+        title: i18next.t('notification.connectionFailed', { error: err.message }),
+        type: 'error',
+        duration: 5000,
+      });
+    });
+  }, [gwUrl, setAiState]);
+
   const webSocketContextValue = useMemo(() => ({
     sendMessage,
     wsState,
-    reconnect: () => {
-      gatewayConnector.disconnect();
-      gatewayAdapter.reset();
-      setAiState('idle');
-      gatewayConnector.connect({
-        url: gwUrl,
-        token: GATEWAY_TOKEN,
-        clientId: 'webchat-ui',
-        displayName: BRAND_AVATAR_NAME,
-      }).then(() => {
-        // Re-resolve session after manual reconnect
-        gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId()).catch((err) => {
-          console.error('[WebSocketHandler] Manual reconnect resolveSession failed:', err);
-        });
-        toaster.create({
-          title: i18next.t('notification.connectionRestored'),
-          type: 'success',
-          duration: 3000,
-        });
-      }).catch((err) => {
-        console.error('[WebSocketHandler] Manual reconnect failed:', err);
-        toaster.create({
-          title: i18next.t('notification.connectionFailed', { error: err.message }),
-          type: 'error',
-          duration: 5000,
-        });
-      });
-    },
+    reconnect,
     wsUrl: gwUrl,
     setWsUrl: setGwUrl,
     baseUrl,
     setBaseUrl,
-  }), [sendMessage, wsState, gwUrl, baseUrl]);
+  }), [sendMessage, wsState, reconnect, gwUrl, baseUrl]);
 
   return (
     <WebSocketContext.Provider value={webSocketContextValue}>
