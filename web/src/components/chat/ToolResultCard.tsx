@@ -114,7 +114,7 @@ const S_TC_COLLAPSED_TEXT: CSSProperties = {
   overflowWrap: "break-word", wordBreak: "break-word",
 };
 const S_TC_TEXT: CSSProperties = {
-  display: "block", fontSize: "13px", color: "rgba(255,255,255,0.75)",
+  display: "block", fontSize: "13px", color: "rgba(255,255,255,0.82)",
   whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word", lineHeight: 1.6,
 };
 const S_TC_TEXT_ERROR: CSSProperties = { ...S_TC_TEXT, color: "rgba(248, 113, 113, 0.85)" };
@@ -139,7 +139,7 @@ const CARD_COLORS: Record<string, { bg: string; border: string; accent: string }
 function buildCategoryStyles(colors: { bg: string; border: string; accent: string }) {
   const card: CSSProperties = {
     background: colors.bg, border: `1px solid ${colors.border}`,
-    borderRadius: "12px", overflow: "hidden", transition: "all 0.3s ease",
+    borderRadius: "14px", overflow: "hidden", transition: "all 0.3s ease",
   };
   const headerBase = {
     display: "flex" as const, alignItems: "center" as const, gap: "8px",

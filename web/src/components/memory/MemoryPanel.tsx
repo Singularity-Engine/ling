@@ -107,6 +107,8 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
           borderLeft: '1px solid rgba(139, 92, 246, 0.2)',
+          borderTopLeftRadius: '16px',
+          borderBottomLeftRadius: '16px',
           boxShadow: '0 12px 40px rgba(0,0,0,0.5), 0 0 24px rgba(139,92,246,0.1)',
           display: 'flex',
           flexDirection: 'column',
@@ -246,7 +248,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
                 padding: '14px 16px',
                 background: 'rgba(255,255,255,0.05)',
                 border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: '14px',
+                borderRadius: '12px',
                 marginBottom: '12px',
               }}
             >
