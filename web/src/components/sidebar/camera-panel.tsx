@@ -71,10 +71,14 @@ function CameraPanel(): JSX.Element {
   } = useCameraPanel();
 
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.srcObject = stream;
+    const el = videoRef.current;
+    if (el) {
+      el.srcObject = stream;
     }
-  }, [stream]);
+    return () => {
+      if (el) el.srcObject = null;
+    };
+  }, [stream, videoRef]);
 
   return (
     <Box {...sidebarStyles.cameraPanel.container}>

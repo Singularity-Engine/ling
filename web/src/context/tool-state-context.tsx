@@ -183,6 +183,13 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
     removalTimers.current.clear();
   }, []);
 
+  // Cleanup all timers on unmount to prevent state updates after unmount
+  useEffect(() => () => {
+    if (presentingTimer.current) clearTimeout(presentingTimer.current);
+    removalTimers.current.forEach(t => clearTimeout(t));
+    removalTimers.current.clear();
+  }, []);
+
   const dominantCategory = useMemo(() => computeDominant(activeTools), [computeDominant, activeTools]);
   const activeToolName = useMemo(() => activeTools.length > 0 ? activeTools[0].name : null, [activeTools]);
 

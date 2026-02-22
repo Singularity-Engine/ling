@@ -80,10 +80,11 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
     convergeRafId = requestAnimationFrame(updateProgress);
 
     // Phase 2: explode (2.5-3.0s)
+    let flashTimer: ReturnType<typeof setTimeout>;
     const explodeTimer = setTimeout(() => {
       setParticlePhase("explode");
       setFlashOpacity(0.8);
-      setTimeout(() => setFlashOpacity(0), 400);
+      flashTimer = setTimeout(() => setFlashOpacity(0), 400);
     }, 2500);
 
     // Phase 3: text (3.0s+)
@@ -97,6 +98,7 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
       clearTimeout(convergeTimer);
       cancelAnimationFrame(convergeRafId);
       clearTimeout(explodeTimer);
+      clearTimeout(flashTimer);
       clearTimeout(textTimer);
     };
   }, []);
