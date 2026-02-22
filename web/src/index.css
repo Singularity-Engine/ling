@@ -461,7 +461,7 @@ canvas {
 .md-content code {
   background: var(--ling-purple-15);
   color: var(--ling-code-text);
-  padding: 1px 5px;
+  padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.9em;
   font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', monospace;
@@ -469,18 +469,26 @@ canvas {
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
-/* Code block wrapper — full-bleed to bubble edges for more code space */
+/* Code block wrapper — base styles for all contexts (nested in blockquotes, lists, etc.) */
 .md-content .code-block-wrap {
   position: relative;
-  margin: 0.5em -18px;
-  border-top: 1px solid var(--ling-purple-25);
-  border-bottom: 1px solid var(--ling-purple-25);
-  border-left: none;
-  border-right: none;
-  border-radius: 0;
+  margin: 0.5em 0;
+  border: 1px solid var(--ling-purple-25);
+  border-radius: 6px;
   overflow: hidden;
   background: var(--ling-code-bg);
 }
+/* Full-bleed to bubble edges — top-level code blocks only */
+.md-content > .code-block-wrap {
+  margin-left: -18px;
+  margin-right: -18px;
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+}
+/* Tighter vertical spacing when code block is at message boundary */
+.md-content > .code-block-wrap:first-child { margin-top: -4px; }
+.md-content > .code-block-wrap:last-child { margin-bottom: -4px; }
 .md-content .code-block-header {
   display: flex;
   align-items: center;
@@ -694,9 +702,24 @@ canvas {
     font-size: 12px !important;
   }
 
+  /* 气泡水平间距收窄，给内容更多空间 */
+  .ling-bubble {
+    padding: 10px 12px !important;
+  }
+  .md-content > .code-block-wrap {
+    margin-left: -12px;
+    margin-right: -12px;
+  }
+  .md-content .code-block-header {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
   /* 代码块限高，避免窄屏上过高的代码区域 */
   .md-content .code-block-wrap pre {
     max-height: 300px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
 }
 

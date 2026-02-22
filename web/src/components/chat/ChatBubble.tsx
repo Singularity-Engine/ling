@@ -435,6 +435,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
         <div style={S_REL}>
           <div
             ref={bubbleRef}
+            className={isUser ? "ling-bubble ling-bubble-user" : "ling-bubble ling-bubble-ai"}
             onDoubleClick={handleDoubleClick}
             style={bubbleStyle}
           >

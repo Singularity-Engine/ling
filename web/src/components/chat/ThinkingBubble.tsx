@@ -125,7 +125,7 @@ export const ThinkingBubble = memo(({ content, isThinking, isStreaming }: Thinki
       <div className="ling-avatar" style={S_AVATAR_AI}>{aiInitial}</div>
       <div style={S_INNER} className="chat-msg-inner">
         <span style={S_NAME}>{t("chat.characterName")}</span>
-        <div style={S_BUBBLE}>
+        <div className="ling-bubble ling-bubble-ai" style={S_BUBBLE}>
           {(isThinking || showDotsExit) && (
             <TypingIndicator fadeOut={showDotsExit} />
           )}
