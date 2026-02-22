@@ -153,6 +153,14 @@ export const AudioVisualizer = memo(() => {
 
       let hasEnergy = false;
 
+      // One shared gradient per frame instead of 32 per-bar allocations.
+      // Per-bar opacity is controlled via globalAlpha (see below).
+      const sharedGradient = ctx2d.createLinearGradient(0, h, 0, 0);
+      sharedGradient.addColorStop(0, 'rgba(139, 92, 246, 0.75)');
+      sharedGradient.addColorStop(0.5, 'rgba(99, 102, 241, 0.6)');
+      sharedGradient.addColorStop(1, 'rgba(96, 165, 250, 0.45)');
+      ctx2d.fillStyle = sharedGradient;
+
       for (let i = 0; i < BAR_COUNT; i++) {
         // Map bar index to frequency bin range (weighted toward lower frequencies)
         const ratio = i / BAR_COUNT;
@@ -185,13 +193,7 @@ export const AudioVisualizer = memo(() => {
         const x = startX + i * barWidth;
         const y = h - barHeight;
 
-        // Gradient from purple (bottom) to blue (top)
-        const gradient = ctx2d.createLinearGradient(x, h, x, y);
-        gradient.addColorStop(0, `rgba(139, 92, 246, ${0.6 * val + 0.15})`);
-        gradient.addColorStop(0.5, `rgba(99, 102, 241, ${0.5 * val + 0.1})`);
-        gradient.addColorStop(1, `rgba(96, 165, 250, ${0.4 * val + 0.05})`);
-
-        ctx2d.fillStyle = gradient;
+        ctx2d.globalAlpha = val;
         ctx2d.beginPath();
         const radius = Math.min(effectiveBarWidth / 2, 3);
         // Rounded top rectangle
@@ -204,6 +206,7 @@ export const AudioVisualizer = memo(() => {
         ctx2d.quadraticCurveTo(x, y, x + radius, y);
         ctx2d.fill();
       }
+      ctx2d.globalAlpha = 1;
 
       // If no analyser and no energy left, deactivate
       if (!analyser && !hasEnergy) {
