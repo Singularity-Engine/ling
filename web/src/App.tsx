@@ -24,7 +24,7 @@ import { ThemeProvider } from "./context/theme-context";
 import { ChatArea } from "./components/chat/ChatArea";
 import { InputBar } from "./components/chat/InputBar";
 import { AffinityBadge } from "./components/status/AffinityBadge";
-import { AffinityBar } from "./components/status/AffinityBar";
+// AffinityBar removed — AffinityBadge in the sidebar already shows level + progress
 import { ConnectionStatus } from "./components/status/ConnectionStatus";
 import { AffinityProvider } from "./context/affinity-context";
 import { ToolStateProvider } from "./context/tool-state-context";
@@ -298,10 +298,10 @@ function MainContent(): JSX.Element {
         <ConnectionStatus />
         {/* Divider: status indicators above, action buttons below */}
         <div style={{
-          width: "24px",
+          width: "20px",
           height: "1px",
-          background: "rgba(255, 255, 255, 0.08)",
-          margin: "2px 0",
+          background: "rgba(255, 255, 255, 0.10)",
+          margin: "4px 0",
           alignSelf: "center",
         }} />
         <button
@@ -461,9 +461,7 @@ function MainContent(): JSX.Element {
           </div>
         </div>
 
-        <div style={{ flexShrink: 0, pointerEvents: "auto" }}>
-          <AffinityBar />
-        </div>
+        {/* AffinityBar removed — redundant with AffinityBadge in sidebar */}
       </div>
 
       {/* ===== Layer 99: 快捷键帮助浮层 ===== */}
