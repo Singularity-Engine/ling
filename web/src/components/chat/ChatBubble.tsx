@@ -148,7 +148,7 @@ const S_AVATAR: CSSProperties = {
   fontSize: "13px", fontWeight: 600, flexShrink: 0,
   letterSpacing: "0.3px", userSelect: "none", marginTop: "1px",
 };
-const S_AVATAR_AI: CSSProperties = { ...S_AVATAR, background: "var(--ling-avatar-ai-bg)", color: "var(--ling-avatar-ai-color)" };
+const S_AVATAR_AI: CSSProperties = { ...S_AVATAR, background: "var(--ling-avatar-ai-bg)", color: "var(--ling-avatar-ai-color)", border: "1.5px solid var(--ling-avatar-ai-color)" };
 const S_AVATAR_USER: CSSProperties = { ...S_AVATAR, background: "var(--ling-avatar-user-bg)", color: "var(--ling-avatar-user-color)" };
 
 // Static person-silhouette icon for user avatar — shared across all instances.
