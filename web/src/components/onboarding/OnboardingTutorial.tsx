@@ -170,7 +170,7 @@ export function OnboardingTutorial({ onComplete }: OnboardingTutorialProps) {
                 height: '8px',
                 borderRadius: '4px',
                 background: i === step ? current.color : 'rgba(255,255,255,0.15)',
-                transition: 'all 0.3s ease',
+                transition: 'width 0.3s ease, background 0.3s ease',
               }}
             />
           ))}
@@ -194,7 +194,7 @@ export function OnboardingTutorial({ onComplete }: OnboardingTutorialProps) {
               color: 'rgba(255,255,255,0.4)',
               fontSize: '14px',
               cursor: 'pointer',
-              transition: 'all 0.2s',
+              transition: 'background 0.2s, border-color 0.2s',
             }}
           >
             Skip
@@ -210,7 +210,7 @@ export function OnboardingTutorial({ onComplete }: OnboardingTutorialProps) {
               fontSize: '14px',
               fontWeight: 600,
               cursor: 'pointer',
-              transition: 'all 0.2s',
+              transition: 'background 0.2s, opacity 0.2s',
             }}
           >
             {step < STEPS.length - 1 ? 'Next' : "Let's Go!"}

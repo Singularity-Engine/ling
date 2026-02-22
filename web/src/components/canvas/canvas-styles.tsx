@@ -63,7 +63,7 @@ export const canvasStyles = {
       fontSize: '14px',
       fontWeight: 500,
       color: 'white',
-      transition: 'all 0.2s',
+      transition: 'background 0.2s, opacity 0.2s',
       cursor: 'pointer',
       userSelect: 'none',
     } as CSSProperties,

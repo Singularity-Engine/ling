@@ -47,7 +47,7 @@ export const settingStyles = {
         px: 3,
         py: 1.5,
         borderRadius: 'md',
-        transition: 'all 0.2s ease',
+        transition: 'color 0.2s ease, background 0.2s ease',
         _selected: {
           color: 'white',
           bg: 'whiteAlpha.100',
@@ -132,7 +132,7 @@ export const settingStyles = {
         bg: 'whiteAlpha.50',
         borderColor: 'whiteAlpha.100',
         borderRadius: 'lg',
-        transition: 'all 0.2s ease',
+        transition: 'background 0.2s ease, border-color 0.2s ease',
         _hover: {
           bg: 'whiteAlpha.100',
           borderColor: 'whiteAlpha.200',
@@ -143,7 +143,7 @@ export const settingStyles = {
       bg: 'whiteAlpha.50',
       borderColor: 'whiteAlpha.100',
       borderRadius: 'lg',
-      transition: 'all 0.2s ease',
+      transition: 'background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
       _hover: {
         bg: 'whiteAlpha.100',
         borderColor: 'whiteAlpha.200',
@@ -195,7 +195,7 @@ export const settingStyles = {
         bg: 'whiteAlpha.50',
         borderColor: 'whiteAlpha.100',
         borderRadius: 'lg',
-        transition: 'all 0.2s ease',
+        transition: 'background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
         _hover: {
           bg: 'whiteAlpha.100',
           borderColor: 'whiteAlpha.200',
@@ -216,7 +216,7 @@ export const settingStyles = {
       bg: 'whiteAlpha.50',
       borderColor: 'whiteAlpha.100',
       borderRadius: 'lg',
-      transition: 'all 0.2s ease',
+      transition: 'background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
       _hover: {
         bg: 'whiteAlpha.100',
         borderColor: 'whiteAlpha.200',
@@ -235,7 +235,7 @@ export const settingStyles = {
       borderRadius: 'xl',
       p: 4,
       backdropFilter: 'blur(8px)',
-      transition: 'all 0.2s ease',
+      transition: 'border-color 0.2s ease',
       _hover: {
         borderColor: 'whiteAlpha.150',
       },

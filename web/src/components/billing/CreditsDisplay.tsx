@@ -21,7 +21,7 @@ const S_BUTTON: CSSProperties = {
   WebkitBackdropFilter: 'blur(12px)',
   border: '1px solid rgba(255, 255, 255, 0.08)',
   cursor: 'pointer',
-  transition: 'all 0.3s ease',
+  transition: 'background 0.3s ease, border-color 0.3s ease',
   font: 'inherit',
   color: 'inherit',
 };

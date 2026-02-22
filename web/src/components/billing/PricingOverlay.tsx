@@ -327,7 +327,7 @@ const PricingOverlay: React.FC = () => {
                       fontSize: '14px',
                       fontWeight: 600,
                       cursor: isCurrent ? 'default' : loading ? 'wait' : 'pointer',
-                      transition: 'all 0.2s',
+                      transition: 'background 0.2s, opacity 0.2s',
                     }}
                   >
                     {isCurrent
@@ -372,7 +372,7 @@ const PricingOverlay: React.FC = () => {
                   color: '#fff',
                   cursor: currentPlan === 'free' ? 'not-allowed' : loading ? 'wait' : 'pointer',
                   textAlign: 'center',
-                  transition: 'all 0.2s',
+                  transition: 'background 0.2s, border-color 0.2s',
                   opacity: currentPlan === 'free' ? 0.4 : 1,
                 }}
               >

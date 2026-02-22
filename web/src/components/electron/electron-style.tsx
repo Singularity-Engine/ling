@@ -36,7 +36,7 @@ export const inputSubtitleStyles = {
     color: 'white',
     fontSize: 'sm',
     lineHeight: '1.5',
-    transition: 'all 0.3s',
+    transition: 'color 0.3s, opacity 0.3s',
   },
 
   statusBox: {
@@ -49,7 +49,7 @@ export const inputSubtitleStyles = {
   statusText: {
     fontSize: 'xs',
     color: 'whiteAlpha.800',
-    transition: 'all 0.3s',
+    transition: 'color 0.3s, opacity 0.3s',
   },
 
   iconButton: {

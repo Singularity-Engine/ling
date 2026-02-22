@@ -118,7 +118,7 @@ const InsufficientCreditsModal: React.FC = () => {
                 fontSize: '14px',
                 fontWeight: 600,
                 cursor: 'pointer',
-                transition: 'all 0.2s',
+                transition: 'background 0.2s, opacity 0.2s',
                 textDecoration: 'none',
               }}
             >
@@ -139,7 +139,7 @@ const InsufficientCreditsModal: React.FC = () => {
                 fontSize: '14px',
                 fontWeight: 600,
                 cursor: 'pointer',
-                transition: 'all 0.2s',
+                transition: 'background 0.2s, opacity 0.2s',
               }}
             >
               {t('billing.viewPlans')}
@@ -156,7 +156,7 @@ const InsufficientCreditsModal: React.FC = () => {
               fontSize: '14px',
               fontWeight: 600,
               cursor: 'pointer',
-              transition: 'all 0.2s',
+              transition: 'background 0.2s, border-color 0.2s',
             }}
           >
             {t('billing.maybeLater')}
