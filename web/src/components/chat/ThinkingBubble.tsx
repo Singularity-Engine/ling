@@ -26,7 +26,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
 
 const S_OUTER: CSSProperties = {
   display: "flex", justifyContent: "flex-start", alignItems: "flex-start", gap: "8px",
-  marginBottom: "14px", padding: "0 16px", animation: "thinkingBubbleIn 0.3s ease-out",
+  marginBottom: "8px", padding: "0 16px", animation: "thinkingBubbleIn 0.3s ease-out",
 };
 const S_AVATAR_AI: CSSProperties = {
   width: "28px", height: "28px", borderRadius: "50%",
@@ -36,13 +36,13 @@ const S_AVATAR_AI: CSSProperties = {
   background: "var(--ling-avatar-ai-bg)", color: "var(--ling-avatar-ai-color)",
   border: "1.5px solid var(--ling-avatar-ai-color)",
 };
-const S_INNER: CSSProperties = { maxWidth: "min(78%, 560px)", minWidth: 0 };
+const S_INNER: CSSProperties = { maxWidth: "min(82%, 620px)", minWidth: 0 };
 const S_NAME: CSSProperties = {
   display: "block", fontSize: "11px", color: "var(--ling-chat-label)",
   marginBottom: "4px", marginLeft: "4px", fontWeight: 500, letterSpacing: "0.5px",
 };
 const S_BUBBLE: CSSProperties = {
-  padding: "12px 18px", borderRadius: "18px 18px 18px 2px",
+  padding: "12px 18px", borderRadius: "18px 18px 18px 4px",
   background: "var(--ling-bubble-ai-bg)", border: "1px solid var(--ling-bubble-ai-border)",
   borderLeft: "3px solid var(--ling-bubble-ai-accent)",
   backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",

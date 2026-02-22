@@ -136,11 +136,12 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
 
 // ─── Static style constants (avoid per-render allocation across 50+ messages) ───
 
-const S_OUTER_USER: CSSProperties = { display: "flex", justifyContent: "flex-end", alignItems: "flex-start", gap: "8px", marginBottom: "14px", padding: "0 16px" };
-const S_OUTER_AI: CSSProperties = { display: "flex", justifyContent: "flex-start", alignItems: "flex-start", gap: "8px", marginBottom: "14px", padding: "0 16px" };
-// Extra top gap when speaker changes — creates visual "turn separation"
-const S_OUTER_USER_GAP: CSSProperties = { ...S_OUTER_USER, marginTop: "8px" };
-const S_OUTER_AI_GAP: CSSProperties = { ...S_OUTER_AI, marginTop: "8px" };
+// Tighter base gap for same-sender message grouping
+const S_OUTER_USER: CSSProperties = { display: "flex", justifyContent: "flex-end", alignItems: "flex-start", gap: "8px", marginBottom: "8px", padding: "0 16px" };
+const S_OUTER_AI: CSSProperties = { display: "flex", justifyContent: "flex-start", alignItems: "flex-start", gap: "8px", marginBottom: "8px", padding: "0 16px" };
+// Generous turn separation when speaker changes
+const S_OUTER_USER_GAP: CSSProperties = { ...S_OUTER_USER, marginTop: "16px" };
+const S_OUTER_AI_GAP: CSSProperties = { ...S_OUTER_AI, marginTop: "16px" };
 
 const S_AVATAR: CSSProperties = {
   width: "28px", height: "28px", borderRadius: "50%",
@@ -159,7 +160,7 @@ const USER_ICON = (
 );
 
 const S_BUBBLE_USER: CSSProperties = {
-  padding: "12px 18px", borderRadius: "18px 18px 2px 18px",
+  padding: "12px 18px", borderRadius: "18px 18px 4px 18px",
   background: "var(--ling-bubble-user-bg)",
   border: "1px solid var(--ling-bubble-user-border)",
   backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
@@ -167,7 +168,7 @@ const S_BUBBLE_USER: CSSProperties = {
   boxShadow: "0 2px 12px var(--ling-bubble-user-shadow)",
 };
 const S_BUBBLE_AI: CSSProperties = {
-  padding: "12px 18px", borderRadius: "18px 18px 18px 2px",
+  padding: "12px 18px", borderRadius: "18px 18px 18px 4px",
   background: "var(--ling-bubble-ai-bg)",
   border: "1px solid var(--ling-bubble-ai-border)",
   borderLeft: "3px solid var(--ling-bubble-ai-accent)",
@@ -214,24 +215,25 @@ const S_COPY_USER_DONE: CSSProperties = { ...S_COPY_USER, color: "var(--ling-suc
 const S_COLLAPSE_MASK: CSSProperties = {
   position: "absolute", bottom: 0, left: 0, right: 0, height: "64px",
   background: "var(--ling-collapse-mask-ai)",
-  pointerEvents: "none", borderRadius: "0 0 18px 2px",
+  pointerEvents: "none", borderRadius: "0 0 18px 4px",
 };
 const S_COLLAPSE_MASK_USER: CSSProperties = {
   ...S_COLLAPSE_MASK,
   background: "var(--ling-collapse-mask-user)",
-  borderRadius: "0 0 2px 18px",
+  borderRadius: "0 0 4px 18px",
 };
 const S_TOGGLE_BTN: CSSProperties = {
   display: "flex", alignItems: "center", justifyContent: "center", gap: "4px",
   width: "100%", minHeight: "44px", padding: "10px 0 4px", border: "none", background: "transparent",
   color: "var(--ling-purple-85)", fontSize: "12px", fontWeight: 500,
   cursor: "pointer", letterSpacing: "0.3px", transition: "all 0.2s ease",
-  borderRadius: "0 0 14px 14px",
+  borderRadius: "0 0 16px 16px",
 };
 const S_TOGGLE_ARROW: CSSProperties = { fontSize: "10px" };
 
 const S_TOOL_WRAP: CSSProperties = { padding: "0 16px", marginBottom: "12px", maxWidth: "min(90%, 620px)" };
-const S_INNER: CSSProperties = { maxWidth: "min(78%, 560px)", minWidth: 0 };
+const S_INNER_USER: CSSProperties = { maxWidth: "min(78%, 560px)", minWidth: 0 };
+const S_INNER_AI: CSSProperties = { maxWidth: "min(82%, 620px)", minWidth: 0 };
 const S_REL: CSSProperties = { position: "relative" };
 const S_CURSOR: CSSProperties = {
   display: "inline-block", width: "2px", height: "14px", background: "var(--ling-purple)",
@@ -429,7 +431,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
   return (
     <div className="ling-msg-row" style={outerStyle}>
       {!isUser && <div className="ling-avatar" style={S_AVATAR_AI}>{aiInitial}</div>}
-      <div style={S_INNER} className="chat-bubble-wrap chat-msg-inner">
+      <div style={isUser ? S_INNER_USER : S_INNER_AI} className="chat-bubble-wrap chat-msg-inner">
         {isUser ? (
           <span style={S_NAME_USER}>
             {t("chat.you")}

@@ -171,7 +171,7 @@ const S_CONTAINER: CSSProperties = {
   height: "100%",
   overflowY: "auto",
   overflowX: "hidden",
-  padding: "12px 0",
+  padding: "16px 0",
   position: "relative",
 };
 
