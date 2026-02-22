@@ -5,10 +5,11 @@
  * 从 ui-context 的 pricingOpen 控制显示/隐藏。
  */
 
-import { useState, useEffect, useCallback, memo } from 'react';
+import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { apiClient } from '@/services/api-client';
 import { useUI } from '@/context/ui-context';
 import { useAuth } from '@/context/auth-context';
+import { toaster } from '@/components/ui/toaster';
 import { createLogger } from '@/utils/logger';
 
 const log = createLogger('Pricing');
@@ -205,6 +206,45 @@ const CREDIT_PACKS = [
   { credits: 2000, price: '$69.99' },
 ];
 
+/* ── Pre-computed per-plan styles (PLANS is static, computed once at module load) ── */
+
+const planCardStyles = PLANS.map((plan) => ({
+  card: {
+    background: 'rgba(255,255,255,0.04)',
+    border: plan.popular
+      ? `2px solid ${plan.color}`
+      : '1px solid rgba(255,255,255,0.1)',
+    borderRadius: '16px',
+    padding: '24px',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    position: 'relative' as const,
+  } as React.CSSProperties,
+  badge: { ...popularBadgeBase, background: plan.color } as React.CSSProperties,
+  name: { color: plan.color, fontSize: '18px', fontWeight: 700, margin: 0 } as React.CSSProperties,
+  bullet: { color: plan.color, fontSize: '10px', marginTop: '4px' } as React.CSSProperties,
+}));
+
+const planBtnBase: React.CSSProperties = {
+  padding: '10px',
+  borderRadius: '10px',
+  border: 'none',
+  fontSize: '14px',
+  fontWeight: 600,
+  transition: 'background 0.2s, opacity 0.2s',
+};
+
+const creditBtnBase: React.CSSProperties = {
+  flex: '1 1 140px',
+  padding: '16px',
+  borderRadius: '12px',
+  border: '1px solid rgba(139, 92, 246, 0.2)',
+  background: 'rgba(139, 92, 246, 0.08)',
+  color: '#fff',
+  textAlign: 'center',
+  transition: 'background 0.2s, border-color 0.2s',
+};
+
 const PricingOverlay: React.FC = memo(() => {
   const { pricingOpen, setPricingOpen } = useUI();
   const { user } = useAuth();
@@ -237,11 +277,19 @@ const PricingOverlay: React.FC = memo(() => {
       if (data.checkout_url) {
         window.open(data.checkout_url, '_blank');
       } else {
-        alert(data.detail || 'Failed to create checkout session');
+        toaster.create({
+          title: data.detail || 'Failed to create checkout session',
+          type: 'error',
+          duration: 4000,
+        });
       }
     } catch (err: unknown) {
       log.error('Checkout error:', err);
-      alert(err instanceof Error ? err.message : 'Network error');
+      toaster.create({
+        title: err instanceof Error ? err.message : 'Network error',
+        type: 'error',
+        duration: 4000,
+      });
     } finally {
       setLoading(null);
     }
@@ -255,22 +303,46 @@ const PricingOverlay: React.FC = memo(() => {
       }
     } catch (err: unknown) {
       log.error('Portal error:', err);
-      alert(err instanceof Error ? err.message : 'Network error');
+      toaster.create({
+        title: err instanceof Error ? err.message : 'Network error',
+        type: 'error',
+        duration: 4000,
+      });
     }
   };
 
   const currentPlan = user?.plan || 'free';
 
+  const handleClose = useCallback(() => setPricingOpen(false), [setPricingOpen]);
+  const handleOverlayClick = useCallback(
+    (e: React.MouseEvent) => { if (e.target === e.currentTarget) setPricingOpen(false); },
+    [setPricingOpen],
+  );
+
+  // Dynamic button styles that depend on runtime state
+  const getPlanBtnStyle = useCallback(
+    (plan: typeof PLANS[number], isCurrent: boolean): React.CSSProperties => ({
+      ...planBtnBase,
+      background: isCurrent
+        ? 'rgba(255,255,255,0.08)'
+        : plan.popular ? plan.color : `${plan.color}33`,
+      color: isCurrent ? 'rgba(255,255,255,0.4)' : '#fff',
+      cursor: isCurrent ? 'default' : loading ? 'wait' : 'pointer',
+    }),
+    [loading],
+  );
+
+  const creditBtnDynamic = useMemo((): React.CSSProperties => ({
+    ...creditBtnBase,
+    cursor: currentPlan === 'free' ? 'not-allowed' : loading ? 'wait' : 'pointer',
+    opacity: currentPlan === 'free' ? 0.4 : 1,
+  }), [currentPlan, loading]);
+
   return (
-    <div
-      style={overlayStyle}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) setPricingOpen(false);
-      }}
-    >
+    <div style={overlayStyle} onClick={handleOverlayClick}>
       <div style={innerWrapperStyle}>
         {/* Close button */}
-        <button onClick={() => setPricingOpen(false)} style={closeBtnStyle}>
+        <button onClick={handleClose} style={closeBtnStyle}>
           ×
         </button>
 
@@ -284,34 +356,18 @@ const PricingOverlay: React.FC = memo(() => {
 
         {/* Plan cards */}
         <div style={planGridStyle}>
-          {PLANS.map((plan) => {
+          {PLANS.map((plan, idx) => {
+            const styles = planCardStyles[idx];
             const isCurrent = (plan.isFree && currentPlan === 'free') ||
               plan.key?.startsWith(currentPlan);
             return (
-              <div
-                key={plan.name}
-                style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  border: plan.popular
-                    ? `2px solid ${plan.color}`
-                    : '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '16px',
-                  padding: '24px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  position: 'relative',
-                }}
-              >
+              <div key={plan.name} style={styles.card}>
                 {plan.popular && (
-                  <div style={{ ...popularBadgeBase, background: plan.color }}>
-                    Most Popular
-                  </div>
+                  <div style={styles.badge}>Most Popular</div>
                 )}
 
                 <div style={planInfoStyle}>
-                  <h3 style={{ color: plan.color, fontSize: '18px', fontWeight: 700, margin: 0 }}>
-                    {plan.name}
-                  </h3>
+                  <h3 style={styles.name}>{plan.name}</h3>
                   <p style={planSubtitleStyle}>{plan.subtitle}</p>
                 </div>
 
@@ -323,7 +379,7 @@ const PricingOverlay: React.FC = memo(() => {
                 <ul style={featureListStyle}>
                   {plan.features.map((f) => (
                     <li key={f} style={featureItemStyle}>
-                      <span style={{ color: plan.color, fontSize: '10px', marginTop: '4px' }}>●</span>
+                      <span style={styles.bullet}>●</span>
                       {f}
                     </li>
                   ))}
@@ -339,21 +395,7 @@ const PricingOverlay: React.FC = memo(() => {
                     onClick={() =>
                       plan.key && handleCheckout('subscription', plan.key)
                     }
-                    style={{
-                      padding: '10px',
-                      borderRadius: '10px',
-                      border: 'none',
-                      background: isCurrent
-                        ? 'rgba(255,255,255,0.08)'
-                        : plan.popular
-                          ? plan.color
-                          : `${plan.color}33`,
-                      color: isCurrent ? 'rgba(255,255,255,0.4)' : '#fff',
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      cursor: isCurrent ? 'default' : loading ? 'wait' : 'pointer',
-                      transition: 'background 0.2s, opacity 0.2s',
-                    }}
+                    style={getPlanBtnStyle(plan, isCurrent)}
                   >
                     {isCurrent
                       ? 'Current Plan'
@@ -379,18 +421,7 @@ const PricingOverlay: React.FC = memo(() => {
                 key={pack.credits}
                 disabled={!!loading || currentPlan === 'free'}
                 onClick={() => handleCheckout('credits', undefined, pack.credits)}
-                style={{
-                  flex: '1 1 140px',
-                  padding: '16px',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(139, 92, 246, 0.2)',
-                  background: 'rgba(139, 92, 246, 0.08)',
-                  color: '#fff',
-                  cursor: currentPlan === 'free' ? 'not-allowed' : loading ? 'wait' : 'pointer',
-                  textAlign: 'center',
-                  transition: 'background 0.2s, border-color 0.2s',
-                  opacity: currentPlan === 'free' ? 0.4 : 1,
-                }}
+                style={creditBtnDynamic}
               >
                 <div style={creditAmountStyle}>✦ {pack.credits}</div>
                 <div style={creditPriceStyle}>
