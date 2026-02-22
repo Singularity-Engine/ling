@@ -4,17 +4,17 @@ import { InfoCrystal } from "./InfoCrystal";
 
 const DESKTOP_POSITIONS: Record<number, React.CSSProperties> = {
   0: { left: "3%", top: "14%" },
-  1: { right: "3%", top: "28%" },
-  2: { left: "3%", top: "42%" },
-  3: { right: "3%", top: "56%" },
+  1: { right: "5%", top: "30%" },
+  2: { left: "3%", top: "46%" },
+  3: { right: "5%", top: "62%" },
 };
 
 // Mobile: stack all on the left to avoid right-side toolbar overlap
 const MOBILE_POSITIONS: Record<number, React.CSSProperties> = {
-  0: { left: "3%", top: "10%" },
-  1: { left: "3%", top: "26%" },
-  2: { left: "3%", top: "42%" },
-  3: { left: "3%", top: "58%" },
+  0: { left: "3%", top: "12%" },
+  1: { left: "3%", top: "32%" },
+  2: { left: "3%", top: "52%" },
+  3: { left: "3%", top: "72%" },
 };
 
 export const CrystalField = memo(() => {

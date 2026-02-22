@@ -52,7 +52,7 @@ export const AffinityBar = memo(() => {
         </span>
         <div
           style={{
-            width: "130px",
+            width: "clamp(100px, 20vw, 160px)",
             height: "6px",
             background: "rgba(255,255,255,0.12)",
             borderRadius: "3px",

@@ -244,7 +244,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
                 background: 'rgba(255,255,255,0.03)',
                 border: '1px solid rgba(255,255,255,0.06)',
                 borderRadius: '12px',
-                marginBottom: '8px',
+                marginBottom: '12px',
               }}
             >
               <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>
