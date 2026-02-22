@@ -243,6 +243,14 @@ function MainContent(): JSX.Element {
   const { messages } = useChatMessages();
   const { currentHistoryUid, updateHistoryList } = useHistoryList();
 
+  // Ref mirrors so createNewChat stays stable across message/session changes.
+  // Without this, every new chat message recreates createNewChat → rebuilds
+  // the shortcuts useMemo array, wasting work on every message arrival.
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+  const historyUidRef = useRef(currentHistoryUid);
+  historyUidRef.current = currentHistoryUid;
+
   useEffect(() => {
     const handleResize = () => {
       const vh = window.innerHeight * 0.01;
@@ -300,13 +308,13 @@ function MainContent(): JSX.Element {
   }, [toggleChat]);
 
   const createNewChat = useCallback(() => {
-    if (currentHistoryUid && messages.length > 0) {
-      const latestMessage = messages[messages.length - 1];
-      updateHistoryList(currentHistoryUid, latestMessage);
+    if (historyUidRef.current && messagesRef.current.length > 0) {
+      const latestMessage = messagesRef.current[messagesRef.current.length - 1];
+      updateHistoryList(historyUidRef.current, latestMessage);
     }
     interrupt();
     sendMessage({ type: "create-new-history" });
-  }, [currentHistoryUid, messages, updateHistoryList, interrupt, sendMessage]);
+  }, [updateHistoryList, interrupt, sendMessage]);
 
   // Refs for ephemeral UI state — lets the Escape shortcut read latest values
   // without adding them as useMemo deps (avoids rebuilding the entire shortcuts
