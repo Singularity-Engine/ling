@@ -119,6 +119,7 @@ const S_MILESTONE_BASE: CSSProperties = {
   animation: "popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
 };
 const S_MILESTONE_TEXT: CSSProperties = { fontSize: "13px", color: "white", fontWeight: 500 };
+const S_HEART_PATH: CSSProperties = { transition: "stroke 0.5s ease" };
 
 const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPercent: number; size?: number }) => {
   const gradientId = useId();
@@ -135,7 +136,7 @@ const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPerce
         fill={`url(#${gradientId})`}
         stroke={color}
         strokeWidth="0.5"
-        style={{ transition: "stroke 0.5s ease" }}
+        style={S_HEART_PATH}
       />
     </svg>
   );

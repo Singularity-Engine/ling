@@ -604,7 +604,3 @@ function StepReady({
   );
 }
 
-/** Check if onboarding has been completed this session */
-export function shouldShowOnboarding(): boolean {
-  return !sessionStorage.getItem(STORAGE_KEY);
-}

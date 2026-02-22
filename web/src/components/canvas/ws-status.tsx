@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { canvasStyles } from './canvas-styles';
 import { useWSStatus } from '@/hooks/canvas/use-ws-status';
@@ -29,13 +29,15 @@ const WebSocketStatus = memo((): JSX.Element => {
     e.currentTarget.style.opacity = '1';
   }, []);
 
+  const containerStyle = useMemo<CSSProperties>(() => ({
+    ...canvasStyles.wsStatus.container,
+    backgroundColor: color,
+    cursor: isDisconnected ? 'pointer' : 'default',
+  }), [color, isDisconnected]);
+
   return (
     <div
-      style={{
-        ...canvasStyles.wsStatus.container,
-        backgroundColor: color,
-        cursor: isDisconnected ? 'pointer' : 'default',
-      }}
+      style={containerStyle}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

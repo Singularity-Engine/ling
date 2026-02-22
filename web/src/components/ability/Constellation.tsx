@@ -64,6 +64,22 @@ const S_SVG: CSSProperties = {
   overflow: "visible",
 };
 const CLOSED_VARIANT = { x: 0, y: 0, opacity: 0, scale: 0.3 };
+const STAGGER_VARIANTS = {
+  open: { transition: { staggerChildren: 0.05 } },
+  closed: { transition: { staggerChildren: 0.03, staggerDirection: -1 } },
+};
+const LINE_VARIANTS = {
+  closed: { pathLength: 0, opacity: 0 },
+  open: { pathLength: 1, opacity: 1 },
+};
+const WHILETAP_095 = { scale: 0.95 };
+const WHILETAP_090 = { scale: 0.9 };
+const CORE_OPEN = { rotate: 45 };
+const CORE_CLOSED = { rotate: 0 };
+const CORE_TRANSITION = { type: "spring" as const, stiffness: 300, damping: 20 };
+const FADE_IN = { opacity: 0 };
+const FADE_VISIBLE = { opacity: 1 };
+const FADE_TRANSITION = { duration: 0.2 };
 
 // ── Star button (memo'd — rendered in a list) ───────────────────
 const StarButton = memo(function StarButton({
@@ -92,6 +108,8 @@ const StarButton = memo(function StarButton({
   const size = baseSize + (maxCount > 0 ? (count / maxCount) * maxBonus : 0);
   const Icon = meta.icon;
   const handleClick = useCallback(() => onStarClick(skillKey), [onStarClick, skillKey]);
+
+  const whileHover = useMemo(() => ({ scale: 1.15, boxShadow: `0 0 20px ${meta.color}66` }), [meta.color]);
 
   const starStyle = useMemo<CSSProperties>(() => ({
     position: "absolute",
@@ -127,8 +145,8 @@ const StarButton = memo(function StarButton({
       onClick={handleClick}
       aria-label={meta.label[lang]}
       style={starStyle}
-      whileHover={{ scale: 1.15, boxShadow: `0 0 20px ${meta.color}66` }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={whileHover}
+      whileTap={WHILETAP_095}
     >
       <Icon size={18} color={meta.color} />
     </motion.button>
@@ -244,10 +262,10 @@ export const Constellation = memo(() => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            initial={FADE_IN}
+            animate={FADE_VISIBLE}
+            exit={FADE_IN}
+            transition={FADE_TRANSITION}
             onClick={closeConstellation}
             style={S_BACKDROP}
           />
@@ -261,10 +279,7 @@ export const Constellation = memo(() => {
             initial="closed"
             animate="open"
             exit="closed"
-            variants={{
-              open: { transition: { staggerChildren: 0.05 } },
-              closed: { transition: { staggerChildren: 0.03, staggerDirection: -1 } },
-            }}
+            variants={STAGGER_VARIANTS}
             style={S_STARFIELD}
           >
             {/* Connection lines */}
@@ -283,10 +298,7 @@ export const Constellation = memo(() => {
                       y2={p2.y + OUTER_RADIUS + 20}
                       stroke="rgba(139,92,246,0.12)"
                       strokeWidth="1"
-                      variants={{
-                        closed: { pathLength: 0, opacity: 0 },
-                        open: { pathLength: 1, opacity: 1 },
-                      }}
+                      variants={LINE_VARIANTS}
                       transition={{ duration: 0.4, delay: i * 0.05 }}
                     />
                   );
@@ -320,9 +332,9 @@ export const Constellation = memo(() => {
         onMouseLeave={setHoveredFalse}
         aria-label={tooltipText}
         title={tooltipText}
-        animate={isOpen ? { rotate: 45 } : { rotate: 0 }}
-        whileTap={{ scale: 0.9 }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        animate={isOpen ? CORE_OPEN : CORE_CLOSED}
+        whileTap={WHILETAP_090}
+        transition={CORE_TRANSITION}
         style={coreStyle}
       >
         {/* Star icon SVG */}
