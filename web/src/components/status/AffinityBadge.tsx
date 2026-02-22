@@ -176,6 +176,12 @@ export const AffinityBadge = memo(() => {
               />
             </div>
 
+            {/* Score range label */}
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "6px" }}>
+              <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", fontFamily: "monospace" }}>0</span>
+              <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", fontFamily: "monospace" }}>100</span>
+            </div>
+
           </div>
         )}
 

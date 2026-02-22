@@ -121,10 +121,11 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
         <div
           style={{
             padding: '20px 24px',
-            borderBottom: '1px solid rgba(255,255,255,0.06)',
+            borderBottom: '1px solid rgba(139, 92, 246, 0.12)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            background: 'rgba(139, 92, 246, 0.04)',
           }}
         >
           <div>
@@ -244,19 +245,39 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
           {memories.map((memory) => (
             <div
               key={memory.id}
+              className="ling-memory-card"
               style={{
                 padding: '14px 16px',
                 background: 'rgba(255,255,255,0.04)',
                 border: '1px solid rgba(255,255,255,0.07)',
-                borderLeft: '2px solid rgba(139,92,246,0.25)',
+                borderLeft: '3px solid rgba(139,92,246,0.4)',
                 borderRadius: '10px',
                 marginBottom: '12px',
+                transition: 'background 0.2s ease, border-color 0.2s ease',
+                cursor: 'default',
+              }}
+              onPointerEnter={(e) => {
+                const el = e.currentTarget;
+                el.style.background = 'rgba(255,255,255,0.07)';
+                el.style.borderLeftColor = 'rgba(139,92,246,0.6)';
+              }}
+              onPointerLeave={(e) => {
+                const el = e.currentTarget;
+                el.style.background = 'rgba(255,255,255,0.04)';
+                el.style.borderLeftColor = 'rgba(139,92,246,0.4)';
               }}
             >
               <p style={{ color: 'rgba(255,255,255,0.88)', fontSize: '14px', lineHeight: 1.65, margin: 0 }}>
                 {memory.content}
               </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginTop: '10px',
+                paddingTop: '8px',
+                borderTop: '1px solid rgba(255,255,255,0.05)',
+              }}>
                 <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px' }}>
                   {new Date(memory.created_at).toLocaleDateString(undefined, {
                     month: 'short',
@@ -266,11 +287,12 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
                 {memory.group_id && (
                   <span style={{
                     fontSize: '11px',
-                    color: 'rgba(167,139,250,0.75)',
-                    background: 'rgba(139,92,246,0.10)',
+                    color: 'rgba(167,139,250,0.85)',
+                    background: 'rgba(139,92,246,0.14)',
                     padding: '2px 8px',
                     borderRadius: '8px',
                     letterSpacing: '0.3px',
+                    fontWeight: 500,
                   }}>
                     {memory.group_id}
                   </span>
@@ -284,8 +306,9 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
         <div
           style={{
             padding: '12px 24px',
-            borderTop: '1px solid rgba(255,255,255,0.06)',
+            borderTop: '1px solid rgba(139, 92, 246, 0.12)',
             textAlign: 'center',
+            background: 'rgba(139, 92, 246, 0.04)',
           }}
         >
           <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px' }}>

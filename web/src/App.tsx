@@ -290,100 +290,117 @@ function MainContent(): JSX.Element {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: isMobile ? "8px" : "12px",
+          gap: isMobile ? "10px" : "14px",
         }}
       >
-        <CreditsDisplay />
-        <AffinityBadge />
-        <ConnectionStatus />
-        {/* Divider: status indicators above, action buttons below */}
+        {/* ── Status indicators group ── */}
         <div style={{
-          width: "20px",
-          height: "1px",
-          background: "rgba(255, 255, 255, 0.10)",
-          margin: "4px 0",
-          alignSelf: "center",
-        }} />
-        <button
-          onClick={toggleChat}
-          aria-label={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}
-          aria-pressed={chatExpanded}
-          title={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}
-          style={{
-            width: isMobile ? "44px" : "42px",
-            height: isMobile ? "44px" : "42px",
-            borderRadius: "50%",
-            background: chatExpanded ? "rgba(139, 92, 246, 0.4)" : "rgba(255, 255, 255, 0.08)",
-            border: chatExpanded ? "1px solid rgba(139, 92, 246, 0.6)" : "1px solid rgba(255, 255, 255, 0.12)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            transition: "background 0.3s ease, border-color 0.3s ease",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
-            padding: 0,
-          }}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
-        </button>
-        <button
-          onClick={() => setMemoryOpen(true)}
-          aria-label="Memories"
-          title="Memories"
-          style={{
-            width: isMobile ? "44px" : "42px",
-            height: isMobile ? "44px" : "42px",
-            borderRadius: "50%",
-            background: memoryOpen ? "rgba(139, 92, 246, 0.4)" : "rgba(255, 255, 255, 0.08)",
-            border: memoryOpen ? "1px solid rgba(139, 92, 246, 0.6)" : "1px solid rgba(255, 255, 255, 0.12)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            transition: "background 0.3s ease, border-color 0.3s ease",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
-            padding: 0,
-          }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.58-3.25 3.93" />
-            <path d="M8.24 4.47A4 4 0 0 1 12 2" />
-            <path d="M12 9v1" />
-            <path d="M4.93 4.93l.7.7" />
-            <path d="M19.07 4.93l-.7.7" />
-            <path d="M12 22c-4.97 0-9-2.69-9-6v-2c0-3.31 4.03-6 9-6s9 2.69 9 6v2c0 3.31-4.03 6-9 6z" />
-          </svg>
-        </button>
-        <button
-          onClick={() => setAboutOpen(true)}
-          aria-label={t("shortcuts.showAbout")}
-          title={t("shortcuts.showAbout")}
-          style={{
-            width: isMobile ? "44px" : "42px",
-            height: isMobile ? "44px" : "42px",
-            borderRadius: "50%",
-            background: "rgba(255, 255, 255, 0.08)",
-            border: "1px solid rgba(255, 255, 255, 0.12)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            transition: "all 0.3s ease",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
-            padding: 0,
-          }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="16" x2="12" y2="12" />
-            <line x1="12" y1="8" x2="12.01" y2="8" />
-          </svg>
-        </button>
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: isMobile ? "6px" : "8px",
+          padding: "6px",
+          borderRadius: "20px",
+          background: "rgba(0, 0, 0, 0.15)",
+          border: "1px solid rgba(255, 255, 255, 0.04)",
+        }}>
+          <CreditsDisplay />
+          <AffinityBadge />
+          <ConnectionStatus />
+        </div>
+
+        {/* ── Action buttons group ── */}
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: isMobile ? "6px" : "8px",
+          padding: "6px",
+          borderRadius: "20px",
+          background: "rgba(0, 0, 0, 0.15)",
+          border: "1px solid rgba(255, 255, 255, 0.04)",
+        }}>
+          <button
+            onClick={toggleChat}
+            aria-label={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}
+            aria-pressed={chatExpanded}
+            title={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}
+            style={{
+              width: isMobile ? "44px" : "42px",
+              height: isMobile ? "44px" : "42px",
+              borderRadius: "50%",
+              background: chatExpanded ? "rgba(139, 92, 246, 0.4)" : "rgba(255, 255, 255, 0.08)",
+              border: chatExpanded ? "1px solid rgba(139, 92, 246, 0.6)" : "1px solid rgba(255, 255, 255, 0.12)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              transition: "background 0.3s ease, border-color 0.3s ease",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+              padding: 0,
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+          </button>
+          <button
+            onClick={() => setMemoryOpen(true)}
+            aria-label="Memories"
+            title="Memories"
+            style={{
+              width: isMobile ? "44px" : "42px",
+              height: isMobile ? "44px" : "42px",
+              borderRadius: "50%",
+              background: memoryOpen ? "rgba(139, 92, 246, 0.4)" : "rgba(255, 255, 255, 0.08)",
+              border: memoryOpen ? "1px solid rgba(139, 92, 246, 0.6)" : "1px solid rgba(255, 255, 255, 0.12)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              transition: "background 0.3s ease, border-color 0.3s ease",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+              padding: 0,
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.58-3.25 3.93" />
+              <path d="M8.24 4.47A4 4 0 0 1 12 2" />
+              <path d="M12 9v1" />
+              <path d="M4.93 4.93l.7.7" />
+              <path d="M19.07 4.93l-.7.7" />
+              <path d="M12 22c-4.97 0-9-2.69-9-6v-2c0-3.31 4.03-6 9-6s9 2.69 9 6v2c0 3.31-4.03 6-9 6z" />
+            </svg>
+          </button>
+          <button
+            onClick={() => setAboutOpen(true)}
+            aria-label={t("shortcuts.showAbout")}
+            title={t("shortcuts.showAbout")}
+            style={{
+              width: isMobile ? "44px" : "42px",
+              height: isMobile ? "44px" : "42px",
+              borderRadius: "50%",
+              background: "rgba(255, 255, 255, 0.08)",
+              border: "1px solid rgba(255, 255, 255, 0.12)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+              padding: 0,
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* ===== Layer 2: 浮动聊天区域 ===== */}
