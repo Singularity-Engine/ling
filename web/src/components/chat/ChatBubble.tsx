@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useCallback, useRef, type ReactNode, type CSSProperties } from "react";
+import { memo, useMemo, useState, useCallback, useRef, useEffect, type ReactNode, type CSSProperties } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -294,6 +294,24 @@ function formatTime(ts: string): string {
   }
 }
 
+/** Self-updating relative timestamp — adjusts refresh rate based on message age. */
+const RelativeTime = memo(({ timestamp, style }: { timestamp: string; style: CSSProperties }) => {
+  const [rev, tick] = useState(0);
+
+  useEffect(() => {
+    const age = Date.now() - new Date(timestamp).getTime();
+    if (age > 6 * 3_600_000) return;             // absolute format, no updates
+    const delay = age < 60_000 ? 15_000           // "just now" → every 15s
+                : age < 3_600_000 ? 60_000        // "X min ago" → every 1 min
+                : 300_000;                        // "Xh ago" → every 5 min
+    const timer = setTimeout(() => tick(c => c + 1), delay);
+    return () => clearTimeout(timer);
+  }, [timestamp, rev]);
+
+  return <span className="chat-bubble-ts" style={style}>{formatTime(timestamp)}</span>;
+});
+RelativeTime.displayName = "RelativeTime";
+
 export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolCall, toolName, toolStatus, isGreeting, skipEntryAnimation, senderChanged }: ChatBubbleProps) => {
   const { t } = useTranslation();
   const isUser = role === "user";
@@ -455,9 +473,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
           )}
         </div>
         {timestamp && (
-          <span className="chat-bubble-ts" style={isUser ? S_TS_USER : S_TS_AI}>
-            {formatTime(timestamp)}
-          </span>
+          <RelativeTime timestamp={timestamp} style={isUser ? S_TS_USER : S_TS_AI} />
         )}
       </div>
       {isUser && <div className="ling-avatar" style={S_AVATAR_USER}>{USER_ICON}</div>}
