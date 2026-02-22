@@ -1,8 +1,6 @@
 import { Box, Button } from '@chakra-ui/react';
 import { FiTrash2 } from 'react-icons/fi';
 import i18next from 'i18next';
-import { format, isToday, isYesterday, isThisYear } from 'date-fns';
-import { zhCN, enUS } from 'date-fns/locale';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -36,22 +34,29 @@ interface HistoryItemProps {
 
 function formatTimestamp(timestamp: string, lang: string): string {
   const date = new Date(timestamp);
-  const locale = lang === 'zh' ? zhCN : enUS;
+  const now = new Date();
+  const locale = lang === 'zh' ? 'zh-CN' : 'en-US';
+  const timeStr = date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false });
 
-  if (isToday(date)) {
-    return format(date, 'HH:mm', { locale });
+  const sameDay = (a: Date, b: Date) =>
+    a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+  if (sameDay(date, now)) {
+    return timeStr;
   }
-  if (isYesterday(date)) {
-    return `${i18next.t('time.yesterday')} ${format(date, 'HH:mm', { locale })}`;
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (sameDay(date, yesterday)) {
+    return `${i18next.t('time.yesterday')} ${timeStr}`;
   }
-  if (isThisYear(date)) {
+  if (date.getFullYear() === now.getFullYear()) {
     return lang === 'zh'
-      ? format(date, 'M月d日 HH:mm', { locale })
-      : format(date, 'MMM d, HH:mm', { locale });
+      ? `${date.getMonth() + 1}月${date.getDate()}日 ${timeStr}`
+      : `${date.toLocaleDateString(locale, { month: 'short', day: 'numeric' })}, ${timeStr}`;
   }
   return lang === 'zh'
-    ? format(date, 'yyyy年M月d日', { locale })
-    : format(date, 'MMM d, yyyy', { locale });
+    ? `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`
+    : date.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 // Reusable components
