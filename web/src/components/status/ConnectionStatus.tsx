@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useRef, useCallback, type CSSProperties } from "react";
+import { memo, useState, useEffect, useRef, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { useWebSocket } from "@/context/websocket-context";
 import { gatewayConnector, RECONNECT_MAX_RETRIES } from "@/services/gateway-connector";
@@ -150,17 +150,6 @@ export const ConnectionStatus = memo(() => {
     return () => { attemptSub.unsubscribe(); idleSub.unsubscribe(); };
   }, []);
 
-  const handleMouseEnter = useCallback((e: React.MouseEvent) => {
-    const el = e.currentTarget as HTMLElement;
-    el.style.background = "rgba(0, 0, 0, 0.55)";
-    el.style.borderColor = "var(--ling-error)";
-  }, []);
-
-  const handleMouseLeave = useCallback((e: React.MouseEvent) => {
-    const el = e.currentTarget as HTMLElement;
-    el.style.background = "rgba(0, 0, 0, 0.35)";
-    el.style.borderColor = "var(--ling-error-border)";
-  }, []);
 
   if (isOpen && !showConnected) return null;
 
@@ -195,8 +184,7 @@ export const ConnectionStatus = memo(() => {
       <Tag
         onClick={isClosed ? reconnect : undefined}
         style={containerStyle}
-        onMouseEnter={isClosed ? handleMouseEnter : undefined}
-        onMouseLeave={isClosed ? handleMouseLeave : undefined}
+        className={isClosed ? "ling-conn-closed" : undefined}
       >
         {/* Status dot */}
         <div style={dotStyle} />

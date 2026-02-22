@@ -134,7 +134,6 @@ export const footerStyles: {
       boxShadow: '0 0 12px rgba(139, 92, 246, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)',
       overflow: 'hidden',
       border: '1px solid rgba(139, 92, 246, 0.3)',
-      animation: 'indicatorBreathe 3s ease-in-out infinite',
     },
     text: {
       fontSize: '12px',

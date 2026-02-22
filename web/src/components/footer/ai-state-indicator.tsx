@@ -9,7 +9,7 @@ function AIStateIndicator(): JSX.Element {
   const styles = footerStyles.aiIndicator;
 
   return (
-    <Box {...styles.container}>
+    <Box className="ling-ai-indicator" {...styles.container}>
       <Text {...styles.text}>{t(`aiState.${aiState}`)}</Text>
     </Box>
   );

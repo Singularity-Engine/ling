@@ -395,9 +395,33 @@ body {
   100% { transform: translateX(200%); }
 }
 
-@keyframes indicatorBreathe {
-  0%, 100% { box-shadow: 0 0 12px rgba(139, 92, 246, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2); }
-  50% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.5), 0 2px 12px rgba(0, 0, 0, 0.25); }
+/* AI indicator — GPU-friendly glow via opacity-only animation on ::after (avoids per-frame box-shadow repaint) */
+@keyframes indicatorBreatheOpacity {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+.ling-ai-indicator {
+  position: relative;
+}
+.ling-ai-indicator::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.5), 0 2px 12px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  animation: indicatorBreatheOpacity 3s ease-in-out infinite;
+  pointer-events: none;
+  will-change: opacity;
+}
+
+/* ConnectionStatus — CSS hover instead of JS DOM manipulation */
+.ling-conn-closed {
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.ling-conn-closed:hover {
+  background: rgba(0, 0, 0, 0.55) !important;
+  border-color: var(--ling-error) !important;
 }
 
 /* Live2D 点击粒子 */
