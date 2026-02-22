@@ -208,9 +208,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const { updateCredits, user } = useAuth();
   const { setBillingModal } = useUI();
 
-  useEffect(() => {
-    autoStartMicOnConvEndRef.current = autoStartMicOnConvEnd;
-  }, [autoStartMicOnConvEnd]);
+  autoStartMicOnConvEndRef.current = autoStartMicOnConvEnd;
 
   useEffect(() => {
     if (pendingModelInfo && confUid) {
@@ -224,28 +222,30 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   } = useHistoryList();
   const { setMessages } = useChatMessages();
 
-  // ─── Refs for sendMessage access (avoids closure dependency) ──
+  // ─── Refs for stable callback access ─────────────────────────
+  // Direct assignment keeps refs current without useEffect overhead.
+  // Safe: ref writes in render don't affect the render tree.
 
   const appendHumanMessageRef = useRef(appendHumanMessage);
-  useEffect(() => { appendHumanMessageRef.current = appendHumanMessage; }, [appendHumanMessage]);
+  appendHumanMessageRef.current = appendHumanMessage;
 
   const setMessagesRef = useRef(setMessages);
-  useEffect(() => { setMessagesRef.current = setMessages; }, [setMessages]);
+  setMessagesRef.current = setMessages;
 
   const setHistoryListRef = useRef(setHistoryList);
-  useEffect(() => { setHistoryListRef.current = setHistoryList; }, [setHistoryList]);
+  setHistoryListRef.current = setHistoryList;
 
   const setCurrentHistoryUidRef = useRef(setCurrentHistoryUid);
-  useEffect(() => { setCurrentHistoryUidRef.current = setCurrentHistoryUid; }, [setCurrentHistoryUid]);
+  setCurrentHistoryUidRef.current = setCurrentHistoryUid;
 
   const setAiStateRef = useRef(setAiState);
-  useEffect(() => { setAiStateRef.current = setAiState; }, [setAiState]);
+  setAiStateRef.current = setAiState;
 
   const setSubtitleTextRef = useRef(setSubtitleText);
-  useEffect(() => { setSubtitleTextRef.current = setSubtitleText; }, [setSubtitleText]);
+  setSubtitleTextRef.current = setSubtitleText;
 
   const clearResponseRef = useRef(clearResponse);
-  useEffect(() => { clearResponseRef.current = clearResponse; }, [clearResponse]);
+  clearResponseRef.current = clearResponse;
 
   // Per-visitor session key — bound to user account when logged in
   const sessionKeyRef = useRef(getVisitorSessionKey(user?.id));
@@ -278,13 +278,13 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
   // ─── Billing check ──────────────────────────────────────────
   const userRef = useRef(user);
-  useEffect(() => { userRef.current = user; }, [user]);
+  userRef.current = user;
 
   const billingInFlightRef = useRef(false);
   const updateCreditsRef = useRef(updateCredits);
-  useEffect(() => { updateCreditsRef.current = updateCredits; }, [updateCredits]);
+  updateCreditsRef.current = updateCredits;
   const setBillingModalRef = useRef(setBillingModal);
-  useEffect(() => { setBillingModalRef.current = setBillingModal; }, [setBillingModal]);
+  setBillingModalRef.current = setBillingModal;
 
   const checkBilling = useCallback(async (): Promise<boolean> => {
     const token = apiClient.getToken();
@@ -644,7 +644,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   // ─── Subscribe to Gateway events (stable — never tears down) ───
 
   const handleWebSocketMessageRef = useRef(handleWebSocketMessage);
-  useEffect(() => { handleWebSocketMessageRef.current = handleWebSocketMessage; }, [handleWebSocketMessage]);
+  handleWebSocketMessageRef.current = handleWebSocketMessage;
 
   useEffect(() => {
     // Subscribe to Gateway state changes — track transitions for user notifications
@@ -790,23 +790,23 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   // ─── TTS state refs (for stable useEffect access) ──────────────
 
   const markSynthStartRef = useRef(markSynthStart);
-  useEffect(() => { markSynthStartRef.current = markSynthStart; }, [markSynthStart]);
+  markSynthStartRef.current = markSynthStart;
   const markSynthDoneRef = useRef(markSynthDone);
-  useEffect(() => { markSynthDoneRef.current = markSynthDone; }, [markSynthDone]);
+  markSynthDoneRef.current = markSynthDone;
   const markSynthErrorRef = useRef(markSynthError);
-  useEffect(() => { markSynthErrorRef.current = markSynthError; }, [markSynthError]);
+  markSynthErrorRef.current = markSynthError;
   const markPlayStartRef = useRef(markPlayStart);
-  useEffect(() => { markPlayStartRef.current = markPlayStart; }, [markPlayStart]);
+  markPlayStartRef.current = markPlayStart;
   const markPlayDoneRef = useRef(markPlayDone);
-  useEffect(() => { markPlayDoneRef.current = markPlayDone; }, [markPlayDone]);
+  markPlayDoneRef.current = markPlayDone;
   const resetTTSStateRef = useRef(resetTTSState);
-  useEffect(() => { resetTTSStateRef.current = resetTTSState; }, [resetTTSState]);
+  resetTTSStateRef.current = resetTTSState;
 
   // ─── TTS: synthesize speech when full-text arrives ─────────────
 
   const lastTtsTextRef = useRef('');
   const addAudioTaskRef = useRef(addAudioTask);
-  useEffect(() => { addAudioTaskRef.current = addAudioTask; }, [addAudioTask]);
+  addAudioTaskRef.current = addAudioTask;
 
   // Synthesis queue: serialize synthesis calls to preserve sentence order
   const synthQueueRef = useRef<Promise<void>>(Promise.resolve());
@@ -816,7 +816,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const ttsErrorShownRef = useRef(false);
   // Track current expression for TTS audio tasks
   const currentExpressionRef = useRef<string | null>(null);
-  useEffect(() => { currentExpressionRef.current = affinityContext.currentExpression; }, [affinityContext.currentExpression]);
+  currentExpressionRef.current = affinityContext.currentExpression;
 
   useEffect(() => {
     const sub = gatewayAdapter.message$.subscribe((msg) => {
