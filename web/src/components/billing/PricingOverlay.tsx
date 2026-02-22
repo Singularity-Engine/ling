@@ -5,10 +5,120 @@
  * 从 ui-context 的 pricingOpen 控制显示/隐藏。
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { apiClient } from '@/services/api-client';
 import { useUI } from '@/context/ui-context';
 import { useAuth } from '@/context/auth-context';
+
+/* ── Module-level style constants (allocated once, never GC'd) ── */
+
+const overlayStyle: React.CSSProperties = {
+  position: 'fixed',
+  inset: 0,
+  zIndex: 9999,
+  background: 'rgba(0, 0, 0, 0.85)',
+  backdropFilter: 'blur(12px)',
+  WebkitBackdropFilter: 'blur(12px)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '20px',
+  overflow: 'auto',
+};
+
+const innerWrapperStyle: React.CSSProperties = {
+  maxWidth: '1100px',
+  width: '100%',
+  position: 'relative',
+};
+
+const closeBtnStyle: React.CSSProperties = {
+  position: 'absolute',
+  top: '-40px',
+  right: '0',
+  background: 'none',
+  border: 'none',
+  color: 'rgba(255,255,255,0.5)',
+  fontSize: '28px',
+  cursor: 'pointer',
+  padding: '4px',
+  lineHeight: 1,
+};
+
+const titleContainerStyle: React.CSSProperties = { textAlign: 'center', marginBottom: '32px' };
+const titleStyle: React.CSSProperties = { color: '#fff', fontSize: '28px', fontWeight: 700, margin: 0 };
+const subtitleStyle: React.CSSProperties = { color: 'rgba(255,255,255,0.5)', fontSize: '14px', marginTop: '8px' };
+
+const planGridStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+  gap: '16px',
+  marginBottom: '32px',
+};
+
+const popularBadgeBase: React.CSSProperties = {
+  position: 'absolute',
+  top: '-12px',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  color: '#fff',
+  fontSize: '11px',
+  fontWeight: 700,
+  padding: '4px 16px',
+  borderRadius: '12px',
+  textTransform: 'uppercase',
+  letterSpacing: '0.5px',
+};
+
+const planInfoStyle: React.CSSProperties = { marginBottom: '16px' };
+const planSubtitleStyle: React.CSSProperties = { color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '4px 0 0' };
+const planPriceContainerStyle: React.CSSProperties = { marginBottom: '20px' };
+const planPriceStyle: React.CSSProperties = { color: '#fff', fontSize: '32px', fontWeight: 700 };
+const planPeriodStyle: React.CSSProperties = { color: 'rgba(255,255,255,0.4)', fontSize: '14px' };
+
+const featureListStyle: React.CSSProperties = { listStyle: 'none', padding: 0, margin: '0 0 20px', flex: 1 };
+const featureItemStyle: React.CSSProperties = {
+  color: 'rgba(255,255,255,0.7)',
+  fontSize: '13px',
+  padding: '4px 0',
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: '8px',
+};
+
+const freeBtnStyle: React.CSSProperties = {
+  padding: '10px',
+  borderRadius: '10px',
+  border: '1px solid rgba(255,255,255,0.1)',
+  background: 'transparent',
+  color: 'rgba(255,255,255,0.3)',
+  fontSize: '14px',
+  fontWeight: 600,
+  cursor: 'default',
+};
+
+const creditSectionStyle: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.03)',
+  border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: '16px',
+  padding: '24px',
+};
+
+const creditTitleStyle: React.CSSProperties = { color: 'rgba(255,255,255,0.8)', fontSize: '16px', fontWeight: 600, margin: '0 0 16px' };
+const creditDescStyle: React.CSSProperties = { color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '-8px 0 16px' };
+const creditFlexStyle: React.CSSProperties = { display: 'flex', gap: '12px', flexWrap: 'wrap' };
+const creditAmountStyle: React.CSSProperties = { fontSize: '20px', fontWeight: 700 };
+const creditPriceStyle: React.CSSProperties = { fontSize: '14px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' };
+const creditNoteStyle: React.CSSProperties = { color: 'rgba(255,255,255,0.3)', fontSize: '12px', marginTop: '12px', textAlign: 'center' };
+const manageLinkContainerStyle: React.CSSProperties = { textAlign: 'center', marginTop: '16px' };
+const manageLinkStyle: React.CSSProperties = {
+  background: 'none',
+  border: 'none',
+  color: 'rgba(255,255,255,0.4)',
+  fontSize: '13px',
+  cursor: 'pointer',
+  textDecoration: 'underline',
+};
 
 const PLANS = [
   {
@@ -92,7 +202,7 @@ const CREDIT_PACKS = [
   { credits: 2000, price: '$69.99' },
 ];
 
-const PricingOverlay: React.FC = () => {
+const PricingOverlay: React.FC = memo(() => {
   const { pricingOpen, setPricingOpen } = useUI();
   const { user } = useAuth();
   const [loading, setLoading] = useState<string | null>(null);
@@ -150,68 +260,27 @@ const PricingOverlay: React.FC = () => {
 
   return (
     <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 9999,
-        background: 'rgba(0, 0, 0, 0.85)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
-        overflow: 'auto',
-      }}
+      style={overlayStyle}
       onClick={(e) => {
         if (e.target === e.currentTarget) setPricingOpen(false);
       }}
     >
-      <div
-        style={{
-          maxWidth: '1100px',
-          width: '100%',
-          position: 'relative',
-        }}
-      >
+      <div style={innerWrapperStyle}>
         {/* Close button */}
-        <button
-          onClick={() => setPricingOpen(false)}
-          style={{
-            position: 'absolute',
-            top: '-40px',
-            right: '0',
-            background: 'none',
-            border: 'none',
-            color: 'rgba(255,255,255,0.5)',
-            fontSize: '28px',
-            cursor: 'pointer',
-            padding: '4px',
-            lineHeight: 1,
-          }}
-        >
+        <button onClick={() => setPricingOpen(false)} style={closeBtnStyle}>
           ×
         </button>
 
         {/* Title */}
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <h2 style={{ color: '#fff', fontSize: '28px', fontWeight: 700, margin: 0 }}>
-            Choose Your Plan
-          </h2>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', marginTop: '8px' }}>
+        <div style={titleContainerStyle}>
+          <h2 style={titleStyle}>Choose Your Plan</h2>
+          <p style={subtitleStyle}>
             Unlock deeper conversations, more tools, and permanent memory
           </p>
         </div>
 
         {/* Plan cards */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
-            gap: '16px',
-            marginBottom: '32px',
-          }}
-        >
+        <div style={planGridStyle}>
           {PLANS.map((plan) => {
             const isCurrent = (plan.isFree && currentPlan === 'free') ||
               plan.key?.startsWith(currentPlan);
@@ -231,59 +300,26 @@ const PricingOverlay: React.FC = () => {
                 }}
               >
                 {plan.popular && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: '-12px',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      background: plan.color,
-                      color: '#fff',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      padding: '4px 16px',
-                      borderRadius: '12px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px',
-                    }}
-                  >
+                  <div style={{ ...popularBadgeBase, background: plan.color }}>
                     Most Popular
                   </div>
                 )}
 
-                <div style={{ marginBottom: '16px' }}>
+                <div style={planInfoStyle}>
                   <h3 style={{ color: plan.color, fontSize: '18px', fontWeight: 700, margin: 0 }}>
                     {plan.name}
                   </h3>
-                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '4px 0 0' }}>
-                    {plan.subtitle}
-                  </p>
+                  <p style={planSubtitleStyle}>{plan.subtitle}</p>
                 </div>
 
-                <div style={{ marginBottom: '20px' }}>
-                  <span style={{ color: '#fff', fontSize: '32px', fontWeight: 700 }}>
-                    {plan.price}
-                  </span>
-                  {plan.period && (
-                    <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px' }}>
-                      {plan.period}
-                    </span>
-                  )}
+                <div style={planPriceContainerStyle}>
+                  <span style={planPriceStyle}>{plan.price}</span>
+                  {plan.period && <span style={planPeriodStyle}>{plan.period}</span>}
                 </div>
 
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px', flex: 1 }}>
+                <ul style={featureListStyle}>
                   {plan.features.map((f) => (
-                    <li
-                      key={f}
-                      style={{
-                        color: 'rgba(255,255,255,0.7)',
-                        fontSize: '13px',
-                        padding: '4px 0',
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: '8px',
-                      }}
-                    >
+                    <li key={f} style={featureItemStyle}>
                       <span style={{ color: plan.color, fontSize: '10px', marginTop: '4px' }}>●</span>
                       {f}
                     </li>
@@ -291,19 +327,7 @@ const PricingOverlay: React.FC = () => {
                 </ul>
 
                 {plan.isFree ? (
-                  <button
-                    disabled
-                    style={{
-                      padding: '10px',
-                      borderRadius: '10px',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      background: 'transparent',
-                      color: 'rgba(255,255,255,0.3)',
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      cursor: 'default',
-                    }}
-                  >
+                  <button disabled style={freeBtnStyle}>
                     {isCurrent ? 'Current Plan' : 'Free'}
                   </button>
                 ) : (
@@ -321,9 +345,7 @@ const PricingOverlay: React.FC = () => {
                         : plan.popular
                           ? plan.color
                           : `${plan.color}33`,
-                      color: isCurrent
-                        ? 'rgba(255,255,255,0.4)'
-                        : '#fff',
+                      color: isCurrent ? 'rgba(255,255,255,0.4)' : '#fff',
                       fontSize: '14px',
                       fontWeight: 600,
                       cursor: isCurrent ? 'default' : loading ? 'wait' : 'pointer',
@@ -343,21 +365,12 @@ const PricingOverlay: React.FC = () => {
         </div>
 
         {/* Credit packs */}
-        <div
-          style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '16px',
-            padding: '24px',
-          }}
-        >
-          <h3 style={{ color: 'rgba(255,255,255,0.8)', fontSize: '16px', fontWeight: 600, margin: '0 0 16px' }}>
-            Credit Packs
-          </h3>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '-8px 0 16px' }}>
+        <div style={creditSectionStyle}>
+          <h3 style={creditTitleStyle}>Credit Packs</h3>
+          <p style={creditDescStyle}>
             For image generation, long writing, voice calls, and more
           </p>
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={creditFlexStyle}>
             {CREDIT_PACKS.map((pack) => (
               <button
                 key={pack.credits}
@@ -376,15 +389,15 @@ const PricingOverlay: React.FC = () => {
                   opacity: currentPlan === 'free' ? 0.4 : 1,
                 }}
               >
-                <div style={{ fontSize: '20px', fontWeight: 700 }}>✦ {pack.credits}</div>
-                <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>
+                <div style={creditAmountStyle}>✦ {pack.credits}</div>
+                <div style={creditPriceStyle}>
                   {loading === `credits-${pack.credits}` ? 'Loading...' : pack.price}
                 </div>
               </button>
             ))}
           </div>
           {currentPlan === 'free' && (
-            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', marginTop: '12px', textAlign: 'center' }}>
+            <p style={creditNoteStyle}>
               Subscribe to a paid plan to purchase credit packs
             </p>
           )}
@@ -392,18 +405,8 @@ const PricingOverlay: React.FC = () => {
 
         {/* Manage subscription */}
         {currentPlan !== 'free' && (
-          <div style={{ textAlign: 'center', marginTop: '16px' }}>
-            <button
-              onClick={handlePortal}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'rgba(255,255,255,0.4)',
-                fontSize: '13px',
-                cursor: 'pointer',
-                textDecoration: 'underline',
-              }}
-            >
+          <div style={manageLinkContainerStyle}>
+            <button onClick={handlePortal} style={manageLinkStyle}>
               Manage Subscription
             </button>
           </div>
@@ -411,6 +414,8 @@ const PricingOverlay: React.FC = () => {
       </div>
     </div>
   );
-};
+});
+
+PricingOverlay.displayName = 'PricingOverlay';
 
 export default PricingOverlay;
