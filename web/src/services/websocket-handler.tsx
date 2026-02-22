@@ -378,7 +378,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       default:
         if (import.meta.env.DEV) console.warn('Unknown control command:', controlText);
     }
-  }, [setAiState, clearResponse, setForceNewMessage, startMic, stopMic]);
+  }, [setAiState, clearResponse, startMic, stopMic]);
 
   // ─── Message handler (receives adapted Gateway messages) ──────
 
@@ -525,7 +525,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         // Suppress noisy warnings for known-unhandled types
         break;
     }
-  }, [aiState, appendHumanMessage, appendAIMessage, baseUrl, bgUrlContext, setAiState, setConfName, setConfUid, setConfigFiles, setCurrentHistoryUid, setHistoryList, setMessages, setModelInfo, setSubtitleText, setFullResponse, startMic, stopMic, setSelfUid, setGroupMembers, setIsOwner, backendSynthComplete, setBackendSynthComplete, clearResponse, handleControlMessage, appendOrUpdateToolCallMessage, interrupt, setBrowserViewData, t, affinityContext]);
+  }, [handleControlMessage, setSubtitleText, setFullResponse, appendAIMessage, clearResponse, setBackendSynthComplete, setAiState, setForceNewMessage, interrupt, setBrowserViewData, appendOrUpdateToolCallMessage, startTool, completeTool, failTool, affinityContext]);
 
   // ─── Connect to Gateway on mount / URL change ─────────────────
 

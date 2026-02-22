@@ -277,6 +277,7 @@ export function ChatHistoryProvider({ children }: { children: ReactNode }) {
       appendAIMessage,
       appendOrUpdateToolCallMessage,
       popLastHumanMessage,
+      setMessages,
     ],
   );
 

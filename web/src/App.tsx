@@ -305,7 +305,7 @@ function MainContent(): JSX.Element {
     };
 
     vv.addEventListener("resize", throttledResize);
-    vv.addEventListener("scroll", throttledResize);
+    vv.addEventListener("scroll", throttledResize, { passive: true });
     return () => {
       cancelAnimationFrame(rafId);
       vv.removeEventListener("resize", throttledResize);
