@@ -52,6 +52,7 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
 
   const presentingTimer = useRef<ReturnType<typeof setTimeout>>();
   const removalTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const demoTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 
   const computeDominant = useCallback((tools: ToolCall[]): ToolCategory | null => {
     if (tools.length === 0) return null;
@@ -188,6 +189,8 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
     if (presentingTimer.current) clearTimeout(presentingTimer.current);
     removalTimers.current.forEach(t => clearTimeout(t));
     removalTimers.current.clear();
+    demoTimers.current.forEach(t => clearTimeout(t));
+    demoTimers.current.clear();
   }, []);
 
   const dominantCategory = useMemo(() => computeDominant(activeTools), [computeDominant, activeTools]);
@@ -195,6 +198,11 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
 
   // Demo trigger: window.__triggerToolDemo('search') in browser console
   useEffect(() => {
+    const timers = demoTimers.current;
+    const trackTimeout = (fn: () => void, ms: number) => {
+      const id = setTimeout(() => { timers.delete(id); fn(); }, ms);
+      timers.add(id);
+    };
     window.__triggerToolDemo = (category: ToolCategory = 'search') => {
       startTool({ name: `demo_${category}`, category, arguments: JSON.stringify({ query: 'Demo 展示' }) });
       // The tool will auto-complete after 3s via the timeout below
@@ -202,15 +210,19 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
         setActiveTools(prev => {
           const demoTool = prev.find(t => t.name === `demo_${category}` && t.status === 'pending');
           if (demoTool) {
-            setTimeout(() => completeTool(demoTool.id, JSON.stringify({ summary: `${category} 工具演示完成`, demo: true })), 3000);
+            trackTimeout(() => completeTool(demoTool.id, JSON.stringify({ summary: `${category} 工具演示完成`, demo: true })), 3000);
           }
           return prev;
         });
       };
       // Small delay to let React state settle
-      setTimeout(checkAndComplete, 50);
+      trackTimeout(checkAndComplete, 50);
     };
-    return () => { delete window.__triggerToolDemo; };
+    return () => {
+      delete window.__triggerToolDemo;
+      timers.forEach(id => clearTimeout(id));
+      timers.clear();
+    };
   }, [startTool, completeTool]);
 
   const value = useMemo(() => ({

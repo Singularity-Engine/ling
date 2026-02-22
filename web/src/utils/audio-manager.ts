@@ -1,3 +1,7 @@
+import { createLogger } from './logger';
+
+const log = createLogger('AudioManager');
+
 type AudioEventListener = (audio: HTMLAudioElement | null) => void;
 
 /** Minimal duck-type for the Live2D model parts used by AudioManager */
@@ -46,7 +50,7 @@ class AudioManager {
    */
   stopCurrentAudioAndLipSync() {
     if (this.currentAudio) {
-      if (import.meta.env.DEV) console.log('[AudioManager] Stopping current audio and lip sync');
+      log.debug('Stopping current audio and lip sync');
       const audio = this.currentAudio;
       
       // Stop audio playback
@@ -60,20 +64,20 @@ class AudioManager {
         try {
           // Release PCM data to stop lip sync calculation in update()
           model._wavFileHandler.releasePcmData();
-          if (import.meta.env.DEV) console.log('[AudioManager] Called _wavFileHandler.releasePcmData()');
+          log.debug('Called _wavFileHandler.releasePcmData()');
 
           // Additional reset of state variables as fallback
           model._wavFileHandler._lastRms = 0.0;
           model._wavFileHandler._sampleOffset = 0;
           model._wavFileHandler._userTimeSeconds = 0.0;
-          if (import.meta.env.DEV) console.log('[AudioManager] Also reset _lastRms, _sampleOffset, _userTimeSeconds as fallback');
+          log.debug('Also reset _lastRms, _sampleOffset, _userTimeSeconds as fallback');
         } catch (e) {
-          console.error('[AudioManager] Error stopping/resetting wavFileHandler:', e);
+          log.error('Error stopping/resetting wavFileHandler:', e);
         }
       } else if (model) {
-        if (import.meta.env.DEV) console.warn('[AudioManager] Current model does not have _wavFileHandler to stop/reset.');
+        log.warn('Current model does not have _wavFileHandler to stop/reset.');
       } else {
-        if (import.meta.env.DEV) console.log('[AudioManager] No associated model found to stop lip sync.');
+        log.debug('No associated model found to stop lip sync.');
       }
 
       // Clear references
@@ -81,7 +85,7 @@ class AudioManager {
       this.currentModel = null;
       this.notifyListeners();
     } else {
-      if (import.meta.env.DEV) console.log('[AudioManager] No current audio playing to stop.');
+      log.debug('No current audio playing to stop.');
     }
   }
 
