@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import { useState, type ReactNode } from 'react';
+import { memo, useState, type ReactNode } from 'react';
 import {
   Text, Input, NumberInput, createListCollection, Flex, Box, Stack,
 } from '@chakra-ui/react';
@@ -89,7 +89,7 @@ interface InputFieldProps {
 }
 
 // Reusable Components
-export function SelectField({
+export const SelectField = memo(function SelectField({
   label,
   value,
   onChange,
@@ -120,9 +120,9 @@ export function SelectField({
       </SelectRoot>
     </Field>
   );
-}
+});
 
-export function NumberField({
+export const NumberField = memo(function NumberField({
   label,
   value,
   onChange,
@@ -159,9 +159,9 @@ export function NumberField({
       </NumberInput.Root>
     </Field>
   );
-}
+});
 
-export function SwitchField({ label, checked, onChange, help }: SwitchFieldProps): JSX.Element {
+export const SwitchField = memo(function SwitchField({ label, checked, onChange, help }: SwitchFieldProps): JSX.Element {
   return (
     <Field
       {...settingStyles.common.field}
@@ -179,9 +179,9 @@ export function SwitchField({ label, checked, onChange, help }: SwitchFieldProps
       />
     </Field>
   );
-}
+});
 
-export function InputField({
+export const InputField = memo(function InputField({
   label,
   value,
   onChange,
@@ -206,7 +206,7 @@ export function InputField({
       />
     </Field>
   );
-}
+});
 
 // Section card for grouping related settings
 interface SettingSectionProps {

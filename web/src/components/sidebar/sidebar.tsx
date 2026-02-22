@@ -28,6 +28,10 @@ interface HeaderButtonsProps {
   isElectron: boolean
 }
 
+// Static style objects — avoids new references that defeat ToggleButton memo
+const S_TOGGLE_OPEN: React.CSSProperties = { transform: 'rotate(0deg)' };
+const S_TOGGLE_COLLAPSED: React.CSSProperties = { transform: 'rotate(180deg)' };
+
 // Reusable components
 const ToggleButton = memo(({ isCollapsed, onToggle }: {
   isCollapsed: boolean
@@ -42,9 +46,7 @@ const ToggleButton = memo(({ isCollapsed, onToggle }: {
     aria-label={isCollapsed ? t('ui.expandSidebar') : t('ui.collapseSidebar')}
     aria-expanded={!isCollapsed}
     title={isCollapsed ? t('ui.expandSidebar') : t('ui.collapseSidebar')}
-    style={{
-      transform: isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)',
-    }}
+    style={isCollapsed ? S_TOGGLE_COLLAPSED : S_TOGGLE_OPEN}
     onClick={onToggle}
     onKeyDown={(e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle(); } }}
   >

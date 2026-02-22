@@ -1,8 +1,9 @@
-import { 
-  Box, 
-  Stack, 
-  Text, 
-  Heading, 
+import { memo } from 'react';
+import {
+  Box,
+  Stack,
+  Text,
+  Heading,
   HStack,
   Icon,
 } from '@chakra-ui/react';
@@ -11,15 +12,15 @@ import { FaGithub, FaBook } from 'react-icons/fa';
 import { settingStyles } from './setting-styles';
 import { Button } from '@/components/ui/button';
 
-function About(): JSX.Element {
+// Static click handlers — URLs never change, no need to recreate per render
+const openGithub = () => window.open('https://github.com/Singularity-Engine/ling-web', '_blank');
+const openDocs = () => window.open('https://docs.llmvtuber.com', '_blank');
+const openLicense = () => window.open('https://github.com/Singularity-Engine/ling-web/blob/main/LICENSE', '_blank');
+
+const APP_VERSION = '1.2.1';
+
+const About = memo(function About(): JSX.Element {
   const { t } = useTranslation();
-  
-  const openExternalLink = (url: string) => {
-    // Handle external link opening via electron
-    window.open(url, '_blank');
-  };
-  
-  const appVersion = '1.2.1';
 
   return (
     <Stack {...settingStyles.common.container} gap={3}>
@@ -30,7 +31,7 @@ function About(): JSX.Element {
         <Text fontWeight="bold" mb={0}>
           {t("settings.about.version")}
         </Text>
-        <Text>{appVersion}</Text>
+        <Text>{APP_VERSION}</Text>
       </Box>
       <Box borderTop="1px solid" borderColor="whiteAlpha.200" pt={2} mt={1} />
       <Box mt={1}>
@@ -38,27 +39,17 @@ function About(): JSX.Element {
           {t("settings.about.projectLinks")}
         </Text>
         <HStack mt={1} gap={2}>
-          <Button
-            size="sm"
-            onClick={() =>
-              openExternalLink(
-                "https://github.com/Singularity-Engine/ling-web"
-              )
-            }
-          >
+          <Button size="sm" onClick={openGithub}>
             <Icon as={FaGithub} mr={2} /> {t("settings.about.github")}
           </Button>
-          <Button
-            size="sm"
-            onClick={() => openExternalLink("https://docs.llmvtuber.com")}
-          >
+          <Button size="sm" onClick={openDocs}>
             <Icon as={FaBook} mr={2} /> {t("settings.about.documentation")}
           </Button>
         </HStack>
       </Box>
       <Box borderTop="1px solid" borderColor="whiteAlpha.200" pt={2} mt={1} />
       <Box mt={1}>
-        <Button size="xs" colorPalette="blue" onClick={() => openExternalLink("https://github.com/Singularity-Engine/ling-web/blob/main/LICENSE")}>
+        <Button size="xs" colorPalette="blue" onClick={openLicense}>
           {t("settings.about.viewLicense")}
         </Button>
       </Box>
@@ -70,6 +61,6 @@ function About(): JSX.Element {
       </Box>
     </Stack>
   );
-}
+});
 
 export default About;

@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Stack, createListCollection } from "@chakra-ui/react";
 import { useBgUrl } from "@/context/bgurl-context";
@@ -14,43 +14,44 @@ interface GeneralProps {
   onCancel?: (callback: () => void) => () => void;
 }
 
-// Data collection definition
+// Static collection — labels never change, no need to recreate
+const LANGUAGE_COLLECTION = createListCollection({
+  items: [
+    { label: "English", value: "en" },
+    { label: "中文", value: "zh" },
+  ],
+});
+
+// Memoized collections — avoids recreating on every render
 const useCollections = (t: (key: string) => string) => {
   const { backgroundFiles } = useBgUrl() || {};
   const { configFiles } = useConfig();
 
-  const languages = createListCollection({
-    items: [
-      { label: "English", value: "en" },
-      { label: "中文", value: "zh" },
-    ],
-  });
-
-  const themes = createListCollection({
+  const themes = useMemo(() => createListCollection({
     items: [
       { label: t("settings.general.themeDark"), value: "dark" },
       { label: t("settings.general.themeLight"), value: "light" },
       { label: t("settings.general.themeSystem"), value: "system" },
     ],
-  });
+  }), [t]);
 
-  const backgrounds = createListCollection({
+  const backgrounds = useMemo(() => createListCollection({
     items:
       backgroundFiles?.map((filename) => ({
         label: String(filename),
         value: `/bg/${filename}`,
       })) || [],
-  });
+  }), [backgroundFiles]);
 
-  const characterPresets = createListCollection({
+  const characterPresets = useMemo(() => createListCollection({
     items: configFiles.map((config) => ({
       label: config.name,
       value: config.filename,
     })),
-  });
+  }), [configFiles]);
 
   return {
-    languages,
+    languages: LANGUAGE_COLLECTION,
     themes,
     backgrounds,
     characterPresets,

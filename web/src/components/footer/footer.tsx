@@ -37,6 +37,10 @@ interface MessageInputProps {
   onCompositionEnd: () => void
 }
 
+// Static style objects — avoids new references that defeat ToggleButton memo
+const S_TOGGLE_OPEN: React.CSSProperties = { transform: 'rotate(0deg)' };
+const S_TOGGLE_COLLAPSED: React.CSSProperties = { transform: 'rotate(180deg)' };
+
 // Reusable components
 const ToggleButton = memo(({ isCollapsed, onToggle }: ToggleButtonProps) => {
   const { t } = useTranslation();
@@ -50,9 +54,7 @@ const ToggleButton = memo(({ isCollapsed, onToggle }: ToggleButtonProps) => {
     title={isCollapsed ? t('ui.expandFooter') : t('ui.collapseFooter')}
     onClick={onToggle}
     onKeyDown={(e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle?.(); } }}
-    style={{
-      transform: isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)',
-    }}
+    style={isCollapsed ? S_TOGGLE_COLLAPSED : S_TOGGLE_OPEN}
   >
     <FiChevronDown />
   </Box>
