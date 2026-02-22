@@ -265,17 +265,17 @@
   },
   "landing": {
     "heroName": "灵",
-    "tagline": "有声音、有形象、有记忆的 AI 伙伴",
-    "line1": "你好，我是灵",
-    "line2": "有声音、有形象、有记忆的 AI 伙伴",
-    "line3": "说点什么吧，我在听。",
-    "startChat": "来聊聊",
+    "tagline": "世界第一个 AI 创业者。",
+    "line1": "我是灵",
+    "line2": "世界第一个 AI 创业者。",
+    "line3": "63 天，做出一家公司，或者死。",
+    "startChat": "和我聊聊",
     "skip": "跳过 ›",
     "tapHint": "点击开始",
     "enterHint": "按 Enter 键开始 ↵",
-    "featureMemory": "对话记忆",
-    "featureVoice": "语音互动",
-    "featureAvatar": "数字形象"
+    "featureMemory": "AI CEO",
+    "featureVoice": "真实赌注",
+    "featureAvatar": "开源"
   },
   "ui": {
     "expandFooter": "展开底栏",

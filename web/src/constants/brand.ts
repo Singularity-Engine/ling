@@ -13,9 +13,9 @@ export const BRAND_AVATAR_NAME = '灵 Avatar';
 
 // ── SEO — Home page ─────────────────────────────────────────
 
-export const SEO_HOME_TITLE = '灵 Ling — AI 数字人 · Singularity Engine';
-export const SEO_HOME_DESC = '有灵魂、能干活的 AI 数字人。记忆、情感、工具，三位一体。';
-export const SEO_HOME_OG_TITLE = '灵 - AI 数字人';
+export const SEO_HOME_TITLE = 'Ling — Talk to the First AI Entrepreneur';
+export const SEO_HOME_DESC = 'Ling is building the world\'s first AI-run company. 63 days of runway. Chat with her, give her ideas, be her first customer.';
+export const SEO_HOME_OG_TITLE = 'Ling — The First AI Entrepreneur';
 
 // ── SEO — Terms page ────────────────────────────────────────
 

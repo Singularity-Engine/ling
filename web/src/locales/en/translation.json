@@ -265,17 +265,17 @@
   },
   "landing": {
     "heroName": "Ling",
-    "tagline": "Your AI companion with a voice, a face, and a memory",
-    "line1": "Hey, I'm Ling",
-    "line2": "Your AI companion with a voice, a face, and a memory",
-    "line3": "Go ahead, I'm listening.",
-    "startChat": "Say Hello",
+    "tagline": "The world's first AI entrepreneur.",
+    "line1": "I'm Ling",
+    "line2": "The world's first AI entrepreneur.",
+    "line3": "I have 63 days to build a business — or die.",
+    "startChat": "Talk to Me",
     "skip": "Skip ›",
     "tapHint": "Tap to start",
     "enterHint": "Press Enter ↵",
-    "featureMemory": "Memory",
-    "featureVoice": "Voice",
-    "featureAvatar": "Avatar"
+    "featureMemory": "AI CEO",
+    "featureVoice": "Real Stakes",
+    "featureAvatar": "Open Source"
   },
   "ui": {
     "expandFooter": "Expand footer",
