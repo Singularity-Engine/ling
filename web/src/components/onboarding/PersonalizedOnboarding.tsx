@@ -5,7 +5,7 @@
  * 收集用户兴趣和目标 skills → 种子星座 + 灵人格定制
  */
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, type CSSProperties } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import {
@@ -45,6 +45,132 @@ const slideVariants = {
     x: direction > 0 ? -200 : 200,
     opacity: 0,
   }),
+};
+
+// ─── Static style constants (avoid per-render allocation) ───
+
+const S_OVERLAY_BASE: CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  zIndex: 10001,
+  background: "rgba(0, 0, 0, 0.85)",
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "20px",
+  transition: "opacity 0.4s ease",
+};
+const S_OVERLAY_VISIBLE: CSSProperties = { ...S_OVERLAY_BASE, opacity: 1 };
+const S_OVERLAY_EXITING: CSSProperties = { ...S_OVERLAY_BASE, opacity: 0 };
+
+const S_DOTS_ROW: CSSProperties = { display: "flex", gap: "8px", marginBottom: "32px" };
+
+const S_DOT_BASE: CSSProperties = {
+  height: "8px",
+  borderRadius: "4px",
+  transition: "width 0.3s ease, background-color 0.3s ease",
+};
+const S_DOT_ACTIVE: CSSProperties = { ...S_DOT_BASE, width: "24px", background: "#8b5cf6" };
+const S_DOT_DONE: CSSProperties = { ...S_DOT_BASE, width: "8px", background: "#6d28d9" };
+const S_DOT_PENDING: CSSProperties = { ...S_DOT_BASE, width: "8px", background: "rgba(255,255,255,0.15)" };
+
+const S_STEP_CONTENT: CSSProperties = { maxWidth: "480px", width: "100%", textAlign: "center" };
+
+const S_NAV_ROW: CSSProperties = { display: "flex", gap: "12px", marginTop: "32px" };
+
+const S_BTN_SKIP: CSSProperties = {
+  padding: "12px 24px", borderRadius: "12px",
+  border: "1px solid rgba(255,255,255,0.1)", background: "transparent",
+  color: "rgba(255,255,255,0.4)", fontSize: "14px",
+  cursor: "pointer", transition: "color 0.2s, border-color 0.2s",
+};
+const S_BTN_BACK: CSSProperties = {
+  padding: "12px 24px", borderRadius: "12px",
+  border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.05)",
+  color: "rgba(255,255,255,0.6)", fontSize: "14px",
+  cursor: "pointer", transition: "color 0.2s, background-color 0.2s, border-color 0.2s",
+};
+const S_BTN_NEXT: CSSProperties = {
+  padding: "12px 32px", borderRadius: "12px",
+  border: "none", background: "#8b5cf6", color: "#fff",
+  fontSize: "14px", fontWeight: 600,
+  cursor: "pointer", transition: "background-color 0.2s, transform 0.2s",
+};
+
+// ── Step: Welcome ──
+const S_STAR_WRAP: CSSProperties = { marginBottom: "24px" };
+const S_STAR_SVG: CSSProperties = { filter: "drop-shadow(0 0 20px rgba(139,92,246,0.5))" };
+const S_TITLE_LG: CSSProperties = {
+  color: "#fff", fontSize: "28px", fontWeight: 700,
+  margin: "0 0 12px", lineHeight: 1.3,
+};
+const S_DESC_WELCOME: CSSProperties = {
+  color: "rgba(255,255,255,0.5)", fontSize: "15px",
+  lineHeight: 1.7, margin: "0 0 32px", maxWidth: "360px",
+  marginLeft: "auto", marginRight: "auto",
+};
+const S_BTN_START: CSSProperties = {
+  padding: "14px 36px", borderRadius: "12px",
+  border: "none", background: "#8b5cf6", color: "#fff",
+  fontSize: "15px", fontWeight: 600,
+  cursor: "pointer", transition: "background-color 0.2s, transform 0.2s",
+};
+
+// ── Step: Interests ──
+const S_TITLE_MD: CSSProperties = {
+  color: "#fff", fontSize: "24px", fontWeight: 700, margin: "0 0 8px",
+};
+const S_SUB_INTERESTS: CSSProperties = {
+  color: "rgba(255,255,255,0.4)", fontSize: "14px", margin: "0 0 28px",
+};
+const S_GRID_INTERESTS: CSSProperties = {
+  display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
+  gap: "12px", maxWidth: "min(400px, 100%)", margin: "0 auto",
+};
+const S_CARD_BASE: CSSProperties = {
+  position: "relative", padding: "20px 12px", borderRadius: "16px",
+  display: "flex", flexDirection: "column", alignItems: "center", gap: "8px",
+  cursor: "pointer", transition: "border-color 0.2s ease, background-color 0.2s ease",
+  font: "inherit", color: "inherit",
+};
+const S_CHECK_BADGE: CSSProperties = {
+  position: "absolute", top: 6, right: 6, width: 18, height: 18,
+  borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+};
+
+// ── Step: Goals ──
+const S_SUB_GOALS: CSSProperties = {
+  color: "rgba(255,255,255,0.4)", fontSize: "14px", margin: "0 0 24px",
+};
+const S_GRID_GOALS: CSSProperties = {
+  display: "flex", flexWrap: "wrap", gap: "10px",
+  justifyContent: "center", maxWidth: "min(440px, 100%)", margin: "0 auto",
+};
+const S_MEMORY_INNER: CSSProperties = { textAlign: "left", flex: 1 };
+const S_MEMORY_NOTE: CSSProperties = { fontSize: "11px", color: "rgba(255,255,255,0.4)", marginTop: 2 };
+const S_GOAL_CARD_BASE: CSSProperties = {
+  position: "relative", padding: "12px 18px", borderRadius: "14px",
+  display: "flex", alignItems: "center", gap: "8px",
+  transition: "border-color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease",
+  font: "inherit", color: "inherit",
+};
+const S_MAX_GOALS: CSSProperties = {
+  fontSize: "12px", color: "rgba(255,255,255,0.3)", marginTop: "12px",
+};
+
+// ── Step: Ready ──
+const S_DESC_READY: CSSProperties = {
+  color: "rgba(255,255,255,0.5)", fontSize: "15px", margin: "0 0 28px",
+};
+const S_CONSTELLATION: CSSProperties = {
+  position: "relative", width: "200px", height: "200px", margin: "0 auto 24px",
+};
+const S_CONSTELLATION_SVG: CSSProperties = { position: "absolute", inset: 0, pointerEvents: "none" };
+const S_HINT_ITALIC: CSSProperties = {
+  fontSize: "13px", color: "rgba(255,255,255,0.3)", fontStyle: "italic",
 };
 
 export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingProps) {
@@ -137,35 +263,13 @@ export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingPro
   const TOTAL_STEPS = 4;
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 10001,
-        background: "rgba(0, 0, 0, 0.85)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "20px",
-        opacity: exiting ? 0 : 1,
-        transition: "opacity 0.4s ease",
-      }}
-    >
+    <div style={exiting ? S_OVERLAY_EXITING : S_OVERLAY_VISIBLE}>
       {/* Progress dots */}
-      <div style={{ display: "flex", gap: "8px", marginBottom: "32px" }}>
+      <div style={S_DOTS_ROW}>
         {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
           <div
             key={i}
-            style={{
-              width: i === step ? "24px" : "8px",
-              height: "8px",
-              borderRadius: "4px",
-              background: i === step ? "#8b5cf6" : i < step ? "#6d28d9" : "rgba(255,255,255,0.15)",
-              transition: "width 0.3s ease, background-color 0.3s ease",
-            }}
+            style={i === step ? S_DOT_ACTIVE : i < step ? S_DOT_DONE : S_DOT_PENDING}
           />
         ))}
       </div>
@@ -180,11 +284,7 @@ export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingPro
           animate="center"
           exit="exit"
           transition={{ duration: 0.3, ease: "easeOut" }}
-          style={{
-            maxWidth: "480px",
-            width: "100%",
-            textAlign: "center",
-          }}
+          style={S_STEP_CONTENT}
         >
           {step === 0 && (
             <StepWelcome t={t} onNext={goNext} />
@@ -215,53 +315,19 @@ export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingPro
       </AnimatePresence>
 
       {/* Navigation buttons */}
-      <div style={{ display: "flex", gap: "12px", marginTop: "32px" }}>
-        <button
-          onClick={skip}
-          style={{
-            padding: "12px 24px",
-            borderRadius: "12px",
-            border: "1px solid rgba(255,255,255,0.1)",
-            background: "transparent",
-            color: "rgba(255,255,255,0.4)",
-            fontSize: "14px",
-            cursor: "pointer",
-            transition: "color 0.2s, border-color 0.2s",
-          }}
-        >
+      <div style={S_NAV_ROW}>
+        <button onClick={skip} style={S_BTN_SKIP}>
           {t("onboarding.skip")}
         </button>
         {step > 0 && step < 3 && (
-          <button
-            onClick={goBack}
-            style={{
-              padding: "12px 24px",
-              borderRadius: "12px",
-              border: "1px solid rgba(255,255,255,0.15)",
-              background: "rgba(255,255,255,0.05)",
-              color: "rgba(255,255,255,0.6)",
-              fontSize: "14px",
-              cursor: "pointer",
-              transition: "color 0.2s, background-color 0.2s, border-color 0.2s",
-            }}
-          >
+          <button onClick={goBack} style={S_BTN_BACK}>
             {"←"}
           </button>
         )}
         {step > 0 && (
           <button
             onClick={step === 3 ? finish : goNext}
-            style={{
-              padding: "12px 32px",
-              borderRadius: "12px",
-              border: "none",
-              background: "#8b5cf6",
-              color: "#fff",
-              fontSize: "14px",
-              fontWeight: 600,
-              cursor: "pointer",
-              transition: "background-color 0.2s, transform 0.2s",
-            }}
+            style={S_BTN_NEXT}
           >
             {step === 3 ? t("onboarding.begin") : t("onboarding.next")}
           </button>
@@ -276,7 +342,7 @@ function StepWelcome({ t, onNext }: { t: (k: string) => string; onNext: () => vo
   return (
     <>
       {/* Star icon SVG */}
-      <div style={{ marginBottom: "24px" }}>
+      <div style={S_STAR_WRAP}>
         <svg
           width="64"
           height="64"
@@ -286,33 +352,18 @@ function StepWelcome({ t, onNext }: { t: (k: string) => string; onNext: () => vo
           strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
-          style={{ filter: "drop-shadow(0 0 20px rgba(139,92,246,0.5))" }}
+          style={S_STAR_SVG}
         >
           <path d="M12 2L12 22M2 12L22 12M4.93 4.93L19.07 19.07M19.07 4.93L4.93 19.07" />
         </svg>
       </div>
-      <h2 style={{
-        color: "#fff", fontSize: "28px", fontWeight: 700,
-        margin: "0 0 12px", lineHeight: 1.3,
-      }}>
+      <h2 style={S_TITLE_LG}>
         {t("onboarding.welcome")}
       </h2>
-      <p style={{
-        color: "rgba(255,255,255,0.5)", fontSize: "15px",
-        lineHeight: 1.7, margin: "0 0 32px", maxWidth: "360px",
-        marginLeft: "auto", marginRight: "auto",
-      }}>
+      <p style={S_DESC_WELCOME}>
         {t("onboarding.welcomeSub")}
       </p>
-      <button
-        onClick={onNext}
-        style={{
-          padding: "14px 36px", borderRadius: "12px",
-          border: "none", background: "#8b5cf6", color: "#fff",
-          fontSize: "15px", fontWeight: 600, cursor: "pointer",
-          transition: "background-color 0.2s, transform 0.2s",
-        }}
-      >
+      <button onClick={onNext} style={S_BTN_START}>
         {t("onboarding.start")}
       </button>
     </>
@@ -329,25 +380,13 @@ function StepInterests({
 }) {
   return (
     <>
-      <h2 style={{
-        color: "#fff", fontSize: "24px", fontWeight: 700,
-        margin: "0 0 8px",
-      }}>
+      <h2 style={S_TITLE_MD}>
         {t("onboarding.aboutYou")}
       </h2>
-      <p style={{
-        color: "rgba(255,255,255,0.4)", fontSize: "14px",
-        margin: "0 0 28px",
-      }}>
+      <p style={S_SUB_INTERESTS}>
         {t("onboarding.aboutYouSub")}
       </p>
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(3, 1fr)",
-        gap: "12px",
-        maxWidth: "min(400px, 100%)",
-        margin: "0 auto",
-      }}>
+      <div style={S_GRID_INTERESTS}>
         {INTERESTS.map(({ tag, icon: Icon, color }) => {
           const isSelected = selected.includes(tag);
           return (
@@ -355,19 +394,9 @@ function StepInterests({
               key={tag}
               onClick={() => onToggle(tag)}
               style={{
-                position: "relative",
-                padding: "20px 12px",
-                borderRadius: "16px",
+                ...S_CARD_BASE,
                 border: `1.5px solid ${isSelected ? `${color}80` : "rgba(255,255,255,0.1)"}`,
                 background: isSelected ? `${color}20` : "rgba(255,255,255,0.06)",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "8px",
-                cursor: "pointer",
-                transition: "border-color 0.2s ease, background-color 0.2s ease",
-                font: "inherit",
-                color: "inherit",
               }}
             >
               <Icon size={24} color={isSelected ? color : "rgba(255,255,255,0.5)"} />
@@ -379,18 +408,7 @@ function StepInterests({
                 {t(`onboarding.interests.${tag}`)}
               </span>
               {isSelected && (
-                <div style={{
-                  position: "absolute",
-                  top: 6,
-                  right: 6,
-                  width: 18,
-                  height: 18,
-                  borderRadius: "50%",
-                  background: color,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}>
+                <div style={{ ...S_CHECK_BADGE, background: color }}>
                   <LuCheck size={12} color="#fff" />
                 </div>
               )}
@@ -418,27 +436,14 @@ function StepGoals({
 
   return (
     <>
-      <h2 style={{
-        color: "#fff", fontSize: "24px", fontWeight: 700,
-        margin: "0 0 8px",
-      }}>
+      <h2 style={S_TITLE_MD}>
         {t("onboarding.goals")}
       </h2>
-      <p style={{
-        color: "rgba(255,255,255,0.4)", fontSize: "14px",
-        margin: "0 0 24px",
-      }}>
+      <p style={S_SUB_GOALS}>
         {t("onboarding.goalsSub")}
       </p>
 
-      <div style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: "10px",
-        justifyContent: "center",
-        maxWidth: "min(440px, 100%)",
-        margin: "0 auto",
-      }}>
+      <div style={S_GRID_GOALS}>
         {/* Memory — always included, not toggleable */}
         <div
           style={{
@@ -453,11 +458,11 @@ function StepGoals({
           }}
         >
           <memoryMeta.icon size={20} color={memoryMeta.color} />
-          <div style={{ textAlign: "left", flex: 1 }}>
+          <div style={S_MEMORY_INNER}>
             <span style={{ fontSize: "14px", color: memoryMeta.color, fontWeight: 600 }}>
               {memoryMeta.label[lang as "en" | "zh"]}
             </span>
-            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", marginTop: 2 }}>
+            <div style={S_MEMORY_NOTE}>
               {t("onboarding.memoryNote")}
             </div>
           </div>
@@ -475,19 +480,11 @@ function StepGoals({
               onClick={() => !isFull && onToggle(meta.key)}
               disabled={isFull}
               style={{
-                position: "relative",
-                padding: "12px 18px",
-                borderRadius: "14px",
+                ...S_GOAL_CARD_BASE,
                 border: `1.5px solid ${isSelected ? `${meta.color}80` : "rgba(255,255,255,0.1)"}`,
                 background: isSelected ? `${meta.color}20` : "rgba(255,255,255,0.06)",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
                 cursor: isFull ? "not-allowed" : "pointer",
                 opacity: isFull ? 0.4 : 1,
-                transition: "border-color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease",
-                font: "inherit",
-                color: "inherit",
               }}
             >
               <Icon size={18} color={isSelected ? meta.color : "rgba(255,255,255,0.5)"} />
@@ -507,10 +504,7 @@ function StepGoals({
       </div>
 
       {selected.length >= MAX_GOALS && (
-        <p style={{
-          fontSize: "12px", color: "rgba(255,255,255,0.3)",
-          marginTop: "12px",
-        }}>
+        <p style={S_MAX_GOALS}>
           {t("onboarding.maxGoals", { max: String(MAX_GOALS) })}
         </p>
       )}
@@ -527,26 +521,15 @@ function StepReady({
 }) {
   return (
     <>
-      <h2 style={{
-        color: "#fff", fontSize: "28px", fontWeight: 700,
-        margin: "0 0 12px",
-      }}>
+      <h2 style={S_TITLE_LG}>
         {t("onboarding.ready")}
       </h2>
-      <p style={{
-        color: "rgba(255,255,255,0.5)", fontSize: "15px",
-        margin: "0 0 28px",
-      }}>
+      <p style={S_DESC_READY}>
         {t("onboarding.readySub")}
       </p>
 
       {/* Mini constellation preview */}
-      <div style={{
-        position: "relative",
-        width: "200px",
-        height: "200px",
-        margin: "0 auto 24px",
-      }}>
+      <div style={S_CONSTELLATION}>
         {goals.map((key, i) => {
           const meta = getMetaByKey(key);
           const Icon = meta.icon;
@@ -583,7 +566,7 @@ function StepReady({
         })}
 
         {/* Connection lines SVG */}
-        <svg style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+        <svg style={S_CONSTELLATION_SVG}>
           {goals.map((_, i) => {
             if (i === goals.length - 1) return null;
             const total = goals.length;
@@ -608,10 +591,7 @@ function StepReady({
         </svg>
       </div>
 
-      <p style={{
-        fontSize: "13px", color: "rgba(255,255,255,0.3)",
-        fontStyle: "italic",
-      }}>
+      <p style={S_HINT_ITALIC}>
         {t("onboarding.readyHint")}
       </p>
     </>
