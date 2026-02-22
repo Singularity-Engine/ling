@@ -5,7 +5,7 @@
  * owner/admin 和 free 用户不显示。
  */
 
-import { useCallback, type CSSProperties } from 'react';
+import { memo, useCallback, type CSSProperties } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { useUI } from '@/context/ui-context';
 
@@ -30,7 +30,7 @@ const S_ICON_LOW: CSSProperties = { fontSize: '12px', fontWeight: 600, color: 'v
 const S_TEXT_NORMAL: CSSProperties = { fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.8)' };
 const S_TEXT_LOW: CSSProperties = { fontSize: '12px', fontWeight: 600, color: 'var(--ling-error)' };
 
-const CreditsDisplay: React.FC = () => {
+const CreditsDisplay: React.FC = memo(() => {
   const { user } = useAuth();
   const { setPricingOpen } = useUI();
   const openPricing = useCallback(() => setPricingOpen(true), [setPricingOpen]);
@@ -52,6 +52,8 @@ const CreditsDisplay: React.FC = () => {
       <span style={isLow ? S_TEXT_LOW : S_TEXT_NORMAL}>{Math.floor(balance)}</span>
     </button>
   );
-};
+});
+
+CreditsDisplay.displayName = 'CreditsDisplay';
 
 export default CreditsDisplay;

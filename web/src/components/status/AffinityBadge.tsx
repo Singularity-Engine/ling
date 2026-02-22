@@ -198,6 +198,59 @@ export const AffinityBadge = memo(() => {
     [config.beatSpeed],
   );
 
+  const levelLabelStyle = useMemo<CSSProperties>(
+    () => ({ ...S_LEVEL_LABEL_BASE, color: `${config.color}cc` }),
+    [config.color],
+  );
+
+  const panelStyle = useMemo<CSSProperties>(
+    () => ({
+      ...S_PANEL_BASE,
+      border: `1px solid ${config.color}38`,
+      boxShadow: `0 12px 40px rgba(0,0,0,0.5), 0 0 24px ${config.color}15`,
+    }),
+    [config.color],
+  );
+
+  const panelLevelNameStyle = useMemo<CSSProperties>(
+    () => ({ ...S_PANEL_LEVEL_NAME, color: config.color }),
+    [config.color],
+  );
+
+  const panelScoreStyle = useMemo<CSSProperties>(
+    () => ({ ...S_PANEL_SCORE, color: config.color }),
+    [config.color],
+  );
+
+  const progressFillStyle = useMemo<CSSProperties>(
+    () => ({
+      ...S_PROGRESS_FILL_BASE,
+      background: `linear-gradient(90deg, ${config.color}66, ${config.color})`,
+      transform: `scaleX(${levelInfo.progressInLevel / 100})`,
+      boxShadow: `0 0 8px ${config.color}33`,
+    }),
+    [config.color, levelInfo.progressInLevel],
+  );
+
+  const milestoneStyle = useMemo<CSSProperties>(
+    () => ({
+      ...S_MILESTONE_BASE,
+      background: `linear-gradient(135deg, ${config.color}dd, ${config.color}99)`,
+      boxShadow: `0 4px 20px ${config.color}44`,
+    }),
+    [config.color],
+  );
+
+  const nextConfig = useMemo(
+    () => levelInfo.next ? (AFFINITY_LEVELS[levelInfo.next.level] || AFFINITY_LEVELS[DEFAULT_LEVEL]) : null,
+    [levelInfo.next],
+  );
+
+  const nextLevelNameStyle = useMemo<CSSProperties | undefined>(
+    () => nextConfig ? { fontSize: "11px", color: nextConfig.color, fontWeight: 600 } : undefined,
+    [nextConfig],
+  );
+
   return (
     <>
       <div ref={containerRef} style={S_WRAPPER}>
@@ -213,7 +266,7 @@ export const AffinityBadge = memo(() => {
           <span style={heartWrapStyle}>
             <HeartIcon color={config.heartColor} fillPercent={affinity} size={22} />
           </span>
-          <span style={{ ...S_LEVEL_LABEL_BASE, color: `${config.color}cc` }}>
+          <span style={levelLabelStyle}>
             {t(config.i18nKey)}
           </span>
           <span style={hovered ? S_AFFINITY_VALUE_VISIBLE : S_AFFINITY_VALUE_HIDDEN}>
@@ -223,25 +276,19 @@ export const AffinityBadge = memo(() => {
 
         {/* Expanded panel */}
         {expanded && (
-          <div
-            style={{
-              ...S_PANEL_BASE,
-              border: `1px solid ${config.color}38`,
-              boxShadow: `0 12px 40px rgba(0,0,0,0.5), 0 0 24px ${config.color}15`,
-            }}
-          >
+          <div style={panelStyle}>
             {/* Header: heart + level info */}
             <div style={S_PANEL_HEADER}>
               <HeartIcon color={config.heartColor} fillPercent={affinity} size={32} />
               <div style={S_PANEL_FLEX1}>
-                <span style={{ ...S_PANEL_LEVEL_NAME, color: config.color }}>
+                <span style={panelLevelNameStyle}>
                   {t(config.i18nKey)}
                 </span>
                 <span style={S_PANEL_SUBLABEL}>
                   {t("affinity.label")}
                 </span>
               </div>
-              <span style={{ ...S_PANEL_SCORE, color: config.color }}>
+              <span style={panelScoreStyle}>
                 {affinity}
               </span>
             </div>
@@ -257,47 +304,31 @@ export const AffinityBadge = memo(() => {
                 </span>
               </div>
               <div style={S_PROGRESS_TRACK}>
-                <div
-                  style={{
-                    ...S_PROGRESS_FILL_BASE,
-                    background: `linear-gradient(90deg, ${config.color}66, ${config.color})`,
-                    transform: `scaleX(${levelInfo.progressInLevel / 100})`,
-                    boxShadow: `0 0 8px ${config.color}33`,
-                  }}
-                />
+                <div style={progressFillStyle} />
               </div>
             </div>
 
             {/* Next level hint */}
-            {levelInfo.next && (() => {
-              const nextConfig = AFFINITY_LEVELS[levelInfo.next.level] || AFFINITY_LEVELS[DEFAULT_LEVEL];
-              return (
-                <div style={S_NEXT_LEVEL_WRAP}>
-                  <span style={S_NEXT_LABEL}>
-                    {t("affinity.nextLevel")}
-                  </span>
-                  <span style={{ fontSize: "11px", color: nextConfig.color, fontWeight: 600 }}>
-                    {t(nextConfig.i18nKey)}
-                  </span>
-                  <span style={S_NEXT_RANGE}>
-                    {levelInfo.next.min}+
-                  </span>
-                </div>
-              );
-            })()}
+            {nextConfig && levelInfo.next && (
+              <div style={S_NEXT_LEVEL_WRAP}>
+                <span style={S_NEXT_LABEL}>
+                  {t("affinity.nextLevel")}
+                </span>
+                <span style={nextLevelNameStyle}>
+                  {t(nextConfig.i18nKey)}
+                </span>
+                <span style={S_NEXT_RANGE}>
+                  {levelInfo.next.min}+
+                </span>
+              </div>
+            )}
 
           </div>
         )}
 
         {/* Milestone popup — hidden when expanded panel is open to avoid overlap */}
         {milestone && !expanded && (
-          <div
-            style={{
-              ...S_MILESTONE_BASE,
-              background: `linear-gradient(135deg, ${config.color}dd, ${config.color}99)`,
-              boxShadow: `0 4px 20px ${config.color}44`,
-            }}
-          >
+          <div style={milestoneStyle}>
             <span style={S_MILESTONE_TEXT}>
               ✨ {milestone}
             </span>
