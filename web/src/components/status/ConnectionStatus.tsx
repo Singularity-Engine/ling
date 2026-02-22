@@ -2,6 +2,7 @@ import { memo, useState, useEffect, useRef, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { useWebSocket } from "@/context/websocket-context";
 import { gatewayConnector, RECONNECT_MAX_RETRIES } from "@/services/gateway-connector";
+import { OVERLAY_COLORS, WHITE_ALPHA } from "@/constants/colors";
 
 // ── Module-level keyframe injection (consistent with other components) ──
 const CONN_STYLE_ID = "connection-status-keyframes";
@@ -27,7 +28,7 @@ const S_CONTAINER_BASE: CSSProperties = {
   alignItems: "center",
   gap: "6px",
   padding: "5px 10px",
-  background: "rgba(0, 0, 0, 0.35)",
+  background: OVERLAY_COLORS.MEDIUM,
   backdropFilter: "blur(12px)",
   borderRadius: "16px",
   transition: "border-color 0.4s ease, opacity 0.4s ease",

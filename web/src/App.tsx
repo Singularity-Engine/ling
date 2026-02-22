@@ -44,6 +44,7 @@ import { useAffinityIdleExpression } from "./hooks/use-affinity-idle-expression"
 import { AuthProvider, useAuth } from "./context/auth-context";
 import { UIProvider } from "./context/ui-context";
 import CreditsDisplay from "./components/billing/CreditsDisplay";
+import { OVERLAY_COLORS, WHITE_ALPHA, MISC_COLORS } from "./constants/colors";
 import "./index.css";
 
 // ─── Lazy-loaded overlays & modals (chunk loads on first use) ───
@@ -94,7 +95,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
               {this.state.showDetail ? i18next.t('error.hideDetails') : i18next.t('error.showErrorDetails')}
             </button>
             {this.state.showDetail && (
-              <pre style={{ marginTop: 12, textAlign: 'left', color: 'rgba(255,107,107,0.7)', fontSize: 11, fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all', maxHeight: 200, overflow: 'auto', background: 'rgba(0,0,0,0.3)', padding: 12, borderRadius: 8 }}>
+              <pre style={{ marginTop: 12, textAlign: 'left', color: 'rgba(255,107,107,0.7)', fontSize: 11, fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all', maxHeight: 200, overflow: 'auto', background: MISC_COLORS.ERROR_BG, padding: 12, borderRadius: 8 }}>
                 {this.state.error?.toString()}{'\n'}{this.state.errorInfo?.componentStack}
               </pre>
             )}
@@ -139,7 +140,7 @@ const S_TOOLBAR_M: CSSProperties = {
 const _GROUP_BASE: CSSProperties = {
   display: "flex", flexDirection: "column", alignItems: "center",
   padding: "6px", borderRadius: "20px",
-  background: "rgba(0, 0, 0, 0.18)", border: "1px solid rgba(255, 255, 255, 0.06)",
+  background: OVERLAY_COLORS.LIGHT, border: `1px solid ${WHITE_ALPHA.LIGHT_BORDER}`,
 };
 const S_GROUP_D: CSSProperties = { ..._GROUP_BASE, gap: "8px" };
 const S_GROUP_M: CSSProperties = { ..._GROUP_BASE, gap: "6px" };
@@ -150,9 +151,9 @@ const _ACTION_BTN: CSSProperties = {
   cursor: "pointer", transition: "background 0.3s ease, border-color 0.3s ease",
   backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", padding: 0,
 };
-const S_BTN_D_OFF: CSSProperties = { ..._ACTION_BTN, width: "42px", height: "42px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" };
+const S_BTN_D_OFF: CSSProperties = { ..._ACTION_BTN, width: "42px", height: "42px", background: WHITE_ALPHA.BUTTON_BG, border: `1px solid ${WHITE_ALPHA.BORDER}` };
 const S_BTN_D_ON: CSSProperties = { ..._ACTION_BTN, width: "42px", height: "42px", background: "rgba(139,92,246,0.4)", border: "1px solid rgba(139,92,246,0.6)" };
-const S_BTN_M_OFF: CSSProperties = { ..._ACTION_BTN, width: "44px", height: "44px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" };
+const S_BTN_M_OFF: CSSProperties = { ..._ACTION_BTN, width: "44px", height: "44px", background: WHITE_ALPHA.BUTTON_BG, border: `1px solid ${WHITE_ALPHA.BORDER}` };
 const S_BTN_M_ON: CSSProperties = { ..._ACTION_BTN, width: "44px", height: "44px", background: "rgba(139,92,246,0.4)", border: "1px solid rgba(139,92,246,0.6)" };
 function btnStyle(mobile: boolean, active: boolean): CSSProperties {
   if (mobile) return active ? S_BTN_M_ON : S_BTN_M_OFF;
