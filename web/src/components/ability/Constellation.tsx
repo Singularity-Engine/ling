@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useConstellation } from "../../hooks/use-constellation";
@@ -40,14 +40,42 @@ function getPosition(i: number, total: number, radius: number) {
   return { x: radius * Math.cos(angle), y: radius * Math.sin(angle) };
 }
 
-// ── Star button ─────────────────────────────────────────────────
-function StarButton({
+// ── Pre-allocated style constants ────────────────────────────────
+const S_CONTAINER: CSSProperties = { position: "relative" };
+const S_BACKDROP: CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,0.2)",
+  zIndex: 24,
+};
+const S_STARFIELD: CSSProperties = {
+  position: "absolute",
+  bottom: "calc(100% + 8px)",
+  left: "22px",
+  width: 0,
+  height: 0,
+  zIndex: 26,
+};
+const S_SVG: CSSProperties = {
+  position: "absolute",
+  left: -OUTER_RADIUS - 20,
+  top: -OUTER_RADIUS - 20,
+  width: (OUTER_RADIUS + 20) * 2,
+  height: (OUTER_RADIUS + 20) * 2,
+  pointerEvents: "none",
+  overflow: "visible",
+};
+const CLOSED_VARIANT = { x: 0, y: 0, opacity: 0, scale: 0.3 };
+
+// ── Star button (memo'd — rendered in a list) ───────────────────
+const StarButton = memo(function StarButton({
   meta,
   count,
   maxCount,
   position,
   isBirthing,
-  onClick,
+  skillKey,
+  onStarClick,
   delay,
 }: {
   meta: SkillMeta;
@@ -55,7 +83,8 @@ function StarButton({
   maxCount: number;
   position: { x: number; y: number };
   isBirthing: boolean;
-  onClick: () => void;
+  skillKey: string;
+  onStarClick: (key: string) => void;
   delay: number;
 }) {
   const { i18n } = useTranslation();
@@ -64,20 +93,22 @@ function StarButton({
   const maxBonus = 8;
   const size = baseSize + (maxCount > 0 ? (count / maxCount) * maxBonus : 0);
   const Icon = meta.icon;
+  const handleClick = useCallback(() => onStarClick(skillKey), [onStarClick, skillKey]);
+
+  const variants = useMemo(
+    () => ({ closed: CLOSED_VARIANT, open: { x: position.x, y: position.y, opacity: 1, scale: 1 } }),
+    [position.x, position.y],
+  );
+  const transition = useMemo(
+    () => ({ type: "spring" as const, stiffness: 320, damping: 22, delay }),
+    [delay],
+  );
 
   return (
     <motion.button
-      variants={{
-        closed: { x: 0, y: 0, opacity: 0, scale: 0.3 },
-        open: { x: position.x, y: position.y, opacity: 1, scale: 1 },
-      }}
-      transition={{
-        type: "spring",
-        stiffness: 320,
-        damping: 22,
-        delay,
-      }}
-      onClick={onClick}
+      variants={variants}
+      transition={transition}
+      onClick={handleClick}
       aria-label={meta.label[lang]}
       style={{
         position: "absolute",
@@ -102,7 +133,7 @@ function StarButton({
       <Icon size={18} color={meta.color} />
     </motion.button>
   );
-}
+});
 
 // ── Main Constellation component ────────────────────────────────
 export const Constellation = memo(() => {
@@ -171,13 +202,17 @@ export const Constellation = memo(() => {
     if (isNew) clearNewFlag();
   }, [isNew, clearNewFlag]);
 
+  const closeConstellation = useCallback(() => setIsOpen(false), []);
+  const setHoveredTrue = useCallback(() => setHovered(true), []);
+  const setHoveredFalse = useCallback(() => setHovered(false), []);
+
   // Tooltip text
   const tooltipText = discovered.length === 0
     ? t("constellation.emptyHint")
     : isOpen ? t("constellation.close") : t("constellation.open");
 
   return (
-    <div ref={containerRef} style={{ position: "relative" }}>
+    <div ref={containerRef} style={S_CONTAINER}>
       {/* ── Backdrop (when open) ── */}
       <AnimatePresence>
         {isOpen && (
@@ -186,13 +221,8 @@ export const Constellation = memo(() => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            onClick={() => setIsOpen(false)}
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(0,0,0,0.2)",
-              zIndex: 24,
-            }}
+            onClick={closeConstellation}
+            style={S_BACKDROP}
           />
         )}
       </AnimatePresence>
@@ -208,27 +238,10 @@ export const Constellation = memo(() => {
               open: { transition: { staggerChildren: 0.05 } },
               closed: { transition: { staggerChildren: 0.03, staggerDirection: -1 } },
             }}
-            style={{
-              position: "absolute",
-              bottom: "calc(100% + 8px)",
-              left: "22px",
-              width: 0,
-              height: 0,
-              zIndex: 26,
-            }}
+            style={S_STARFIELD}
           >
             {/* Connection lines */}
-            <svg
-              style={{
-                position: "absolute",
-                left: -OUTER_RADIUS - 20,
-                top: -OUTER_RADIUS - 20,
-                width: (OUTER_RADIUS + 20) * 2,
-                height: (OUTER_RADIUS + 20) * 2,
-                pointerEvents: "none",
-                overflow: "visible",
-              }}
-            >
+            <svg style={S_SVG}>
               {sorted.length > 1 &&
                 sorted.map((_, i) => {
                   if (i === sorted.length - 1) return null;
@@ -263,7 +276,8 @@ export const Constellation = memo(() => {
                   maxCount={maxCount}
                   position={positions[i]}
                   isBirthing={newSkillKey === skill.key}
-                  onClick={() => handleStarClick(skill.key)}
+                  skillKey={skill.key}
+                  onStarClick={handleStarClick}
                   delay={i * 0.05}
                 />
               );
@@ -275,8 +289,8 @@ export const Constellation = memo(() => {
       {/* ── Core button (always visible) ── */}
       <motion.button
         onClick={toggleOpen}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        onMouseEnter={setHoveredTrue}
+        onMouseLeave={setHoveredFalse}
         aria-label={tooltipText}
         title={tooltipText}
         animate={isOpen ? { rotate: 45 } : { rotate: 0 }}

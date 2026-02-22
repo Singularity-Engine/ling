@@ -5,12 +5,35 @@
  * owner/admin 和 free 用户不显示。
  */
 
+import { useCallback, type CSSProperties } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { useUI } from '@/context/ui-context';
+
+// ── Pre-allocated style constants ──
+const S_BUTTON: CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '4px',
+  padding: '5px 10px',
+  borderRadius: '16px',
+  background: 'rgba(0, 0, 0, 0.35)',
+  backdropFilter: 'blur(12px)',
+  WebkitBackdropFilter: 'blur(12px)',
+  border: '1px solid rgba(255, 255, 255, 0.08)',
+  cursor: 'pointer',
+  transition: 'all 0.3s ease',
+  font: 'inherit',
+  color: 'inherit',
+};
+const S_ICON_NORMAL: CSSProperties = { fontSize: '12px', fontWeight: 600, color: 'rgba(168, 85, 247, 0.9)' };
+const S_ICON_LOW: CSSProperties = { fontSize: '12px', fontWeight: 600, color: 'var(--ling-error)' };
+const S_TEXT_NORMAL: CSSProperties = { fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.8)' };
+const S_TEXT_LOW: CSSProperties = { fontSize: '12px', fontWeight: 600, color: 'var(--ling-error)' };
 
 const CreditsDisplay: React.FC = () => {
   const { user } = useAuth();
   const { setPricingOpen } = useUI();
+  const openPricing = useCallback(() => setPricingOpen(true), [setPricingOpen]);
 
   if (!user) return null;
 
@@ -24,43 +47,9 @@ const CreditsDisplay: React.FC = () => {
   const isLow = balance <= 10;
 
   return (
-    <button
-      onClick={() => setPricingOpen(true)}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '4px',
-        padding: '5px 10px',
-        borderRadius: '16px',
-        background: 'rgba(0, 0, 0, 0.35)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-        font: 'inherit',
-        color: 'inherit',
-      }}
-      title={`Credits: ${balance}`}
-    >
-      <span
-        style={{
-          fontSize: '12px',
-          fontWeight: 600,
-          color: isLow ? 'var(--ling-error)' : 'rgba(168, 85, 247, 0.9)',
-        }}
-      >
-        ✦
-      </span>
-      <span
-        style={{
-          fontSize: '12px',
-          fontWeight: 600,
-          color: isLow ? 'var(--ling-error)' : 'rgba(255, 255, 255, 0.8)',
-        }}
-      >
-        {Math.floor(balance)}
-      </span>
+    <button onClick={openPricing} style={S_BUTTON} title={`Credits: ${balance}`}>
+      <span style={isLow ? S_ICON_LOW : S_ICON_NORMAL}>✦</span>
+      <span style={isLow ? S_TEXT_LOW : S_TEXT_NORMAL}>{Math.floor(balance)}</span>
     </button>
   );
 };
