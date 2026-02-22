@@ -289,6 +289,16 @@ function MainContent(): JSX.Element {
     setChatExpanded(prev => !prev);
   }, []);
 
+  // Stable open/close handlers — prevents defeating memo on ShortcutsOverlay, AboutOverlay, MemoryPanel
+  const openMemory = useCallback(() => setMemoryOpen(true), []);
+  const openAbout = useCallback(() => setAboutOpen(true), []);
+  const closeShortcuts = useCallback(() => setShortcutsOpen(false), []);
+  const closeAbout = useCallback(() => setAboutOpen(false), []);
+  const closeMemory = useCallback(() => setMemoryOpen(false), []);
+  const handleExpandKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleChat(); }
+  }, [toggleChat]);
+
   const createNewChat = useCallback(() => {
     if (currentHistoryUid && messages.length > 0) {
       const latestMessage = messages[messages.length - 1];
@@ -427,7 +437,7 @@ function MainContent(): JSX.Element {
           <button
             className="ling-action-btn"
             data-active={memoryOpen}
-            onClick={() => setMemoryOpen(true)}
+            onClick={openMemory}
             aria-label="Memories"
             title="Memories"
             style={btnStyle(isMobile, memoryOpen)}
@@ -437,7 +447,7 @@ function MainContent(): JSX.Element {
           <button
             className="ling-action-btn"
             data-active={aboutOpen}
-            onClick={() => setAboutOpen(true)}
+            onClick={openAbout}
             aria-label={t("shortcuts.showAbout")}
             title={t("shortcuts.showAbout")}
             style={btnStyle(isMobile, aboutOpen)}
@@ -460,7 +470,7 @@ function MainContent(): JSX.Element {
             aria-label={t("ui.expandChat")}
             style={S_EXPAND_HANDLE}
             onClick={toggleChat}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleChat(); } }}
+            onKeyDown={handleExpandKeyDown}
           >
             {ICON_CHEVRON_UP}
           </div>
@@ -481,9 +491,9 @@ function MainContent(): JSX.Element {
       </div>
 
       {/* ===== Layer 99: 快捷键帮助浮层 ===== */}
-      <ShortcutsOverlay open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
-      <AboutOverlay open={aboutOpen} onClose={() => setAboutOpen(false)} />
-      <MemoryPanel open={memoryOpen} onClose={() => setMemoryOpen(false)} />
+      <ShortcutsOverlay open={shortcutsOpen} onClose={closeShortcuts} />
+      <AboutOverlay open={aboutOpen} onClose={closeAbout} />
+      <MemoryPanel open={memoryOpen} onClose={closeMemory} />
     </div>
   );
 }
@@ -543,6 +553,8 @@ function MainApp() {
     return sessionStorage.getItem('ling-visited') ? shouldShowOnboarding() : false;
   });
   useCheckoutCallback();
+
+  const closeOnboarding = useCallback(() => setShowOnboarding(false), []);
 
   const handleLandingComplete = useCallback(() => {
     setLandingExiting(true);
@@ -615,7 +627,7 @@ function MainApp() {
       <PricingOverlay />
       <InsufficientCreditsModal />
       {showOnboarding && (
-        <PersonalizedOnboarding onComplete={() => setShowOnboarding(false)} />
+        <PersonalizedOnboarding onComplete={closeOnboarding} />
       )}
       </UIProvider>
 
