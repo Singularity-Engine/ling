@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, Component, ErrorInfo, ReactNode } from "react";
+import { useState, useEffect, useCallback, useMemo, Component, ErrorInfo, type ReactNode, type CSSProperties } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
@@ -98,6 +98,134 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
     return this.props.children;
   }
 }
+
+// ─── Static style constants (avoid per-render allocation in MainContent) ───
+
+const S_ROOT: CSSProperties = {
+  position: "relative", height: "100dvh", width: "100vw",
+  background: "#0a0015", overflow: "hidden",
+};
+const S_LAYER_STARFIELD: CSSProperties = { position: "absolute", inset: 0, zIndex: -1 };
+const S_LAYER_LIVE2D: CSSProperties = { position: "absolute", inset: 0, zIndex: 0 };
+const S_LAYER_EFFECTS: CSSProperties = { position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none", overflow: "hidden" };
+
+const S_GROUND_GRADIENT: CSSProperties = {
+  position: "absolute", bottom: 0, left: 0, right: 0,
+  height: "44dvh", zIndex: 22, pointerEvents: "none",
+  background: "linear-gradient(to bottom, transparent 0%, rgba(10,0,21,0.02) 12%, rgba(10,0,21,0.07) 24%, rgba(10,0,21,0.16) 36%, rgba(10,0,21,0.28) 48%, rgba(10,0,21,0.42) 60%, rgba(10,0,21,0.56) 72%, rgba(10,0,21,0.68) 84%, rgba(10,0,21,0.78) 94%, rgba(10,0,21,0.82) 100%)",
+};
+
+// Right toolbar positioning — desktop / mobile variants
+const S_TOOLBAR_D: CSSProperties = {
+  position: "absolute", top: "16px", right: "12px", zIndex: 20,
+  display: "flex", flexDirection: "column", alignItems: "center", gap: "12px",
+};
+const S_TOOLBAR_M: CSSProperties = {
+  position: "absolute",
+  top: "max(8px, env(safe-area-inset-top, 0px))",
+  right: "max(8px, env(safe-area-inset-right, 0px))",
+  zIndex: 20,
+  display: "flex", flexDirection: "column", alignItems: "center", gap: "8px",
+};
+
+// Status / action group capsules
+const _GROUP_BASE: CSSProperties = {
+  display: "flex", flexDirection: "column", alignItems: "center",
+  padding: "6px", borderRadius: "20px",
+  background: "rgba(0, 0, 0, 0.18)", border: "1px solid rgba(255, 255, 255, 0.06)",
+};
+const S_GROUP_D: CSSProperties = { ..._GROUP_BASE, gap: "8px" };
+const S_GROUP_M: CSSProperties = { ..._GROUP_BASE, gap: "6px" };
+
+// Action button style variants (mobile/desktop × active/inactive)
+const _ACTION_BTN: CSSProperties = {
+  borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+  cursor: "pointer", transition: "background 0.3s ease, border-color 0.3s ease",
+  backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", padding: 0,
+};
+const S_BTN_D_OFF: CSSProperties = { ..._ACTION_BTN, width: "42px", height: "42px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" };
+const S_BTN_D_ON: CSSProperties = { ..._ACTION_BTN, width: "42px", height: "42px", background: "rgba(139,92,246,0.4)", border: "1px solid rgba(139,92,246,0.6)" };
+const S_BTN_M_OFF: CSSProperties = { ..._ACTION_BTN, width: "44px", height: "44px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" };
+const S_BTN_M_ON: CSSProperties = { ..._ACTION_BTN, width: "44px", height: "44px", background: "rgba(139,92,246,0.4)", border: "1px solid rgba(139,92,246,0.6)" };
+function btnStyle(mobile: boolean, active: boolean): CSSProperties {
+  if (mobile) return active ? S_BTN_M_ON : S_BTN_M_OFF;
+  return active ? S_BTN_D_ON : S_BTN_D_OFF;
+}
+
+// Chat area expand/collapse variants
+const _CHAT_INNER: CSSProperties = {
+  overflow: "hidden", position: "relative", pointerEvents: "auto",
+  transition: "max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+  willChange: "max-height, opacity",
+  maskImage: "linear-gradient(to bottom, transparent 0%, black 15%)",
+  WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 15%)",
+};
+const S_CHAT_D_OPEN: CSSProperties = { ..._CHAT_INNER, maxHeight: "40dvh", opacity: 1 };
+const S_CHAT_M_OPEN: CSSProperties = { ..._CHAT_INNER, maxHeight: "35dvh", opacity: 1 };
+const S_CHAT_CLOSED: CSSProperties = { ..._CHAT_INNER, maxHeight: "0px", opacity: 0 };
+function chatInnerStyle(mobile: boolean, expanded: boolean): CSSProperties {
+  if (!expanded) return S_CHAT_CLOSED;
+  return mobile ? S_CHAT_M_OPEN : S_CHAT_D_OPEN;
+}
+
+// Chat area outer — base for useMemo (kbOffset is numeric, needs runtime style)
+const S_CHAT_OUTER_BASE: CSSProperties = {
+  position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 25,
+  display: "flex", flexDirection: "column", pointerEvents: "none",
+};
+
+const S_EXPAND_HANDLE: CSSProperties = {
+  pointerEvents: "auto", display: "flex", justifyContent: "center",
+  padding: "6px 0", cursor: "pointer",
+};
+const S_INPUT_SECTION: CSSProperties = { flexShrink: 0, pointerEvents: "auto", position: "relative" as const };
+const S_CONSTELLATION_POS: CSSProperties = {
+  position: "absolute", bottom: "calc(100% + 12px)", left: 16, zIndex: 26, pointerEvents: "auto",
+};
+const S_INPUT_BAR_BG: CSSProperties = {
+  background: "rgba(10, 0, 21, 0.55)",
+  backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+  borderTop: "1px solid rgba(139, 92, 246, 0.15)",
+};
+
+// Landing → main content transition
+const S_MAIN_VISIBLE: CSSProperties = {
+  opacity: 1, transform: "scale(1)",
+  transition: "opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
+};
+const S_MAIN_HIDDEN: CSSProperties = {
+  opacity: 0, transform: "scale(0.97)",
+  transition: "opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
+};
+
+// Pre-created SVG icon elements — shared across all renders
+const ICON_CHAT = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </svg>
+);
+const ICON_MEMORY = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.58-3.25 3.93" />
+    <path d="M8.24 4.47A4 4 0 0 1 12 2" />
+    <path d="M12 9v1" />
+    <path d="M4.93 4.93l.7.7" />
+    <path d="M19.07 4.93l-.7.7" />
+    <path d="M12 22c-4.97 0-9-2.69-9-6v-2c0-3.31 4.03-6 9-6s9 2.69 9 6v2c0 3.31-4.03 6-9 6z" />
+  </svg>
+);
+const ICON_INFO = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="16" x2="12" y2="12" />
+    <line x1="12" y1="8" x2="12.01" y2="8" />
+  </svg>
+);
+const ICON_CHEVRON_UP = (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(139,92,246,0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="18 15 12 9 6 15" />
+  </svg>
+);
 
 function MainContent(): JSX.Element {
   const { t } = useTranslation();
@@ -235,23 +363,22 @@ function MainContent(): JSX.Element {
   useKeyboardShortcuts(shortcuts);
   useAffinityIdleExpression();
 
+  // Memoize only the kbOffset-dependent style (numeric, can't pre-compute variants)
+  const chatOuterStyle = useMemo<CSSProperties>(() => ({
+    ...S_CHAT_OUTER_BASE,
+    transform: kbOffset > 0 ? `translateY(-${kbOffset}px)` : "none",
+    transition: kbOffset > 0 ? "none" : "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+  }), [kbOffset]);
+
   return (
-    <div
-      style={{
-        position: "relative",
-        height: "100dvh",
-        width: "100vw",
-        background: "#0a0015",
-        overflow: "hidden",
-      }}
-    >
+    <div style={S_ROOT}>
       {/* ===== Layer -1: 星空背景 ===== */}
-      <div style={{ position: "absolute", inset: 0, zIndex: -1 }}>
+      <div style={S_LAYER_STARFIELD}>
         <StarField />
       </div>
 
       {/* ===== Layer 0: Live2D 全屏 ===== */}
-      <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+      <div style={S_LAYER_LIVE2D}>
         <Live2D />
       </div>
 
@@ -259,7 +386,7 @@ function MainContent(): JSX.Element {
       <TapParticles />
 
       {/* ===== Layer 0.5: 工具状态反馈层 ===== */}
-      <div style={{ position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none", overflow: "hidden" }}>
+      <div style={S_LAYER_EFFECTS}>
         <BackgroundReactor />
         <AudioVisualizer />
       </div>
@@ -273,52 +400,19 @@ function MainContent(): JSX.Element {
       <CrystalField />
 
       {/* ===== Layer 1.8: 底部渐变遮罩 (Ground Plane) ===== */}
-      <div style={{
-        position: "absolute", bottom: 0, left: 0, right: 0,
-        height: "44dvh", zIndex: 22, pointerEvents: "none",
-        background: "linear-gradient(to bottom, transparent 0%, rgba(10,0,21,0.02) 12%, rgba(10,0,21,0.07) 24%, rgba(10,0,21,0.16) 36%, rgba(10,0,21,0.28) 48%, rgba(10,0,21,0.42) 60%, rgba(10,0,21,0.56) 72%, rgba(10,0,21,0.68) 84%, rgba(10,0,21,0.78) 94%, rgba(10,0,21,0.82) 100%)",
-      }} />
+      <div style={S_GROUND_GRADIENT} />
 
       {/* ===== Layer 1.5: 右侧工具栏 ===== */}
-      <div
-        style={{
-          position: "absolute",
-          top: isMobile ? "max(8px, env(safe-area-inset-top, 0px))" : "16px",
-          right: isMobile ? "max(8px, env(safe-area-inset-right, 0px))" : "12px",
-          zIndex: 20,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: isMobile ? "8px" : "12px",
-        }}
-      >
+      <div style={isMobile ? S_TOOLBAR_M : S_TOOLBAR_D}>
         {/* ── Status indicators group ── */}
-        <div style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: isMobile ? "6px" : "8px",
-          padding: "6px",
-          borderRadius: "20px",
-          background: "rgba(0, 0, 0, 0.18)",
-          border: "1px solid rgba(255, 255, 255, 0.06)",
-        }}>
+        <div style={isMobile ? S_GROUP_M : S_GROUP_D}>
           <CreditsDisplay />
           <AffinityBadge />
           <ConnectionStatus />
         </div>
 
         {/* ── Action buttons group ── */}
-        <div style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: isMobile ? "6px" : "8px",
-          padding: "6px",
-          borderRadius: "20px",
-          background: "rgba(0, 0, 0, 0.18)",
-          border: "1px solid rgba(255, 255, 255, 0.06)",
-        }}>
+        <div style={isMobile ? S_GROUP_M : S_GROUP_D}>
           <button
             className="ling-action-btn"
             data-active={chatExpanded}
@@ -326,25 +420,9 @@ function MainContent(): JSX.Element {
             aria-label={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}
             aria-pressed={chatExpanded}
             title={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}
-            style={{
-              width: isMobile ? "44px" : "42px",
-              height: isMobile ? "44px" : "42px",
-              borderRadius: "50%",
-              background: chatExpanded ? "rgba(139, 92, 246, 0.4)" : "rgba(255, 255, 255, 0.08)",
-              border: chatExpanded ? "1px solid rgba(139, 92, 246, 0.6)" : "1px solid rgba(255, 255, 255, 0.12)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              transition: "background 0.3s ease, border-color 0.3s ease",
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
-              padding: 0,
-            }}
+            style={btnStyle(isMobile, chatExpanded)}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
+            {ICON_CHAT}
           </button>
           <button
             className="ling-action-btn"
@@ -352,30 +430,9 @@ function MainContent(): JSX.Element {
             onClick={() => setMemoryOpen(true)}
             aria-label="Memories"
             title="Memories"
-            style={{
-              width: isMobile ? "44px" : "42px",
-              height: isMobile ? "44px" : "42px",
-              borderRadius: "50%",
-              background: memoryOpen ? "rgba(139, 92, 246, 0.4)" : "rgba(255, 255, 255, 0.08)",
-              border: memoryOpen ? "1px solid rgba(139, 92, 246, 0.6)" : "1px solid rgba(255, 255, 255, 0.12)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              transition: "background 0.3s ease, border-color 0.3s ease",
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
-              padding: 0,
-            }}
+            style={btnStyle(isMobile, memoryOpen)}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.58-3.25 3.93" />
-              <path d="M8.24 4.47A4 4 0 0 1 12 2" />
-              <path d="M12 9v1" />
-              <path d="M4.93 4.93l.7.7" />
-              <path d="M19.07 4.93l-.7.7" />
-              <path d="M12 22c-4.97 0-9-2.69-9-6v-2c0-3.31 4.03-6 9-6s9 2.69 9 6v2c0 3.31-4.03 6-9 6z" />
-            </svg>
+            {ICON_MEMORY}
           </button>
           <button
             className="ling-action-btn"
@@ -383,59 +440,16 @@ function MainContent(): JSX.Element {
             onClick={() => setAboutOpen(true)}
             aria-label={t("shortcuts.showAbout")}
             title={t("shortcuts.showAbout")}
-            style={{
-              width: isMobile ? "44px" : "42px",
-              height: isMobile ? "44px" : "42px",
-              borderRadius: "50%",
-              background: aboutOpen ? "rgba(139, 92, 246, 0.4)" : "rgba(255, 255, 255, 0.08)",
-              border: aboutOpen ? "1px solid rgba(139, 92, 246, 0.6)" : "1px solid rgba(255, 255, 255, 0.12)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              transition: "background 0.3s ease, border-color 0.3s ease",
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
-              padding: 0,
-            }}
+            style={btnStyle(isMobile, aboutOpen)}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="16" x2="12" y2="12" />
-              <line x1="12" y1="8" x2="12.01" y2="8" />
-            </svg>
+            {ICON_INFO}
           </button>
         </div>
       </div>
 
       {/* ===== Layer 2: 浮动聊天区域 ===== */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 25,
-          display: "flex",
-          flexDirection: "column",
-          pointerEvents: "none",
-          transform: kbOffset > 0 ? `translateY(-${kbOffset}px)` : "none",
-          transition: kbOffset > 0 ? "none" : "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-        }}
-      >
-        <div
-          style={{
-            overflow: "hidden",
-            position: "relative",
-            pointerEvents: "auto",
-            transition: "max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-            maxHeight: chatExpanded ? (isMobile ? "35dvh" : "40dvh") : "0px",
-            opacity: chatExpanded ? 1 : 0,
-            willChange: "max-height, opacity",
-            maskImage: "linear-gradient(to bottom, transparent 0%, black 15%)",
-            WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 15%)",
-          }}
-        >
+      <div style={chatOuterStyle}>
+        <div style={chatInnerStyle(isMobile, chatExpanded)}>
           <ChatArea />
         </div>
 
@@ -444,41 +458,22 @@ function MainContent(): JSX.Element {
             role="button"
             tabIndex={0}
             aria-label={t("ui.expandChat")}
-            style={{
-              pointerEvents: "auto",
-              display: "flex",
-              justifyContent: "center",
-              padding: "6px 0",
-              cursor: "pointer",
-            }}
+            style={S_EXPAND_HANDLE}
             onClick={toggleChat}
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleChat(); } }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(139, 92, 246, 0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="18 15 12 9 6 15" />
-            </svg>
+            {ICON_CHEVRON_UP}
           </div>
         )}
 
-        <div style={{ flexShrink: 0, pointerEvents: "auto", position: "relative" }}>
+        <div style={S_INPUT_SECTION}>
           {/* 星座 — 浮在 InputBar 左上方 */}
           {!isMobile && (
-            <div style={{
-              position: "absolute",
-              bottom: "calc(100% + 12px)",
-              left: 16,
-              zIndex: 26,
-              pointerEvents: "auto",
-            }}>
+            <div style={S_CONSTELLATION_POS}>
               <Constellation />
             </div>
           )}
-          <div style={{
-            background: "rgba(10, 0, 21, 0.55)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            borderTop: "1px solid rgba(139, 92, 246, 0.15)",
-          }}>
+          <div style={S_INPUT_BAR_BG}>
             <InputBar />
           </div>
         </div>
@@ -591,11 +586,7 @@ function MainApp() {
                                   <TTSStateProvider>
                                   <AffinityProvider>
                                     <WebSocketHandler>
-                                      <div style={{
-                                        opacity: landingExiting || !showLanding ? 1 : 0,
-                                        transform: landingExiting || !showLanding ? 'scale(1)' : 'scale(0.97)',
-                                        transition: 'opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)',
-                                      }}>
+                                      <div style={landingExiting || !showLanding ? S_MAIN_VISIBLE : S_MAIN_HIDDEN}>
                                         <MainContent />
                                       </div>
                                     </WebSocketHandler>
