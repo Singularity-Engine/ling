@@ -23,14 +23,14 @@ import { useInterrupt } from '@/hooks/utils/use-interrupt';
 import { useBrowser } from '@/context/browser-context';
 import { useAffinity } from '@/context/affinity-context';
 import { useToolState, categorize } from '@/context/tool-state-context';
-import { gatewayConnector, GatewayState } from '@/services/gateway-connector';
+import { gatewayConnector, GatewayState, ChatHistoryPayload, SessionListPayload } from '@/services/gateway-connector';
 import { gatewayAdapter, GatewayMessageEvent } from '@/services/gateway-message-adapter';
 import { ttsService } from '@/services/tts-service';
 import { asrService } from '@/services/asr-service';
 import { useTTSState } from '@/context/tts-state-context';
 import { BRAND_NAME_SHORT, BRAND_NAME_DISPLAY, BRAND_AVATAR_NAME } from '@/constants/brand';
 import { useAuth } from '@/context/auth-context';
-import { useUI } from '@/context/ui-context';
+import { useUI, type BillingModalState } from '@/context/ui-context';
 import { apiClient } from '@/services/api-client';
 import i18next from 'i18next';
 
@@ -262,7 +262,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       if (!data.allowed) {
         setBillingModalRef.current({
           open: true,
-          reason: data.reason as any,
+          reason: data.reason as BillingModalState['reason'],
           message: data.message,
         });
         return false;
@@ -447,13 +447,13 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           const mMsg = message as GatewayMessageEvent;
           affinityContext.showMilestone(message.content || i18next.t('notification.affinityReached', { milestone: mMsg.milestone }));
           // Upgrade prompt for free users at 'friendly' milestone
-          if ((mMsg as any).level === 'friendly' || mMsg.milestone === 'friendly') {
+          if (mMsg.level === 'friendly' || mMsg.milestone === 'friendly') {
             const currentUser = userRef.current;
-            if (currentUser && (currentUser as any).plan === 'free') {
+            if (currentUser && currentUser.plan === 'free') {
               setTimeout(() => {
                 setBillingModalRef.current({
                   open: true,
-                  reason: 'affinity_milestone' as any,
+                  reason: 'affinity_milestone',
                   message: i18next.t('billing.affinityUpgradeMessage'),
                 });
               }, 3000);
@@ -548,8 +548,8 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         .then(() =>
           gatewayConnector.getChatHistory(sessionKeyRef.current)
             .then((res) => {
-              const payload = res.payload as any;
-              if (payload?.messages?.length > 0) {
+              const payload = res.payload as ChatHistoryPayload | undefined;
+              if (payload?.messages?.length && payload.messages.length > 0) {
                 setMessagesRef.current(payload.messages);
                 greetingSentRef.current = true;
                 if (import.meta.env.DEV) console.log(`[WebSocketHandler] Restored ${payload.messages.length} messages from previous session`);
@@ -704,8 +704,8 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId())
         .then(() => gatewayConnector.getChatHistory(sessionKeyRef.current))
         .then((res) => {
-          const payload = res.payload as any;
-          if (payload?.messages?.length > 0) {
+          const payload = res.payload as ChatHistoryPayload | undefined;
+          if (payload?.messages?.length && payload.messages.length > 0) {
             setMessagesRef.current(payload.messages);
             if (import.meta.env.DEV) console.log(`[WebSocketHandler] Post-reconnect: restored ${payload.messages.length} messages`);
           }

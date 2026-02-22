@@ -40,6 +40,34 @@ export interface GatewayAgentEvent {
   data: Record<string, unknown>;
 }
 
+/** Typed response payloads — eliminates `as any` casts on API responses */
+
+export interface HelloOkPayload {
+  type: 'hello-ok';
+  server?: { connId?: string };
+}
+
+export interface AgentEventPayload {
+  runId?: string;
+  stream?: string;
+  seq?: number;
+  data?: Record<string, unknown>;
+}
+
+export interface ChatHistoryPayload {
+  messages?: Array<{ role: string; content: string; timestamp?: string }>;
+}
+
+export interface SessionListPayload {
+  sessions?: Array<{
+    key?: string;
+    id?: string;
+    lastMessage?: string | null;
+    updatedAt?: string;
+    createdAt?: string;
+  }>;
+}
+
 /** Connect options */
 export interface GatewayConnectOptions {
   url: string;
@@ -336,8 +364,9 @@ class GatewayConnector {
         }
 
         // ── Hello OK ──
-        if (frame.type === 'res' && frame.ok === true && (frame.payload as any)?.type === 'hello-ok') {
-          this.connId = (frame.payload as any)?.server?.connId || null;
+        const helloPayload = frame.payload as HelloOkPayload | undefined;
+        if (frame.type === 'res' && frame.ok === true && helloPayload?.type === 'hello-ok') {
+          this.connId = helloPayload?.server?.connId || null;
           const wasReconnecting = this.reconnectAttempts > 0 || this.inIdleRetry;
           this.reconnectAttempts = 0;
           this.inIdleRetry = false;
@@ -379,12 +408,12 @@ class GatewayConnector {
 
         // ── Agent events ──
         if (frame.type === 'event' && (frame.event === 'agent.event' || frame.event === 'agent')) {
-          const payload = frame.payload as any;
+          const payload = (frame.payload || {}) as AgentEventPayload;
           const agentEvent: GatewayAgentEvent = {
-            runId: payload?.runId || '',
-            stream: payload?.stream || 'lifecycle',
-            seq: payload?.seq || 0,
-            data: payload?.data || {},
+            runId: payload.runId || '',
+            stream: (payload.stream as GatewayAgentEvent['stream']) || 'lifecycle',
+            seq: payload.seq || 0,
+            data: payload.data || {},
           };
           this.debugCounters.agentEvents++;
           this.debugCounters.lastEvent = `${agentEvent.stream}:${JSON.stringify(agentEvent.data).slice(0, 60)}`;

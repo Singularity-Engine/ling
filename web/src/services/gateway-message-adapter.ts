@@ -132,7 +132,7 @@ class GatewayMessageAdapter {
       this.activeRuns.set(runId, run);
 
       // New run = new message bubble (force-new-message)
-      this.emit({ type: 'force-new-message' } as any);
+      this.emit({ type: 'force-new-message' });
     }
 
     // Skip duplicate or out-of-order seq
@@ -216,7 +216,7 @@ class GatewayMessageAdapter {
           this.emit({
             type: 'ai-message-complete',
             text: finalText,
-          } as any);
+          });
         }
 
         this.emit({
@@ -250,7 +250,7 @@ class GatewayMessageAdapter {
           this.emit({
             type: 'ai-message-complete',
             text: partialText,
-          } as any);
+          });
         }
 
         // Surface the error message to the user
@@ -258,7 +258,7 @@ class GatewayMessageAdapter {
         this.emit({
           type: 'error',
           message: errorMessage,
-        } as any);
+        });
 
         // End the conversation chain so UI resets from thinking-speaking
         this.emit({
