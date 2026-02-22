@@ -32,8 +32,8 @@ export const AffinityBar = memo(() => {
       <style>{breatheKeyframes}{slideUpKeyframes}</style>
       <div
         style={{
-          padding: "6px 20px",
-          paddingBottom: "calc(6px + env(safe-area-inset-bottom, 0px))",
+          padding: "8px 20px",
+          paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
           background: "rgba(0, 0, 0, 0.25)",
           backdropFilter: "blur(12px)",
           display: "flex",
@@ -52,7 +52,7 @@ export const AffinityBar = memo(() => {
         </span>
         <div
           style={{
-            width: "80px",
+            width: "100px",
             height: "4px",
             background: "rgba(255,255,255,0.06)",
             borderRadius: "2px",

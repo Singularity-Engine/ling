@@ -276,8 +276,8 @@ function MainContent(): JSX.Element {
       {/* ===== Layer 1.8: 底部渐变遮罩 (Ground Plane) ===== */}
       <div style={{
         position: "absolute", bottom: 0, left: 0, right: 0,
-        height: "45dvh", zIndex: 22, pointerEvents: "none",
-        background: "linear-gradient(to bottom, transparent 0%, rgba(10,0,21,0.15) 30%, rgba(10,0,21,0.45) 60%, rgba(10,0,21,0.65) 100%)",
+        height: "42dvh", zIndex: 22, pointerEvents: "none",
+        background: "linear-gradient(to bottom, transparent 0%, rgba(10,0,21,0.15) 30%, rgba(10,0,21,0.45) 60%, rgba(10,0,21,0.72) 100%)",
       }} />
 
       {/* ===== Layer 1.5: 右侧工具栏 ===== */}

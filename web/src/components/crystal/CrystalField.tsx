@@ -3,10 +3,10 @@ import { useToolState } from "../../context/tool-state-context";
 import { InfoCrystal } from "./InfoCrystal";
 
 const DESKTOP_POSITIONS: Record<number, React.CSSProperties> = {
-  0: { left: "3%", top: "15%" },
-  1: { right: "3%", top: "22%" },
+  0: { left: "3%", top: "14%" },
+  1: { right: "3%", top: "28%" },
   2: { left: "3%", top: "42%" },
-  3: { right: "3%", top: "49%" },
+  3: { right: "3%", top: "56%" },
 };
 
 // Mobile: stack all on the left to avoid right-side toolbar overlap
