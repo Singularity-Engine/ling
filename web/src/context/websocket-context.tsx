@@ -42,8 +42,28 @@ export interface HistoryInfo {
   timestamp: string | null;
 }
 
+/** Discriminated union of all legacy message types sent via sendMessage. */
+export type LegacyMessage =
+  | { type: 'text-input'; text: string; images?: unknown[] }
+  | { type: 'interrupt-signal'; text?: string }
+  | { type: 'mic-audio-data'; audio: number[] }
+  | { type: 'mic-audio-end'; images?: unknown[] }
+  | { type: 'ai-speak-signal'; idle_time?: number; images?: unknown[] }
+  | { type: 'fetch-and-set-history'; history_uid: string }
+  | { type: 'create-new-history' }
+  | { type: 'fetch-history-list' }
+  | { type: 'delete-history'; history_uid: string }
+  | { type: 'switch-config'; file: string }
+  | { type: 'fetch-configs' }
+  | { type: 'fetch-backgrounds' }
+  | { type: 'audio-play-start' }
+  | { type: 'frontend-playback-complete' }
+  | { type: 'request-group-info' }
+  | { type: 'add-client-to-group' }
+  | { type: 'remove-client-from-group' };
+
 interface WebSocketContextProps {
-  sendMessage: (message: object) => void;
+  sendMessage: (message: LegacyMessage) => void;
   wsState: string;
   reconnect: () => void;
   wsUrl: string;

@@ -29,7 +29,7 @@ export const useFooter = () => {
   };
 
   const handleKeyPress = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    handleKey(e as any);
+    handleKey(e);
   };
 
   const handleInterrupt = () => {

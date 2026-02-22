@@ -43,7 +43,7 @@ export function useInputSubtitle() {
   };
 
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
-    handleKey(e as any);
+    handleKey(e);
   };
 
   return {

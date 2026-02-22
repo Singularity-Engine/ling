@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MessageEvent } from '@/services/websocket-service';
 import {
-  WebSocketContext, HistoryInfo, defaultBaseUrl,
+  WebSocketContext, HistoryInfo, LegacyMessage, defaultBaseUrl,
 } from '@/context/websocket-context';
 import { ModelInfo, useLive2DConfig } from '@/context/live2d-config-context';
 import { useSubtitle } from '@/context/subtitle-context';
@@ -848,14 +848,12 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
   // ─── sendMessage: intercept ALL legacy message types ──────────
 
-  const sendMessage = useCallback((message: object) => {
-    const msg = message as any;
-
-    switch (msg.type) {
+  const sendMessage = useCallback((message: LegacyMessage) => {
+    switch (message.type) {
       // ── Phase 2: Text input → Gateway chat.send (with billing check) ──
       case 'text-input':
-        if (msg.text) {
-          const text = msg.text;
+        if (message.text) {
+          const text = message.text;
           // Guest message limit check
           if (!apiClient.getToken()) {
             guestMessageCountRef.current++;
