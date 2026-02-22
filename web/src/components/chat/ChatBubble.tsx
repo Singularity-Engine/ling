@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useCallback, useRef, useEffect, type ReactNode, type CSSProperties } from "react";
+import { memo, useMemo, useState, useCallback, useRef, useEffect, useReducer, type ReactNode, type CSSProperties } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -294,19 +294,26 @@ function formatTime(ts: string): string {
   }
 }
 
-/** Self-updating relative timestamp — adjusts refresh rate based on message age. */
+/** Self-updating relative timestamp — adjusts refresh rate based on message age.
+ *  Uses a self-scheduling timer chain with [timestamp] as the only effect dep,
+ *  avoiding React effect cleanup/setup overhead on every tick (~15-20 visible
+ *  instances each ticking every 15-60s). */
 const RelativeTime = memo(({ timestamp, style }: { timestamp: string; style: CSSProperties }) => {
-  const [rev, tick] = useState(0);
+  const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
-    const age = Date.now() - new Date(timestamp).getTime();
-    if (age > 6 * 3_600_000) return;             // absolute format, no updates
-    const delay = age < 60_000 ? 15_000           // "just now" → every 15s
-                : age < 3_600_000 ? 60_000        // "X min ago" → every 1 min
-                : 300_000;                        // "Xh ago" → every 5 min
-    const timer = setTimeout(() => tick(c => c + 1), delay);
-    return () => clearTimeout(timer);
-  }, [timestamp, rev]);
+    const schedule = () => {
+      const age = Date.now() - new Date(timestamp).getTime();
+      if (age > 6 * 3_600_000) return;           // absolute format, stop updating
+      const delay = age < 60_000 ? 15_000         // "just now" → every 15s
+                  : age < 3_600_000 ? 60_000      // "X min ago" → every 1 min
+                  : 300_000;                      // "Xh ago" → every 5 min
+      timerRef.current = setTimeout(() => { forceUpdate(); schedule(); }, delay);
+    };
+    schedule();
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [timestamp]);
 
   return <span className="chat-bubble-ts" style={style}>{formatTime(timestamp)}</span>;
 });

@@ -31,7 +31,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     .welcome-chip { transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease; }
     .welcome-chip:hover { background: var(--ling-purple-25) !important; border-color: var(--ling-purple-30) !important; transform: translateY(-1px); }
     .welcome-chip:active { transform: scale(0.97); }
-    .chat-msg-item { contain: layout style; }
+    .chat-msg-item { contain: layout paint style; }
   `;
   document.head.appendChild(style);
 }
