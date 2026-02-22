@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useRef } from "react";
+import { memo, useState, useEffect, useRef, useCallback, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { useWebSocket } from "@/context/websocket-context";
 import { gatewayConnector, RECONNECT_MAX_RETRIES } from "@/services/gateway-connector";
@@ -20,6 +20,72 @@ if (typeof document !== "undefined" && !document.getElementById(CONN_STYLE_ID)) 
   `;
   document.head.appendChild(style);
 }
+
+// ── Pre-allocated style constants — eliminate per-render allocations ──
+const S_CONTAINER_BASE: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "6px",
+  padding: "5px 10px",
+  background: "rgba(0, 0, 0, 0.35)",
+  backdropFilter: "blur(12px)",
+  borderRadius: "16px",
+  transition: "border-color 0.4s ease, opacity 0.4s ease",
+};
+
+const S_CONTAINER_OPEN: CSSProperties = {
+  ...S_CONTAINER_BASE,
+  border: "1px solid rgba(255,255,255,0.08)",
+  cursor: "default",
+  opacity: 0.7,
+  animation: "connFadeIn 0.3s ease-out",
+};
+
+const S_CONTAINER_CONNECTING: CSSProperties = {
+  ...S_CONTAINER_BASE,
+  border: "1px solid rgba(255,255,255,0.08)",
+  cursor: "default",
+  opacity: 1,
+};
+
+const S_CONTAINER_CLOSED: CSSProperties = {
+  ...S_CONTAINER_BASE,
+  border: "1px solid var(--ling-error-border)",
+  cursor: "pointer",
+  opacity: 1,
+  font: "inherit",
+  color: "inherit",
+};
+
+const S_DOT_BASE: CSSProperties = {
+  width: "7px",
+  height: "7px",
+  borderRadius: "50%",
+  flexShrink: 0,
+};
+
+const S_LABEL_ERROR: CSSProperties = {
+  fontSize: "11px",
+  color: "var(--ling-error)",
+  fontWeight: 500,
+  whiteSpace: "nowrap",
+  lineHeight: 1,
+};
+
+const S_LABEL_WARNING: CSSProperties = {
+  fontSize: "11px",
+  color: "var(--ling-warning)",
+  fontWeight: 500,
+  whiteSpace: "nowrap",
+  lineHeight: 1,
+};
+
+const S_HINT: CSSProperties = {
+  fontSize: "10px",
+  color: "rgba(255,255,255,0.35)",
+  whiteSpace: "nowrap",
+  lineHeight: 1,
+};
 
 /**
  * Minimal connection status indicator.
@@ -57,6 +123,18 @@ export const ConnectionStatus = memo(() => {
     return () => { attemptSub.unsubscribe(); idleSub.unsubscribe(); };
   }, []);
 
+  const handleMouseEnter = useCallback((e: React.MouseEvent) => {
+    const el = e.currentTarget as HTMLElement;
+    el.style.background = "rgba(0, 0, 0, 0.55)";
+    el.style.borderColor = "var(--ling-error)";
+  }, []);
+
+  const handleMouseLeave = useCallback((e: React.MouseEvent) => {
+    const el = e.currentTarget as HTMLElement;
+    el.style.background = "rgba(0, 0, 0, 0.35)";
+    el.style.borderColor = "var(--ling-error-border)";
+  }, []);
+
   if (isOpen && !showConnected) return null;
 
   const dotColor = isOpen
@@ -75,78 +153,48 @@ export const ConnectionStatus = memo(() => {
         ? t("connection.idleRetry")
         : t("connection.disconnected");
 
+  const containerStyle = isOpen
+    ? S_CONTAINER_OPEN
+    : isClosed
+      ? S_CONTAINER_CLOSED
+      : S_CONTAINER_CONNECTING;
+
+  const dotAnimation = isConnecting
+    ? "connPulse 1.2s ease-in-out infinite"
+    : isClosed && idleRetry
+      ? "connPulse 2.4s ease-in-out infinite"
+      : undefined;
+
   const Tag = isClosed ? "button" : "div";
 
   return (
     <>
       <Tag
         onClick={isClosed ? reconnect : undefined}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "6px",
-          padding: "5px 10px",
-          background: "rgba(0, 0, 0, 0.35)",
-          backdropFilter: "blur(12px)",
-          borderRadius: "16px",
-          border: `1px solid ${isClosed ? "var(--ling-error-border)" : "rgba(255,255,255,0.08)"}`,
-          cursor: isClosed ? "pointer" : "default",
-          transition: "border-color 0.4s ease, opacity 0.4s ease",
-          opacity: isOpen ? 0.7 : 1,
-          animation: isOpen ? "connFadeIn 0.3s ease-out" : undefined,
-          // reset button styles
-          ...(isClosed ? { font: "inherit", color: "inherit" } : {}),
-        }}
-        onMouseEnter={(e) => {
-          if (isClosed) {
-            const el = e.currentTarget as HTMLElement;
-            el.style.background = "rgba(0, 0, 0, 0.55)";
-            el.style.borderColor = "var(--ling-error)";
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (isClosed) {
-            const el = e.currentTarget as HTMLElement;
-            el.style.background = "rgba(0, 0, 0, 0.35)";
-            el.style.borderColor = "var(--ling-error-border)";
-          }
-        }}
+        style={containerStyle}
+        onMouseEnter={isClosed ? handleMouseEnter : undefined}
+        onMouseLeave={isClosed ? handleMouseLeave : undefined}
       >
         {/* Status dot */}
         <div
           style={{
-            width: "7px",
-            height: "7px",
-            borderRadius: "50%",
+            ...S_DOT_BASE,
             background: dotColor,
             boxShadow: `0 0 6px ${dotColor}88`,
-            flexShrink: 0,
-            animation: isConnecting
-              ? "connPulse 1.2s ease-in-out infinite"
-              : isClosed && idleRetry
-                ? "connPulse 2.4s ease-in-out infinite"
-                : undefined,
+            animation: dotAnimation,
           }}
         />
 
         {/* Label */}
         {!isOpen && (
-          <span
-            style={{
-              fontSize: "11px",
-              color: isClosed ? "var(--ling-error)" : "var(--ling-warning)",
-              fontWeight: 500,
-              whiteSpace: "nowrap",
-              lineHeight: 1,
-            }}
-          >
+          <span style={isClosed ? S_LABEL_ERROR : S_LABEL_WARNING}>
             {label}
           </span>
         )}
 
         {/* Click hint for disconnected state */}
         {isClosed && (
-          <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", whiteSpace: "nowrap", lineHeight: 1 }}>
+          <span style={S_HINT}>
             {t("connection.clickRetry")}
           </span>
         )}

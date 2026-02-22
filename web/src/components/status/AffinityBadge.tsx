@@ -1,4 +1,4 @@
-import { memo, useState, useId, useMemo, useEffect, useRef, useCallback } from "react";
+import { memo, useState, useId, useMemo, useEffect, useRef, useCallback, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { useAffinity } from "@/context/affinity-context";
 import { AFFINITY_LEVELS, DEFAULT_LEVEL } from "@/config/affinity-palette";
@@ -6,29 +6,123 @@ import { LEVELS } from "@/hooks/use-affinity-engine";
 
 // ── Module-level keyframe injection (consistent with BackgroundReactor) ──
 const BADGE_STYLE_ID = "affinity-badge-keyframes";
-function ensureBadgeStyles() {
-  if (typeof document === "undefined" || document.getElementById(BADGE_STYLE_ID)) return;
-  const el = document.createElement("style");
-  el.id = BADGE_STYLE_ID;
-  el.textContent = `
-    @keyframes heartbeat {
-      0%, 100% { transform: scale(1); }
-      14% { transform: scale(1.1); }
-      28% { transform: scale(1); }
-      42% { transform: scale(1.08); }
-      70% { transform: scale(1); }
-    }
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes popIn {
-      from { opacity: 0; transform: scale(0.8) translateY(-4px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-  `;
-  document.head.appendChild(el);
+if (typeof document === "undefined" || !document.getElementById(BADGE_STYLE_ID)) {
+  if (typeof document !== "undefined") {
+    const el = document.createElement("style");
+    el.id = BADGE_STYLE_ID;
+    el.textContent = `
+      @keyframes heartbeat {
+        0%, 100% { transform: scale(1); }
+        14% { transform: scale(1.1); }
+        28% { transform: scale(1); }
+        42% { transform: scale(1.08); }
+        70% { transform: scale(1); }
+      }
+      @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes popIn {
+        from { opacity: 0; transform: scale(0.8) translateY(-4px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+      }
+    `;
+    document.head.appendChild(el);
+  }
 }
+
+// ── Pre-allocated style constants ──
+const S_WRAPPER: CSSProperties = { position: "relative" };
+
+const S_BTN_BASE: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "6px",
+  padding: "6px 10px",
+  backdropFilter: "blur(12px)",
+  borderRadius: "16px",
+  cursor: "pointer",
+  transition: "background 0.3s ease, border-color 0.3s ease, transform 0.3s ease",
+  font: "inherit",
+  color: "inherit",
+};
+
+const S_HEART_WRAP: CSSProperties = { display: "inline-flex" };
+
+const S_LEVEL_LABEL_BASE: CSSProperties = {
+  fontSize: "12px",
+  fontWeight: 600,
+  transition: "color 0.3s ease",
+};
+
+const S_AFFINITY_VALUE_HIDDEN: CSSProperties = {
+  fontSize: "12px",
+  color: "rgba(255,255,255,0.7)",
+  fontFamily: "monospace",
+  fontWeight: 500,
+  overflow: "hidden",
+  maxWidth: "0px",
+  opacity: 0,
+  transition: "max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+  whiteSpace: "nowrap",
+};
+
+const S_AFFINITY_VALUE_VISIBLE: CSSProperties = {
+  ...S_AFFINITY_VALUE_HIDDEN,
+  maxWidth: "40px",
+  opacity: 1,
+};
+
+const S_PANEL_BASE: CSSProperties = {
+  position: "absolute",
+  top: "100%",
+  right: 0,
+  marginTop: "8px",
+  padding: "20px",
+  background: "rgba(10, 0, 21, 0.92)",
+  backdropFilter: "blur(24px)",
+  borderRadius: "16px",
+  minWidth: "200px",
+  transition: "box-shadow 0.5s ease, border-color 0.5s ease",
+  animation: "fadeInDown 0.25s ease-out",
+};
+
+const S_PANEL_HEADER: CSSProperties = { display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" };
+const S_PANEL_FLEX1: CSSProperties = { flex: 1 };
+const S_PANEL_LEVEL_NAME: CSSProperties = { fontSize: "15px", fontWeight: 700, display: "block", letterSpacing: "0.3px", transition: "color 0.5s ease" };
+const S_PANEL_SUBLABEL: CSSProperties = { fontSize: "11px", color: "rgba(255,255,255,0.5)", display: "block", marginTop: "2px" };
+const S_PANEL_SCORE: CSSProperties = { fontSize: "22px", fontWeight: 700, fontFamily: "monospace", letterSpacing: "-0.5px", transition: "color 0.5s ease" };
+
+const S_PROGRESS_WRAP: CSSProperties = { marginBottom: "14px" };
+const S_PROGRESS_HEADER: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "6px" };
+const S_PROGRESS_LABEL: CSSProperties = { fontSize: "11px", color: "rgba(255,255,255,0.5)" };
+const S_PROGRESS_RANGE: CSSProperties = { fontSize: "11px", color: "rgba(255,255,255,0.4)", fontFamily: "monospace" };
+const S_PROGRESS_TRACK: CSSProperties = { width: "100%", height: "6px", background: "rgba(255,255,255,0.1)", borderRadius: "3px", overflow: "hidden" };
+const S_PROGRESS_FILL_BASE: CSSProperties = { height: "100%", width: "100%", borderRadius: "3px", transformOrigin: "left", transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease" };
+
+const S_NEXT_LEVEL_WRAP: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "6px",
+  padding: "8px 10px",
+  background: "rgba(255,255,255,0.04)",
+  borderRadius: "10px",
+  border: "1px solid rgba(255,255,255,0.06)",
+};
+const S_NEXT_LABEL: CSSProperties = { fontSize: "11px", color: "rgba(255,255,255,0.4)" };
+const S_NEXT_RANGE: CSSProperties = { fontSize: "10px", color: "rgba(255,255,255,0.3)", fontFamily: "monospace", marginLeft: "auto" };
+
+const S_MILESTONE_BASE: CSSProperties = {
+  position: "absolute",
+  top: "100%",
+  right: 0,
+  marginTop: "8px",
+  padding: "8px 14px",
+  borderRadius: "20px",
+  whiteSpace: "nowrap",
+  animation: "popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+};
+const S_MILESTONE_TEXT: CSSProperties = { fontSize: "13px", color: "white", fontWeight: 500 };
 
 const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPercent: number; size?: number }) => {
   const gradientId = useId();
@@ -71,7 +165,12 @@ export const AffinityBadge = memo(() => {
   }, [level, affinity]);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(ensureBadgeStyles, []);
+  // ── Stabilized event handlers ──
+  const toggleExpanded = useCallback(() => setExpanded(v => !v), []);
+  const onMouseEnter = useCallback(() => setHovered(true), []);
+  const onMouseLeave = useCallback(() => { setHovered(false); setPressed(false); }, []);
+  const onMouseDown = useCallback(() => setPressed(true), []);
+  const onMouseUp = useCallback(() => setPressed(false), []);
 
   // Close expanded panel on outside click
   const handleClickOutside = useCallback((e: MouseEvent) => {
@@ -86,51 +185,38 @@ export const AffinityBadge = memo(() => {
     }
   }, [expanded, handleClickOutside]);
 
+  // ── Computed styles (depend on hover/press/config state) ──
+  const btnStyle = useMemo<CSSProperties>(() => ({
+    ...S_BTN_BASE,
+    background: pressed ? "rgba(0, 0, 0, 0.55)" : hovered ? "rgba(0, 0, 0, 0.45)" : "rgba(0, 0, 0, 0.35)",
+    border: hovered ? `1px solid ${config.color}44` : "1px solid rgba(255,255,255,0.08)",
+    transform: pressed ? "scale(0.95)" : "scale(1)",
+  }), [pressed, hovered, config.color]);
+
+  const heartWrapStyle = useMemo<CSSProperties>(
+    () => ({ ...S_HEART_WRAP, animation: `heartbeat ${config.beatSpeed} ease-in-out infinite` }),
+    [config.beatSpeed],
+  );
+
   return (
     <>
-      <div ref={containerRef} style={{ position: "relative" }}>
+      <div ref={containerRef} style={S_WRAPPER}>
         {/* Heart button */}
         <button
-          onClick={() => setExpanded(!expanded)}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => { setHovered(false); setPressed(false); }}
-          onMouseDown={() => setPressed(true)}
-          onMouseUp={() => setPressed(false)}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            padding: "6px 10px",
-            background: pressed ? "rgba(0, 0, 0, 0.55)" : hovered ? "rgba(0, 0, 0, 0.45)" : "rgba(0, 0, 0, 0.35)",
-            backdropFilter: "blur(12px)",
-            borderRadius: "16px",
-            border: hovered ? `1px solid ${config.color}44` : "1px solid rgba(255,255,255,0.08)",
-            cursor: "pointer",
-            transition: "background 0.3s ease, border-color 0.3s ease, transform 0.3s ease",
-            transform: pressed ? "scale(0.95)" : "scale(1)",
-            font: "inherit",
-            color: "inherit",
-          }}
+          onClick={toggleExpanded}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
+          onMouseDown={onMouseDown}
+          onMouseUp={onMouseUp}
+          style={btnStyle}
         >
-          <span style={{ display: "inline-flex", animation: `heartbeat ${config.beatSpeed} ease-in-out infinite` }}>
+          <span style={heartWrapStyle}>
             <HeartIcon color={config.heartColor} fillPercent={affinity} size={22} />
           </span>
-          <span style={{ fontSize: "12px", color: `${config.color}cc`, fontWeight: 600, transition: "color 0.3s ease" }}>
+          <span style={{ ...S_LEVEL_LABEL_BASE, color: `${config.color}cc` }}>
             {t(config.i18nKey)}
           </span>
-          <span
-            style={{
-              fontSize: "12px",
-              color: "rgba(255,255,255,0.7)",
-              fontFamily: "monospace",
-              fontWeight: 500,
-              overflow: "hidden",
-              maxWidth: hovered ? "40px" : "0px",
-              opacity: hovered ? 1 : 0,
-              transition: "max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              whiteSpace: "nowrap",
-            }}
-          >
+          <span style={hovered ? S_AFFINITY_VALUE_VISIBLE : S_AFFINITY_VALUE_HIDDEN}>
             {affinity}
           </span>
         </button>
@@ -139,57 +225,43 @@ export const AffinityBadge = memo(() => {
         {expanded && (
           <div
             style={{
-              position: "absolute",
-              top: "100%",
-              right: 0,
-              marginTop: "8px",
-              padding: "20px",
-              background: "rgba(10, 0, 21, 0.92)",
-              backdropFilter: "blur(24px)",
-              borderRadius: "16px",
+              ...S_PANEL_BASE,
               border: `1px solid ${config.color}38`,
-              minWidth: "200px",
               boxShadow: `0 12px 40px rgba(0,0,0,0.5), 0 0 24px ${config.color}15`,
-              transition: "box-shadow 0.5s ease, border-color 0.5s ease",
-              animation: "fadeInDown 0.25s ease-out",
             }}
           >
             {/* Header: heart + level info */}
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+            <div style={S_PANEL_HEADER}>
               <HeartIcon color={config.heartColor} fillPercent={affinity} size={32} />
-              <div style={{ flex: 1 }}>
-                <span style={{ fontSize: "15px", color: config.color, fontWeight: 700, display: "block", letterSpacing: "0.3px", transition: "color 0.5s ease" }}>
+              <div style={S_PANEL_FLEX1}>
+                <span style={{ ...S_PANEL_LEVEL_NAME, color: config.color }}>
                   {t(config.i18nKey)}
                 </span>
-                <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)", display: "block", marginTop: "2px" }}>
+                <span style={S_PANEL_SUBLABEL}>
                   {t("affinity.label")}
                 </span>
               </div>
-              <span style={{ fontSize: "22px", color: config.color, fontWeight: 700, fontFamily: "monospace", letterSpacing: "-0.5px", transition: "color 0.5s ease" }}>
+              <span style={{ ...S_PANEL_SCORE, color: config.color }}>
                 {affinity}
               </span>
             </div>
 
-            {/* Level progress bar — shows progress within current level */}
-            <div style={{ marginBottom: "14px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "6px" }}>
-                <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)" }}>
+            {/* Level progress bar */}
+            <div style={S_PROGRESS_WRAP}>
+              <div style={S_PROGRESS_HEADER}>
+                <span style={S_PROGRESS_LABEL}>
                   {t("affinity.currentLevel")}
                 </span>
-                <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", fontFamily: "monospace" }}>
+                <span style={S_PROGRESS_RANGE}>
                   {levelInfo.current.min}–{levelInfo.current.max === 101 ? 100 : levelInfo.current.max}
                 </span>
               </div>
-              <div style={{ width: "100%", height: "6px", background: "rgba(255,255,255,0.1)", borderRadius: "3px", overflow: "hidden" }}>
+              <div style={S_PROGRESS_TRACK}>
                 <div
                   style={{
-                    height: "100%",
-                    width: "100%",
+                    ...S_PROGRESS_FILL_BASE,
                     background: `linear-gradient(90deg, ${config.color}66, ${config.color})`,
-                    borderRadius: "3px",
-                    transformOrigin: "left",
                     transform: `scaleX(${levelInfo.progressInLevel / 100})`,
-                    transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease",
                     boxShadow: `0 0 8px ${config.color}33`,
                   }}
                 />
@@ -200,22 +272,14 @@ export const AffinityBadge = memo(() => {
             {levelInfo.next && (() => {
               const nextConfig = AFFINITY_LEVELS[levelInfo.next.level] || AFFINITY_LEVELS[DEFAULT_LEVEL];
               return (
-                <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "8px 10px",
-                  background: "rgba(255,255,255,0.04)",
-                  borderRadius: "10px",
-                  border: "1px solid rgba(255,255,255,0.06)",
-                }}>
-                  <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)" }}>
+                <div style={S_NEXT_LEVEL_WRAP}>
+                  <span style={S_NEXT_LABEL}>
                     {t("affinity.nextLevel")}
                   </span>
                   <span style={{ fontSize: "11px", color: nextConfig.color, fontWeight: 600 }}>
                     {t(nextConfig.i18nKey)}
                   </span>
-                  <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.3)", fontFamily: "monospace", marginLeft: "auto" }}>
+                  <span style={S_NEXT_RANGE}>
                     {levelInfo.next.min}+
                   </span>
                 </div>
@@ -229,19 +293,12 @@ export const AffinityBadge = memo(() => {
         {milestone && !expanded && (
           <div
             style={{
-              position: "absolute",
-              top: "100%",
-              right: 0,
-              marginTop: "8px",
-              padding: "8px 14px",
+              ...S_MILESTONE_BASE,
               background: `linear-gradient(135deg, ${config.color}dd, ${config.color}99)`,
-              borderRadius: "20px",
               boxShadow: `0 4px 20px ${config.color}44`,
-              whiteSpace: "nowrap",
-              animation: "popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
             }}
           >
-            <span style={{ fontSize: "13px", color: "white", fontWeight: 500 }}>
+            <span style={S_MILESTONE_TEXT}>
               ✨ {milestone}
             </span>
           </div>
