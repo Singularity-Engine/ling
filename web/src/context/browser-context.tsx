@@ -1,6 +1,5 @@
-/* eslint-disable react/jsx-no-constructed-context-values */
 import {
-  createContext, useContext, useState, ReactNode, useCallback,
+  createContext, useContext, useState, useMemo, ReactNode, useCallback,
 } from 'react';
 
 // Define browser view data structure
@@ -45,14 +44,13 @@ export function BrowserProvider({ children }: { children: ReactNode }) {
     setBrowserViewDataState(null);
   }, []);
 
+  const value = useMemo<BrowserContextType>(
+    () => ({ browserViewData, setBrowserViewData, clearBrowserViewData }),
+    [browserViewData, setBrowserViewData, clearBrowserViewData],
+  );
+
   return (
-    <BrowserContext.Provider
-      value={{
-        browserViewData,
-        setBrowserViewData,
-        clearBrowserViewData,
-      }}
-    >
+    <BrowserContext.Provider value={value}>
       {children}
     </BrowserContext.Provider>
   );

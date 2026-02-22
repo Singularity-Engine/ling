@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toaster } from "@/components/ui/toaster";
 
@@ -18,7 +18,7 @@ export function ScreenCaptureProvider({ children }: { children: ReactNode }) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState('');
 
-  const startCapture = async () => {
+  const startCapture = useCallback(async () => {
     try {
       let mediaStream: MediaStream;
 
@@ -62,27 +62,23 @@ export function ScreenCaptureProvider({ children }: { children: ReactNode }) {
       });
       console.error('[ScreenCapture] Failed to start capture:', err);
     }
-  };
+  }, [t]);
 
-  const stopCapture = () => {
-    if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
-      setStream(null);
-      setIsStreaming(false);
-    }
-  };
+  const stopCapture = useCallback(() => {
+    setStream((prev) => {
+      if (prev) prev.getTracks().forEach((track) => track.stop());
+      return null;
+    });
+    setIsStreaming(false);
+  }, []);
+
+  const value = useMemo<ScreenCaptureContextType>(
+    () => ({ stream, isStreaming, error, startCapture, stopCapture }),
+    [stream, isStreaming, error, startCapture, stopCapture],
+  );
 
   return (
-    <ScreenCaptureContext.Provider
-      // eslint-disable-next-line react/jsx-no-constructed-context-values
-      value={{
-        stream,
-        isStreaming,
-        error,
-        startCapture,
-        stopCapture,
-      }}
-    >
+    <ScreenCaptureContext.Provider value={value}>
       {children}
     </ScreenCaptureContext.Provider>
   );
