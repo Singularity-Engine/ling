@@ -92,5 +92,14 @@ export const AFFINITY_CRYSTAL_THEMES: Record<string, AffinityCrystalTheme> = {
   devoted:     { glow: "244, 114, 182", borderAlpha: 0.75, breatheIntensity: 1.7, scale: 1.06, floatRange: 8,  shimmer: true,  bgAlpha: 0.45, blur: 24 },
 };
 
+// ── Tool category colors (shared by InfoCrystal, ThoughtHalo, CapabilityRing) ──
+export const CATEGORY_COLORS: Record<string, string> = {
+  search: "#60a5fa",
+  code: "#10b981",
+  memory: "#a78bfa",
+  weather: "#facc15",
+  generic: "#8b5cf6",
+};
+
 // ── Defaults ──
 export const DEFAULT_LEVEL = "neutral";

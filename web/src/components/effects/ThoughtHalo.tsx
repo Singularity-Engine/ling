@@ -1,17 +1,51 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
-import { useToolState, ToolCategory } from '../../context/tool-state-context';
+import { useToolState } from '../../context/tool-state-context';
 import { useAiState } from '../../context/ai-state-context';
 import { useAffinity } from '../../context/affinity-context';
 import { MOBILE_BREAKPOINT } from '../../constants/breakpoints';
-import { AFFINITY_HALO_COLORS, DEFAULT_LEVEL } from '../../config/affinity-palette';
+import { AFFINITY_HALO_COLORS, CATEGORY_COLORS, DEFAULT_LEVEL } from '../../config/affinity-palette';
 
-const CATEGORY_COLORS: Record<ToolCategory, string> = {
-  search: '#60a5fa',
-  code: '#10b981',
-  memory: '#a78bfa',
-  weather: '#facc15',
-  generic: '#8b5cf6',
-};
+// ── Module-level keyframe injection (consistent with BackgroundReactor, Constellation) ──
+const STYLE_ID = 'thought-halo-keyframes';
+if (typeof document !== 'undefined' && !document.getElementById(STYLE_ID)) {
+  const style = document.createElement('style');
+  style.id = STYLE_ID;
+  style.textContent = `
+    @keyframes thoughtHaloRotate {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    @keyframes thoughtHaloRotateReverse {
+      from { transform: translate(-50%, -50%) rotate(360deg); }
+      to { transform: translate(-50%, -50%) rotate(0deg); }
+    }
+    @keyframes thoughtHaloEnter {
+      from { opacity: 0; transform: translate(-50%, -50%) scale(0) rotate(0deg); }
+      to { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+    }
+    @keyframes thoughtHaloExit {
+      from { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+      to { opacity: 0; transform: translate(-50%, -50%) scale(0) rotate(0deg); }
+    }
+    @keyframes particlePulse {
+      0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.8); }
+    }
+    @keyframes particlePulseInner {
+      0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.8); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.6); }
+    }
+    @keyframes ringPulse {
+      0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+      50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.08); }
+    }
+    @keyframes innerGlowPulse {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 0.5; }
+    }
+  `;
+  document.head.appendChild(style);
+}
 
 // Desktop / Mobile geometry
 const DESKTOP = { particles: 14, innerParticles: 8, a: 60, b: 20, innerA: 42, innerB: 14 };
@@ -80,40 +114,7 @@ export const ThoughtHalo = memo(() => {
 
   return (
     <>
-      <style>{`
-        @keyframes thoughtHaloRotate {
-          from { transform: translate(-50%, -50%) rotate(0deg); }
-          to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-        @keyframes thoughtHaloRotateReverse {
-          from { transform: translate(-50%, -50%) rotate(360deg); }
-          to { transform: translate(-50%, -50%) rotate(0deg); }
-        }
-        @keyframes thoughtHaloEnter {
-          from { opacity: 0; transform: translate(-50%, -50%) scale(0) rotate(0deg); }
-          to { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
-        }
-        @keyframes thoughtHaloExit {
-          from { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
-          to { opacity: 0; transform: translate(-50%, -50%) scale(0) rotate(0deg); }
-        }
-        @keyframes particlePulse {
-          0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
-          50% { opacity: 1; transform: translate(-50%, -50%) scale(1.8); }
-        }
-        @keyframes particlePulseInner {
-          0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.8); }
-          50% { opacity: 1; transform: translate(-50%, -50%) scale(1.6); }
-        }
-        @keyframes ringPulse {
-          0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
-          50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.08); }
-        }
-        @keyframes innerGlowPulse {
-          0%, 100% { opacity: 0.2; }
-          50% { opacity: 0.5; }
-        }
-      `}</style>
+      {/* Keyframes injected at module level — no inline <style> needed */}
 
       {/* Inner glow ring - soft radial glow behind particles */}
       <div

@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { memo, useState, useCallback, useMemo, useEffect } from "react";
-import type { ToolCategory } from "../../context/tool-state-context";
 import { useAffinity } from "@/context/affinity-context";
-import { AFFINITY_CRYSTAL_THEMES, DEFAULT_LEVEL, type AffinityCrystalTheme } from "@/config/affinity-palette";
+import { AFFINITY_CRYSTAL_THEMES, CATEGORY_COLORS, DEFAULT_LEVEL, type AffinityCrystalTheme } from "@/config/affinity-palette";
+import type { ToolCategory } from "../../context/tool-state-context";
 
 const DEFAULT_THEME: AffinityCrystalTheme = AFFINITY_CRYSTAL_THEMES[DEFAULT_LEVEL];
 
@@ -65,14 +65,6 @@ function ensureSharedStyles() {
 }
 
 // ─── Static data ─────────────────────────────────────────────────
-
-const CATEGORY_COLORS: Record<ToolCategory, string> = {
-  search: "#60a5fa",
-  code: "#10b981",
-  memory: "#a78bfa",
-  weather: "#facc15",
-  generic: "#8b5cf6",
-};
 
 const TOOL_ICONS: Record<string, string> = {
   search: "🔍",

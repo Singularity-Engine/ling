@@ -1,14 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useToolState, type ToolCategory } from "../../context/tool-state-context";
-
-const CATEGORY_COLORS: Record<ToolCategory, string> = {
-  search: "#60a5fa",
-  code: "#10b981",
-  memory: "#a78bfa",
-  weather: "#facc15",
-  generic: "#8b5cf6",
-};
+import { CATEGORY_COLORS } from "../../config/affinity-palette";
 
 const ABILITIES = [
   { key: "search" as ToolCategory, icon: "🔍", labelKey: "capability.search", promptKey: "capability.searchPrompt" },

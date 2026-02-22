@@ -5,7 +5,7 @@
  * 通过 Engine BFF 代理调用 EverMemOS memory_search API。
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiClient } from '@/services/api-client';
 import { useAuth } from '@/context/auth-context';
@@ -22,12 +22,16 @@ interface MemoryPanelProps {
   onClose: () => void;
 }
 
+const EXIT_DURATION = 250; // ms — matches slideOutRight animation
+
 export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [memories, setMemories] = useState<MemoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [closing, setClosing] = useState(false);
+  const closingTimer = useRef<ReturnType<typeof setTimeout>>();
 
   const fetchMemories = useCallback(async () => {
     if (!user) return;
@@ -44,12 +48,27 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
   }, [user]);
 
   useEffect(() => {
-    if (open) fetchMemories();
+    if (open) {
+      setClosing(false);
+      fetchMemories();
+    }
   }, [open, fetchMemories]);
+
+  // Clean up timer on unmount
+  useEffect(() => () => { clearTimeout(closingTimer.current); }, []);
+
+  const handleClose = useCallback(() => {
+    if (closing) return;
+    setClosing(true);
+    closingTimer.current = setTimeout(() => {
+      setClosing(false);
+      onClose();
+    }, EXIT_DURATION);
+  }, [onClose, closing]);
 
   // ESC to close — handled globally by useKeyboardShortcuts in App.tsx
 
-  if (!open) return null;
+  if (!open && !closing) return null;
 
   return (
     <div
@@ -61,7 +80,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
         justifyContent: 'flex-end',
       }}
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget) handleClose();
       }}
     >
       {/* Backdrop */}
@@ -72,6 +91,8 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
           background: 'rgba(0, 0, 0, 0.4)',
           backdropFilter: 'blur(4px)',
           WebkitBackdropFilter: 'blur(4px)',
+          opacity: closing ? 0 : 1,
+          transition: `opacity ${EXIT_DURATION}ms ease`,
         }}
       />
 
@@ -86,7 +107,9 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
           borderLeft: '1px solid rgba(139, 92, 246, 0.2)',
           display: 'flex',
           flexDirection: 'column',
-          animation: 'slideInRight 0.3s ease-out',
+          animation: closing
+            ? `slideOutRight ${EXIT_DURATION}ms ease-in forwards`
+            : 'slideInRight 0.3s ease-out',
         }}
       >
         {/* Header */}
@@ -108,7 +131,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
             </p>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             aria-label={t('common.close')}
             style={{
               background: 'none',
