@@ -132,7 +132,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
             <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: 700, margin: 0, letterSpacing: '0.2px' }}>
               {t('memory.title')}
             </h3>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', margin: '4px 0 0' }}>
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: '4px 0 0' }}>
               {t('memory.subtitle')}
             </p>
           </div>
@@ -203,10 +203,10 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
               <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.5 }}>
                 {'\uD83D\uDD12'}
               </div>
-              <h4 style={{ color: 'rgba(255,255,255,0.6)', fontSize: '16px', fontWeight: 600, margin: '0 0 8px' }}>
+              <h4 style={{ color: 'rgba(255,255,255,0.75)', fontSize: '16px', fontWeight: 600, margin: '0 0 8px' }}>
                 {t('memory.guestTitle')}
               </h4>
-              <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '13px', lineHeight: 1.6, marginBottom: '16px' }}>
+              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '13px', lineHeight: 1.6, marginBottom: '16px' }}>
                 {t('memory.guestDesc')}
               </p>
               <a
@@ -233,10 +233,10 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
               <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.5 }}>
                 {'\uD83E\uDDE0'}
               </div>
-              <h4 style={{ color: 'rgba(255,255,255,0.6)', fontSize: '16px', fontWeight: 600, margin: '0 0 8px' }}>
+              <h4 style={{ color: 'rgba(255,255,255,0.75)', fontSize: '16px', fontWeight: 600, margin: '0 0 8px' }}>
                 {t('memory.noMemoriesTitle')}
               </h4>
-              <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '13px', lineHeight: 1.6 }}>
+              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '13px', lineHeight: 1.6 }}>
                 {t('memory.noMemoriesDesc')}
               </p>
             </div>
@@ -248,8 +248,8 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
               className="ling-memory-card"
               style={{
                 padding: '14px 16px',
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.07)',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.08)',
                 borderLeft: '3px solid rgba(139,92,246,0.4)',
                 borderRadius: '10px',
                 marginBottom: '12px',
@@ -258,16 +258,16 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
               }}
               onPointerEnter={(e) => {
                 const el = e.currentTarget;
-                el.style.background = 'rgba(255,255,255,0.07)';
+                el.style.background = 'rgba(255,255,255,0.08)';
                 el.style.borderLeftColor = 'rgba(139,92,246,0.6)';
               }}
               onPointerLeave={(e) => {
                 const el = e.currentTarget;
-                el.style.background = 'rgba(255,255,255,0.04)';
+                el.style.background = 'rgba(255,255,255,0.05)';
                 el.style.borderLeftColor = 'rgba(139,92,246,0.4)';
               }}
             >
-              <p style={{ color: 'rgba(255,255,255,0.88)', fontSize: '14px', lineHeight: 1.65, margin: 0 }}>
+              <p style={{ color: 'rgba(255,255,255,0.92)', fontSize: '14px', lineHeight: 1.65, margin: 0 }}>
                 {memory.content}
               </p>
               <div style={{
