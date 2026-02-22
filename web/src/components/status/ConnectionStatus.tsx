@@ -1,7 +1,7 @@
 import { memo, useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useWebSocket } from "@/context/websocket-context";
-import { gatewayConnector } from "@/services/gateway-connector";
+import { gatewayConnector, RECONNECT_MAX_RETRIES } from "@/services/gateway-connector";
 
 const keyframesStyle = `
 @keyframes connFadeIn {
@@ -25,6 +25,7 @@ export const ConnectionStatus = memo(() => {
   const { wsState, reconnect } = useWebSocket();
   const [showConnected, setShowConnected] = useState(false);
   const [reconnectAttempt, setReconnectAttempt] = useState(0);
+  const [idleRetry, setIdleRetry] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
 
   const isOpen = wsState === "OPEN";
@@ -44,15 +45,16 @@ export const ConnectionStatus = memo(() => {
   }, [isOpen]);
 
   useEffect(() => {
-    const sub = gatewayConnector.reconnectAttempt$.subscribe(setReconnectAttempt);
-    return () => sub.unsubscribe();
+    const attemptSub = gatewayConnector.reconnectAttempt$.subscribe(setReconnectAttempt);
+    const idleSub = gatewayConnector.inIdleRetry$.subscribe(setIdleRetry);
+    return () => { attemptSub.unsubscribe(); idleSub.unsubscribe(); };
   }, []);
 
   if (isOpen && !showConnected) return null;
 
   const dotColor = isOpen
     ? "var(--ling-success)"
-    : isConnecting
+    : isConnecting || (isClosed && idleRetry)
       ? "var(--ling-warning)"
       : "var(--ling-error)";
 
@@ -60,9 +62,11 @@ export const ConnectionStatus = memo(() => {
     ? t("connection.connected")
     : isConnecting
       ? reconnectAttempt > 0
-        ? `${t("connection.reconnecting")} (${reconnectAttempt}/10)`
+        ? `${t("connection.reconnecting")} (${reconnectAttempt}/${RECONNECT_MAX_RETRIES})`
         : t("connection.reconnecting")
-      : t("connection.disconnected");
+      : idleRetry
+        ? t("connection.idleRetry")
+        : t("connection.disconnected");
 
   const Tag = isClosed ? "button" : "div";
 
@@ -111,7 +115,11 @@ export const ConnectionStatus = memo(() => {
             background: dotColor,
             boxShadow: `0 0 6px ${dotColor}88`,
             flexShrink: 0,
-            animation: isConnecting ? "connPulse 1.2s ease-in-out infinite" : undefined,
+            animation: isConnecting
+              ? "connPulse 1.2s ease-in-out infinite"
+              : isClosed && idleRetry
+                ? "connPulse 2.4s ease-in-out infinite"
+                : undefined,
           }}
         />
 

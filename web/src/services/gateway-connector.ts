@@ -56,7 +56,7 @@ export interface GatewayConnectOptions {
 
 const RECONNECT_BASE_MS = 1000;
 const RECONNECT_MAX_MS = 30000;
-const RECONNECT_MAX_RETRIES = 10;
+export const RECONNECT_MAX_RETRIES = 10;
 const HANDSHAKE_TIMEOUT_MS = 15000;
 const HEARTBEAT_TIMEOUT_MS = 90_000; // Treat connection as dead if no tick in 90s
 const HEARTBEAT_CHECK_MS = 30_000;   // Check heartbeat every 30s
@@ -103,6 +103,9 @@ class GatewayConnector {
     typeof navigator !== 'undefined' ? !navigator.onLine : false,
   );
 
+  /** Whether connector is in idle retry mode (exponential backoff exhausted) */
+  readonly inIdleRetry$ = new BehaviorSubject<boolean>(false);
+
   // ── Public API ──────────────────────────────────────────────────
 
   /**
@@ -114,6 +117,7 @@ class GatewayConnector {
     this.reconnectAttempts = 0;
     this.authFailed = false;
     this.inIdleRetry = false;
+    this.inIdleRetry$.next(false);
     this.clearReconnectTimer();
     this.stopIdleRetry();
     this.setupVisibilityHandler();
@@ -128,6 +132,7 @@ class GatewayConnector {
     this.removeVisibilityHandler();
     this.reconnectAttempts = RECONNECT_MAX_RETRIES; // prevent reconnect
     this.inIdleRetry = false;
+    this.inIdleRetry$.next(false);
     if (this.ws) {
       this.ws.close(1000, 'client disconnect');
       this.ws = null;
@@ -336,6 +341,7 @@ class GatewayConnector {
           const wasReconnecting = this.reconnectAttempts > 0 || this.inIdleRetry;
           this.reconnectAttempts = 0;
           this.inIdleRetry = false;
+          this.inIdleRetry$.next(false);
           this.stopIdleRetry();
           this.reconnectAttempt$.next(0);
           this.lastTickAt = Date.now();
@@ -542,6 +548,11 @@ class GatewayConnector {
   private startIdleRetry() {
     this.stopIdleRetry();
     this.inIdleRetry = true;
+    this.inIdleRetry$.next(true);
+    // Add ±25% jitter to prevent thundering herd when multiple clients exhaust backoff simultaneously
+    const jitter = IDLE_RETRY_MS * (0.75 + Math.random() * 0.5);
+    const delay = Math.round(jitter);
+    if (import.meta.env.DEV) console.log(`[GatewayConnector] Idle retry scheduled in ${delay}ms`);
     this.idleRetryTimer = setTimeout(() => {
       if (this.state !== 'DISCONNECTED' || this.authFailed) return;
       if (import.meta.env.DEV) console.log('[GatewayConnector] Idle retry — attempting reconnect');
@@ -552,7 +563,7 @@ class GatewayConnector {
         // Schedule next idle retry
         this.startIdleRetry();
       });
-    }, IDLE_RETRY_MS);
+    }, delay);
   }
 
   private stopIdleRetry() {
