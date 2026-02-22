@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef, Component, ErrorInfo, type ReactNode, type CSSProperties } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense, Component, ErrorInfo, type ReactNode, type CSSProperties } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
@@ -38,22 +38,29 @@ import { LoadingSkeleton } from "./components/loading/LoadingSkeleton";
 import { Toaster, toaster } from "./components/ui/toaster";
 import { useWebSocket } from "./context/websocket-context";
 import { useKeyboardShortcuts, ShortcutDef } from "./hooks/use-keyboard-shortcuts";
-import { ShortcutsOverlay } from "./components/shortcuts/ShortcutsOverlay";
-import { AboutOverlay } from "./components/about/AboutOverlay";
 import { NetworkStatusBanner } from "./components/effects/NetworkStatusBanner";
 import { TapParticles } from "./components/effects/TapParticles";
 import { useAffinityIdleExpression } from "./hooks/use-affinity-idle-expression";
 import { AuthProvider, useAuth } from "./context/auth-context";
 import { UIProvider } from "./context/ui-context";
-import { LoginPage } from "./pages/LoginPage";
-import { RegisterPage } from "./pages/RegisterPage";
-import { TermsPage } from "./pages/TermsPage";
 import CreditsDisplay from "./components/billing/CreditsDisplay";
-import PricingOverlay from "./components/billing/PricingOverlay";
-import InsufficientCreditsModal from "./components/billing/InsufficientCreditsModal";
-import { PersonalizedOnboarding, shouldShowOnboarding } from "./components/onboarding/PersonalizedOnboarding";
-import { MemoryPanel } from "./components/memory/MemoryPanel";
 import "./index.css";
+
+// ─── Lazy-loaded overlays & modals (chunk loads on first use) ───
+const ShortcutsOverlay = lazy(() => import("./components/shortcuts/ShortcutsOverlay").then(m => ({ default: m.ShortcutsOverlay })));
+const AboutOverlay = lazy(() => import("./components/about/AboutOverlay").then(m => ({ default: m.AboutOverlay })));
+const MemoryPanel = lazy(() => import("./components/memory/MemoryPanel").then(m => ({ default: m.MemoryPanel })));
+const PricingOverlay = lazy(() => import("./components/billing/PricingOverlay"));
+const InsufficientCreditsModal = lazy(() => import("./components/billing/InsufficientCreditsModal"));
+const PersonalizedOnboarding = lazy(() => import("./components/onboarding/PersonalizedOnboarding").then(m => ({ default: m.PersonalizedOnboarding })));
+
+// ─── Lazy-loaded route pages ───
+const LoginPage = lazy(() => import("./pages/LoginPage").then(m => ({ default: m.LoginPage })));
+const RegisterPage = lazy(() => import("./pages/RegisterPage").then(m => ({ default: m.RegisterPage })));
+const TermsPage = lazy(() => import("./pages/TermsPage").then(m => ({ default: m.TermsPage })));
+
+// Inlined to avoid eagerly importing the full onboarding module
+const shouldShowOnboarding = () => !sessionStorage.getItem("ling-onboarding-done");
 
 // Error Boundary
 interface ErrorBoundaryState { hasError: boolean; error: Error | null; errorInfo: ErrorInfo | null; showDetail: boolean; }
@@ -510,10 +517,22 @@ function MainContent(): JSX.Element {
 
       </div>
 
-      {/* ===== Layer 99: 快捷键帮助浮层 ===== */}
-      <ShortcutsOverlay open={shortcutsOpen} onClose={closeShortcuts} />
-      <AboutOverlay open={aboutOpen} onClose={closeAbout} />
-      <MemoryPanel open={memoryOpen} onClose={closeMemory} />
+      {/* ===== Layer 99: 快捷键帮助浮层 (lazy-loaded on first open) ===== */}
+      {shortcutsOpen && (
+        <Suspense fallback={null}>
+          <ShortcutsOverlay open={shortcutsOpen} onClose={closeShortcuts} />
+        </Suspense>
+      )}
+      {aboutOpen && (
+        <Suspense fallback={null}>
+          <AboutOverlay open={aboutOpen} onClose={closeAbout} />
+        </Suspense>
+      )}
+      {memoryOpen && (
+        <Suspense fallback={null}>
+          <MemoryPanel open={memoryOpen} onClose={closeMemory} />
+        </Suspense>
+      )}
     </div>
   );
 }
@@ -644,10 +663,14 @@ function MainApp() {
         <LandingAnimation onComplete={handleLandingComplete} />
       )}
 
-      <PricingOverlay />
-      <InsufficientCreditsModal />
+      <Suspense fallback={null}>
+        <PricingOverlay />
+        <InsufficientCreditsModal />
+      </Suspense>
       {showOnboarding && (
-        <PersonalizedOnboarding onComplete={closeOnboarding} />
+        <Suspense fallback={null}>
+          <PersonalizedOnboarding onComplete={closeOnboarding} />
+        </Suspense>
       )}
       </UIProvider>
 
@@ -670,12 +693,14 @@ function AnimatedRoutes(): JSX.Element {
   return (
     <AnimatePresence mode="wait">
       <motion.div key={pageKey} {...pageTransition} style={{ minHeight: '100dvh' }}>
-        <Routes location={location}>
-          <Route path="/login" element={<GuestOnly><LoginPage /></GuestOnly>} />
-          <Route path="/register" element={<GuestOnly><RegisterPage /></GuestOnly>} />
-          <Route path="/terms" element={<TermsPage />} />
-          <Route path="/*" element={<MainApp />} />
-        </Routes>
+        <Suspense fallback={null}>
+          <Routes location={location}>
+            <Route path="/login" element={<GuestOnly><LoginPage /></GuestOnly>} />
+            <Route path="/register" element={<GuestOnly><RegisterPage /></GuestOnly>} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/*" element={<MainApp />} />
+          </Routes>
+        </Suspense>
       </motion.div>
     </AnimatePresence>
   );
