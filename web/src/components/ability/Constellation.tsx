@@ -4,13 +4,12 @@ import { useTranslation } from "react-i18next";
 import { useConstellation } from "../../hooks/use-constellation";
 import { useToolState } from "../../context/tool-state-context";
 import { getSkillMeta, getMetaByKey, type SkillMeta } from "../../config/skill-registry";
+import { createStyleInjector } from "../../utils/style-injection";
 
-// ── Inject keyframes once ───────────────────────────────────────
-const STYLE_ID = "constellation-styles";
-if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
-  const style = document.createElement("style");
-  style.id = STYLE_ID;
-  style.textContent = `
+// ── Deferred keyframe injection ─────────────────────────────────
+const ensureConstellationStyles = createStyleInjector({
+  id: "constellation-styles",
+  css: `
     @keyframes constellationPulse {
       0%, 100% { box-shadow: 0 0 8px rgba(139,92,246,0.3), 0 0 2px rgba(139,92,246,0.15); }
       50% { box-shadow: 0 0 16px rgba(139,92,246,0.5), 0 0 4px rgba(139,92,246,0.3); }
@@ -24,9 +23,8 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
       0% { box-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(139,92,246,0.6); transform: scale(1.15); }
       100% { box-shadow: 0 0 8px rgba(139,92,246,0.3); transform: scale(1); }
     }
-  `;
-  document.head.appendChild(style);
-}
+  `,
+});
 
 // ── Arc layout helpers ──────────────────────────────────────────
 const ARC_SPAN = 150;
@@ -95,6 +93,24 @@ const StarButton = memo(function StarButton({
   const Icon = meta.icon;
   const handleClick = useCallback(() => onStarClick(skillKey), [onStarClick, skillKey]);
 
+  const starStyle = useMemo<CSSProperties>(() => ({
+    position: "absolute",
+    width: size,
+    height: size,
+    borderRadius: "50%",
+    background: `radial-gradient(circle at 30% 30%, ${meta.color}30, rgba(10,0,21,0.6))`,
+    border: `1.5px solid ${meta.color}88`,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    padding: 0,
+    font: "inherit",
+    color: "inherit",
+    animation: isBirthing ? "constellationBirth 0.6s ease-out" : undefined,
+    boxShadow: `0 0 8px ${meta.color}33`,
+  }), [size, meta.color, isBirthing]);
+
   const variants = useMemo(
     () => ({ closed: CLOSED_VARIANT, open: { x: position.x, y: position.y, opacity: 1, scale: 1 } }),
     [position.x, position.y],
@@ -110,23 +126,7 @@ const StarButton = memo(function StarButton({
       transition={transition}
       onClick={handleClick}
       aria-label={meta.label[lang]}
-      style={{
-        position: "absolute",
-        width: size,
-        height: size,
-        borderRadius: "50%",
-        background: `radial-gradient(circle at 30% 30%, ${meta.color}30, rgba(10,0,21,0.6))`,
-        border: `1.5px solid ${meta.color}88`,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        cursor: "pointer",
-        padding: 0,
-        font: "inherit",
-        color: "inherit",
-        animation: isBirthing ? "constellationBirth 0.6s ease-out" : undefined,
-        boxShadow: `0 0 8px ${meta.color}33`,
-      }}
+      style={starStyle}
       whileHover={{ scale: 1.15, boxShadow: `0 0 20px ${meta.color}66` }}
       whileTap={{ scale: 0.95 }}
     >
@@ -143,6 +143,9 @@ export const Constellation = memo(() => {
   const [isOpen, setIsOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Inject keyframe styles on first render
+  useEffect(ensureConstellationStyles, []);
 
   // Active tool color for core glow
   const activeMeta = activeToolName ? getSkillMeta(activeToolName) : null;
@@ -205,6 +208,30 @@ export const Constellation = memo(() => {
   const closeConstellation = useCallback(() => setIsOpen(false), []);
   const setHoveredTrue = useCallback(() => setHovered(true), []);
   const setHoveredFalse = useCallback(() => setHovered(false), []);
+
+  const coreStyle = useMemo<CSSProperties>(() => ({
+    position: "relative",
+    zIndex: 27,
+    width: 44,
+    height: 44,
+    borderRadius: "50%",
+    background: isOpen ? "rgba(139,92,246,0.3)" : "rgba(139,92,246,0.15)",
+    backdropFilter: "blur(12px)",
+    WebkitBackdropFilter: "blur(12px)",
+    border: `1.5px solid ${coreBorderColor}`,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    padding: 0,
+    font: "inherit",
+    color: "inherit",
+    animation: isNew
+      ? "constellationFlash 0.6s ease-out"
+      : "constellationPulse 3s ease-in-out infinite",
+    boxShadow: hovered ? `0 0 20px ${coreColor}55` : undefined,
+    transition: "border-color 0.3s ease, box-shadow 0.3s ease",
+  }), [isOpen, coreBorderColor, isNew, hovered, coreColor]);
 
   // Tooltip text
   const tooltipText = discovered.length === 0
@@ -296,31 +323,7 @@ export const Constellation = memo(() => {
         animate={isOpen ? { rotate: 45 } : { rotate: 0 }}
         whileTap={{ scale: 0.9 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        style={{
-          position: "relative",
-          zIndex: 27,
-          width: 44,
-          height: 44,
-          borderRadius: "50%",
-          background: isOpen
-            ? "rgba(139,92,246,0.3)"
-            : "rgba(139,92,246,0.15)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          border: `1.5px solid ${coreBorderColor}`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-          padding: 0,
-          font: "inherit",
-          color: "inherit",
-          animation: isNew
-            ? "constellationFlash 0.6s ease-out"
-            : "constellationPulse 3s ease-in-out infinite",
-          boxShadow: hovered ? `0 0 20px ${coreColor}55` : undefined,
-          transition: "border-color 0.3s ease, box-shadow 0.3s ease",
-        }}
+        style={coreStyle}
       >
         {/* Star icon SVG */}
         <svg

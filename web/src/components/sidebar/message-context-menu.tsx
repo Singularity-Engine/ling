@@ -7,20 +7,18 @@ import { ttsService } from '@/services/tts-service';
 import { useWebSocket } from '@/context/websocket-context';
 import { useChatMessages } from '@/context/chat-history-context';
 import { toaster } from '@/components/ui/toaster';
+import { createStyleInjector } from '@/utils/style-injection';
 
-// ── Module-level keyframe injection (runs once, not on every render) ──
-const CTX_MENU_KEYFRAMES_ID = 'ctx-menu-keyframes';
-if (typeof document !== 'undefined' && !document.getElementById(CTX_MENU_KEYFRAMES_ID)) {
-  const el = document.createElement('style');
-  el.id = CTX_MENU_KEYFRAMES_ID;
-  el.textContent = `
+// ── Deferred keyframe injection ──
+const ensureCtxMenuStyles = createStyleInjector({
+  id: 'ctx-menu-keyframes',
+  css: `
     @keyframes contextMenuFadeIn {
       from { opacity: 0; transform: scale(0.95); }
       to { opacity: 1; transform: scale(1); }
     }
-  `;
-  document.head.appendChild(el);
-}
+  `,
+});
 
 interface MessageContextMenuProps {
   message: Message;
@@ -47,6 +45,9 @@ export const MessageContextMenu = memo(function MessageContextMenu({ message, po
   const menuRef = useRef<HTMLDivElement>(null);
   const { sendMessage } = useWebSocket();
   const { messages } = useChatMessages();
+
+  // Inject keyframe styles on first render
+  useEffect(ensureCtxMenuStyles, []);
 
   // Close on click outside
   useEffect(() => {
