@@ -457,7 +457,7 @@ canvas {
 .md-content del { color: var(--ling-text-tertiary); }
 .md-content a, .user-msg-link { color: var(--ling-purple-light); text-decoration: none; border-bottom: 1px solid rgba(167,139,250,0.3); transition: border-color 0.2s; overflow-wrap: anywhere; }
 .md-content a:hover, .user-msg-link:hover { border-color: var(--ling-purple-light); }
-.md-content img { max-width: 100%; height: auto; }
+.md-content img { max-width: 100%; height: auto; border-radius: 8px; }
 .md-content code {
   background: var(--ling-purple-15);
   color: var(--ling-code-text);
@@ -472,7 +472,7 @@ canvas {
 /* Code block wrapper — full-bleed to bubble edges for more code space */
 .md-content .code-block-wrap {
   position: relative;
-  margin: 0.5em -16px;
+  margin: 0.5em -18px;
   border-top: 1px solid var(--ling-purple-25);
   border-bottom: 1px solid var(--ling-purple-25);
   border-left: none;
@@ -485,7 +485,7 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 12px;
+  padding: 4px 16px;
   background: var(--ling-overlay-4);
   border-bottom: 1px solid var(--ling-purple-15);
   min-height: 28px;
@@ -526,7 +526,7 @@ canvas {
   border: none;
   border-radius: 0;
   background: transparent;
-  padding: 10px 14px;
+  padding: 10px 16px;
   overflow: auto;
   max-height: 500px;
   line-height: 1.5;
@@ -566,11 +566,14 @@ canvas {
   overflow: visible;
 }
 .md-content ul, .md-content ol { margin: 0.6em 0; padding-left: 1.5em; }
+.md-content li > ul, .md-content li > ol { margin: 0.2em 0; }
 .md-content li { margin-bottom: 0.35em; }
 .md-content blockquote {
   margin: 0.75em 0;
   padding: 6px 14px;
   border-left: 3px solid var(--ling-purple-40);
+  background: var(--ling-overlay-4);
+  border-radius: 0 6px 6px 0;
   color: var(--ling-md-blockquote-color);
 }
 .md-content h1, .md-content h2, .md-content h3,
