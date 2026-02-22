@@ -22,7 +22,7 @@
   --ling-text-primary: rgba(255, 255, 255, 0.95);
   --ling-text-secondary: rgba(255, 255, 255, 0.8);
   --ling-text-tertiary: rgba(255, 255, 255, 0.45);
-  --ling-text-muted: rgba(255, 255, 255, 0.2);
+  --ling-text-muted: rgba(255, 255, 255, 0.35);
 
   /* 语义色 */
   --ling-success: #4ade80;
@@ -53,7 +53,7 @@
   --ling-bubble-ai-shadow: rgba(0, 0, 0, 0.22);
   --ling-bubble-ai-text: rgba(255, 255, 255, 0.92);
   --ling-chat-timestamp: rgba(255, 255, 255, 0.5);
-  --ling-chat-label: var(--ling-purple-60);
+  --ling-chat-label: var(--ling-purple-70);
   --ling-chat-label-user: rgba(255, 255, 255, 0.68);
   --ling-avatar-user-bg: rgba(139, 92, 246, 0.44);
   --ling-avatar-user-color: rgba(255, 255, 255, 0.9);
@@ -107,7 +107,7 @@
   --ling-text-primary: rgba(0, 0, 0, 0.9);
   --ling-text-secondary: rgba(0, 0, 0, 0.65);
   --ling-text-tertiary: rgba(0, 0, 0, 0.4);
-  --ling-text-muted: rgba(0, 0, 0, 0.2);
+  --ling-text-muted: rgba(0, 0, 0, 0.35);
 
   /* 语义色 */
   --ling-success: #16a34a;
@@ -313,7 +313,7 @@ body {
   --ling-text-secondary: rgba(255, 255, 255, 0.8);
   --ling-purple-25: rgba(139, 92, 246, 0.25);
   --ling-text-tertiary: rgba(255, 255, 255, 0.45);
-  --ling-text-muted: rgba(255, 255, 255, 0.2);
+  --ling-text-muted: rgba(255, 255, 255, 0.35);
 }
 
 /* Landing text line */

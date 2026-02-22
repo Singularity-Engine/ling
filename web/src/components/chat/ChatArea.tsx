@@ -306,7 +306,7 @@ const S_WELCOME_CARD: CSSProperties = {
   WebkitBackdropFilter: "blur(16px)",
   border: "1px solid var(--ling-surface-border)",
   borderRadius: "16px",
-  padding: "20px 24px",
+  padding: "18px 22px",
   maxWidth: "320px",
   width: "100%",
   textAlign: "center",

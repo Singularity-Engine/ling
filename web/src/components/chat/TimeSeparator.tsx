@@ -17,7 +17,7 @@ const S_LINE: CSSProperties = {
 };
 const S_LABEL: CSSProperties = {
   fontSize: "11px",
-  color: "rgba(255, 255, 255, 0.3)",
+  color: "rgba(255, 255, 255, 0.45)",
   whiteSpace: "nowrap",
   letterSpacing: "0.5px",
   userSelect: "none",

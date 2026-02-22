@@ -120,7 +120,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
         {/* Header */}
         <div
           style={{
-            padding: '20px 24px',
+            padding: '18px 20px',
             borderBottom: '1px solid rgba(139, 92, 246, 0.15)',
             display: 'flex',
             alignItems: 'center',
@@ -294,7 +294,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
                 gap: '8px',
                 marginTop: '10px',
               }}>
-                <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px' }}>
+                <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '11px' }}>
                   {new Date(memory.created_at).toLocaleDateString(undefined, {
                     month: 'short',
                     day: 'numeric',
@@ -327,7 +327,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
             background: 'rgba(139, 92, 246, 0.03)',
           }}
         >
-          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>
+          <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '11px' }}>
             {user?.plan === 'free'
               ? <>{t('memory.freeExpiry', { interpolation: { escapeValue: false } }).split('<bold>').map((part, i) => {
                   if (i === 0) return part;
