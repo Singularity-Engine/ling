@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { memo, useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { ParticleCanvas, type ParticlePhase } from "./ParticleCanvas";
 
 const prefersReducedMotion = () =>
@@ -67,6 +67,29 @@ const lineStyleBase: React.CSSProperties[] = [
   { fontSize: "clamp(3rem, 7vw, 4.5rem)", fontWeight: 700, letterSpacing: "0.12em", textAlign: "center", wordBreak: "break-word", minHeight: "4.5rem", marginTop: "0", transition: "opacity 0.5s ease-out, transform 0.5s ease-out" },
   { fontSize: "1.4rem", fontWeight: 500, letterSpacing: "0.04em", textAlign: "center", wordBreak: "break-word", minHeight: "1.75rem", marginTop: "8px", transition: "opacity 0.5s ease-out, transform 0.5s ease-out" },
   { fontSize: "1.25rem", fontWeight: 400, letterSpacing: "0.04em", textAlign: "center", wordBreak: "break-word", minHeight: "1.75rem", marginTop: "28px", transition: "opacity 0.5s ease-out, transform 0.5s ease-out" },
+];
+
+// Precomputed line×state styles (9 total) to avoid allocations in the 70ms typewriter hot loop.
+// States: hidden (i > currentLine), typing (i === currentLine), complete (i < currentLine).
+const LINE_STATE_STYLES: Record<"hidden" | "typing" | "complete", React.CSSProperties>[] = [
+  // Line 0 — title (color handled by .landing-title-gradient CSS class)
+  {
+    hidden:   { ...lineStyleBase[0], opacity: 0, transform: "translateY(12px)", textShadow: "none" },
+    typing:   { ...lineStyleBase[0], opacity: 1, transform: "translateY(0)", textShadow: "0 0 20px var(--ling-purple-25)" },
+    complete: { ...lineStyleBase[0], opacity: 1, transform: "translateY(0)" },
+  },
+  // Line 1 — subtitle
+  {
+    hidden:   { ...lineStyleBase[1], color: "var(--ling-text-secondary)", opacity: 0, transform: "translateY(12px)", textShadow: "none" },
+    typing:   { ...lineStyleBase[1], color: "var(--ling-text-secondary)", opacity: 1, transform: "translateY(0)", textShadow: "none" },
+    complete: { ...lineStyleBase[1], color: "var(--ling-text-secondary)", opacity: 1, transform: "translateY(0)", textShadow: "0 0 20px var(--ling-purple-20)" },
+  },
+  // Line 2 — tagline (last line)
+  {
+    hidden:   { ...lineStyleBase[2], color: "var(--ling-purple-lighter)", opacity: 0, transform: "translateY(12px)", textShadow: "none" },
+    typing:   { ...lineStyleBase[2], color: "var(--ling-purple-lighter)", opacity: 1, transform: "translateY(0)", textShadow: "none" },
+    complete: { ...lineStyleBase[2], color: "var(--ling-purple-lighter)", opacity: 1, transform: "translateY(0)", textShadow: "0 0 20px var(--ling-purple-20)" },
+  },
 ];
 
 const cursorStyleTitle: React.CSSProperties = {
@@ -146,7 +169,7 @@ const skipStyle: React.CSSProperties = {
   padding: "8px 16px",
 };
 
-export function LandingAnimation({ onComplete }: LandingAnimationProps) {
+export const LandingAnimation = memo(function LandingAnimation({ onComplete }: LandingAnimationProps) {
   const { t } = useTranslation();
   const LINES = useMemo(() => [t("landing.line1"), t("landing.line2"), t("landing.line3")], [t]);
   const [particlePhase, setParticlePhase] = useState<ParticlePhase>("float");
@@ -311,37 +334,17 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
       <div style={textWrapperStyle}>
         <div className="landing-text-block" style={textBlockStyle}>
           {LINES.map((line, i) => {
-            const isVisible = i <= currentLine;
-            const chars =
-              i < currentLine ? line.length : i === currentLine ? displayedChars : 0;
+            const isComplete = i < currentLine;
+            const state = isComplete ? "complete" : i === currentLine ? "typing" : "hidden";
+            const chars = isComplete ? line.length : i === currentLine ? displayedChars : 0;
             const text = line.slice(0, chars);
             const isActive = i === currentLine && chars < line.length;
-            const isComplete = i < currentLine;
-            const isLastLine = i === LINES.length - 1;
 
             return (
               <div
                 key={i}
                 className={`landing-text-line${i === 0 ? " landing-title-gradient" : ""}${i === 0 && isComplete ? " landing-title-glow" : ""}`}
-                style={{
-                  ...lineStyleBase[i],
-                  color: i === 0
-                    ? undefined  // handled by .landing-title-gradient
-                    : isLastLine
-                      ? "var(--ling-purple-lighter)"
-                      : "var(--ling-text-secondary)",
-                  opacity: isVisible ? 1 : 0,
-                  transform: isVisible ? "translateY(0)" : "translateY(12px)",
-                  textShadow: i === 0
-                    ? isComplete
-                      ? undefined  // handled by .landing-title-glow animation
-                      : isVisible
-                        ? "0 0 20px var(--ling-purple-25)"
-                        : "none"
-                    : isComplete
-                      ? "0 0 20px var(--ling-purple-20)"
-                      : "none",
-                }}
+                style={LINE_STATE_STYLES[i][state]}
               >
                 {text}
                 {isActive && (
@@ -391,4 +394,4 @@ export function LandingAnimation({ onComplete }: LandingAnimationProps) {
 
     </div>
   );
-}
+});
