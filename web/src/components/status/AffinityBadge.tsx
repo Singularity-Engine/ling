@@ -106,7 +106,7 @@ export const AffinityBadge = memo(() => {
             borderRadius: "16px",
             border: hovered ? `1px solid ${config.color}44` : "1px solid rgba(255,255,255,0.08)",
             cursor: "pointer",
-            transition: "all 0.3s ease",
+            transition: "background 0.3s ease, border-color 0.3s ease, transform 0.3s ease",
             transform: pressed ? "scale(0.95)" : "scale(1)",
             font: "inherit",
             color: "inherit",
@@ -115,7 +115,7 @@ export const AffinityBadge = memo(() => {
           <span style={{ display: "inline-flex", animation: `heartbeat ${config.beatSpeed} ease-in-out infinite` }}>
             <HeartIcon color={config.heartColor} fillPercent={affinity} size={22} />
           </span>
-          <span style={{ fontSize: "12px", color: `${config.color}cc`, fontWeight: 600, transition: "all 0.3s ease" }}>
+          <span style={{ fontSize: "12px", color: `${config.color}cc`, fontWeight: 600, transition: "color 0.3s ease" }}>
             {t(config.i18nKey)}
           </span>
           <span
@@ -127,7 +127,7 @@ export const AffinityBadge = memo(() => {
               overflow: "hidden",
               maxWidth: hovered ? "40px" : "0px",
               opacity: hovered ? 1 : 0,
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              transition: "max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
               whiteSpace: "nowrap",
             }}
           >

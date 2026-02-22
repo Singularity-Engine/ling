@@ -91,7 +91,7 @@ export const ConnectionStatus = memo(() => {
           borderRadius: "16px",
           border: `1px solid ${isClosed ? "var(--ling-error-border)" : "rgba(255,255,255,0.08)"}`,
           cursor: isClosed ? "pointer" : "default",
-          transition: "all 0.4s ease",
+          transition: "border-color 0.4s ease, opacity 0.4s ease",
           opacity: isOpen ? 0.7 : 1,
           animation: isOpen ? "connFadeIn 0.3s ease-out" : undefined,
           // reset button styles

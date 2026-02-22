@@ -164,7 +164,7 @@ export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingPro
               height: "8px",
               borderRadius: "4px",
               background: i === step ? "#8b5cf6" : i < step ? "#6d28d9" : "rgba(255,255,255,0.15)",
-              transition: "all 0.3s ease",
+              transition: "width 0.3s ease, background-color 0.3s ease",
             }}
           />
         ))}
@@ -226,7 +226,7 @@ export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingPro
             color: "rgba(255,255,255,0.4)",
             fontSize: "14px",
             cursor: "pointer",
-            transition: "all 0.2s",
+            transition: "color 0.2s, border-color 0.2s",
           }}
         >
           {t("onboarding.skip")}
@@ -242,7 +242,7 @@ export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingPro
               color: "rgba(255,255,255,0.6)",
               fontSize: "14px",
               cursor: "pointer",
-              transition: "all 0.2s",
+              transition: "color 0.2s, background-color 0.2s, border-color 0.2s",
             }}
           >
             {"←"}
@@ -260,7 +260,7 @@ export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingPro
               fontSize: "14px",
               fontWeight: 600,
               cursor: "pointer",
-              transition: "all 0.2s",
+              transition: "background-color 0.2s, transform 0.2s",
             }}
           >
             {step === 3 ? t("onboarding.begin") : t("onboarding.next")}
@@ -310,7 +310,7 @@ function StepWelcome({ t, onNext }: { t: (k: string) => string; onNext: () => vo
           padding: "14px 36px", borderRadius: "12px",
           border: "none", background: "#8b5cf6", color: "#fff",
           fontSize: "15px", fontWeight: 600, cursor: "pointer",
-          transition: "all 0.2s",
+          transition: "background-color 0.2s, transform 0.2s",
         }}
       >
         {t("onboarding.start")}
@@ -365,7 +365,7 @@ function StepInterests({
                 alignItems: "center",
                 gap: "8px",
                 cursor: "pointer",
-                transition: "all 0.2s ease",
+                transition: "border-color 0.2s ease, background-color 0.2s ease",
                 font: "inherit",
                 color: "inherit",
               }}
@@ -485,7 +485,7 @@ function StepGoals({
                 gap: "8px",
                 cursor: isFull ? "not-allowed" : "pointer",
                 opacity: isFull ? 0.4 : 1,
-                transition: "all 0.2s ease",
+                transition: "border-color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease",
                 font: "inherit",
                 color: "inherit",
               }}

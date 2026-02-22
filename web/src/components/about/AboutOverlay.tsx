@@ -118,7 +118,7 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
           color: rgba(255, 255, 255, 0.7);
           font-size: 12px;
           text-decoration: none;
-          transition: all 0.2s ease;
+          transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
           cursor: pointer;
         }
         .about-link:hover {
