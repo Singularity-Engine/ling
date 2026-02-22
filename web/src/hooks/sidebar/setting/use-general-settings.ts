@@ -1,6 +1,6 @@
 /* eslint-disable import/order */
 /* eslint-disable no-use-before-define */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { BgUrlContextState } from '@/context/bgurl-context';
 import { defaultBaseUrl, defaultWsUrl } from '@/context/websocket-context';
 import { useSubtitle } from '@/context/subtitle-context';
@@ -164,7 +164,7 @@ export const useGeneralSettings = ({
     };
   }, [onSave, onCancel]);
 
-  const handleSettingChange = (
+  const handleSettingChange = useCallback((
     key: keyof GeneralSettings,
     value: GeneralSettings[keyof GeneralSettings],
   ): void => {
@@ -180,38 +180,45 @@ export const useGeneralSettings = ({
     if (key === 'language' && Array.isArray(value) && value.length > 0) {
       i18n.changeLanguage(value[0]);
     }
-  };
+  }, [onWsUrlChange, onBaseUrlChange]);
 
-  const handleSave = (): void => {
-    setOriginalSettings(settings);
-  };
+  const handleSave = useCallback((): void => {
+    setSettings((current) => {
+      setOriginalSettings(current);
+      return current;
+    });
+  }, []);
 
-  const handleCancel = (): void => {
-    setSettings(originalSettings);
+  const handleCancel = useCallback((): void => {
+    setOriginalSettings((orig) => {
+      setSettings(orig);
 
-    // Restore all settings to original values
-    setShowSubtitle(originalSettings.showSubtitle);
-    if (bgUrlContext) {
-      bgUrlContext.setBackgroundUrl(originalSettings.backgroundUrl);
-      bgUrlContext.setUseCameraBackground(originalSettings.useCameraBackground);
-    }
-    onWsUrlChange(originalSettings.wsUrl);
-    onBaseUrlChange(originalSettings.baseUrl);
+      // Restore all settings to original values
+      setShowSubtitle(orig.showSubtitle);
+      if (bgUrlContext) {
+        bgUrlContext.setBackgroundUrl(orig.backgroundUrl);
+        bgUrlContext.setUseCameraBackground(orig.useCameraBackground);
+      }
+      onWsUrlChange(orig.wsUrl);
+      onBaseUrlChange(orig.baseUrl);
 
-    // Restore original character preset
-    if (originalConfName) {
-      setConfName(originalConfName);
-    }
+      // Restore original character preset
+      if (originalConfName) {
+        setConfName(originalConfName);
+      }
 
-    // Handle camera state
-    if (originalSettings.useCameraBackground) {
-      startBackgroundCamera();
-    } else {
-      stopBackgroundCamera();
-    }
-  };
+      // Handle camera state
+      if (orig.useCameraBackground) {
+        startBackgroundCamera();
+      } else {
+        stopBackgroundCamera();
+      }
 
-  const handleCharacterPresetChange = (value: string[]): void => {
+      return orig;
+    });
+  }, [bgUrlContext, onWsUrlChange, onBaseUrlChange, originalConfName, setConfName, setShowSubtitle, startBackgroundCamera, stopBackgroundCamera]);
+
+  const handleCharacterPresetChange = useCallback((value: string[]): void => {
     const selectedFilename = value[0];
     const selectedConfig = configFiles.find((config) => config.filename === selectedFilename);
     const currentFilename = confName ? getFilenameByName(confName) : '';
@@ -225,9 +232,9 @@ export const useGeneralSettings = ({
     if (selectedConfig) {
       switchCharacter(selectedFilename);
     }
-  };
+  }, [configFiles, confName, getFilenameByName, handleSettingChange, switchCharacter]);
 
-  const handleCameraToggle = async (checked: boolean) => {
+  const handleCameraToggle = useCallback(async (checked: boolean) => {
     if (!setUseCameraBackground) return;
 
     if (checked) {
@@ -245,7 +252,7 @@ export const useGeneralSettings = ({
       handleSettingChange('useCameraBackground', false);
       setUseCameraBackground(false);
     }
-  };
+  }, [setUseCameraBackground, startBackgroundCamera, stopBackgroundCamera, handleSettingChange]);
 
   return {
     settings,

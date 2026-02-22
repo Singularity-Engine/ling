@@ -13,7 +13,7 @@ import { audioTaskQueue } from '@/utils/task-queue';
 import { useAudioTask } from '@/components/canvas/live2d';
 import { useBgUrl } from '@/context/bgurl-context';
 import { useConfig } from '@/context/character-config-context';
-import { useChatMessages, useStreamingSetters } from '@/context/chat-history-context';
+import { useChatMessages, useHistoryList, useStreamingSetters } from '@/context/chat-history-context';
 import { toaster } from '@/components/ui/toaster';
 import { useVAD } from '@/context/vad-context';
 import { AiState, useAiState } from "@/context/ai-state-context";
@@ -45,7 +45,7 @@ function getAgentId(): string {
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return 'avatar';
   }
-  return 'avatar-public';
+  return 'ling-chat';
 }
 
 /** Per-visitor session key in Gateway's agent-scoped format: agent:<agentId>:<uuid> */
@@ -209,8 +209,9 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   }, [pendingModelInfo, setModelInfo, confUid]);
 
   const {
-    setCurrentHistoryUid, setMessages, setHistoryList,
-  } = useChatMessages();
+    setCurrentHistoryUid, setHistoryList,
+  } = useHistoryList();
+  const { setMessages } = useChatMessages();
 
   // ─── Refs for sendMessage access (avoids closure dependency) ──
 

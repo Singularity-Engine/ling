@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { memo, useEffect, useMemo } from "react";
+import { memo, useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Stack, createListCollection } from "@chakra-ui/react";
 import { useBgUrl } from "@/context/bgurl-context";
@@ -91,12 +91,56 @@ const General = memo(function General({ onSave, onCancel }: GeneralProps): JSX.E
     }
   }, [i18n.language]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Stable handler refs — prevent memo'd SelectField/InputField from re-rendering
+  const handleLanguageChange = useCallback(
+    (value: string[]) => handleSettingChange("language", value),
+    [handleSettingChange],
+  );
+  const handleBgUrlChange = useCallback(
+    (value: string[]) => handleSettingChange("selectedBgUrl", value),
+    [handleSettingChange],
+  );
+  const handleCustomBgUrlChange = useCallback(
+    (value: string) => handleSettingChange("customBgUrl", value),
+    [handleSettingChange],
+  );
+  const handleWsUrlChange = useCallback(
+    (value: string) => handleSettingChange("wsUrl", value),
+    [handleSettingChange],
+  );
+  const handleBaseUrlChange = useCallback(
+    (value: string) => handleSettingChange("baseUrl", value),
+    [handleSettingChange],
+  );
+  const handleCompressionQualityChange = useCallback(
+    (value: string) => {
+      const quality = parseFloat(value);
+      if (!Number.isNaN(quality) && quality >= 0.1 && quality <= 1.0) {
+        handleSettingChange("imageCompressionQuality", quality);
+      } else if (value === "") {
+        handleSettingChange("imageCompressionQuality", settings.imageCompressionQuality);
+      }
+    },
+    [handleSettingChange, settings.imageCompressionQuality],
+  );
+  const handleImageMaxWidthChange = useCallback(
+    (value: string) => {
+      const maxWidth = parseInt(value, 10);
+      if (!Number.isNaN(maxWidth) && maxWidth >= 0) {
+        handleSettingChange("imageMaxWidth", maxWidth);
+      } else if (value === "") {
+        handleSettingChange("imageMaxWidth", settings.imageMaxWidth);
+      }
+    },
+    [handleSettingChange, settings.imageMaxWidth],
+  );
+
   return (
     <Stack {...settingStyles.common.container}>
       <SelectField
         label={t("settings.general.language")}
         value={settings.language}
-        onChange={(value) => handleSettingChange("language", value)}
+        onChange={handleLanguageChange}
         collection={collections.languages}
         placeholder={t("settings.general.language")}
       />
@@ -118,7 +162,7 @@ const General = memo(function General({ onSave, onCancel }: GeneralProps): JSX.E
           <SelectField
             label={t("settings.general.backgroundImage")}
             value={settings.selectedBgUrl}
-            onChange={(value) => handleSettingChange("selectedBgUrl", value)}
+            onChange={handleBgUrlChange}
             collection={collections.backgrounds}
             placeholder={t("settings.general.backgroundImage")}
           />
@@ -126,7 +170,7 @@ const General = memo(function General({ onSave, onCancel }: GeneralProps): JSX.E
           <InputField
             label={t("settings.general.customBgUrl")}
             value={settings.customBgUrl}
-            onChange={(value) => handleSettingChange("customBgUrl", value)}
+            onChange={handleCustomBgUrlChange}
             placeholder={t("settings.general.customBgUrlPlaceholder")}
           />
         </>
@@ -143,42 +187,28 @@ const General = memo(function General({ onSave, onCancel }: GeneralProps): JSX.E
       <InputField
         label={t("settings.general.wsUrl")}
         value={settings.wsUrl}
-        onChange={(value) => handleSettingChange("wsUrl", value)}
+        onChange={handleWsUrlChange}
         placeholder="Enter WebSocket URL"
       />
 
       <InputField
         label={t("settings.general.baseUrl")}
         value={settings.baseUrl}
-        onChange={(value) => handleSettingChange("baseUrl", value)}
+        onChange={handleBaseUrlChange}
         placeholder="Enter Base URL"
       />
 
       <InputField
         label={t("settings.general.imageCompressionQuality")}
         value={settings.imageCompressionQuality.toString()}
-        onChange={(value) => {
-          const quality = parseFloat(value as string);
-          if (!Number.isNaN(quality) && quality >= 0.1 && quality <= 1.0) {
-            handleSettingChange("imageCompressionQuality", quality);
-          } else if (value === "") {
-            handleSettingChange("imageCompressionQuality", settings.imageCompressionQuality);
-          }
-        }}
+        onChange={handleCompressionQualityChange}
         help={t("settings.general.imageCompressionQualityHelp")}
       />
 
       <InputField
         label={t("settings.general.imageMaxWidth")}
         value={settings.imageMaxWidth.toString()}
-        onChange={(value) => {
-          const maxWidth = parseInt(value as string, 10);
-          if (!Number.isNaN(maxWidth) && maxWidth >= 0) {
-            handleSettingChange("imageMaxWidth", maxWidth);
-          } else if (value === "") {
-            handleSettingChange("imageMaxWidth", settings.imageMaxWidth);
-          }
-        }}
+        onChange={handleImageMaxWidthChange}
         help={t("settings.general.imageMaxWidthHelp")}
       />
     </Stack>

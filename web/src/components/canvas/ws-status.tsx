@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { canvasStyles } from './canvas-styles';
 import { useWSStatus } from '@/hooks/canvas/use-ws-status';
@@ -21,6 +21,14 @@ const WebSocketStatus = memo((): JSX.Element => {
     color, textKey, handleClick, isDisconnected,
   } = useWSStatus();
 
+  const handleMouseEnter = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (isDisconnected) e.currentTarget.style.opacity = '0.8';
+  }, [isDisconnected]);
+
+  const handleMouseLeave = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.currentTarget.style.opacity = '1';
+  }, []);
+
   return (
     <div
       style={{
@@ -29,12 +37,8 @@ const WebSocketStatus = memo((): JSX.Element => {
         cursor: isDisconnected ? 'pointer' : 'default',
       }}
       onClick={handleClick}
-      onMouseEnter={(e) => {
-        if (isDisconnected) e.currentTarget.style.opacity = '0.8';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.opacity = '1';
-      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <MemoizedStatusContent textKey={textKey} />
     </div>

@@ -5,11 +5,11 @@
  * CTA 按钮引导用户查看定价页面。
  */
 
-import { useEffect } from 'react';
+import { memo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUI } from '@/context/ui-context';
 
-const InsufficientCreditsModal: React.FC = () => {
+const InsufficientCreditsModal: React.FC = memo(function InsufficientCreditsModal() {
   const { t } = useTranslation();
   const { billingModal, closeBillingModal, setPricingOpen } = useUI();
 
@@ -165,6 +165,6 @@ const InsufficientCreditsModal: React.FC = () => {
       </div>
     </div>
   );
-};
+});
 
 export default InsufficientCreditsModal;
