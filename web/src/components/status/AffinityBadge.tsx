@@ -136,7 +136,7 @@ export const AffinityBadge = memo(() => {
                 <span style={{ fontSize: "15px", color: config.color, fontWeight: 700, display: "block", letterSpacing: "0.3px", transition: "color 0.5s ease" }}>
                   {t(config.i18nKey)}
                 </span>
-                <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.55)", display: "block", marginTop: "2px" }}>
+                <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.65)", display: "block", marginTop: "2px" }}>
                   {t("affinity.label")}
                 </span>
               </div>

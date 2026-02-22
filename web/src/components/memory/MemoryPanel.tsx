@@ -126,10 +126,10 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
           }}
         >
           <div>
-            <h3 style={{ color: '#fff', fontSize: '16px', fontWeight: 700, margin: 0 }}>
+            <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: 700, margin: 0, letterSpacing: '0.2px' }}>
               {t('memory.title')}
             </h3>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '4px 0 0' }}>
+            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '12px', margin: '4px 0 0' }}>
               {t('memory.subtitle')}
             </p>
           </div>
@@ -184,7 +184,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
           }}
         >
           {loading && (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.3)' }}>
+            <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)' }}>
               {t('memory.loading')}
             </div>
           )}
@@ -203,7 +203,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
               <h4 style={{ color: 'rgba(255,255,255,0.6)', fontSize: '16px', fontWeight: 600, margin: '0 0 8px' }}>
                 {t('memory.guestTitle')}
               </h4>
-              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px', lineHeight: 1.6, marginBottom: '16px' }}>
+              <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '13px', lineHeight: 1.6, marginBottom: '16px' }}>
                 {t('memory.guestDesc')}
               </p>
               <a
@@ -233,7 +233,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
               <h4 style={{ color: 'rgba(255,255,255,0.6)', fontSize: '16px', fontWeight: 600, margin: '0 0 8px' }}>
                 {t('memory.noMemoriesTitle')}
               </h4>
-              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px', lineHeight: 1.6 }}>
+              <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '13px', lineHeight: 1.6 }}>
                 {t('memory.noMemoriesDesc')}
               </p>
             </div>
@@ -253,13 +253,13 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
               <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>
                 {memory.content}
               </p>
-              <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '11px', marginTop: '6px', display: 'block' }}>
+              <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px', marginTop: '6px', display: 'block' }}>
                 {new Date(memory.created_at).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
                 })}
                 {memory.group_id && (
-                  <span style={{ marginLeft: '8px', color: 'rgba(139,92,246,0.4)' }}>
+                  <span style={{ marginLeft: '8px', color: 'rgba(139,92,246,0.55)' }}>
                     #{memory.group_id}
                   </span>
                 )}
@@ -276,7 +276,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
             textAlign: 'center',
           }}
         >
-          <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '11px' }}>
+          <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px' }}>
             {user?.plan === 'free'
               ? <>{t('memory.freeExpiry', { interpolation: { escapeValue: false } }).split('<bold>').map((part, i) => {
                   if (i === 0) return part;

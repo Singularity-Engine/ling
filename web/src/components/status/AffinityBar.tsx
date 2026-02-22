@@ -76,7 +76,7 @@ export const AffinityBar = memo(() => {
             }}
           />
         </div>
-        <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)", fontFamily: "monospace", minWidth: "22px", textAlign: "right" }}>
+        <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)", fontFamily: "monospace", minWidth: "22px", textAlign: "right" }}>
           {affinity}
         </span>
 
