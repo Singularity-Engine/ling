@@ -1,10 +1,19 @@
-import { memo, useEffect, useState, useCallback, useRef } from "react";
+import { memo, useEffect, useState, useCallback, useRef, type CSSProperties } from "react";
 
 const EMOJIS = ["❤️", "💜", "✨", "💫", "🩷"];
 const PARTICLE_COUNT = 5;
 const PARTICLE_LIFETIME_MS = 1200;
 const TAP_DURATION_MS = 250;
 const TAP_DISTANCE_PX = 8;
+
+// Static container style — avoids recreating the object on every render.
+const S_CONTAINER: CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  pointerEvents: "none",
+  zIndex: 50,
+  overflow: "hidden",
+};
 
 interface Particle {
   id: number;
@@ -76,15 +85,7 @@ export const TapParticles = memo(() => {
   if (particles.length === 0) return null;
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        pointerEvents: "none",
-        zIndex: 50,
-        overflow: "hidden",
-      }}
-    >
+    <div style={S_CONTAINER}>
       {particles.map(p => (
         <span
           key={p.id}

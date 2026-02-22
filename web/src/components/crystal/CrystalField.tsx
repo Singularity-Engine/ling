@@ -1,8 +1,8 @@
-import { memo, useMemo, useState, useEffect, useRef } from "react";
+import { memo, useMemo, useState, useEffect, useRef, type CSSProperties } from "react";
 import { useToolState } from "../../context/tool-state-context";
 import { InfoCrystal } from "./InfoCrystal";
 
-const DESKTOP_POSITIONS: Record<number, React.CSSProperties> = {
+const DESKTOP_POSITIONS: Record<number, CSSProperties> = {
   0: { left: "3%", top: "14%" },
   1: { right: "5%", top: "30%" },
   2: { left: "3%", top: "46%" },
@@ -10,12 +10,37 @@ const DESKTOP_POSITIONS: Record<number, React.CSSProperties> = {
 };
 
 // Mobile: stack on the left to avoid right-side toolbar overlap; wider margin top for safe area
-const MOBILE_POSITIONS: Record<number, React.CSSProperties> = {
+const MOBILE_POSITIONS: Record<number, CSSProperties> = {
   0: { left: "3%", top: "14%" },
   1: { left: "3%", top: "36%" },
 };
 
 const EXIT_DURATION = 500; // ms — matches crystalExit keyframe
+
+// ─── Static style constants (avoid per-render allocation during tool calls) ───
+
+const S_FIELD: CSSProperties = {
+  position: "absolute", inset: 0, pointerEvents: "none", zIndex: 23,
+};
+
+// Precompute crystal wrapper styles per position slot — eliminates
+// object spreading ({ position, pointerEvents, ...positions[i] }) in
+// the render path when multiple crystals are visible.
+function buildWrapStyles(positions: Record<number, CSSProperties>) {
+  const live: Record<number, CSSProperties> = {};
+  const exit: Record<number, CSSProperties> = {};
+  for (const [idx, pos] of Object.entries(positions)) {
+    live[Number(idx)] = { position: "absolute", pointerEvents: "auto", ...pos };
+    exit[Number(idx)] = {
+      position: "absolute", pointerEvents: "none",
+      animation: `crystalExit ${EXIT_DURATION}ms ease-in forwards`, ...pos,
+    };
+  }
+  return { live, exit };
+}
+
+const DESKTOP_WRAP = buildWrapStyles(DESKTOP_POSITIONS);
+const MOBILE_WRAP = buildWrapStyles(MOBILE_POSITIONS);
 
 export const CrystalField = memo(() => {
   const { recentResults, activeTools } = useToolState();
@@ -85,21 +110,14 @@ export const CrystalField = memo(() => {
     toolCacheRef.current = cache;
   }, [liveCrystals]);
 
-  const positions = isMobile ? MOBILE_POSITIONS : DESKTOP_POSITIONS;
+  const wraps = isMobile ? MOBILE_WRAP : DESKTOP_WRAP;
 
   if (liveCrystals.length === 0 && exitingMap.size === 0) return null;
 
   return (
-    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 23 }}>
+    <div style={S_FIELD}>
       {liveCrystals.map((tool, i) => (
-        <div
-          key={tool.id}
-          style={{
-            position: "absolute",
-            pointerEvents: "auto",
-            ...positions[i],
-          }}
-        >
+        <div key={tool.id} style={wraps.live[i]}>
           <InfoCrystal
             tool={tool}
             position={isMobile ? "left" : i % 2 === 0 ? "left" : "right"}
@@ -109,15 +127,7 @@ export const CrystalField = memo(() => {
       ))}
       {/* Exiting crystals — play exit animation then removed by timer */}
       {[...exitingMap.entries()].map(([id, { tool, index }]) => (
-        <div
-          key={`exit-${id}`}
-          style={{
-            position: "absolute",
-            pointerEvents: "none",
-            animation: `crystalExit ${EXIT_DURATION}ms ease-in forwards`,
-            ...positions[index],
-          }}
-        >
+        <div key={`exit-${id}`} style={wraps.exit[index]}>
           <InfoCrystal
             tool={tool}
             position={isMobile ? "left" : index % 2 === 0 ? "left" : "right"}

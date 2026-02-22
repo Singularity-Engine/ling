@@ -63,24 +63,23 @@ const S_CURSOR: CSSProperties = {
  * during streaming.  Between ticks the component still re-renders (props
  * change at ~30fps) but the useMemo keyed on mdContent returns cached VDOM
  * — essentially free reconciliation.
- * Outside streaming the value passes through immediately.
+ * Outside streaming the value passes through immediately via early return,
+ * avoiding extra state updates and a second useEffect.
  */
 function useMdThrottle(content: string, active: boolean): string {
   const [snap, setSnap] = useState(content);
-  const ref = useRef(content);
-  ref.current = content;
+  const latestRef = useRef(content);
+  latestRef.current = content;
 
   useEffect(() => {
-    if (!active) { setSnap(ref.current); return; }
-    setSnap(ref.current);                       // flush on activation
-    const id = setInterval(() => setSnap(ref.current), 125);
+    if (!active) return;
+    setSnap(latestRef.current);                 // flush on activation
+    const id = setInterval(() => setSnap(latestRef.current), 125);
     return () => clearInterval(id);
   }, [active]);
 
-  // When deactivated, pass through content changes immediately
-  useEffect(() => { if (!active) setSnap(content); }, [active, content]);
-
-  return snap;
+  // When inactive, return content directly — no throttling needed.
+  return active ? snap : content;
 }
 
 interface ThinkingBubbleProps {
