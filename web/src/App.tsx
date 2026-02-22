@@ -265,8 +265,16 @@ function MainContent(): JSX.Element {
       setIsMobile(window.innerWidth < 768);
     };
     handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    let rafId = 0;
+    const throttledResize = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => { rafId = 0; handleResize(); });
+    };
+    window.addEventListener("resize", throttledResize);
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", throttledResize);
+    };
   }, []);
 
   useEffect(() => {
@@ -286,17 +294,22 @@ function MainContent(): JSX.Element {
     if (!vv) return;
 
     const onResize = () => {
-      // When keyboard opens, visualViewport.height < window.innerHeight
-      // The offset from the bottom tells us how much the keyboard covers
       const offset = window.innerHeight - vv.height - vv.offsetTop;
       setKbOffset(Math.max(0, offset));
     };
 
-    vv.addEventListener("resize", onResize);
-    vv.addEventListener("scroll", onResize);
+    let rafId = 0;
+    const throttledResize = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => { rafId = 0; onResize(); });
+    };
+
+    vv.addEventListener("resize", throttledResize);
+    vv.addEventListener("scroll", throttledResize);
     return () => {
-      vv.removeEventListener("resize", onResize);
-      vv.removeEventListener("scroll", onResize);
+      cancelAnimationFrame(rafId);
+      vv.removeEventListener("resize", throttledResize);
+      vv.removeEventListener("scroll", throttledResize);
     };
   }, []);
 

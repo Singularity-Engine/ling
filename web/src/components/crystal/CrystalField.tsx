@@ -22,9 +22,16 @@ export const CrystalField = memo(() => {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
 
   useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth < 768);
+    let rafId = 0;
+    const onResize = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => { rafId = 0; setIsMobile(window.innerWidth < 768); });
+    };
     window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", onResize);
+    };
   }, []);
 
   const limit = isMobile ? 2 : 4;

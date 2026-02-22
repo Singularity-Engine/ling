@@ -128,8 +128,16 @@ export const ParticleCanvas = memo(function ParticleCanvas({
       getParticleCount()
     );
 
-    window.addEventListener("resize", resize);
-    return () => window.removeEventListener("resize", resize);
+    let resizeRaf = 0;
+    const throttledResize = () => {
+      if (resizeRaf) return;
+      resizeRaf = requestAnimationFrame(() => { resizeRaf = 0; resize(); });
+    };
+    window.addEventListener("resize", throttledResize);
+    return () => {
+      cancelAnimationFrame(resizeRaf);
+      window.removeEventListener("resize", throttledResize);
+    };
   }, [getParticleCount]);
 
   // Animation loop — only restarts on phase change (NOT on phaseProgress)

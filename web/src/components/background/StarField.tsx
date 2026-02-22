@@ -88,7 +88,12 @@ export const StarField = memo(() => {
       prevH = newH;
     };
     resize();
-    window.addEventListener("resize", resize);
+    let resizeRaf = 0;
+    const throttledResize = () => {
+      if (resizeRaf) return;
+      resizeRaf = requestAnimationFrame(() => { resizeRaf = 0; resize(); });
+    };
+    window.addEventListener("resize", throttledResize);
 
     // Initialize stars across 3 depth layers
     const stars: Star[] = [];
@@ -229,7 +234,8 @@ export const StarField = memo(() => {
 
     return () => {
       cancelAnimationFrame(animRef.current);
-      window.removeEventListener("resize", resize);
+      cancelAnimationFrame(resizeRaf);
+      window.removeEventListener("resize", throttledResize);
     };
   }, []);
 

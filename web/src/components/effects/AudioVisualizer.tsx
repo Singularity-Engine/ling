@@ -212,8 +212,16 @@ export const AudioVisualizer = memo(() => {
       if (ctx2d) ctx2d.scale(dpr, dpr);
     };
     resize();
-    window.addEventListener('resize', resize);
-    return () => window.removeEventListener('resize', resize);
+    let resizeRaf = 0;
+    const throttledResize = () => {
+      if (resizeRaf) return;
+      resizeRaf = requestAnimationFrame(() => { resizeRaf = 0; resize(); });
+    };
+    window.addEventListener('resize', throttledResize);
+    return () => {
+      cancelAnimationFrame(resizeRaf);
+      window.removeEventListener('resize', throttledResize);
+    };
   }, []);
 
   return (
