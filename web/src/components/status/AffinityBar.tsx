@@ -41,63 +41,51 @@ export const AffinityBar = memo(() => {
       <style>{breatheKeyframes}{slideUpKeyframes}</style>
       <div
         style={{
-          padding: "8px 16px",
-          paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
-          background: "rgba(0, 0, 0, 0.3)",
-          backdropFilter: "blur(10px)",
+          padding: "6px 20px",
+          paddingBottom: "calc(6px + env(safe-area-inset-bottom, 0px))",
+          background: "rgba(0, 0, 0, 0.25)",
+          backdropFilter: "blur(12px)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          gap: "16px",
+          gap: "10px",
           position: "relative",
           borderTop: "1px solid rgba(255,255,255,0.04)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ fontSize: "14px" }} aria-label="affinity icon">
-            {config.icon}
-          </span>
-          <span style={{ fontSize: "12px", color: config.color, fontWeight: 600, transition: "color 0.5s ease" }}>
-            {t(config.i18nKey)}
-          </span>
+        <span style={{ fontSize: "13px", lineHeight: 1 }} aria-label="affinity icon">
+          {config.icon}
+        </span>
+        <span style={{ fontSize: "11px", color: config.color, fontWeight: 600, transition: "color 0.5s ease", whiteSpace: "nowrap" }}>
+          {t(config.i18nKey)}
+        </span>
+        <div
+          style={{
+            width: "80px",
+            height: "4px",
+            background: "rgba(255,255,255,0.06)",
+            borderRadius: "2px",
+            overflow: "hidden",
+            position: "relative",
+            "--glow-color": `${config.color}33`,
+            animation: "affinityBreathe 3s ease-in-out infinite",
+          } as React.CSSProperties}
+        >
           <div
             style={{
-              width: "100px",
-              height: "6px",
-              background: "rgba(255,255,255,0.08)",
-              borderRadius: "3px",
-              overflow: "hidden",
-              position: "relative",
-              "--glow-color": `${config.color}44`,
-              animation: "affinityBreathe 3s ease-in-out infinite",
-            } as React.CSSProperties}
-          >
-            <div
-              style={{
-                height: "100%",
-                width: "100%",
-                background: `linear-gradient(90deg, ${config.color}99, ${config.color})`,
-                borderRadius: "3px",
-                transformOrigin: "left",
-                transform: `scaleX(${affinity / 100})`,
-                transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease",
-              }}
-            />
-          </div>
-          <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", fontFamily: "monospace", minWidth: "24px", textAlign: "right" }}>
-            {affinity}
-          </span>
+              height: "100%",
+              width: "100%",
+              background: `linear-gradient(90deg, ${config.color}88, ${config.color})`,
+              borderRadius: "2px",
+              transformOrigin: "left",
+              transform: `scaleX(${affinity / 100})`,
+              transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease",
+            }}
+          />
         </div>
-
-        <div style={{ width: "1px", height: "12px", background: "rgba(255,255,255,0.1)" }} />
-
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.4)" }}>
-            🧠
-          </span>
-          <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.35)" }}>
-          </span>
-        </div>
+        <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", fontFamily: "monospace", minWidth: "20px", textAlign: "right" }}>
+          {affinity}
+        </span>
 
         {milestone && (
           <div

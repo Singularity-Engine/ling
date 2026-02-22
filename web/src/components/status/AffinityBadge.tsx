@@ -114,48 +114,47 @@ export const AffinityBadge = memo(() => {
               top: "100%",
               right: 0,
               marginTop: "8px",
-              padding: "16px",
-              background: "rgba(10, 0, 21, 0.9)",
-              backdropFilter: "blur(20px)",
-              borderRadius: "16px",
-              border: "1px solid rgba(255,255,255,0.1)",
-              minWidth: "180px",
-              boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 20px ${config.color}22`,
-              transition: "box-shadow 0.5s ease",
-              animation: "fadeInDown 0.2s ease-out",
+              padding: "20px",
+              background: "rgba(10, 0, 21, 0.92)",
+              backdropFilter: "blur(24px)",
+              borderRadius: "18px",
+              border: `1px solid ${config.color}18`,
+              minWidth: "200px",
+              boxShadow: `0 12px 40px rgba(0,0,0,0.5), 0 0 24px ${config.color}15`,
+              transition: "box-shadow 0.5s ease, border-color 0.5s ease",
+              animation: "fadeInDown 0.25s ease-out",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-              <HeartIcon color={config.heartColor} fillPercent={affinity} size={28} />
-              <div>
-                <span style={{ fontSize: "14px", color: config.color, fontWeight: 700, display: "block", transition: "color 0.5s ease" }}>
+            {/* Header: heart + level info */}
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+              <HeartIcon color={config.heartColor} fillPercent={affinity} size={32} />
+              <div style={{ flex: 1 }}>
+                <span style={{ fontSize: "15px", color: config.color, fontWeight: 700, display: "block", letterSpacing: "0.3px", transition: "color 0.5s ease" }}>
                   {t(config.i18nKey)}
                 </span>
-                <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", display: "block" }}>
+                <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.35)", display: "block", marginTop: "2px" }}>
                   {t("affinity.label")}
                 </span>
               </div>
+              <span style={{ fontSize: "20px", color: config.color, fontWeight: 700, fontFamily: "monospace", letterSpacing: "-0.5px", transition: "color 0.5s ease" }}>
+                {affinity}
+              </span>
             </div>
 
             {/* Progress bar */}
-            <div style={{ width: "100%", height: "4px", background: "rgba(255,255,255,0.08)", borderRadius: "2px", marginBottom: "8px", overflow: "hidden" }}>
+            <div style={{ width: "100%", height: "6px", background: "rgba(255,255,255,0.06)", borderRadius: "3px", overflow: "hidden" }}>
               <div
                 style={{
                   height: "100%",
                   width: "100%",
-                  background: `linear-gradient(90deg, ${config.color}88, ${config.color})`,
-                  borderRadius: "2px",
+                  background: `linear-gradient(90deg, ${config.color}66, ${config.color})`,
+                  borderRadius: "3px",
                   transformOrigin: "left",
                   transform: `scaleX(${affinity / 100})`,
                   transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease",
+                  boxShadow: `0 0 8px ${config.color}33`,
                 }}
               />
-            </div>
-
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)" }}>0</span>
-              <span style={{ fontSize: "12px", color: config.color, fontWeight: 600, transition: "color 0.5s ease" }}>{affinity}/100</span>
-              <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)" }}>100</span>
             </div>
 
           </div>
