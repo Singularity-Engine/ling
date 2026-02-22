@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAffinity } from "@/context/affinity-context";
 import { AFFINITY_LEVELS, DEFAULT_LEVEL } from "@/config/affinity-palette";
 
-// ── Module-level keyframe injection (consistent with ThoughtHalo, BackgroundReactor) ──
+// ── Module-level keyframe injection (consistent with BackgroundReactor) ──
 const BADGE_STYLE_ID = "affinity-badge-keyframes";
 function ensureBadgeStyles() {
   if (typeof document === "undefined" || document.getElementById(BADGE_STYLE_ID)) return;

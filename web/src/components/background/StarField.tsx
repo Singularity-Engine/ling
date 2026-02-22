@@ -33,18 +33,20 @@ export const StarField = memo(() => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const dpr = window.devicePixelRatio || 1;
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
     window.addEventListener("resize", resize);
 
-    // Initialize stars
+    // Initialize stars (coordinates in CSS pixels — ctx.setTransform handles DPR scaling)
     const starCount = 120;
     starsRef.current = Array.from({ length: starCount }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
       size: 0.5 + Math.random() * 1.5,
       baseAlpha: 0.2 + Math.random() * 0.6,
       alpha: 0,
@@ -56,7 +58,9 @@ export const StarField = memo(() => {
 
     const animate = () => {
       frame++;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      ctx.clearRect(0, 0, w, h);
 
       // Draw stars
       for (const star of starsRef.current) {
@@ -74,8 +78,8 @@ export const StarField = memo(() => {
       // Spawn meteors (~0.2% chance per frame)
       if (Math.random() < 0.002 && meteorsRef.current.length < 2) {
         meteorsRef.current.push({
-          x: Math.random() * canvas.width * 0.8,
-          y: Math.random() * canvas.height * 0.3,
+          x: Math.random() * w * 0.8,
+          y: Math.random() * h * 0.3,
           length: 60 + Math.random() * 80,
           speed: 4 + Math.random() * 4,
           angle: Math.PI / 4 + (Math.random() - 0.5) * 0.3,

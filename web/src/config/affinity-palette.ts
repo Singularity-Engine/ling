@@ -5,7 +5,6 @@
  * color maps. This ensures visual consistency across:
  *   - AffinityBadge / AffinityBar (UI elements)
  *   - BackgroundReactor (ambient tints)
- *   - ThoughtHalo (particle effects)
  *   - InfoCrystal (tool result cards)
  */
 
@@ -55,19 +54,6 @@ export const AFFINITY_AMBIENT_TINTS: Record<string, AffinityAmbientTint> = {
   devoted:     { color: "#fb7185", idleOpacity: 0.24, activeBoost: 1.22, breatheSpeed: 4,   breatheAmplitude: 2.0, gradientSpread: "85% 75%" },
 };
 
-// ── Halo colors (ThoughtHalo) ──
-// Used for AI-thinking particle ring. Intentionally lighter/softer
-// than ambient tints, matching the ethereal particle aesthetic.
-export const AFFINITY_HALO_COLORS: Record<string, string> = {
-  hatred:      "#dc2626",
-  hostile:     "#ea580c",
-  indifferent: "#78716c",
-  neutral:     "#c4b5fd",
-  friendly:    "#a78bfa",
-  close:       "#d946ef",
-  devoted:     "#fb7185",
-};
-
 // ── Crystal glow (InfoCrystal) ──
 // RGB channels derived from the UI `color` for use in CSS custom
 // properties (box-shadow needs separate R, G, B channels).
@@ -92,7 +78,7 @@ export const AFFINITY_CRYSTAL_THEMES: Record<string, AffinityCrystalTheme> = {
   devoted:     { glow: "244, 114, 182", borderAlpha: 0.75, breatheIntensity: 1.7, scale: 1.06, floatRange: 8,  shimmer: true,  bgAlpha: 0.45, blur: 24 },
 };
 
-// ── Tool category colors (shared by InfoCrystal, ThoughtHalo, CapabilityRing) ──
+// ── Tool category colors (shared by InfoCrystal, Constellation) ──
 export const CATEGORY_COLORS: Record<string, string> = {
   search: "#60a5fa",
   code: "#10b981",
