@@ -1,4 +1,4 @@
-import { memo, useRef, useEffect, useState, useCallback } from 'react';
+import { memo, useMemo, useRef, useEffect, useState, useCallback, type CSSProperties } from 'react';
 import { audioManager } from '../../utils/audio-manager';
 
 const BAR_COUNT = 32;
@@ -6,6 +6,25 @@ const FFT_SIZE = 128;
 const SMOOTHING = 0.82;
 const MIN_DB = -90;
 const MAX_DB = -20;
+
+// ── Module-level style constants (avoid object allocation on every render) ──
+const CONTAINER_STYLE_BASE: CSSProperties = {
+  position: 'absolute',
+  bottom: 0,
+  left: '50%',
+  transform: 'translateX(-50%)',
+  width: 'min(420px, 60vw)',
+  height: '48px',
+  transition: 'opacity 0.4s ease',
+  pointerEvents: 'none',
+  filter: 'drop-shadow(0 0 12px rgba(139, 92, 246, 0.3))',
+};
+
+const CANVAS_STYLE: CSSProperties = {
+  width: '100%',
+  height: '100%',
+  display: 'block',
+};
 
 /**
  * Lightweight audio spectrum visualizer that activates during TTS playback.
@@ -224,30 +243,14 @@ export const AudioVisualizer = memo(() => {
     };
   }, []);
 
+  const containerStyle = useMemo(
+    () => ({ ...CONTAINER_STYLE_BASE, opacity: active ? 1 : 0 }),
+    [active],
+  );
+
   return (
-    <div
-      style={{
-        position: 'absolute',
-        bottom: 0,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: 'min(420px, 60vw)',
-        height: '48px',
-        opacity: active ? 1 : 0,
-        transition: 'opacity 0.4s ease',
-        pointerEvents: 'none',
-        // Soft glow behind the bars
-        filter: 'drop-shadow(0 0 12px rgba(139, 92, 246, 0.3))',
-      }}
-    >
-      <canvas
-        ref={canvasRef}
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'block',
-        }}
-      />
+    <div style={containerStyle}>
+      <canvas ref={canvasRef} style={CANVAS_STYLE} />
     </div>
   );
 });

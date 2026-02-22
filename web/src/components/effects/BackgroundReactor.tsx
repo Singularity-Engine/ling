@@ -71,6 +71,40 @@ const PHASE_COLORS = {
 
 const DEFAULT_TINT: AffinityAmbientTint = AFFINITY_AMBIENT_TINTS[DEFAULT_LEVEL];
 
+// ── Module-level base styles for one-shot animation overlays ──
+// Static properties are hoisted here; dynamic `background` is merged via useMemo.
+const BLOOM_BURST_BASE: CSSProperties = {
+  position: 'absolute',
+  inset: '-10%',
+  pointerEvents: 'none',
+  borderRadius: '50%',
+  animation: 'completionBloom 1.5s ease-out forwards',
+};
+
+const FLASH_BASE: CSSProperties = {
+  position: 'absolute',
+  inset: 0,
+  pointerEvents: 'none',
+  animation: 'completionFlash 1s ease-out forwards',
+};
+
+const GAIN_PULSE_BASE: CSSProperties = {
+  position: 'absolute',
+  inset: 0,
+  pointerEvents: 'none',
+  animation: 'bgGainPulse 1.2s ease-out forwards',
+  willChange: 'opacity, transform',
+};
+
+const LEVEL_BLOOM_BASE: CSSProperties = {
+  position: 'absolute',
+  inset: '-5%',
+  pointerEvents: 'none',
+  borderRadius: '50%',
+  animation: 'bgLevelBloom 1.8s ease-out forwards',
+  willChange: 'opacity, transform',
+};
+
 export const BackgroundReactor = memo(() => {
   const { currentPhase } = useToolState();
   const { isThinkingSpeaking } = useAiState();
@@ -231,6 +265,25 @@ export const BackgroundReactor = memo(() => {
     [tint.color, tint.idleOpacity, tint.breatheSpeed, tint.breatheAmplitude, tintMask, expressionIntensity],
   );
 
+  // Memoized styles for one-shot animation overlays — only recompute when
+  // their dynamic gradient color changes, not on every parent re-render.
+  const bloomBurstStyle = useMemo(
+    () => ({ ...BLOOM_BURST_BASE, background: `radial-gradient(ellipse 50% 45% at 50% 40%, ${phaseColor}55 0%, ${phaseColor}22 40%, transparent 65%)` }),
+    [phaseColor],
+  );
+  const flashStyle = useMemo(
+    () => ({ ...FLASH_BASE, background: `radial-gradient(ellipse 50% 40% at 50% 40%, ${phaseColor}66 0%, transparent 60%)` }),
+    [phaseColor],
+  );
+  const gainPulseStyle = useMemo(
+    () => ({ ...GAIN_PULSE_BASE, background: `radial-gradient(ellipse 55% 45% at 50% 45%, ${gainPulseColor}40 0%, ${gainPulseColor}15 40%, transparent 65%)` }),
+    [gainPulseColor],
+  );
+  const levelBloomStyle = useMemo(
+    () => ({ ...LEVEL_BLOOM_BASE, background: `radial-gradient(ellipse 50% 45% at 50% 45%, ${levelTransition?.color}55 0%, ${levelTransition?.color}22 40%, transparent 65%)` }),
+    [levelTransition?.color],
+  );
+
   return (
     <>
       {/* Keyframes injected at module level — no inline <style> needed */}
@@ -241,55 +294,17 @@ export const BackgroundReactor = memo(() => {
       {/* Presenting: gold bloom burst + flash */}
       {isPresenting && (
         <>
-          <div
-            style={{
-              position: 'absolute',
-              inset: '-10%',
-              pointerEvents: 'none',
-              borderRadius: '50%',
-              background: `radial-gradient(ellipse 50% 45% at 50% 40%, ${phaseColor}55 0%, ${phaseColor}22 40%, transparent 65%)`,
-              animation: 'completionBloom 1.5s ease-out forwards',
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              pointerEvents: 'none',
-              background: `radial-gradient(ellipse 50% 40% at 50% 40%, ${phaseColor}66 0%, transparent 60%)`,
-              animation: 'completionFlash 1s ease-out forwards',
-            }}
-          />
+          <div style={bloomBurstStyle} />
+          <div style={flashStyle} />
         </>
       )}
       {/* Affinity point-gain pulse — brief radial flash on every affinity change */}
       {latestGain && (
-        <div
-          key={latestGain.id}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            pointerEvents: 'none',
-            background: `radial-gradient(ellipse 55% 45% at 50% 45%, ${gainPulseColor}40 0%, ${gainPulseColor}15 40%, transparent 65%)`,
-            animation: 'bgGainPulse 1.2s ease-out forwards',
-            willChange: 'opacity, transform',
-          }}
-        />
+        <div key={latestGain.id} style={gainPulseStyle} />
       )}
       {/* Level transition bloom — dramatic flash when crossing affinity level boundary */}
       {levelTransition && (
-        <div
-          key={levelTransition.key}
-          style={{
-            position: 'absolute',
-            inset: '-5%',
-            pointerEvents: 'none',
-            borderRadius: '50%',
-            background: `radial-gradient(ellipse 50% 45% at 50% 45%, ${levelTransition.color}55 0%, ${levelTransition.color}22 40%, transparent 65%)`,
-            animation: 'bgLevelBloom 1.8s ease-out forwards',
-            willChange: 'opacity, transform',
-          }}
-        />
+        <div key={levelTransition.key} style={levelBloomStyle} />
       )}
     </>
   );
