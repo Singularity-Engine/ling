@@ -17,13 +17,9 @@ const S_CONTAINER: CSSProperties = {
 
 interface Particle {
   id: number;
-  x: number;
-  y: number;
   emoji: string;
-  offsetX: number;
-  scale: number;
-  delay: number;
-  drift: string;
+  /** Pre-computed at spawn time — values never change, so no need to rebuild each render. */
+  style: CSSProperties;
 }
 
 /**
@@ -36,16 +32,21 @@ export const TapParticles = memo(() => {
   const downRef = useRef<{ x: number; y: number; t: number } | null>(null);
 
   const spawn = useCallback((clientX: number, clientY: number) => {
-    const batch: Particle[] = Array.from({ length: PARTICLE_COUNT }, () => ({
-      id: ++idRef.current,
-      x: clientX + (Math.random() - 0.5) * 30,
-      y: clientY - 10,
-      emoji: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
-      offsetX: 0,
-      scale: 0.7 + Math.random() * 0.6,
-      delay: Math.random() * 80,
-      drift: `${(Math.random() - 0.5) * 50}px`,
-    }));
+    const batch: Particle[] = Array.from({ length: PARTICLE_COUNT }, () => {
+      const scale = 0.7 + Math.random() * 0.6;
+      return {
+        id: ++idRef.current,
+        emoji: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
+        style: {
+          position: "absolute" as const,
+          left: clientX + (Math.random() - 0.5) * 30,
+          top: clientY - 10,
+          fontSize: `${18 * scale}px`,
+          animationDelay: `${Math.random() * 80}ms`,
+          ["--drift" as string]: `${(Math.random() - 0.5) * 50}px`,
+        },
+      };
+    });
     setParticles(prev => [...prev, ...batch]);
     setTimeout(() => {
       const ids = new Set(batch.map(p => p.id));
@@ -87,18 +88,7 @@ export const TapParticles = memo(() => {
   return (
     <div style={S_CONTAINER}>
       {particles.map(p => (
-        <span
-          key={p.id}
-          className="ling-tap-particle"
-          style={{
-            position: "absolute",
-            left: p.x,
-            top: p.y,
-            fontSize: `${18 * p.scale}px`,
-            animationDelay: `${p.delay}ms`,
-            ["--drift" as string]: p.drift,
-          }}
-        >
+        <span key={p.id} className="ling-tap-particle" style={p.style}>
           {p.emoji}
         </span>
       ))}

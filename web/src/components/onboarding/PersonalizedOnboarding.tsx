@@ -519,6 +519,40 @@ function StepReady({
   t: (k: string, opts?: Record<string, string>) => string;
   goals: string[];
 }) {
+  // Pre-compute constellation geometry once per goal set.
+  // Eliminates duplicate trig calculations and stabilises style objects.
+  const layout = useMemo(() =>
+    goals.map((key, i) => {
+      const meta = getMetaByKey(key);
+      const total = goals.length;
+      const angle = (-180 + i * (150 / Math.max(total - 1, 1))) * (Math.PI / 180);
+      const r = 70;
+      const cx = 100 + r * Math.cos(angle);
+      const cy = 100 + r * Math.sin(angle);
+      return {
+        key,
+        meta,
+        cx,
+        cy,
+        nodeStyle: {
+          position: "absolute" as const,
+          left: cx - 18,
+          top: cy - 18,
+          width: 36,
+          height: 36,
+          borderRadius: "50%",
+          background: `radial-gradient(circle at 30% 30%, ${meta.color}30, rgba(10,0,21,0.6))`,
+          border: `1.5px solid ${meta.color}66`,
+          display: "flex" as const,
+          alignItems: "center" as const,
+          justifyContent: "center" as const,
+          boxShadow: `0 0 12px ${meta.color}33`,
+        } as CSSProperties,
+      };
+    }),
+    [goals],
+  );
+
   return (
     <>
       <h2 style={S_TITLE_LG}>
@@ -530,56 +564,28 @@ function StepReady({
 
       {/* Mini constellation preview */}
       <div style={S_CONSTELLATION}>
-        {goals.map((key, i) => {
-          const meta = getMetaByKey(key);
-          const Icon = meta.icon;
-          const total = goals.length;
-          const angle = (-180 + i * (150 / Math.max(total - 1, 1))) * (Math.PI / 180);
-          const r = 70;
-          const cx = 100 + r * Math.cos(angle);
-          const cy = 100 + r * Math.sin(angle);
+        {layout.map((item, i) => (
+          <motion.div
+            key={item.key}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2 + i * 0.1, type: "spring", stiffness: 300 }}
+            style={item.nodeStyle}
+          >
+            <item.meta.icon size={16} color={item.meta.color} />
+          </motion.div>
+        ))}
 
-          return (
-            <motion.div
-              key={key}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2 + i * 0.1, type: "spring", stiffness: 300 }}
-              style={{
-                position: "absolute",
-                left: cx - 18,
-                top: cy - 18,
-                width: 36,
-                height: 36,
-                borderRadius: "50%",
-                background: `radial-gradient(circle at 30% 30%, ${meta.color}30, rgba(10,0,21,0.6))`,
-                border: `1.5px solid ${meta.color}66`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: `0 0 12px ${meta.color}33`,
-              }}
-            >
-              <Icon size={16} color={meta.color} />
-            </motion.div>
-          );
-        })}
-
-        {/* Connection lines SVG */}
+        {/* Connection lines — reuse pre-computed cx/cy */}
         <svg style={S_CONSTELLATION_SVG}>
-          {goals.map((_, i) => {
-            if (i === goals.length - 1) return null;
-            const total = goals.length;
-            const a1 = (-180 + i * (150 / Math.max(total - 1, 1))) * (Math.PI / 180);
-            const a2 = (-180 + (i + 1) * (150 / Math.max(total - 1, 1))) * (Math.PI / 180);
-            const r = 70;
+          {layout.map((item, i) => {
+            if (i === layout.length - 1) return null;
+            const next = layout[i + 1];
             return (
               <motion.line
                 key={i}
-                x1={100 + r * Math.cos(a1)}
-                y1={100 + r * Math.sin(a1)}
-                x2={100 + r * Math.cos(a2)}
-                y2={100 + r * Math.sin(a2)}
+                x1={item.cx} y1={item.cy}
+                x2={next.cx} y2={next.cy}
                 stroke="rgba(139,92,246,0.15)"
                 strokeWidth="1"
                 initial={{ pathLength: 0 }}
