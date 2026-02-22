@@ -6,16 +6,13 @@ import { ThinkingBubble } from "./ThinkingBubble";
 import { TimeSeparator, shouldShowSeparator } from "./TimeSeparator";
 import { useChatMessages, useStreamingValue, useStreamingRef } from "@/context/chat-history-context";
 import type { Message } from "@/services/websocket-service";
+import { createStyleInjector } from "@/utils/style-injection";
 
 import { useAiState } from "@/context/ai-state-context";
 import { useWebSocket } from "@/context/websocket-context";
 
-// Inject scrollbar + animation styles once
-const STYLE_ID = "chat-area-styles";
-if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
-  const style = document.createElement("style");
-  style.id = STYLE_ID;
-  style.textContent = `
+// ── Deferred style injection (performance optimization) ──
+const CHAT_STYLES_CSS = `
     .chat-area-scroll::-webkit-scrollbar { width: 4px; }
     .chat-area-scroll::-webkit-scrollbar-track { background: transparent; }
     .chat-area-scroll::-webkit-scrollbar-thumb { background: var(--ling-purple-30); border-radius: 2px; }
@@ -33,8 +30,11 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     .welcome-chip:active { transform: scale(0.97); }
     .chat-msg-item { contain: layout paint style; }
   `;
-  document.head.appendChild(style);
-}
+
+const ensureChatStyles = createStyleInjector({
+  id: "chat-area-styles",
+  css: CHAT_STYLES_CSS,
+});
 
 // Touch-only device detection (no hover capability = phone/tablet)
 const isTouchDevice =
@@ -463,6 +463,9 @@ export const ChatArea = memo(() => {
   const { isThinkingSpeaking } = useAiState();
   const { sendMessage, wsState } = useWebSocket();
   const { t } = useTranslation();
+
+  // Inject chat area styles
+  useEffect(ensureChatStyles, []);
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const rafScrollRef = useRef(0);
