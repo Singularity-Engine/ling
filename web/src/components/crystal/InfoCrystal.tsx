@@ -2,7 +2,6 @@ import { useTranslation } from "react-i18next";
 import { memo, useState, useCallback, useMemo, useEffect, type CSSProperties } from "react";
 import { useAffinity } from "@/context/affinity-context";
 import { AFFINITY_CRYSTAL_THEMES, CATEGORY_COLORS, DEFAULT_LEVEL, type AffinityCrystalTheme } from "@/config/affinity-palette";
-import { OVERLAY_COLORS } from "@/constants/colors";
 import { createStyleInjector } from "@/utils/style-injection";
 import type { ToolCategory } from "../../context/tool-state-context";
 

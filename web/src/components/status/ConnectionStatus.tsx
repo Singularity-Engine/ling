@@ -2,7 +2,7 @@ import { memo, useState, useEffect, useRef, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { useWebSocket } from "@/context/websocket-context";
 import { gatewayConnector, RECONNECT_MAX_RETRIES } from "@/services/gateway-connector";
-import { OVERLAY_COLORS, WHITE_ALPHA } from "@/constants/colors";
+import { OVERLAY_COLORS } from "@/constants/colors";
 import { createStyleInjector } from "@/utils/style-injection";
 
 // ── Deferred keyframe injection (performance optimization) ──
