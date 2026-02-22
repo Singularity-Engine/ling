@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { Box, Text } from "@chakra-ui/react";
 import { FiMonitor } from "react-icons/fi";
 import { memo } from "react";

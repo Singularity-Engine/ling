@@ -1,10 +1,4 @@
-/* eslint-disable function-paren-newline */
-/* eslint-disable react/jsx-one-expression-per-line */
-/* eslint-disable no-trailing-spaces */
-/* eslint-disable no-nested-ternary */
-/* eslint-disable import/order */
 /* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable react/require-default-props */
 import React, { memo, useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { Box, Spinner, Flex, Text, Icon } from '@chakra-ui/react';
 import { sidebarStyles, chatPanelStyles } from './sidebar-styles';
@@ -38,6 +32,52 @@ const S_TOOL_CONTAIN: React.CSSProperties = {
   contentVisibility: 'auto',
   containIntrinsicSize: '0 40px',
 };
+
+// Avatar image & fallback styles (avoid per-render allocation)
+const S_AVATAR_IMG: React.CSSProperties = {
+  width: '100%',
+  height: '100%',
+  borderRadius: '50%',
+};
+const S_AVATAR_FALLBACK: React.CSSProperties = {
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderRadius: '50%',
+  backgroundColor: 'var(--chakra-colors-blue-500)',
+  color: 'white',
+  fontSize: '14px',
+};
+
+/**
+ * Self-contained avatar that falls back to an initial letter on image error.
+ * Replaces the previous outerHTML approach which broke React VDOM reconciliation
+ * and was XSS-vulnerable with unsanitized names.
+ */
+const AvatarImage = memo(function AvatarImage({
+  src,
+  fallbackName,
+}: {
+  src: string;
+  fallbackName: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  const handleError = useCallback(() => setFailed(true), []);
+
+  if (failed) {
+    return <div style={S_AVATAR_FALLBACK}>{fallbackName[0].toUpperCase()}</div>;
+  }
+  return (
+    <img
+      src={src}
+      alt="avatar"
+      style={S_AVATAR_IMG}
+      onError={handleError}
+    />
+  );
+});
 
 // Static style constant for load-more button (avoid per-render allocation)
 const S_LOAD_MORE_BTN: React.CSSProperties = {
@@ -196,20 +236,14 @@ const ChatHistoryPanel = memo(function ChatHistoryPanel(): JSX.Element {
               <ChatAvatar>
                 {msg.role === 'ai' ? (
                   msg.avatar ? (
-                    <img
+                    <AvatarImage
                       src={`${baseUrl}/avatars/${msg.avatar}`}
-                      alt="avatar"
-                      style={{ width: '100%', height: '100%', borderRadius: '50%' }}
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        const fallbackName = msg.name || confName || 'A';
-                        target.outerHTML = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 50%; background-color: var(--chakra-colors-blue-500); color: white; font-size: 14px;">${fallbackName[0].toUpperCase()}</div>`;
-                      }}
+                      fallbackName={msg.name || confName || 'A'}
                     />
                   ) : (
-                    (msg.name && msg.name[0].toUpperCase()) ||
-                      (confName && confName[0].toUpperCase()) ||
-                      'A'
+                    (msg.name && msg.name[0].toUpperCase())
+                      || (confName && confName[0].toUpperCase())
+                      || 'A'
                   )
                 ) : (
                   userName[0].toUpperCase()
