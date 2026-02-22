@@ -65,7 +65,7 @@ const InsufficientCreditsModal: React.FC = () => {
     >
       <div
         style={{
-          background: '#1a0a2e',
+          background: 'rgba(20, 8, 40, 0.95)',
           border: '1px solid rgba(139, 92, 246, 0.3)',
           borderRadius: '20px',
           padding: '32px',
