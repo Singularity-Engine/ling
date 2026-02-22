@@ -34,7 +34,7 @@ export function useAffinityIdleExpression() {
 
     // Override idle expression after a short delay
     timerRef.current = setTimeout(() => {
-      const lappAdapter = (window as any).getLAppAdapter?.();
+      const lappAdapter = window.getLAppAdapter?.();
       if (!lappAdapter) return;
 
       try {

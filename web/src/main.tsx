@@ -28,7 +28,7 @@ console.error = (...args: unknown[]) => {
 };
 
 if (typeof window !== 'undefined') {
-  (window as any).getLAppAdapter = () => LAppAdapter.getInstance();
+  window.getLAppAdapter = () => LAppAdapter.getInstance();
 
   // Render React immediately — don't block on Live2D Core.
   // Landing animation runs ~7s, plenty of time for the script to load in background.

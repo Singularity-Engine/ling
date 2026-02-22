@@ -94,7 +94,7 @@ export const useAudioTask = () => {
         const audioDataUrl = `data:audio/wav;base64,${audioBase64}`;
 
         // Get Live2D manager and model
-        const live2dManager = (window as any).getLive2DManager?.();
+        const live2dManager = window.getLive2DManager?.();
         if (!live2dManager) {
           console.error('Live2D manager not found');
           resolve();
@@ -109,7 +109,7 @@ export const useAudioTask = () => {
         }
 
         // Set expression if available
-        const lappAdapter = (window as any).getLAppAdapter?.();
+        const lappAdapter = window.getLAppAdapter?.();
         if (lappAdapter && expressions?.[0] !== undefined) {
           setExpression(
             expressions[0],

@@ -138,7 +138,7 @@ const DEFAULT_CONFIG_FILES = [
  *  Delayed to ensure the model is loaded — longer delay for initial page load. */
 function setGreetingExpression(delayMs = 200) {
   setTimeout(() => {
-    const lappAdapter = (window as any).getLAppAdapter?.();
+    const lappAdapter = window.getLAppAdapter?.();
     if (lappAdapter) {
       try { lappAdapter.setExpression('kaixin'); } catch { /* model may not be ready */ }
     }

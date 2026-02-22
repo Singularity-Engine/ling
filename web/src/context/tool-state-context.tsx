@@ -195,7 +195,7 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
 
   // Demo trigger: window.__triggerToolDemo('search') in browser console
   useEffect(() => {
-    (window as any).__triggerToolDemo = (category: ToolCategory = 'search') => {
+    window.__triggerToolDemo = (category: ToolCategory = 'search') => {
       startTool({ name: `demo_${category}`, category, arguments: JSON.stringify({ query: 'Demo 展示' }) });
       // The tool will auto-complete after 3s via the timeout below
       const checkAndComplete = () => {
@@ -210,7 +210,7 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
       // Small delay to let React state settle
       setTimeout(checkAndComplete, 50);
     };
-    return () => { delete (window as any).__triggerToolDemo; };
+    return () => { delete window.__triggerToolDemo; };
   }, [startTool, completeTool]);
 
   const value = useMemo(() => ({

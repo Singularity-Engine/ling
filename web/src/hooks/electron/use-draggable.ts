@@ -32,7 +32,7 @@ export function useDraggable({ componentId }: UseDraggableProps) {
    */
   const handleMouseEnter = () => {
     if (isPet) {
-      (window.api as any)?.updateComponentHover(componentId, true);
+      window.api?.updateComponentHover(componentId, true);
     }
   };
 
@@ -42,7 +42,7 @@ export function useDraggable({ componentId }: UseDraggableProps) {
    */
   const handleMouseLeave = () => {
     if (isPet && !isDragging) {
-      (window.api as any)?.updateComponentHover(componentId, false);
+      window.api?.updateComponentHover(componentId, false);
     }
   };
 

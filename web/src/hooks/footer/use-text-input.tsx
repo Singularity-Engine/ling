@@ -39,7 +39,7 @@ export function useTextInput() {
     setInputText('');
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLElement>) => {
     if (isComposing) return;
 
     if (e.key === 'Enter' && !e.shiftKey) {

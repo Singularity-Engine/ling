@@ -50,7 +50,7 @@ export function InputSubtitle() {
 
   const handleClose = useCallback(() => {
     if (isPet) {
-      (window.api as any)?.updateComponentHover('input-subtitle', false);
+      window.api?.updateComponentHover('input-subtitle', false);
     }
     setIsVisible(false);
   }, [isPet]);
@@ -61,7 +61,7 @@ export function InputSubtitle() {
 
   useEffect(() => {
     if (isPet) {
-      const cleanup = (window.api as any)?.onToggleInputSubtitle(() => {
+      const cleanup = window.api?.onToggleInputSubtitle(() => {
         if (isVisible) {
           handleClose();
         } else {
@@ -74,13 +74,13 @@ export function InputSubtitle() {
   }, [handleClose, isPet, isVisible]);
 
   useEffect(() => {
-    (window as any).inputSubtitle = {
+    window.inputSubtitle = {
       open: handleOpen,
       close: handleClose,
     };
 
     return () => {
-      delete (window as any).inputSubtitle;
+      delete window.inputSubtitle;
     };
   }, [isPet, handleClose]);
 
