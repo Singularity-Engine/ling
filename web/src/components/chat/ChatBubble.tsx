@@ -8,7 +8,7 @@ import { toaster } from "@/components/ui/toaster";
 import { ToolResultCard } from "./ToolResultCard";
 
 export const remarkPlugins = [remarkGfm];
-export const rehypePlugins = [rehypeHighlight];
+const rehypePlugins = [rehypeHighlight];
 
 // Language display names
 const LANG_LABELS: Record<string, string> = {

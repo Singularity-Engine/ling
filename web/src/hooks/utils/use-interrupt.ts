@@ -10,7 +10,6 @@ export const useInterrupt = () => {
   const { sendMessage } = useWebSocket();
   const { getFullResponse } = useStreamingRef();
   const { clearResponse } = useStreamingSetters();
-  // const { currentModel } = useLive2DModel();
   const { subtitleText, setSubtitleText } = useSubtitle();
   const { stopCurrentAudioAndLipSync } = useAudioTask();
 

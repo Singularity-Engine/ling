@@ -20,7 +20,6 @@ function About(): JSX.Element {
   };
   
   const appVersion = '1.2.1';
-  // const appAuthor = 'Singularity Engine';
 
   return (
     <Stack {...settingStyles.common.container} gap={3}>
@@ -33,10 +32,6 @@ function About(): JSX.Element {
         </Text>
         <Text>{appVersion}</Text>
       </Box>
-      {/* <Box mt={1}>
-        <Text fontWeight="bold" mb={0}>{t('Author')}</Text>
-        <Text>{appAuthor}</Text>
-      </Box> */}
       <Box borderTop="1px solid" borderColor="whiteAlpha.200" pt={2} mt={1} />
       <Box mt={1}>
         <Text fontWeight="bold" mb={1}>

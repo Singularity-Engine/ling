@@ -114,8 +114,6 @@ export function Live2DConfigProvider({ children }: { children: React.ReactNode }
     },
   );
 
-  // const [modelInfo, setModelInfoState] = useState<ModelInfo | undefined>(DEFAULT_CONFIG.modelInfo);
-
   const setModelInfo = (info: ModelInfo | undefined) => {
     if (!info?.url) {
       setModelInfoState(undefined);
