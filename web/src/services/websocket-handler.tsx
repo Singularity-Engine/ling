@@ -23,7 +23,7 @@ import { useInterrupt } from '@/hooks/utils/use-interrupt';
 import { useBrowser } from '@/context/browser-context';
 import { useAffinity } from '@/context/affinity-context';
 import { useToolState, categorize } from '@/context/tool-state-context';
-import { gatewayConnector, GatewayState, ChatHistoryPayload, SessionListPayload } from '@/services/gateway-connector';
+import { gatewayConnector, GatewayState } from '@/services/gateway-connector';
 import { gatewayAdapter, GatewayMessageEvent } from '@/services/gateway-message-adapter';
 import { ttsService } from '@/services/tts-service';
 import { asrService } from '@/services/asr-service';
@@ -548,7 +548,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         .then(() =>
           gatewayConnector.getChatHistory(sessionKeyRef.current)
             .then((res) => {
-              const payload = res.payload as ChatHistoryPayload | undefined;
+              const payload = res.payload;
               if (payload?.messages?.length && payload.messages.length > 0) {
                 setMessagesRef.current(payload.messages);
                 greetingSentRef.current = true;
@@ -704,7 +704,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId())
         .then(() => gatewayConnector.getChatHistory(sessionKeyRef.current))
         .then((res) => {
-          const payload = res.payload as ChatHistoryPayload | undefined;
+          const payload = res.payload;
           if (payload?.messages?.length && payload.messages.length > 0) {
             setMessagesRef.current(payload.messages);
             if (import.meta.env.DEV) console.log(`[WebSocketHandler] Post-reconnect: restored ${payload.messages.length} messages`);
@@ -862,7 +862,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             if (guestMessageCountRef.current > GUEST_MESSAGE_LIMIT) {
               setBillingModalRef.current({
                 open: true,
-                reason: 'guest_limit' as any,
+                reason: 'guest_limit',
                 message: i18next.t('billing.guestLimitMessage'),
               });
               window.dispatchEvent(new CustomEvent('send-failed', { detail: { text } }));
@@ -991,9 +991,8 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             // Stale-check: if the user switched sessions again before this
             // resolved, discard the result to avoid overwriting the new session.
             if (sessionKeyRef.current !== targetUid) return;
-            const payload = res.payload as any;
-            if (payload?.messages) {
-              setMessagesRef.current(payload.messages);
+            if (res.payload?.messages) {
+              setMessagesRef.current(res.payload.messages);
             } else {
               // Gateway may return empty or different format
               setMessagesRef.current([]);
@@ -1057,9 +1056,8 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
       case 'fetch-history-list':
         gatewayConnector.listSessions().then((res) => {
-          const payload = res.payload as any;
-          if (payload?.sessions) {
-            const historyList: HistoryInfo[] = payload.sessions.map((s: any) => ({
+          if (res.payload?.sessions) {
+            const historyList: HistoryInfo[] = res.payload.sessions.map((s) => ({
               uid: s.key || s.id,
               latest_message: s.lastMessage || null,
               timestamp: s.updatedAt || s.createdAt || new Date().toISOString(),

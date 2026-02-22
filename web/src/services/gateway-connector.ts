@@ -20,13 +20,13 @@ import { BRAND_AVATAR_NAME } from '@/constants/brand';
 export type GatewayState = 'DISCONNECTED' | 'CONNECTING' | 'HANDSHAKING' | 'CONNECTED' | 'RECONNECTING';
 
 /** Raw Gateway frame — every WS message is one of these */
-export interface GatewayFrame {
+export interface GatewayFrame<P = Record<string, unknown>> {
   type: 'req' | 'res' | 'event';
   id?: string;
   method?: string;
   params?: Record<string, unknown>;
   ok?: boolean;
-  payload?: Record<string, unknown>;
+  payload?: P;
   error?: { code: string; message: string; retryable?: boolean; retryAfterMs?: number };
   event?: string;
   seq?: number;
@@ -196,13 +196,13 @@ class GatewayConnector {
   }
 
   /** List sessions */
-  async listSessions(): Promise<GatewayFrame> {
+  async listSessions(): Promise<GatewayFrame<SessionListPayload>> {
     return this.sendRequest({
       type: 'req',
       id: crypto.randomUUID(),
       method: 'sessions.list',
       params: {},
-    });
+    }) as Promise<GatewayFrame<SessionListPayload>>;
   }
 
   /** Resolve (create/get) a session */
@@ -216,13 +216,13 @@ class GatewayConnector {
   }
 
   /** Get chat history for a session */
-  async getChatHistory(sessionKey: string): Promise<GatewayFrame> {
+  async getChatHistory(sessionKey: string): Promise<GatewayFrame<ChatHistoryPayload>> {
     return this.sendRequest({
       type: 'req',
       id: crypto.randomUUID(),
       method: 'chat.history',
       params: { sessionKey },
-    });
+    }) as Promise<GatewayFrame<ChatHistoryPayload>>;
   }
 
   /** Send raw message (escape hatch) */
