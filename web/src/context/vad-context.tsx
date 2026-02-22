@@ -1,6 +1,6 @@
 /* eslint-disable no-use-before-define */
 import {
-  createContext, useContext, useRef, useCallback, useEffect, useReducer, useMemo,
+  createContext, useContext, useRef, useCallback, useEffect, useMemo,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MicVAD } from '@ricky0123/vad-web';
@@ -135,21 +135,27 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
   );
   const autoStartMicOnConvEndRef = useRef(false);
 
-  // Force update mechanism for ref updates
-  const [, forceUpdate] = useReducer((x) => x + 1, 0);
-
   // External hooks and contexts
   const { interrupt } = useInterrupt();
   const { sendAudioPartition } = useSendAudio();
   const { setSubtitleText } = useContext(SubtitleContext)!;
   const { aiState, setAiState } = useContext(AiStateContext)!;
 
-  // Refs for callback stability
+  // Refs for callback stability — direct assignment keeps them current
+  // synchronously during render, before any async callbacks can fire.
   const interruptRef = useRef(interrupt);
+  interruptRef.current = interrupt;
   const sendAudioPartitionRef = useRef(sendAudioPartition);
+  sendAudioPartitionRef.current = sendAudioPartition;
   const aiStateRef = useRef<AiState>(aiState);
+  aiStateRef.current = aiState;
   const setSubtitleTextRef = useRef(setSubtitleText);
+  setSubtitleTextRef.current = setSubtitleText;
   const setAiStateRef = useRef(setAiState);
+  setAiStateRef.current = setAiState;
+  autoStopMicRef.current = autoStopMic;
+  autoStartMicRef.current = autoStartMicOn;
+  autoStartMicOnConvEndRef.current = autoStartMicOnConvEnd;
 
   const isProcessingRef = useRef(false);
   const settingsRestartTimer = useRef<ReturnType<typeof setTimeout>>();
@@ -161,45 +167,11 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Update refs when dependencies change
-  useEffect(() => {
-    aiStateRef.current = aiState;
-  }, [aiState]);
-
-  useEffect(() => {
-    interruptRef.current = interrupt;
-  }, [interrupt]);
-
-  useEffect(() => {
-    sendAudioPartitionRef.current = sendAudioPartition;
-  }, [sendAudioPartition]);
-
-  useEffect(() => {
-    setSubtitleTextRef.current = setSubtitleText;
-  }, [setSubtitleText]);
-
-  useEffect(() => {
-    setAiStateRef.current = setAiState;
-  }, [setAiState]);
-
-  useEffect(() => {
-    autoStopMicRef.current = autoStopMic;
-  }, [autoStopMic]);
-
-  useEffect(() => {
-    autoStartMicRef.current = autoStartMicOn;
-  }, [autoStartMicOn]);
-
-  useEffect(() => {
-    autoStartMicOnConvEndRef.current = autoStartMicOnConvEnd;
-  }, [autoStartMicOnConvEnd]);
-
   /**
-   * Update previous triggered probability and force re-render
+   * Update previous triggered probability (ref-based, non-reactive)
    */
   const setPreviousTriggeredProbability = useCallback((value: number) => {
     previousTriggeredProbabilityRef.current = value;
-    forceUpdate();
   }, []);
 
   /**
@@ -355,25 +327,22 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
   const setAutoStopMic = useCallback((value: boolean) => {
     autoStopMicRef.current = value;
     setAutoStopMicState(value);
-    forceUpdate();
   }, []);
 
   const setAutoStartMicOn = useCallback((value: boolean) => {
     autoStartMicRef.current = value;
     setAutoStartMicOnState(value);
-    forceUpdate();
   }, []);
 
   const setAutoStartMicOnConvEnd = useCallback((value: boolean) => {
     autoStartMicOnConvEndRef.current = value;
     setAutoStartMicOnConvEndState(value);
-    forceUpdate();
   }, []);
 
   // Memoized context value
   const contextValue = useMemo(
     () => ({
-      autoStopMic: autoStopMicRef.current,
+      autoStopMic,
       micOn,
       setMicOn,
       setAutoStopMic,
@@ -383,17 +352,20 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
       setPreviousTriggeredProbability,
       settings,
       updateSettings,
-      autoStartMicOn: autoStartMicRef.current,
+      autoStartMicOn,
       setAutoStartMicOn,
-      autoStartMicOnConvEnd: autoStartMicOnConvEndRef.current,
+      autoStartMicOnConvEnd,
       setAutoStartMicOnConvEnd,
     }),
     [
+      autoStopMic,
       micOn,
       startMic,
       stopMic,
       settings,
       updateSettings,
+      autoStartMicOn,
+      autoStartMicOnConvEnd,
     ],
   );
 
