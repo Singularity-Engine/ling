@@ -83,7 +83,7 @@ export const ConnectionStatus = memo(() => {
           background: "rgba(0, 0, 0, 0.35)",
           backdropFilter: "blur(12px)",
           borderRadius: "16px",
-          border: `1px solid ${isClosed ? "var(--ling-error-border)" : "rgba(255,255,255,0.06)"}`,
+          border: `1px solid ${isClosed ? "var(--ling-error-border)" : "rgba(255,255,255,0.08)"}`,
           cursor: isClosed ? "pointer" : "default",
           transition: "all 0.4s ease",
           opacity: isOpen ? 0.7 : 1,

@@ -277,7 +277,7 @@ function MainContent(): JSX.Element {
       <div style={{
         position: "absolute", bottom: 0, left: 0, right: 0,
         height: "44dvh", zIndex: 22, pointerEvents: "none",
-        background: "linear-gradient(to bottom, transparent 0%, rgba(10,0,21,0.04) 10%, rgba(10,0,21,0.12) 22%, rgba(10,0,21,0.24) 36%, rgba(10,0,21,0.40) 50%, rgba(10,0,21,0.56) 64%, rgba(10,0,21,0.70) 78%, rgba(10,0,21,0.82) 92%, rgba(10,0,21,0.88) 100%)",
+        background: "linear-gradient(to bottom, transparent 0%, rgba(10,0,21,0.03) 10%, rgba(10,0,21,0.10) 22%, rgba(10,0,21,0.20) 36%, rgba(10,0,21,0.34) 50%, rgba(10,0,21,0.48) 64%, rgba(10,0,21,0.62) 78%, rgba(10,0,21,0.74) 92%, rgba(10,0,21,0.82) 100%)",
       }} />
 
       {/* ===== Layer 1.5: 右侧工具栏 ===== */}

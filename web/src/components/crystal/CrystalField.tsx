@@ -85,7 +85,7 @@ export const CrystalField = memo(() => {
   if (liveCrystals.length === 0 && exitingMap.size === 0) return null;
 
   return (
-    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 15 }}>
+    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 23 }}>
       {liveCrystals.map((tool, i) => (
         <div
           key={tool.id}

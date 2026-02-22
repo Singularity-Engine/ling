@@ -212,7 +212,7 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
             style={{
               fontSize: "14px",
               lineHeight: 1.7,
-              color: "rgba(255, 255, 255, 0.82)",
+              color: "rgba(255, 255, 255, 0.88)",
               whiteSpace: "pre-wrap",
               wordBreak: "break-word",
               display: "block",
@@ -326,7 +326,7 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
           style={{
             fontSize: "12px",
             lineHeight: 1.6,
-            color: "rgba(255, 255, 255, 0.82)",
+            color: "rgba(255, 255, 255, 0.88)",
             overflow: "hidden",
             textOverflow: "ellipsis",
             display: "-webkit-box",
