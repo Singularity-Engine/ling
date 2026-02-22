@@ -4,12 +4,9 @@ import { useWebSocket } from "@/context/websocket-context";
 import { gatewayConnector, RECONNECT_MAX_RETRIES } from "@/services/gateway-connector";
 import { OVERLAY_COLORS, WHITE_ALPHA } from "@/constants/colors";
 
-// ── Module-level keyframe injection (consistent with other components) ──
+// ── Deferred keyframe injection (performance optimization) ──
 const CONN_STYLE_ID = "connection-status-keyframes";
-if (typeof document !== "undefined" && !document.getElementById(CONN_STYLE_ID)) {
-  const style = document.createElement("style");
-  style.id = CONN_STYLE_ID;
-  style.textContent = `
+const KEYFRAMES_CSS = `
     @keyframes connFadeIn {
       from { opacity: 0; transform: translateY(-4px); }
       to { opacity: 0.7; transform: translateY(0); }
@@ -19,7 +16,17 @@ if (typeof document !== "undefined" && !document.getElementById(CONN_STYLE_ID)) 
       50% { opacity: 0.4; transform: scale(0.8); }
     }
   `;
-  document.head.appendChild(style);
+
+let _stylesInjected = false;
+function ensureKeyframeStyles() {
+  if (_stylesInjected || typeof document === "undefined") return;
+  if (!document.getElementById(CONN_STYLE_ID)) {
+    const style = document.createElement("style");
+    style.id = CONN_STYLE_ID;
+    style.textContent = KEYFRAMES_CSS;
+    document.head.appendChild(style);
+  }
+  _stylesInjected = true;
 }
 
 // ── Pre-allocated style constants — eliminate per-render allocations ──
@@ -132,6 +139,9 @@ export const ConnectionStatus = memo(() => {
   const isOpen = wsState === "OPEN";
   const isConnecting = wsState === "CONNECTING";
   const isClosed = wsState === "CLOSED";
+
+  // Inject keyframe styles on component mount
+  useEffect(ensureKeyframeStyles, []);
 
   useEffect(() => {
     if (isOpen) {

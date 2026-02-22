@@ -3,12 +3,9 @@ import { memo, useState, useEffect, useRef, type CSSProperties } from 'react';
 import { useTTSState, TTSPhase } from '@/context/tts-state-context';
 import { OVERLAY_COLORS } from '@/constants/colors';
 
-// ── Module-level keyframe injection ──
+// ── Deferred keyframe injection (performance optimization) ──
 const TTS_STYLE_ID = 'tts-status-keyframes';
-if (typeof document !== 'undefined' && !document.getElementById(TTS_STYLE_ID)) {
-  const el = document.createElement('style');
-  el.id = TTS_STYLE_ID;
-  el.textContent = `
+const KEYFRAMES_CSS = `
     @keyframes ttsPulse {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.4; transform: scale(0.8); }
@@ -34,7 +31,17 @@ if (typeof document !== 'undefined' && !document.getElementById(TTS_STYLE_ID)) {
       50% { transform: scaleY(4.67); }
     }
   `;
-  document.head.appendChild(el);
+
+let _stylesInjected = false;
+function ensureKeyframeStyles() {
+  if (_stylesInjected || typeof document === 'undefined') return;
+  if (!document.getElementById(TTS_STYLE_ID)) {
+    const el = document.createElement('style');
+    el.id = TTS_STYLE_ID;
+    el.textContent = KEYFRAMES_CSS;
+    document.head.appendChild(el);
+  }
+  _stylesInjected = true;
 }
 
 const phaseConfig: Record<Exclude<TTSPhase, 'idle'>, {
@@ -149,6 +156,9 @@ export const TTSStatus = memo(() => {
   const [fading, setFading] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
   const fadeTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // Inject keyframe styles on component mount
+  useEffect(ensureKeyframeStyles, []);
 
   useEffect(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
