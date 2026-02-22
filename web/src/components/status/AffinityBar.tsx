@@ -53,9 +53,9 @@ export const AffinityBar = memo(() => {
         <div
           style={{
             width: "100px",
-            height: "4px",
+            height: "5px",
             background: "rgba(255,255,255,0.06)",
-            borderRadius: "2px",
+            borderRadius: "2.5px",
             overflow: "hidden",
             position: "relative",
             "--glow-color": `${config.color}33`,
@@ -67,14 +67,14 @@ export const AffinityBar = memo(() => {
               height: "100%",
               width: "100%",
               background: `linear-gradient(90deg, ${config.color}88, ${config.color})`,
-              borderRadius: "2px",
+              borderRadius: "2.5px",
               transformOrigin: "left",
               transform: `scaleX(${affinity / 100})`,
               transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease",
             }}
           />
         </div>
-        <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.35)", fontFamily: "monospace", minWidth: "20px", textAlign: "right" }}>
+        <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.48)", fontFamily: "monospace", minWidth: "20px", textAlign: "right" }}>
           {affinity}
         </span>
 
