@@ -333,7 +333,8 @@ const S_TAGLINE: CSSProperties = {
   fontSize: "13px",
   color: "var(--ling-text-muted)",
   letterSpacing: "1px",
-  marginTop: "-12px",
+  marginTop: "-14px",
+  marginBottom: "-4px",
   animation: "chatFadeInUp 0.5s ease-out 0.1s both",
 };
 
@@ -342,6 +343,7 @@ const S_CAPS_ROW: CSSProperties = {
   gap: "8px",
   justifyContent: "center",
   flexWrap: "wrap",
+  marginBottom: "-8px",
   animation: "chatFadeInUp 0.5s ease-out 0.35s both",
 };
 

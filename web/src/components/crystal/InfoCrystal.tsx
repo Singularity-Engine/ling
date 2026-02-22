@@ -302,7 +302,7 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
         </div>
 
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
           <span style={{ fontSize: "15px", lineHeight: 1 }}>{icon}</span>
           <span
             style={{
@@ -326,7 +326,7 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
           style={{
             fontSize: "12px",
             lineHeight: 1.6,
-            color: "rgba(255, 255, 255, 0.75)",
+            color: "rgba(255, 255, 255, 0.78)",
             overflow: "hidden",
             textOverflow: "ellipsis",
             display: "-webkit-box",
@@ -342,7 +342,7 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
           style={{
             fontSize: "11px",
             color: `${color}bb`,
-            marginTop: "10px",
+            marginTop: "12px",
             textAlign: "right",
             display: "block",
           }}

@@ -180,7 +180,7 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
           style={{
             flex: 1,
             overflowY: 'auto',
-            padding: '16px 24px',
+            padding: '20px 24px',
           }}
         >
           {loading && (
@@ -243,27 +243,36 @@ export function MemoryPanel({ open, onClose }: MemoryPanelProps) {
             <div
               key={memory.id}
               style={{
-                padding: '12px 16px',
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.06)',
+                padding: '14px 16px',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: '14px',
                 marginBottom: '12px',
               }}
             >
-              <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>
+              <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>
                 {memory.content}
               </p>
-              <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px', marginTop: '6px', display: 'block' }}>
-                {new Date(memory.created_at).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                })}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+                <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px' }}>
+                  {new Date(memory.created_at).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </span>
                 {memory.group_id && (
-                  <span style={{ marginLeft: '8px', color: 'rgba(139,92,246,0.55)' }}>
-                    #{memory.group_id}
+                  <span style={{
+                    fontSize: '10px',
+                    color: 'rgba(167,139,250,0.8)',
+                    background: 'rgba(139,92,246,0.12)',
+                    padding: '2px 8px',
+                    borderRadius: '8px',
+                    letterSpacing: '0.3px',
+                  }}>
+                    {memory.group_id}
                   </span>
                 )}
-              </span>
+              </div>
             </div>
           ))}
         </div>
