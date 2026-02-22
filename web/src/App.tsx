@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, Component, ErrorInfo, type ReactNode, type CSSProperties } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, Component, ErrorInfo, type ReactNode, type CSSProperties } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
@@ -308,6 +308,18 @@ function MainContent(): JSX.Element {
     sendMessage({ type: "create-new-history" });
   }, [currentHistoryUid, messages, updateHistoryList, interrupt, sendMessage]);
 
+  // Refs for ephemeral UI state — lets the Escape shortcut read latest values
+  // without adding them as useMemo deps (avoids rebuilding the entire shortcuts
+  // array on every overlay toggle or chat expand/collapse).
+  const shortcutsOpenRef = useRef(shortcutsOpen);
+  shortcutsOpenRef.current = shortcutsOpen;
+  const aboutOpenRef = useRef(aboutOpen);
+  aboutOpenRef.current = aboutOpen;
+  const memoryOpenRef = useRef(memoryOpen);
+  memoryOpenRef.current = memoryOpen;
+  const chatExpandedRef = useRef(chatExpanded);
+  chatExpandedRef.current = chatExpanded;
+
   // Keyboard shortcuts definition
   const shortcuts: ShortcutDef[] = useMemo(() => [
     {
@@ -354,11 +366,11 @@ function MainContent(): JSX.Element {
         // Let context menus handle their own Escape
         if (document.querySelector('[role="menu"]')) return false;
         // Cascade: close overlays first, then collapse chat panel
-        if (shortcutsOpen || aboutOpen || memoryOpen) {
+        if (shortcutsOpenRef.current || aboutOpenRef.current || memoryOpenRef.current) {
           setShortcutsOpen(false);
           setAboutOpen(false);
           setMemoryOpen(false);
-        } else if (chatExpanded) {
+        } else if (chatExpandedRef.current) {
           setChatExpanded(false);
           // Blur textarea so focus doesn't remain on hidden input
           (document.activeElement as HTMLElement)?.blur?.();
@@ -368,7 +380,7 @@ function MainContent(): JSX.Element {
       },
       allowInInput: true,
     },
-  ], [micOn, startMic, stopMic, createNewChat, t, shortcutsOpen, aboutOpen, memoryOpen, chatExpanded]);
+  ], [micOn, startMic, stopMic, createNewChat]);
 
   useKeyboardShortcuts(shortcuts);
   useAffinityIdleExpression();

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type CSSProperties } from "react";
+import { memo, useState, useEffect, useRef, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { useNetworkStatus } from "../../hooks/use-network-status";
 
@@ -57,7 +57,7 @@ const S_RECOVERED: CSSProperties = {
 
 type Phase = "hidden" | "offline" | "recovered";
 
-export function NetworkStatusBanner() {
+export const NetworkStatusBanner = memo(function NetworkStatusBanner() {
   const { t } = useTranslation();
   const { isOnline } = useNetworkStatus();
   const [phase, setPhase] = useState<Phase>("hidden");
@@ -83,4 +83,6 @@ export function NetworkStatusBanner() {
       {phase === "offline" ? t("network.offline") : t("network.recovered")}
     </div>
   );
-}
+});
+
+NetworkStatusBanner.displayName = "NetworkStatusBanner";

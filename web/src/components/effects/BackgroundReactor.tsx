@@ -223,8 +223,12 @@ export const BackgroundReactor = memo(() => {
       animationDuration: `${tint.breatheSpeed * (1 / (1 + expressionIntensity * 0.3))}s`,
       animationTimingFunction: 'ease-in-out',
       animationIterationCount: 'infinite' as const,
+      // CSS custom properties consumed by bgAffinityBreathe keyframes —
+      // folded into the memo to avoid an inline spread that defeats memoization.
+      '--affinity-idle-opacity': tint.idleOpacity,
+      '--affinity-breathe-amp': tint.breatheAmplitude,
     }),
-    [tint.color, tint.idleOpacity, tint.breatheSpeed, tintMask, expressionIntensity],
+    [tint.color, tint.idleOpacity, tint.breatheSpeed, tint.breatheAmplitude, tintMask, expressionIntensity],
   );
 
   return (
@@ -233,7 +237,7 @@ export const BackgroundReactor = memo(() => {
       <div style={glowStyle as CSSProperties} />
       <div style={ambientStyle} />
       <div style={vignetteStyle} />
-      <div style={{ ...affinityTintStyle, '--affinity-idle-opacity': tint.idleOpacity, '--affinity-breathe-amp': tint.breatheAmplitude } as React.CSSProperties} />
+      <div style={affinityTintStyle as CSSProperties} />
       {/* Presenting: gold bloom burst + flash */}
       {isPresenting && (
         <>
