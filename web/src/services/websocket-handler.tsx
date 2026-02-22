@@ -552,6 +552,23 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       setConfigFiles(DEFAULT_CONFIG_FILES);
       bgUrlContext?.setBackgroundFiles(DEFAULT_BACKGROUNDS);
 
+      // Helper: build experiment-aware greeting context
+      const buildGreetingContext = () => {
+        const prefs = localStorage.getItem('ling-user-preferences');
+        const visitCount = parseInt(localStorage.getItem('ling_visit_count') || '0', 10) + 1;
+        localStorage.setItem('ling_visit_count', String(visitCount));
+        const ctx: Record<string, unknown> = {
+          role: 'advisor',
+          visitCount,
+          isFirstVisit: visitCount <= 1,
+          referrer: document.referrer || null,
+        };
+        if (prefs) {
+          try { Object.assign(ctx, JSON.parse(prefs)); } catch { /* ignore */ }
+        }
+        return `[greeting:experiment]${JSON.stringify(ctx)}`;
+      };
+
       // Helper: send auto-greeting (used when no previous history exists)
       const sendGreetingIfNeeded = () => {
         if (!greetingSentRef.current) {
@@ -559,8 +576,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             if (greetingSentRef.current) return;
             greetingSentRef.current = true;
             setAiState('thinking-speaking');
-            const prefs = localStorage.getItem('ling-user-preferences');
-            const greetingMsg = prefs ? `[greeting:context]${prefs}` : '[greeting]';
+            const greetingMsg = buildGreetingContext();
             gatewayConnector.sendChat(sessionKeyRef.current, greetingMsg).catch((err) => {
               log.debug('Auto-greeting failed:', err);
               setAiState('idle');
@@ -1073,8 +1089,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           // immediately to avoid empty-state flash (same as initial page load path)
           setAiStateRef.current('thinking-speaking');
           setGreetingExpression(200); // Model is already loaded
-          const newPrefs = localStorage.getItem('ling-user-preferences');
-          const newGreetingMsg = newPrefs ? `[greeting:context]${newPrefs}` : '[greeting]';
+          const newGreetingMsg = buildGreetingContext();
           gatewayConnector.sendChat(newSessionKey, newGreetingMsg).catch((err) => {
             log.debug('New session greeting failed:', err);
             setAiStateRef.current('idle');

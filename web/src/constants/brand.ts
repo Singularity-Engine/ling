@@ -14,7 +14,7 @@ export const BRAND_AVATAR_NAME = '灵 Avatar';
 // ── SEO — Home page ─────────────────────────────────────────
 
 export const SEO_HOME_TITLE = 'Ling — Talk to the First AI Entrepreneur';
-export const SEO_HOME_DESC = 'Ling is building the world\'s first AI-run company. 63 days of runway. Chat with her, give her ideas, be her first customer.';
+export const SEO_HOME_DESC = 'An AI with 63 days to build a business or die. Talk to Ling, become her advisor, help her survive. The world\'s first AI-run company.';
 export const SEO_HOME_OG_TITLE = 'Ling — The First AI Entrepreneur';
 
 // ── SEO — Terms page ────────────────────────────────────────

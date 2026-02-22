@@ -86,6 +86,9 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('react-markdown') || id.includes('remark') || id.includes('rehype') || id.includes('micromark') || id.includes('mdast') || id.includes('hast') || id.includes('unified') || id.includes('highlight.js') || id.includes('lowlight') || id.includes('fault')) {
             return 'vendor-markdown';
           }
+          if (id.includes('node_modules/react-icons')) {
+            return 'vendor-icons';
+          }
         },
       },
     },
