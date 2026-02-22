@@ -8,6 +8,9 @@ import { useCamera } from '@/context/camera-context';
 import { useSwitchCharacter } from '@/hooks/utils/use-switch-character';
 import { useConfig } from '@/context/character-config-context';
 import i18n from 'i18next';
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('Settings');
 
 export const IMAGE_COMPRESSION_QUALITY_KEY = 'appImageCompressionQuality';
 export const DEFAULT_IMAGE_COMPRESSION_QUALITY = 0.8;
@@ -243,7 +246,7 @@ export const useGeneralSettings = ({
         handleSettingChange('useCameraBackground', true);
         setUseCameraBackground(true);
       } catch (error) {
-        console.error('Failed to start camera:', error);
+        log.error('Failed to start camera:', error);
         handleSettingChange('useCameraBackground', false);
         setUseCameraBackground(false);
       }

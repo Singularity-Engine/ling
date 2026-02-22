@@ -25,6 +25,10 @@ const FISH_TTS_REFERENCE_ID = '9dec9671824543b4a4f9f382dbf15748';
 // Sentence boundary pattern (Chinese + English punctuation + newlines)
 const SENTENCE_TERMINATORS = /[。！？.!?\n；;]/;
 
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('TTS');
+
 // ─── Types ───────────────────────────────────────────────────────
 
 export interface TTSResult {
@@ -65,7 +69,7 @@ class TTSService {
         sliceLength: lipSyncData.volumes.length,
       };
     } catch (err) {
-      console.error('[TTSService] Synthesis failed:', err);
+      log.error('Synthesis failed:', err);
 
       return null;
     }
@@ -176,7 +180,7 @@ class TTSService {
       const audioBuffer = await ctx.decodeAudioData(arrayBuffer.slice(0));
       return this.computeLipSyncData(audioBuffer);
     } catch (err) {
-      console.error('[TTSService] Lip sync extraction failed:', err);
+      log.error('Lip sync extraction failed:', err);
       return { volumes: [], mouthForms: [] };
     }
   }

@@ -1,5 +1,9 @@
 /* eslint-disable no-promise-executor-return */
 /* eslint-disable arrow-parens */
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('TaskQueue');
+
 export class TaskQueue {
   private queue: (() => Promise<void>)[] = [];
 
@@ -45,7 +49,7 @@ export class TaskQueue {
         await taskPromise;
         await new Promise(resolve => setTimeout(resolve, this.taskInterval));
       } catch (error) {
-        console.error('Task Queue Error', error);
+        log.error('Task execution failed:', error);
       } finally {
         this.activeTasks.delete(taskPromise);
         this.running = false;

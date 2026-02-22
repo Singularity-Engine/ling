@@ -8,6 +8,9 @@ import { useWebSocket } from '@/context/websocket-context';
 import { useChatMessages } from '@/context/chat-history-context';
 import { toaster } from '@/components/ui/toaster';
 import { createStyleInjector } from '@/utils/style-injection';
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('ContextMenu');
 
 // ── Deferred keyframe injection ──
 const ensureCtxMenuStyles = createStyleInjector({
@@ -129,10 +132,10 @@ export const MessageContextMenu = memo(function MessageContextMenu({ message, po
       if (result) {
         // Play audio directly without Live2D lip sync dependency
         const audio = new Audio(`data:audio/mp3;base64,${result.audioBase64}`);
-        audio.play().catch((err) => console.error('[TTS] Playback error:', err));
+        audio.play().catch((err) => log.error('Playback error:', err));
       }
     } catch (err) {
-      console.error('[TTS] Read aloud failed:', err);
+      log.error('Read aloud failed:', err);
       toaster.create({
         title: t('tts.error'),
         type: 'error',

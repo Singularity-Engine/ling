@@ -6,6 +6,10 @@
  * On subsequent visits, reads the existing cookie value.
  */
 
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('UserIdentity');
+
 const COOKIE_NAME = 'ling_uid';
 const MAX_AGE_DAYS = 365;
 
@@ -30,9 +34,9 @@ export function getUserId(): string {
   if (!uid) {
     uid = crypto.randomUUID();
     setCookie(COOKIE_NAME, uid, MAX_AGE_DAYS);
-    if (import.meta.env.DEV) console.log('[user-identity] New user, generated ling_uid:', uid);
+    log.debug('New user, generated ling_uid:', uid);
   } else {
-    if (import.meta.env.DEV) console.log('[user-identity] Returning user, ling_uid:', uid);
+    log.debug('Returning user, ling_uid:', uid);
   }
 
   cachedUid = uid;

@@ -4,6 +4,9 @@ import {
 } from 'react';
 import { Message } from '@/services/websocket-service';
 import { HistoryInfo } from './websocket-context';
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('ChatHistory');
 
 /**
  * Context 1a — Chat messages & message mutators.
@@ -180,7 +183,7 @@ export function ChatHistoryProvider({ children }: { children: ReactNode }) {
 
   const appendOrUpdateToolCallMessage = useCallback((toolMessageData: Partial<Message>) => {
     if (!toolMessageData.tool_id || !toolMessageData.tool_name || !toolMessageData.status || !toolMessageData.timestamp) {
-      console.error('[ChatHistory] Incomplete tool message data, missing fields for tool_id:', toolMessageData.tool_id);
+      log.error('Incomplete tool message data, missing fields for tool_id:', toolMessageData.tool_id);
       return;
     }
 
@@ -224,11 +227,11 @@ export function ChatHistoryProvider({ children }: { children: ReactNode }) {
 
   const updateHistoryList = useCallback(
     (uid: string, latestMessage: Message | null) => {
-      if (import.meta.env.DEV && !uid) {
-        console.warn('[ChatHistory] updateHistoryList: uid is null');
+      if (!uid) {
+        log.debug('updateHistoryList: uid is null');
       }
-      if (import.meta.env.DEV && !currentHistoryUidRef.current) {
-        console.warn('[ChatHistory] updateHistoryList: currentHistoryUid is null');
+      if (!currentHistoryUidRef.current) {
+        log.debug('updateHistoryList: currentHistoryUid is null');
       }
 
       setHistoryList((prevList) => prevList.map((history) => {

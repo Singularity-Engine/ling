@@ -6,6 +6,10 @@
  * speech ends, and provide the accumulated transcript.
  */
 
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('ASR');
+
 class ASRService {
   private recognition: SpeechRecognition | null = null;
   private isListening = false;
@@ -23,7 +27,7 @@ class ASRService {
   start() {
     if (this.isListening) return;
     if (!this.isSupported) {
-      if (import.meta.env.DEV) console.warn('[ASRService] SpeechRecognition not supported');
+      log.debug('SpeechRecognition not supported');
       return;
     }
 
@@ -60,7 +64,7 @@ class ASRService {
 
     this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       if (event.error === 'no-speech' || event.error === 'aborted') return;
-      console.error('[ASRService] Error:', event.error);
+      log.error('Error:', event.error);
     };
 
     try {
@@ -68,9 +72,9 @@ class ASRService {
       this.isListening = true;
       this.currentTranscript = '';
       this.finalTranscript = '';
-      if (import.meta.env.DEV) console.log('[ASRService] Started listening');
+      log.debug('Started listening');
     } catch (err) {
-      console.error('[ASRService] Failed to start:', err);
+      log.error('Failed to start:', err);
     }
   }
 
@@ -91,7 +95,7 @@ class ASRService {
     const result = this.currentTranscript || this.finalTranscript;
     this.currentTranscript = '';
     this.finalTranscript = '';
-    if (import.meta.env.DEV) console.log('[ASRService] Stopped, transcript:', result);
+    log.debug('Stopped, transcript:', result);
     return result;
   }
 

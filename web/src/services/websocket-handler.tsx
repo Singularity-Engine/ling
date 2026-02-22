@@ -33,10 +33,12 @@ import { useAuth } from '@/context/auth-context';
 import { useUI, type BillingModalState } from '@/context/ui-context';
 import { apiClient } from '@/services/api-client';
 import i18next from 'i18next';
+import { createLogger } from '@/utils/logger';
 
 // ─── Gateway configuration ──────────────────────────────────────
 
 const GATEWAY_TOKEN = import.meta.env.VITE_GATEWAY_TOKEN || '';
+const log = createLogger('WSHandler');
 
 /** Per-visitor session key — each browser gets its own isolated session */
 /** Public site uses restricted agent; local dev uses full agent */
@@ -162,7 +164,7 @@ function GatewayDebugPanel() {
     const msgCounter = { count: 0 };
     const msgSub = gatewayAdapter.message$.subscribe((msg) => {
       msgCounter.count++;
-      if (import.meta.env.DEV) console.log('[DebugPanel] message$ event:', msg.type, msg);
+      log.debug('message$ event:', msg.type, msg);
     });
     const timer = setInterval(() => {
       const c = gatewayConnector.debugCounters;
@@ -343,11 +345,11 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const handleControlMessage = useCallback((controlText: string) => {
     switch (controlText) {
       case 'start-mic':
-        if (import.meta.env.DEV) console.log('Starting microphone...');
+        log.debug('Starting microphone...');
         startMic();
         break;
       case 'stop-mic':
-        if (import.meta.env.DEV) console.log('Stopping microphone...');
+        log.debug('Stopping microphone...');
         stopMic();
         break;
       case 'conversation-chain-start':
@@ -359,7 +361,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       case 'conversation-chain-end':
         // Skip idle transition if a new message was just sent (prevents flicker)
         if (pendingNewChatRef.current) {
-          if (import.meta.env.DEV) console.log('[WS-Handler] Skipping idle transition — pending new chat');
+          log.debug('Skipping idle transition — pending new chat');
           break;
         }
         audioTaskQueue.addTask(() => new Promise<void>((resolve) => {
@@ -376,24 +378,24 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         }));
         break;
       default:
-        if (import.meta.env.DEV) console.warn('Unknown control command:', controlText);
+        log.debug('Unknown control command:', controlText);
     }
   }, [setAiState, clearResponse, startMic, stopMic]);
 
   // ─── Message handler (receives adapted Gateway messages) ──────
 
   const handleWebSocketMessage = useCallback((message: MessageEvent) => {
-    if (import.meta.env.DEV) console.log('[WS-Handler] Processing message:', message.type, message);
+    log.debug('Processing message:', message.type, message);
     switch (message.type) {
       case 'control':
         if (message.text) {
-          if (import.meta.env.DEV) console.log('[WS-Handler] control:', message.text);
+          log.debug('control:', message.text);
           handleControlMessage(message.text);
         }
         break;
       case 'full-text':
         if (message.text) {
-          if (import.meta.env.DEV) console.log('[WS-Handler] full-text:', message.text.slice(0, 50));
+          log.debug('full-text:', message.text.slice(0, 50));
           setSubtitleText(message.text);
           setFullResponse(message.text);
         }
@@ -401,7 +403,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       case 'ai-message-complete':
         // Finalize the streamed text as a permanent chat message
         if (message.text) {
-          if (import.meta.env.DEV) console.log('[WS-Handler] ai-message-complete:', message.text.slice(0, 50));
+          log.debug('ai-message-complete:', message.text.slice(0, 50));
           appendAIMessage(message.text);
           clearResponse();
         }
@@ -537,7 +539,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       clientId: 'webchat-ui',
       displayName: BRAND_AVATAR_NAME,
     }).then(() => {
-      if (import.meta.env.DEV) console.log('[WebSocketHandler] Gateway connected!');
+      log.debug('Gateway connected!');
 
       // Initialize: set model info directly (no backend fetch needed)
       setConfName(BRAND_NAME_DISPLAY);
@@ -560,7 +562,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             const prefs = localStorage.getItem('ling-user-preferences');
             const greetingMsg = prefs ? `[greeting:context]${prefs}` : '[greeting]';
             gatewayConnector.sendChat(sessionKeyRef.current, greetingMsg).catch((err) => {
-              if (import.meta.env.DEV) console.error('[WebSocketHandler] Auto-greeting failed:', err);
+              log.debug('Auto-greeting failed:', err);
               setAiState('idle');
             });
           };
@@ -588,7 +590,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
               if (payload?.messages?.length && payload.messages.length > 0) {
                 setMessagesRef.current(payload.messages);
                 greetingSentRef.current = true;
-                if (import.meta.env.DEV) console.log(`[WebSocketHandler] Restored ${payload.messages.length} messages from previous session`);
+                log.debug('Restored', payload.messages.length, 'messages from previous session');
                 return;
               }
               sendGreetingIfNeeded();
@@ -597,7 +599,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         )
         .catch((err) => {
           // Session doesn't exist yet — chat.send will create it on first message
-          if (import.meta.env.DEV) console.log('[WebSocketHandler] resolveSession failed (will create on first chat):', err.message);
+          log.debug('resolveSession failed (will create on first chat):', err.message);
           sendGreetingIfNeeded();
         });
 
@@ -610,7 +612,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         timestamp: new Date().toISOString(),
       }]);
     }).catch((err) => {
-      console.error('[WebSocketHandler] Gateway connection failed:', err);
+      log.error('Gateway connection failed:', err);
       toaster.create({
         title: i18next.t('notification.connectionFailed', { error: err.message }),
         type: 'error',
@@ -743,11 +745,11 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           const payload = res.payload;
           if (payload?.messages?.length && payload.messages.length > 0) {
             setMessagesRef.current(payload.messages);
-            if (import.meta.env.DEV) console.log(`[WebSocketHandler] Post-reconnect: restored ${payload.messages.length} messages`);
+            log.debug('Post-reconnect: restored', payload.messages.length, 'messages');
           }
         })
         .catch((err) => {
-          console.error('[WebSocketHandler] Post-reconnect session recovery failed:', err);
+          log.error('Post-reconnect session recovery failed:', err);
         });
       // Notify user
       toaster.create({
@@ -814,7 +816,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           if (sentence.trim().length < 2) continue;
           // Dedup: skip if already synthesized in this conversation
           if (synthesizedRef.current.has(sentence)) {
-            if (import.meta.env.DEV) console.log('[TTS] Skipping duplicate:', sentence);
+            log.debug('Skipping duplicate:', sentence);
             continue;
           }
           synthesizedRef.current.add(sentence);
@@ -823,7 +825,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           const gen = ttsGenerationRef.current;
           synthQueueRef.current = synthQueueRef.current.then(async () => {
             if (gen !== ttsGenerationRef.current) return; // Stale — discard
-            if (import.meta.env.DEV) console.log('[TTS] Synthesizing:', sentence);
+            log.debug('Synthesizing:', sentence);
             markSynthStartRef.current();
             try {
               const result = await ttsService.synthesize(sentence);
@@ -854,7 +856,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
               }
             } catch (err) {
               if (gen !== ttsGenerationRef.current) return; // Stale — suppress error
-              console.error('[TTS] Synthesis failed:', err);
+              log.error('Synthesis failed:', err);
               markSynthErrorRef.current(err instanceof Error ? err.message : 'TTS synthesis failed');
               if (!ttsErrorShownRef.current) {
                 ttsErrorShownRef.current = true;
@@ -918,7 +920,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             clearResponseRef.current();
             setAiStateRef.current('thinking-speaking');
             gatewayConnector.sendChat(sessionKeyRef.current, text).catch((err) => {
-              console.error('[Gateway] sendChat failed:', err);
+              log.error('sendChat failed:', err);
               toaster.create({
                 title: i18next.t('notification.sendFailed', { error: err.message }),
                 type: 'error',
@@ -941,7 +943,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         const runId = gatewayAdapter.getActiveRunId();
         if (runId) {
           gatewayConnector.abortRun(runId).catch((err) => {
-            console.error('[Gateway] abortRun failed:', err);
+            log.error('abortRun failed:', err);
             toaster.create({
               title: i18next.t('notification.stopFailed'),
               type: 'error',
@@ -975,7 +977,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             clearResponseRef.current();
             setAiStateRef.current('thinking-speaking');
             gatewayConnector.sendChat(sessionKeyRef.current, trimmed).catch((err) => {
-              console.error('[Gateway] sendChat (ASR) failed:', err);
+              log.error('sendChat (ASR) failed:', err);
               toaster.create({
                 title: i18next.t('notification.voiceSendFailed', { error: err.message }),
                 type: 'error',
@@ -986,7 +988,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             });
           });
         } else {
-          if (import.meta.env.DEV) console.warn('[ASR] No transcript available from speech recognition');
+          log.debug('No transcript available from speech recognition');
           toaster.create({
             title: i18next.t('notification.noSpeechDetected'),
             type: 'info',
@@ -1004,7 +1006,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           sessionKeyRef.current,
           '[proactive-speak]',
         ).catch((err) => {
-          console.error('[Gateway] proactive speak failed:', err);
+          log.error('proactive speak failed:', err);
           toaster.create({
             title: i18next.t('notification.proactiveSpeakFailed'),
             type: 'error',
@@ -1037,7 +1039,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
               duration: 2000,
             });
           }).catch((err) => {
-            console.error('[Gateway] getChatHistory failed:', err);
+            log.error('getChatHistory failed:', err);
             toaster.create({
               title: i18next.t('notification.loadSessionFailed', { error: err.message }),
               type: 'error',
@@ -1074,11 +1076,11 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           const newPrefs = localStorage.getItem('ling-user-preferences');
           const newGreetingMsg = newPrefs ? `[greeting:context]${newPrefs}` : '[greeting]';
           gatewayConnector.sendChat(newSessionKey, newGreetingMsg).catch((err) => {
-            if (import.meta.env.DEV) console.error('[WebSocketHandler] New session greeting failed:', err);
+            log.debug('New session greeting failed:', err);
             setAiStateRef.current('idle');
           });
         }).catch((err) => {
-          console.error('[Gateway] resolveSession failed:', err);
+          log.error('resolveSession failed:', err);
           toaster.create({
             title: i18next.t('notification.createConversationFailed'),
             type: 'error',
@@ -1099,7 +1101,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             setHistoryListRef.current(historyList);
           }
         }).catch((err) => {
-          console.error('[Gateway] listSessions failed:', err);
+          log.error('listSessions failed:', err);
           toaster.create({
             title: i18next.t('notification.loadSessionsFailed'),
             type: 'error',
@@ -1126,7 +1128,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       case 'switch-config':
         // In Gateway mode, character switching is handled locally
         // The model info is set directly without backend involvement
-        if (import.meta.env.DEV) console.log('[Gateway] switch-config intercepted, handled locally');
+        log.debug('switch-config intercepted, handled locally');
         return;
 
       case 'fetch-configs':
@@ -1149,7 +1151,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
       default:
         // Unknown message type — log for debugging
-        if (import.meta.env.DEV) console.log('[Gateway] Unhandled sendMessage type:', msg.type);
+        log.debug('Unhandled sendMessage type:', msg.type);
         return;
     }
   }, []);
@@ -1166,7 +1168,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     }).then(() => {
       // Re-resolve session after manual reconnect
       gatewayConnector.resolveSession(sessionKeyRef.current, getAgentId()).catch((err) => {
-        console.error('[WebSocketHandler] Manual reconnect resolveSession failed:', err);
+        log.error('Manual reconnect resolveSession failed:', err);
       });
       toaster.create({
         title: i18next.t('notification.connectionRestored'),
@@ -1174,7 +1176,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         duration: 3000,
       });
     }).catch((err) => {
-      console.error('[WebSocketHandler] Manual reconnect failed:', err);
+      log.error('Manual reconnect failed:', err);
       toaster.create({
         title: i18next.t('notification.connectionFailed', { error: err.message }),
         type: 'error',

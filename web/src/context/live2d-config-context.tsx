@@ -2,6 +2,9 @@ import {
   createContext, useContext, useState, useMemo,
 } from 'react';
 import { useLocalStorage } from '@/hooks/utils/use-local-storage';
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('Live2DConfig');
 
 /**
  * Model emotion mapping interface
@@ -122,7 +125,7 @@ export function Live2DConfigProvider({ children }: { children: React.ReactNode }
 
     // Always use the scale defined in the incoming info object (from config)
     const finalScale = Number(info.kScale || 0.5) * 2;
-    if (import.meta.env.DEV) console.log("Setting model info with default scale:", finalScale);
+    log.debug('Setting model info with default scale:', finalScale);
 
     setModelInfoState({
       ...info,

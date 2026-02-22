@@ -14,6 +14,9 @@ import { useEffect, useRef } from 'react';
 import { useAiState, AiStateEnum } from '@/context/ai-state-context';
 import { useAffinity } from '@/context/affinity-context';
 import { getIdleExpression, EXPRESSION_TRANSITION } from '@/config/expression-presets';
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('Affinity');
 
 export function useAffinityIdleExpression() {
   const { aiState } = useAiState();
@@ -44,9 +47,9 @@ export function useAffinityIdleExpression() {
           const name = lappAdapter.getExpressionName(expression);
           if (name) lappAdapter.setExpression(name);
         }
-        if (import.meta.env.DEV) console.log(`[Affinity] Idle expression set to "${expression}" (level: ${level})`);
+        log.debug('Idle expression set to', expression, '(level:', level + ')');
       } catch (e) {
-        console.error('[Affinity] Failed to set idle expression:', e);
+        log.error('Failed to set idle expression:', e);
       }
     }, EXPRESSION_TRANSITION.idleOverrideDelay);
 

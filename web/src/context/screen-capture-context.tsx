@@ -1,6 +1,9 @@
 import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toaster } from "@/components/ui/toaster";
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('ScreenCapture');
 
 interface ScreenCaptureContextType {
   stream: MediaStream | null;
@@ -60,7 +63,7 @@ export function ScreenCaptureProvider({ children }: { children: ReactNode }) {
         type: 'error',
         duration: 2000,
       });
-      console.error('[ScreenCapture] Failed to start capture:', err);
+      log.error('Failed to start capture:', err);
     }
   }, [t]);
 

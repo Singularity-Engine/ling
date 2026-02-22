@@ -1,5 +1,8 @@
 import { memo, useMemo, useRef, useEffect, useState, useCallback, type CSSProperties } from 'react';
 import { audioManager } from '../../utils/audio-manager';
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('AudioViz');
 
 const BAR_COUNT = 32;
 const FFT_SIZE = 128;
@@ -100,7 +103,7 @@ export const AudioVisualizer = memo(() => {
         connectedAudioRef.current = audio;
         setActive(true);
       } catch (e) {
-        console.error('[AudioVisualizer] Failed to connect analyser:', e);
+        log.error('Failed to connect analyser:', e);
       }
     });
 

@@ -9,6 +9,9 @@ import { useState, useEffect, useCallback, memo } from 'react';
 import { apiClient } from '@/services/api-client';
 import { useUI } from '@/context/ui-context';
 import { useAuth } from '@/context/auth-context';
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('Pricing');
 
 /* ── Module-level style constants (allocated once, never GC'd) ── */
 
@@ -237,7 +240,7 @@ const PricingOverlay: React.FC = memo(() => {
         alert(data.detail || 'Failed to create checkout session');
       }
     } catch (err: unknown) {
-      console.error('Checkout error:', err);
+      log.error('Checkout error:', err);
       alert(err instanceof Error ? err.message : 'Network error');
     } finally {
       setLoading(null);
@@ -251,7 +254,7 @@ const PricingOverlay: React.FC = memo(() => {
         window.open(data.portal_url, '_blank');
       }
     } catch (err: unknown) {
-      console.error('Portal error:', err);
+      log.error('Portal error:', err);
       alert(err instanceof Error ? err.message : 'Network error');
     }
   };

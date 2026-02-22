@@ -14,6 +14,7 @@
 
 import { Subject, ReplaySubject, BehaviorSubject } from 'rxjs';
 import { BRAND_AVATAR_NAME } from '@/constants/brand';
+import { createLogger } from '@/utils/logger';
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -89,6 +90,8 @@ const HANDSHAKE_TIMEOUT_MS = 15000;
 const HEARTBEAT_TIMEOUT_MS = 90_000; // Treat connection as dead if no tick in 90s
 const HEARTBEAT_CHECK_MS = 30_000;   // Check heartbeat every 30s
 const IDLE_RETRY_MS = 60_000;        // After max retries exhausted, retry every 60s
+
+const log = createLogger('GatewayConnector');
 
 // ─── Connector ────────────────────────────────────────────────────
 
@@ -230,7 +233,7 @@ class GatewayConnector {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
     } else {
-      if (import.meta.env.DEV) console.warn('[GatewayConnector] Cannot send, WS not open');
+      log.debug('Cannot send, WS not open');
     }
   }
 
@@ -250,9 +253,9 @@ class GatewayConnector {
     } else {
       return;
     }
-    if (import.meta.env.DEV) console.log('[GatewayConnector] retryNow — network recovered, reconnecting immediately');
+    log.debug('retryNow — network recovered, reconnecting immediately');
     this.doConnect().catch((err) => {
-      console.error('[GatewayConnector] retryNow failed:', err.message);
+      log.error('retryNow failed:', err.message);
     });
   }
 
@@ -314,7 +317,7 @@ class GatewayConnector {
       ws.onopen = () => {
         // Ignore events from a superseded socket
         if (this.ws !== ws) return;
-        if (import.meta.env.DEV) console.log('[GatewayConnector] WebSocket open, waiting for challenge...');
+        log.debug('WebSocket open, waiting for challenge...');
         this.setState('HANDSHAKING');
       };
 
@@ -325,7 +328,7 @@ class GatewayConnector {
         try {
           frame = JSON.parse(event.data);
         } catch {
-          console.error('[GatewayConnector] Failed to parse message:', event.data);
+          log.error('Failed to parse message:', event.data);
           return;
         }
 
@@ -335,7 +338,7 @@ class GatewayConnector {
 
         // ── Challenge ──
         if (frame.type === 'event' && frame.event === 'connect.challenge') {
-          if (import.meta.env.DEV) console.log('[GatewayConnector] Challenge received, authenticating...');
+          log.debug('Challenge received, authenticating...');
           const connectReq: GatewayFrame = {
             type: 'req',
             id: crypto.randomUUID(),
@@ -376,7 +379,7 @@ class GatewayConnector {
           this.lastTickAt = Date.now();
           this.startHeartbeatMonitor();
           this.setState('CONNECTED');
-          if (import.meta.env.DEV) console.log(`[GatewayConnector] Connected! connId=${this.connId}`);
+          log.debug('Connected! connId=', this.connId);
           if (wasReconnecting) {
             this.reconnected$.next();
           }
@@ -391,7 +394,7 @@ class GatewayConnector {
         // ── Connect Error (auth failure) ──
         if (frame.type === 'res' && frame.ok === false && !handshakeResolved) {
           const errMsg = frame.error?.message || 'Connection rejected';
-          console.error('[GatewayConnector] Handshake failed:', errMsg);
+          log.error('Handshake failed:', errMsg);
           this.authFailed = true;
           handshakeResolved = true;
           clearTimeout(handshakeTimer);
@@ -417,7 +420,7 @@ class GatewayConnector {
           };
           this.debugCounters.agentEvents++;
           this.debugCounters.lastEvent = `${agentEvent.stream}:${JSON.stringify(agentEvent.data).slice(0, 60)}`;
-          if (import.meta.env.DEV) console.log('[GatewayConnector] AGENT EVENT:', agentEvent.stream, agentEvent.data);
+          log.debug('AGENT EVENT:', agentEvent.stream, agentEvent.data);
           this.agentEvent$.next(agentEvent);
           this.options?.onAgentEvent?.(agentEvent);
           return;
@@ -450,7 +453,7 @@ class GatewayConnector {
         // Ignore close events from superseded sockets
         if (this.ws !== ws && this.ws !== null) return;
 
-        if (import.meta.env.DEV) console.log(`[GatewayConnector] Closed: code=${event.code} reason=${event.reason}`);
+        log.debug('Closed: code=', event.code, 'reason=', event.reason);
         clearTimeout(handshakeTimer);
         this.stopHeartbeatMonitor();
         this.ws = null;
@@ -462,7 +465,7 @@ class GatewayConnector {
         }
 
         if (this.authFailed) {
-          if (import.meta.env.DEV) console.log('[GatewayConnector] Auth failed, not reconnecting');
+          log.debug('Auth failed, not reconnecting');
           this.setState('DISCONNECTED');
         } else if (this.state !== 'DISCONNECTED') {
           this.scheduleReconnect();
@@ -471,7 +474,7 @@ class GatewayConnector {
 
       ws.onerror = () => {
         if (this.ws !== ws) return;
-        console.error('[GatewayConnector] WebSocket error');
+        log.error('WebSocket error');
         this.options?.onError?.({ code: 'WS_ERROR', message: 'WebSocket connection error' });
       };
     });
@@ -515,7 +518,7 @@ class GatewayConnector {
 
   private scheduleReconnect() {
     if (this.reconnectAttempts >= RECONNECT_MAX_RETRIES) {
-      if (import.meta.env.DEV) console.log('[GatewayConnector] Max reconnect attempts reached, starting idle retry every 60s');
+      log.debug('Max reconnect attempts reached, starting idle retry every 60s');
       this.setState('DISCONNECTED');
       this.startIdleRetry();
       return;
@@ -524,7 +527,7 @@ class GatewayConnector {
     // If we were in idle-retry mode and the single probe failed, go back to
     // idle retry instead of entering the full exponential backoff sequence.
     if (this.inIdleRetry) {
-      if (import.meta.env.DEV) console.log('[GatewayConnector] Idle retry probe failed, scheduling next idle retry');
+      log.debug('Idle retry probe failed, scheduling next idle retry');
       this.setState('DISCONNECTED');
       this.startIdleRetry();
       return;
@@ -535,7 +538,7 @@ class GatewayConnector {
     // If browser reports offline, don't burn retry budget — wait for `online`
     // event (handled in websocket-handler.tsx) which calls retryNow().
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
-      if (import.meta.env.DEV) console.log('[GatewayConnector] Browser offline — preserving retry budget, waiting for network');
+      log.debug('Browser offline — preserving retry budget, waiting for network');
       return;
     }
 
@@ -548,11 +551,11 @@ class GatewayConnector {
     const delay = Math.round(jitter);
     this.reconnectAttempts++;
     this.reconnectAttempt$.next(this.reconnectAttempts);
-    if (import.meta.env.DEV) console.log(`[GatewayConnector] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${RECONNECT_MAX_RETRIES})`);
+    log.debug('Reconnecting in', delay + 'ms', `(attempt ${this.reconnectAttempts}/${RECONNECT_MAX_RETRIES})`);
 
     this.reconnectTimer = setTimeout(() => {
       this.doConnect().catch((err) => {
-        console.error('[GatewayConnector] Reconnect failed:', err.message);
+        log.error('Reconnect failed:', err.message);
       });
     }, delay);
   }
@@ -581,14 +584,14 @@ class GatewayConnector {
     // Add ±25% jitter to prevent thundering herd when multiple clients exhaust backoff simultaneously
     const jitter = IDLE_RETRY_MS * (0.75 + Math.random() * 0.5);
     const delay = Math.round(jitter);
-    if (import.meta.env.DEV) console.log(`[GatewayConnector] Idle retry scheduled in ${delay}ms`);
+    log.debug('Idle retry scheduled in', delay + 'ms');
     this.idleRetryTimer = setTimeout(() => {
       if (this.state !== 'DISCONNECTED' || this.authFailed) return;
-      if (import.meta.env.DEV) console.log('[GatewayConnector] Idle retry — attempting reconnect');
+      log.debug('Idle retry — attempting reconnect');
       // Reset to 1 (not 0) so hello-ok handler detects this as a reconnection
       this.reconnectAttempts = 1;
       this.doConnect().catch((err) => {
-        console.error('[GatewayConnector] Idle retry failed:', err.message);
+        log.error('Idle retry failed:', err.message);
         // Schedule next idle retry
         this.startIdleRetry();
       });
@@ -609,7 +612,7 @@ class GatewayConnector {
     this.heartbeatTimer = setInterval(() => {
       if (this.state !== 'CONNECTED') return;
       if (this.lastTickAt > 0 && Date.now() - this.lastTickAt > HEARTBEAT_TIMEOUT_MS) {
-        console.error(`[GatewayConnector] Heartbeat timeout — no tick in ${HEARTBEAT_TIMEOUT_MS}ms, closing`);
+        log.error('Heartbeat timeout — no tick in', HEARTBEAT_TIMEOUT_MS + 'ms, closing');
         this.ws?.close(4001, 'Heartbeat timeout');
       }
     }, HEARTBEAT_CHECK_MS);
@@ -631,7 +634,7 @@ class GatewayConnector {
         if (this.state === 'CONNECTED') {
           // Tab became visible — check if connection went stale while hidden
           if (this.lastTickAt > 0 && Date.now() - this.lastTickAt > HEARTBEAT_TIMEOUT_MS) {
-            console.error('[GatewayConnector] Stale connection detected on tab focus, reconnecting...');
+            log.error('Stale connection detected on tab focus, reconnecting...');
             this.ws?.close(4001, 'Stale after tab resume');
           }
         } else if (this.state === 'DISCONNECTED' || this.state === 'RECONNECTING') {

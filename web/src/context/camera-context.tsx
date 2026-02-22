@@ -9,6 +9,9 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toaster } from '@/components/ui/toaster';
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('Camera');
 
 /**
  * Camera configuration interface
@@ -93,7 +96,7 @@ export function CameraProvider({ children }: { children: ReactNode }) {
       }
       setIsStreaming(true);
     } catch (err) {
-      console.error('Failed to start camera:', err);
+      log.error('Failed to start camera:', err);
       toaster.create({
         title: `${t('error.failedStartCamera')}: ${err}`,
         type: 'error',
@@ -135,7 +138,7 @@ export function CameraProvider({ children }: { children: ReactNode }) {
       backgroundStreamRef.current = stream;
       setIsBackgroundStreaming(true);
     } catch (err) {
-      console.error('Failed to start background camera:', err);
+      log.error('Failed to start background camera:', err);
       toaster.create({
         title: `${t('error.failedStartBackgroundCamera')}: ${err}`,
         type: 'error',

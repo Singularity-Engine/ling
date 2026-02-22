@@ -11,6 +11,9 @@ import { SubtitleContext } from './subtitle-context';
 import { AiStateContext, AiState } from './ai-state-context';
 import { useLocalStorage } from '@/hooks/utils/use-local-storage';
 import { toaster } from '@/components/ui/toaster';
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('VAD');
 
 /**
  * VAD settings configuration interface
@@ -203,7 +206,7 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
    * Handle speech start event (initial detection)
    */
   const handleSpeechStart = useCallback(() => {
-    if (import.meta.env.DEV) console.log('Speech started - saving current state');
+    log.debug('Speech started - saving current state');
     // Save current AI state but DON'T change to listening yet
     previousAiStateRef.current = aiStateRef.current;
     isProcessingRef.current = true;
@@ -214,10 +217,10 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
    * Handle real speech start event (confirmed speech)
    */
   const handleSpeechRealStart = useCallback(() => {
-    if (import.meta.env.DEV) console.log('Real speech confirmed - checking if need to interrupt');
+    log.debug('Real speech confirmed - checking if need to interrupt');
     // Check if we need to interrupt based on the PREVIOUS state (before speech started)
     if (previousAiStateRef.current === 'thinking-speaking') {
-      if (import.meta.env.DEV) console.log('Interrupting AI speech due to user speaking');
+      log.debug('Interrupting AI speech due to user speaking');
       interruptRef.current();
     }
     // Now change to listening state
@@ -238,13 +241,13 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
    */
   const handleSpeechEnd = useCallback((audio: Float32Array) => {
     if (!isProcessingRef.current) return;
-    if (import.meta.env.DEV) console.log('Speech ended');
+    log.debug('Speech ended');
     audioTaskQueue.clearQueue();
 
     if (autoStopMicRef.current) {
       stopMic();
     } else {
-      if (import.meta.env.DEV) console.log('Auto stop mic is OFF, keeping mic active');
+      log.debug('Auto stop mic is OFF, keeping mic active');
     }
 
     setPreviousTriggeredProbability(0);
@@ -258,7 +261,7 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
    */
   const handleVADMisfire = useCallback(() => {
     if (!isProcessingRef.current) return;
-    if (import.meta.env.DEV) console.log('VAD misfire detected');
+    log.debug('VAD misfire detected');
     setPreviousTriggeredProbability(0);
     isProcessingRef.current = false;
 
@@ -311,15 +314,15 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
   const startMic = useCallback(async () => {
     try {
       if (!vadRef.current) {
-        if (import.meta.env.DEV) console.log('Initializing VAD');
+        log.debug('Initializing VAD');
         await initVAD();
       } else {
-        if (import.meta.env.DEV) console.log('Starting VAD');
+        log.debug('Starting VAD');
         vadRef.current.start();
       }
       setMicOn(true);
     } catch (error) {
-      console.error('Failed to start VAD:', error);
+      log.error('Failed to start VAD:', error);
       toaster.create({
         title: t('error.failedStartVAD'),
         type: 'error',
@@ -332,15 +335,15 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
    * Stop microphone and VAD processing
    */
   const stopMic = useCallback(() => {
-    if (import.meta.env.DEV) console.log('Stopping VAD');
+    log.debug('Stopping VAD');
     if (vadRef.current) {
       vadRef.current.pause();
       vadRef.current.destroy();
       vadRef.current = null;
-      if (import.meta.env.DEV) console.log('VAD stopped and destroyed successfully');
+      log.debug('VAD stopped and destroyed successfully');
       setPreviousTriggeredProbability(0);
     } else {
-      if (import.meta.env.DEV) console.log('VAD instance not found');
+      log.debug('VAD instance not found');
     }
     setMicOn(false);
     isProcessingRef.current = false;

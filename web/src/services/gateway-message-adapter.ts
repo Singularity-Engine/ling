@@ -12,6 +12,9 @@
 import { Subject } from 'rxjs';
 import type { GatewayAgentEvent, GatewayFrame } from './gateway-connector';
 import type { MessageEvent } from './websocket-service';
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('GatewayAdapter');
 
 // Extended MessageEvent with Gateway-specific fields (affinity, emotion)
 export interface GatewayMessageEvent extends MessageEvent {
@@ -51,7 +54,7 @@ class GatewayMessageAdapter {
         this.handleLifecycleEvent(event);
         break;
       default:
-        if (import.meta.env.DEV) console.warn('[GatewayAdapter] Unknown stream:', event.stream);
+        log.debug('Unknown stream:', event.stream);
     }
   }
 
@@ -99,7 +102,7 @@ class GatewayMessageAdapter {
         break;
 
       default:
-        if (import.meta.env.DEV) console.log('[GatewayAdapter] Unhandled event:', event);
+        log.debug('Unhandled event:', event);
     }
   }
 
@@ -137,7 +140,7 @@ class GatewayMessageAdapter {
 
     // Skip duplicate or out-of-order seq
     if (event.seq <= run.lastSeq) {
-      if (import.meta.env.DEV) console.warn('[GatewayAdapter] Skipping duplicate/out-of-order seq', event.seq, '<=', run.lastSeq);
+      log.debug('Skipping duplicate/out-of-order seq', event.seq, '<=', run.lastSeq);
       return;
     }
 
@@ -269,7 +272,7 @@ class GatewayMessageAdapter {
       }
 
       default:
-        if (import.meta.env.DEV) console.warn('[GatewayAdapter] Unknown lifecycle phase:', phase);
+        log.debug('Unknown lifecycle phase:', phase);
     }
   }
 
