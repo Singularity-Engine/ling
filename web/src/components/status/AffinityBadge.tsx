@@ -174,7 +174,7 @@ export const AffinityBadge = memo(() => {
               marginTop: "8px",
               padding: "8px 14px",
               background: `linear-gradient(135deg, ${config.color}dd, ${config.color}99)`,
-              borderRadius: "16px",
+              borderRadius: "20px",
               boxShadow: `0 4px 20px ${config.color}44`,
               whiteSpace: "nowrap",
               animation: "popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",

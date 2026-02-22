@@ -89,7 +89,7 @@ export const AffinityBar = memo(() => {
               marginBottom: "8px",
               background: `linear-gradient(135deg, ${config.color}dd, ${config.color}99)`,
               padding: "8px 20px",
-              borderRadius: "24px",
+              borderRadius: "20px",
               animation: "affinitySlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
               boxShadow: `0 4px 20px ${config.color}44`,
               whiteSpace: "nowrap",
