@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { useEffect, useMemo } from "react";
+import { memo, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Stack, createListCollection } from "@chakra-ui/react";
 import { useBgUrl } from "@/context/bgurl-context";
@@ -58,7 +58,7 @@ const useCollections = (t: (key: string) => string) => {
   };
 };
 
-function General({ onSave, onCancel }: GeneralProps): JSX.Element {
+const General = memo(function General({ onSave, onCancel }: GeneralProps): JSX.Element {
   const { t, i18n } = useTranslation();
   const bgUrlContext = useBgUrl();
   const { confName, setConfName } = useConfig();
@@ -183,6 +183,6 @@ function General({ onSave, onCancel }: GeneralProps): JSX.Element {
       />
     </Stack>
   );
-}
+});
 
 export default General;

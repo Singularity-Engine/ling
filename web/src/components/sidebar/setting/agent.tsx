@@ -1,5 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { Stack } from '@chakra-ui/react';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { settingStyles } from './setting-styles';
 import { useAgentSettings } from '@/hooks/sidebar/setting/use-agent-settings';
@@ -10,7 +11,7 @@ interface AgentProps {
   onCancel?: (callback: () => void) => () => void
 }
 
-function Agent({ onSave, onCancel }: AgentProps): JSX.Element {
+const Agent = memo(function Agent({ onSave, onCancel }: AgentProps): JSX.Element {
   const { t } = useTranslation();
   const {
     settings,
@@ -45,6 +46,6 @@ function Agent({ onSave, onCancel }: AgentProps): JSX.Element {
       />
     </Stack>
   );
-}
+});
 
 export default Agent;

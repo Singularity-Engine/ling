@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { Box, Text } from "@chakra-ui/react";
 import { FiMonitor } from "react-icons/fi";
+import { memo } from "react";
 import { useTranslation } from "react-i18next";
 import { Tooltip } from "@/components/ui/tooltip";
 import { sidebarStyles } from "./sidebar-styles";
@@ -62,7 +63,7 @@ function VideoStream({
   );
 }
 
-function ScreenPanel(): JSX.Element {
+const ScreenPanel = memo(function ScreenPanel(): JSX.Element {
   const { t } = useTranslation();
   const {
     videoRef,
@@ -118,6 +119,6 @@ function ScreenPanel(): JSX.Element {
       </Tooltip>
     </Box>
   );
-}
+});
 
 export default ScreenPanel;

@@ -128,7 +128,7 @@ const EmptyState = memo((): JSX.Element => {
 EmptyState.displayName = 'EmptyState';
 
 // Main component
-function HistoryDrawer({ children }: HistoryDrawerProps): JSX.Element {
+const HistoryDrawer = memo(function HistoryDrawer({ children }: HistoryDrawerProps): JSX.Element {
   const { t } = useTranslation();
   const {
     open,
@@ -188,6 +188,6 @@ function HistoryDrawer({ children }: HistoryDrawerProps): JSX.Element {
       </DrawerContent>
     </DrawerRoot>
   );
-}
+});
 
 export default HistoryDrawer;

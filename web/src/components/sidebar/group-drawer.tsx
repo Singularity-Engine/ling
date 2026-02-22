@@ -1,5 +1,6 @@
 import { Box, Button, IconButton, Input, Text } from "@chakra-ui/react";
 import { FiX } from "react-icons/fi";
+import { memo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   DrawerRoot,
@@ -22,7 +23,7 @@ interface GroupDrawerProps {
   children: React.ReactNode;
 }
 
-function GroupDrawer({ children }: GroupDrawerProps) {
+const GroupDrawer = memo(function GroupDrawer({ children }: GroupDrawerProps) {
   const { t } = useTranslation();
   const { selfUid, sortedGroupMembers, isOwner } = useGroup();
   const {
@@ -133,6 +134,6 @@ function GroupDrawer({ children }: GroupDrawerProps) {
       </DrawerContent>
     </DrawerRoot>
   );
-}
+});
 
 export default GroupDrawer;

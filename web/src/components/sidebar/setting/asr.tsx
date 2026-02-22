@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable react/require-default-props */
 import { Stack } from '@chakra-ui/react';
-import { useEffect } from 'react';
+import { memo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { settingStyles } from './setting-styles';
 import { useASRSettings } from '@/hooks/sidebar/setting/use-asr-settings';
@@ -12,7 +12,7 @@ interface ASRProps {
   onCancel?: (callback: () => void) => () => void
 }
 
-function ASR({ onSave, onCancel }: ASRProps): JSX.Element {
+const ASR = memo(function ASR({ onSave, onCancel }: ASRProps): JSX.Element {
   const { t } = useTranslation();
   const {
     localSettings,
@@ -87,6 +87,6 @@ function ASR({ onSave, onCancel }: ASRProps): JSX.Element {
       />
     </Stack>
   );
-}
+});
 
 export default ASR;
