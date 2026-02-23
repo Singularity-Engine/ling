@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
+import { Virtuoso } from "react-virtuoso";
 import { ChatBubble } from "./ChatBubble";
 import { ThinkingBubble } from "./ThinkingBubble";
 import { TimeSeparator, shouldShowSeparator } from "./TimeSeparator";
@@ -471,7 +471,6 @@ export const ChatArea = memo(() => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const rafScrollRef = useRef(0);
-  const virtuosoRef = useRef<VirtuosoHandle>(null);
   // Virtuoso needs a mounted DOM element as customScrollParent.
   // useLayoutEffect sets it before paint so the second render includes Virtuoso.
   const [scrollParent, setScrollParent] = useState<HTMLElement | null>(null);
@@ -801,7 +800,6 @@ export const ChatArea = memo(() => {
       )}
       {scrollParent && (
         <Virtuoso
-          ref={virtuosoRef}
           customScrollParent={scrollParent}
           data={visibleMessages}
           defaultItemHeight={64}

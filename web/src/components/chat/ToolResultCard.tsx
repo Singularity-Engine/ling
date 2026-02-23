@@ -161,11 +161,13 @@ interface ToolResultCardProps {
   status: string;
 }
 
+const CODE_BLOCK_RE = /```(\w*)\n?([\s\S]*?)```/g;
+
 function extractCodeBlocks(text: string): { lang: string; code: string }[] {
-  const regex = /```(\w*)\n?([\s\S]*?)```/g;
+  CODE_BLOCK_RE.lastIndex = 0; // reset stateful regex
   const blocks: { lang: string; code: string }[] = [];
   let match;
-  while ((match = regex.exec(text)) !== null) {
+  while ((match = CODE_BLOCK_RE.exec(text)) !== null) {
     blocks.push({ lang: match[1] || "text", code: match[2].trim() });
   }
   return blocks;

@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useCallback, useRef, useEffect, useReducer, type ReactNode, type CSSProperties } from "react";
+import { memo, useMemo, useState, useCallback, useRef, useEffect, type ReactNode, type CSSProperties } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlightLite from "@/utils/rehype-highlight-lite";
@@ -298,28 +298,48 @@ function formatTime(ts: string): string {
   }
 }
 
-/** Self-updating relative timestamp — adjusts refresh rate based on message age.
- *  Uses a self-scheduling timer chain with [timestamp] as the only effect dep,
- *  avoiding React effect cleanup/setup overhead on every tick (~15-20 visible
- *  instances each ticking every 15-60s). */
+// ── Shared tick for relative timestamps ──
+// All mounted RelativeTime instances subscribe to a single 15-second interval
+// instead of each maintaining its own setTimeout chain. Benefits:
+//  1. O(1) timers instead of O(n) per visible message
+//  2. React 18 batches all setState calls in one render pass
+//  3. setState bails out when the formatted string hasn't changed (most ticks)
+const _tickListeners = new Set<() => void>();
+let _tickTimer: ReturnType<typeof setInterval> | null = null;
+
+function subscribeTimeTick(fn: () => void): () => void {
+  _tickListeners.add(fn);
+  if (!_tickTimer) {
+    _tickTimer = setInterval(() => {
+      _tickListeners.forEach(cb => cb());
+    }, 15_000);
+  }
+  return () => {
+    _tickListeners.delete(fn);
+    if (_tickListeners.size === 0 && _tickTimer) {
+      clearInterval(_tickTimer);
+      _tickTimer = null;
+    }
+  };
+}
+
+/** Self-updating relative timestamp backed by a shared 15s tick.
+ *  Uses useState(displayString) so React skips re-render when the
+ *  formatted output hasn't changed — e.g. "3 min ago" stays stable
+ *  for ~45s between "2 min ago" and "4 min ago" transitions. */
 const RelativeTime = memo(({ timestamp, style }: { timestamp: string; style: CSSProperties }) => {
-  const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const [display, setDisplay] = useState(() => formatTime(timestamp));
 
   useEffect(() => {
-    const schedule = () => {
-      const age = Date.now() - new Date(timestamp).getTime();
-      if (age > 6 * 3_600_000) return;           // absolute format, stop updating
-      const delay = age < 60_000 ? 15_000         // "just now" → every 15s
-                  : age < 3_600_000 ? 60_000      // "X min ago" → every 1 min
-                  : 300_000;                      // "Xh ago" → every 5 min
-      timerRef.current = setTimeout(() => { forceUpdate(); schedule(); }, delay);
-    };
-    schedule();
-    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+    setDisplay(formatTime(timestamp));
+    // Messages older than 6h show absolute time — no updates needed
+    if (Date.now() - new Date(timestamp).getTime() > 6 * 3_600_000) return;
+    return subscribeTimeTick(() => {
+      setDisplay(formatTime(timestamp));
+    });
   }, [timestamp]);
 
-  return <span className="chat-bubble-ts" style={style}>{formatTime(timestamp)}</span>;
+  return <span className="chat-bubble-ts" style={style}>{display}</span>;
 });
 RelativeTime.displayName = "RelativeTime";
 
