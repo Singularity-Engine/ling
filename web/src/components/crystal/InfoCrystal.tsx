@@ -172,6 +172,12 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
     },
     [],
   );
+  const onKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpanded(p => !p); }
+  }, []);
+  const onOverlayKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Escape") setExpanded(false);
+  }, []);
   const onEnter = useCallback(() => setHovered(true), []);
   const onLeave = useCallback(() => { setHovered(false); setPressed(false); }, []);
   const onDown = useCallback(() => setPressed(true), []);
@@ -197,15 +203,24 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
     return (
       <>
         {/* Overlay backdrop */}
-        <div style={S_OVERLAY} onClick={handleOverlayClick} />
+        {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
+        <div style={S_OVERLAY} onClick={handleOverlayClick} onKeyDown={onOverlayKeyDown} />
         {/* Expanded card */}
-        <div style={getExpandCardStyle(color, theme.glow)} onClick={handleClick}>
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={tool.name}
+          style={getExpandCardStyle(color, theme.glow)}
+          onClick={handleClick}
+          onKeyDown={onKeyDown}
+          tabIndex={0}
+        >
           {/* Header */}
           <div style={S_EXP_HEADER}>
-            <span style={S_EXP_ICON}>{icon}</span>
+            <span style={S_EXP_ICON} aria-hidden="true">{icon}</span>
             <span style={S_EXP_NAME}>{tool.name}</span>
-            <span style={S_EXP_STATUS}>{statusIcon}</span>
-            <span style={S_EXP_CLOSE}>✕</span>
+            <span style={S_EXP_STATUS} aria-label={tool.status}>{statusIcon}</span>
+            <span style={S_EXP_CLOSE} role="button" tabIndex={0} aria-label="Close">✕</span>
           </div>
           {/* Full content */}
           <span style={S_EXP_CONTENT}>
@@ -254,8 +269,13 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
     <>
       <div
         className="ling-crystal-card"
+        role="button"
+        tabIndex={0}
+        aria-label={`${tool.name} — ${tool.status}`}
+        aria-expanded={false}
         style={cardStyle}
         onClick={handleClick}
+        onKeyDown={onKeyDown}
         onMouseEnter={onEnter}
         onMouseLeave={onLeave}
         onMouseDown={onDown}
@@ -269,9 +289,9 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
 
         {/* Header */}
         <div style={S_CARD_HEADER}>
-          <span style={S_CARD_ICON}>{icon}</span>
+          <span style={S_CARD_ICON} aria-hidden="true">{icon}</span>
           <span style={getCardNameStyle(color)}>{tool.name}</span>
-          <span style={S_CARD_STATUS}>{statusIcon}</span>
+          <span style={S_CARD_STATUS} aria-label={tool.status}>{statusIcon}</span>
         </div>
 
         {/* Body - max 3 lines */}
