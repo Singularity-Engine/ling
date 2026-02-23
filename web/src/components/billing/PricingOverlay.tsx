@@ -286,17 +286,6 @@ const PricingOverlay: React.FC = memo(() => {
   const [closing, setClosing] = useState(false);
   const closingTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  // ESC to close
-  useEffect(() => {
-    if (!pricingOpen) return;
-    setClosing(false);
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') handleClose();
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [pricingOpen]); // handleClose is stable via ref below
-
   // Clean up timer on unmount
   useEffect(() => () => { clearTimeout(closingTimer.current); }, []);
 
@@ -310,6 +299,21 @@ const PricingOverlay: React.FC = memo(() => {
       setPricingOpen(false);
     }, EXIT_MS);
   }, [setPricingOpen, closing]);
+
+  // Keep a ref so the ESC listener always calls the latest handleClose
+  const handleCloseRef = useRef(handleClose);
+  handleCloseRef.current = handleClose;
+
+  // ESC to close
+  useEffect(() => {
+    if (!pricingOpen) return;
+    setClosing(false);
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleCloseRef.current();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [pricingOpen]);
 
   const handleOverlayClick = useCallback(
     (e: React.MouseEvent) => { if (e.target === e.currentTarget) handleClose(); },
