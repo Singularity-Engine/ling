@@ -282,12 +282,14 @@ class GatewayMessageAdapter {
 
   // ── Helpers ────────────────────────────────────────────────────
 
-  private emit(partial: Partial<GatewayMessageEvent> & { type: string }) {
-    // Direct property assignment avoids the intermediate defaults object +
-    // spread that previously ran on every streaming delta (~30fps).
-    // Timestamp is only created when the caller provides one (tool events).
-    (partial as GatewayMessageEvent).content ??= '';
-    this.message$.next(partial as GatewayMessageEvent);
+  private emit(fields: Partial<GatewayMessageEvent> & { type: string }) {
+    // In-place defaults avoid an intermediate spread object on every
+    // streaming delta (~30fps). Only `content` needs a default; the
+    // remaining required MessageEvent fields (`tool_id`, `tool_name`,
+    // `name`, `status`) are typed as `any` and accept `undefined`.
+    const event = fields as GatewayMessageEvent;
+    event.content ??= '';
+    this.message$.next(event);
   }
 
   /**

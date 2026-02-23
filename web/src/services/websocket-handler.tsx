@@ -943,6 +943,8 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
               pendingNewChatRef.current = false;
               setAiStateRef.current('idle');
             });
+          }).catch((err) => {
+            log.error('checkBilling failed:', err);
           });
         }
         return;
@@ -998,6 +1000,8 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
               pendingNewChatRef.current = false;
               setAiStateRef.current('idle');
             });
+          }).catch((err) => {
+            log.error('checkBilling failed:', err);
           });
         } else {
           log.debug('No transcript available from speech recognition');

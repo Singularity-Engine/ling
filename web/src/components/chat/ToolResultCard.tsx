@@ -1,4 +1,4 @@
-import { memo, useState, useMemo, useCallback, type CSSProperties } from "react";
+import { memo, useState, useMemo, useCallback, useRef, useEffect, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 
 const COLLAPSE_CHAR_THRESHOLD = 200;
@@ -170,6 +170,9 @@ const CodeBlock = memo(({ lang, code, defaultCollapsed }: { lang: string; code: 
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => () => clearTimeout(copyTimerRef.current), []);
 
   const lines = code.split("\n");
   const totalLines = lines.length;
@@ -177,9 +180,11 @@ const CodeBlock = memo(({ lang, code, defaultCollapsed }: { lang: string; code: 
   const displayCode = collapsed && isLong ? lines.slice(0, CODE_PREVIEW_LINES).join("\n") : code;
 
   const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    navigator.clipboard.writeText(code).then(() => {
+      setCopied(true);
+      clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
+    });
   }, [code]);
 
   return (

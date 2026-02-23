@@ -50,7 +50,7 @@ export function useIpcHandlers() {
 
   // Handle toggle force ignore mouse from menu
   const toggleForceIgnoreMouseHandler = useCallback(() => {
-    (window.api as any).toggleForceIgnoreMouse();
+    window.api?.toggleForceIgnoreMouse();
   }, []);
 
   useEffect(() => {
