@@ -604,16 +604,16 @@ body {
 
 /* Language switcher option buttons */
 .ling-lang-option:not([aria-selected="true"]):hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.85);
+  background: var(--ling-surface-hover);
+  color: var(--ling-text-secondary);
 }
 .ling-lang-option:focus-visible {
-  outline: 2px solid rgba(139, 92, 246, 0.6);
+  outline: 2px solid var(--ling-purple-60);
   outline-offset: -2px;
 }
 [data-theme="light"] .ling-lang-option:not([aria-selected="true"]):hover {
-  background: rgba(139, 92, 246, 0.1);
-  color: rgba(0, 0, 0, 0.85);
+  background: var(--ling-purple-08);
+  color: var(--ling-text-primary);
 }
 
 /* Live2D 点击粒子 */

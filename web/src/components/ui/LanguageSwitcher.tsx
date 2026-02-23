@@ -16,9 +16,9 @@ const S_TRIGGER: CSSProperties = {
   gap: "6px",
   padding: "6px 12px",
   borderRadius: "8px",
-  border: "1px solid rgba(139, 92, 246, 0.3)",
+  border: "1px solid var(--ling-purple-30)",
   background: "transparent",
-  color: "rgba(255, 255, 255, 0.6)",
+  color: "var(--ling-btn-ghost-color)",
   fontSize: "12px",
   fontWeight: 600,
   cursor: "pointer",
@@ -27,8 +27,8 @@ const S_TRIGGER: CSSProperties = {
 
 const S_TRIGGER_OPEN: CSSProperties = {
   ...S_TRIGGER,
-  background: "rgba(139, 92, 246, 0.15)",
-  color: "#fff",
+  background: "var(--ling-purple-15)",
+  color: "var(--ling-text-primary)",
 };
 
 const S_DROPDOWN: CSSProperties = {
@@ -41,9 +41,9 @@ const S_DROPDOWN: CSSProperties = {
   gap: "4px",
   padding: "8px",
   borderRadius: "12px",
-  background: "rgba(10, 0, 21, 0.95)",
-  border: "1px solid rgba(139, 92, 246, 0.3)",
-  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px rgba(139, 92, 246, 0.1)",
+  background: "var(--ling-modal-bg)",
+  border: "1px solid var(--ling-modal-border)",
+  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px var(--ling-purple-08)",
   zIndex: 10,
   minWidth: "220px",
   animation: "overlayFadeIn 0.15s ease-out",
@@ -54,7 +54,7 @@ const S_OPTION_BASE: CSSProperties = {
   borderRadius: "8px",
   border: "none",
   background: "transparent",
-  color: "rgba(255, 255, 255, 0.6)",
+  color: "var(--ling-btn-ghost-color)",
   fontSize: "13px",
   fontWeight: 500,
   cursor: "pointer",
@@ -65,8 +65,8 @@ const S_OPTION_BASE: CSSProperties = {
 
 const S_OPTION_ACTIVE: CSSProperties = {
   ...S_OPTION_BASE,
-  background: "rgba(139, 92, 246, 0.3)",
-  color: "#fff",
+  background: "var(--ling-purple-30)",
+  color: "var(--ling-text-primary)",
 };
 
 const ICON_GLOBE = (
