@@ -3,60 +3,7 @@ import { useToolState } from '../../context/tool-state-context';
 import { useAiStateRead } from '../../context/ai-state-context';
 import { useAffinityState } from '../../context/affinity-context';
 import { AFFINITY_AMBIENT_TINTS, DEFAULT_LEVEL, type AffinityAmbientTint } from '../../config/affinity-palette';
-import { createStyleInjector } from '@/utils/style-injection';
-
-// ── Deferred style injection (avoids module-level side effects) ──
-const ensureBgReactorStyles = createStyleInjector({
-  id: 'bg-reactor-keyframes',
-  css: `
-    @keyframes bgThinkingPulse {
-      0%, 100% { opacity: calc(0.5 * var(--bg-glow-boost, 1)); }
-      50% { opacity: calc(0.7 * var(--bg-glow-boost, 1)); }
-    }
-    @keyframes bgWorkingFlow {
-      0%, 100% { opacity: calc(0.55 * var(--bg-glow-boost, 1)); transform: scale(1); }
-      50% { opacity: calc(0.7 * var(--bg-glow-boost, 1)); transform: scale(1.02); }
-    }
-    @keyframes bgAiThinkingBreathe {
-      0%, 100% { opacity: calc(0.35 * var(--bg-glow-boost, 1)); transform: scale(1); }
-      50% { opacity: calc(0.5 * var(--bg-glow-boost, 1)); transform: scale(1.01); }
-    }
-    @keyframes bgWorkingSpin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    @keyframes bgPresentingRays {
-      0% { opacity: 0; transform: scale(0.8); }
-      30% { opacity: 0.6; transform: scale(1.05); }
-      100% { opacity: 0.3; transform: scale(1.2); }
-    }
-    @keyframes completionBloom {
-      0% { opacity: 0; transform: scale(0.5); }
-      20% { opacity: 0.8; transform: scale(1); }
-      100% { opacity: 0; transform: scale(1.5); }
-    }
-    @keyframes completionFlash {
-      0% { opacity: 0; }
-      15% { opacity: 0.8; }
-      100% { opacity: 0; }
-    }
-    @keyframes bgAffinityBreathe {
-      0%, 100% { opacity: var(--affinity-idle-opacity, 0.1); }
-      50% { opacity: calc(var(--affinity-idle-opacity, 0.1) * var(--affinity-breathe-amp, 1.6)); }
-    }
-    @keyframes bgGainPulse {
-      0% { opacity: 0; transform: scale(0.85); }
-      25% { opacity: 0.4; transform: scale(1); }
-      100% { opacity: 0; transform: scale(1.08); }
-    }
-    @keyframes bgLevelBloom {
-      0% { opacity: 0; transform: scale(0.6); }
-      20% { opacity: 0.65; transform: scale(1); }
-      55% { opacity: 0.3; transform: scale(1.15); }
-      100% { opacity: 0; transform: scale(1.3); }
-    }
-  `,
-});
+// Keyframes moved to static index.css — no runtime injection needed.
 
 // Stage-specific colors: thinking=blue, working=cyan, presenting=gold, ai-thinking=purple
 const PHASE_COLORS = {
@@ -104,7 +51,6 @@ const LEVEL_BLOOM_BASE: CSSProperties = {
 };
 
 export const BackgroundReactor = memo(() => {
-  useEffect(ensureBgReactorStyles, []);
   const { currentPhase } = useToolState();
   const { isThinkingSpeaking } = useAiStateRead();
   const { level, pointGains, expressionIntensity } = useAffinityState();

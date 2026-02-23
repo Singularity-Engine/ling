@@ -3,29 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAffinityState } from "@/context/affinity-context";
 import { AFFINITY_LEVELS, DEFAULT_LEVEL } from "@/config/affinity-palette";
 import { LEVELS } from "@/hooks/use-affinity-engine";
-import { createStyleInjector } from "@/utils/style-injection";
-
-// ── Deferred style injection (avoids module-level side effects) ──
-const ensureBadgeStyles = createStyleInjector({
-  id: "affinity-badge-keyframes",
-  css: `
-    @keyframes heartbeat {
-      0%, 100% { transform: scale(1); }
-      14% { transform: scale(1.1); }
-      28% { transform: scale(1); }
-      42% { transform: scale(1.08); }
-      70% { transform: scale(1); }
-    }
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes popIn {
-      from { opacity: 0; transform: scale(0.8) translateY(-4px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-  `,
-});
+// Keyframes moved to static index.css — no runtime injection needed.
 
 // ── Pre-allocated style constants ──
 const S_WRAPPER: CSSProperties = { position: "relative" };

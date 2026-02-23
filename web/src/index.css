@@ -860,6 +860,101 @@ canvas {
 @keyframes toolPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 @keyframes toolStatusPop { 0% { transform: scale(0.6); opacity: 0; } 60% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
 
+/* === Eagerly-loaded component keyframes ===
+ * Moved from runtime createStyleInjector to static CSS (same pattern
+ * as the chat pipeline migration above). Eliminates 5 useEffect hooks
+ * and ~3KB of JS-embedded CSS strings from the initial bundle. */
+
+/* ── BackgroundReactor: AI activity glow & affinity ambient ── */
+@keyframes bgThinkingPulse {
+  0%, 100% { opacity: calc(0.5 * var(--bg-glow-boost, 1)); }
+  50% { opacity: calc(0.7 * var(--bg-glow-boost, 1)); }
+}
+@keyframes bgWorkingFlow {
+  0%, 100% { opacity: calc(0.55 * var(--bg-glow-boost, 1)); transform: scale(1); }
+  50% { opacity: calc(0.7 * var(--bg-glow-boost, 1)); transform: scale(1.02); }
+}
+@keyframes bgAiThinkingBreathe {
+  0%, 100% { opacity: calc(0.35 * var(--bg-glow-boost, 1)); transform: scale(1); }
+  50% { opacity: calc(0.5 * var(--bg-glow-boost, 1)); transform: scale(1.01); }
+}
+@keyframes bgWorkingSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes bgPresentingRays {
+  0% { opacity: 0; transform: scale(0.8); }
+  30% { opacity: 0.6; transform: scale(1.05); }
+  100% { opacity: 0.3; transform: scale(1.2); }
+}
+@keyframes completionBloom {
+  0% { opacity: 0; transform: scale(0.5); }
+  20% { opacity: 0.8; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+@keyframes completionFlash {
+  0% { opacity: 0; }
+  15% { opacity: 0.8; }
+  100% { opacity: 0; }
+}
+@keyframes bgAffinityBreathe {
+  0%, 100% { opacity: var(--affinity-idle-opacity, 0.1); }
+  50% { opacity: calc(var(--affinity-idle-opacity, 0.1) * var(--affinity-breathe-amp, 1.6)); }
+}
+@keyframes bgGainPulse {
+  0% { opacity: 0; transform: scale(0.85); }
+  25% { opacity: 0.4; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.08); }
+}
+@keyframes bgLevelBloom {
+  0% { opacity: 0; transform: scale(0.6); }
+  20% { opacity: 0.65; transform: scale(1); }
+  55% { opacity: 0.3; transform: scale(1.15); }
+  100% { opacity: 0; transform: scale(1.3); }
+}
+
+/* ── AffinityBadge: heart beat & panel animations ── */
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  14% { transform: scale(1.1); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.08); }
+  70% { transform: scale(1); }
+}
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.8) translateY(-4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Constellation: star field animations ── */
+@keyframes constellationPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(139,92,246,0.3), 0 0 2px rgba(139,92,246,0.15); }
+  50% { box-shadow: 0 0 16px rgba(139,92,246,0.5), 0 0 4px rgba(139,92,246,0.3); }
+}
+@keyframes constellationBirth {
+  0% { transform: scale(0); opacity: 0; filter: brightness(3); }
+  50% { transform: scale(1.3); opacity: 1; filter: brightness(2); }
+  100% { transform: scale(1); opacity: 1; filter: brightness(1); }
+}
+@keyframes constellationFlash {
+  0% { box-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(139,92,246,0.6); transform: scale(1.15); }
+  100% { box-shadow: 0 0 8px rgba(139,92,246,0.3); transform: scale(1); }
+}
+
+/* ── NetworkStatusBanner: slide in/out ── */
+@keyframes netBannerSlideDown {
+  from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@keyframes netBannerFadeOut {
+  0%, 70% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100%    { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+}
+
+/* ── ExperimentBar: link hover ── */
+.experiment-bar-link:hover { opacity: 1 !important; }
+
 /* === 主题 color-scheme === */
 :root {
   color-scheme: dark;
