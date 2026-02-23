@@ -9,7 +9,7 @@ import { useMediaCapture } from '@/hooks/utils/use-media-capture';
 export function useTextInput() {
   const [inputText, setInputText] = useState('');
   const [isComposing, setIsComposing] = useState(false);
-  const wsContext = useWebSocket();
+  const wsContext = useWebSocketActions();
   const { aiState } = useAiStateRead();
   const { interrupt } = useInterrupt();
   const { appendHumanMessage } = useChatMessages();

@@ -1,6 +1,6 @@
 import { memo, useState, useRef, useCallback, useEffect, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
-import { useWebSocketActions } from "@/context/websocket-context";
+import { useWebSocketState, useWebSocketActions } from "@/context/websocket-context";
 import { useChatMessages } from "@/context/chat-history-context";
 import { useAiStateRead } from "@/context/ai-state-context";
 import { useInterrupt } from "@/components/canvas/live2d";
@@ -167,7 +167,8 @@ export const InputBar = memo(() => {
   // Prevents premature isSending reset when isAiBusy is true at send time.
   const sentWhileBusyRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const wsContext = useWebSocket();
+  const { wsState } = useWebSocketState();
+  const { sendMessage } = useWebSocketActions();
   const { appendHumanMessage, popLastHumanMessage } = useChatMessages();
   const { aiState } = useAiStateRead();
   const { interrupt } = useInterrupt();
@@ -222,7 +223,7 @@ export const InputBar = memo(() => {
     return () => window.removeEventListener('send-failed', handler);
   }, [popLastHumanMessage]);
 
-  const isConnected = wsContext?.wsState === "OPEN";
+  const isConnected = wsState === "OPEN";
 
   // Auto-focus on mount and reconnect (skip touch devices to avoid keyboard popup)
   useEffect(() => {
@@ -253,7 +254,7 @@ export const InputBar = memo(() => {
     isSendingRef.current = true;
     setIsSending(true);
     appendHumanMessage(text);
-    wsContext.sendMessage({
+    sendMessage({
       type: "text-input",
       text: text,
       images: [],
@@ -265,7 +266,7 @@ export const InputBar = memo(() => {
       textareaRef.current.focus();
     }
     // isSending reset is driven by aiState effect + send-failed listener
-  }, [inputText, wsContext, aiState, interrupt, appendHumanMessage]);
+  }, [inputText, sendMessage, aiState, interrupt, appendHumanMessage]);
 
   // Reset isSending when AI starts processing, connection drops, or safety timeout.
   // Handles the interrupt-then-send case: if AI was already busy when we sent,

@@ -15,7 +15,7 @@ export const useHistoryDrawer = () => {
     setHistoryList,
     updateHistoryList,
   } = useHistoryList();
-  const { sendMessage } = useWebSocket();
+  const { sendMessage } = useWebSocketActions();
 
   // Refs for values that change frequently — lets callbacks stay stable
   const messagesRef = useRef<LegacyMessage[]>(messages);

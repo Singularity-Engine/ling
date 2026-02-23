@@ -47,7 +47,7 @@ export const MessageContextMenu = memo(function MessageContextMenu({ message, po
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const { sendMessage } = useWebSocket();
+  const { sendMessage } = useWebSocketActions();
   const { messages } = useChatMessages();
 
   // Inject keyframe styles on first render
