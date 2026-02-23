@@ -124,13 +124,13 @@ const S_ROOT: CSSProperties = {
   position: "relative", height: "100dvh", width: "100vw",
   background: "#0a0015", overflow: "hidden",
 };
-const S_LAYER_STARFIELD: CSSProperties = { position: "absolute", inset: 0, zIndex: -1 };
-const S_LAYER_LIVE2D: CSSProperties = { position: "absolute", inset: 0, zIndex: 0 };
-const S_LAYER_EFFECTS: CSSProperties = { position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none", overflow: "hidden" };
+const S_LAYER_STARFIELD: CSSProperties = { position: "absolute", inset: 0, zIndex: -1, contain: "strict" };
+const S_LAYER_LIVE2D: CSSProperties = { position: "absolute", inset: 0, zIndex: 0, contain: "strict" };
+const S_LAYER_EFFECTS: CSSProperties = { position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none", overflow: "hidden", contain: "strict" };
 
 const S_GROUND_GRADIENT: CSSProperties = {
   position: "absolute", bottom: 0, left: 0, right: 0,
-  height: "44dvh", zIndex: 22, pointerEvents: "none",
+  height: "44dvh", zIndex: 22, pointerEvents: "none", contain: "strict",
   background: "linear-gradient(to bottom, transparent 0%, rgba(10,0,21,0.02) 12%, rgba(10,0,21,0.07) 24%, rgba(10,0,21,0.16) 36%, rgba(10,0,21,0.28) 48%, rgba(10,0,21,0.42) 60%, rgba(10,0,21,0.56) 72%, rgba(10,0,21,0.68) 84%, rgba(10,0,21,0.78) 94%, rgba(10,0,21,0.82) 100%)",
 };
 
