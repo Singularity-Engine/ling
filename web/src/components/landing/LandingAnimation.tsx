@@ -183,6 +183,8 @@ export const LandingAnimation = memo(function LandingAnimation({ onComplete }: L
   const [exiting, setExiting] = useState(false);
   const startTimeRef = useRef(0);
   const skippedRef = useRef(false);
+  const showButtonRef = useRef(showButton);
+  showButtonRef.current = showButton;
 
   // Skip handler
   const handleSkip = useCallback(() => {
@@ -192,16 +194,16 @@ export const LandingAnimation = memo(function LandingAnimation({ onComplete }: L
     onComplete(); // Fire immediately — cross-dissolve with main content
   }, [onComplete]);
 
-  // Keyboard skip
+  // Keyboard skip — use ref for showButton to avoid listener gap on re-register
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" || (showButton && (e.key === "Enter" || e.key === " "))) {
+      if (e.key === "Escape" || (showButtonRef.current && (e.key === "Enter" || e.key === " "))) {
         handleSkip();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [handleSkip, showButton]);
+  }, [handleSkip]);
 
   // Main timeline — 压缩到 3.0s 开始出文字（更快触达内容）
   // reduced-motion: 跳过粒子动画，直接显示文字

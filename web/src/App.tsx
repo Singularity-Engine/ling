@@ -645,10 +645,10 @@ function DismissFallback() {
   useEffect(() => {
     if (!isLoading) {
       const el = document.getElementById('loading-fallback');
-      if (el) {
-        el.style.opacity = '0';
-        setTimeout(() => el.remove(), 400);
-      }
+      if (!el) return;
+      el.style.opacity = '0';
+      const id = setTimeout(() => el.remove(), 400);
+      return () => clearTimeout(id);
     }
   }, [isLoading]);
   return null;
@@ -699,11 +699,14 @@ function MainApp() {
 
   const closeOnboarding = useCallback(() => setShowOnboarding(false), []);
 
+  const landingTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => { clearTimeout(landingTimerRef.current); }, []);
+
   const handleLandingComplete = useCallback(() => {
     setLandingExiting(true);
     sessionStorage.setItem(SS_VISITED, 'true');
     window.dispatchEvent(new Event('ling-landing-complete'));
-    setTimeout(() => {
+    landingTimerRef.current = setTimeout(() => {
       setShowLanding(false);
       // After landing animation, check if onboarding should show
       if (shouldShowOnboarding()) {

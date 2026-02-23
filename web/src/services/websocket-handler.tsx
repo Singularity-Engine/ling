@@ -176,8 +176,8 @@ function buildGreetingContext(): string {
 
 /** Set a welcoming expression (kaixin/happy) on the Live2D model during greeting.
  *  Delayed to ensure the model is loaded — longer delay for initial page load. */
-function setGreetingExpression(delayMs = 200) {
-  setTimeout(() => {
+function setGreetingExpression(delayMs = 200): ReturnType<typeof setTimeout> {
+  return setTimeout(() => {
     const lappAdapter = window.getLAppAdapter?.();
     if (lappAdapter) {
       try { lappAdapter.setExpression('kaixin'); } catch { /* model may not be ready */ }
@@ -502,7 +502,9 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           if (mMsg.level === 'friendly' || mMsg.milestone === 'friendly') {
             const currentUser = userRef.current;
             if (currentUser && currentUser.plan === 'free') {
-              setTimeout(() => {
+              clearTimeout(milestoneTimer); // cancel previous if milestone re-fires
+              milestoneTimer = setTimeout(() => {
+                milestoneTimer = undefined;
                 setBillingModalRef.current({
                   open: true,
                   reason: 'affinity_milestone',
@@ -550,6 +552,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     let aborted = false;
     // Track landing listener so cleanup can remove it if event hasn't fired yet
     let landingListener: (() => void) | null = null;
+    let greetingExprTimerId: ReturnType<typeof setTimeout> | undefined;
 
     // Connect to Gateway
     gatewayConnector.connect({
@@ -588,11 +591,11 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
         if (sessionStorage.getItem(SS_VISITED)) {
           sendGreeting();
-          setGreetingExpression(2000);
+          greetingExprTimerId = setGreetingExpression(2000);
         } else {
           const onLandingComplete = () => {
             sendGreeting();
-            setGreetingExpression(800);
+            greetingExprTimerId = setGreetingExpression(800);
             window.removeEventListener('ling-landing-complete', onLandingComplete);
             landingListener = null;
           };
@@ -645,6 +648,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
     return () => {
       aborted = true;
+      clearTimeout(greetingExprTimerId);
       if (landingListener) {
         window.removeEventListener('ling-landing-complete', landingListener);
       }
@@ -658,6 +662,9 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const handleWebSocketMessageRef = useLatest(handleWebSocketMessage);
 
   useEffect(() => {
+    // Track fire-and-forget timers so cleanup can cancel them
+    let milestoneTimer: ReturnType<typeof setTimeout> | undefined;
+
     // Subscribe to Gateway state changes — track transitions for user notifications
     let prevGwState: GatewayState | null = null;
     const stateSub = gatewayConnector.state$.subscribe((state) => {
@@ -787,6 +794,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     });
 
     return () => {
+      clearTimeout(milestoneTimer);
       clearInterval(responseCheckTimer);
       window.removeEventListener('offline', onOffline);
       window.removeEventListener('online', onOnline);
