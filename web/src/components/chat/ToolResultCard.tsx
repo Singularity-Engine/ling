@@ -184,7 +184,7 @@ const CodeBlock = memo(({ lang, code, defaultCollapsed }: { lang: string; code: 
       setCopied(true);
       clearTimeout(copyTimerRef.current);
       copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
-    });
+    }, () => { /* clipboard denied */ });
   }, [code]);
 
   return (

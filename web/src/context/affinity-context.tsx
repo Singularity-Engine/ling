@@ -63,6 +63,7 @@ export function AffinityProvider({ children }: { children: ReactNode }) {
       if (milestoneTimer.current) clearTimeout(milestoneTimer.current);
       if (expressionDecayTimer.current) clearTimeout(expressionDecayTimer.current);
       pointGainTimers.current.forEach(t => clearTimeout(t));
+      pointGainTimers.current.clear();
     };
   }, []);
 

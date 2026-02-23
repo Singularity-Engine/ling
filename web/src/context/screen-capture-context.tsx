@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useRef, useMemo, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useRef, useMemo, useEffect, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toaster } from "@/components/ui/toaster";
 import { createLogger } from '@/utils/logger';
@@ -79,6 +79,10 @@ export function ScreenCaptureProvider({ children }: { children: ReactNode }) {
     });
     setIsStreaming(false);
   }, []);
+
+  // Stop active media tracks on unmount — prevents camera/screen resources
+  // from leaking if the provider is removed while capture is in progress.
+  useEffect(() => () => { stopCapture(); }, [stopCapture]);
 
   const value = useMemo<ScreenCaptureContextType>(
     () => ({ stream, isStreaming, error, startCapture, stopCapture }),
