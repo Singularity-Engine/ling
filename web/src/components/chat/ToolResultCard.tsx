@@ -196,6 +196,7 @@ const CodeBlock = memo(({ lang, code, defaultCollapsed }: { lang: string; code: 
       <div style={S_CB_HEADER}>
         <span style={S_CB_LANG}>{lang}</span>
         <button
+          className="ling-tool-copy"
           onClick={handleCopy}
           aria-label={copied ? t("chat.codeCopied") : t("chat.copyCode")}
           title={t("chat.copyCode")}
@@ -208,7 +209,7 @@ const CodeBlock = memo(({ lang, code, defaultCollapsed }: { lang: string; code: 
         <pre style={S_CB_PRE}>{displayCode}</pre>
       </div>
       {isLong && (
-        <button onClick={() => setCollapsed(c => !c)} style={S_CB_EXPAND}>
+        <button className="ling-tool-expand" onClick={() => setCollapsed(c => !c)} style={S_CB_EXPAND}>
           {collapsed
             ? t("chat.toolExpandLines", { count: totalLines - CODE_PREVIEW_LINES })
             : t("chat.toolCollapse")}
@@ -298,6 +299,7 @@ export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCar
       {/* Header — clickable to toggle collapse */}
       {hasContent ? (
         <button
+          className="ling-tool-header"
           onClick={toggleCollapsed}
           aria-expanded={!collapsed}
           aria-label={`${toolName} — ${collapsed ? t("chat.toolExpand") : t("chat.toolCollapse")}`}

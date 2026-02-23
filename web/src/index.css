@@ -923,6 +923,15 @@ canvas {
 /* ── ToolResultCard: tool call visualization ── */
 .tool-code-scroll::-webkit-scrollbar { height: 3px; }
 .tool-code-scroll::-webkit-scrollbar-thumb { background: var(--ling-purple-30); border-radius: 2px; }
+.ling-tool-header:hover { background: rgba(255, 255, 255, 0.04) !important; }
+.ling-tool-header:active { background: rgba(255, 255, 255, 0.06) !important; }
+.ling-tool-header:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: -2px; border-radius: 14px; }
+.ling-tool-copy:hover { color: rgba(255, 255, 255, 0.7) !important; background: rgba(255, 255, 255, 0.08) !important; }
+.ling-tool-copy:active { transform: scale(0.88); color: rgba(255, 255, 255, 0.5) !important; }
+.ling-tool-copy:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
+.ling-tool-expand:hover { background: rgba(139, 92, 246, 0.12) !important; color: rgba(196, 181, 253, 0.95) !important; }
+.ling-tool-expand:active { transform: scale(0.97); }
+.ling-tool-expand:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: -2px; }
 @keyframes toolShimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
 @keyframes toolPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 @keyframes toolStatusPop { 0% { transform: scale(0.6); opacity: 0; } 60% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
