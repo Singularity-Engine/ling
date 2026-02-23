@@ -4,6 +4,10 @@ import { useWebSocketState, useWebSocketActions } from "@/context/websocket-cont
 import { gatewayConnector, RECONNECT_MAX_RETRIES } from "@/services/gateway-connector";
 import { OVERLAY_COLORS } from "@/constants/colors";
 
+// ── Timing constants ──
+const CONNECTED_FADE_START = 1700; // ms — begin fade-out after connection
+const CONNECTED_FADE_END = 2000;   // ms — fully hidden after connection
+
 // ── Pre-allocated style constants — eliminate per-render allocations ──
 const S_CONTAINER_BASE: CSSProperties = {
   display: "flex",
@@ -143,11 +147,11 @@ export const ConnectionStatus = memo(() => {
       setState(prev => ({ ...prev, phase: ConnPhase.VISIBLE }));
       timerRef.current = setTimeout(
         () => setState(prev => ({ ...prev, phase: ConnPhase.CLOSING })),
-        1700,
+        CONNECTED_FADE_START,
       );
       closeTimerRef.current = setTimeout(
         () => setState(prev => ({ ...prev, phase: ConnPhase.HIDDEN })),
-        2000,
+        CONNECTED_FADE_END,
       );
     } else {
       setState(prev => ({ ...prev, phase: ConnPhase.HIDDEN }));
@@ -201,9 +205,12 @@ export const ConnectionStatus = memo(() => {
       onClick={isClosed ? reconnect : undefined}
       style={containerStyle}
       className={isClosed ? "ling-conn-closed" : undefined}
+      role="status"
+      aria-live="polite"
+      aria-label={label}
     >
       {/* Status dot */}
-      <div style={dotStyle} />
+      <div style={dotStyle} aria-hidden="true" />
 
       {/* Label */}
       {!isOpen && (

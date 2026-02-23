@@ -6,6 +6,7 @@ import { toaster } from "@/components/ui/toaster";
 const COLLAPSE_CHAR_THRESHOLD = 200;
 const COLLAPSE_LINE_THRESHOLD = 8;
 const CODE_PREVIEW_LINES = 5;
+const COPY_FEEDBACK_DURATION = 2000; // ms — how long "Copied!" stays visible
 
 // ─── Static style constants (avoid per-render allocation in tool-heavy conversations) ───
 
@@ -189,9 +190,9 @@ const CodeBlock = memo(({ lang, code, defaultCollapsed }: { lang: string; code: 
     navigator.clipboard.writeText(code).then(() => {
       setCopied(true);
       clearTimeout(copyTimerRef.current);
-      copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
+      copyTimerRef.current = setTimeout(() => setCopied(false), COPY_FEEDBACK_DURATION);
     }, () => {
-      toaster.create({ title: i18next.t("chat.copyFailed"), type: "error", duration: 2000 });
+      toaster.create({ title: i18next.t("chat.copyFailed"), type: "error", duration: COPY_FEEDBACK_DURATION });
     });
   }, [code]);
 
@@ -213,7 +214,12 @@ const CodeBlock = memo(({ lang, code, defaultCollapsed }: { lang: string; code: 
         <pre style={S_CB_PRE}>{displayCode}</pre>
       </div>
       {isLong && (
-        <button className="ling-tool-expand" onClick={() => setCollapsed(c => !c)} style={S_CB_EXPAND}>
+        <button
+          className="ling-tool-expand"
+          onClick={() => setCollapsed(c => !c)}
+          style={S_CB_EXPAND}
+          aria-label={collapsed ? t("chat.toolExpand") : t("chat.toolCollapse")}
+        >
           {collapsed
             ? t("chat.toolExpandLines", { count: totalLines - CODE_PREVIEW_LINES })
             : t("chat.toolCollapse")}
