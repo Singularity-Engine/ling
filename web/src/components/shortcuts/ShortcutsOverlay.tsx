@@ -1,7 +1,7 @@
 import { type CSSProperties } from "react";
 import { memo, useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-// Keyframes moved to static index.css — no runtime injection needed.
+import { OVERLAY_COLORS } from "@/constants/colors";
 
 interface ShortcutsOverlayProps {
   open: boolean;
@@ -32,7 +32,7 @@ const S_BACKDROP_BASE: CSSProperties = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  background: "rgba(0, 0, 0, 0.6)",
+  background: OVERLAY_COLORS.DARK,
   backdropFilter: "blur(8px)",
   WebkitBackdropFilter: "blur(8px)",
 };
@@ -40,13 +40,13 @@ const S_BACKDROP_OPEN: CSSProperties = { ...S_BACKDROP_BASE, animation: "shortcu
 const S_BACKDROP_CLOSING: CSSProperties = { ...S_BACKDROP_BASE, animation: `overlayFadeOut ${EXIT_DURATION}ms ease-in forwards` };
 
 const S_CARD_BASE: CSSProperties = {
-  background: "rgba(10, 0, 21, 0.95)",
-  border: "1px solid rgba(139, 92, 246, 0.3)",
+  background: "var(--ling-surface-deep)",
+  border: "1px solid var(--ling-purple-30)",
   borderRadius: "16px",
   padding: "24px 20px",
   width: "100%",
   maxWidth: "min(400px, calc(100vw - 32px))",
-  boxShadow: "0 24px 80px rgba(0, 0, 0, 0.5), 0 0 40px rgba(139, 92, 246, 0.1)",
+  boxShadow: "0 24px 80px rgba(0, 0, 0, 0.5), 0 0 40px var(--ling-purple-08)",
 };
 const S_CARD_OPEN: CSSProperties = { ...S_CARD_BASE, animation: "shortcutsSlideIn 0.25s ease-out" };
 const S_CARD_CLOSING: CSSProperties = { ...S_CARD_BASE, animation: `overlaySlideOut ${EXIT_DURATION}ms ease-in forwards` };
@@ -69,18 +69,18 @@ const S_ROW: CSSProperties = {
   padding: "6px 0",
 };
 
-const S_LABEL: CSSProperties = { color: "rgba(255, 255, 255, 0.8)", fontSize: "13px" };
+const S_LABEL: CSSProperties = { color: "var(--ling-text-secondary)", fontSize: "13px" };
 
 const S_KEY_GROUP: CSSProperties = { display: "flex", gap: "4px" };
 
 const S_KBD: CSSProperties = {
-  background: "rgba(255, 255, 255, 0.08)",
+  background: "var(--ling-surface-border)",
   border: "1px solid rgba(255, 255, 255, 0.15)",
   borderRadius: "6px",
   padding: "2px 8px",
   fontSize: "12px",
   fontFamily: "inherit",
-  color: "rgba(255, 255, 255, 0.7)",
+  color: "var(--ling-text-soft)",
   minWidth: "24px",
   textAlign: "center",
   lineHeight: "20px",
@@ -90,13 +90,14 @@ const S_FOOTER: CSSProperties = {
   marginTop: "20px",
   textAlign: "center",
   fontSize: "11px",
-  color: "rgba(139, 92, 246, 0.6)",
+  color: "var(--ling-purple-60)",
 };
 
 export const ShortcutsOverlay = memo(({ open, onClose }: ShortcutsOverlayProps) => {
   const { t } = useTranslation();
   const [closing, setClosing] = useState(false);
   const closingTimer = useRef<ReturnType<typeof setTimeout>>();
+  const cardRef = useRef<HTMLDivElement>(null);
 
   // Clean up timer on unmount
   useEffect(() => () => { clearTimeout(closingTimer.current); }, []);
@@ -114,16 +115,24 @@ export const ShortcutsOverlay = memo(({ open, onClose }: ShortcutsOverlayProps) 
     if (e.target === e.currentTarget) handleClose();
   }, [handleClose]);
 
-  // Reset closing state when re-opened
-  useEffect(() => { if (open) setClosing(false); }, [open]);
+  // Reset closing state when re-opened; auto-focus dialog for a11y
+  useEffect(() => {
+    if (open) {
+      setClosing(false);
+      requestAnimationFrame(() => cardRef.current?.focus());
+    }
+  }, [open]);
 
-  // ESC to close — handled globally by useKeyboardShortcuts in App.tsx
+  // Direct ESC handler as defense-in-depth (also handled globally)
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Escape") handleClose();
+  }, [handleClose]);
 
   if (!open && !closing) return null;
 
   return (
     <div style={closing ? S_BACKDROP_CLOSING : S_BACKDROP_OPEN} onClick={handleBackdropClick}>
-      <div onClick={(e) => e.stopPropagation()} style={closing ? S_CARD_CLOSING : S_CARD_OPEN} role="dialog" aria-modal="true" aria-labelledby="shortcuts-title">
+      <div ref={cardRef} tabIndex={-1} onKeyDown={handleKeyDown} onClick={(e) => e.stopPropagation()} style={closing ? S_CARD_CLOSING : S_CARD_OPEN} role="dialog" aria-modal="true" aria-labelledby="shortcuts-title">
         <h2 id="shortcuts-title" style={S_HEADING}>{t("shortcuts.title")}</h2>
 
         <div style={S_LIST}>
