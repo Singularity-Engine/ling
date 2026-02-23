@@ -2,9 +2,10 @@ import { useTranslation } from "react-i18next";
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Virtuoso } from "react-virtuoso";
 import { ChatBubble } from "./ChatBubble";
-import { ThinkingBubble } from "./ThinkingBubble";
 import { TimeSeparator, shouldShowSeparator } from "./TimeSeparator";
-import { useChatMessagesState, useChatMessagesActions, useStreamingValue, useStreamingRef } from "@/context/chat-history-context";
+import { SuggestionChips } from "./SuggestionChips";
+import { StreamingFooter } from "./StreamingFooter";
+import { useChatMessagesState, useChatMessagesActions, useStreamingRef } from "@/context/chat-history-context";
 import type { Message } from "@/services/websocket-service";
 
 import { useAiStateRead } from "@/context/ai-state-context";
@@ -14,124 +15,6 @@ import { useChatScroll } from "@/hooks/use-chat-scroll";
 // Touch-only device detection (no hover capability = phone/tablet)
 const isTouchDevice =
   typeof window !== "undefined" && !window.matchMedia("(hover: hover)").matches;
-
-/**
- * Hook: throttle a rapidly-changing string to ~30 fps using rAF.
- * Returns the latest snapshot that the render loop should display.
- * When the source becomes empty the hook returns "" immediately (no delay).
- */
-function useThrottledValue(source: string): string {
-  const [display, setDisplay] = useState(source);
-  const rafRef = useRef(0);
-  const latestRef = useRef(source);
-
-  latestRef.current = source;
-
-  useEffect(() => {
-    // Fast path: source cleared → flush immediately & cancel pending rAF
-    if (source === '') {
-      setDisplay('');
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = 0;
-      }
-      return;
-    }
-
-    // Only schedule if no rAF is pending — avoids cancel+reschedule on every
-    // token during streaming.  The rAF reads latestRef so it always gets the
-    // most recent value even if many source updates arrive within one frame.
-    if (!rafRef.current) {
-      rafRef.current = requestAnimationFrame(() => {
-        rafRef.current = 0;
-        setDisplay(latestRef.current);
-      });
-    }
-    // No per-change cleanup: let the scheduled rAF naturally coalesce rapid updates.
-  }, [source]);
-
-  // Cancel pending rAF only on unmount.
-  useEffect(() => () => {
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = 0;
-    }
-  }, []);
-
-  return display;
-}
-
-// ─── SuggestionChips style constants (avoid per-render allocation) ───
-
-const S_CHIPS_CENTERED: CSSProperties = {
-  display: "flex",
-  flexWrap: "wrap",
-  justifyContent: "center",
-  gap: "8px",
-  maxWidth: "min(340px, 100%)",
-};
-
-const S_CHIPS_LEFT: CSSProperties = {
-  display: "flex",
-  flexWrap: "wrap",
-  gap: "8px",
-  maxWidth: "min(340px, 100%)",
-  padding: "4px 16px 12px",
-};
-
-const S_CHIP_BASE: CSSProperties = {
-  background: "var(--ling-purple-15)",
-  border: "1px solid var(--ling-purple-25)",
-  borderRadius: "20px",
-  padding: "8px 16px",
-  color: "var(--ling-purple-text)",
-  fontSize: "13px",
-  cursor: "pointer",
-  lineHeight: "1.4",
-};
-
-// Lazily-cached chip styles keyed by "baseDelay:index" — avoids spreading
-// S_CHIP_BASE + computing animation on every SuggestionChips render.
-const _chipCache = new Map<string, CSSProperties>();
-function getChipStyle(baseDelay: number, index: number): CSSProperties {
-  const key = `${baseDelay}:${index}`;
-  let s = _chipCache.get(key);
-  if (!s) {
-    s = { ...S_CHIP_BASE, animation: `chipFadeIn 0.4s ease-out ${baseDelay + index * 0.08}s both` };
-    _chipCache.set(key, s);
-  }
-  return s;
-}
-
-// Reusable suggestion chips strip
-const SuggestionChips = memo(function SuggestionChips({
-  chips,
-  onChipClick,
-  centered,
-  baseDelay = 0,
-}: {
-  chips: string[];
-  onChipClick: (text: string) => void;
-  centered?: boolean;
-  baseDelay?: number;
-}) {
-  if (!Array.isArray(chips) || chips.length === 0) return null;
-  return (
-    <div style={centered ? S_CHIPS_CENTERED : S_CHIPS_LEFT}>
-      {chips.map((chip, i) => (
-        <button
-          key={chip}
-          className="welcome-chip"
-          onClick={() => onChipClick(chip)}
-          style={getChipStyle(baseDelay, i)}
-        >
-          {chip}
-        </button>
-      ))}
-    </div>
-  );
-});
-SuggestionChips.displayName = "SuggestionChips";
 
 /**
  * Max messages to render to the DOM at once.
@@ -210,34 +93,6 @@ const S_NEW_DOT: CSSProperties = {
   background: "var(--ling-error)",
   border: "2px solid rgba(15, 15, 20, 0.9)",
   animation: "chatFadeInUp 0.2s ease-out",
-};
-
-const S_TIMEOUT_WRAP: CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  padding: "8px 16px 12px",
-  gap: "8px",
-  animation: "chatFadeInUp 0.3s ease-out",
-};
-
-const S_TIMEOUT_TEXT: CSSProperties = {
-  fontSize: "12px",
-  color: "var(--ling-text-secondary)",
-  textAlign: "center",
-  lineHeight: 1.5,
-};
-
-const S_RETRY_BTN: CSSProperties = {
-  background: "var(--ling-purple-20)",
-  border: "1px solid var(--ling-purple-30)",
-  borderRadius: "14px",
-  padding: "6px 20px",
-  color: "var(--ling-purple-light)",
-  fontSize: "12px",
-  cursor: "pointer",
-  transition: "background 0.2s ease, border-color 0.2s ease, color 0.2s ease",
-  fontWeight: 500,
 };
 
 // ─── Empty-state style constants ───
@@ -339,101 +194,7 @@ const S_KEYBOARD_HINT: CSSProperties = {
   animation: "emptyHintFadeIn 0.5s ease-out 0.55s both",
 };
 
-// ─── StreamingFooter: owns streaming subscription so ChatArea avoids ~30fps re-renders ───
-
-interface StreamingFooterProps {
-  scrollRef: { current: HTMLDivElement | null };
-  isNearBottomRef: { current: boolean };
-  wasStreamingRef: { current: boolean };
-  dedupedMessages: Message[];
-}
-
-const StreamingFooter = memo(function StreamingFooter({
-  scrollRef,
-  isNearBottomRef,
-  wasStreamingRef,
-  dedupedMessages,
-}: StreamingFooterProps) {
-  const { fullResponse } = useStreamingValue();
-  const { isThinkingSpeaking } = useAiStateRead();
-  const { wsState } = useWebSocketState();
-  const { sendMessage } = useWebSocketActions();
-  const { t } = useTranslation();
-
-  const displayResponse = useThrottledValue(fullResponse);
-  const isStreaming = displayResponse.length > 0;
-  const isConnected = wsState === "OPEN";
-  const isConnectedRef = useRef(isConnected);
-  isConnectedRef.current = isConnected;
-
-  const showStreaming = useMemo(() => {
-    if (!isStreaming) return false;
-    const lastAiMsg = dedupedMessages.findLast(m => m.role === 'ai');
-    return !(lastAiMsg && lastAiMsg.content && displayResponse === lastAiMsg.content);
-  }, [isStreaming, dedupedMessages, displayResponse]);
-
-  // Mirror into parent ref so ChatArea's itemContent can read it for skipEntryAnimation
-  useEffect(() => { wasStreamingRef.current = showStreaming; }, [showStreaming, wasStreamingRef]);
-
-  const awaitingReply = useMemo(() => {
-    if (isThinkingSpeaking || isStreaming || !isConnected) return false;
-    const lastMsg = dedupedMessages[dedupedMessages.length - 1];
-    return lastMsg?.role === "human";
-  }, [dedupedMessages, isThinkingSpeaking, isStreaming, isConnected]);
-
-  const [awaitingTimedOut, setAwaitingTimedOut] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
-  useEffect(() => {
-    if (!awaitingReply) {
-      setAwaitingTimedOut(false);
-      return;
-    }
-    setAwaitingTimedOut(false);
-    const timer = setTimeout(() => setAwaitingTimedOut(true), 15_000);
-    return () => clearTimeout(timer);
-  }, [awaitingReply, dedupedMessages.length, retryCount]);
-
-  const showTyping = (isThinkingSpeaking || (awaitingReply && !awaitingTimedOut)) && !isStreaming;
-
-  // Streaming auto-scroll: keep viewport pinned to bottom during rapid updates
-  useEffect(() => {
-    if (!displayResponse) return;
-    if (!isNearBottomRef.current) return;
-    const container = scrollRef.current;
-    if (container) container.scrollTop = container.scrollHeight;
-  }, [displayResponse, scrollRef, isNearBottomRef]);
-
-  const handleRetry = useCallback(() => {
-    const lastHuman = dedupedMessages.findLast(m => m.role === "human");
-    if (lastHuman?.content && isConnectedRef.current) {
-      setAwaitingTimedOut(false);
-      setRetryCount(c => c + 1);
-      sendMessage({ type: "text-input", text: lastHuman.content, images: [] });
-    }
-  }, [dedupedMessages, sendMessage]);
-
-  return (
-    <>
-      {(showStreaming || showTyping) && (
-        <ThinkingBubble
-          content={displayResponse}
-          isThinking={showTyping}
-          isStreaming={showStreaming}
-        />
-      )}
-
-      {awaitingTimedOut && !isStreaming && !showTyping && (
-        <div style={S_TIMEOUT_WRAP}>
-          <span style={S_TIMEOUT_TEXT}>{t("chat.noResponse")}</span>
-          <button onClick={handleRetry} style={S_RETRY_BTN}>
-            {t("chat.retry")}
-          </button>
-        </div>
-      )}
-    </>
-  );
-});
-StreamingFooter.displayName = "StreamingFooter";
+// ─── ChatArea ───
 
 export const ChatArea = memo(() => {
   const { messages } = useChatMessagesState();
