@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useRef, useEffect, useMemo, ReactNode } from "react";
+import { createContext, useContext, useReducer, useCallback, useRef, useEffect, useMemo, ReactNode } from "react";
 import { getSkillKey } from "../config/skill-registry";
 
 export type ToolCategory = 'search' | 'code' | 'memory' | 'weather' | 'generic';
@@ -60,141 +60,159 @@ export function categorize(toolName: string): ToolCategory {
   return KEY_TO_CATEGORY[key] || 'generic';
 }
 
+// ─── Reducer ──────────────────────────────────────────────────────
+// All tool state transitions happen atomically inside the reducer,
+// eliminating the previous anti-pattern of calling setState inside
+// another setState updater (which is unsafe in Concurrent Mode).
+
+interface ToolReducerState {
+  activeTools: ToolCall[];
+  recentResults: ToolCall[];
+  currentPhase: 'idle' | 'thinking' | 'working' | 'presenting';
+}
+
+type ToolAction =
+  | { type: 'start'; tool: ToolCall }
+  | { type: 'update'; id: string; update: Partial<ToolCall> }
+  | { type: 'complete'; id: string; result: string }
+  | { type: 'fail'; id: string; error: string }
+  | { type: 'removeRecent'; id: string }
+  | { type: 'clearResults' }
+  | { type: 'setPhase'; phase: ToolReducerState['currentPhase'] };
+
+const initialToolState: ToolReducerState = {
+  activeTools: [],
+  recentResults: [],
+  currentPhase: 'idle',
+};
+
+/** Infer phase from active tools, or null to keep the current phase. */
+function inferPhase(tools: ToolCall[]): 'thinking' | 'working' | null {
+  if (tools.length === 0) return null;
+  if (tools.some(t => t.status === 'running')) return 'working';
+  if (tools.some(t => t.status === 'pending')) return 'thinking';
+  return null;
+}
+
+function toolReducer(state: ToolReducerState, action: ToolAction): ToolReducerState {
+  switch (action.type) {
+    case 'start': {
+      const next = [...state.activeTools, action.tool];
+      return { ...state, activeTools: next, currentPhase: inferPhase(next) ?? state.currentPhase };
+    }
+    case 'update': {
+      const next = state.activeTools.map(t => t.id === action.id ? { ...t, ...action.update } : t);
+      return { ...state, activeTools: next, currentPhase: inferPhase(next) ?? state.currentPhase };
+    }
+    case 'complete': {
+      const tool = state.activeTools.find(t => t.id === action.id);
+      if (!tool) return state;
+      const completed: ToolCall = { ...tool, status: 'completed', result: action.result, endTime: Date.now() };
+      const remaining = state.activeTools.filter(t => t.id !== action.id);
+      return {
+        activeTools: remaining,
+        recentResults: [completed, ...state.recentResults].slice(0, 5),
+        currentPhase: remaining.length === 0 ? 'presenting' : state.currentPhase,
+      };
+    }
+    case 'fail': {
+      const tool = state.activeTools.find(t => t.id === action.id);
+      if (!tool) return state;
+      const failed: ToolCall = { ...tool, status: 'error', result: action.error, endTime: Date.now() };
+      const remaining = state.activeTools.filter(t => t.id !== action.id);
+      return {
+        activeTools: remaining,
+        recentResults: [failed, ...state.recentResults].slice(0, 5),
+        currentPhase: remaining.length === 0 ? 'idle' : state.currentPhase,
+      };
+    }
+    case 'removeRecent':
+      return { ...state, recentResults: state.recentResults.filter(t => t.id !== action.id) };
+    case 'clearResults':
+      return { ...state, recentResults: [] };
+    case 'setPhase':
+      return state.currentPhase === action.phase ? state : { ...state, currentPhase: action.phase };
+  }
+}
+
+function computeDominant(tools: ToolCall[]): ToolCategory | null {
+  if (tools.length === 0) return null;
+  const counts: Record<string, number> = {};
+  for (const t of tools) {
+    counts[t.category] = (counts[t.category] || 0) + 1;
+  }
+  let max = 0;
+  let dominant: ToolCategory = 'generic';
+  for (const [cat, count] of Object.entries(counts)) {
+    if (count > max) { max = count; dominant = cat as ToolCategory; }
+  }
+  return dominant;
+}
+
+// ─── Provider ─────────────────────────────────────────────────────
+
 export function ToolStateProvider({ children }: { children: ReactNode }) {
-  const [activeTools, setActiveTools] = useState<ToolCall[]>([]);
-  const [recentResults, setRecentResults] = useState<ToolCall[]>([]);
-  const [currentPhase, setCurrentPhase] = useState<'idle' | 'thinking' | 'working' | 'presenting'>('idle');
+  const [state, dispatch] = useReducer(toolReducer, initialToolState);
 
   const presentingTimer = useRef<ReturnType<typeof setTimeout>>();
   const removalTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const demoTimers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 
-  const computeDominant = useCallback((tools: ToolCall[]): ToolCategory | null => {
-    if (tools.length === 0) return null;
-    const counts: Record<string, number> = {};
-    for (const t of tools) {
-      counts[t.category] = (counts[t.category] || 0) + 1;
+  // Auto-transition presenting → idle after 3s
+  useEffect(() => {
+    if (state.currentPhase === 'presenting') {
+      presentingTimer.current = setTimeout(() => dispatch({ type: 'setPhase', phase: 'idle' }), 3000);
     }
-    let max = 0;
-    let dominant: ToolCategory = 'generic';
-    for (const [cat, count] of Object.entries(counts)) {
-      if (count > max) {
-        max = count;
-        dominant = cat as ToolCategory;
+    return () => {
+      if (presentingTimer.current) {
+        clearTimeout(presentingTimer.current);
+        presentingTimer.current = undefined;
       }
-    }
-    return dominant;
-  }, []);
-
-  const updatePhase = useCallback((tools: ToolCall[]) => {
-    if (tools.length === 0) return; // phase managed elsewhere
-    const hasPending = tools.some(t => t.status === 'pending');
-    const hasRunning = tools.some(t => t.status === 'running');
-    if (hasRunning) {
-      setCurrentPhase('working');
-    } else if (hasPending) {
-      setCurrentPhase('thinking');
-    }
-  }, []);
-
-  const startTool = useCallback((tool: Omit<ToolCall, 'id' | 'startTime' | 'status'> & { id?: string; status?: ToolCall['status'] }) => {
-    // Clear presenting timer if a new tool starts during presenting phase
-    if (presentingTimer.current) {
-      clearTimeout(presentingTimer.current);
-      presentingTimer.current = undefined;
-    }
-    const newTool: ToolCall = {
-      ...tool,
-      id: tool.id || `tool-${++toolIdCounter}`,
-      status: tool.status || 'pending',
-      startTime: Date.now(),
     };
-    setActiveTools(prev => {
-      const next = [...prev, newTool];
-      updatePhase(next);
-      return next;
-    });
-  }, [updatePhase]);
-
-  const updateTool = useCallback((id: string, update: Partial<ToolCall>) => {
-    setActiveTools(prev => {
-      const next = prev.map(t => t.id === id ? { ...t, ...update } : t);
-      updatePhase(next);
-      return next;
-    });
-  }, [updatePhase]);
+  }, [state.currentPhase]);
 
   const scheduleRemoval = useCallback((toolId: string) => {
     const timer = setTimeout(() => {
-      setRecentResults(prev => prev.filter(t => t.id !== toolId));
+      dispatch({ type: 'removeRecent', id: toolId });
       removalTimers.current.delete(toolId);
     }, 30000);
     removalTimers.current.set(toolId, timer);
   }, []);
 
-  const completeTool = useCallback((id: string, result: string) => {
-    setActiveTools(prev => {
-      const tool = prev.find(t => t.id === id);
-      if (!tool) return prev;
-
-      const completed: ToolCall = {
+  const startTool = useCallback((tool: Omit<ToolCall, 'id' | 'startTime' | 'status'> & { id?: string; status?: ToolCall['status'] }) => {
+    // Clear presenting timer synchronously to prevent a race where it
+    // fires between dispatch and the next render.
+    if (presentingTimer.current) {
+      clearTimeout(presentingTimer.current);
+      presentingTimer.current = undefined;
+    }
+    dispatch({
+      type: 'start',
+      tool: {
         ...tool,
-        status: 'completed',
-        result,
-        endTime: Date.now(),
-      };
-
-      setRecentResults(recent => {
-        const next = [completed, ...recent].slice(0, 5);
-        return next;
-      });
-      scheduleRemoval(completed.id);
-
-      const remaining = prev.filter(t => t.id !== id);
-
-      if (remaining.length === 0) {
-        // Enter presenting phase, then idle after 3s
-        setCurrentPhase('presenting');
-        if (presentingTimer.current) clearTimeout(presentingTimer.current);
-        presentingTimer.current = setTimeout(() => {
-          setCurrentPhase('idle');
-        }, 3000);
-      }
-
-      return remaining;
+        id: tool.id || `tool-${++toolIdCounter}`,
+        status: tool.status || 'pending',
+        startTime: Date.now(),
+      },
     });
+  }, []);
+
+  const updateTool = useCallback((id: string, update: Partial<ToolCall>) => {
+    dispatch({ type: 'update', id, update });
+  }, []);
+
+  const completeTool = useCallback((id: string, result: string) => {
+    dispatch({ type: 'complete', id, result });
+    scheduleRemoval(id);
   }, [scheduleRemoval]);
 
   const failTool = useCallback((id: string, error: string) => {
-    setActiveTools(prev => {
-      const tool = prev.find(t => t.id === id);
-      if (!tool) return prev;
-
-      const failed: ToolCall = {
-        ...tool,
-        status: 'error',
-        result: error,
-        endTime: Date.now(),
-      };
-
-      setRecentResults(recent => {
-        const next = [failed, ...recent].slice(0, 5);
-        return next;
-      });
-      scheduleRemoval(failed.id);
-
-      const remaining = prev.filter(t => t.id !== id);
-
-      if (remaining.length === 0) {
-        setCurrentPhase('idle');
-      }
-
-      return remaining;
-    });
+    dispatch({ type: 'fail', id, error });
+    scheduleRemoval(id);
   }, [scheduleRemoval]);
 
   const clearResults = useCallback(() => {
-    setRecentResults([]);
+    dispatch({ type: 'clearResults' });
     removalTimers.current.forEach(timer => clearTimeout(timer));
     removalTimers.current.clear();
   }, []);
@@ -208,8 +226,8 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
     demoTimers.current.clear();
   }, []);
 
-  const dominantCategory = useMemo(() => computeDominant(activeTools), [computeDominant, activeTools]);
-  const activeToolName = useMemo(() => activeTools.length > 0 ? activeTools[0].name : null, [activeTools]);
+  const dominantCategory = useMemo(() => computeDominant(state.activeTools), [state.activeTools]);
+  const activeToolName = useMemo(() => state.activeTools.length > 0 ? state.activeTools[0].name : null, [state.activeTools]);
 
   // Demo trigger: window.__triggerToolDemo('search') in browser console
   useEffect(() => {
@@ -219,19 +237,9 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
       timers.add(id);
     };
     window.__triggerToolDemo = (category: ToolCategory = 'search') => {
-      startTool({ name: `demo_${category}`, category, arguments: JSON.stringify({ query: 'Demo 展示' }) });
-      // The tool will auto-complete after 3s via the timeout below
-      const checkAndComplete = () => {
-        setActiveTools(prev => {
-          const demoTool = prev.find(t => t.name === `demo_${category}` && t.status === 'pending');
-          if (demoTool) {
-            trackTimeout(() => completeTool(demoTool.id, JSON.stringify({ summary: `${category} 工具演示完成`, demo: true })), 3000);
-          }
-          return prev;
-        });
-      };
-      // Small delay to let React state settle
-      trackTimeout(checkAndComplete, 50);
+      const demoId = `tool-${++toolIdCounter}`;
+      startTool({ id: demoId, name: `demo_${category}`, category, arguments: JSON.stringify({ query: 'Demo 展示' }) });
+      trackTimeout(() => completeTool(demoId, JSON.stringify({ summary: `${category} 工具演示完成`, demo: true })), 3000);
     };
     return () => {
       delete window.__triggerToolDemo;
@@ -242,12 +250,12 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
 
   // Context 1: read-only state — changes on tool start/complete/fail
   const stateValue = useMemo(() => ({
-    activeTools,
-    recentResults,
-    currentPhase,
+    activeTools: state.activeTools,
+    recentResults: state.recentResults,
+    currentPhase: state.currentPhase,
     dominantCategory,
     activeToolName,
-  }), [activeTools, recentResults, currentPhase, dominantCategory, activeToolName]);
+  }), [state.activeTools, state.recentResults, state.currentPhase, dominantCategory, activeToolName]);
 
   // Context 2: stable actions — all callbacks have stable deps, never changes
   const actionsValue = useMemo(() => ({

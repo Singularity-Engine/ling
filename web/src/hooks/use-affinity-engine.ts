@@ -104,13 +104,15 @@ export function useAffinityEngine({ updateAffinity, showMilestone, showPointGain
   const stateRef = useRef<PersistedAffinity>(loadState());
   const backendDrivenRef = useRef(false);
 
-  // Keep latest callbacks in refs to avoid re-subscribing
+  // Keep latest callbacks in refs to avoid re-subscribing.
+  // Direct assignment (not useEffect) ensures the ref is always
+  // up-to-date before any synchronous code reads it.
   const updateAffinityRef = useRef(updateAffinity);
   const showMilestoneRef = useRef(showMilestone);
   const showPointGainRef = useRef(showPointGain);
-  useEffect(() => { updateAffinityRef.current = updateAffinity; }, [updateAffinity]);
-  useEffect(() => { showMilestoneRef.current = showMilestone; }, [showMilestone]);
-  useEffect(() => { showPointGainRef.current = showPointGain; }, [showPointGain]);
+  updateAffinityRef.current = updateAffinity;
+  showMilestoneRef.current = showMilestone;
+  showPointGainRef.current = showPointGain;
 
   useEffect(() => {
     // On mount: push persisted affinity into context

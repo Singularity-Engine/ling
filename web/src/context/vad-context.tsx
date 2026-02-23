@@ -8,7 +8,7 @@ import { useInterrupt } from '@/components/canvas/live2d';
 import { audioTaskQueue } from '@/utils/task-queue';
 import { useSendAudio } from '@/hooks/utils/use-send-audio';
 import { SubtitleContext } from './subtitle-context';
-import { AiStateContext, AiState } from './ai-state-context';
+import { useAiStateRead, useAiStateActions, type AiState } from './ai-state-context';
 import { useLocalStorage } from '@/hooks/utils/use-local-storage';
 import { toaster } from '@/components/ui/toaster';
 import { createLogger } from '@/utils/logger';
@@ -139,7 +139,8 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
   const { interrupt } = useInterrupt();
   const { sendAudioPartition } = useSendAudio();
   const { setSubtitleText } = useContext(SubtitleContext)!;
-  const { aiState, setAiState } = useContext(AiStateContext)!;
+  const { aiState } = useAiStateRead();
+  const { setAiState } = useAiStateActions();
 
   // Refs for callback stability — direct assignment keeps them current
   // synchronously during render, before any async callbacks can fire.
