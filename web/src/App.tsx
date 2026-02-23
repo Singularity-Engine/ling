@@ -13,7 +13,7 @@ import WebSocketHandler from "./services/websocket-handler";
 import { CameraProvider } from "./context/camera-context";
 import { ChatHistoryProvider, useChatMessages, useHistoryList } from "./context/chat-history-context";
 import { CharacterConfigProvider } from "./context/character-config-context";
-import { VADProvider, useVAD } from "./context/vad-context";
+import { VADProvider, useVADState, useVADActions } from "./context/vad-context";
 import { Live2D, useInterrupt } from "./components/canvas/live2d";
 import { ProactiveSpeakProvider } from "./context/proactive-speak-context";
 import { ScreenCaptureProvider } from "./context/screen-capture-context";

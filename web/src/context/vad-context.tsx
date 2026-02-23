@@ -31,51 +31,30 @@ export interface VADSettings {
 }
 
 /**
- * VAD context state interface
- * @interface VADState
+ * Context 1 — Read-only VAD state.
+ * Changes when micOn, autoStopMic, settings, or auto-start flags update.
  */
-interface VADState {
-  /** Auto stop mic feature state */
-  autoStopMic: boolean;
-
-  /** Microphone active state */
+interface VADStateReadType {
   micOn: boolean;
-
-  /** Set microphone state */
-  setMicOn: (value: boolean) => void;
-
-  /** Set Auto stop mic state */
-  setAutoStopMic: (value: boolean) => void;
-
-  /** Start microphone and VAD */
-  startMic: () => Promise<void>;
-
-  /** Stop microphone and VAD */
-  stopMic: () => void;
-
-  /** Previous speech probability value */
-  previousTriggeredProbability: number;
-
-  /** Set previous speech probability */
-  setPreviousTriggeredProbability: (value: number) => void;
-
-  /** VAD settings configuration */
-  settings: VADSettings;
-
-  /** Update VAD settings */
-  updateSettings: (newSettings: VADSettings) => void;
-
-  /** Auto start microphone when AI starts speaking */
+  autoStopMic: boolean;
   autoStartMicOn: boolean;
-
-  /** Set auto start microphone state */
-  setAutoStartMicOn: (value: boolean) => void;
-
-  /** Auto start microphone when conversation ends */
   autoStartMicOnConvEnd: boolean;
+  settings: VADSettings;
+}
 
-  /** Set auto start microphone when conversation ends state */
+/**
+ * Context 2 — Stable action callbacks.
+ * All callbacks use useCallback with empty/stable deps, so this
+ * context value never changes after mount. Consumers that only
+ * WRITE VAD state subscribe here without re-renders on state changes.
+ */
+interface VADActionsType {
+  startMic: () => Promise<void>;
+  stopMic: () => void;
+  setAutoStopMic: (value: boolean) => void;
+  setAutoStartMicOn: (value: boolean) => void;
   setAutoStartMicOnConvEnd: (value: boolean) => void;
+  updateSettings: (newSettings: VADSettings) => void;
 }
 
 /**
@@ -94,17 +73,12 @@ const DEFAULT_VAD_STATE = {
   autoStartMicOnConvEnd: false,
 };
 
-/**
- * Create the VAD context
- */
-export const VADContext = createContext<VADState | null>(null);
+const VADStateReadContext = createContext<VADStateReadType | null>(null);
+const VADActionsContext = createContext<VADActionsType | null>(null);
 
 /**
  * VAD Provider Component
  * Manages voice activity detection and microphone state
- *
- * @param {Object} props - Provider props
- * @param {React.ReactNode} props.children - Child components
  */
 export function VADProvider({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
@@ -322,9 +296,6 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
     isProcessingRef.current = false;
   }, []);
 
-  /**
-   * Set Auto stop mic state
-   */
   const setAutoStopMic = useCallback((value: boolean) => {
     autoStopMicRef.current = value;
     setAutoStopMicState(value);
@@ -340,53 +311,57 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
     setAutoStartMicOnConvEndState(value);
   }, []);
 
-  // Memoized context value
-  const contextValue = useMemo(
+  const actions = useMemo(
     () => ({
-      autoStopMic,
-      micOn,
-      setMicOn,
+      startMic,
+      stopMic,
       setAutoStopMic,
-      startMic,
-      stopMic,
-      previousTriggeredProbability: previousTriggeredProbabilityRef.current,
-      setPreviousTriggeredProbability,
-      settings,
-      updateSettings,
-      autoStartMicOn,
       setAutoStartMicOn,
-      autoStartMicOnConvEnd,
       setAutoStartMicOnConvEnd,
-    }),
-    [
-      autoStopMic,
-      micOn,
-      startMic,
-      stopMic,
-      settings,
       updateSettings,
+    }),
+    [startMic, stopMic, setAutoStopMic, setAutoStartMicOn, setAutoStartMicOnConvEnd, updateSettings],
+  );
+
+  const state = useMemo(
+    () => ({
+      micOn,
+      autoStopMic,
       autoStartMicOn,
       autoStartMicOnConvEnd,
-    ],
+      settings,
+    }),
+    [micOn, autoStopMic, autoStartMicOn, autoStartMicOnConvEnd, settings],
   );
 
   return (
-    <VADContext.Provider value={contextValue}>
-      {children}
-    </VADContext.Provider>
+    <VADActionsContext.Provider value={actions}>
+      <VADStateReadContext.Provider value={state}>
+        {children}
+      </VADStateReadContext.Provider>
+    </VADActionsContext.Provider>
   );
 }
 
+/** Subscribe to read-only VAD state (re-renders on state changes). */
+export function useVADState() {
+  const ctx = useContext(VADStateReadContext);
+  if (!ctx) throw new Error('useVADState must be used within VADProvider');
+  return ctx;
+}
+
+/** Subscribe to stable VAD actions (never causes re-renders). */
+export function useVADActions() {
+  const ctx = useContext(VADActionsContext);
+  if (!ctx) throw new Error('useVADActions must be used within VADProvider');
+  return ctx;
+}
+
 /**
- * Custom hook to use the VAD context
- * @throws {Error} If used outside of VADProvider
+ * Combined hook — returns both read-only state and actions.
+ * Kept for backward compatibility with restricted files (hooks/utils/).
+ * Prefer useVADState() or useVADActions() for targeted subscriptions.
  */
 export function useVAD() {
-  const context = useContext(VADContext);
-
-  if (!context) {
-    throw new Error('useVAD must be used within a VADProvider');
-  }
-
-  return context;
+  return { ...useVADState(), ...useVADActions() };
 }

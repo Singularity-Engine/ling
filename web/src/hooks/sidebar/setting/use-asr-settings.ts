@@ -1,17 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { useVAD, VADSettings } from '@/context/vad-context';
+import { useVADState, useVADActions, VADSettings } from '@/context/vad-context';
 
 export const useASRSettings = () => {
-  const {
-    settings,
-    updateSettings,
-    autoStopMic,
-    setAutoStopMic,
-    autoStartMicOn,
-    setAutoStartMicOn,
-    autoStartMicOnConvEnd,
-    setAutoStartMicOnConvEnd,
-  } = useVAD();
+  const { settings, autoStopMic, autoStartMicOn, autoStartMicOnConvEnd } = useVADState();
+  const { updateSettings, setAutoStopMic, setAutoStartMicOn, setAutoStartMicOnConvEnd } = useVADActions();
 
   const localSettingsRef = useRef<VADSettings>(settings);
   const originalSettingsRef = useRef(settings);

@@ -1,5 +1,5 @@
 import { ChangeEvent, KeyboardEvent } from 'react';
-import { useVAD } from '@/context/vad-context';
+import { useVADState, useVADActions } from '@/context/vad-context';
 import { useTextInput } from '@/hooks/footer/use-text-input';
 import { useInterrupt } from '@/hooks/utils/use-interrupt';
 import { useMicToggle } from '@/hooks/utils/use-mic-toggle';
@@ -17,7 +17,8 @@ export const useFooter = () => {
   } = useTextInput();
 
   const { interrupt } = useInterrupt();
-  const { startMic, autoStartMicOn } = useVAD();
+  const { autoStartMicOn } = useVADState();
+  const { startMic } = useVADActions();
   const { handleMicToggle, micOn } = useMicToggle();
   const { setAiState, aiState } = useAiState();
   const { sendTriggerSignal } = useTriggerSpeak();

@@ -4,7 +4,7 @@ import { useWebSocket } from "@/context/websocket-context";
 import { useChatMessages } from "@/context/chat-history-context";
 import { useAiStateRead } from "@/context/ai-state-context";
 import { useInterrupt } from "@/components/canvas/live2d";
-import { useVAD } from "@/context/vad-context";
+import { useVADState, useVADActions } from "@/context/vad-context";
 import { createStyleInjector } from "@/utils/style-injection";
 
 
@@ -171,7 +171,8 @@ export const InputBar = memo(() => {
   const { appendHumanMessage, popLastHumanMessage } = useChatMessages();
   const { aiState } = useAiStateRead();
   const { interrupt } = useInterrupt();
-  const { micOn, startMic, stopMic } = useVAD();
+  const { micOn } = useVADState();
+  const { startMic, stopMic } = useVADActions();
 
   useEffect(() => {
     const handler = (e: Event) => {

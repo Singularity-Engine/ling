@@ -15,7 +15,7 @@ import { useBgUrl } from '@/context/bgurl-context';
 import { useConfig } from '@/context/character-config-context';
 import { useChatMessages, useHistoryList, useStreamingSetters } from '@/context/chat-history-context';
 import { toaster } from '@/components/ui/toaster';
-import { useVAD } from '@/context/vad-context';
+import { useVADState, useVADActions } from '@/context/vad-context';
 import { AiState, useAiStateRead, useAiStateActions } from "@/context/ai-state-context";
 import { useLocalStorage } from '@/hooks/utils/use-local-storage';
 import { useGroup } from '@/context/group-context';
@@ -142,6 +142,26 @@ const DEFAULT_BACKGROUNDS = [
 const DEFAULT_CONFIG_FILES = [
   { filename: 'ling_pro_zh.yaml', name: BRAND_NAME_DISPLAY },
 ];
+
+// ─── Greeting context builder ────────────────────────────────────
+
+/** Build experiment-aware greeting context payload.
+ *  Uses only localStorage / document.referrer — safe at module level. */
+function buildGreetingContext(): string {
+  const prefs = localStorage.getItem('ling-user-preferences');
+  const visitCount = parseInt(localStorage.getItem('ling_visit_count') || '0', 10) + 1;
+  localStorage.setItem('ling_visit_count', String(visitCount));
+  const ctx: Record<string, unknown> = {
+    role: 'advisor',
+    visitCount,
+    isFirstVisit: visitCount <= 1,
+    referrer: document.referrer || null,
+  };
+  if (prefs) {
+    try { Object.assign(ctx, JSON.parse(prefs)); } catch { /* ignore */ }
+  }
+  return `[greeting:experiment]${JSON.stringify(ctx)}`;
+}
 
 // ─── Greeting expression helper ─────────────────────────────────
 
@@ -552,23 +572,6 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       // Phase 6: Pre-populate config files and backgrounds locally
       setConfigFiles(DEFAULT_CONFIG_FILES);
       bgUrlContext?.setBackgroundFiles(DEFAULT_BACKGROUNDS);
-
-      // Helper: build experiment-aware greeting context
-      const buildGreetingContext = () => {
-        const prefs = localStorage.getItem('ling-user-preferences');
-        const visitCount = parseInt(localStorage.getItem('ling_visit_count') || '0', 10) + 1;
-        localStorage.setItem('ling_visit_count', String(visitCount));
-        const ctx: Record<string, unknown> = {
-          role: 'advisor',
-          visitCount,
-          isFirstVisit: visitCount <= 1,
-          referrer: document.referrer || null,
-        };
-        if (prefs) {
-          try { Object.assign(ctx, JSON.parse(prefs)); } catch { /* ignore */ }
-        }
-        return `[greeting:experiment]${JSON.stringify(ctx)}`;
-      };
 
       // Helper: send auto-greeting (used when no previous history exists)
       const sendGreetingIfNeeded = () => {
@@ -1035,9 +1038,9 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
       // ── Phase 6: Session management ──
       case 'fetch-and-set-history':
-        if (msg.history_uid) {
+        if (message.history_uid) {
           // Sync sessionKeyRef so subsequent sendChat uses the selected session
-          const targetUid = msg.history_uid;
+          const targetUid = message.history_uid;
           sessionKeyRef.current = targetUid;
           setCurrentHistoryUidRef.current(targetUid);
           gatewayConnector.getChatHistory(targetUid).then((res) => {
@@ -1127,10 +1130,10 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         return;
 
       case 'delete-history':
-        if (msg.history_uid) {
+        if (message.history_uid) {
           // Remove from local list (Gateway may not support delete)
           setHistoryListRef.current((prev: HistoryInfo[]) =>
-            prev.filter((h: HistoryInfo) => h.uid !== msg.history_uid)
+            prev.filter((h: HistoryInfo) => h.uid !== message.history_uid)
           );
           toaster.create({
             title: i18next.t('notification.sessionDeleted'),
@@ -1167,7 +1170,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
       default:
         // Unknown message type — log for debugging
-        log.debug('Unhandled sendMessage type:', msg.type);
+        log.debug('Unhandled sendMessage type:', message.type);
         return;
     }
   }, []);

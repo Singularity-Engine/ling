@@ -3,7 +3,7 @@ import { useWebSocket } from '@/context/websocket-context';
 import { useAiStateRead } from '@/context/ai-state-context';
 import { useInterrupt } from '@/components/canvas/live2d';
 import { useChatMessages } from '@/context/chat-history-context';
-import { useVAD } from '@/context/vad-context';
+import { useVADState, useVADActions } from '@/context/vad-context';
 import { useMediaCapture } from '@/hooks/utils/use-media-capture';
 
 export function useTextInput() {
@@ -13,7 +13,8 @@ export function useTextInput() {
   const { aiState } = useAiStateRead();
   const { interrupt } = useInterrupt();
   const { appendHumanMessage } = useChatMessages();
-  const { stopMic, autoStopMic } = useVAD();
+  const { autoStopMic } = useVADState();
+  const { stopMic } = useVADActions();
   const { captureAllMedia } = useMediaCapture();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
