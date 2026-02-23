@@ -4,27 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useConstellation } from "../../hooks/use-constellation";
 import { useToolState } from "../../context/tool-state-context";
 import { getSkillMeta, getMetaByKey, type SkillMeta } from "../../config/skill-registry";
-import { createStyleInjector } from "../../utils/style-injection";
-
-// ── Deferred keyframe injection ─────────────────────────────────
-const ensureConstellationStyles = createStyleInjector({
-  id: "constellation-styles",
-  css: `
-    @keyframes constellationPulse {
-      0%, 100% { box-shadow: 0 0 8px rgba(139,92,246,0.3), 0 0 2px rgba(139,92,246,0.15); }
-      50% { box-shadow: 0 0 16px rgba(139,92,246,0.5), 0 0 4px rgba(139,92,246,0.3); }
-    }
-    @keyframes constellationBirth {
-      0% { transform: scale(0); opacity: 0; filter: brightness(3); }
-      50% { transform: scale(1.3); opacity: 1; filter: brightness(2); }
-      100% { transform: scale(1); opacity: 1; filter: brightness(1); }
-    }
-    @keyframes constellationFlash {
-      0% { box-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(139,92,246,0.6); transform: scale(1.15); }
-      100% { box-shadow: 0 0 8px rgba(139,92,246,0.3); transform: scale(1); }
-    }
-  `,
-});
+// Keyframes moved to static index.css — no runtime injection needed.
 
 // ── Arc layout helpers ──────────────────────────────────────────
 const ARC_SPAN = 150;
@@ -161,9 +141,6 @@ export const Constellation = memo(() => {
   const [isOpen, setIsOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Inject keyframe styles on first render
-  useEffect(ensureConstellationStyles, []);
 
   // Active tool color for core glow
   const activeMeta = activeToolName ? getSkillMeta(activeToolName) : null;

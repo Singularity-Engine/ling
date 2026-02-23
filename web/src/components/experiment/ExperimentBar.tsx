@@ -11,7 +11,7 @@
  */
 
 import { useState, useEffect, useReducer, useRef, useMemo, memo, type CSSProperties } from "react";
-import { createStyleInjector } from "@/utils/style-injection";
+// Keyframes & hover styles moved to static index.css — no runtime injection needed.
 
 // ── Types ──
 
@@ -51,12 +51,6 @@ const FALLBACK: ExperimentStatus = {
 };
 
 const REFRESH_MS = 5 * 60 * 1000; // 5 min
-
-// ── Deferred style injection (hover via CSS avoids inline event handlers) ──
-const ensureBarStyles = createStyleInjector({
-  id: "experiment-bar-styles",
-  css: `.experiment-bar-link:hover { opacity: 1 !important; }`,
-});
 
 // ── Styles ──
 
@@ -184,7 +178,6 @@ CountdownTimer.displayName = "CountdownTimer";
 // ── Component ──
 
 export const ExperimentBar = memo(function ExperimentBar() {
-  useEffect(ensureBarStyles, []);
   const [status, setStatus] = useState<ExperimentStatus>(FALLBACK);
 
   // Fetch on mount + interval; AbortController cancels in-flight requests on unmount

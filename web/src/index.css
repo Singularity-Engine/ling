@@ -959,6 +959,81 @@ canvas {
 /* ── ExperimentBar: link hover ── */
 .experiment-bar-link:hover { opacity: 1 !important; }
 
+/* ── ShortcutsOverlay: fade/slide ── */
+@keyframes shortcutsFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes shortcutsSlideIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── AboutOverlay: fade/slide + link styles ── */
+@keyframes aboutFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes aboutSlideIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.about-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px; text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+}
+.about-link:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.4);
+  color: var(--ling-purple-lighter);
+}
+
+/* ── InfoCrystal: @property for smooth affinity transitions + keyframes ── */
+@property --cg-r { syntax: '<number>'; inherits: false; initial-value: 96; }
+@property --cg-g { syntax: '<number>'; inherits: false; initial-value: 165; }
+@property --cg-b { syntax: '<number>'; inherits: false; initial-value: 250; }
+@property --cb-lo { syntax: '<length>'; inherits: false; initial-value: 10px; }
+@property --cb-hi { syntax: '<length>'; inherits: false; initial-value: 22px; }
+@property --cb-lo-a { syntax: '<number>'; inherits: false; initial-value: 0.12; }
+@property --cb-hi-a { syntax: '<number>'; inherits: false; initial-value: 0.30; }
+@property --cf-y { syntax: '<length>'; inherits: false; initial-value: 0px; }
+@property --c-scale { syntax: '<number>'; inherits: false; initial-value: 1; }
+@property --c-bg-alpha { syntax: '<number>'; inherits: false; initial-value: 0.60; }
+@property --c-blur { syntax: '<length>'; inherits: false; initial-value: 16px; }
+@property --ce-scale { syntax: '<number>'; inherits: false; initial-value: 1; }
+@property --ce-y { syntax: '<length>'; inherits: false; initial-value: 0px; }
+
+@keyframes crystalOverlayIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes crystalExpandIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes crystalBreathe {
+  0%, 100% { box-shadow: 0 0 var(--cb-lo) rgba(var(--cg-r), var(--cg-g), var(--cg-b), var(--cb-lo-a)); }
+  50%      { box-shadow: 0 0 var(--cb-hi) rgba(var(--cg-r), var(--cg-g), var(--cg-b), var(--cb-hi-a)); }
+}
+@keyframes crystalEnter {
+  from { opacity: 0; --ce-scale: 0.5; --ce-y: 40px; }
+  to   { opacity: 1; --ce-scale: 1; --ce-y: 0px; }
+}
+@keyframes crystalFloat {
+  0%, 100% { --cf-y: 0px; }
+  50%      { --cf-y: var(--cf-range); }
+}
+@keyframes crystalExit {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to   { opacity: 0; transform: scale(0.6) translateY(30px); }
+}
+@keyframes shimmerSweep {
+  0%, 60%  { transform: translateX(-100%) rotate(25deg); }
+  80%, 100% { transform: translateX(200%) rotate(25deg); }
+}
+
+/* ── MemoryPanel: hover interactions ── */
+.ling-mem-close:hover { background: rgba(255,255,255,0.06) !important; color: rgba(255,255,255,0.6) !important; }
+.ling-mem-close:active { background: rgba(255,255,255,0.08) !important; color: rgba(255,255,255,0.7) !important; transform: scale(0.9); }
+.ling-memory-card:hover { background: rgba(255,255,255,0.07) !important; border-left-color: rgba(139,92,246,0.55) !important; }
+
 /* === 主题 color-scheme === */
 :root {
   color-scheme: dark;

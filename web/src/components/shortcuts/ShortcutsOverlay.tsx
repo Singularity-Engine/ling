@@ -1,7 +1,7 @@
-import { useEffect, type CSSProperties } from "react";
+import { type CSSProperties } from "react";
 import { memo } from "react";
-import { createStyleInjector } from "@/utils/style-injection";
 import { useTranslation } from "react-i18next";
+// Keyframes moved to static index.css — no runtime injection needed.
 
 interface ShortcutsOverlayProps {
   open: boolean;
@@ -89,23 +89,7 @@ const S_FOOTER: CSSProperties = {
   color: "rgba(139, 92, 246, 0.6)",
 };
 
-// ── Deferred style injection (avoids module-level side effects) ──
-const ensureShortcutsStyles = createStyleInjector({
-  id: "shortcuts-overlay-keyframes",
-  css: `
-    @keyframes shortcutsFadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes shortcutsSlideIn {
-      from { opacity: 0; transform: translateY(12px) scale(0.96); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-  `,
-});
-
 export const ShortcutsOverlay = memo(({ open, onClose }: ShortcutsOverlayProps) => {
-  useEffect(ensureShortcutsStyles, []);
   const { t } = useTranslation();
 
   // ESC to close — handled globally by useKeyboardShortcuts in App.tsx

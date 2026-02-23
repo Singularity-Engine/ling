@@ -121,7 +121,6 @@ const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPerce
 };
 
 export const AffinityBadge = memo(() => {
-  useEffect(ensureBadgeStyles, []);
   const { affinity, level, milestone } = useAffinityState();
   const [expanded, setExpanded] = useState(false);
   const [hovered, setHovered] = useState(false);

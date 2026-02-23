@@ -1,68 +1,11 @@
 import { useTranslation } from "react-i18next";
-import { memo, useState, useCallback, useMemo, useEffect, type CSSProperties } from "react";
+import { memo, useState, useCallback, useMemo, type CSSProperties } from "react";
 import { useAffinityState } from "@/context/affinity-context";
 import { AFFINITY_CRYSTAL_THEMES, CATEGORY_COLORS, DEFAULT_LEVEL, type AffinityCrystalTheme } from "@/config/affinity-palette";
-import { createStyleInjector } from "@/utils/style-injection";
+// @property rules + keyframes moved to static index.css — no runtime injection needed.
 import type { ToolCategory } from "../../context/tool-state-context";
 
 const DEFAULT_THEME: AffinityCrystalTheme = AFFINITY_CRYSTAL_THEMES[DEFAULT_LEVEL];
-
-// ─── Shared CSS: @property + static keyframes ───────────────────
-// @property enables smooth CSS variable transitions when affinity
-// level changes. Keyframes reference var() so they pick up live
-// values without regeneration — glow color, intensity and float
-// range interpolate over 0.8s instead of jumping.
-//
-// crystalFloat animates --cf-y (a custom property) rather than
-// transform directly, so the inline transform remains controllable
-// for hover effects.
-
-const SHARED_STYLES = `
-@property --cg-r { syntax: '<number>'; inherits: false; initial-value: 96; }
-@property --cg-g { syntax: '<number>'; inherits: false; initial-value: 165; }
-@property --cg-b { syntax: '<number>'; inherits: false; initial-value: 250; }
-@property --cb-lo { syntax: '<length>'; inherits: false; initial-value: 10px; }
-@property --cb-hi { syntax: '<length>'; inherits: false; initial-value: 22px; }
-@property --cb-lo-a { syntax: '<number>'; inherits: false; initial-value: 0.12; }
-@property --cb-hi-a { syntax: '<number>'; inherits: false; initial-value: 0.30; }
-@property --cf-y { syntax: '<length>'; inherits: false; initial-value: 0px; }
-@property --c-scale { syntax: '<number>'; inherits: false; initial-value: 1; }
-@property --c-bg-alpha { syntax: '<number>'; inherits: false; initial-value: 0.60; }
-@property --c-blur { syntax: '<length>'; inherits: false; initial-value: 16px; }
-@property --ce-scale { syntax: '<number>'; inherits: false; initial-value: 1; }
-@property --ce-y { syntax: '<length>'; inherits: false; initial-value: 0px; }
-
-@keyframes crystalOverlayIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes crystalExpandIn {
-  from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-}
-@keyframes crystalBreathe {
-  0%, 100% { box-shadow: 0 0 var(--cb-lo) rgba(var(--cg-r), var(--cg-g), var(--cg-b), var(--cb-lo-a)); }
-  50%      { box-shadow: 0 0 var(--cb-hi) rgba(var(--cg-r), var(--cg-g), var(--cg-b), var(--cb-hi-a)); }
-}
-@keyframes crystalEnter {
-  from { opacity: 0; --ce-scale: 0.5; --ce-y: 40px; }
-  to   { opacity: 1; --ce-scale: 1; --ce-y: 0px; }
-}
-@keyframes crystalFloat {
-  0%, 100% { --cf-y: 0px; }
-  50%      { --cf-y: var(--cf-range); }
-}
-@keyframes crystalExit {
-  from { opacity: 1; transform: scale(1) translateY(0); }
-  to   { opacity: 0; transform: scale(0.6) translateY(30px); }
-}
-@keyframes shimmerSweep {
-  0%, 60%  { transform: translateX(-100%) rotate(25deg); }
-  80%, 100% { transform: translateX(200%) rotate(25deg); }
-}
-`;
-
-const ensureSharedStyles = createStyleInjector({
-  attribute: "data-info-crystal",
-  css: SHARED_STYLES,
-});
 
 // ─── Static data ─────────────────────────────────────────────────
 
@@ -213,9 +156,6 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
     const [r, g, b] = theme.glow.split(",").map(s => Number(s.trim()));
     return [r, g, b] as const;
   }, [theme.glow]);
-
-  // Inject shared @property + keyframes once
-  useEffect(ensureSharedStyles, []);
 
   const rotateY = position === "left" ? 5 : position === "right" ? -5 : 0;
 
