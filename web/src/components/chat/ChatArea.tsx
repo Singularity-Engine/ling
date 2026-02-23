@@ -464,6 +464,7 @@ export const ChatArea = memo(() => {
       {!isNearBottom && (
         <div style={S_SCROLL_WRAP}>
           <button
+            className="ling-scroll-btn"
             onClick={scrollToBottom}
             aria-label={t("ui.scrollToLatest")}
             style={hasNewMessage ? S_SCROLL_BTN_PULSE : S_SCROLL_BTN}
