@@ -220,10 +220,9 @@ export const Constellation = memo(() => {
     padding: 0,
     font: "inherit",
     color: "inherit",
-    animation: isNew ? "constellationFlash 0.6s ease-out" : undefined,
     boxShadow: hovered ? `0 0 20px ${coreColor}55` : undefined,
     transition: "border-color 0.3s ease, box-shadow 0.3s ease",
-  }), [isOpen, coreBorderColor, isNew, hovered, coreColor]);
+  }), [isOpen, coreBorderColor, hovered, coreColor]);
 
   // Tooltip text
   const tooltipText = discovered.length === 0
@@ -301,7 +300,7 @@ export const Constellation = memo(() => {
 
       {/* ── Core button (always visible) ── */}
       <motion.button
-        className="constellation-core"
+        className={`constellation-core${isNew ? " constellation-flash" : ""}`}
         onClick={toggleOpen}
         onMouseEnter={setHoveredTrue}
         onMouseLeave={setHoveredFalse}
