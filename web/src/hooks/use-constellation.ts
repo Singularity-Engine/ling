@@ -20,7 +20,9 @@ interface ConstellationState {
   clearNewFlag: () => void;
 }
 
-const STORAGE_KEY = "ling-constellation-v1";
+import { SK_CONSTELLATION } from '@/constants/storage-keys';
+
+const STORAGE_KEY = SK_CONSTELLATION;
 
 // Timer for auto-clearing the "new skill" flag; tracked so rapid
 // discoveries cancel the previous pending clear.

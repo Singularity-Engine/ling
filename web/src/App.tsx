@@ -54,6 +54,7 @@ import { ExperimentBar } from "./components/experiment/ExperimentBar";
 import { SectionErrorBoundary } from "./components/error/SectionErrorBoundary";
 import { createLogger } from "./utils/logger";
 import { OVERLAY_COLORS, WHITE_ALPHA, MISC_COLORS } from "./constants/colors";
+import { SS_ONBOARDING_DONE, SS_VISITED } from "./constants/storage-keys";
 import "./index.css";
 
 // ─── Lazy-loaded overlays & modals (chunk loads on first use) ───
@@ -70,7 +71,7 @@ const RegisterPage = lazy(() => import("./pages/RegisterPage").then(m => ({ defa
 const TermsPage = lazy(() => import("./pages/TermsPage").then(m => ({ default: m.TermsPage })));
 
 // Inlined to avoid eagerly importing the full onboarding module
-const shouldShowOnboarding = () => !sessionStorage.getItem("ling-onboarding-done");
+const shouldShowOnboarding = () => !sessionStorage.getItem(SS_ONBOARDING_DONE);
 
 const rootLog = createLogger("App");
 
@@ -642,12 +643,12 @@ function useCheckoutCallback() {
 /** 主应用（包含 Landing + 所有 Providers） */
 function MainApp() {
   const [showLanding, setShowLanding] = useState(() => {
-    return !sessionStorage.getItem('ling-visited');
+    return !sessionStorage.getItem(SS_VISITED);
   });
   const [landingExiting, setLandingExiting] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => {
     // If landing is skipped (returning visitor), check onboarding immediately
-    return sessionStorage.getItem('ling-visited') ? shouldShowOnboarding() : false;
+    return sessionStorage.getItem(SS_VISITED) ? shouldShowOnboarding() : false;
   });
   useCheckoutCallback();
 
@@ -655,7 +656,7 @@ function MainApp() {
 
   const handleLandingComplete = useCallback(() => {
     setLandingExiting(true);
-    sessionStorage.setItem('ling-visited', 'true');
+    sessionStorage.setItem(SS_VISITED, 'true');
     window.dispatchEvent(new Event('ling-landing-complete'));
     setTimeout(() => {
       setShowLanding(false);

@@ -15,7 +15,9 @@ import { gatewayAdapter } from '@/services/gateway-message-adapter';
 
 // ─── Constants ────────────────────────────────────────────────────
 
-const STORAGE_KEY = 'ling-affinity-state';
+import { SK_AFFINITY_STATE } from '@/constants/storage-keys';
+
+const STORAGE_KEY = SK_AFFINITY_STATE;
 const INITIAL_AFFINITY = 30; // 初次见面
 const MIN_AFFINITY = 0;
 const MAX_AFFINITY = 100;

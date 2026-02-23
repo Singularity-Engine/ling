@@ -9,7 +9,9 @@ interface ThemeContextState {
   setMode: (mode: ThemeMode) => void;
 }
 
-const STORAGE_KEY = 'ling-theme';
+import { SK_THEME } from '@/constants/storage-keys';
+
+const STORAGE_KEY = SK_THEME;
 
 const ThemeContext = createContext<ThemeContextState | null>(null);
 

@@ -27,6 +27,11 @@ import { ttsService } from '@/services/tts-service';
 import { asrService } from '@/services/asr-service';
 import { useTTSActions } from '@/context/tts-state-context';
 import { BRAND_NAME_SHORT, BRAND_NAME_DISPLAY, BRAND_AVATAR_NAME } from '@/constants/brand';
+import {
+  SK_OLD_VISITOR_SESSION, skOldSession, skSessionKey,
+  SK_USER_PREFERENCES, SK_VISIT_COUNT, SK_GATEWAY_URL, SK_BASE_URL,
+  SS_VISITED,
+} from '@/constants/storage-keys';
 import { MOBILE_BREAKPOINT } from '@/constants/breakpoints';
 import { useAuthState, useAuthActions } from '@/context/auth-context';
 import { useUIActions, type BillingModalState } from '@/context/ui-context';
@@ -56,8 +61,8 @@ function getAgentId(): string {
 function getVisitorSessionKey(userId?: string | null): string {
   const agentId = getAgentId();
   // Purge old key formats
-  localStorage.removeItem('ling-visitor-session-key');
-  localStorage.removeItem(`ling-session-${agentId}`);
+  localStorage.removeItem(SK_OLD_VISITOR_SESSION);
+  localStorage.removeItem(skOldSession(agentId));
 
   // Logged-in user: deterministic key based on user ID
   if (userId) {
@@ -65,7 +70,7 @@ function getVisitorSessionKey(userId?: string | null): string {
   }
 
   // Guest: persistent random UUID in localStorage
-  const STORAGE_KEY = `ling-sk-${agentId}`;
+  const STORAGE_KEY = skSessionKey(agentId);
   let key = localStorage.getItem(STORAGE_KEY);
   if (!key || !key.startsWith('agent:')) {
     key = `agent:${agentId}:${crypto.randomUUID()}`;
@@ -148,9 +153,9 @@ const DEFAULT_CONFIG_FILES = [
 /** Build experiment-aware greeting context payload.
  *  Uses only localStorage / document.referrer — safe at module level. */
 function buildGreetingContext(): string {
-  const prefs = localStorage.getItem('ling-user-preferences');
-  const visitCount = parseInt(localStorage.getItem('ling_visit_count') || '0', 10) + 1;
-  localStorage.setItem('ling_visit_count', String(visitCount));
+  const prefs = localStorage.getItem(SK_USER_PREFERENCES);
+  const visitCount = parseInt(localStorage.getItem(SK_VISIT_COUNT) || '0', 10) + 1;
+  localStorage.setItem(SK_VISIT_COUNT, String(visitCount));
   const ctx: Record<string, unknown> = {
     role: 'advisor',
     visitCount,
@@ -205,8 +210,8 @@ function GatewayDebugPanel() {
 
 function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const [wsState, setWsState] = useState<string>('CLOSED');
-  const [gwUrl, setGwUrl] = useLocalStorage<string>('gwUrl', getDefaultGatewayUrl());
-  const [baseUrl, setBaseUrl] = useLocalStorage<string>('baseUrl', defaultBaseUrl);
+  const [gwUrl, setGwUrl] = useLocalStorage<string>(SK_GATEWAY_URL, getDefaultGatewayUrl());
+  const [baseUrl, setBaseUrl] = useLocalStorage<string>(SK_BASE_URL, defaultBaseUrl);
   const { setAiState, setBackendSynthComplete } = useAiStateActions();
   const { setModelInfo } = useLive2DConfigActions();
   const { setSubtitleText } = useSubtitleActions();
@@ -577,7 +582,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           });
         };
 
-        if (sessionStorage.getItem('ling-visited')) {
+        if (sessionStorage.getItem(SS_VISITED)) {
           sendGreeting();
           setGreetingExpression(2000);
         } else {

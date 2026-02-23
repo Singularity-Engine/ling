@@ -7,12 +7,13 @@ import { useSubtitle } from '@/context/subtitle-context';
 import { useWebSocketState, useWebSocketActions, defaultBaseUrl, defaultWsUrl } from '@/context/websocket-context';
 import { useSwitchCharacter } from '@/hooks/utils/use-switch-character';
 import { createLogger } from '@/utils/logger';
+import { SK_IMAGE_COMPRESSION_QUALITY, SK_IMAGE_MAX_WIDTH } from '@/constants/storage-keys';
 
 const log = createLogger('Settings');
 
-export const IMAGE_COMPRESSION_QUALITY_KEY = 'appImageCompressionQuality';
+export const IMAGE_COMPRESSION_QUALITY_KEY = SK_IMAGE_COMPRESSION_QUALITY;
 export const DEFAULT_IMAGE_COMPRESSION_QUALITY = 0.8;
-export const IMAGE_MAX_WIDTH_KEY = 'appImageMaxWidth';
+export const IMAGE_MAX_WIDTH_KEY = SK_IMAGE_MAX_WIDTH;
 export const DEFAULT_IMAGE_MAX_WIDTH = 0;
 
 interface GeneralSettings {

@@ -6,6 +6,8 @@
  * compatible with the existing audio playback system.
  */
 
+import { SK_TOKEN } from '@/constants/storage-keys';
+
 // ─── Configuration ───────────────────────────────────────────────
 
 // TTS proxy URL — standalone TTS service (port 12394) with Engine BFF fallback (12393)
@@ -124,7 +126,7 @@ class TTSService {
     const timeoutId = setTimeout(() => controller.abort(), 30_000);
 
     // Phase 1: 通过后端代理请求 TTS，注入认证 token
-    const token = localStorage.getItem('ling_token');
+    const token = localStorage.getItem(SK_TOKEN);
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
