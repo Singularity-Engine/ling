@@ -120,6 +120,20 @@
   --ling-btn-muted-bg: rgba(255, 255, 255, 0.06);
   --ling-btn-muted-border: rgba(255, 255, 255, 0.08);
   --ling-btn-muted-color: rgba(255, 255, 255, 0.5);
+
+  /* 工具卡片分类色 */
+  --ling-tool-search: #60a5fa;
+  --ling-tool-search-bg: rgba(96, 165, 250, 0.08);
+  --ling-tool-search-border: rgba(96, 165, 250, 0.2);
+  --ling-tool-weather: #facc15;
+  --ling-tool-weather-bg: rgba(250, 204, 21, 0.08);
+  --ling-tool-weather-border: rgba(250, 204, 21, 0.2);
+  --ling-tool-memory: #a78bfa;
+  --ling-tool-memory-bg: rgba(167, 139, 250, 0.08);
+  --ling-tool-memory-border: rgba(167, 139, 250, 0.2);
+  --ling-tool-code: #10b981;
+  --ling-tool-code-bg: rgba(16, 185, 129, 0.08);
+  --ling-tool-code-border: rgba(16, 185, 129, 0.2);
 }
 
 /* === 亮色主题变量 === */
@@ -226,6 +240,20 @@
   --ling-btn-muted-bg: rgba(0, 0, 0, 0.04);
   --ling-btn-muted-border: rgba(0, 0, 0, 0.1);
   --ling-btn-muted-color: rgba(0, 0, 0, 0.4);
+
+  /* 工具卡片分类色 */
+  --ling-tool-search: #3b82f6;
+  --ling-tool-search-bg: rgba(59, 130, 246, 0.06);
+  --ling-tool-search-border: rgba(59, 130, 246, 0.15);
+  --ling-tool-weather: #d97706;
+  --ling-tool-weather-bg: rgba(217, 119, 6, 0.06);
+  --ling-tool-weather-border: rgba(217, 119, 6, 0.15);
+  --ling-tool-memory: #8b5cf6;
+  --ling-tool-memory-bg: rgba(139, 92, 246, 0.06);
+  --ling-tool-memory-border: rgba(139, 92, 246, 0.15);
+  --ling-tool-code: #059669;
+  --ling-tool-code-bg: rgba(5, 150, 105, 0.06);
+  --ling-tool-code-border: rgba(5, 150, 105, 0.15);
 }
 
 /* === 全局基础 === */

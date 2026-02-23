@@ -109,11 +109,11 @@ const S_NAME_FLEX: CSSProperties = { fontSize: "12px", fontWeight: 600, flex: 1 
 const ERROR_COLORS = { bg: "var(--ling-error-bg)", border: "var(--ling-error-border)", accent: "var(--ling-error)" };
 
 const CARD_COLORS: Record<string, { bg: string; border: string; accent: string }> = {
-  search: { bg: "rgba(96, 165, 250, 0.08)", border: "rgba(96, 165, 250, 0.2)", accent: "#60a5fa" },
-  weather: { bg: "rgba(250, 204, 21, 0.08)", border: "rgba(250, 204, 21, 0.2)", accent: "#facc15" },
-  memory: { bg: "rgba(167, 139, 250, 0.08)", border: "rgba(167, 139, 250, 0.2)", accent: "#a78bfa" },
-  code: { bg: "rgba(16, 185, 129, 0.08)", border: "rgba(16, 185, 129, 0.2)", accent: "#10b981" },
-  generic: { bg: "rgba(139, 92, 246, 0.08)", border: "rgba(139, 92, 246, 0.15)", accent: "#8b5cf6" },
+  search: { bg: "var(--ling-tool-search-bg)", border: "var(--ling-tool-search-border)", accent: "var(--ling-tool-search)" },
+  weather: { bg: "var(--ling-tool-weather-bg)", border: "var(--ling-tool-weather-border)", accent: "var(--ling-tool-weather)" },
+  memory: { bg: "var(--ling-tool-memory-bg)", border: "var(--ling-tool-memory-border)", accent: "var(--ling-tool-memory)" },
+  code: { bg: "var(--ling-tool-code-bg)", border: "var(--ling-tool-code-border)", accent: "var(--ling-tool-code)" },
+  generic: { bg: "var(--ling-purple-08)", border: "var(--ling-purple-15)", accent: "var(--ling-purple)" },
 };
 
 // Precompute per-category card & header styles — avoids creating new objects in render
