@@ -1169,6 +1169,10 @@ canvas {
 .ling-plan-btn:active { transform: scale(0.97); }
 .ling-credit-btn:hover { background: rgba(139, 92, 246, 0.18) !important; border-color: rgba(139, 92, 246, 0.4) !important; }
 .ling-credit-btn:active { transform: scale(0.97); }
+.ling-pricing-close:hover { color: rgba(255,255,255,0.85) !important; }
+.ling-pricing-close:active { transform: scale(0.85); color: rgba(255,255,255,0.6) !important; }
+.ling-pricing-manage:hover { color: rgba(255,255,255,0.7) !important; }
+.ling-pricing-manage:active { transform: scale(0.97); color: rgba(255,255,255,0.5) !important; }
 .ling-credits-display:hover { background: rgba(0, 0, 0, 0.45) !important; border-color: rgba(168, 85, 247, 0.3) !important; }
 .ling-credits-display:active { transform: scale(0.95); }
 

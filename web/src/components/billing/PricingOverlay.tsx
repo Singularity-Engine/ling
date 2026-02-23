@@ -53,6 +53,7 @@ const closeBtnStyle: React.CSSProperties = {
   cursor: 'pointer',
   padding: '4px',
   lineHeight: 1,
+  transition: 'color 0.2s, transform 0.2s',
 };
 
 const titleContainerStyle: React.CSSProperties = { textAlign: 'center', marginBottom: '32px' };
@@ -128,6 +129,7 @@ const manageLinkStyle: React.CSSProperties = {
   fontSize: '13px',
   cursor: 'pointer',
   textDecoration: 'underline',
+  transition: 'color 0.2s, transform 0.2s',
 };
 
 const PLANS = [
@@ -376,7 +378,7 @@ const PricingOverlay: React.FC = memo(() => {
     <div style={closing ? S_OVERLAY_CLOSING : S_OVERLAY_OPEN} onClick={handleOverlayClick}>
       <div style={closing ? S_INNER_CLOSING : S_INNER_OPEN} role="dialog" aria-modal="true" aria-labelledby="pricing-title">
         {/* Close button */}
-        <button onClick={handleClose} style={closeBtnStyle} aria-label="Close">
+        <button className="ling-pricing-close" onClick={handleClose} style={closeBtnStyle} aria-label="Close">
           ×
         </button>
 
@@ -476,7 +478,7 @@ const PricingOverlay: React.FC = memo(() => {
         {/* Manage subscription */}
         {currentPlan !== 'free' && (
           <div style={manageLinkContainerStyle}>
-            <button onClick={handlePortal} style={manageLinkStyle}>
+            <button className="ling-pricing-manage" onClick={handlePortal} style={manageLinkStyle}>
               Manage Subscription
             </button>
           </div>
