@@ -17,10 +17,14 @@
   --ling-surface-hover: rgba(255, 255, 255, 0.1);
   --ling-surface-border: rgba(255, 255, 255, 0.08);
   --ling-surface-elevated: rgba(0, 0, 0, 0.35);
+  --ling-surface-subtle: rgba(255, 255, 255, 0.04);
+  --ling-surface-deep: rgba(10, 0, 21, 0.92);
 
   /* 文字 */
   --ling-text-primary: rgba(255, 255, 255, 0.95);
   --ling-text-secondary: rgba(255, 255, 255, 0.8);
+  --ling-text-soft: rgba(255, 255, 255, 0.7);
+  --ling-text-dim: rgba(255, 255, 255, 0.5);
   --ling-text-tertiary: rgba(255, 255, 255, 0.45);
   --ling-text-muted: rgba(255, 255, 255, 0.35);
 

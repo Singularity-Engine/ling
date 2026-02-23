@@ -33,7 +33,7 @@ const S_LEVEL_LABEL_BASE: CSSProperties = {
 
 const S_AFFINITY_VALUE_HIDDEN: CSSProperties = {
   fontSize: "12px",
-  color: "rgba(255,255,255,0.7)",
+  color: "var(--ling-text-soft)",
   fontFamily: "monospace",
   fontWeight: 500,
   overflow: "hidden",
@@ -49,7 +49,7 @@ const S_PANEL_BASE: CSSProperties = {
   right: 0,
   marginTop: "8px",
   padding: "20px",
-  background: "rgba(10, 0, 21, 0.92)",
+  background: "var(--ling-surface-deep)",
   backdropFilter: "blur(24px)",
   borderRadius: "16px",
   minWidth: "200px",
@@ -60,14 +60,14 @@ const S_PANEL_BASE: CSSProperties = {
 const S_PANEL_HEADER: CSSProperties = { display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" };
 const S_PANEL_FLEX1: CSSProperties = { flex: 1 };
 const S_PANEL_LEVEL_NAME: CSSProperties = { fontSize: "15px", fontWeight: 700, display: "block", letterSpacing: "0.3px", transition: "color 0.5s ease" };
-const S_PANEL_SUBLABEL: CSSProperties = { fontSize: "11px", color: "rgba(255,255,255,0.5)", display: "block", marginTop: "2px" };
+const S_PANEL_SUBLABEL: CSSProperties = { fontSize: "11px", color: "var(--ling-text-dim)", display: "block", marginTop: "2px" };
 const S_PANEL_SCORE: CSSProperties = { fontSize: "22px", fontWeight: 700, fontFamily: "monospace", letterSpacing: "-0.5px", transition: "color 0.5s ease" };
 
 const S_PROGRESS_WRAP: CSSProperties = { marginBottom: "14px" };
 const S_PROGRESS_HEADER: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "6px" };
-const S_PROGRESS_LABEL: CSSProperties = { fontSize: "11px", color: "rgba(255,255,255,0.5)" };
-const S_PROGRESS_RANGE: CSSProperties = { fontSize: "11px", color: "rgba(255,255,255,0.4)", fontFamily: "monospace" };
-const S_PROGRESS_TRACK: CSSProperties = { width: "100%", height: "6px", background: "rgba(255,255,255,0.1)", borderRadius: "3px", overflow: "hidden" };
+const S_PROGRESS_LABEL: CSSProperties = { fontSize: "11px", color: "var(--ling-text-dim)" };
+const S_PROGRESS_RANGE: CSSProperties = { fontSize: "11px", color: "var(--ling-text-muted)", fontFamily: "monospace" };
+const S_PROGRESS_TRACK: CSSProperties = { width: "100%", height: "6px", background: "var(--ling-surface-hover)", borderRadius: "3px", overflow: "hidden" };
 const S_PROGRESS_FILL_BASE: CSSProperties = { height: "100%", width: "100%", borderRadius: "3px", transformOrigin: "left", transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease" };
 
 const S_NEXT_LEVEL_WRAP: CSSProperties = {
@@ -75,12 +75,12 @@ const S_NEXT_LEVEL_WRAP: CSSProperties = {
   alignItems: "center",
   gap: "6px",
   padding: "8px 10px",
-  background: "rgba(255,255,255,0.04)",
+  background: "var(--ling-surface-subtle)",
   borderRadius: "10px",
-  border: "1px solid rgba(255,255,255,0.06)",
+  border: "1px solid var(--ling-surface)",
 };
-const S_NEXT_LABEL: CSSProperties = { fontSize: "11px", color: "rgba(255,255,255,0.4)" };
-const S_NEXT_RANGE: CSSProperties = { fontSize: "10px", color: "rgba(255,255,255,0.3)", fontFamily: "monospace", marginLeft: "auto" };
+const S_NEXT_LABEL: CSSProperties = { fontSize: "11px", color: "var(--ling-text-muted)" };
+const S_NEXT_RANGE: CSSProperties = { fontSize: "10px", color: "var(--ling-text-muted)", fontFamily: "monospace", marginLeft: "auto" };
 
 const S_MILESTONE_BASE: CSSProperties = {
   position: "absolute",
@@ -92,13 +92,13 @@ const S_MILESTONE_BASE: CSSProperties = {
   whiteSpace: "nowrap",
   animation: "popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
 };
-const S_MILESTONE_TEXT: CSSProperties = { fontSize: "13px", color: "white", fontWeight: 500 };
+const S_MILESTONE_TEXT: CSSProperties = { fontSize: "13px", color: "var(--ling-text-primary)", fontWeight: 500 };
 const S_HEART_PATH: CSSProperties = { transition: "stroke 0.5s ease" };
 
 const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPercent: number; size?: number }) => {
   const gradientId = useId();
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <defs>
         <linearGradient id={gradientId} x1="0" y1="1" x2="0" y2="0">
           <stop offset={`${fillPercent}%`} stopColor={color} />
@@ -154,24 +154,31 @@ export const AffinityBadge = memo(() => {
   }, [expanded, panelClosing, closePanel]);
 
 
-  // Close expanded panel on outside click
+  // Close expanded panel on outside click or Escape
   const handleClickOutside = useCallback((e: MouseEvent) => {
     if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
       closePanel();
     }
   }, [closePanel]);
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === "Escape") closePanel();
+  }, [closePanel]);
   useEffect(() => {
     if (expanded) {
       document.addEventListener("pointerdown", handleClickOutside);
-      return () => document.removeEventListener("pointerdown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.removeEventListener("pointerdown", handleClickOutside);
+        document.removeEventListener("keydown", handleKeyDown);
+      };
     }
-  }, [expanded, handleClickOutside]);
+  }, [expanded, handleClickOutside, handleKeyDown]);
 
   // ── Computed styles ──
   const btnStyle = useMemo<CSSProperties>(() => ({
     ...S_BTN_BASE,
-    background: "rgba(0, 0, 0, 0.35)",
-    border: "1px solid rgba(255,255,255,0.08)",
+    background: "var(--ling-surface-elevated)",
+    border: "1px solid var(--ling-surface-border)",
     '--ling-accent': `${config.color}44`,
   } as CSSProperties), [config.color]);
 
@@ -232,6 +239,7 @@ export const AffinityBadge = memo(() => {
           onClick={toggleExpanded}
           className="ling-affinity-btn"
           aria-label={t("affinity.label")}
+          aria-expanded={expanded}
           style={btnStyle}
         >
           <span style={heartWrapStyle}>
@@ -247,7 +255,7 @@ export const AffinityBadge = memo(() => {
 
         {/* Expanded panel */}
         {(expanded || panelClosing) && (
-          <div style={panelClosing ? configStyles.panelClosing : configStyles.panelOpen}>
+          <div role="region" aria-label={t("affinity.label")} style={panelClosing ? configStyles.panelClosing : configStyles.panelOpen}>
             {/* Header: heart + level info */}
             <div style={S_PANEL_HEADER}>
               <HeartIcon color={config.heartColor} fillPercent={affinity} size={32} />
@@ -274,7 +282,7 @@ export const AffinityBadge = memo(() => {
                   {levelInfo.current.min}–{levelInfo.current.max === 101 ? 100 : levelInfo.current.max}
                 </span>
               </div>
-              <div style={S_PROGRESS_TRACK}>
+              <div style={S_PROGRESS_TRACK} role="progressbar" aria-valuenow={Math.round(levelInfo.progressInLevel)} aria-valuemin={0} aria-valuemax={100}>
                 <div style={progressFillStyle} />
               </div>
             </div>
@@ -299,7 +307,7 @@ export const AffinityBadge = memo(() => {
 
         {/* Milestone popup — hidden when expanded panel is open to avoid overlap */}
         {milestone && !expanded && (
-          <div style={configStyles.milestone}>
+          <div role="status" aria-live="polite" style={configStyles.milestone}>
             <span style={S_MILESTONE_TEXT}>
               ✨ {milestone}
             </span>
