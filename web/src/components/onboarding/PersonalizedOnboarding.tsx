@@ -162,6 +162,90 @@ const S_MAX_GOALS: CSSProperties = {
   fontSize: "12px", color: "rgba(255,255,255,0.3)", marginTop: "12px",
 };
 
+// ─── Lazy-cached dynamic styles (avoids per-render allocation in .map()) ───
+// Pattern matches SuggestionChips._chipCache and ToolResultCard._dotCache.
+
+const _interestCardCache = new Map<string, CSSProperties>();
+function getInterestCardStyle(color: string, isSelected: boolean): CSSProperties {
+  const key = `${color}:${isSelected}`;
+  let s = _interestCardCache.get(key);
+  if (!s) {
+    s = {
+      ...S_CARD_BASE,
+      border: `1.5px solid ${isSelected ? `${color}80` : "rgba(255,255,255,0.1)"}`,
+      background: isSelected ? `${color}20` : "rgba(255,255,255,0.06)",
+    };
+    _interestCardCache.set(key, s);
+  }
+  return s;
+}
+
+const _labelCache = new Map<string, CSSProperties>();
+function getLabelStyle(color: string, isSelected: boolean): CSSProperties {
+  const key = `${color}:${isSelected}`;
+  let s = _labelCache.get(key);
+  if (!s) {
+    s = {
+      fontSize: "13px",
+      color: isSelected ? color : "rgba(255,255,255,0.6)",
+      fontWeight: isSelected ? 600 : 400,
+    };
+    _labelCache.set(key, s);
+  }
+  return s;
+}
+
+const _checkBadgeCache = new Map<string, CSSProperties>();
+function getCheckBadgeStyle(color: string): CSSProperties {
+  let s = _checkBadgeCache.get(color);
+  if (!s) {
+    s = { ...S_CHECK_BADGE, background: color };
+    _checkBadgeCache.set(color, s);
+  }
+  return s;
+}
+
+const _goalCardCache = new Map<string, CSSProperties>();
+function getGoalCardStyle(color: string, isSelected: boolean, isFull: boolean): CSSProperties {
+  const key = `${color}:${isSelected}:${isFull}`;
+  let s = _goalCardCache.get(key);
+  if (!s) {
+    s = {
+      ...S_GOAL_CARD_BASE,
+      border: `1.5px solid ${isSelected ? `${color}80` : "rgba(255,255,255,0.1)"}`,
+      background: isSelected ? `${color}20` : "rgba(255,255,255,0.06)",
+      cursor: isFull ? "not-allowed" : "pointer",
+      opacity: isFull ? 0.4 : 1,
+    };
+    _goalCardCache.set(key, s);
+  }
+  return s;
+}
+
+const _memoryCardCache = new Map<string, CSSProperties>();
+function getMemoryCardStyle(color: string): CSSProperties {
+  let s = _memoryCardCache.get(color);
+  if (!s) {
+    s = {
+      padding: "12px 16px", borderRadius: "14px",
+      border: `1.5px solid ${color}80`, background: `${color}20`,
+      display: "flex", alignItems: "center", gap: "8px", width: "100%",
+    };
+    _memoryCardCache.set(color, s);
+  }
+  return s;
+}
+
+const _memoryLabelCache = new Map<string, CSSProperties>();
+function getMemoryLabelStyle(color: string): CSSProperties {
+  let s = _memoryLabelCache.get(color);
+  if (!s) {
+    s = { fontSize: "14px", color, fontWeight: 600 };
+    _memoryLabelCache.set(color, s);
+  }
+  return s;
+}
+
 // ── Step: Ready ──
 const S_DESC_READY: CSSProperties = {
   color: "rgba(255,255,255,0.5)", fontSize: "15px", margin: "0 0 28px",
@@ -397,22 +481,14 @@ function StepInterests({
               key={tag}
               onClick={() => onToggle(tag)}
               aria-pressed={isSelected}
-              style={{
-                ...S_CARD_BASE,
-                border: `1.5px solid ${isSelected ? `${color}80` : "rgba(255,255,255,0.1)"}`,
-                background: isSelected ? `${color}20` : "rgba(255,255,255,0.06)",
-              }}
+              style={getInterestCardStyle(color, isSelected)}
             >
               <Icon size={24} color={isSelected ? color : "rgba(255,255,255,0.5)"} aria-hidden="true" />
-              <span style={{
-                fontSize: "13px",
-                color: isSelected ? color : "rgba(255,255,255,0.6)",
-                fontWeight: isSelected ? 600 : 400,
-              }}>
+              <span style={getLabelStyle(color, isSelected)}>
                 {t(`onboarding.interests.${tag}`)}
               </span>
               {isSelected && (
-                <div style={{ ...S_CHECK_BADGE, background: color }}>
+                <div style={getCheckBadgeStyle(color)}>
                   <LuCheck size={12} color="#fff" />
                 </div>
               )}
@@ -449,21 +525,10 @@ function StepGoals({
 
       <div style={S_GRID_GOALS}>
         {/* Memory — always included, not toggleable */}
-        <div
-          style={{
-            padding: "12px 16px",
-            borderRadius: "14px",
-            border: `1.5px solid ${memoryMeta.color}80`,
-            background: `${memoryMeta.color}20`,
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            width: "100%",
-          }}
-        >
+        <div style={getMemoryCardStyle(memoryMeta.color)}>
           <memoryMeta.icon size={20} color={memoryMeta.color} />
           <div style={S_MEMORY_INNER}>
-            <span style={{ fontSize: "14px", color: memoryMeta.color, fontWeight: 600 }}>
+            <span style={getMemoryLabelStyle(memoryMeta.color)}>
               {memoryMeta.label[lang as "en" | "zh"]}
             </span>
             <div style={S_MEMORY_NOTE}>
@@ -484,20 +549,10 @@ function StepGoals({
               onClick={() => !isFull && onToggle(meta.key)}
               disabled={isFull}
               aria-pressed={isSelected}
-              style={{
-                ...S_GOAL_CARD_BASE,
-                border: `1.5px solid ${isSelected ? `${meta.color}80` : "rgba(255,255,255,0.1)"}`,
-                background: isSelected ? `${meta.color}20` : "rgba(255,255,255,0.06)",
-                cursor: isFull ? "not-allowed" : "pointer",
-                opacity: isFull ? 0.4 : 1,
-              }}
+              style={getGoalCardStyle(meta.color, isSelected, isFull)}
             >
               <Icon size={18} color={isSelected ? meta.color : "rgba(255,255,255,0.5)"} aria-hidden="true" />
-              <span style={{
-                fontSize: "13px",
-                color: isSelected ? meta.color : "rgba(255,255,255,0.6)",
-                fontWeight: isSelected ? 600 : 400,
-              }}>
+              <span style={getLabelStyle(meta.color, isSelected)}>
                 {meta.label[lang as "en" | "zh"]}
               </span>
               {isSelected && (

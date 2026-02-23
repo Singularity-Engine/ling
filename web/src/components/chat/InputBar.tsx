@@ -157,6 +157,8 @@ export const InputBar = memo(() => {
   const { micOn } = useVADState();
   const { startMic, stopMic } = useVADActions();
 
+  const handleStop = useCallback(() => interrupt(), [interrupt]);
+
   useEffect(() => {
     const handler = (e: Event) => {
       const text = (e as CustomEvent).detail?.text;
@@ -337,7 +339,7 @@ export const InputBar = memo(() => {
 
         <button
           className="ling-send-btn"
-          onClick={isAiSpeaking ? () => interrupt() : handleSend}
+          onClick={isAiSpeaking ? handleStop : handleSend}
           disabled={!isAiSpeaking && !canSend}
           aria-label={isAiSpeaking ? t("chat.stopReply") : !isConnected ? t("chat.sendDisconnected") : t("chat.sendMessage")}
           title={isAiSpeaking ? t("chat.stopReply") : !isConnected ? t("chat.sendDisconnected") : t("chat.sendMessage")}
