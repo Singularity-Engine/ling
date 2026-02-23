@@ -3,20 +3,26 @@ import { useTranslation } from "react-i18next";
 import { useNetworkStatus } from "../../hooks/use-network-status";
 // Keyframes moved to static index.css — no runtime injection needed.
 
+// ── Named constants ──
+const BANNER_TOP_PX = 16;
+const BANNER_Z_INDEX = 9999;
+const BANNER_BLUR_PX = 12;
+const RECOVERY_DISPLAY_MS = 3000;
+
 // ── Pre-allocated style constants ──
 const S_BASE: CSSProperties = {
   position: "fixed",
-  top: 16,
+  top: BANNER_TOP_PX,
   left: "50%",
   transform: "translateX(-50%)",
-  zIndex: 9999,
+  zIndex: BANNER_Z_INDEX,
   padding: "8px 20px",
   borderRadius: 999,
   fontSize: 14,
   fontWeight: 600,
   color: "#fff",
-  backdropFilter: "blur(12px)",
-  WebkitBackdropFilter: "blur(12px)",
+  backdropFilter: `blur(${BANNER_BLUR_PX}px)`,
+  WebkitBackdropFilter: `blur(${BANNER_BLUR_PX}px)`,
   pointerEvents: "none",
   userSelect: "none",
   whiteSpace: "nowrap",
@@ -24,17 +30,17 @@ const S_BASE: CSSProperties = {
 
 const S_OFFLINE: CSSProperties = {
   ...S_BASE,
-  background: "rgba(220, 38, 38, 0.75)",
-  border: "1px solid rgba(248, 113, 113, 0.4)",
-  boxShadow: "0 4px 24px rgba(220, 38, 38, 0.3)",
+  background: "var(--ling-status-offline-bg)",
+  border: "1px solid var(--ling-status-offline-border)",
+  boxShadow: "0 4px 24px var(--ling-status-offline-shadow)",
   animation: "netBannerSlideDown 0.35s ease-out",
 };
 
 const S_RECOVERED: CSSProperties = {
   ...S_BASE,
-  background: "rgba(22, 163, 74, 0.75)",
-  border: "1px solid rgba(74, 222, 128, 0.4)",
-  boxShadow: "0 4px 24px rgba(22, 163, 74, 0.3)",
+  background: "var(--ling-status-recovered-bg)",
+  border: "1px solid var(--ling-status-recovered-border)",
+  boxShadow: "0 4px 24px var(--ling-status-recovered-shadow)",
   animation: "netBannerFadeOut 3s ease-out forwards",
 };
 
@@ -54,7 +60,10 @@ export const NetworkStatusBanner = memo(function NetworkStatusBanner() {
       setPhase("offline");
     } else if (wasOffline.current) {
       setPhase("recovered");
-      timerRef.current = setTimeout(() => setPhase("hidden"), 3000);
+      timerRef.current = setTimeout(
+        () => setPhase("hidden"),
+        RECOVERY_DISPLAY_MS,
+      );
     }
     return () => clearTimeout(timerRef.current);
   }, [isOnline]);
@@ -62,7 +71,12 @@ export const NetworkStatusBanner = memo(function NetworkStatusBanner() {
   if (phase === "hidden") return null;
 
   return (
-    <div style={phase === "offline" ? S_OFFLINE : S_RECOVERED}>
+    <div
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      style={phase === "offline" ? S_OFFLINE : S_RECOVERED}
+    >
       {phase === "offline" ? t("network.offline") : t("network.recovered")}
     </div>
   );

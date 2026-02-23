@@ -31,6 +31,14 @@
   --ling-error-bg: rgba(248, 113, 113, 0.2);
   --ling-error-border: rgba(248, 113, 113, 0.3);
 
+  /* 状态横幅 */
+  --ling-status-offline-bg: rgba(220, 38, 38, 0.75);
+  --ling-status-offline-border: rgba(248, 113, 113, 0.4);
+  --ling-status-offline-shadow: rgba(220, 38, 38, 0.3);
+  --ling-status-recovered-bg: rgba(22, 163, 74, 0.75);
+  --ling-status-recovered-border: rgba(74, 222, 128, 0.4);
+  --ling-status-recovered-shadow: rgba(22, 163, 74, 0.3);
+
   /* 紫色常用透明度 */
   --ling-purple-15: rgba(139, 92, 246, 0.15);
   --ling-purple-20: rgba(139, 92, 246, 0.2);
