@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useEffect, useRef, type CSSProperties } from "react";
+import { memo, useMemo, useState, useEffect, useRef, useCallback, type CSSProperties } from "react";
 import { useToolState } from "../../context/tool-state-context";
 import { useIsMobile } from "../../hooks/use-is-mobile";
 import { InfoCrystal } from "./InfoCrystal";
@@ -61,6 +61,29 @@ export const CrystalField = memo(() => {
     Map<string, { tool: (typeof liveCrystals)[0]; index: number }>
   >(new Map());
 
+  // Hold exit-animation timers in a ref so they survive effect re-runs.
+  // Previously, `return () => clearTimeout(timer)` in the effect would cancel
+  // earlier timers when liveCrystals changed rapidly, leaking exitingMap entries.
+  const exitTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+
+  // Cleanup all pending timers on unmount
+  useEffect(() => {
+    const timers = exitTimersRef.current;
+    return () => { timers.forEach(t => clearTimeout(t)); };
+  }, []);
+
+  const scheduleExitCleanup = useCallback((ids: string[]) => {
+    const timer = setTimeout(() => {
+      exitTimersRef.current.delete(timer);
+      setExitingMap(prev => {
+        const next = new Map(prev);
+        ids.forEach(id => next.delete(id));
+        return next.size === prev.size ? prev : next;
+      });
+    }, EXIT_DURATION);
+    exitTimersRef.current.add(timer);
+  }, []);
+
   useEffect(() => {
     const currentIds = new Set(liveCrystals.map(c => c.id));
     const exiting = new Map<string, { tool: (typeof liveCrystals)[0]; index: number }>();
@@ -81,17 +104,9 @@ export const CrystalField = memo(() => {
 
     if (exiting.size > 0) {
       setExitingMap(prev => new Map([...prev, ...exiting]));
-      // Remove exiting entries after animation completes
-      const timer = setTimeout(() => {
-        setExitingMap(prev => {
-          const next = new Map(prev);
-          exiting.forEach((_, id) => next.delete(id));
-          return next;
-        });
-      }, EXIT_DURATION);
-      return () => clearTimeout(timer);
+      scheduleExitCleanup([...exiting.keys()]);
     }
-  }, [liveCrystals]);
+  }, [liveCrystals, scheduleExitCleanup]);
 
   const wraps = isMobile ? MOBILE_WRAP : DESKTOP_WRAP;
 
