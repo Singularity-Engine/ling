@@ -75,6 +75,28 @@ const shouldShowOnboarding = () => !sessionStorage.getItem(SS_ONBOARDING_DONE);
 
 const rootLog = createLogger("App");
 
+// ─── ErrorBoundary style constants (avoid per-render allocation on error screen) ───
+
+const S_EB_WRAP: CSSProperties = {
+  width: '100vw', height: '100vh', background: '#0a0015',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+};
+const S_EB_INNER: CSSProperties = { maxWidth: 'min(440px, calc(100vw - 32px))', textAlign: 'center', padding: '32px 16px' };
+const S_EB_EMOJI: CSSProperties = { fontSize: 48, marginBottom: 16, opacity: 0.8 };
+const S_EB_TITLE: CSSProperties = { color: 'var(--ling-purple-lighter)', marginBottom: 8, fontSize: 20, fontWeight: 600 };
+const S_EB_DESC: CSSProperties = { color: 'rgba(255,255,255,0.5)', fontSize: 14, marginBottom: 24, lineHeight: 1.6 };
+const S_EB_BTN_ROW: CSSProperties = { display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' };
+const _EB_BTN: CSSProperties = { padding: '10px 24px', borderRadius: 8, fontSize: 14, cursor: 'pointer', border: 'none', transition: 'opacity 0.2s' };
+const S_EB_BTN_PRIMARY: CSSProperties = { ..._EB_BTN, background: 'rgba(139,92,246,0.5)', color: '#fff' };
+const S_EB_BTN_SECONDARY: CSSProperties = { ..._EB_BTN, background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.12)' };
+const S_EB_DETAIL_TOGGLE: CSSProperties = { marginTop: 20, background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: 12, cursor: 'pointer' };
+const S_EB_DETAIL_PRE: CSSProperties = {
+  marginTop: 12, textAlign: 'left', color: 'rgba(255,107,107,0.7)',
+  fontSize: 11, fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+  maxHeight: 200, overflow: 'auto', background: MISC_COLORS.ERROR_BG, padding: 12, borderRadius: 8,
+};
+
 // Error Boundary
 interface ErrorBoundaryState { hasError: boolean; error: Error | null; errorInfo: ErrorInfo | null; showDetail: boolean; }
 class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryState> {
@@ -83,31 +105,30 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
   componentDidCatch(error: Error, errorInfo: ErrorInfo) { this.setState({ errorInfo }); rootLog.error('Root crash:', error, errorInfo.componentStack); }
   render() {
     if (this.state.hasError) {
-      const btnBase: React.CSSProperties = { padding: '10px 24px', borderRadius: 8, fontSize: 14, cursor: 'pointer', border: 'none', transition: 'opacity 0.2s' };
       return (
-        <div style={{ width: '100vw', height: '100vh', background: '#0a0015', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}>
-          <div style={{ maxWidth: 'min(440px, calc(100vw - 32px))', textAlign: 'center', padding: '32px 16px' }}>
-            <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.8 }}>:(</div>
-            <h2 style={{ color: 'var(--ling-purple-lighter)', marginBottom: 8, fontSize: 20, fontWeight: 600 }}>{i18next.t('error.pageCrashTitle')}</h2>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, marginBottom: 24, lineHeight: 1.6 }}>
+        <div style={S_EB_WRAP}>
+          <div style={S_EB_INNER}>
+            <div style={S_EB_EMOJI}>:(</div>
+            <h2 style={S_EB_TITLE}>{i18next.t('error.pageCrashTitle')}</h2>
+            <p style={S_EB_DESC}>
               {i18next.t('error.pageCrashLine1')}<br />{i18next.t('error.pageCrashLine2')}
             </p>
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button onClick={() => window.location.reload()} style={{ ...btnBase, background: 'rgba(139,92,246,0.5)', color: '#fff' }}>
+            <div style={S_EB_BTN_ROW}>
+              <button onClick={() => window.location.reload()} style={S_EB_BTN_PRIMARY}>
                 {i18next.t('error.refreshPage')}
               </button>
-              <button onClick={() => { localStorage.clear(); window.location.reload(); }} style={{ ...btnBase, background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.12)' }}>
+              <button onClick={() => { localStorage.clear(); window.location.reload(); }} style={S_EB_BTN_SECONDARY}>
                 {i18next.t('error.clearCacheRefresh')}
               </button>
             </div>
             <button
               onClick={() => this.setState({ showDetail: !this.state.showDetail })}
-              style={{ marginTop: 20, background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: 12, cursor: 'pointer' }}
+              style={S_EB_DETAIL_TOGGLE}
             >
               {this.state.showDetail ? i18next.t('error.hideDetails') : i18next.t('error.showErrorDetails')}
             </button>
             {this.state.showDetail && (
-              <pre style={{ marginTop: 12, textAlign: 'left', color: 'rgba(255,107,107,0.7)', fontSize: 11, fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all', maxHeight: 200, overflow: 'auto', background: MISC_COLORS.ERROR_BG, padding: 12, borderRadius: 8 }}>
+              <pre style={S_EB_DETAIL_PRE}>
                 {this.state.error?.toString()}{'\n'}{this.state.errorInfo?.componentStack}
               </pre>
             )}
@@ -207,6 +228,10 @@ const S_INPUT_BAR_BG: CSSProperties = {
   backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
   borderTop: "1px solid rgba(139, 92, 246, 0.15)",
 };
+
+// Fallback styles for SectionErrorBoundary
+const S_FALLBACK_CHAT: CSSProperties = { padding: "16px", textAlign: "center", color: "rgba(255,255,255,0.4)", fontSize: 13 };
+const S_FALLBACK_INPUT: CSSProperties = { padding: "12px 16px", color: "rgba(255,255,255,0.3)", fontSize: 13, textAlign: "center" };
 
 // Landing → main content transition
 const S_MAIN_VISIBLE: CSSProperties = {
@@ -535,9 +560,7 @@ function MainContent(): JSX.Element {
       <div style={chatOuterStyle}>
         <div style={chatInnerStyle(isMobile, chatExpanded)}>
           <SectionErrorBoundary name="ChatArea" fallback={
-            <div style={{ padding: "16px", textAlign: "center", color: "rgba(255,255,255,0.4)", fontSize: 13 }}>
-              {t("error.chatRenderFailed")}
-            </div>
+            <div style={S_FALLBACK_CHAT}>{t("error.chatRenderFailed")}</div>
           }>
             <Suspense fallback={null}>
               <ChatArea />
@@ -571,9 +594,7 @@ function MainContent(): JSX.Element {
           )}
           <SectionErrorBoundary name="InputBar" fallback={
             <div style={S_INPUT_BAR_BG}>
-              <div style={{ padding: "12px 16px", color: "rgba(255,255,255,0.3)", fontSize: 13, textAlign: "center" }}>
-                {i18next.t("error.inputBarFailed")}
-              </div>
+              <div style={S_FALLBACK_INPUT}>{i18next.t("error.inputBarFailed")}</div>
             </div>
           }>
             <div style={S_INPUT_BAR_BG}>
