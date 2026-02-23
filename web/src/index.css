@@ -543,6 +543,20 @@ body {
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important;
 }
 
+/* Language switcher option buttons */
+.ling-lang-option:not([aria-selected="true"]):hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+}
+.ling-lang-option:focus-visible {
+  outline: 2px solid rgba(139, 92, 246, 0.6);
+  outline-offset: -2px;
+}
+[data-theme="light"] .ling-lang-option:not([aria-selected="true"]):hover {
+  background: rgba(139, 92, 246, 0.1);
+  color: rgba(0, 0, 0, 0.85);
+}
+
 /* Live2D 点击粒子 */
 @keyframes tapParticleFloat {
   0% { opacity: 1; transform: translateY(0) translateX(0) scale(1); }
