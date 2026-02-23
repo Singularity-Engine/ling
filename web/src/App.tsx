@@ -38,7 +38,7 @@ import { CrystalField } from "./components/crystal/CrystalField";
 import { Constellation } from "./components/ability/Constellation";
 import { LoadingSkeleton } from "./components/loading/LoadingSkeleton";
 import { Toaster, toaster } from "./components/ui/toaster";
-import { useWebSocket } from "./context/websocket-context";
+import { useWebSocketActions } from "./context/websocket-context";
 import { useKeyboardShortcuts, ShortcutDef } from "./hooks/use-keyboard-shortcuts";
 import { NetworkStatusBanner } from "./components/effects/NetworkStatusBanner";
 import { TapParticles } from "./components/effects/TapParticles";
@@ -254,7 +254,7 @@ function MainContent(): JSX.Element {
   // Contexts for keyboard shortcuts
   const { micOn } = useVADState();
   const { startMic, stopMic } = useVADActions();
-  const { sendMessage } = useWebSocket();
+  const { sendMessage } = useWebSocketActions();
   const { interrupt } = useInterrupt();
   const { messages } = useChatMessages();
   const { currentHistoryUid, updateHistoryList } = useHistoryList();

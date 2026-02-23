@@ -9,7 +9,7 @@ import type { Message } from "@/services/websocket-service";
 import { createStyleInjector } from "@/utils/style-injection";
 
 import { useAiStateRead } from "@/context/ai-state-context";
-import { useWebSocket } from "@/context/websocket-context";
+import { useWebSocketState, useWebSocketActions } from "@/context/websocket-context";
 
 // ── Deferred style injection (performance optimization) ──
 const CHAT_STYLES_CSS = `
@@ -381,7 +381,8 @@ const StreamingFooter = memo(function StreamingFooter({
 }: StreamingFooterProps) {
   const { fullResponse } = useStreamingValue();
   const { isThinkingSpeaking } = useAiStateRead();
-  const { sendMessage, wsState } = useWebSocket();
+  const { wsState } = useWebSocketState();
+  const { sendMessage } = useWebSocketActions();
   const { t } = useTranslation();
 
   const displayResponse = useThrottledValue(fullResponse);
@@ -461,7 +462,8 @@ export const ChatArea = memo(() => {
   const { messages, appendHumanMessage } = useChatMessages();
   const { getFullResponse } = useStreamingRef();
   const { isThinkingSpeaking } = useAiStateRead();
-  const { sendMessage, wsState } = useWebSocket();
+  const { wsState } = useWebSocketState();
+  const { sendMessage } = useWebSocketActions();
   const { t } = useTranslation();
 
   // Inject chat area styles

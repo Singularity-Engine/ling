@@ -1,6 +1,6 @@
 import { memo, useState, useEffect, useRef, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
-import { useWebSocket } from "@/context/websocket-context";
+import { useWebSocketState, useWebSocketActions } from "@/context/websocket-context";
 import { gatewayConnector, RECONNECT_MAX_RETRIES } from "@/services/gateway-connector";
 import { OVERLAY_COLORS } from "@/constants/colors";
 import { createStyleInjector } from "@/utils/style-injection";
@@ -123,7 +123,8 @@ const S_HINT: CSSProperties = {
  */
 export const ConnectionStatus = memo(() => {
   const { t } = useTranslation();
-  const { wsState, reconnect } = useWebSocket();
+  const { wsState } = useWebSocketState();
+  const { reconnect } = useWebSocketActions();
   const [showConnected, setShowConnected] = useState(false);
   const [reconnectAttempt, setReconnectAttempt] = useState(0);
   const [idleRetry, setIdleRetry] = useState(false);

@@ -1,7 +1,7 @@
 /* eslint-disable import/order */
 import { useState, useEffect, useCallback } from 'react';
 import { useBgUrlState, useBgUrlActions } from '@/context/bgurl-context';
-import { useWebSocket, defaultBaseUrl, defaultWsUrl } from '@/context/websocket-context';
+import { useWebSocketState, useWebSocketActions, defaultBaseUrl, defaultWsUrl } from '@/context/websocket-context';
 import { useSubtitle } from '@/context/subtitle-context';
 import { useCameraActions } from '@/context/camera-context';
 import { useSwitchCharacter } from '@/hooks/utils/use-switch-character';
@@ -65,7 +65,8 @@ export const useGeneralSettings = ({
   const { setBackgroundUrl, setUseCameraBackground } = useBgUrlActions();
   const { confName, configFiles, getFilenameByName } = useConfigState();
   const { setConfName } = useConfigActions();
-  const { wsUrl, setWsUrl, baseUrl, setBaseUrl } = useWebSocket();
+  const { wsUrl, baseUrl } = useWebSocketState();
+  const { setWsUrl, setBaseUrl } = useWebSocketActions();
   const { showSubtitle, setShowSubtitle } = useSubtitle();
   const { startBackgroundCamera, stopBackgroundCamera } = useCameraActions();
   const { switchCharacter } = useSwitchCharacter();

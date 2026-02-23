@@ -7,7 +7,7 @@ import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import { useChatMessages } from '@/context/chat-history-context';
 import { Global } from '@emotion/react';
 import { useConfigState } from '@/context/character-config-context';
-import { useWebSocket } from '@/context/websocket-context';
+import { useWebSocketState } from '@/context/websocket-context';
 import { FaTools, FaCheck, FaTimes } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { Message } from '@/services/websocket-service';
@@ -95,7 +95,7 @@ const ChatHistoryPanel = memo(function ChatHistoryPanel(): JSX.Element {
   const { t } = useTranslation();
   const { messages } = useChatMessages();
   const { confName } = useConfigState();
-  const { baseUrl } = useWebSocket();
+  const { baseUrl } = useWebSocketState();
   const userName = "Me";
 
   // Context menu state

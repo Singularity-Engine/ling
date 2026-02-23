@@ -2,7 +2,7 @@ import {
   createContext, useMemo, useContext, useState, useCallback,
 } from 'react';
 import { useLocalStorage } from '@/hooks/utils/use-local-storage';
-import { useWebSocket } from './websocket-context';
+import { useWebSocketState } from './websocket-context';
 
 /**
  * Background file interface
@@ -51,7 +51,7 @@ const BgUrlActionsContext = createContext<BgUrlActions | null>(null);
  * Background URL Provider Component
  */
 export function BgUrlProvider({ children }: { children: React.ReactNode }) {
-  const { baseUrl } = useWebSocket();
+  const { baseUrl } = useWebSocketState();
   const defaultBackground = useMemo(
     () => `${baseUrl}/bg/ceiling-window-room-night.jpeg`,
     [baseUrl],
