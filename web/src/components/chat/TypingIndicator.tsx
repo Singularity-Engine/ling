@@ -1,9 +1,17 @@
 import { memo, type CSSProperties } from "react";
 
+// ─── Constants ───
+
+const DOT_SIZE = 8;            // px
+const DOT_GAP = 6;             // px
+const BOUNCE_DURATION_S = 1.4; // animation cycle
+const BOUNCE_STAGGER_S = 0.2;  // delay between dots
+const GRADIENT_ANGLE = 135;    // degrees
+
 const DOT_COLORS = [
-  "linear-gradient(135deg, #a78bfa, #8b5cf6)",
-  "linear-gradient(135deg, #8b5cf6, #7c3aed)",
-  "linear-gradient(135deg, #7c3aed, #6d28d9)",
+  `linear-gradient(${GRADIENT_ANGLE}deg, var(--ling-purple-light), var(--ling-purple))`,
+  `linear-gradient(${GRADIENT_ANGLE}deg, var(--ling-purple), var(--ling-purple-deep))`,
+  `var(--ling-purple-deep)`,
 ];
 
 // ─── Static style constants (avoid per-render allocation) ───
@@ -11,9 +19,9 @@ const DOT_COLORS = [
 const S_WRAP_BASE: CSSProperties = {
   display: "flex",
   alignItems: "center",
-  gap: "6px",
+  gap: `${DOT_GAP}px`,
   padding: "4px 2px",
-  filter: "drop-shadow(0 1px 3px rgba(139, 92, 246, 0.25))",
+  filter: "drop-shadow(0 1px 3px var(--ling-purple-25))",
 };
 
 const S_WRAP_IN: CSSProperties = {
@@ -29,11 +37,11 @@ const S_WRAP_OUT: CSSProperties = {
 const DOT_INDICES = [0, 1, 2] as const;
 
 const S_DOTS: CSSProperties[] = DOT_INDICES.map((i) => ({
-  width: "8px",
-  height: "8px",
+  width: `${DOT_SIZE}px`,
+  height: `${DOT_SIZE}px`,
   borderRadius: "50%",
   background: DOT_COLORS[i],
-  animation: `thinkingDot 1.4s ease-in-out ${i * 0.2}s infinite`,
+  animation: `thinkingDot ${BOUNCE_DURATION_S}s ease-in-out ${i * BOUNCE_STAGGER_S}s infinite`,
 }));
 
 interface TypingIndicatorProps {
@@ -43,7 +51,11 @@ interface TypingIndicatorProps {
 
 export const TypingIndicator = memo(({ fadeOut }: TypingIndicatorProps) => {
   return (
-    <div style={fadeOut ? S_WRAP_OUT : S_WRAP_IN}>
+    <div
+      role="status"
+      aria-label="AI is thinking"
+      style={fadeOut ? S_WRAP_OUT : S_WRAP_IN}
+    >
       {DOT_INDICES.map((i) => (
         <div key={i} style={S_DOTS[i]} />
       ))}
