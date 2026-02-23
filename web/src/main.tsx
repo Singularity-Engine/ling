@@ -14,18 +14,6 @@ console.warn = (...args) => {
   originalConsoleWarn.apply(console, args);
 };
 
-// Suppress specific console.error messages from @chatscope/chat-ui-kit-react
-const originalConsoleError = console.error;
-const errorMessagesToIgnore = ["Warning: Failed"];
-console.error = (...args: unknown[]) => {
-  if (typeof args[0] === 'string') {
-    const shouldIgnore = errorMessagesToIgnore.some(msg => args[0].startsWith(msg));
-    if (shouldIgnore) {
-      return;
-    }
-  }
-  originalConsoleError.apply(console, args);
-};
 
 if (typeof window !== 'undefined') {
   window.getLAppAdapter = () => LAppAdapter.getInstance();

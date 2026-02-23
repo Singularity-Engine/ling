@@ -10,8 +10,6 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^3.2.3",
-    "@chatscope/chat-ui-kit-react": "^2.0.3",
-    "@chatscope/chat-ui-kit-styles": "^1.4.0",
     "@emotion/react": "^11.14.0",
     "@ricky0123/vad-web": "^0.0.24",
     "framer-motion": "^11.14.4",

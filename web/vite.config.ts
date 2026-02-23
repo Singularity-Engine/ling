@@ -77,7 +77,7 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/')) {
             return 'vendor-react';
           }
-          if (id.includes('node_modules/@chakra-ui') || id.includes('node_modules/@emotion')) {
+          if (id.includes('node_modules/@chakra-ui') || id.includes('node_modules/@emotion') || id.includes('node_modules/@ark-ui') || id.includes('node_modules/@pandacss')) {
             return 'vendor-ui';
           }
           if (id.includes('node_modules/framer-motion')) {
