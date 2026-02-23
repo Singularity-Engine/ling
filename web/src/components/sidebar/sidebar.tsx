@@ -3,7 +3,7 @@ import { Box, Button, Menu } from '@chakra-ui/react';
 import {
   FiSettings, FiClock, FiPlus, FiChevronLeft, FiUsers, FiLayers
 } from 'react-icons/fi';
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { sidebarStyles } from './sidebar-styles';
 import SettingUI from './setting/setting-ui';
@@ -57,40 +57,43 @@ const ToggleButton = memo(({ isCollapsed, onToggle }: {
 
 ToggleButton.displayName = 'ToggleButton';
 
-const ModeMenu = memo(({ setMode, currentMode, isElectron }: {
+const ModeMenu = memo(function ModeMenu({ setMode, currentMode, isElectron }: {
   setMode: (mode: ModeType) => void
   currentMode: ModeType
   isElectron: boolean
-}) => (
-  <Menu.Root>
-    <Menu.Trigger as={Button} aria-label="Mode Menu" title="Change Mode">
-      <FiLayers />
-    </Menu.Trigger>
-    <Menu.Positioner>
-      <Menu.Content>
-        <Menu.RadioItemGroup value={currentMode}>
-          <Menu.RadioItem value="window" onClick={() => setMode('window')}>
-            <Menu.ItemIndicator />
-            Live Mode
-          </Menu.RadioItem>
-          <Menu.RadioItem 
-            value="pet" 
-            onClick={() => {
-              if (isElectron) {
-                setMode('pet');
-              }
-            }}
-            disabled={!isElectron}
-            title={!isElectron ? "Pet mode is only available in desktop app" : undefined}
-          >
-            <Menu.ItemIndicator />
-            Pet Mode
-          </Menu.RadioItem>
-        </Menu.RadioItemGroup>
-      </Menu.Content>
-    </Menu.Positioner>
-  </Menu.Root>
-));
+}) {
+  const handleWindowMode = useCallback(() => setMode('window'), [setMode]);
+  const handlePetMode = useCallback(() => {
+    if (isElectron) setMode('pet');
+  }, [setMode, isElectron]);
+
+  return (
+    <Menu.Root>
+      <Menu.Trigger as={Button} aria-label="Mode Menu" title="Change Mode">
+        <FiLayers />
+      </Menu.Trigger>
+      <Menu.Positioner>
+        <Menu.Content>
+          <Menu.RadioItemGroup value={currentMode}>
+            <Menu.RadioItem value="window" onClick={handleWindowMode}>
+              <Menu.ItemIndicator />
+              Live Mode
+            </Menu.RadioItem>
+            <Menu.RadioItem
+              value="pet"
+              onClick={handlePetMode}
+              disabled={!isElectron}
+              title={!isElectron ? "Pet mode is only available in desktop app" : undefined}
+            >
+              <Menu.ItemIndicator />
+              Pet Mode
+            </Menu.RadioItem>
+          </Menu.RadioItemGroup>
+        </Menu.Content>
+      </Menu.Positioner>
+    </Menu.Root>
+  );
+});
 
 ModeMenu.displayName = 'ModeMenu';
 

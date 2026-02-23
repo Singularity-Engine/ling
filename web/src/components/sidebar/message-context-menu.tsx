@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useCallback } from 'react';
+import { memo, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
 import { FaCopy, FaRedo, FaVolumeUp } from 'react-icons/fa';
@@ -89,18 +89,21 @@ export const MessageContextMenu = memo(function MessageContextMenu({ message, po
     return () => document.removeEventListener('keydown', handler);
   }, [onClose]);
 
-  // Keep menu within viewport
-  const adjustedPosition = { ...position };
-  if (typeof window !== 'undefined') {
-    const menuW = 160;
-    const menuH = 140;
-    if (position.x + menuW > window.innerWidth) {
-      adjustedPosition.x = window.innerWidth - menuW - 8;
+  // Keep menu within viewport — memoize to stabilize reference
+  const adjustedPosition = useMemo(() => {
+    const pos = { ...position };
+    if (typeof window !== 'undefined') {
+      const menuW = 160;
+      const menuH = 140;
+      if (position.x + menuW > window.innerWidth) {
+        pos.x = window.innerWidth - menuW - 8;
+      }
+      if (position.y + menuH > window.innerHeight) {
+        pos.y = window.innerHeight - menuH - 8;
+      }
     }
-    if (position.y + menuH > window.innerHeight) {
-      adjustedPosition.y = window.innerHeight - menuH - 8;
-    }
-  }
+    return pos;
+  }, [position.x, position.y]);
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(message.content).then(() => {

@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { memo, useCallback, useEffect } from "react";
+import { memo, useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Stack, createListCollection } from "@chakra-ui/react";
 import { useBgUrlState } from "@/context/bgurl-context";
@@ -49,12 +49,12 @@ const useCollections = (t: (key: string) => string) => {
     })),
   }), [configFiles]);
 
-  return {
+  return useMemo(() => ({
     languages: LANGUAGE_COLLECTION,
     themes,
     backgrounds,
     characterPresets,
-  };
+  }), [themes, backgrounds, characterPresets]);
 };
 
 const General = memo(function General({ onSave, onCancel }: GeneralProps): JSX.Element {
