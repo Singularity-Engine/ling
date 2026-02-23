@@ -162,7 +162,7 @@ function Sidebar({ isCollapsed = false, onToggle }: SidebarProps): JSX.Element {
   } = useSidebar();
 
   return (
-    <Box {...sidebarStyles.sidebar.container(isCollapsed)}>
+    <Box {...(isCollapsed ? sidebarStyles.sidebar.containerCollapsed : sidebarStyles.sidebar.containerOpen)}>
       <ToggleButton isCollapsed={isCollapsed} onToggle={onToggle} />
 
       {!isCollapsed && !settingsOpen && (

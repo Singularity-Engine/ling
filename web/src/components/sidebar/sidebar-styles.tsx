@@ -32,23 +32,36 @@ const commonStyles = {
 
 export const sidebarStyles = {
   sidebar: {
-    container: (isCollapsed: boolean) => ({
+    containerOpen: {
       position: 'absolute' as const,
       left: 0,
       top: 0,
       height: '100%',
       width: 'min(440px, 100vw)',
       bg: 'gray.900',
-      transform: isCollapsed
-        ? 'translateX(calc(-100% + 32px))'
-        : 'translateX(0)',
+      transform: 'translateX(0)',
       transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       display: 'flex',
       flexDirection: 'column' as const,
       gap: 4,
-      overflow: isCollapsed ? 'visible' : 'hidden',
+      overflow: 'hidden',
       pb: '4',
-    }),
+    },
+    containerCollapsed: {
+      position: 'absolute' as const,
+      left: 0,
+      top: 0,
+      height: '100%',
+      width: 'min(440px, 100vw)',
+      bg: 'gray.900',
+      transform: 'translateX(calc(-100% + 32px))',
+      transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      display: 'flex',
+      flexDirection: 'column' as const,
+      gap: 4,
+      overflow: 'visible',
+      pb: '4',
+    },
     toggleButton: {
       position: 'absolute',
       right: 0,
