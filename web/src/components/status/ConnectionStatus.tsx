@@ -111,14 +111,22 @@ const S_HINT: CSSProperties = {
  * - Connecting/Reconnecting: pulsing amber dot + "重连中..."
  * - Disconnected: red dot + "连接断开" + click-to-retry
  */
+// Connected-notification animation phase (eliminates impossible state combinations)
+const enum ConnPhase { HIDDEN, VISIBLE, CLOSING }
+
+interface ConnState {
+  phase: ConnPhase;
+  reconnectAttempt: number;
+  idleRetry: boolean;
+}
+
+const INIT_STATE: ConnState = { phase: ConnPhase.HIDDEN, reconnectAttempt: 0, idleRetry: false };
+
 export const ConnectionStatus = memo(() => {
   const { t } = useTranslation();
   const { wsState } = useWebSocketState();
   const { reconnect } = useWebSocketActions();
-  const [showConnected, setShowConnected] = useState(false);
-  const [closingConnected, setClosingConnected] = useState(false);
-  const [reconnectAttempt, setReconnectAttempt] = useState(0);
-  const [idleRetry, setIdleRetry] = useState(false);
+  const [state, setState] = useState<ConnState>(INIT_STATE);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
   const closeTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
@@ -126,18 +134,23 @@ export const ConnectionStatus = memo(() => {
   const isConnecting = wsState === "CONNECTING";
   const isClosed = wsState === "CLOSED";
 
+  const { phase, reconnectAttempt, idleRetry } = state;
+  const showConnected = phase !== ConnPhase.HIDDEN;
+  const closingConnected = phase === ConnPhase.CLOSING;
+
   useEffect(() => {
     if (isOpen) {
-      setShowConnected(true);
-      setClosingConnected(false);
-      timerRef.current = setTimeout(() => setClosingConnected(true), 1700);
-      closeTimerRef.current = setTimeout(() => {
-        setShowConnected(false);
-        setClosingConnected(false);
-      }, 2000);
+      setState(prev => ({ ...prev, phase: ConnPhase.VISIBLE }));
+      timerRef.current = setTimeout(
+        () => setState(prev => ({ ...prev, phase: ConnPhase.CLOSING })),
+        1700,
+      );
+      closeTimerRef.current = setTimeout(
+        () => setState(prev => ({ ...prev, phase: ConnPhase.HIDDEN })),
+        2000,
+      );
     } else {
-      setShowConnected(false);
-      setClosingConnected(false);
+      setState(prev => ({ ...prev, phase: ConnPhase.HIDDEN }));
     }
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
@@ -146,11 +159,14 @@ export const ConnectionStatus = memo(() => {
   }, [isOpen]);
 
   useEffect(() => {
-    const attemptSub = gatewayConnector.reconnectAttempt$.subscribe(setReconnectAttempt);
-    const idleSub = gatewayConnector.inIdleRetry$.subscribe(setIdleRetry);
+    const attemptSub = gatewayConnector.reconnectAttempt$.subscribe(v =>
+      setState(prev => ({ ...prev, reconnectAttempt: v })),
+    );
+    const idleSub = gatewayConnector.inIdleRetry$.subscribe(v =>
+      setState(prev => ({ ...prev, idleRetry: v })),
+    );
     return () => { attemptSub.unsubscribe(); idleSub.unsubscribe(); };
   }, []);
-
 
   if (isOpen && !showConnected) return null;
 
