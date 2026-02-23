@@ -10,7 +10,9 @@ const log = createLogger('ChatHistory');
 /**
  * Context 1a-state — Read-only messages array.
  * Changes on every message add/remove/replace.
- * Only components that RENDER messages (ChatArea, App) subscribe here.
+ * Only components that RENDER messages (ChatArea) subscribe here.
+ * Components that only READ messages imperatively (e.g. MainContent
+ * for createNewChat) should use useMessagesRef() instead.
  */
 interface MessagesStateValue {
   messages: Message[];
@@ -81,6 +83,16 @@ interface StreamingRefState {
 }
 
 /**
+ * Context 5 — Non-reactive ref to latest messages array.
+ * Stable getter (never changes after mount). Use when you need
+ * the current messages at call-time (e.g. saving history before
+ * creating a new chat) without subscribing to every message update.
+ */
+interface MessagesRefState {
+  getMessages: () => Message[];
+}
+
+/**
  * Keep at most this many messages in memory.
  * Oldest messages are trimmed when the limit is exceeded to prevent
  * unbounded DOM growth and state-update slowdowns in long conversations.
@@ -100,6 +112,7 @@ const HistoryListContext = createContext<HistoryListState | null>(null);
 const StreamingValueContext = createContext<StreamingValueState | null>(null);
 const StreamingSetterContext = createContext<StreamingSetterState | null>(null);
 const StreamingRefContext = createContext<StreamingRefState | null>(null);
+const MessagesRefContext = createContext<MessagesRefState | null>(null);
 
 /**
  * Combined provider — wraps three granular contexts so App.tsx only
@@ -118,6 +131,10 @@ export function ChatHistoryProvider({ children }: { children: ReactNode }) {
   const [currentHistoryUid, setCurrentHistoryUid] = useState<string | null>(
     DEFAULT_HISTORY.currentHistoryUid,
   );
+
+  // ── Ref mirror for messages — stable getter, never triggers re-renders ──
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
 
   // ── Streaming state ──
   const [fullResponse, setFullResponse] = useState(DEFAULT_HISTORY.fullResponse);
@@ -330,18 +347,26 @@ export function ChatHistoryProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  // Context 5: messages REF — stable getter, never triggers re-renders
+  const messagesRefValue = useMemo<MessagesRefState>(
+    () => ({ getMessages: () => messagesRef.current }),
+    [],
+  );
+
   return (
     <MessagesActionsContext.Provider value={messagesActionsValue}>
       <MessagesStateContext.Provider value={messagesStateValue}>
-        <HistoryListContext.Provider value={historyValue}>
-          <StreamingSetterContext.Provider value={streamSetters}>
-            <StreamingValueContext.Provider value={streamValue}>
-              <StreamingRefContext.Provider value={streamRefValue}>
-                {children}
-              </StreamingRefContext.Provider>
-            </StreamingValueContext.Provider>
-          </StreamingSetterContext.Provider>
-        </HistoryListContext.Provider>
+        <MessagesRefContext.Provider value={messagesRefValue}>
+          <HistoryListContext.Provider value={historyValue}>
+            <StreamingSetterContext.Provider value={streamSetters}>
+              <StreamingValueContext.Provider value={streamValue}>
+                <StreamingRefContext.Provider value={streamRefValue}>
+                  {children}
+                </StreamingRefContext.Provider>
+              </StreamingValueContext.Provider>
+            </StreamingSetterContext.Provider>
+          </HistoryListContext.Provider>
+        </MessagesRefContext.Provider>
       </MessagesStateContext.Provider>
     </MessagesActionsContext.Provider>
   );
@@ -399,6 +424,17 @@ export function useStreamingSetters() {
 export function useStreamingRef() {
   const ctx = useContext(StreamingRefContext);
   if (!ctx) throw new Error('useStreamingRef must be used within ChatHistoryProvider');
+  return ctx;
+}
+
+/**
+ * Non-reactive ref getter for messages — never triggers re-renders.
+ * Use when you need current messages at call-time (e.g. saving history)
+ * without subscribing to every message update.
+ */
+export function useMessagesRef() {
+  const ctx = useContext(MessagesRefContext);
+  if (!ctx) throw new Error('useMessagesRef must be used within ChatHistoryProvider');
   return ctx;
 }
 

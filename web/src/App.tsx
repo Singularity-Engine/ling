@@ -13,7 +13,7 @@ import { SubtitleProvider } from "./context/subtitle-context";
 import { BgUrlProvider } from "./context/bgurl-context";
 import WebSocketHandler from "./services/websocket-handler";
 import { CameraProvider } from "./context/camera-context";
-import { ChatHistoryProvider, useChatMessagesState, useHistoryList } from "./context/chat-history-context";
+import { ChatHistoryProvider, useMessagesRef, useHistoryList } from "./context/chat-history-context";
 import { CharacterConfigProvider } from "./context/character-config-context";
 import { VADProvider, useVADState, useVADActions } from "./context/vad-context";
 import { Live2D, useInterrupt } from "./components/canvas/live2d";
@@ -259,14 +259,15 @@ function MainContent(): JSX.Element {
   const { startMic, stopMic } = useVADActions();
   const { sendMessage } = useWebSocketActions();
   const { interrupt } = useInterrupt();
-  const { messages } = useChatMessagesState();
+  // Non-reactive ref getter — reads current messages at call-time without
+  // subscribing MainContent to every message update (avoids ~N re-renders
+  // per conversation turn where N = number of messages added).
+  const { getMessages } = useMessagesRef();
   const { currentHistoryUid, updateHistoryList } = useHistoryList();
 
   // Ref mirrors so createNewChat and shortcuts stay stable across state changes.
-  // Without this, every new chat message or mic toggle recreates callbacks →
+  // Without this, every mic toggle or history switch recreates callbacks →
   // rebuilds the shortcuts useMemo array, wasting work on every state change.
-  const messagesRef = useRef(messages);
-  messagesRef.current = messages;
   const historyUidRef = useRef(currentHistoryUid);
   historyUidRef.current = currentHistoryUid;
   const micOnRef = useRef(micOn);
@@ -342,13 +343,13 @@ function MainContent(): JSX.Element {
   }, [toggleChat]);
 
   const createNewChat = useCallback(() => {
-    if (historyUidRef.current && messagesRef.current.length > 0) {
-      const latestMessage = messagesRef.current[messagesRef.current.length - 1];
-      updateHistoryList(historyUidRef.current, latestMessage);
+    const msgs = getMessages();
+    if (historyUidRef.current && msgs.length > 0) {
+      updateHistoryList(historyUidRef.current, msgs[msgs.length - 1]);
     }
     interrupt();
     sendMessage({ type: "create-new-history" });
-  }, [updateHistoryList, interrupt, sendMessage]);
+  }, [getMessages, updateHistoryList, interrupt, sendMessage]);
 
   // Refs for ephemeral UI state — lets the Escape shortcut read latest values
   // without adding them as useMemo deps (avoids rebuilding the entire shortcuts
