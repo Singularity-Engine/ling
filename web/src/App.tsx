@@ -4,7 +4,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
-import { LandingAnimation } from "./components/landing/LandingAnimation";
+// Lazy-loaded: only shown on first visit (before sessionStorage 'ling-visited' is set).
+// Avoids bundling the particle canvas + typewriter animation code for returning visitors.
+const LandingAnimation = lazy(() => import("./components/landing/LandingAnimation").then(m => ({ default: m.LandingAnimation })));
 import { AiStateProvider } from "./context/ai-state-context";
 import { Live2DConfigProvider } from "./context/live2d-config-context";
 import { SubtitleProvider } from "./context/subtitle-context";
@@ -257,13 +259,15 @@ function MainContent(): JSX.Element {
   const { messages } = useChatMessages();
   const { currentHistoryUid, updateHistoryList } = useHistoryList();
 
-  // Ref mirrors so createNewChat stays stable across message/session changes.
-  // Without this, every new chat message recreates createNewChat → rebuilds
-  // the shortcuts useMemo array, wasting work on every message arrival.
+  // Ref mirrors so createNewChat and shortcuts stay stable across state changes.
+  // Without this, every new chat message or mic toggle recreates callbacks →
+  // rebuilds the shortcuts useMemo array, wasting work on every state change.
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
   const historyUidRef = useRef(currentHistoryUid);
   historyUidRef.current = currentHistoryUid;
+  const micOnRef = useRef(micOn);
+  micOnRef.current = micOn;
 
   useEffect(() => {
     const handleResize = () => {
@@ -360,7 +364,8 @@ function MainContent(): JSX.Element {
     {
       key: "mod+m",
       labelKey: "shortcuts.toggleMic",
-      action: () => { micOn ? stopMic() : startMic(); },
+      // Read via ref so mic state changes don't rebuild the entire shortcuts array.
+      action: () => { micOnRef.current ? stopMic() : startMic(); },
     },
     {
       key: "/",
@@ -415,7 +420,10 @@ function MainContent(): JSX.Element {
       },
       allowInInput: true,
     },
-  ], [micOn, startMic, stopMic, createNewChat]);
+    // Fully stable: micOn read via micOnRef, startMic/stopMic are stable
+    // VADActions callbacks, createNewChat uses refs internally.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [startMic, stopMic, createNewChat]);
 
   useKeyboardShortcuts(shortcuts);
   useAffinityIdleExpression();
@@ -701,7 +709,9 @@ function MainApp() {
       </ThemeProvider>
 
       {showLanding && (
-        <LandingAnimation onComplete={handleLandingComplete} />
+        <Suspense fallback={null}>
+          <LandingAnimation onComplete={handleLandingComplete} />
+        </Suspense>
       )}
 
       <SectionErrorBoundary name="BillingOverlays">

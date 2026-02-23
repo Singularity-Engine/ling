@@ -1212,7 +1212,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     setWsUrl: setGwUrl,
     baseUrl,
     setBaseUrl,
-  }), [sendMessage, wsState, reconnect, gwUrl, baseUrl]);
+  }), [sendMessage, wsState, reconnect, gwUrl, setGwUrl, baseUrl, setBaseUrl]);
 
   return (
     <WebSocketContext.Provider value={webSocketContextValue}>

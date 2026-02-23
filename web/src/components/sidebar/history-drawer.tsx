@@ -1,7 +1,7 @@
 import { Box, Button } from '@chakra-ui/react';
 import { FiTrash2 } from 'react-icons/fi';
 import i18next from 'i18next';
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   DrawerRoot,
@@ -25,10 +25,11 @@ interface HistoryDrawerProps {
 }
 
 interface HistoryItemProps {
+  uid: string;
   isSelected: boolean;
   latestMessage: { content: string; timestamp: string | null };
-  onSelect: () => void;
-  onDelete: (e: React.MouseEvent) => void;
+  onSelect: (uid: string) => void;
+  onDelete: (uid: string) => void;
   isDeleteDisabled: boolean;
 }
 
@@ -61,6 +62,7 @@ function formatTimestamp(timestamp: string, lang: string): string {
 
 // Reusable components
 const HistoryItem = memo(({
+  uid,
   isSelected,
   latestMessage,
   onSelect,
@@ -68,11 +70,16 @@ const HistoryItem = memo(({
   isDeleteDisabled,
 }: HistoryItemProps): JSX.Element => {
   const { t, i18n } = useTranslation();
+  const handleSelect = useCallback(() => onSelect(uid), [onSelect, uid]);
+  const handleDelete = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete(uid);
+  }, [onDelete, uid]);
   return (
     <Box
       {...sidebarStyles.historyDrawer.historyItem}
       {...(isSelected ? sidebarStyles.historyDrawer.historyItemSelected : {})}
-      onClick={onSelect}
+      onClick={handleSelect}
       className="group"
     >
       <Box {...sidebarStyles.historyDrawer.historyHeader}>
@@ -83,7 +90,7 @@ const HistoryItem = memo(({
         </Box>
         {!isDeleteDisabled && (
           <Button
-            onClick={onDelete}
+            onClick={handleDelete}
             aria-label={t('ui.deleteChat')}
             title={t('ui.deleteChat')}
             {...sidebarStyles.historyDrawer.deleteButton}
@@ -140,10 +147,12 @@ const HistoryDrawer = memo(function HistoryDrawer({ children }: HistoryDrawerPro
     getLatestMessageContent,
   } = useHistoryDrawer();
 
+  const handleOpenChange = useCallback((e: { open: boolean }) => setOpen(e.open), [setOpen]);
+
   return (
     <DrawerRoot
       open={open}
-      onOpenChange={(e) => setOpen(e.open)}
+      onOpenChange={handleOpenChange}
       placement="start"
     >
       <DrawerBackdrop />
@@ -164,13 +173,11 @@ const HistoryDrawer = memo(function HistoryDrawer({ children }: HistoryDrawerPro
               {historyList.map((history: HistoryInfo) => (
                 <HistoryItem
                   key={history.uid}
+                  uid={history.uid}
                   isSelected={currentHistoryUid === history.uid}
                   latestMessage={getLatestMessageContent(history)}
-                  onSelect={() => fetchAndSetHistory(history.uid)}
-                  onDelete={(e) => {
-                    e.stopPropagation();
-                    deleteHistory(history.uid);
-                  }}
+                  onSelect={fetchAndSetHistory}
+                  onDelete={deleteHistory}
                   isDeleteDisabled={currentHistoryUid === history.uid}
                 />
               ))}

@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useChatMessages, useHistoryList } from '@/context/chat-history-context';
-import { useWebSocket, HistoryInfo } from '@/context/websocket-context';
+import { useWebSocket, HistoryInfo, LegacyMessage } from '@/context/websocket-context';
 import { toaster } from '@/components/ui/toaster';
 
 export const useHistoryDrawer = () => {
@@ -17,12 +17,20 @@ export const useHistoryDrawer = () => {
   } = useHistoryList();
   const { sendMessage } = useWebSocket();
 
-  const fetchAndSetHistory = (uid: string) => {
-    if (!uid || uid === currentHistoryUid) return;
+  // Refs for values that change frequently — lets callbacks stay stable
+  const messagesRef = useRef<LegacyMessage[]>(messages);
+  messagesRef.current = messages;
+  const currentHistoryUidRef = useRef(currentHistoryUid);
+  currentHistoryUidRef.current = currentHistoryUid;
 
-    if (currentHistoryUid && messages.length > 0) {
-      const latestMessage = messages[messages.length - 1];
-      updateHistoryList(currentHistoryUid, latestMessage);
+  const fetchAndSetHistory = useCallback((uid: string) => {
+    const curUid = currentHistoryUidRef.current;
+    const msgs = messagesRef.current;
+    if (!uid || uid === curUid) return;
+
+    if (curUid && msgs.length > 0) {
+      const latestMessage = msgs[msgs.length - 1];
+      updateHistoryList(curUid, latestMessage);
     }
 
     setCurrentHistoryUid(uid);
@@ -30,10 +38,10 @@ export const useHistoryDrawer = () => {
       type: 'fetch-and-set-history',
       history_uid: uid,
     });
-  };
+  }, [sendMessage, setCurrentHistoryUid, updateHistoryList]);
 
-  const deleteHistory = (uid: string) => {
-    if (uid === currentHistoryUid) {
+  const deleteHistory = useCallback((uid: string) => {
+    if (uid === currentHistoryUidRef.current) {
       toaster.create({
         title: t('error.cannotDeleteCurrentHistory'),
         type: 'warning',
@@ -46,8 +54,8 @@ export const useHistoryDrawer = () => {
       type: 'delete-history',
       history_uid: uid,
     });
-    setHistoryList(historyList.filter((history) => history.uid !== uid));
-  };
+    setHistoryList((prev) => prev.filter((history) => history.uid !== uid));
+  }, [sendMessage, setHistoryList, t]);
 
   const getLatestMessageContent = (history: HistoryInfo) => {
     if (history.uid === currentHistoryUid && messages.length > 0) {
