@@ -419,7 +419,11 @@ class GatewayConnector {
             data: payload.data || {},
           };
           this.debugCounters.agentEvents++;
-          this.debugCounters.lastEvent = `${agentEvent.stream}:${JSON.stringify(agentEvent.data).slice(0, 60)}`;
+          // JSON.stringify at ~30fps during streaming creates significant GC
+          // pressure for a debug-only field; skip it in production builds.
+          if (import.meta.env.DEV) {
+            this.debugCounters.lastEvent = `${agentEvent.stream}:${JSON.stringify(agentEvent.data).slice(0, 60)}`;
+          }
           log.debug('AGENT EVENT:', agentEvent.stream, agentEvent.data);
           this.agentEvent$.next(agentEvent);
           this.options?.onAgentEvent?.(agentEvent);

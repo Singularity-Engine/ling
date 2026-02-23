@@ -160,7 +160,25 @@ class ApiClient {
 
   // ── Refresh ─────────────────────────────────────────────
 
+  // Dedup guard: when multiple 401s arrive simultaneously (e.g. parallel
+  // requests), only the first triggers an actual refresh; subsequent callers
+  // share the same in-flight promise. Without this, the second call would
+  // race and use an already-consumed refresh token, fail, clear credentials,
+  // and redirect to login — a real-world auth failure on concurrent requests.
+  private _refreshPromise: Promise<boolean> | null = null;
+
   private async _tryRefresh(): Promise<boolean> {
+    if (this._refreshPromise) return this._refreshPromise;
+
+    this._refreshPromise = this._doRefresh();
+    try {
+      return await this._refreshPromise;
+    } finally {
+      this._refreshPromise = null;
+    }
+  }
+
+  private async _doRefresh(): Promise<boolean> {
     const refreshToken = this.getRefreshToken();
     if (!refreshToken) return false;
 
