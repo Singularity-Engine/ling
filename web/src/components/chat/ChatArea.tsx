@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Virtuoso } from "react-virtuoso";
 import { ChatBubble } from "./ChatBubble";
 import { ThinkingBubble } from "./ThinkingBubble";
@@ -10,6 +10,7 @@ import { createStyleInjector } from "@/utils/style-injection";
 
 import { useAiStateRead } from "@/context/ai-state-context";
 import { useWebSocketState, useWebSocketActions } from "@/context/websocket-context";
+import { useChatScroll } from "@/hooks/use-chat-scroll";
 
 // ── Deferred style injection (performance optimization) ──
 const CHAT_STYLES_CSS = `
@@ -471,120 +472,20 @@ export const ChatArea = memo(() => {
 
   // Inject chat area styles
   useEffect(ensureChatStyles, []);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const rafScrollRef = useRef(0);
-  // Virtuoso needs a mounted DOM element as customScrollParent.
-  // useLayoutEffect sets it before paint so the second render includes Virtuoso.
-  const [scrollParent, setScrollParent] = useState<HTMLElement | null>(null);
-  useLayoutEffect(() => { setScrollParent(scrollRef.current); }, []);
-  // Track message count so we can detect newly-added human messages
-  const lastMsgCountRef = useRef(messages.length);
-  // Track first message ID to detect conversation switches (full message replacement)
-  const prevFirstMsgIdRef = useRef<string | undefined>(undefined);
+
+  const {
+    scrollRef, bottomRef, scrollParent,
+    isNearBottom, hasNewMessage, isNearBottomRef,
+    scrollToBottom,
+  } = useChatScroll(messages, getFullResponse);
 
   // Track empty-state exit animation: keep showing for 350ms with fade-out
   const [emptyExiting, setEmptyExiting] = useState(false);
   const prevEmptyRef = useRef(true);
 
-  const [isNearBottom, setIsNearBottom] = useState(true);
-  const [hasNewMessage, setHasNewMessage] = useState(false);
-  // Ref mirrors isNearBottom so the auto-scroll effect can read the latest
-  // value without depending on it (avoids re-firing on scroll-position changes).
-  const isNearBottomRef = useRef(true);
   // true during the render immediately after streaming ends — lets us skip
   // the entry animation on the just-committed AI bubble (avoids a blink).
   const wasStreamingRef = useRef(false);
-
-  const checkNearBottom = useCallback(() => {
-    if (rafScrollRef.current) return;
-    rafScrollRef.current = requestAnimationFrame(() => {
-      rafScrollRef.current = 0;
-      const el = scrollRef.current;
-      if (!el) return;
-      const near = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
-      isNearBottomRef.current = near;
-      setIsNearBottom((prev) => (prev === near ? prev : near));
-      if (near) setHasNewMessage(false);
-    });
-  }, []);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.addEventListener("scroll", checkNearBottom, { passive: true });
-    return () => {
-      el.removeEventListener("scroll", checkNearBottom);
-      if (rafScrollRef.current) {
-        cancelAnimationFrame(rafScrollRef.current);
-        rafScrollRef.current = 0;
-      }
-    };
-  }, [checkNearBottom]);
-
-  // Scroll to bottom when the chat panel transitions from collapsed (0 height)
-  // to expanded. Without this, reopening the panel shows old messages at the top.
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    let wasCollapsed = el.clientHeight < 20;
-    const ro = new ResizeObserver(() => {
-      const collapsed = el.clientHeight < 20;
-      if (wasCollapsed && !collapsed) {
-        requestAnimationFrame(() => { el.scrollTop = el.scrollHeight; });
-      }
-      wasCollapsed = collapsed;
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  useEffect(() => {
-    // Detect conversation switch: messages array fully replaced (different first message).
-    // Always scroll to bottom so the user sees the latest messages of the loaded conversation.
-    const firstId = messages[0]?.id;
-    const isConversationSwitch = prevFirstMsgIdRef.current !== undefined
-      && firstId !== prevFirstMsgIdRef.current;
-    prevFirstMsgIdRef.current = firstId;
-
-    if (isConversationSwitch) {
-      lastMsgCountRef.current = messages.length;
-      setHasNewMessage(false);
-      const container = scrollRef.current;
-      if (container) {
-        requestAnimationFrame(() => { container.scrollTop = container.scrollHeight; });
-      }
-      return;
-    }
-
-    // Detect newly-added human message → always scroll to show it,
-    // even if the user had scrolled up to read history.
-    const isNewMsg = messages.length !== lastMsgCountRef.current;
-    const lastMsg = messages[messages.length - 1];
-    const isOwnNewMsg = isNewMsg && lastMsg?.role === "human";
-    lastMsgCountRef.current = messages.length;
-
-    if (!isNearBottomRef.current && !isOwnNewMsg) {
-      setHasNewMessage(true);
-      return;
-    }
-    const container = scrollRef.current;
-    if (!container) return;
-    // getFullResponse() reads streaming state at call-time without subscribing.
-    // Streaming auto-scroll is handled by StreamingFooter; this is only for
-    // new-message scroll (decides instant vs smooth based on active streaming).
-    if (getFullResponse()) {
-      container.scrollTop = container.scrollHeight;
-    } else {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages, getFullResponse]);
-
-  const scrollToBottom = useCallback(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    setHasNewMessage(false);
-  }, []);
 
   const isConnected = wsState === "OPEN";
   // Ref mirror — keeps handleChipClick stable across connection state changes
