@@ -48,6 +48,8 @@ export function useChatScroll(
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const rafScrollRef = useRef(0);
+  const rafExpandRef = useRef(0);
+  const rafSwitchRef = useRef(0);
 
   // Virtuoso needs a mounted DOM element as customScrollParent.
   // useLayoutEffect sets it before paint so the first paint includes Virtuoso.
@@ -105,18 +107,32 @@ export function useChatScroll(
     const ro = new ResizeObserver(() => {
       const collapsed = el.clientHeight < COLLAPSED_HEIGHT_PX;
       if (wasCollapsed && !collapsed) {
-        requestAnimationFrame(() => {
+        cancelAnimationFrame(rafExpandRef.current);
+        rafExpandRef.current = requestAnimationFrame(() => {
+          rafExpandRef.current = 0;
           el.scrollTop = el.scrollHeight;
         });
       }
       wasCollapsed = collapsed;
     });
     ro.observe(el);
-    return () => ro.disconnect();
+    return () => {
+      ro.disconnect();
+      if (rafExpandRef.current) {
+        cancelAnimationFrame(rafExpandRef.current);
+        rafExpandRef.current = 0;
+      }
+    };
   }, []);
 
   // ── Auto-scroll on new messages / conversation switch ──
   useEffect(() => {
+    const cleanup = () => {
+      if (rafSwitchRef.current) {
+        cancelAnimationFrame(rafSwitchRef.current);
+        rafSwitchRef.current = 0;
+      }
+    };
     // Detect conversation switch: messages array fully replaced (different first
     // message). Always scroll to bottom so the user sees the latest messages.
     const firstId = messages[0]?.id;
@@ -130,11 +146,13 @@ export function useChatScroll(
       setHasNewMessage(false);
       const container = scrollRef.current;
       if (container) {
-        requestAnimationFrame(() => {
+        cancelAnimationFrame(rafSwitchRef.current);
+        rafSwitchRef.current = requestAnimationFrame(() => {
+          rafSwitchRef.current = 0;
           container.scrollTop = container.scrollHeight;
         });
       }
-      return;
+      return cleanup;
     }
 
     // Detect newly-added human message → always scroll to show it, even if the
@@ -146,10 +164,10 @@ export function useChatScroll(
 
     if (!isNearBottomRef.current && !isOwnNewMsg) {
       setHasNewMessage(true);
-      return;
+      return cleanup;
     }
     const container = scrollRef.current;
-    if (!container) return;
+    if (!container) return cleanup;
     // getFullResponse() reads streaming state at call-time without subscribing.
     // Streaming auto-scroll is handled by StreamingFooter; this only decides
     // instant vs smooth for new-message scroll.
@@ -158,6 +176,7 @@ export function useChatScroll(
     } else {
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }
+    return cleanup;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages, getFullResponse]);
 
