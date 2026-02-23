@@ -233,7 +233,8 @@
     "showLess": "접기",
     "toolRunning": "실행 중",
     "toolCompleted": "완료",
-    "toolError": "오류"
+    "toolError": "오류",
+    "toolResult": "도구 결과"
   },
   "connection": {
     "connected": "연결됨",

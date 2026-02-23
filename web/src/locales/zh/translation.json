@@ -233,7 +233,8 @@
     "showLess": "收起",
     "toolRunning": "运行中",
     "toolCompleted": "已完成",
-    "toolError": "错误"
+    "toolError": "错误",
+    "toolResult": "工具结果"
   },
   "connection": {
     "connected": "已连接",

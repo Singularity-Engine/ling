@@ -12,35 +12,35 @@ const COPY_FEEDBACK_DURATION = 2000; // ms — how long "Copied!" stays visible
 
 // CodeBlock
 const S_CB_OUTER: CSSProperties = {
-  background: "rgba(0, 0, 0, 0.6)",
+  background: "var(--ling-code-bg)",
   borderRadius: "8px",
   overflow: "hidden",
   marginTop: "8px",
-  border: "1px solid rgba(255,255,255,0.08)",
+  border: "1px solid var(--ling-surface-border)",
 };
 const S_CB_HEADER: CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
   padding: "6px 12px",
-  background: "rgba(255,255,255,0.04)",
-  borderBottom: "1px solid rgba(255,255,255,0.06)",
+  background: "var(--ling-overlay-4)",
+  borderBottom: "1px solid var(--ling-surface-border)",
 };
-const S_CB_LANG: CSSProperties = { fontSize: "11px", color: "rgba(139, 92, 246, 0.8)", fontFamily: "monospace" };
+const S_CB_LANG: CSSProperties = { fontSize: "11px", color: "var(--ling-purple-85)", fontFamily: "monospace" };
 const S_CB_COPY: CSSProperties = {
-  fontSize: "11px", color: "rgba(255,255,255,0.4)", cursor: "pointer",
+  fontSize: "11px", color: "var(--ling-text-tertiary)", cursor: "pointer",
   transition: "color 0.2s, transform 0.15s", background: "none", border: "none",
   padding: "6px 8px", minHeight: "32px", borderRadius: "4px",
 };
 const S_CB_SCROLL: CSSProperties = { padding: "10px 12px", overflowX: "auto" };
 const S_CB_PRE: CSSProperties = {
   fontSize: "12px", fontFamily: "'SF Mono', 'Fira Code', 'JetBrains Mono', monospace",
-  color: "#e2e8f0", whiteSpace: "pre", lineHeight: 1.6, margin: 0,
+  color: "var(--ling-md-pre-code)", whiteSpace: "pre", lineHeight: 1.6, margin: 0,
 };
 const S_CB_EXPAND: CSSProperties = {
   display: "block", width: "100%", padding: "8px 12px", minHeight: "36px", fontSize: "11px",
-  color: "rgba(139, 92, 246, 0.8)", background: "rgba(255,255,255,0.02)",
-  border: "none", borderTop: "1px solid rgba(255,255,255,0.06)",
+  color: "var(--ling-purple-85)", background: "var(--ling-stripe-bg)",
+  border: "none", borderTop: "1px solid var(--ling-surface-border)",
   cursor: "pointer", textAlign: "center", transition: "background 0.2s, transform 0.15s",
 };
 
@@ -81,7 +81,7 @@ function getShimmerInnerStyle(accent: string): CSSProperties {
 }
 
 // ShimmerBar
-const S_SHIMMER: CSSProperties = { height: "2px", overflow: "hidden", position: "relative", background: "rgba(255,255,255,0.04)" };
+const S_SHIMMER: CSSProperties = { height: "2px", overflow: "hidden", position: "relative", background: "var(--ling-overlay-4)" };
 
 // ToolResultCard
 const S_TC_ICON: CSSProperties = { fontSize: "14px" };
@@ -91,16 +91,16 @@ const S_TC_CONTENT: CSSProperties = {
 };
 const S_TC_COLLAPSED_WRAP: CSSProperties = { padding: "6px 14px 8px" };
 const S_TC_COLLAPSED_TEXT: CSSProperties = {
-  fontSize: "12px", color: "rgba(255,255,255,0.4)", lineHeight: 1.5,
+  fontSize: "12px", color: "var(--ling-text-tertiary)", lineHeight: 1.5,
   overflowWrap: "break-word", wordBreak: "break-word",
 };
 const S_TC_TEXT: CSSProperties = {
-  display: "block", fontSize: "13px", color: "rgba(255,255,255,0.82)",
+  display: "block", fontSize: "13px", color: "var(--ling-text-secondary)",
   whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word", lineHeight: 1.6,
 };
-const S_TC_TEXT_ERROR: CSSProperties = { ...S_TC_TEXT, color: "rgba(248, 113, 113, 0.85)" };
+const S_TC_TEXT_ERROR: CSSProperties = { ...S_TC_TEXT, color: "var(--ling-error)" };
 const S_CHEVRON_OPEN: CSSProperties = {
-  fontSize: "10px", color: "rgba(255,255,255,0.3)", transition: "transform 0.2s ease",
+  fontSize: "10px", color: "var(--ling-text-muted)", transition: "transform 0.2s ease",
   transform: "rotate(180deg)", lineHeight: 1,
 };
 const S_CHEVRON_CLOSED: CSSProperties = { ...S_CHEVRON_OPEN, transform: "rotate(0deg)" };
@@ -305,7 +305,7 @@ export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCar
     : (!collapsed ? styles.headerExpanded : styles.headerCollapsed);
 
   return (
-    <div style={styles.card}>
+    <div style={styles.card} role="region" aria-label={`${t("chat.toolResult")}: ${toolName}`}>
       {/* Header — clickable to toggle collapse */}
       {hasContent ? (
         <button

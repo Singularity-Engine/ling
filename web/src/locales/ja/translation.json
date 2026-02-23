@@ -233,7 +233,8 @@
     "showLess": "閉じる",
     "toolRunning": "実行中",
     "toolCompleted": "完了",
-    "toolError": "エラー"
+    "toolError": "エラー",
+    "toolResult": "ツール結果"
   },
   "connection": {
     "connected": "接続済み",

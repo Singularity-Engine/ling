@@ -233,7 +233,8 @@
     "showLess": "Voir moins",
     "toolRunning": "En cours",
     "toolCompleted": "Terminé",
-    "toolError": "Erreur"
+    "toolError": "Erreur",
+    "toolResult": "Résultat d'outil"
   },
   "connection": {
     "connected": "Connecte",
