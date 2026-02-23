@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useWebSocket } from '@/context/websocket-context';
+import { useWebSocketActions } from '@/context/websocket-context';
 import { useAiStateRead } from '@/context/ai-state-context';
 import { useInterrupt } from '@/components/canvas/live2d';
 import { useChatMessages } from '@/context/chat-history-context';

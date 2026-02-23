@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { FaCopy, FaRedo, FaVolumeUp } from 'react-icons/fa';
 import { Message } from '@/services/websocket-service';
 import { ttsService } from '@/services/tts-service';
-import { useWebSocket } from '@/context/websocket-context';
+import { useWebSocketActions } from '@/context/websocket-context';
 import { useChatMessages } from '@/context/chat-history-context';
 import { toaster } from '@/components/ui/toaster';
 import { createStyleInjector } from '@/utils/style-injection';

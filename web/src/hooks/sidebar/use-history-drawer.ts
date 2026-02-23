@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useChatMessages, useHistoryList } from '@/context/chat-history-context';
-import { useWebSocket, HistoryInfo, LegacyMessage } from '@/context/websocket-context';
+import { useWebSocketActions, HistoryInfo, LegacyMessage } from '@/context/websocket-context';
 import { toaster } from '@/components/ui/toaster';
 
 export const useHistoryDrawer = () => {

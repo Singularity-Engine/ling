@@ -1,6 +1,6 @@
 import { memo, useState, useRef, useCallback, useEffect, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
-import { useWebSocket } from "@/context/websocket-context";
+import { useWebSocketActions } from "@/context/websocket-context";
 import { useChatMessages } from "@/context/chat-history-context";
 import { useAiStateRead } from "@/context/ai-state-context";
 import { useInterrupt } from "@/components/canvas/live2d";

@@ -5,7 +5,8 @@ import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MessageEvent } from '@/services/websocket-service';
 import {
-  WebSocketContext, HistoryInfo, LegacyMessage, defaultBaseUrl,
+  WebSocketStateContext, WebSocketActionsContext,
+  HistoryInfo, LegacyMessage, defaultBaseUrl,
 } from '@/context/websocket-context';
 import { ModelInfo, useLive2DConfigActions } from '@/context/live2d-config-context';
 import { useSubtitleActions } from '@/context/subtitle-context';
@@ -1178,21 +1179,26 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     });
   }, [gwUrl, setAiState]);
 
-  const webSocketContextValue = useMemo(() => ({
-    sendMessage,
+  const wsStateValue = useMemo(() => ({
     wsState,
-    reconnect,
     wsUrl: gwUrl,
-    setWsUrl: setGwUrl,
     baseUrl,
+  }), [wsState, gwUrl, baseUrl]);
+
+  const wsActionsValue = useMemo(() => ({
+    sendMessage,
+    reconnect,
+    setWsUrl: setGwUrl,
     setBaseUrl,
-  }), [sendMessage, wsState, reconnect, gwUrl, setGwUrl, baseUrl, setBaseUrl]);
+  }), [sendMessage, reconnect, setGwUrl, setBaseUrl]);
 
   return (
-    <WebSocketContext.Provider value={webSocketContextValue}>
-      {import.meta.env.DEV && <GatewayDebugPanel />}
-      {children}
-    </WebSocketContext.Provider>
+    <WebSocketStateContext.Provider value={wsStateValue}>
+      <WebSocketActionsContext.Provider value={wsActionsValue}>
+        {import.meta.env.DEV && <GatewayDebugPanel />}
+        {children}
+      </WebSocketActionsContext.Provider>
+    </WebSocketStateContext.Provider>
   );
 }
 

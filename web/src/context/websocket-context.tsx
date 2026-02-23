@@ -62,32 +62,49 @@ export type LegacyMessage =
   | { type: 'add-client-to-group' }
   | { type: 'remove-client-from-group' };
 
-interface WebSocketContextProps {
-  sendMessage: (message: LegacyMessage) => void;
+// ─── State context (changes on connect/disconnect/URL change) ────
+export interface WebSocketStateProps {
   wsState: string;
-  reconnect: () => void;
   wsUrl: string;
-  setWsUrl: (url: string) => void;
   baseUrl: string;
+}
+
+export const WebSocketStateContext = React.createContext<WebSocketStateProps>({
+  wsState: 'CLOSED',
+  wsUrl: DEFAULT_WS_URL,
+  baseUrl: DEFAULT_BASE_URL,
+});
+
+// ─── Actions context (stable callbacks, rarely changes) ──────────
+export interface WebSocketActionsProps {
+  sendMessage: (message: LegacyMessage) => void;
+  reconnect: () => void;
+  setWsUrl: (url: string) => void;
   setBaseUrl: (url: string) => void;
 }
 
-export const WebSocketContext = React.createContext<WebSocketContextProps>({
+export const WebSocketActionsContext = React.createContext<WebSocketActionsProps>({
   sendMessage: wsService.sendMessage.bind(wsService),
-  wsState: 'CLOSED',
   reconnect: () => wsService.connect(DEFAULT_WS_URL),
-  wsUrl: DEFAULT_WS_URL,
   setWsUrl: () => {},
-  baseUrl: DEFAULT_BASE_URL,
   setBaseUrl: () => {},
 });
 
+// ─── Hooks ───────────────────────────────────────────────────────
+
+export function useWebSocketState() {
+  return useContext(WebSocketStateContext);
+}
+
+export function useWebSocketActions() {
+  return useContext(WebSocketActionsContext);
+}
+
+/** Combined hook — backward compat for restricted files. */
 export function useWebSocket() {
-  const context = useContext(WebSocketContext);
-  if (!context) {
-    throw new Error('useWebSocket must be used within a WebSocketProvider');
-  }
-  return context;
+  const state = useContext(WebSocketStateContext);
+  const actions = useContext(WebSocketActionsContext);
+  return { ...state, ...actions };
 }
 
 export const defaultWsUrl = DEFAULT_WS_URL;
@@ -101,19 +118,24 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     wsService.connect(url);
   }, [setWsUrl]);
 
-  const value = useMemo(() => ({
-    sendMessage: wsService.sendMessage.bind(wsService),
+  const stateValue = useMemo(() => ({
     wsState: 'CLOSED' as const,
-    reconnect: () => wsService.connect(wsUrl),
     wsUrl,
-    setWsUrl: handleSetWsUrl,
     baseUrl,
+  }), [wsUrl, baseUrl]);
+
+  const actionsValue = useMemo(() => ({
+    sendMessage: wsService.sendMessage.bind(wsService),
+    reconnect: () => wsService.connect(wsUrl),
+    setWsUrl: handleSetWsUrl,
     setBaseUrl,
-  }), [wsUrl, handleSetWsUrl, baseUrl, setBaseUrl]);
+  }), [wsUrl, handleSetWsUrl, setBaseUrl]);
 
   return (
-    <WebSocketContext.Provider value={value}>
-      {children}
-    </WebSocketContext.Provider>
+    <WebSocketStateContext.Provider value={stateValue}>
+      <WebSocketActionsContext.Provider value={actionsValue}>
+        {children}
+      </WebSocketActionsContext.Provider>
+    </WebSocketStateContext.Provider>
   );
 }
