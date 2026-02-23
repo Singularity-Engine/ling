@@ -3,7 +3,7 @@ import {
 } from 'react';
 import { useLocalStorage } from '@/hooks/utils/use-local-storage';
 import { useTriggerSpeak } from '@/hooks/utils/use-trigger-speak';
-import { useAiState, AiStateEnum } from '@/context/ai-state-context';
+import { useAiStateRead, AiStateEnum } from '@/context/ai-state-context';
 
 interface ProactiveSpeakSettings {
   allowButtonTrigger: boolean;
@@ -30,7 +30,7 @@ export function ProactiveSpeakProvider({ children }: { children: ReactNode }) {
     defaultSettings,
   );
 
-  const { aiState } = useAiState();
+  const { aiState } = useAiStateRead();
   const { sendTriggerSignal } = useTriggerSpeak();
 
   const idleTimerRef = useRef<NodeJS.Timeout | null>(null);

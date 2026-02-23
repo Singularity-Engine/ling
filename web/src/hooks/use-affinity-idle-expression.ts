@@ -11,7 +11,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { useAiState, AiStateEnum } from '@/context/ai-state-context';
+import { useAiStateRead, AiStateEnum } from '@/context/ai-state-context';
 import { useAffinityState } from '@/context/affinity-context';
 import { getIdleExpression, EXPRESSION_TRANSITION } from '@/config/expression-presets';
 import { createLogger } from '@/utils/logger';
@@ -19,7 +19,7 @@ import { createLogger } from '@/utils/logger';
 const log = createLogger('Affinity');
 
 export function useAffinityIdleExpression() {
-  const { aiState } = useAiState();
+  const { aiState } = useAiStateRead();
   const { level } = useAffinityState();
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
 

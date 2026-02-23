@@ -8,7 +8,7 @@ import { useChatMessages, useStreamingValue, useStreamingRef } from "@/context/c
 import type { Message } from "@/services/websocket-service";
 import { createStyleInjector } from "@/utils/style-injection";
 
-import { useAiState } from "@/context/ai-state-context";
+import { useAiStateRead } from "@/context/ai-state-context";
 import { useWebSocket } from "@/context/websocket-context";
 
 // ── Deferred style injection (performance optimization) ──
@@ -380,7 +380,7 @@ const StreamingFooter = memo(function StreamingFooter({
   dedupedMessages,
 }: StreamingFooterProps) {
   const { fullResponse } = useStreamingValue();
-  const { isThinkingSpeaking } = useAiState();
+  const { isThinkingSpeaking } = useAiStateRead();
   const { sendMessage, wsState } = useWebSocket();
   const { t } = useTranslation();
 
@@ -460,7 +460,7 @@ StreamingFooter.displayName = "StreamingFooter";
 export const ChatArea = memo(() => {
   const { messages, appendHumanMessage } = useChatMessages();
   const { getFullResponse } = useStreamingRef();
-  const { isThinkingSpeaking } = useAiState();
+  const { isThinkingSpeaking } = useAiStateRead();
   const { sendMessage, wsState } = useWebSocket();
   const { t } = useTranslation();
 

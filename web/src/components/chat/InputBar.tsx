@@ -2,7 +2,7 @@ import { memo, useState, useRef, useCallback, useEffect, type CSSProperties } fr
 import { useTranslation } from "react-i18next";
 import { useWebSocket } from "@/context/websocket-context";
 import { useChatMessages } from "@/context/chat-history-context";
-import { useAiState } from "@/context/ai-state-context";
+import { useAiStateRead } from "@/context/ai-state-context";
 import { useInterrupt } from "@/components/canvas/live2d";
 import { useVAD } from "@/context/vad-context";
 import { createStyleInjector } from "@/utils/style-injection";
@@ -169,7 +169,7 @@ export const InputBar = memo(() => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const wsContext = useWebSocket();
   const { appendHumanMessage, popLastHumanMessage } = useChatMessages();
-  const { aiState } = useAiState();
+  const { aiState } = useAiStateRead();
   const { interrupt } = useInterrupt();
   const { micOn, startMic, stopMic } = useVAD();
 

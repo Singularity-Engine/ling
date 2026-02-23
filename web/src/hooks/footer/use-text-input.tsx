@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useWebSocket } from '@/context/websocket-context';
-import { useAiState } from '@/context/ai-state-context';
+import { useAiStateRead } from '@/context/ai-state-context';
 import { useInterrupt } from '@/components/canvas/live2d';
 import { useChatMessages } from '@/context/chat-history-context';
 import { useVAD } from '@/context/vad-context';
@@ -10,7 +10,7 @@ export function useTextInput() {
   const [inputText, setInputText] = useState('');
   const [isComposing, setIsComposing] = useState(false);
   const wsContext = useWebSocket();
-  const { aiState } = useAiState();
+  const { aiState } = useAiStateRead();
   const { interrupt } = useInterrupt();
   const { appendHumanMessage } = useChatMessages();
   const { stopMic, autoStopMic } = useVAD();

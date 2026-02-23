@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import { useState, useEffect, memo } from 'react';
-import { useAiState, AiStateEnum } from '@/context/ai-state-context';
+import { useAiStateRead, AiStateEnum } from '@/context/ai-state-context';
 
 // --- Module-level style constants ---
 
@@ -112,7 +112,7 @@ const S_SKELETON_BAR_SHIMMER_1: CSSProperties = {
  * Fades out gracefully once aiState leaves LOADING.
  */
 export const LoadingSkeleton = memo(function LoadingSkeleton() {
-  const { aiState } = useAiState();
+  const { aiState } = useAiStateRead();
   const isLoading = aiState === AiStateEnum.LOADING;
   const [visible, setVisible] = useState(true);
 

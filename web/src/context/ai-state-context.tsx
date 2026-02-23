@@ -51,34 +51,42 @@ export const enum AiStateEnum {
 export type AiState = `${AiStateEnum}`;
 
 /**
- * Type definition for the AI state context
+ * Context 1 — Read-only AI state.
+ * Changes when aiState or backendSynthComplete update.
  */
-interface AiStateContextType {
+interface AiStateReadType {
   aiState: AiState;
-  setAiState: {
-    (state: AiState): void;
-    (updater: (currentState: AiState) => AiState): void;
-  };
   backendSynthComplete: boolean;
-  setBackendSynthComplete: (complete: boolean) => void;
   isIdle: boolean;
   isThinkingSpeaking: boolean;
   isInterrupted: boolean;
   isLoading: boolean;
   isListening: boolean;
   isWaiting: boolean;
+}
+
+/**
+ * Context 2 — Stable action callbacks.
+ * All callbacks use useCallback with empty/stable deps, so this
+ * context value never changes after mount. Consumers that only
+ * WRITE AI state subscribe here without re-renders on state changes.
+ */
+interface AiStateActionsType {
+  setAiState: {
+    (state: AiState): void;
+    (updater: (currentState: AiState) => AiState): void;
+  };
+  setBackendSynthComplete: (complete: boolean) => void;
   resetState: () => void;
 }
+
+const AiStateReadContext = createContext<AiStateReadType | null>(null);
+const AiStateActionsContext = createContext<AiStateActionsType | null>(null);
 
 /**
  * Initial context value
  */
 const initialState: AiState = AiStateEnum.LOADING;
-
-/**
- * Create the AI state context
- */
-export const AiStateContext = createContext<AiStateContextType | null>(null);
 
 /**
  * AI State Provider Component
@@ -114,20 +122,6 @@ export function AiStateProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  // Memoized state checks
-  const stateChecks = useMemo(
-    () => ({
-      isIdle: aiState === AiStateEnum.IDLE,
-      isThinkingSpeaking: aiState === AiStateEnum.THINKING_SPEAKING,
-      isInterrupted: aiState === AiStateEnum.INTERRUPTED,
-      isLoading: aiState === AiStateEnum.LOADING,
-      isListening: aiState === AiStateEnum.LISTENING,
-      isWaiting: aiState === AiStateEnum.WAITING,
-    }),
-    [aiState],
-  );
-
-  // Reset state handler
   const resetState = useCallback(() => {
     setAiState(AiStateEnum.IDLE);
   }, [setAiState]);
@@ -138,36 +132,53 @@ export function AiStateProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Memoized context value
-  const contextValue = useMemo(
+  const actions = useMemo(
+    () => ({ setAiState, setBackendSynthComplete, resetState }),
+    [setAiState, resetState],
+  );
+
+  const state = useMemo(
     () => ({
       aiState,
-      setAiState,
       backendSynthComplete,
-      setBackendSynthComplete,
-      ...stateChecks,
-      resetState,
+      isIdle: aiState === AiStateEnum.IDLE,
+      isThinkingSpeaking: aiState === AiStateEnum.THINKING_SPEAKING,
+      isInterrupted: aiState === AiStateEnum.INTERRUPTED,
+      isLoading: aiState === AiStateEnum.LOADING,
+      isListening: aiState === AiStateEnum.LISTENING,
+      isWaiting: aiState === AiStateEnum.WAITING,
     }),
-    [aiState, setAiState, backendSynthComplete, stateChecks, resetState],
+    [aiState, backendSynthComplete],
   );
 
   return (
-    <AiStateContext.Provider value={contextValue}>
-      {children}
-    </AiStateContext.Provider>
+    <AiStateActionsContext.Provider value={actions}>
+      <AiStateReadContext.Provider value={state}>
+        {children}
+      </AiStateReadContext.Provider>
+    </AiStateActionsContext.Provider>
   );
 }
 
+/** Subscribe to read-only AI state (re-renders on state changes). */
+export function useAiStateRead() {
+  const ctx = useContext(AiStateReadContext);
+  if (!ctx) throw new Error('useAiStateRead must be used within AiStateProvider');
+  return ctx;
+}
+
+/** Subscribe to stable AI state actions (never causes re-renders). */
+export function useAiStateActions() {
+  const ctx = useContext(AiStateActionsContext);
+  if (!ctx) throw new Error('useAiStateActions must be used within AiStateProvider');
+  return ctx;
+}
+
 /**
- * Custom hook to use the AI state context
- * @throws {Error} If used outside of AiStateProvider
+ * Combined hook — returns both read-only state and actions.
+ * Kept for backward compatibility with restricted files (hooks/utils/, components/canvas/).
+ * Prefer useAiStateRead() or useAiStateActions() for targeted subscriptions.
  */
 export function useAiState() {
-  const context = useContext(AiStateContext);
-
-  if (!context) {
-    throw new Error('useAiState must be used within a AiStateProvider');
-  }
-
-  return context;
+  return { ...useAiStateRead(), ...useAiStateActions() };
 }

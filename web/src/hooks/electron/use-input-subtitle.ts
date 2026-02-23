@@ -3,7 +3,7 @@ import { useChatMessages } from '@/context/chat-history-context';
 import { useVAD } from '@/context/vad-context';
 import { useMicToggle } from '@/hooks/utils/use-mic-toggle';
 import { useTextInput } from '@/hooks/footer/use-text-input';
-import { useAiState, AiStateEnum } from '@/context/ai-state-context';
+import { useAiStateRead, useAiStateActions, AiStateEnum } from '@/context/ai-state-context';
 import { useInterrupt } from '@/hooks/utils/use-interrupt';
 
 export function useInputSubtitle() {
@@ -20,7 +20,8 @@ export function useInputSubtitle() {
   const { messages } = useChatMessages();
   const { startMic, autoStartMicOn } = useVAD();
   const { handleMicToggle, micOn } = useMicToggle();
-  const { aiState, setAiState } = useAiState();
+  const { aiState } = useAiStateRead();
+  const { setAiState } = useAiStateActions();
   const { interrupt } = useInterrupt();
 
   const lastAIMessage = messages
