@@ -404,16 +404,17 @@ export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingPro
 
       {/* Navigation buttons */}
       <div style={S_NAV_ROW}>
-        <button onClick={skip} style={S_BTN_SKIP}>
+        <button className="ling-ob-skip" onClick={skip} style={S_BTN_SKIP}>
           {t("onboarding.skip")}
         </button>
         {step > 0 && step < 3 && (
-          <button onClick={goBack} style={S_BTN_BACK} aria-label={t("onboarding.back")}>
+          <button className="ling-ob-back" onClick={goBack} style={S_BTN_BACK} aria-label={t("onboarding.back")}>
             {"←"}
           </button>
         )}
         {step > 0 && (
           <button
+            className="ling-ob-next"
             onClick={step === 3 ? finish : goNext}
             style={S_BTN_NEXT}
           >
@@ -451,7 +452,7 @@ function StepWelcome({ t, onNext }: { t: (k: string) => string; onNext: () => vo
       <p style={S_DESC_WELCOME}>
         {t("onboarding.welcomeSub")}
       </p>
-      <button onClick={onNext} style={S_BTN_START}>
+      <button className="ling-ob-next" onClick={onNext} style={S_BTN_START}>
         {t("onboarding.start")}
       </button>
     </>
@@ -480,6 +481,7 @@ function StepInterests({
           return (
             <button
               key={tag}
+              className="ling-ob-card"
               onClick={() => onToggle(tag)}
               aria-pressed={isSelected}
               style={getInterestCardStyle(color, isSelected)}
@@ -547,6 +549,7 @@ function StepGoals({
           return (
             <button
               key={meta.key}
+              className="ling-ob-card"
               onClick={() => !isFull && onToggle(meta.key)}
               disabled={isFull}
               aria-pressed={isSelected}
