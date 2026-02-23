@@ -5,6 +5,7 @@
  */
 
 import i18next from 'i18next';
+import { SK_TOKEN, SK_REFRESH_TOKEN } from '@/constants/storage-keys';
 
 function getApiBase(): string {
   // 开发模式：Vite proxy 会把 /api 转发到后端，无需指定地址
@@ -15,8 +16,8 @@ function getApiBase(): string {
   return 'https://lain.sngxai.com';
 }
 
-const TOKEN_KEY = 'ling_token';
-const REFRESH_KEY = 'ling_refresh_token';
+const TOKEN_KEY = SK_TOKEN;
+const REFRESH_KEY = SK_REFRESH_TOKEN;
 
 class ApiClient {
   private base: string;

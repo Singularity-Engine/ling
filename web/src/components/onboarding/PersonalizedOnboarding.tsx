@@ -14,9 +14,10 @@ import {
 } from "react-icons/lu";
 import { getSkillsByTags, getMetaByKey, type SkillMeta } from "../../config/skill-registry";
 import { useConstellation } from "../../hooks/use-constellation";
+import { SK_ONBOARDING_DONE, SK_USER_PREFERENCES } from "@/constants/storage-keys";
 
-const STORAGE_KEY = "ling-onboarding-done";
-const PREFS_KEY = "ling-user-preferences";
+const STORAGE_KEY = SK_ONBOARDING_DONE;
+const PREFS_KEY = SK_USER_PREFERENCES;
 
 interface PersonalizedOnboardingProps {
   onComplete: () => void;
