@@ -1,12 +1,11 @@
-/* eslint-disable import/order */
 import { useState, useEffect, useCallback } from 'react';
-import { useBgUrlState, useBgUrlActions } from '@/context/bgurl-context';
-import { useWebSocketState, useWebSocketActions, defaultBaseUrl, defaultWsUrl } from '@/context/websocket-context';
-import { useSubtitle } from '@/context/subtitle-context';
-import { useCameraActions } from '@/context/camera-context';
-import { useSwitchCharacter } from '@/hooks/utils/use-switch-character';
-import { useConfigState, useConfigActions } from '@/context/character-config-context';
 import i18n from 'i18next';
+import { useBgUrlState, useBgUrlActions } from '@/context/bgurl-context';
+import { useCameraActions } from '@/context/camera-context';
+import { useConfigState, useConfigActions } from '@/context/character-config-context';
+import { useSubtitle } from '@/context/subtitle-context';
+import { useWebSocketState, useWebSocketActions, defaultBaseUrl, defaultWsUrl } from '@/context/websocket-context';
+import { useSwitchCharacter } from '@/hooks/utils/use-switch-character';
 import { createLogger } from '@/utils/logger';
 
 const log = createLogger('Settings');

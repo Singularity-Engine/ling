@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 import {
   createContext, useContext, useRef, useCallback, useEffect, useMemo,
 } from 'react';
@@ -150,6 +149,26 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   /**
+   * Stop microphone and VAD processing.
+   * Defined before speech handlers so they can reference it without
+   * triggering the no-use-before-define lint rule.
+   */
+  const stopMic = useCallback(() => {
+    log.debug('Stopping VAD');
+    if (vadRef.current) {
+      vadRef.current.pause();
+      vadRef.current.destroy();
+      vadRef.current = null;
+      log.debug('VAD stopped and destroyed successfully');
+      setPreviousTriggeredProbability(0);
+    } else {
+      log.debug('VAD instance not found');
+    }
+    setMicOn(false);
+    isProcessingRef.current = false;
+  }, []);
+
+  /**
    * Handle speech start event (initial detection)
    */
   const handleSpeechStart = useCallback(() => {
@@ -218,20 +237,6 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
   }, [t]);
 
   /**
-   * Update VAD settings and restart if active
-   */
-  const updateSettings = useCallback((newSettings: VADSettings) => {
-    setSettings(newSettings);
-    if (vadRef.current) {
-      stopMic();
-      if (settingsRestartTimer.current) clearTimeout(settingsRestartTimer.current);
-      settingsRestartTimer.current = setTimeout(() => {
-        startMic();
-      }, 100);
-    }
-  }, []);
-
-  /**
    * Initialize new VAD instance
    */
   const initVAD = async () => {
@@ -279,21 +284,17 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
   }, [t]);
 
   /**
-   * Stop microphone and VAD processing
+   * Update VAD settings and restart if active
    */
-  const stopMic = useCallback(() => {
-    log.debug('Stopping VAD');
+  const updateSettings = useCallback((newSettings: VADSettings) => {
+    setSettings(newSettings);
     if (vadRef.current) {
-      vadRef.current.pause();
-      vadRef.current.destroy();
-      vadRef.current = null;
-      log.debug('VAD stopped and destroyed successfully');
-      setPreviousTriggeredProbability(0);
-    } else {
-      log.debug('VAD instance not found');
+      stopMic();
+      if (settingsRestartTimer.current) clearTimeout(settingsRestartTimer.current);
+      settingsRestartTimer.current = setTimeout(() => {
+        startMic();
+      }, 100);
     }
-    setMicOn(false);
-    isProcessingRef.current = false;
   }, []);
 
   const setAutoStopMic = useCallback((value: boolean) => {

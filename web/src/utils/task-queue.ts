@@ -1,5 +1,3 @@
-/* eslint-disable no-promise-executor-return */
-/* eslint-disable arrow-parens */
 import { createLogger } from '@/utils/logger';
 
 const log = createLogger('TaskQueue');
@@ -48,7 +46,7 @@ export class TaskQueue {
 
       try {
         await taskPromise;
-        await new Promise(resolve => setTimeout(resolve, this.taskInterval));
+        await new Promise<void>((resolve) => { setTimeout(resolve, this.taskInterval); });
       } catch (error) {
         log.error('Task execution failed:', error);
       } finally {
@@ -69,7 +67,7 @@ export class TaskQueue {
    */
   public waitForCompletion(): Promise<void> {
     if (!this.hasTask()) return Promise.resolve();
-    return new Promise(resolve => { this.drainResolvers.push(resolve); });
+    return new Promise<void>((resolve) => { this.drainResolvers.push(resolve); });
   }
 
   private notifyDrain() {
