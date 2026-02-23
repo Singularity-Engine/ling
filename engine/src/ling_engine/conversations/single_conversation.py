@@ -435,6 +435,14 @@ async def process_agent_response(
             # 记忆保存完全异步，不阻塞用户响应（火忘模式）
             logger.debug("🧠 启动异步记忆保存任务（不等待完成）...")
             asyncio.create_task(save_memory_async(summr, user_id))
+            # 同时记录到 EverMemOS（灵的长期记忆）
+            try:
+                from ..tools.evermemos_client import record_conversation
+                asyncio.create_task(
+                    record_conversation(clean_user_input, clean_ai_response, user_id)
+                )
+            except Exception:
+                pass
         except Exception as e:
             logger.warning(f"🧠 记忆保存失败: {e}")
 

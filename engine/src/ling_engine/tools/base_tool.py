@@ -2,6 +2,7 @@
 基础工具类 - 提供可扩展的工具框架
 """
 
+import asyncio
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
 from langchain_core.tools import tool
@@ -95,12 +96,28 @@ class BaseTool(ABC):
                 # 调用工具执行
                 result = await self.execute(**kwargs)
                 self.log_execution(kwargs, result)
+                # 异步记录到 EverMemOS（不阻塞工具返回）
+                try:
+                    from .evermemos_client import record_tool_call
+                    asyncio.create_task(
+                        record_tool_call(self.name, kwargs, result, success=True)
+                    )
+                except Exception:
+                    pass  # EverMemOS 不可用不影响工具执行
                 return result
             except Exception as e:
                 error_msg = f"工具执行失败: {str(e)}"
                 self.logger.error(f"❌ {error_msg}")
                 import traceback
                 traceback.print_exc()
+                # 记录失败的工具调用
+                try:
+                    from .evermemos_client import record_tool_call
+                    asyncio.create_task(
+                        record_tool_call(self.name, kwargs, error_msg, success=False)
+                    )
+                except Exception:
+                    pass
                 return error_msg
         
         # 设置工具函数的名称和描述
