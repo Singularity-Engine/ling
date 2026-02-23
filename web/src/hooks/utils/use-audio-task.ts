@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAiState } from '@/context/ai-state-context';
+import { useAiStateRead, useAiStateActions } from '@/context/ai-state-context';
 import { useSubtitle } from '@/context/subtitle-context';
 import { useChatMessages, useStreamingSetters } from '@/context/chat-history-context';
 import { audioTaskQueue } from '@/utils/task-queue';
@@ -32,7 +32,8 @@ interface AudioTaskOptions {
  */
 export const useAudioTask = () => {
   const { t } = useTranslation();
-  const { aiState, backendSynthComplete, setBackendSynthComplete } = useAiState();
+  const { aiState, backendSynthComplete } = useAiStateRead();
+  const { setBackendSynthComplete } = useAiStateActions();
   const { setSubtitleText } = useSubtitle();
   const { appendAIMessage } = useChatMessages();
   const { appendResponse } = useStreamingSetters();

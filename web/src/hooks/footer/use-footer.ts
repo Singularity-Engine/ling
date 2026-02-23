@@ -3,7 +3,7 @@ import { useVADState, useVADActions } from '@/context/vad-context';
 import { useTextInput } from '@/hooks/footer/use-text-input';
 import { useInterrupt } from '@/hooks/utils/use-interrupt';
 import { useMicToggle } from '@/hooks/utils/use-mic-toggle';
-import { useAiState, AiStateEnum } from '@/context/ai-state-context';
+import { useAiStateRead, useAiStateActions, AiStateEnum } from '@/context/ai-state-context';
 import { useTriggerSpeak } from '@/hooks/utils/use-trigger-speak';
 import { useProactiveSpeak } from '@/context/proactive-speak-context';
 
@@ -20,7 +20,8 @@ export const useFooter = () => {
   const { autoStartMicOn } = useVADState();
   const { startMic } = useVADActions();
   const { handleMicToggle, micOn } = useMicToggle();
-  const { setAiState, aiState } = useAiState();
+  const { aiState } = useAiStateRead();
+  const { setAiState } = useAiStateActions();
   const { sendTriggerSignal } = useTriggerSpeak();
   const { settings } = useProactiveSpeak();
 

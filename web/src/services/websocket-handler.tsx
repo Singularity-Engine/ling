@@ -219,7 +219,8 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const { confUid, setConfName, setConfUid, setConfigFiles } = useConfig();
   const [pendingModelInfo, setPendingModelInfo] = useState<ModelInfo | undefined>(undefined);
   const { setSelfUid, setGroupMembers, setIsOwner } = useGroup();
-  const { micOn, startMic, stopMic, autoStartMicOnConvEnd } = useVAD();
+  const { micOn, autoStartMicOnConvEnd } = useVADState();
+  const { startMic, stopMic } = useVADActions();
   const autoStartMicOnConvEndRef = useRef(autoStartMicOnConvEnd);
   const { interrupt } = useInterrupt();
   const { setBrowserViewData } = useBrowser();

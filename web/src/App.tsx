@@ -250,7 +250,8 @@ function MainContent(): JSX.Element {
   const [kbOffset, setKbOffset] = useState(0);
 
   // Contexts for keyboard shortcuts
-  const { micOn, startMic, stopMic } = useVAD();
+  const { micOn } = useVADState();
+  const { startMic, stopMic } = useVADActions();
   const { sendMessage } = useWebSocket();
   const { interrupt } = useInterrupt();
   const { messages } = useChatMessages();
