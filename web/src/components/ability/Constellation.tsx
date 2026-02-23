@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useConstellation } from "../../hooks/use-constellation";
 import { useToolState } from "../../context/tool-state-context";
-import { getSkillMeta, getMetaByKey, type SkillMeta } from "../../config/skill-registry";
+import { getSkillMeta, getMetaByKey, getSkillLabel, type SkillMeta } from "../../config/skill-registry";
 // Keyframes moved to static index.css — no runtime injection needed.
 
 // ── Arc layout helpers ──────────────────────────────────────────
@@ -82,7 +82,6 @@ const StarButton = memo(function StarButton({
   delay: number;
 }) {
   const { i18n } = useTranslation();
-  const lang = i18n.language?.startsWith("zh") ? "zh" : "en";
   const baseSize = 40;
   const maxBonus = 8;
   const size = baseSize + (maxCount > 0 ? (count / maxCount) * maxBonus : 0);
@@ -123,7 +122,7 @@ const StarButton = memo(function StarButton({
       variants={variants}
       transition={transition}
       onClick={handleClick}
-      aria-label={meta.label[lang]}
+      aria-label={getSkillLabel(meta, i18n.language)}
       style={starStyle}
       whileHover={whileHover}
       whileTap={WHILETAP_095}

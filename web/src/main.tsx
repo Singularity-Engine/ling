@@ -5,6 +5,8 @@ import 'highlight.js/styles/atom-one-dark.min.css';
 import App from './App';
 import { LAppAdapter } from '../WebSDK/src/lappadapter';
 import './i18n';
+import { initSentry } from './lib/sentry';
+import { initAnalytics } from './lib/analytics';
 
 const originalConsoleWarn = console.warn;
 console.warn = (...args) => {
@@ -16,6 +18,10 @@ console.warn = (...args) => {
 
 
 if (typeof window !== 'undefined') {
+  // Initialize monitoring & analytics (non-blocking, env-var gated)
+  initSentry();
+  initAnalytics();
+
   window.getLAppAdapter = () => LAppAdapter.getInstance();
 
   // Render React immediately — don't block on Live2D Core.

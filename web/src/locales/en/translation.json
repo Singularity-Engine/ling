@@ -1,4 +1,15 @@
 {
+  "brand": {
+    "nameShort": "Ling",
+    "nameDisplay": "Ling"
+  },
+  "seo": {
+    "homeTitle": "Ling — Talk to the First AI Entrepreneur",
+    "homeDesc": "An AI with 63 days to build a business or die. Talk to Ling, become her advisor, help her survive. The world's first AI-run company.",
+    "homeOgTitle": "Ling — The First AI Entrepreneur",
+    "termsTitle": "Terms of Service — Ling",
+    "termsDesc": "Terms of service and usage agreement for the Ling AI companion platform."
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",
@@ -327,7 +338,9 @@
     "maybeLater": "Maybe Later",
     "guestLimitTitle": "Enjoying the conversation?",
     "guestLimitMessage": "Sign up for free to continue chatting with Ling — unlock memories, deeper conversations, and more.",
-    "registerFree": "Sign Up Free"
+    "registerFree": "Sign Up Free",
+    "checkoutSuccess": "Payment successful! Welcome aboard.",
+    "checkoutCanceled": "Checkout canceled. You can try again anytime."
   },
   "memory": {
     "title": "Memories",
@@ -373,7 +386,10 @@
     "docs": "Docs",
     "guestPrompt": "Sign in to unlock memories, deeper conversations, and more.",
     "loginButton": "Sign In",
-    "registerButton": "Sign Up"
+    "registerButton": "Sign Up",
+    "upgrade": "Upgrade",
+    "manageSubscription": "Manage Subscription",
+    "signOut": "Sign Out"
   },
   "network": {
     "offline": "Network disconnected",

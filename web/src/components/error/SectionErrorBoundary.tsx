@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { createLogger } from "@/utils/logger";
+import { captureError } from "@/lib/sentry";
 
 const log = createLogger("ErrorBoundary");
 
@@ -30,6 +31,7 @@ export class SectionErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     log.error(`[${this.props.name}] caught:`, error, info.componentStack);
+    captureError(error, { section: this.props.name, componentStack: info.componentStack ?? '' });
   }
 
   render() {

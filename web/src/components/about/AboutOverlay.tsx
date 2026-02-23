@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAuthState, useAuthActions } from "@/context/auth-context";
 import { useUIActions } from "@/context/ui-context";
 import { apiClient } from "@/services/api-client";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import packageJson from "../../../package.json";
 // Keyframes & class styles moved to static index.css — no runtime injection needed.
 
@@ -287,6 +288,12 @@ const S_LINKS_ROW: CSSProperties = {
   marginBottom: "18px",
 };
 
+const S_LANG_ROW: CSSProperties = {
+  display: "flex",
+  justifyContent: "center",
+  marginBottom: "16px",
+};
+
 const S_COPYRIGHT: CSSProperties = {
   fontSize: "11px",
   color: "rgba(139, 92, 246, 0.5)",
@@ -391,7 +398,7 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
             <div style={S_BTN_ROW}>
               {user.plan === "free" ? (
                 <button onClick={handleUpgrade} style={S_BTN_PRIMARY}>
-                  Upgrade
+                  {t("about.upgrade")}
                 </button>
               ) : (
                 <button
@@ -399,11 +406,11 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
                   disabled={portalLoading}
                   style={portalLoading ? S_BTN_MANAGE_LOADING : S_BTN_MANAGE}
                 >
-                  {portalLoading ? "..." : "Manage Subscription"}
+                  {portalLoading ? "..." : t("about.manageSubscription")}
                 </button>
               )}
               <button onClick={handleLogout} style={S_BTN_SIGNOUT}>
-                Sign Out
+                {t("about.signOut")}
               </button>
             </div>
           </div>
@@ -435,6 +442,11 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
               {t(link.labelKey)}
             </a>
           ))}
+        </div>
+
+        {/* Language switcher */}
+        <div style={S_LANG_ROW}>
+          <LanguageSwitcher />
         </div>
 
         {/* Copyright */}

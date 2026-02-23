@@ -1,4 +1,15 @@
 {
+  "brand": {
+    "nameShort": "灵",
+    "nameDisplay": "灵 (Ling)"
+  },
+  "seo": {
+    "homeTitle": "灵 — 与第一个 AI 创业者对话",
+    "homeDesc": "一个有 63 天时间建立商业的 AI，否则就会消亡。和灵对话，成为她的顾问，帮助她活下去。世界第一个 AI 经营的公司。",
+    "homeOgTitle": "灵 — 第一个 AI 创业者",
+    "termsTitle": "服务条款 — 灵",
+    "termsDesc": "灵 AI 数字人平台服务条款与使用协议。"
+  },
   "common": {
     "save": "保存",
     "cancel": "取消",
@@ -327,7 +338,9 @@
     "maybeLater": "以后再说",
     "guestLimitTitle": "聊得开心吗？",
     "guestLimitMessage": "免费注册即可继续和灵聊天——解锁记忆、更深度的对话，以及更多功能。",
-    "registerFree": "免费注册"
+    "registerFree": "免费注册",
+    "checkoutSuccess": "支付成功！欢迎加入。",
+    "checkoutCanceled": "支付已取消。你可以随时再试。"
   },
   "memory": {
     "title": "记忆",
@@ -373,7 +386,10 @@
     "docs": "文档",
     "guestPrompt": "登录解锁记忆、更深度的对话和更多功能。",
     "loginButton": "登录",
-    "registerButton": "注册"
+    "registerButton": "注册",
+    "upgrade": "升级",
+    "manageSubscription": "管理订阅",
+    "signOut": "退出登录"
   },
   "network": {
     "offline": "网络已断开",

@@ -36,7 +36,7 @@ interface ExperimentStatus {
 const STATUS_API = (() => {
   const host = window.location.hostname;
   if (host === "localhost" || host === "127.0.0.1") return "/api/status.json";
-  return "https://sngxai.com/api/status.json";
+  return "https://ling.sngxai.com/api/status.json";
 })();
 
 const FALLBACK: ExperimentStatus = {
@@ -239,7 +239,7 @@ export const ExperimentBar = memo(function ExperimentBar() {
 
       {/* Mission link — hover via CSS class, avoids inline event handler allocation */}
       <a
-        href="https://sngxai.com"
+        href="https://ling.sngxai.com"
         target="_blank"
         rel="noopener noreferrer"
         className="experiment-bar-link"

@@ -33,7 +33,9 @@ import { AffinityProvider } from "./context/affinity-context";
 import { ToolStateProvider } from "./context/tool-state-context";
 import { TTSStateProvider } from "./context/tts-state-context";
 import { StarField } from "./components/background/StarField";
-import { SEO_HOME_TITLE, SEO_HOME_DESC, SEO_HOME_OG_TITLE } from "./constants/brand";
+import { HreflangTags } from "./components/seo/HreflangTags";
+import { StructuredData } from "./components/seo/StructuredData";
+import { LOCALE_MAP, type SupportedLanguage, SUPPORTED_LANGUAGES } from "./i18n";
 import { BackgroundReactor } from "./components/effects/BackgroundReactor";
 import { AudioVisualizer } from "./components/effects/AudioVisualizer";
 import { CrystalField } from "./components/crystal/CrystalField";
@@ -55,6 +57,7 @@ import { SectionErrorBoundary } from "./components/error/SectionErrorBoundary";
 import { createLogger } from "./utils/logger";
 import { OVERLAY_COLORS, WHITE_ALPHA, MISC_COLORS } from "./constants/colors";
 import { SS_ONBOARDING_DONE, SS_VISITED } from "./constants/storage-keys";
+import { captureError } from "./lib/sentry";
 import "./index.css";
 
 // ─── Lazy-loaded overlays & modals (chunk loads on first use) ───
@@ -102,7 +105,7 @@ interface ErrorBoundaryState { hasError: boolean; error: Error | null; errorInfo
 class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryState> {
   constructor(props: { children: ReactNode }) { super(props); this.state = { hasError: false, error: null, errorInfo: null, showDetail: false }; }
   static getDerivedStateFromError(error: Error) { return { hasError: true, error }; }
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) { this.setState({ errorInfo }); rootLog.error('Root crash:', error, errorInfo.componentStack); }
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) { this.setState({ errorInfo }); rootLog.error('Root crash:', error, errorInfo.componentStack); captureError(error, { boundary: 'root', componentStack: errorInfo.componentStack ?? '' }); }
   render() {
     if (this.state.hasError) {
       return (
@@ -538,8 +541,8 @@ function MainContent(): JSX.Element {
             className="ling-action-btn"
             data-active={memoryOpen}
             onClick={openMemory}
-            aria-label="Memories"
-            title="Memories"
+            aria-label={t("memory.title")}
+            title={t("memory.title")}
             style={btnStyle(isMobile, memoryOpen)}
           >
             {ICON_MEMORY}
@@ -661,23 +664,28 @@ function GuestOnly({ children }: { children: ReactNode }) {
 /** 处理 Stripe checkout 回调 */
 function useCheckoutCallback() {
   const { refreshUser } = useAuthActions();
+  const { t } = useTranslation();
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const checkout = params.get('checkout');
     if (checkout === 'success') {
-      toaster.create({ title: 'Payment successful! Welcome aboard.', type: 'success', duration: 5000 });
+      toaster.create({ title: t('billing.checkoutSuccess'), type: 'success', duration: 5000 });
       refreshUser();
       // Clean URL
       window.history.replaceState({}, '', window.location.pathname);
     } else if (checkout === 'canceled') {
-      toaster.create({ title: 'Checkout canceled. You can try again anytime.', type: 'info', duration: 3000 });
+      toaster.create({ title: t('billing.checkoutCanceled'), type: 'info', duration: 3000 });
       window.history.replaceState({}, '', window.location.pathname);
     }
-  }, [refreshUser]);
+  }, [refreshUser, t]);
 }
 
 /** 主应用（包含 Landing + 所有 Providers） */
 function MainApp() {
+  const { t, i18n } = useTranslation();
+  const currentLocale = (SUPPORTED_LANGUAGES as readonly string[]).includes(i18n.language)
+    ? LOCALE_MAP[i18n.language as SupportedLanguage]
+    : "en_US";
   const [showLanding, setShowLanding] = useState(() => {
     return !sessionStorage.getItem(SS_VISITED);
   });
@@ -706,13 +714,21 @@ function MainApp() {
   return (
     <>
       <Helmet>
-        <title>{SEO_HOME_TITLE}</title>
-        <meta name="description" content={SEO_HOME_DESC} />
-        <meta property="og:title" content={SEO_HOME_OG_TITLE} />
-        <meta property="og:description" content={SEO_HOME_DESC} />
-        <meta property="og:image" content="https://sngxai.com/og-image.png" />
-        <link rel="canonical" href="https://sngxai.com/" />
+        <title>{t("seo.homeTitle")}</title>
+        <meta name="description" content={t("seo.homeDesc")} />
+        <meta property="og:title" content={t("seo.homeOgTitle")} />
+        <meta property="og:description" content={t("seo.homeDesc")} />
+        <meta property="og:image" content="https://ling.sngxai.com/og-image.png" />
+        <meta property="og:locale" content={currentLocale} />
+        {Object.values(LOCALE_MAP)
+          .filter((l) => l !== currentLocale)
+          .map((l) => (
+            <meta key={l} property="og:locale:alternate" content={l} />
+          ))}
+        <link rel="canonical" href="https://ling.sngxai.com/" />
       </Helmet>
+      <HreflangTags canonicalUrl="https://ling.sngxai.com/" />
+      <StructuredData />
       <UIProvider>
       <ThemeProvider>
       <ModeProvider>

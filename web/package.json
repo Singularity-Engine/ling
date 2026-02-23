@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/generate-sitemap.mjs && vite build && node scripts/prerender-routes.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -33,6 +33,7 @@
     "@vitejs/plugin-react-swc": "^3.7.2",
     "typescript": "~5.5.2",
     "vite": "^5.3.1",
+    "vite-plugin-pwa": "^1.2.0",
     "vite-plugin-static-copy": "^2.3.1"
   }
 }

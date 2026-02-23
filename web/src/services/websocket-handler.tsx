@@ -131,6 +131,10 @@ const LING_MODEL_INFO: ModelInfo = {
     思考: 'tuosai',
     自信: 'chayao',
     困: 'shuijiao',
+    smile: 'weixiao',
+    evil: 'mogui',
+    微笑: 'weixiao',
+    邪恶: 'mogui',
     // Default expression (index 0)
     neutral: 0,
   },

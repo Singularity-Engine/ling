@@ -1,22 +1,25 @@
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { SEO_TERMS_TITLE, SEO_TERMS_DESC } from '@/constants/brand';
+import { HreflangTags } from '@/components/seo/HreflangTags';
 
 export function TermsPage() {
   const { t } = useTranslation();
   const items = t('terms.s2Items', { returnObjects: true }) as string[];
+  const seoTitle = t('seo.termsTitle');
+  const seoDesc = t('seo.termsDesc');
 
   return (
     <div style={styles.page}>
       <Helmet>
-        <title>{SEO_TERMS_TITLE}</title>
-        <meta name="description" content={SEO_TERMS_DESC} />
-        <meta property="og:title" content={SEO_TERMS_TITLE} />
-        <meta property="og:description" content={SEO_TERMS_DESC} />
-        <meta property="og:image" content="https://sngxai.com/og-image.png" />
-        <link rel="canonical" href="https://sngxai.com/terms" />
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDesc} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDesc} />
+        <meta property="og:image" content="https://ling.sngxai.com/og-image.png" />
+        <link rel="canonical" href="https://ling.sngxai.com/terms" />
       </Helmet>
+      <HreflangTags canonicalUrl="https://ling.sngxai.com/terms" />
       <div style={styles.container}>
         <h1 style={styles.title}>{t('terms.title')}</h1>
         <p style={styles.updated}>{t('terms.updated')}</p>

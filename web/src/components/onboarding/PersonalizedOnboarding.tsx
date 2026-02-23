@@ -12,7 +12,7 @@ import {
   LuPalette, LuCode, LuBookOpen, LuBriefcase,
   LuGamepad2, LuGlobe, LuCheck,
 } from "react-icons/lu";
-import { getSkillsByTags, getMetaByKey, type SkillMeta } from "../../config/skill-registry";
+import { getSkillsByTags, getMetaByKey, getSkillLabel, type SkillMeta } from "../../config/skill-registry";
 import { useConstellation } from "../../hooks/use-constellation";
 import { SK_ONBOARDING_DONE, SK_USER_PREFERENCES } from "@/constants/storage-keys";
 
@@ -530,7 +530,7 @@ function StepGoals({
           <memoryMeta.icon size={20} color={memoryMeta.color} />
           <div style={S_MEMORY_INNER}>
             <span style={getMemoryLabelStyle(memoryMeta.color)}>
-              {memoryMeta.label[lang as "en" | "zh"]}
+              {getSkillLabel(memoryMeta, lang)}
             </span>
             <div style={S_MEMORY_NOTE}>
               {t("onboarding.memoryNote")}
@@ -554,7 +554,7 @@ function StepGoals({
             >
               <Icon size={18} color={isSelected ? meta.color : "rgba(255,255,255,0.5)"} aria-hidden="true" />
               <span style={getLabelStyle(meta.color, isSelected)}>
-                {meta.label[lang as "en" | "zh"]}
+                {getSkillLabel(meta, lang)}
               </span>
               {isSelected && (
                 <LuCheck size={14} color={meta.color} style={S_CHECK_ML} />

@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthActions } from '@/context/auth-context';
 import { ApiError } from '@/services/api-client';
+import { HreflangTags } from '@/components/seo/HreflangTags';
 
 export function RegisterPage() {
   const { t } = useTranslation();
@@ -49,9 +50,10 @@ export function RegisterPage() {
         <meta name="description" content={t('auth.metaRegisterDesc')} />
         <meta property="og:title" content={t('auth.metaRegisterTitle')} />
         <meta property="og:description" content={t('auth.metaRegisterDesc')} />
-        <meta property="og:image" content="https://sngxai.com/og-image.png" />
-        <link rel="canonical" href="https://sngxai.com/register" />
+        <meta property="og:image" content="https://ling.sngxai.com/og-image.png" />
+        <link rel="canonical" href="https://ling.sngxai.com/register" />
       </Helmet>
+      <HreflangTags canonicalUrl="https://ling.sngxai.com/register" />
       <div style={styles.card}>
         <h1 style={styles.title}>Ling</h1>
         <p style={styles.subtitle}>{t('auth.registerTitle')}</p>

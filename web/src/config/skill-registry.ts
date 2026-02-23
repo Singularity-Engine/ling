@@ -75,3 +75,9 @@ export function getSkillsByTags(tags: string[]): SkillMeta[] {
     meta.tags.some(t => t === 'all' || tags.includes(t))
   );
 }
+
+/** Get a skill's localized label, normalizing any lang string to 'en' | 'zh'. */
+export function getSkillLabel(meta: SkillMeta, lang: string): string {
+  const key: 'en' | 'zh' = lang.startsWith('zh') ? 'zh' : 'en';
+  return meta.label[key];
+}

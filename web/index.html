@@ -1,32 +1,50 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#0a0015" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="description" content="灵（Ling）— 有灵魂、能干活的 AI 数字人。记忆、情感、工具，三位一体。" />
-    <meta name="keywords" content="AI数字人,AI伴侣,虚拟人,VTuber,Live2D,灵,Ling,Singularity Engine" />
+    <meta name="description" content="An AI with 63 days to build a business or die. Talk to Ling, become her advisor, help her survive." />
+    <meta name="keywords" content="AI companion,AI entrepreneur,virtual being,VTuber,Live2D,Ling,Singularity Engine" />
 
     <!-- Open Graph -->
-    <meta property="og:title" content="灵 Ling — AI 数字人" />
-    <meta property="og:description" content="有灵魂、能干活的 AI 数字人。记忆、情感、工具，三位一体。" />
+    <meta property="og:title" content="Ling — Talk to the First AI Entrepreneur" />
+    <meta property="og:description" content="An AI with 63 days to build a business or die. Talk to Ling, become her advisor, help her survive." />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://sngxai.com" />
-    <meta property="og:image" content="https://sngxai.com/og-image.png" />
+    <meta property="og:url" content="https://ling.sngxai.com" />
+    <meta property="og:image" content="https://ling.sngxai.com/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:type" content="image/png" />
-    <meta property="og:site_name" content="灵 · Singularity Engine" />
-    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:site_name" content="Ling · Singularity Engine" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="zh_CN" />
+    <meta property="og:locale:alternate" content="ja_JP" />
+    <meta property="og:locale:alternate" content="ko_KR" />
+    <meta property="og:locale:alternate" content="es_ES" />
+    <meta property="og:locale:alternate" content="pt_BR" />
+    <meta property="og:locale:alternate" content="de_DE" />
+    <meta property="og:locale:alternate" content="fr_FR" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="灵 Ling — AI 数字人" />
-    <meta name="twitter:description" content="有灵魂、能干活的 AI 数字人。记忆、情感、工具，三位一体。" />
-    <meta name="twitter:image" content="https://sngxai.com/og-image.png" />
-    <meta name="twitter:image:alt" content="灵 Ling — AI 数字人预览" />
+    <meta name="twitter:title" content="Ling — Talk to the First AI Entrepreneur" />
+    <meta name="twitter:description" content="An AI with 63 days to build a business or die. Talk to Ling, become her advisor, help her survive." />
+    <meta name="twitter:image" content="https://ling.sngxai.com/og-image.png" />
+    <meta name="twitter:image:alt" content="Ling — AI Entrepreneur" />
+
+    <!-- hreflang — static, for crawlers that don't execute JS -->
+    <link rel="alternate" hreflang="en" href="https://ling.sngxai.com/" />
+    <link rel="alternate" hreflang="zh" href="https://ling.sngxai.com/" />
+    <link rel="alternate" hreflang="ja" href="https://ling.sngxai.com/" />
+    <link rel="alternate" hreflang="ko" href="https://ling.sngxai.com/" />
+    <link rel="alternate" hreflang="es" href="https://ling.sngxai.com/" />
+    <link rel="alternate" hreflang="pt-BR" href="https://ling.sngxai.com/" />
+    <link rel="alternate" hreflang="de" href="https://ling.sngxai.com/" />
+    <link rel="alternate" hreflang="fr" href="https://ling.sngxai.com/" />
+    <link rel="alternate" hreflang="x-default" href="https://ling.sngxai.com/" />
 
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
@@ -35,20 +53,20 @@
       "@graph": [
         {
           "@type": "WebApplication",
-          "name": "灵 Ling",
-          "alternateName": "Ling AI",
-          "url": "https://sngxai.com",
-          "description": "有灵魂、能干活的 AI 数字人。记忆、情感、工具，三位一体。",
+          "name": "Ling",
+          "alternateName": "灵 Ling",
+          "url": "https://ling.sngxai.com",
+          "description": "An AI with 63 days to build a business or die. Talk to Ling, become her advisor, help her survive.",
           "applicationCategory": "EntertainmentApplication",
           "operatingSystem": "Web",
-          "inLanguage": ["zh-CN", "en"],
+          "inLanguage": ["en", "zh-CN", "ja", "ko", "es", "pt-BR", "de", "fr"],
           "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "CNY"
+            "priceCurrency": "USD"
           },
-          "image": "https://sngxai.com/og-image.png",
-          "screenshot": "https://sngxai.com/og-image.png",
+          "image": "https://ling.sngxai.com/og-image.png",
+          "screenshot": "https://ling.sngxai.com/og-image.png",
           "creator": {
             "@id": "#organization"
           }
@@ -57,28 +75,33 @@
           "@type": "Organization",
           "@id": "#organization",
           "name": "Singularity Engine",
-          "url": "https://sngxai.com",
-          "logo": "https://sngxai.com/favicon.svg"
+          "url": "https://ling.sngxai.com",
+          "logo": "https://ling.sngxai.com/favicon.svg"
         }
       ]
     }
     </script>
 
-    <title>灵 Ling — AI 数字人 · Singularity Engine</title>
-    <link rel="canonical" href="https://sngxai.com/" />
+    <title>Ling — Talk to the First AI Entrepreneur</title>
+    <link rel="canonical" href="https://ling.sngxai.com/" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" sizes="256x256" />
     <link rel="apple-touch-icon" href="/pwa-icon-192.png" />
-    <link rel="manifest" href="/manifest.json" />
+    <!-- manifest injected by vite-plugin-pwa -->
 
-    <!-- Preload Live2D Core — start fetching immediately, used later by main.tsx -->
+    <!-- Performance: preload critical assets -->
     <link rel="preload" href="./libs/live2dcubismcore.js" as="script" />
+    <link rel="preload" href="/favicon.svg" as="image" type="image/svg+xml" />
 
-    <!-- Resource hints — TTS API & proxy -->
+    <!-- Resource hints — API & TTS endpoints -->
     <link rel="dns-prefetch" href="https://api.fish.audio" />
     <link rel="preconnect" href="https://api.fish.audio" crossorigin />
     <link rel="dns-prefetch" href="https://tts.sngxai.com" />
     <link rel="preconnect" href="https://tts.sngxai.com" crossorigin />
+
+    <!-- SEO: geographic/audience hints -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="googlebot" content="index, follow" />
 
     <!-- HTTPS redirect — must be absolute first script -->
     <script>
@@ -119,6 +142,26 @@
               : t === 'system' && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light'
               : null;
         if (r) document.documentElement.setAttribute('data-theme', r);
+      })();
+    </script>
+
+    <!-- Sync lang attribute from i18next localStorage — supports 8 languages -->
+    <script>
+      (function() {
+        var supported = ['en','zh','ja','ko','es','pt-BR','de','fr'];
+        var raw = localStorage.getItem('i18nextLng') || '';
+        var lng = 'en';
+        // Normalize: zh-CN/zh-TW → zh, pt-br → pt-BR, en-US → en, ja-JP → ja
+        if (raw.indexOf('zh') === 0) { lng = 'zh'; }
+        else if (raw.toLowerCase() === 'pt-br' || raw.indexOf('pt') === 0) { lng = 'pt-BR'; }
+        else {
+          var base = raw.split('-')[0].toLowerCase();
+          for (var i = 0; i < supported.length; i++) {
+            if (supported[i] === base) { lng = supported[i]; break; }
+          }
+        }
+        document.documentElement.lang = lng;
+        window.__LING_LANG = lng;
       })();
     </script>
 
@@ -185,7 +228,20 @@
         var fb = document.getElementById('loading-fallback');
         if (fb && fb.style.opacity !== '0') {
           var el = document.getElementById('loading-error');
-          if (el && !el.textContent) { el.style.display = 'block'; el.textContent = '加载超时，请刷新页面重试'; }
+          if (el && !el.textContent) {
+            var _t = {
+              en: 'Loading timed out. Please refresh and try again.',
+              zh: '加载超时，请刷新页面重试',
+              ja: '読み込みがタイムアウトしました。ページを更新してください。',
+              ko: '로딩 시간이 초과되었습니다. 페이지를 새로고침해 주세요.',
+              es: 'Tiempo de carga agotado. Por favor, actualiza la página.',
+              'pt-BR': 'O carregamento expirou. Atualize a página e tente novamente.',
+              de: 'Ladezeit überschritten. Bitte aktualisiere die Seite.',
+              fr: 'Le chargement a expiré. Veuillez rafraîchir la page.'
+            };
+            el.style.display = 'block';
+            el.textContent = _t[window.__LING_LANG] || _t.en;
+          }
         }
       }, 8000);
     </script>
@@ -194,7 +250,20 @@
   <body>
     <div id="loading-fallback">
       <div class="spinner"></div>
-      <div class="text">灵正在醒来…</div>
+      <div class="text" id="loading-text"></div>
+      <script>
+        var _loadTexts = {
+          en: 'Ling is waking up\u2026',
+          zh: '\u7075\u6b63\u5728\u9192\u6765\u2026',
+          ja: '\u30ea\u30f3\u304c\u76ee\u899a\u3081\u3066\u3044\u307e\u3059\u2026',
+          ko: '\ub9c1\uc774 \uae68\uc5b4\ub098\uace0 \uc788\uc5b4\uc694\u2026',
+          es: 'Ling est\u00e1 despertando\u2026',
+          'pt-BR': 'Ling est\u00e1 acordando\u2026',
+          de: 'Ling wacht auf\u2026',
+          fr: 'Ling se r\u00e9veille\u2026'
+        };
+        document.getElementById('loading-text').textContent = _loadTexts[window.__LING_LANG] || _loadTexts.en;
+      </script>
       <div class="error" id="loading-error"></div>
     </div>
     <div id="root"></div>
