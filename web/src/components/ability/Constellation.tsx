@@ -23,7 +23,7 @@ const S_CONTAINER: CSSProperties = { position: "relative" };
 const S_BACKDROP: CSSProperties = {
   position: "fixed",
   inset: 0,
-  background: "rgba(0,0,0,0.2)",
+  background: "var(--ling-overlay-dim)",
   zIndex: 24,
 };
 const S_STARFIELD: CSSProperties = {
@@ -119,6 +119,7 @@ const StarButton = memo(function StarButton({
 
   return (
     <motion.button
+      role="menuitem"
       variants={variants}
       transition={transition}
       onClick={handleClick}
@@ -143,8 +144,8 @@ export const Constellation = memo(() => {
 
   // Active tool color for core glow
   const activeMeta = activeToolName ? getSkillMeta(activeToolName) : null;
-  const coreColor = activeMeta ? activeMeta.color : "rgba(139,92,246,0.6)";
-  const coreBorderColor = activeMeta ? `${activeMeta.color}cc` : "rgba(139,92,246,0.4)";
+  const coreColor = activeMeta ? activeMeta.color : "var(--ling-purple-60)";
+  const coreBorderColor = activeMeta ? `${activeMeta.color}cc` : "var(--ling-purple-40)";
 
   // Sort discovered by count descending for display
   const sorted = useMemo(
@@ -209,7 +210,7 @@ export const Constellation = memo(() => {
     width: 44,
     height: 44,
     borderRadius: "50%",
-    background: isOpen ? "rgba(139,92,246,0.3)" : "rgba(139,92,246,0.15)",
+    background: isOpen ? "var(--ling-purple-30)" : "var(--ling-purple-15)",
     backdropFilter: "blur(12px)",
     WebkitBackdropFilter: "blur(12px)",
     border: `1.5px solid ${coreBorderColor}`,
@@ -240,6 +241,7 @@ export const Constellation = memo(() => {
             exit={FADE_IN}
             transition={FADE_TRANSITION}
             onClick={closeConstellation}
+            aria-hidden="true"
             style={S_BACKDROP}
           />
         )}
@@ -249,6 +251,8 @@ export const Constellation = memo(() => {
       <AnimatePresence>
         {isOpen && sorted.length > 0 && (
           <motion.div
+            role="menu"
+            aria-label={t("constellation.open")}
             initial="closed"
             animate="open"
             exit="closed"
@@ -269,7 +273,7 @@ export const Constellation = memo(() => {
                       y1={p1.y + OUTER_RADIUS + 20}
                       x2={p2.x + OUTER_RADIUS + 20}
                       y2={p2.y + OUTER_RADIUS + 20}
-                      stroke="rgba(139,92,246,0.12)"
+                      stroke="var(--ling-purple-12)"
                       strokeWidth="1"
                       variants={LINE_VARIANTS}
                       transition={{ duration: 0.4, delay: i * 0.05 }}
@@ -305,6 +309,8 @@ export const Constellation = memo(() => {
         onMouseEnter={setHoveredTrue}
         onMouseLeave={setHoveredFalse}
         aria-label={tooltipText}
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
         title={tooltipText}
         animate={isOpen ? CORE_OPEN : CORE_CLOSED}
         whileTap={WHILETAP_090}
@@ -317,7 +323,7 @@ export const Constellation = memo(() => {
           height="20"
           viewBox="0 0 24 24"
           fill="none"
-          stroke={activeMeta ? activeMeta.color : "rgba(196,181,253,0.8)"}
+          stroke={activeMeta ? activeMeta.color : "var(--ling-purple-lighter)"}
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
