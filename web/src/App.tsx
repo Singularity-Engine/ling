@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense, Component, ErrorInfo, type ReactNode, type CSSProperties } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+// framer-motion deferred: only loaded by lazy Constellation/Onboarding chunks
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
@@ -37,7 +37,8 @@ import { SEO_HOME_TITLE, SEO_HOME_DESC, SEO_HOME_OG_TITLE } from "./constants/br
 import { BackgroundReactor } from "./components/effects/BackgroundReactor";
 import { AudioVisualizer } from "./components/effects/AudioVisualizer";
 import { CrystalField } from "./components/crystal/CrystalField";
-import { Constellation } from "./components/ability/Constellation";
+// Lazy-loaded: Constellation pulls in framer-motion (~30KB), deferred to first render (desktop only).
+const Constellation = lazy(() => import("./components/ability/Constellation").then(m => ({ default: m.Constellation })));
 import { LoadingSkeleton } from "./components/loading/LoadingSkeleton";
 import { Toaster, toaster } from "./components/ui/toaster";
 import { useWebSocketActions } from "./context/websocket-context";
@@ -553,10 +554,12 @@ function MainContent(): JSX.Element {
         )}
 
         <div style={S_INPUT_SECTION}>
-          {/* 星座 — 浮在 InputBar 左上方 */}
+          {/* 星座 — 浮在 InputBar 左上方 (lazy: defers framer-motion chunk) */}
           {!isMobile && (
             <div style={S_CONSTELLATION_POS}>
-              <Constellation />
+              <Suspense fallback={null}>
+                <Constellation />
+              </Suspense>
             </div>
           )}
           <div style={S_INPUT_BAR_BG}>
@@ -741,29 +744,29 @@ function MainApp() {
   );
 }
 
-const pageTransition = { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.2, ease: 'easeInOut' },
-} as const;
+// CSS-only page transition: lightweight fade-in on route change.
+// Replaces framer-motion AnimatePresence to defer the ~30KB library
+// from the critical path (now only loaded by lazy Constellation chunk).
+const S_PAGE_WRAP: CSSProperties = { minHeight: "100dvh", animation: "pageFadeIn 0.2s ease-in-out" };
 
 function AnimatedRoutes(): JSX.Element {
   const location = useLocation();
-  // Normalize key so all catch-all paths share the same key (avoids spurious re-animation)
+  // Normalize key so all catch-all paths share the same key (avoids spurious remount)
   const pageKey = ['/login', '/register', '/terms'].includes(location.pathname)
     ? location.pathname
     : '/';
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div key={pageKey} {...pageTransition} style={{ minHeight: '100dvh' }}>
-        <Suspense fallback={null}>
-          <Routes location={location}>
-            <Route path="/login" element={<GuestOnly><LoginPage /></GuestOnly>} />
-            <Route path="/register" element={<GuestOnly><RegisterPage /></GuestOnly>} />
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="/*" element={<MainApp />} />
-          </Routes>
-        </Suspense>
-      </motion.div>
-    </AnimatePresence>
+    <div key={pageKey} style={S_PAGE_WRAP}>
+      <Suspense fallback={null}>
+        <Routes location={location}>
+          <Route path="/login" element={<GuestOnly><LoginPage /></GuestOnly>} />
+          <Route path="/register" element={<GuestOnly><RegisterPage /></GuestOnly>} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/*" element={<MainApp />} />
+        </Routes>
+      </Suspense>
+    </div>
   );
 }
 

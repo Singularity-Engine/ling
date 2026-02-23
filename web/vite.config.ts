@@ -77,8 +77,11 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/')) {
             return 'vendor-react';
           }
-          if (id.includes('node_modules/@chakra-ui') || id.includes('node_modules/@emotion') || id.includes('node_modules/framer-motion')) {
+          if (id.includes('node_modules/@chakra-ui') || id.includes('node_modules/@emotion')) {
             return 'vendor-ui';
+          }
+          if (id.includes('node_modules/framer-motion')) {
+            return 'vendor-framer';
           }
           if (id.includes('node_modules/@ricky0123/vad-web')) {
             return 'vendor-vad';
