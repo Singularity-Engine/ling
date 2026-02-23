@@ -16,6 +16,20 @@ import { createLogger } from '@/utils/logger';
 
 const log = createLogger('GatewayAdapter');
 
+// ─── Runtime type guards for untyped Gateway payloads ────────────
+
+function str(val: unknown, fallback = ''): string {
+  return typeof val === 'string' ? val : fallback;
+}
+
+function num(val: unknown, fallback = 0): number {
+  return typeof val === 'number' && !Number.isNaN(val) ? val : fallback;
+}
+
+function bool(val: unknown, fallback = false): boolean {
+  return typeof val === 'boolean' ? val : fallback;
+}
+
 // Extended MessageEvent with Gateway-specific fields (affinity, emotion)
 export interface GatewayMessageEvent extends MessageEvent {
   affinity?: number;
@@ -73,24 +87,24 @@ class GatewayMessageAdapter {
       case 'affinity-update':
         this.emit({
           type: 'affinity-update',
-          affinity: payload.affinity as number,
-          level: payload.level as string,
+          affinity: num(payload.affinity),
+          level: str(payload.level),
         });
         break;
 
       case 'affinity-milestone':
         this.emit({
           type: 'affinity-milestone',
-          milestone: payload.milestone as string,
-          message: payload.message as string,
+          milestone: str(payload.milestone),
+          message: str(payload.message),
         });
         break;
 
       case 'emotion-expression':
         this.emit({
           type: 'emotion-expression',
-          expression: payload.expression as string,
-          intensity: payload.intensity as number,
+          expression: str(payload.expression),
+          intensity: num(payload.intensity),
         });
         break;
 
@@ -144,11 +158,11 @@ class GatewayMessageAdapter {
       return;
     }
 
-    const deltaText = (data.delta as string) || '';
+    const deltaText = str(data.delta);
     if (deltaText) {
       run.accumulatedText += deltaText;
     } else if (data.text) {
-      run.accumulatedText = data.text as string;
+      run.accumulatedText = str(data.text);
     }
     run.lastSeq = event.seq;
 
@@ -163,11 +177,11 @@ class GatewayMessageAdapter {
 
   private handleToolEvent(event: GatewayAgentEvent) {
     const { data } = event;
-    const phase = data.phase as string;
-    const toolName = (data.name as string) || 'unknown';
-    const toolCallId = (data.toolCallId as string) || event.runId + '-' + event.seq;
-    const meta = (data.meta as string) || '';
-    const isError = data.isError as boolean || false;
+    const phase = str(data.phase);
+    const toolName = str(data.name, 'unknown');
+    const toolCallId = str(data.toolCallId, event.runId + '-' + event.seq);
+    const meta = str(data.meta);
+    const isError = bool(data.isError);
 
     if (phase === 'call') {
       // Tool call started
@@ -197,7 +211,7 @@ class GatewayMessageAdapter {
   // ── Lifecycle events ───────────────────────────────────────────
 
   private handleLifecycleEvent(event: GatewayAgentEvent) {
-    const phase = event.data.phase as string;
+    const phase = str(event.data.phase);
 
     switch (phase) {
       case 'start':
@@ -257,7 +271,7 @@ class GatewayMessageAdapter {
         }
 
         // Surface the error message to the user
-        const errorMessage = (event.data.message as string) || (event.data.error as string) || 'Agent encountered an error';
+        const errorMessage = str(event.data.message) || str(event.data.error) || 'Agent encountered an error';
         this.emit({
           type: 'error',
           message: errorMessage,
