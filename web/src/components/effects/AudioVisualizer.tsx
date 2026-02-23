@@ -129,7 +129,6 @@ export const AudioVisualizer = memo(() => {
 
     const dataArray = new Uint8Array(FFT_SIZE / 2);
     const decay = decayRef.current;
-    const dpr = window.devicePixelRatio || 1;
     const gap = 2;
 
     // Cached bar layout + gradient — only recomputed when canvas dimensions
@@ -151,6 +150,10 @@ export const AudioVisualizer = memo(() => {
 
       if (timestamp - lastTime < FRAME_INTERVAL) return;
       lastTime = timestamp;
+
+      // Read DPR live each frame so multi-monitor moves are handled correctly
+      // (closure capture goes stale when the window moves between displays).
+      const dpr = window.devicePixelRatio || 1;
 
       // Use CSS-pixel dimensions: canvas stores physical pixels (CSS × DPR)
       // after the resize handler applies ctx.scale(dpr). Drawing in physical-
@@ -246,7 +249,9 @@ export const AudioVisualizer = memo(() => {
     };
   }, [active]);
 
-  // Resize canvas to match container
+  // Resize canvas to match container — ResizeObserver fires only when the
+  // canvas element itself changes size, avoiding unnecessary work on unrelated
+  // window resize events. Browser batches callbacks before paint automatically.
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -259,16 +264,9 @@ export const AudioVisualizer = memo(() => {
       if (ctx2d) ctx2d.scale(dpr, dpr);
     };
     resize();
-    let resizeRaf = 0;
-    const throttledResize = () => {
-      if (resizeRaf) return;
-      resizeRaf = requestAnimationFrame(() => { resizeRaf = 0; resize(); });
-    };
-    window.addEventListener('resize', throttledResize);
-    return () => {
-      cancelAnimationFrame(resizeRaf);
-      window.removeEventListener('resize', throttledResize);
-    };
+    const ro = new ResizeObserver(() => resize());
+    ro.observe(canvas);
+    return () => ro.disconnect();
   }, []);
 
   const containerStyle = useMemo(
