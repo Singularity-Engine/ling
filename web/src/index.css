@@ -1165,6 +1165,14 @@ canvas {
 .ling-credit-btn:hover { background: rgba(139, 92, 246, 0.18) !important; border-color: rgba(139, 92, 246, 0.4) !important; }
 .ling-credit-btn:active { transform: scale(0.97); }
 
+/* ── Auth pages: input/button/link interactive states ── */
+.ling-auth-input:focus { border-color: var(--ling-purple-60) !important; background: rgba(255,255,255,0.09) !important; }
+.ling-auth-input::placeholder { color: rgba(255,255,255,0.3); }
+.ling-auth-btn:hover { opacity: 0.88; }
+.ling-auth-btn:active { opacity: 0.75; transform: scale(0.98); }
+.ling-auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.ling-auth-link:hover { text-decoration: underline; }
+
 /* === 主题 color-scheme === */
 :root {
   color-scheme: dark;

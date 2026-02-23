@@ -47,6 +47,7 @@ export function LoginPage() {
         <form onSubmit={handleSubmit} style={styles.form}>
           <input
             type="text"
+            className="ling-auth-input"
             placeholder={t('auth.placeholderEmailOrUsername')}
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
@@ -56,6 +57,7 @@ export function LoginPage() {
           />
           <input
             type="password"
+            className="ling-auth-input"
             placeholder={t('auth.placeholderPassword')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -66,14 +68,14 @@ export function LoginPage() {
 
           {error && <p style={styles.error}>{error}</p>}
 
-          <button type="submit" disabled={loading} style={styles.button}>
+          <button type="submit" className="ling-auth-btn" disabled={loading} style={styles.button}>
             {loading ? t('auth.loginSubmitting') : t('auth.loginSubmit')}
           </button>
         </form>
 
         <p style={styles.footer}>
           {t('auth.loginFooter')}{' '}
-          <Link to="/register" style={styles.link}>
+          <Link to="/register" className="ling-auth-link" style={styles.link}>
             {t('auth.loginFooterLink')}
           </Link>
         </p>

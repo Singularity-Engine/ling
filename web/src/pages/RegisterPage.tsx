@@ -61,6 +61,7 @@ export function RegisterPage() {
         <form onSubmit={handleSubmit} style={styles.form}>
           <input
             type="email"
+            className="ling-auth-input"
             placeholder={t('auth.placeholderEmail')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -70,6 +71,7 @@ export function RegisterPage() {
           />
           <input
             type="text"
+            className="ling-auth-input"
             placeholder={t('auth.placeholderUsername')}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -79,6 +81,7 @@ export function RegisterPage() {
           />
           <input
             type="password"
+            className="ling-auth-input"
             placeholder={t('auth.placeholderPassword')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -89,6 +92,7 @@ export function RegisterPage() {
           />
           <input
             type="password"
+            className="ling-auth-input"
             placeholder={t('auth.placeholderConfirmPassword')}
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
@@ -106,7 +110,7 @@ export function RegisterPage() {
             />
             <span>
               {t('auth.ageConfirm')}{' '}
-              <Link to="/terms" target="_blank" style={styles.link}>
+              <Link to="/terms" target="_blank" className="ling-auth-link" style={styles.link}>
                 {t('auth.termsLink')}
               </Link>
             </span>
@@ -114,14 +118,14 @@ export function RegisterPage() {
 
           {error && <p style={styles.error}>{error}</p>}
 
-          <button type="submit" disabled={loading} style={styles.button}>
+          <button type="submit" className="ling-auth-btn" disabled={loading} style={styles.button}>
             {loading ? t('auth.registerSubmitting') : t('auth.registerSubmit')}
           </button>
         </form>
 
         <p style={styles.footer}>
           {t('auth.registerFooter')}{' '}
-          <Link to="/login" style={styles.link}>
+          <Link to="/login" className="ling-auth-link" style={styles.link}>
             {t('auth.registerFooterLink')}
           </Link>
         </p>
