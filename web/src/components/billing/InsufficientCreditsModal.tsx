@@ -164,10 +164,10 @@ const InsufficientCreditsModal: React.FC = memo(function InsufficientCreditsModa
 
   return (
     <div style={closing ? S_BACKDROP_CLOSING : S_BACKDROP_OPEN} onClick={handleBackdropClick}>
-      <div style={closing ? S_CARD_CLOSING : S_CARD_OPEN}>
+      <div style={closing ? S_CARD_CLOSING : S_CARD_OPEN} role="dialog" aria-modal="true" aria-labelledby="billing-modal-title">
         <div style={S_ICON}>{icon}</div>
 
-        <h3 style={S_TITLE}>{title}</h3>
+        <h3 id="billing-modal-title" style={S_TITLE}>{title}</h3>
 
         <p style={S_MESSAGE}>
           {billingModal.message || defaultMessage}

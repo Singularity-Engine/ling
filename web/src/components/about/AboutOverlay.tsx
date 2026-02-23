@@ -349,9 +349,9 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
 
   return (
     <div style={closing ? S_BACKDROP_CLOSING : S_BACKDROP_OPEN} onClick={handleClose}>
-      <div onClick={stopPropagation} style={closing ? S_CARD_CLOSING : S_CARD_OPEN}>
+      <div onClick={stopPropagation} style={closing ? S_CARD_CLOSING : S_CARD_OPEN} role="dialog" aria-modal="true" aria-labelledby="about-title">
         {/* Product name */}
-        <h2 style={S_PRODUCT_NAME}>{t("about.name")}</h2>
+        <h2 id="about-title" style={S_PRODUCT_NAME}>{t("about.name")}</h2>
 
         {/* Tagline */}
         <p style={S_TAGLINE}>{t("about.tagline")}</p>

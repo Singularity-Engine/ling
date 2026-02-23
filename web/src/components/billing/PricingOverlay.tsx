@@ -361,15 +361,15 @@ const PricingOverlay: React.FC = memo(() => {
 
   return (
     <div style={closing ? S_OVERLAY_CLOSING : S_OVERLAY_OPEN} onClick={handleOverlayClick}>
-      <div style={closing ? S_INNER_CLOSING : S_INNER_OPEN}>
+      <div style={closing ? S_INNER_CLOSING : S_INNER_OPEN} role="dialog" aria-modal="true" aria-labelledby="pricing-title">
         {/* Close button */}
-        <button onClick={handleClose} style={closeBtnStyle}>
+        <button onClick={handleClose} style={closeBtnStyle} aria-label="Close">
           ×
         </button>
 
         {/* Title */}
         <div style={titleContainerStyle}>
-          <h2 style={titleStyle}>Choose Your Plan</h2>
+          <h2 id="pricing-title" style={titleStyle}>Choose Your Plan</h2>
           <p style={subtitleStyle}>
             Unlock deeper conversations, more tools, and permanent memory
           </p>

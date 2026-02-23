@@ -98,8 +98,8 @@ export const ShortcutsOverlay = memo(({ open, onClose }: ShortcutsOverlayProps) 
 
   return (
     <div style={S_BACKDROP} onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} style={S_CARD}>
-        <h2 style={S_HEADING}>{t("shortcuts.title")}</h2>
+      <div onClick={(e) => e.stopPropagation()} style={S_CARD} role="dialog" aria-modal="true" aria-labelledby="shortcuts-title">
+        <h2 id="shortcuts-title" style={S_HEADING}>{t("shortcuts.title")}</h2>
 
         <div style={S_LIST}>
           {SHORTCUT_GROUPS.map((item) => (
