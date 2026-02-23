@@ -459,6 +459,8 @@
     "begin": "开始对话",
     "skip": "跳过",
     "next": "下一步",
-    "maxGoals": "最多选 {{max}} 个"
+    "back": "返回",
+    "maxGoals": "最多选 {{max}} 个",
+    "stepProgress": "第 {{current}} 步，共 {{total}} 步"
   }
 }

@@ -264,13 +264,15 @@ export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingPro
   const TOTAL_STEPS = 4;
 
   return (
-    <div style={exiting ? S_OVERLAY_EXITING : S_OVERLAY_VISIBLE}>
+    <div style={exiting ? S_OVERLAY_EXITING : S_OVERLAY_VISIBLE} role="dialog" aria-modal="true" aria-label={t("onboarding.welcome")}>
       {/* Progress dots */}
-      <div style={S_DOTS_ROW}>
+      <div style={S_DOTS_ROW} role="group" aria-label={t("onboarding.stepProgress", { current: String(step + 1), total: String(TOTAL_STEPS) })}>
         {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
           <div
             key={i}
             style={i === step ? S_DOT_ACTIVE : i < step ? S_DOT_DONE : S_DOT_PENDING}
+            role="presentation"
+            aria-current={i === step ? "step" : undefined}
           />
         ))}
       </div>
@@ -321,7 +323,7 @@ export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingPro
           {t("onboarding.skip")}
         </button>
         {step > 0 && step < 3 && (
-          <button onClick={goBack} style={S_BTN_BACK}>
+          <button onClick={goBack} style={S_BTN_BACK} aria-label={t("onboarding.back")}>
             {"←"}
           </button>
         )}
@@ -343,7 +345,7 @@ function StepWelcome({ t, onNext }: { t: (k: string) => string; onNext: () => vo
   return (
     <>
       {/* Star icon SVG */}
-      <div style={S_STAR_WRAP}>
+      <div style={S_STAR_WRAP} aria-hidden="true">
         <svg
           width="64"
           height="64"
@@ -394,13 +396,14 @@ function StepInterests({
             <button
               key={tag}
               onClick={() => onToggle(tag)}
+              aria-pressed={isSelected}
               style={{
                 ...S_CARD_BASE,
                 border: `1.5px solid ${isSelected ? `${color}80` : "rgba(255,255,255,0.1)"}`,
                 background: isSelected ? `${color}20` : "rgba(255,255,255,0.06)",
               }}
             >
-              <Icon size={24} color={isSelected ? color : "rgba(255,255,255,0.5)"} />
+              <Icon size={24} color={isSelected ? color : "rgba(255,255,255,0.5)"} aria-hidden="true" />
               <span style={{
                 fontSize: "13px",
                 color: isSelected ? color : "rgba(255,255,255,0.6)",
@@ -480,6 +483,7 @@ function StepGoals({
               key={meta.key}
               onClick={() => !isFull && onToggle(meta.key)}
               disabled={isFull}
+              aria-pressed={isSelected}
               style={{
                 ...S_GOAL_CARD_BASE,
                 border: `1.5px solid ${isSelected ? `${meta.color}80` : "rgba(255,255,255,0.1)"}`,
@@ -488,7 +492,7 @@ function StepGoals({
                 opacity: isFull ? 0.4 : 1,
               }}
             >
-              <Icon size={18} color={isSelected ? meta.color : "rgba(255,255,255,0.5)"} />
+              <Icon size={18} color={isSelected ? meta.color : "rgba(255,255,255,0.5)"} aria-hidden="true" />
               <span style={{
                 fontSize: "13px",
                 color: isSelected ? meta.color : "rgba(255,255,255,0.6)",

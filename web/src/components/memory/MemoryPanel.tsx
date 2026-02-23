@@ -177,12 +177,12 @@ export const MemoryPanel = memo(function MemoryPanel({ open, onClose }: MemoryPa
   return (
     <div style={S_OVERLAY} onClick={handleOverlayClick}>
       {/* Backdrop */}
-      <div style={closing ? S_BACKDROP_CLOSING : S_BACKDROP_OPEN} />
+      <div style={closing ? S_BACKDROP_CLOSING : S_BACKDROP_OPEN} aria-hidden="true" />
 
       {/* Panel */}
-      <div style={closing ? S_PANEL_CLOSING : S_PANEL_OPEN}>
+      <div style={closing ? S_PANEL_CLOSING : S_PANEL_OPEN} role="dialog" aria-modal="true" aria-label={t('memory.title')}>
         {/* Header */}
-        <div style={S_HEADER}>
+        <header style={S_HEADER}>
           <div>
             <div style={S_TITLE_ROW}>
               <h3 style={S_TITLE}>{t('memory.title')}</h3>
@@ -200,7 +200,7 @@ export const MemoryPanel = memo(function MemoryPanel({ open, onClose }: MemoryPa
           >
             ×
           </button>
-        </div>
+        </header>
 
         {/* Content */}
         <div className="ling-memory-scroll" style={S_CONTENT}>
@@ -214,7 +214,7 @@ export const MemoryPanel = memo(function MemoryPanel({ open, onClose }: MemoryPa
 
           {!user && (
             <div style={S_EMPTY_WRAP}>
-              <div style={S_EMPTY_ICON}>{'\uD83D\uDD12'}</div>
+              <div style={S_EMPTY_ICON} role="img" aria-label={t('memory.guestTitle')}>{'\uD83D\uDD12'}</div>
               <h4 style={S_EMPTY_TITLE}>{t('memory.guestTitle')}</h4>
               <p style={S_EMPTY_DESC_MB}>{t('memory.guestDesc')}</p>
               <a href="/register" style={S_REGISTER_LINK}>
@@ -225,7 +225,7 @@ export const MemoryPanel = memo(function MemoryPanel({ open, onClose }: MemoryPa
 
           {user && !loading && !error && memories.length === 0 && (
             <div style={S_EMPTY_WRAP}>
-              <div style={S_EMPTY_ICON}>{'\uD83E\uDDE0'}</div>
+              <div style={S_EMPTY_ICON} role="img" aria-label={t('memory.noMemoriesTitle')}>{'\uD83E\uDDE0'}</div>
               <h4 style={S_EMPTY_TITLE}>{t('memory.noMemoriesTitle')}</h4>
               <p style={S_EMPTY_DESC}>{t('memory.noMemoriesDesc')}</p>
             </div>

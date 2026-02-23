@@ -459,6 +459,8 @@
     "begin": "Start chatting",
     "skip": "Skip",
     "next": "Next",
-    "maxGoals": "Up to {{max}} selections"
+    "back": "Back",
+    "maxGoals": "Up to {{max}} selections",
+    "stepProgress": "Step {{current}} of {{total}}"
   }
 }
