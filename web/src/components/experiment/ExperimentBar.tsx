@@ -10,7 +10,7 @@
  * 从 /api/public/status 或本地 fallback 获取数据。
  */
 
-import { useState, useEffect, useCallback, useReducer, useRef, useMemo, memo, type CSSProperties } from "react";
+import { useState, useEffect, useReducer, useRef, useMemo, memo, type CSSProperties } from "react";
 import { createStyleInjector } from "@/utils/style-injection";
 
 // ── Types ──
@@ -187,24 +187,22 @@ export const ExperimentBar = memo(function ExperimentBar() {
   useEffect(ensureBarStyles, []);
   const [status, setStatus] = useState<ExperimentStatus>(FALLBACK);
 
-  const fetchStatus = useCallback(async () => {
-    try {
-      const r = await fetch(STATUS_API, { cache: "no-cache" });
-      if (r.ok) {
-        const data = await r.json();
-        setStatus(data);
-      }
-    } catch {
-      // silently use fallback
-    }
-  }, []);
-
-  // Fetch on mount + interval
+  // Fetch on mount + interval; AbortController cancels in-flight requests on unmount
   useEffect(() => {
-    fetchStatus();
-    const id = setInterval(fetchStatus, REFRESH_MS);
-    return () => clearInterval(id);
-  }, [fetchStatus]);
+    const ac = new AbortController();
+    const doFetch = async () => {
+      try {
+        const r = await fetch(STATUS_API, { cache: "no-cache", signal: ac.signal });
+        if (r.ok) setStatus(await r.json());
+      } catch (e) {
+        if (e instanceof DOMException && e.name === "AbortError") return;
+        // silently use fallback for network errors
+      }
+    };
+    doFetch();
+    const id = setInterval(doFetch, REFRESH_MS);
+    return () => { clearInterval(id); ac.abort(); };
+  }, []);
 
   const isDanger = status.days_remaining <= 7;
   const revPct = Math.min(

@@ -64,8 +64,11 @@ export const CrystalField = memo(() => {
     return [...activeTools, ...recentResults].slice(0, limit);
   }, [activeTools, recentResults, limit]);
 
-  // Track exiting crystals so they can animate out before removal
+  // Track exiting crystals so they can animate out before removal.
+  // Cache + exit-detection are in a single effect to avoid ordering fragility
+  // between two effects that both depend on liveCrystals.
   const prevIdsRef = useRef<Set<string>>(new Set());
+  const toolCacheRef = useRef<Map<string, { tool: (typeof liveCrystals)[0]; index: number }>>(new Map());
   const [exitingMap, setExitingMap] = useState<
     Map<string, { tool: (typeof liveCrystals)[0]; index: number }>
   >(new Map());
@@ -74,19 +77,19 @@ export const CrystalField = memo(() => {
     const currentIds = new Set(liveCrystals.map(c => c.id));
     const exiting = new Map<string, { tool: (typeof liveCrystals)[0]; index: number }>();
 
-    // Find crystals that were visible but are no longer in the live list
+    // Detect crystals that left — read from the *previous* cache before overwriting
     prevIdsRef.current.forEach(id => {
       if (!currentIds.has(id)) {
-        // Look up the tool data from the previous render's exiting map or nowhere
-        // We stored it in the ref below
         const cached = toolCacheRef.current.get(id);
-        if (cached) {
-          exiting.set(id, cached);
-        }
+        if (cached) exiting.set(id, cached);
       }
     });
 
+    // Update bookkeeping for next diff
     prevIdsRef.current = currentIds;
+    const cache = new Map<string, { tool: (typeof liveCrystals)[0]; index: number }>();
+    liveCrystals.forEach((tool, i) => cache.set(tool.id, { tool, index: i }));
+    toolCacheRef.current = cache;
 
     if (exiting.size > 0) {
       setExitingMap(prev => new Map([...prev, ...exiting]));
@@ -100,14 +103,6 @@ export const CrystalField = memo(() => {
       }, EXIT_DURATION);
       return () => clearTimeout(timer);
     }
-  }, [liveCrystals]);
-
-  // Cache tool data + position index for exit animation
-  const toolCacheRef = useRef<Map<string, { tool: (typeof liveCrystals)[0]; index: number }>>(new Map());
-  useEffect(() => {
-    const cache = new Map<string, { tool: (typeof liveCrystals)[0]; index: number }>();
-    liveCrystals.forEach((tool, i) => cache.set(tool.id, { tool, index: i }));
-    toolCacheRef.current = cache;
   }, [liveCrystals]);
 
   const wraps = isMobile ? MOBILE_WRAP : DESKTOP_WRAP;
