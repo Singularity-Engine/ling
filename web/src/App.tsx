@@ -23,7 +23,9 @@ import { GroupProvider } from "./context/group-context";
 import { BrowserProvider } from "./context/browser-context";
 import { ModeProvider } from "./context/mode-context";
 import { ThemeProvider } from "./context/theme-context";
-import { ChatArea } from "./components/chat/ChatArea";
+// Lazy-loaded: ChatArea pulls in ChatBubble → react-markdown + remark + rehype
+// (~273KB vendor-markdown chunk), deferring it from the critical path.
+const ChatArea = lazy(() => import("./components/chat/ChatArea").then(m => ({ default: m.ChatArea })));
 import { InputBar } from "./components/chat/InputBar";
 import { AffinityBadge } from "./components/status/AffinityBadge";
 import { ConnectionStatus } from "./components/status/ConnectionStatus";
@@ -530,7 +532,9 @@ function MainContent(): JSX.Element {
               {t("error.chatRenderFailed")}
             </div>
           }>
-            <ChatArea />
+            <Suspense fallback={null}>
+              <ChatArea />
+            </Suspense>
           </SectionErrorBoundary>
         </div>
 
