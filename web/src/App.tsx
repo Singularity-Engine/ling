@@ -444,7 +444,9 @@ function MainContent(): JSX.Element {
   return (
     <div style={S_ROOT}>
       {/* ===== Layer -2: 实验状态栏 ===== */}
-      <ExperimentBar />
+      <SectionErrorBoundary name="ExperimentBar">
+        <ExperimentBar />
+      </SectionErrorBoundary>
 
       {/* ===== Layer -1: 星空背景 ===== */}
       <div style={S_LAYER_STARFIELD}>
@@ -485,11 +487,13 @@ function MainContent(): JSX.Element {
       {/* ===== Layer 1.5: 右侧工具栏 ===== */}
       <div style={isMobile ? S_TOOLBAR_M : S_TOOLBAR_D}>
         {/* ── Status indicators group ── */}
-        <div style={isMobile ? S_GROUP_M : S_GROUP_D}>
-          <CreditsDisplay />
-          <AffinityBadge />
-          <ConnectionStatus />
-        </div>
+        <SectionErrorBoundary name="StatusGroup">
+          <div style={isMobile ? S_GROUP_M : S_GROUP_D}>
+            <CreditsDisplay />
+            <AffinityBadge />
+            <ConnectionStatus />
+          </div>
+        </SectionErrorBoundary>
 
         {/* ── Action buttons group ── */}
         <div style={isMobile ? S_GROUP_M : S_GROUP_D}>
@@ -557,15 +561,25 @@ function MainContent(): JSX.Element {
         <div style={S_INPUT_SECTION}>
           {/* 星座 — 浮在 InputBar 左上方 (lazy: defers framer-motion chunk) */}
           {!isMobile && (
-            <div style={S_CONSTELLATION_POS}>
-              <Suspense fallback={null}>
-                <Constellation />
-              </Suspense>
-            </div>
+            <SectionErrorBoundary name="Constellation">
+              <div style={S_CONSTELLATION_POS}>
+                <Suspense fallback={null}>
+                  <Constellation />
+                </Suspense>
+              </div>
+            </SectionErrorBoundary>
           )}
-          <div style={S_INPUT_BAR_BG}>
-            <InputBar />
-          </div>
+          <SectionErrorBoundary name="InputBar" fallback={
+            <div style={S_INPUT_BAR_BG}>
+              <div style={{ padding: "12px 16px", color: "rgba(255,255,255,0.3)", fontSize: 13, textAlign: "center" }}>
+                {i18next.t("error.inputBarFailed")}
+              </div>
+            </div>
+          }>
+            <div style={S_INPUT_BAR_BG}>
+              <InputBar />
+            </div>
+          </SectionErrorBoundary>
         </div>
 
       </div>
