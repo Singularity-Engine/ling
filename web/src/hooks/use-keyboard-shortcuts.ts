@@ -11,33 +11,56 @@ export interface ShortcutDef {
   allowInInput?: boolean;
 }
 
+// ── Pre-parsed combo representation ──
+// Parsed once per unique combo string, cached for all subsequent keydown
+// matches. Eliminates string.split() + Set allocation + navigator.platform
+// string ops on every keydown event (7 shortcuts × every keystroke).
+
+interface ParsedCombo {
+  key: string;
+  wantCtrl: boolean;
+  wantMeta: boolean;
+  needShift: boolean;
+  needAlt: boolean;
+}
+
+const IS_MAC = typeof navigator !== "undefined" && /mac/i.test(navigator.platform);
+const _comboCache = new Map<string, ParsedCombo>();
+
+function parseCombo(raw: string): ParsedCombo {
+  let p = _comboCache.get(raw);
+  if (p) return p;
+
+  const parts = raw.toLowerCase().split("+");
+  const key = parts.pop()!;
+  const hasCtrl = parts.includes("ctrl");
+  const hasMeta = parts.includes("meta");
+  const hasMod = parts.includes("mod");
+
+  p = {
+    key,
+    wantCtrl: hasCtrl || (!IS_MAC && hasMod),
+    wantMeta: hasMeta || (IS_MAC && hasMod),
+    needShift: parts.includes("shift"),
+    needAlt: parts.includes("alt"),
+  };
+  _comboCache.set(raw, p);
+  return p;
+}
+
 /**
- * Parses a key combo string like "ctrl+/" into a matcher.
- * Supports: ctrl, meta (cmd), shift, alt + a single key.
- * "mod" maps to meta on Mac, ctrl on others.
+ * Tests whether a KeyboardEvent matches a combo string.
+ * All string operations have been moved to parseCombo() (cached) —
+ * this function does pure boolean comparisons only.
  */
 function matchesCombo(e: KeyboardEvent, combo: string): boolean {
-  const parts = combo.toLowerCase().split("+");
-  const key = parts.pop()!;
-  const mods = new Set(parts);
-
-  const isMac = navigator.platform.toUpperCase().includes("MAC");
-
-  const needCtrl = mods.has("ctrl");
-  const needMeta = mods.has("meta");
-  const needMod = mods.has("mod");
-  const needShift = mods.has("shift");
-  const needAlt = mods.has("alt");
-
-  const wantCtrl = needCtrl || (!isMac && needMod);
-  const wantMeta = needMeta || (isMac && needMod);
+  const { key, wantCtrl, wantMeta, needShift, needAlt } = parseCombo(combo);
 
   if (wantCtrl !== e.ctrlKey) return false;
   if (wantMeta !== e.metaKey) return false;
   if (needShift !== e.shiftKey) return false;
   if (needAlt !== e.altKey) return false;
 
-  // Match the key itself
   const eventKey = e.key.toLowerCase();
   if (key === "?") return eventKey === "?";
   if (key === "/") return eventKey === "/" || e.code === "Slash";
