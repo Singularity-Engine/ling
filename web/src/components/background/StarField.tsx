@@ -51,9 +51,10 @@ const STAR_LAYERS = [
   { count: 30, sizeMin: 1.0, sizeMax: 2.0, alphaMin: 0.3, alphaMax: 0.7, twinkleMin: 0.008, twinkleMax: 0.018 },
 ];
 
-// Pre-computed star color prefixes per layer (avoids template-string allocation per star per frame)
-// Layer 0 (far): purpleMix=10 → r=210, g=210 | Layer 1 (mid): 25 → 225,225 | Layer 2 (near): 40 → 240,240
-const STAR_RGBA_PREFIX = ["rgba(210,210,255,", "rgba(225,225,255,", "rgba(240,240,255,"];
+// Opaque star colors per layer — used with ctx.globalAlpha so per-star alpha
+// is a numeric assignment instead of a string concatenation + parse per frame.
+// Layer 0 (far): purpleMix=10 → 210,210 | Layer 1 (mid): 25 → 225,225 | Layer 2 (near): 40 → 240,240
+const STAR_RGB = ["rgb(210,210,255)", "rgb(225,225,255)", "rgb(240,240,255)"];
 
 // Static canvas style — avoids recreating the object on every render.
 const S_CANVAS: CSSProperties = {
@@ -114,7 +115,9 @@ export const StarField = memo(() => {
     };
     window.addEventListener("resize", throttledResize);
 
-    // Initialize stars across 3 depth layers
+    // Initialize stars across 3 depth layers.
+    // Stars are already grouped by layer (generated in layer order) so fillStyle
+    // only changes 3 times per frame instead of up to 150 times.
     const stars: Star[] = [];
     for (let layer = 0; layer < STAR_LAYERS.length; layer++) {
       const cfg = STAR_LAYERS[layer];
@@ -133,11 +136,16 @@ export const StarField = memo(() => {
     }
     starsRef.current = stars;
 
-    // Initialize nebulae with random phase
+    // Initialize nebulae with random phase + pre-computed transparent stop string
     nebulaeRef.current = INIT_NEBULAE.map((cfg) => ({
       ...cfg,
       pulsePhase: Math.random() * Math.PI * 2,
     }));
+    // Pre-compute the fully-transparent gradient stop per nebula — constant,
+    // so no template literal needed inside the 30fps loop.
+    const nebTransparentStop = INIT_NEBULAE.map(
+      (n) => `rgba(${n.r},${n.g},${n.b},0)`,
+    );
 
     let time = 0;
     let lastTs = 0;
@@ -156,7 +164,11 @@ export const StarField = memo(() => {
       ctx.clearRect(0, 0, w, h);
 
       // ── Nebula clouds (behind stars, very faint) ──
-      for (const neb of nebulaeRef.current) {
+      // Uses setTransform() instead of save/restore to avoid pushing/popping
+      // the full canvas state 8 times per frame (4 nebulae × save + restore).
+      const nebulae = nebulaeRef.current;
+      for (let ni = 0; ni < nebulae.length; ni++) {
+        const neb = nebulae[ni];
         // Slow drift
         neb.cx += neb.driftX * dt;
         neb.cy += neb.driftY * dt;
@@ -172,24 +184,27 @@ export const StarField = memo(() => {
         const cy = neb.cy * h;
         const rx = neb.rx * w;
 
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.scale(1, neb.ry / neb.rx); // elliptical shape
+        // Combined DPR + translate(cx,cy) + scale(1, ry/rx) as a single matrix.
+        // Equivalent to: save → translate(cx,cy) → scale(1, ry/rx) → draw → restore
+        const ratio = neb.ry / neb.rx;
+        ctx.setTransform(dpr, 0, 0, dpr * ratio, dpr * cx, dpr * cy);
         const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
-        grad.addColorStop(0, `rgba(${neb.r}, ${neb.g}, ${neb.b}, ${alpha})`);
-        grad.addColorStop(
-          0.45,
-          `rgba(${neb.r}, ${neb.g}, ${neb.b}, ${alpha * 0.4})`,
-        );
-        grad.addColorStop(1, `rgba(${neb.r}, ${neb.g}, ${neb.b}, 0)`);
+        grad.addColorStop(0, `rgba(${neb.r},${neb.g},${neb.b},${alpha})`);
+        grad.addColorStop(0.45, `rgba(${neb.r},${neb.g},${neb.b},${alpha * 0.4})`);
+        grad.addColorStop(1, nebTransparentStop[ni]);
         ctx.fillStyle = grad;
         ctx.beginPath();
         ctx.arc(0, 0, rx, 0, Math.PI * 2);
         ctx.fill();
-        ctx.restore();
       }
+      // Reset to base DPR transform for subsequent draws
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       // ── Stars with depth ──
+      // Per-star alpha via globalAlpha (numeric assignment) instead of RGBA
+      // string concatenation — eliminates ~150 string allocations per frame.
+      // Stars are grouped by layer so fillStyle only changes 3 times.
+      let curLayer = -1;
       for (const star of starsRef.current) {
         // Reduced motion: static brightness, no twinkle
         star.alpha = prefersReducedMotion
@@ -197,22 +212,25 @@ export const StarField = memo(() => {
           : star.baseAlpha *
             (0.5 + 0.5 * Math.sin(time * star.twinkleSpeed + star.twinkleOffset));
 
-        // Layer-based coloring via pre-computed prefix (avoids template-string per star per frame)
-        const prefix = STAR_RGBA_PREFIX[star.layer];
+        if (star.layer !== curLayer) {
+          curLayer = star.layer;
+          ctx.fillStyle = STAR_RGB[curLayer];
+        }
 
+        ctx.globalAlpha = star.alpha;
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-        ctx.fillStyle = prefix + star.alpha + ")";
         ctx.fill();
 
         // Glow halo on bright near-layer stars
         if (star.layer === 2 && star.alpha > 0.4) {
+          ctx.globalAlpha = star.alpha * 0.08;
           ctx.beginPath();
           ctx.arc(star.x, star.y, star.size * 3, 0, Math.PI * 2);
-          ctx.fillStyle = prefix + (star.alpha * 0.08) + ")";
           ctx.fill();
         }
       }
+      ctx.globalAlpha = 1;
 
       // ── Meteors (disabled under prefers-reduced-motion) ──
       if (!prefersReducedMotion && Math.random() < 0.002 && meteorsRef.current.length < 2) {
