@@ -224,6 +224,10 @@ export const InputBar = memo(() => {
   }, [popLastHumanMessage]);
 
   const isConnected = wsState === "OPEN";
+  // Ref mirror — lets handleSend read the latest value without depending on it
+  // (fixes stale closure: isConnected was used in handleSend but missing from deps).
+  const isConnectedRef = useRef(isConnected);
+  isConnectedRef.current = isConnected;
 
   // Auto-focus on mount and reconnect (skip touch devices to avoid keyboard popup)
   useEffect(() => {
@@ -244,7 +248,7 @@ export const InputBar = memo(() => {
 
   const handleSend = useCallback(() => {
     const text = inputText.trim();
-    if (!text || text.length > MAX_LENGTH || isSendingRef.current || !isConnected) return;
+    if (!text || text.length > MAX_LENGTH || isSendingRef.current || !isConnectedRef.current) return;
 
     if (aiState === "thinking-speaking") {
       interrupt();

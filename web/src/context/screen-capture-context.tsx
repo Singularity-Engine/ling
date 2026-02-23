@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useRef, useMemo, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toaster } from "@/components/ui/toaster";
 import { createLogger } from '@/utils/logger';
@@ -17,6 +17,10 @@ const ScreenCaptureContext = createContext<ScreenCaptureContextType | undefined>
 
 export function ScreenCaptureProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
+  // Ref mirror — t changes identity on language switch; reading via ref keeps
+  // startCapture stable so context consumers don't re-render on language change.
+  const tRef = useRef(t);
+  tRef.current = t;
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState('');
@@ -57,15 +61,16 @@ export function ScreenCaptureProvider({ children }: { children: ReactNode }) {
       setIsStreaming(true);
       setError('');
     } catch (err) {
-      setError(t('error.failedStartScreenCapture'));
+      const msg = tRef.current('error.failedStartScreenCapture');
+      setError(msg);
       toaster.create({
-        title: `${t('error.failedStartScreenCapture')}: ${err}`,
+        title: `${msg}: ${err}`,
         type: 'error',
         duration: 2000,
       });
       log.error('Failed to start capture:', err);
     }
-  }, [t]);
+  }, []);
 
   const stopCapture = useCallback(() => {
     setStream((prev) => {

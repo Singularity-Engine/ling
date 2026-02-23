@@ -388,6 +388,8 @@ const StreamingFooter = memo(function StreamingFooter({
   const displayResponse = useThrottledValue(fullResponse);
   const isStreaming = displayResponse.length > 0;
   const isConnected = wsState === "OPEN";
+  const isConnectedRef = useRef(isConnected);
+  isConnectedRef.current = isConnected;
 
   const showStreaming = useMemo(() => {
     if (!isStreaming) return false;
@@ -428,12 +430,12 @@ const StreamingFooter = memo(function StreamingFooter({
 
   const handleRetry = useCallback(() => {
     const lastHuman = dedupedMessages.findLast(m => m.role === "human");
-    if (lastHuman?.content && isConnected) {
+    if (lastHuman?.content && isConnectedRef.current) {
       setAwaitingTimedOut(false);
       setRetryCount(c => c + 1);
       sendMessage({ type: "text-input", text: lastHuman.content, images: [] });
     }
-  }, [dedupedMessages, sendMessage, isConnected]);
+  }, [dedupedMessages, sendMessage]);
 
   return (
     <>
@@ -584,6 +586,10 @@ export const ChatArea = memo(() => {
   }, []);
 
   const isConnected = wsState === "OPEN";
+  // Ref mirror — keeps handleChipClick stable across connection state changes
+  // so SuggestionChips memo isn't invalidated on every connect/disconnect.
+  const isConnectedRef = useRef(isConnected);
+  isConnectedRef.current = isConnected;
 
   // Memoize dedup so it only recalculates when messages change, not on every streaming delta
   const dedupedMessages = useMemo(
@@ -649,7 +655,7 @@ export const ChatArea = memo(() => {
 
   const handleChipClick = useCallback(
     (text: string) => {
-      if (!isConnected) return;
+      if (!isConnectedRef.current) return;
       appendHumanMessage(text);
       sendMessage({ type: "text-input", text, images: [] });
       // Focus textarea so the user is ready to type when AI responds
@@ -657,7 +663,7 @@ export const ChatArea = memo(() => {
         (document.querySelector(".ling-textarea") as HTMLElement)?.focus();
       }, 0);
     },
-    [appendHumanMessage, sendMessage, isConnected]
+    [appendHumanMessage, sendMessage]
   );
 
   // ── Render windowing: only mount the last RENDER_WINDOW messages ──
