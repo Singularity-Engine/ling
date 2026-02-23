@@ -1,7 +1,7 @@
 import { SystemStyleObject } from '@chakra-ui/react';
 
 interface FooterStyles {
-  container: (isCollapsed: boolean) => SystemStyleObject
+  container: Record<'collapsed' | 'expanded', SystemStyleObject>
   toggleButton: SystemStyleObject
   actionButton: SystemStyleObject
   input: SystemStyleObject
@@ -18,23 +18,34 @@ export const footerStyles: {
   aiIndicator: AIIndicatorStyles
 } = {
   footer: {
-    container: (isCollapsed) => ({
-      bg: isCollapsed
-        ? 'transparent'
-        : { base: 'transparent', md: 'rgba(10, 0, 21, 0.55)' },
-      backdropFilter: isCollapsed ? 'none' : { base: 'none', md: 'blur(20px)' },
-      WebkitBackdropFilter: isCollapsed ? 'none' : { base: 'none', md: 'blur(20px)' },
-      borderTop: isCollapsed
-        ? 'none'
-        : { base: 'none', md: '1px solid rgba(139, 92, 246, 0.15)' },
-      borderTopRadius: isCollapsed ? 'none' : { base: 'none', md: '16px' },
-      transform: isCollapsed ? 'translateY(calc(100% - 44px))' : 'translateY(0)',
-      transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, border-radius 0.3s ease, backdrop-filter 0.3s ease',
-      height: '100%',
-      position: 'relative',
-      overflow: isCollapsed ? 'visible' : 'hidden',
-      pb: '4',
-    }),
+    container: {
+      collapsed: {
+        bg: 'transparent',
+        backdropFilter: 'none',
+        WebkitBackdropFilter: 'none',
+        borderTop: 'none',
+        borderTopRadius: 'none',
+        transform: 'translateY(calc(100% - 44px))',
+        transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, border-radius 0.3s ease, backdrop-filter 0.3s ease',
+        height: '100%',
+        position: 'relative',
+        overflow: 'visible',
+        pb: '4',
+      },
+      expanded: {
+        bg: { base: 'transparent', md: 'rgba(10, 0, 21, 0.55)' },
+        backdropFilter: { base: 'none', md: 'blur(20px)' },
+        WebkitBackdropFilter: { base: 'none', md: 'blur(20px)' },
+        borderTop: { base: 'none', md: '1px solid rgba(139, 92, 246, 0.15)' },
+        borderTopRadius: { base: 'none', md: '16px' },
+        transform: 'translateY(0)',
+        transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, border-radius 0.3s ease, backdrop-filter 0.3s ease',
+        height: '100%',
+        position: 'relative',
+        overflow: 'hidden',
+        pb: '4',
+      },
+    },
     toggleButton: {
       height: '44px',
       minH: '44px',

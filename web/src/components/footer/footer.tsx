@@ -143,7 +143,7 @@ function Footer({ isCollapsed = false, onToggle }: FooterProps): JSX.Element {
   } = useFooter();
 
   return (
-    <Box {...footerStyles.footer.container(isCollapsed)}>
+    <Box {...footerStyles.footer.container[isCollapsed ? 'collapsed' : 'expanded']}>
       <ToggleButton isCollapsed={isCollapsed} onToggle={onToggle} />
 
       <Box pt="0" px="4">
