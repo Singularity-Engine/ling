@@ -22,6 +22,7 @@ const isTouchDevice =
  * Messages beyond this window still exist in state (up to MAX_MESSAGES=200).
  */
 const RENDER_WINDOW = 80;
+const EMPTY_IMAGES: never[] = [];
 
 // ─── Static style constants (avoid per-render allocation during ~30fps streaming) ───
 
@@ -293,7 +294,7 @@ export const ChatArea = memo(() => {
     (text: string) => {
       if (!isConnectedRef.current) return;
       appendHumanMessage(text);
-      sendMessage({ type: "text-input", text, images: [] });
+      sendMessage({ type: "text-input", text, images: EMPTY_IMAGES });
       // Focus textarea so the user is ready to type when AI responds
       setTimeout(() => {
         (document.querySelector(".ling-textarea") as HTMLElement)?.focus();

@@ -250,6 +250,16 @@ export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCar
   const { t } = useTranslation();
   const category = useMemo(() => getToolCategory(toolName), [toolName]);
   const codeBlocks = useMemo(() => extractCodeBlocks(content), [content]);
+  // Pre-compute key + defaultCollapsed once per content change,
+  // avoiding redundant .slice() / .split("\n") in the render path.
+  const codeBlocksMeta = useMemo(
+    () => codeBlocks.map((block) => ({
+      block,
+      key: `${block.lang}:${block.code.slice(0, 48)}`,
+      defaultCollapsed: block.code.split("\n").length > COLLAPSE_LINE_THRESHOLD,
+    })),
+    [codeBlocks],
+  );
   const hasCode = codeBlocks.length > 0;
   const icon = TOOL_ICONS[category] || TOOL_ICONS.generic;
 
@@ -315,8 +325,8 @@ export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCar
           {textContent && (
             <span style={isError ? S_TC_TEXT_ERROR : S_TC_TEXT}>{displayText}</span>
           )}
-          {codeBlocks.map((block) => (
-            <CodeBlock key={`${block.lang}:${block.code.slice(0, 48)}`} lang={block.lang} code={block.code} defaultCollapsed={block.code.split("\n").length > COLLAPSE_LINE_THRESHOLD} />
+          {codeBlocksMeta.map(({ block, key, defaultCollapsed }) => (
+            <CodeBlock key={key} lang={block.lang} code={block.code} defaultCollapsed={defaultCollapsed} />
           ))}
         </div>
       )}
