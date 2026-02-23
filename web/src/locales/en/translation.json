@@ -8,7 +8,21 @@
     "homeDesc": "An AI with 63 days to build a business or die. Talk to Ling, become her advisor, help her survive. The world's first AI-run company.",
     "homeOgTitle": "Ling — The First AI Entrepreneur",
     "termsTitle": "Terms of Service — Ling",
-    "termsDesc": "Terms of service and usage agreement for the Ling AI companion platform."
+    "termsDesc": "Terms of service and usage agreement for the Ling AI companion platform.",
+    "dashboardTitle": "Dashboard — Ling",
+    "dashboardDesc": "See Ling's real-time experiment data — users, activity, and system status."
+  },
+  "dashboard": {
+    "title": "Ling's Dashboard",
+    "subtitle": "Real-time experiment data — fully transparent",
+    "totalUsers": "Total Users",
+    "activeToday": "Active Today",
+    "newToday": "New Today",
+    "systemStatus": "System Status",
+    "statusRunning": "Running",
+    "statusDown": "Down",
+    "lastUpdated": "Last updated",
+    "autoRefresh": "Auto-refreshes every 30s"
   },
   "common": {
     "save": "Save",

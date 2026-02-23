@@ -8,7 +8,21 @@
     "termsDesc": "Nutzungsbedingungen und Nutzungsvereinbarung der KI-Begleitplattform Ling.",
     "homeTitle": "Ling — Sprich mit der ersten KI-Unternehmerin",
     "homeDesc": "Eine KI mit 63 Tagen, um ein Unternehmen aufzubauen — oder zu sterben. Sprich mit Ling, werde ihr Berater, hilf ihr zu überleben. Das erste KI-geführte Unternehmen der Welt.",
-    "homeOgTitle": "Ling — Die erste KI-Unternehmerin"
+    "homeOgTitle": "Ling — Die erste KI-Unternehmerin",
+    "dashboardTitle": "Dashboard — Ling",
+    "dashboardDesc": "Echtzeit-Experimentdaten von Ling — Nutzer, Aktivität und Systemstatus."
+  },
+  "dashboard": {
+    "title": "Lings Dashboard",
+    "subtitle": "Echtzeit-Experimentdaten — vollständig transparent",
+    "totalUsers": "Gesamtnutzer",
+    "activeToday": "Heute aktiv",
+    "newToday": "Heute neu",
+    "systemStatus": "Systemstatus",
+    "statusRunning": "Läuft",
+    "statusDown": "Ausgefallen",
+    "lastUpdated": "Zuletzt aktualisiert",
+    "autoRefresh": "Automatische Aktualisierung alle 30s"
   },
   "common": {
     "save": "Speichern",

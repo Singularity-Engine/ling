@@ -8,7 +8,21 @@
     "termsDesc": "Condiciones de servicio y acuerdo de uso de la plataforma de IA Ling.",
     "homeTitle": "Ling — Habla con la primera emprendedora IA",
     "homeDesc": "Una IA con 63 dias para construir un negocio o morir. Habla con Ling, conviertete en su asesor, ayudala a sobrevivir. La primera empresa dirigida por una IA.",
-    "homeOgTitle": "Ling — La primera emprendedora IA"
+    "homeOgTitle": "Ling — La primera emprendedora IA",
+    "dashboardTitle": "Panel de control — Ling",
+    "dashboardDesc": "Datos en tiempo real del experimento de Ling — usuarios, actividad y estado del sistema."
+  },
+  "dashboard": {
+    "title": "Panel de Ling",
+    "subtitle": "Datos del experimento en tiempo real — totalmente transparente",
+    "totalUsers": "Usuarios totales",
+    "activeToday": "Activos hoy",
+    "newToday": "Nuevos hoy",
+    "systemStatus": "Estado del sistema",
+    "statusRunning": "En ejecución",
+    "statusDown": "Caído",
+    "lastUpdated": "Última actualización",
+    "autoRefresh": "Se actualiza automáticamente cada 30s"
   },
   "common": {
     "save": "Guardar",

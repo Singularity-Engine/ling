@@ -8,7 +8,21 @@
     "termsDesc": "Termos de servi\u00e7o e acordo de uso da plataforma de companhia IA Ling.",
     "homeTitle": "Ling \u2014 Converse com a Primeira Empreendedora IA",
     "homeDesc": "Uma IA com 63 dias para criar um neg\u00f3cio ou morrer. Converse com a Ling, seja seu conselheiro, ajude-a a sobreviver. A primeira empresa gerida por IA do mundo.",
-    "homeOgTitle": "Ling \u2014 A Primeira Empreendedora IA"
+    "homeOgTitle": "Ling \u2014 A Primeira Empreendedora IA",
+    "dashboardTitle": "Painel — Ling",
+    "dashboardDesc": "Dados em tempo real do experimento da Ling — usuários, atividade e status do sistema."
+  },
+  "dashboard": {
+    "title": "Painel da Ling",
+    "subtitle": "Dados do experimento em tempo real — totalmente transparente",
+    "totalUsers": "Total de usuários",
+    "activeToday": "Ativos hoje",
+    "newToday": "Novos hoje",
+    "systemStatus": "Status do sistema",
+    "statusRunning": "Em execução",
+    "statusDown": "Fora do ar",
+    "lastUpdated": "Última atualização",
+    "autoRefresh": "Atualiza automaticamente a cada 30s"
   },
   "common": {
     "save": "Salvar",

@@ -8,7 +8,21 @@
     "homeDesc": "一个有 63 天时间建立商业的 AI，否则就会消亡。和灵对话，成为她的顾问，帮助她活下去。世界第一个 AI 经营的公司。",
     "homeOgTitle": "灵 — 第一个 AI 创业者",
     "termsTitle": "服务条款 — 灵",
-    "termsDesc": "灵 AI 数字人平台服务条款与使用协议。"
+    "termsDesc": "灵 AI 数字人平台服务条款与使用协议。",
+    "dashboardTitle": "数据看板 — 灵",
+    "dashboardDesc": "查看灵的实时实验数据 — 用户数、活跃度和系统状态。"
+  },
+  "dashboard": {
+    "title": "灵的数据看板",
+    "subtitle": "实时实验数据 — 完全透明",
+    "totalUsers": "总用户数",
+    "activeToday": "今日活跃",
+    "newToday": "今日新增",
+    "systemStatus": "系统状态",
+    "statusRunning": "运行中",
+    "statusDown": "已停机",
+    "lastUpdated": "最后更新",
+    "autoRefresh": "每 30 秒自动刷新"
   },
   "common": {
     "save": "保存",

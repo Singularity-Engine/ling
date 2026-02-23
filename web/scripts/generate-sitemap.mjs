@@ -11,7 +11,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const SITE = 'https://ling.sngxai.com';
 const LANGUAGES = ['en', 'zh', 'ja', 'ko', 'es', 'pt-BR', 'de', 'fr'];
-const PAGES = ['/', '/terms'];
+const PAGES = ['/', '/terms', '/dashboard'];
 
 function hreflangLinks(page) {
   return LANGUAGES.map(
@@ -23,7 +23,7 @@ function urlEntry(page) {
   return `  <url>
     <loc>${SITE}${page}</loc>
     <changefreq>weekly</changefreq>
-    <priority>${page === '/' ? '1.0' : '0.5'}</priority>
+    <priority>${page === '/' ? '1.0' : page === '/dashboard' ? '0.7' : '0.5'}</priority>
 ${hreflangLinks(page)}
   </url>`;
 }

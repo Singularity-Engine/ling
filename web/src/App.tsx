@@ -72,6 +72,7 @@ const PersonalizedOnboarding = lazy(() => import("./components/onboarding/Person
 const LoginPage = lazy(() => import("./pages/LoginPage").then(m => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import("./pages/RegisterPage").then(m => ({ default: m.RegisterPage })));
 const TermsPage = lazy(() => import("./pages/TermsPage").then(m => ({ default: m.TermsPage })));
+const DashboardPage = lazy(() => import("./pages/DashboardPage").then(m => ({ default: m.DashboardPage })));
 
 // Inlined to avoid eagerly importing the full onboarding module
 const shouldShowOnboarding = () => !sessionStorage.getItem(SS_ONBOARDING_DONE);
@@ -805,7 +806,7 @@ const S_PAGE_WRAP: CSSProperties = { minHeight: "100dvh", animation: "pageFadeIn
 function AnimatedRoutes(): JSX.Element {
   const location = useLocation();
   // Normalize key so all catch-all paths share the same key (avoids spurious remount)
-  const pageKey = ['/login', '/register', '/terms'].includes(location.pathname)
+  const pageKey = ['/login', '/register', '/terms', '/dashboard'].includes(location.pathname)
     ? location.pathname
     : '/';
 
@@ -816,6 +817,7 @@ function AnimatedRoutes(): JSX.Element {
           <Route path="/login" element={<GuestOnly><LoginPage /></GuestOnly>} />
           <Route path="/register" element={<GuestOnly><RegisterPage /></GuestOnly>} />
           <Route path="/terms" element={<TermsPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/*" element={<MainApp />} />
         </Routes>
       </Suspense>

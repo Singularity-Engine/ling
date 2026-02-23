@@ -115,6 +115,22 @@ async def create_routes(default_context_cache: ServiceContext) -> APIRouter:
         ling_memory_router = create_ling_memory_router()
         router.include_router(ling_memory_router)
         logger.info("✅ 灵记忆路由已注册 (/api/memory/*)")
+
+        # 公开 Dashboard 路由（无需认证）
+        from .bff_integration.api.ling_public_routes import create_ling_public_router
+        ling_public_router = create_ling_public_router(_get_repo())
+        router.include_router(ling_public_router)
+        logger.info("✅ 灵公开路由已注册 (/api/public/*)")
+
+        # 给 Dashboard Tool 注入 repo
+        try:
+            from .tools.base_tool import tool_registry
+            dashboard_tool = tool_registry.get_tool("query_dashboard")
+            if dashboard_tool and hasattr(dashboard_tool, "set_repo"):
+                dashboard_tool.set_repo(_get_repo())
+                logger.info("✅ Dashboard 查询工具已注入 repo")
+        except Exception as e:
+            logger.warning(f"⚠️ Dashboard Tool repo 注入跳过: {e}")
     except Exception as e:
         logger.error(f"❌ 注册灵路由失败: {e}")
         import traceback

@@ -39,6 +39,12 @@ const ROUTES = [
     desc: en.auth.metaRegisterDesc,
     ogTitle: en.auth.metaRegisterTitle,
   },
+  {
+    path: '/dashboard',
+    title: en.seo.dashboardTitle,
+    desc: en.seo.dashboardDesc,
+    ogTitle: en.seo.dashboardTitle,
+  },
 ];
 
 const indexHtml = readFileSync(resolve(DIST, 'index.html'), 'utf-8');

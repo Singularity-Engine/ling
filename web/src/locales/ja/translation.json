@@ -8,7 +8,21 @@
     "termsDesc": "Ling AI コンパニオンプラットフォームの利用規約です。",
     "homeTitle": "Ling — 世界初のAI起業家と話そう",
     "homeDesc": "63日以内に事業を立ち上げなければ消えてしまうAI。Ling と話して、アドバイザーになって、彼女の生存を助けてください。世界初のAI経営企業。",
-    "homeOgTitle": "Ling — 世界初のAI起業家"
+    "homeOgTitle": "Ling — 世界初のAI起業家",
+    "dashboardTitle": "ダッシュボード — Ling",
+    "dashboardDesc": "Lingのリアルタイム実験データ — ユーザー数、アクティビティ、システム状態。"
+  },
+  "dashboard": {
+    "title": "Lingのダッシュボード",
+    "subtitle": "リアルタイム実験データ — 完全透明",
+    "totalUsers": "総ユーザー数",
+    "activeToday": "本日アクティブ",
+    "newToday": "本日新規",
+    "systemStatus": "システム状態",
+    "statusRunning": "稼働中",
+    "statusDown": "停止中",
+    "lastUpdated": "最終更新",
+    "autoRefresh": "30秒ごとに自動更新"
   },
   "common": {
     "save": "保存",

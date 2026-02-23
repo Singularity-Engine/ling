@@ -18,6 +18,9 @@ from .memory_tools import (
     create_all_memory_tools
 )
 
+# 导入 Dashboard 查询工具
+from .dashboard_tool import DashboardQueryTool, create_dashboard_tool
+
 # 自动注册工具到全局注册表
 def _auto_register_tools():
     """自动注册所有工具到全局注册表"""
@@ -31,6 +34,11 @@ def _auto_register_tools():
         if 'search_similar_memories' not in all_tools:
             memory_tool = create_memory_search_tool()
             tool_registry.register(memory_tool)
+
+        # 注册 Dashboard 查询工具
+        if 'query_dashboard' not in tool_registry.get_all_tools():
+            dashboard_tool = create_dashboard_tool()
+            tool_registry.register(dashboard_tool)
     except Exception as e:
         print(f"❌ 自动注册工具失败: {e}")
 
@@ -52,5 +60,9 @@ __all__ = [
     # 记忆工具
     'MemorySearchTool',
     'create_memory_search_tool',
-    'create_all_memory_tools'
+    'create_all_memory_tools',
+
+    # Dashboard 工具
+    'DashboardQueryTool',
+    'create_dashboard_tool',
 ]

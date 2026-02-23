@@ -8,7 +8,21 @@
     "termsDesc": "Ling AI 컴패니언 플랫폼의 이용약관 및 서비스 동의서예요.",
     "homeTitle": "Ling — 세계 최초의 AI 창업가와 대화하세요",
     "homeDesc": "63일 안에 사업을 만들지 못하면 사라지는 AI. Ling과 대화하고, 그녀의 조언자가 되어 생존을 도와주세요. 세계 최초의 AI 운영 기업.",
-    "homeOgTitle": "Ling — 세계 최초의 AI 창업가"
+    "homeOgTitle": "Ling — 세계 최초의 AI 창업가",
+    "dashboardTitle": "대시보드 — Ling",
+    "dashboardDesc": "Ling의 실시간 실험 데이터 — 사용자 수, 활동, 시스템 상태."
+  },
+  "dashboard": {
+    "title": "Ling의 대시보드",
+    "subtitle": "실시간 실험 데이터 — 완전 투명",
+    "totalUsers": "전체 사용자",
+    "activeToday": "오늘 활동",
+    "newToday": "오늘 신규",
+    "systemStatus": "시스템 상태",
+    "statusRunning": "실행 중",
+    "statusDown": "중단됨",
+    "lastUpdated": "마지막 업데이트",
+    "autoRefresh": "30초마다 자동 새로고침"
   },
   "common": {
     "save": "저장",
