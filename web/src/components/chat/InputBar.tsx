@@ -142,6 +142,13 @@ export const InputBar = memo(() => {
   // Prevents premature isSending reset when isAiBusy is true at send time.
   const sentWhileBusyRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  /** Resize textarea to fit content (max 96px). Shared by input, fill, and send-fail handlers. */
+  const resizeTextarea = useCallback((el: HTMLTextAreaElement | null) => {
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 96) + "px";
+  }, []);
   const { wsState } = useWebSocketState();
   const { sendMessage } = useWebSocketActions();
   const { appendHumanMessage, popLastHumanMessage } = useChatMessagesActions();
@@ -157,17 +164,13 @@ export const InputBar = memo(() => {
         setInputText(text.slice(0, MAX_LENGTH));
         requestAnimationFrame(() => {
           const el = textareaRef.current;
-          if (el) {
-            el.focus();
-            el.style.height = "auto";
-            el.style.height = Math.min(el.scrollHeight, 96) + "px";
-          }
+          if (el) { el.focus(); resizeTextarea(el); }
         });
       }
     };
     window.addEventListener('fill-input', handler);
     return () => window.removeEventListener('fill-input', handler);
-  }, []);
+  }, [resizeTextarea]);
 
   // Ref mirror so the send-failed handler reads latest inputText without
   // re-attaching the listener on every keystroke.
@@ -186,17 +189,13 @@ export const InputBar = memo(() => {
         setInputText(text.slice(0, MAX_LENGTH));
         requestAnimationFrame(() => {
           const el = textareaRef.current;
-          if (el) {
-            el.focus();
-            el.style.height = "auto";
-            el.style.height = Math.min(el.scrollHeight, 96) + "px";
-          }
+          if (el) { el.focus(); resizeTextarea(el); }
         });
       }
     };
     window.addEventListener('send-failed', handler);
     return () => window.removeEventListener('send-failed', handler);
-  }, [popLastHumanMessage]);
+  }, [popLastHumanMessage, resizeTextarea]);
 
   const isConnected = wsState === "OPEN";
   // Ref mirror — lets handleSend read the latest value without depending on it
@@ -291,10 +290,8 @@ export const InputBar = memo(() => {
     const value = e.target.value;
     // Hard cap at MAX_LENGTH + small buffer for paste UX (counter turns red)
     setInputText(value.length > MAX_LENGTH + 200 ? value.slice(0, MAX_LENGTH + 200) : value);
-    const el = e.target;
-    el.style.height = "auto";
-    el.style.height = Math.min(el.scrollHeight, 96) + "px";
-  }, []);
+    resizeTextarea(e.target);
+  }, [resizeTextarea]);
 
   const handleMicToggle = useCallback(() => {
     if (micOn) {

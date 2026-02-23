@@ -119,6 +119,7 @@ function buildCategoryStyles(colors: { bg: string; border: string; accent: strin
   const headerBase = {
     display: "flex" as const, alignItems: "center" as const, gap: "8px",
     padding: "10px 14px", minHeight: "44px", userSelect: "none" as const, transition: "background 0.2s",
+    width: "100%", background: "none", border: "none", font: "inherit", color: "inherit", textAlign: "left" as const,
   };
   const headerExpanded: CSSProperties = { ...headerBase, borderBottom: `1px solid ${colors.border}`, cursor: "pointer" };
   const headerCollapsed: CSSProperties = { ...headerBase, borderBottom: "none", cursor: "pointer" };
@@ -220,7 +221,7 @@ const StatusIndicator = memo(({ status, accent }: { status: string; accent: stri
   if (status === "running") {
     const dots = getDotStyles(accent);
     return (
-      <span style={S_SI_DOTS}>
+      <span style={S_SI_DOTS} role="status" aria-label="Running">
         {dots.map((dotStyle, i) => (
           <span key={i} style={dotStyle} />
         ))}
@@ -228,9 +229,9 @@ const StatusIndicator = memo(({ status, accent }: { status: string; accent: stri
     );
   }
   if (status === "completed") {
-    return <span style={S_SI_DONE}>✓</span>;
+    return <span style={S_SI_DONE} aria-label="Completed">✓</span>;
   }
-  return <span style={S_SI_ERROR}>✕</span>;
+  return <span style={S_SI_ERROR} aria-label="Error">✕</span>;
 });
 StatusIndicator.displayName = "StatusIndicator";
 
@@ -281,14 +282,25 @@ export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCar
   return (
     <div style={styles.card}>
       {/* Header — clickable to toggle collapse */}
-      <div onClick={toggleCollapsed} style={headerStyle}>
-        <span style={S_TC_ICON}>{icon}</span>
-        <span style={styles.name}>{toolName}</span>
-        <StatusIndicator status={status} accent={colors.accent} />
-        {hasContent && (
-          <span style={collapsed ? S_CHEVRON_CLOSED : S_CHEVRON_OPEN}>▼</span>
-        )}
-      </div>
+      {hasContent ? (
+        <button
+          onClick={toggleCollapsed}
+          aria-expanded={!collapsed}
+          aria-label={`${toolName} — ${collapsed ? t("chat.toolExpand") : t("chat.toolCollapse")}`}
+          style={headerStyle}
+        >
+          <span style={S_TC_ICON} aria-hidden="true">{icon}</span>
+          <span style={styles.name}>{toolName}</span>
+          <StatusIndicator status={status} accent={colors.accent} />
+          <span style={collapsed ? S_CHEVRON_CLOSED : S_CHEVRON_OPEN} aria-hidden="true">▼</span>
+        </button>
+      ) : (
+        <div style={headerStyle}>
+          <span style={S_TC_ICON} aria-hidden="true">{icon}</span>
+          <span style={styles.name}>{toolName}</span>
+          <StatusIndicator status={status} accent={colors.accent} />
+        </div>
+      )}
 
       {/* Shimmer bar when running */}
       {isRunning && <ShimmerBar accent={colors.accent} />}

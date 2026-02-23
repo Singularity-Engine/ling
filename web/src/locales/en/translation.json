@@ -188,6 +188,7 @@
     "copy": "Copy",
     "copied": "Copied",
     "toolCollapse": "Collapse",
+    "toolExpand": "Expand",
     "toolExpandLines": "Expand {{count}} more lines",
     "placeholderDisconnected": "Disconnected, please wait...",
     "sendDisconnected": "Not connected",
