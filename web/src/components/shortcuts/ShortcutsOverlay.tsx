@@ -1,5 +1,5 @@
 import { type CSSProperties } from "react";
-import { memo } from "react";
+import { memo, useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 // Keyframes moved to static index.css — no runtime injection needed.
 
@@ -21,9 +21,11 @@ const SHORTCUT_GROUPS = [
   { labelKey: "shortcuts.closeOverlay", keys: "Esc" },
 ] as const;
 
+const EXIT_DURATION = 200; // ms — matches overlayFadeOut/overlaySlideOut
+
 // --- Module-level style constants (no per-render allocations) ---
 
-const S_BACKDROP: CSSProperties = {
+const S_BACKDROP_BASE: CSSProperties = {
   position: "fixed",
   inset: 0,
   zIndex: 9999,
@@ -33,10 +35,11 @@ const S_BACKDROP: CSSProperties = {
   background: "rgba(0, 0, 0, 0.6)",
   backdropFilter: "blur(8px)",
   WebkitBackdropFilter: "blur(8px)",
-  animation: "shortcutsFadeIn 0.2s ease-out",
 };
+const S_BACKDROP_OPEN: CSSProperties = { ...S_BACKDROP_BASE, animation: "shortcutsFadeIn 0.2s ease-out" };
+const S_BACKDROP_CLOSING: CSSProperties = { ...S_BACKDROP_BASE, animation: `overlayFadeOut ${EXIT_DURATION}ms ease-in forwards` };
 
-const S_CARD: CSSProperties = {
+const S_CARD_BASE: CSSProperties = {
   background: "rgba(10, 0, 21, 0.95)",
   border: "1px solid rgba(139, 92, 246, 0.3)",
   borderRadius: "16px",
@@ -44,8 +47,9 @@ const S_CARD: CSSProperties = {
   width: "100%",
   maxWidth: "min(400px, calc(100vw - 32px))",
   boxShadow: "0 24px 80px rgba(0, 0, 0, 0.5), 0 0 40px rgba(139, 92, 246, 0.1)",
-  animation: "shortcutsSlideIn 0.25s ease-out",
 };
+const S_CARD_OPEN: CSSProperties = { ...S_CARD_BASE, animation: "shortcutsSlideIn 0.25s ease-out" };
+const S_CARD_CLOSING: CSSProperties = { ...S_CARD_BASE, animation: `overlaySlideOut ${EXIT_DURATION}ms ease-in forwards` };
 
 const S_HEADING: CSSProperties = {
   color: "var(--ling-purple-lighter)",
@@ -91,14 +95,35 @@ const S_FOOTER: CSSProperties = {
 
 export const ShortcutsOverlay = memo(({ open, onClose }: ShortcutsOverlayProps) => {
   const { t } = useTranslation();
+  const [closing, setClosing] = useState(false);
+  const closingTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  // Clean up timer on unmount
+  useEffect(() => () => { clearTimeout(closingTimer.current); }, []);
+
+  const handleClose = useCallback(() => {
+    if (closing) return;
+    setClosing(true);
+    closingTimer.current = setTimeout(() => {
+      setClosing(false);
+      onClose();
+    }, EXIT_DURATION);
+  }, [onClose, closing]);
+
+  const handleBackdropClick = useCallback((e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) handleClose();
+  }, [handleClose]);
+
+  // Reset closing state when re-opened
+  useEffect(() => { if (open) setClosing(false); }, [open]);
 
   // ESC to close — handled globally by useKeyboardShortcuts in App.tsx
 
-  if (!open) return null;
+  if (!open && !closing) return null;
 
   return (
-    <div style={S_BACKDROP} onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} style={S_CARD} role="dialog" aria-modal="true" aria-labelledby="shortcuts-title">
+    <div style={closing ? S_BACKDROP_CLOSING : S_BACKDROP_OPEN} onClick={handleBackdropClick}>
+      <div onClick={(e) => e.stopPropagation()} style={closing ? S_CARD_CLOSING : S_CARD_OPEN} role="dialog" aria-modal="true" aria-labelledby="shortcuts-title">
         <h2 id="shortcuts-title" style={S_HEADING}>{t("shortcuts.title")}</h2>
 
         <div style={S_LIST}>

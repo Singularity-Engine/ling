@@ -5,6 +5,8 @@ import { AFFINITY_LEVELS, DEFAULT_LEVEL } from "@/config/affinity-palette";
 import { LEVELS } from "@/hooks/use-affinity-engine";
 // Keyframes moved to static index.css — no runtime injection needed.
 
+const PANEL_EXIT_DURATION = 200; // ms — matches fadeOutUp animation
+
 // ── Pre-allocated style constants ──
 const S_WRAPPER: CSSProperties = { position: "relative" };
 
@@ -123,8 +125,10 @@ const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPerce
 export const AffinityBadge = memo(() => {
   const { affinity, level, milestone } = useAffinityMeta();
   const [expanded, setExpanded] = useState(false);
+  const [panelClosing, setPanelClosing] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [pressed, setPressed] = useState(false);
+  const panelCloseTimer = useRef<ReturnType<typeof setTimeout>>();
   const { t } = useTranslation();
 
   const config = useMemo(() => AFFINITY_LEVELS[level] || AFFINITY_LEVELS[DEFAULT_LEVEL], [level]);
@@ -140,8 +144,23 @@ export const AffinityBadge = memo(() => {
   }, [level, affinity]);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Clean up timer on unmount
+  useEffect(() => () => { clearTimeout(panelCloseTimer.current); }, []);
+
   // ── Stabilized event handlers ──
-  const toggleExpanded = useCallback(() => setExpanded(v => !v), []);
+  const closePanel = useCallback(() => {
+    if (panelClosing || !expanded) return;
+    setPanelClosing(true);
+    panelCloseTimer.current = setTimeout(() => {
+      setPanelClosing(false);
+      setExpanded(false);
+    }, PANEL_EXIT_DURATION);
+  }, [panelClosing, expanded]);
+
+  const toggleExpanded = useCallback(() => {
+    if (expanded || panelClosing) { closePanel(); } else { setExpanded(true); }
+  }, [expanded, panelClosing, closePanel]);
+
   const onMouseEnter = useCallback(() => setHovered(true), []);
   const onMouseLeave = useCallback(() => { setHovered(false); setPressed(false); }, []);
   const onMouseDown = useCallback(() => setPressed(true), []);
@@ -150,9 +169,9 @@ export const AffinityBadge = memo(() => {
   // Close expanded panel on outside click
   const handleClickOutside = useCallback((e: MouseEvent) => {
     if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-      setExpanded(false);
+      closePanel();
     }
-  }, []);
+  }, [closePanel]);
   useEffect(() => {
     if (expanded) {
       document.addEventListener("pointerdown", handleClickOutside);
@@ -177,10 +196,16 @@ export const AffinityBadge = memo(() => {
   // (avoids 5 separate shallow-compare + object-creation cycles per render)
   const configStyles = useMemo(() => ({
     levelLabel: { ...S_LEVEL_LABEL_BASE, color: `${config.color}cc` } as CSSProperties,
-    panel: {
+    panelOpen: {
       ...S_PANEL_BASE,
       border: `1px solid ${config.color}38`,
       boxShadow: `0 12px 40px rgba(0,0,0,0.5), 0 0 24px ${config.color}15`,
+    } as CSSProperties,
+    panelClosing: {
+      ...S_PANEL_BASE,
+      border: `1px solid ${config.color}38`,
+      boxShadow: `0 12px 40px rgba(0,0,0,0.5), 0 0 24px ${config.color}15`,
+      animation: `fadeOutUp ${PANEL_EXIT_DURATION}ms ease-in forwards`,
     } as CSSProperties,
     panelLevelName: { ...S_PANEL_LEVEL_NAME, color: config.color } as CSSProperties,
     panelScore: { ...S_PANEL_SCORE, color: config.color } as CSSProperties,
@@ -236,8 +261,8 @@ export const AffinityBadge = memo(() => {
         </button>
 
         {/* Expanded panel */}
-        {expanded && (
-          <div style={configStyles.panel}>
+        {(expanded || panelClosing) && (
+          <div style={panelClosing ? configStyles.panelClosing : configStyles.panelOpen}>
             {/* Header: heart + level info */}
             <div style={S_PANEL_HEADER}>
               <HeartIcon color={config.heartColor} fillPercent={affinity} size={32} />
