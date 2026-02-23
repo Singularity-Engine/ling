@@ -74,39 +74,27 @@ export function DashboardPage() {
 
         {/* Cards grid */}
         <div style={S.grid}>
-          {/* Total Users */}
-          <div style={{ ...S.card, borderColor: 'rgba(139,92,246,0.4)' }}>
+          <div style={S_CARD_PURPLE}>
             <span style={S.cardLabel}>{t('dashboard.totalUsers')}</span>
-            <span style={{ ...S.cardValue, color: 'var(--ling-purple-lighter, #c4b5fd)' }}>
-              {data?.experiment.total_users ?? '—'}
-            </span>
+            <span style={S_VAL_PURPLE}>{data?.experiment.total_users ?? '—'}</span>
           </div>
 
-          {/* Active Today */}
-          <div style={{ ...S.card, borderColor: 'rgba(34,197,94,0.4)' }}>
+          <div style={S_CARD_GREEN}>
             <span style={S.cardLabel}>{t('dashboard.activeToday')}</span>
-            <span style={{ ...S.cardValue, color: '#4ade80' }}>
-              {data?.experiment.active_today ?? '—'}
-            </span>
+            <span style={S_VAL_GREEN}>{data?.experiment.active_today ?? '—'}</span>
           </div>
 
-          {/* New Today */}
-          <div style={{ ...S.card, borderColor: 'rgba(167,139,250,0.4)' }}>
+          <div style={S_CARD_LAVENDER}>
             <span style={S.cardLabel}>{t('dashboard.newToday')}</span>
-            <span style={{ ...S.cardValue, color: '#a78bfa' }}>
-              {data?.experiment.new_today ?? '—'}
-            </span>
+            <span style={S_VAL_LAVENDER}>{data?.experiment.new_today ?? '—'}</span>
           </div>
 
-          {/* Status */}
-          <div style={{ ...S.card, borderColor: statusOk ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)' }}>
+          <div style={statusOk ? S_CARD_GREEN : S_CARD_RED}>
             <span style={S.cardLabel}>{t('dashboard.systemStatus')}</span>
-            <span style={{ ...S.cardValue, color: statusOk ? '#4ade80' : '#f87171' }}>
+            <span style={statusOk ? S_VAL_GREEN : S_VAL_RED}>
               {data ? (statusOk ? t('dashboard.statusRunning') : t('dashboard.statusDown')) : '—'}
             </span>
-            {statusOk && (
-              <span style={S.statusDot} />
-            )}
+            {statusOk && <span style={S.statusDot} />}
           </div>
         </div>
 
@@ -231,3 +219,13 @@ const S: Record<string, React.CSSProperties> = {
     textDecoration: 'none',
   },
 };
+
+// Pre-computed card variants — avoids inline spread on every 30s poll render
+const S_CARD_PURPLE: React.CSSProperties = { ...S.card, borderColor: 'rgba(139,92,246,0.4)' };
+const S_CARD_GREEN: React.CSSProperties = { ...S.card, borderColor: 'rgba(34,197,94,0.4)' };
+const S_CARD_LAVENDER: React.CSSProperties = { ...S.card, borderColor: 'rgba(167,139,250,0.4)' };
+const S_CARD_RED: React.CSSProperties = { ...S.card, borderColor: 'rgba(239,68,68,0.4)' };
+const S_VAL_PURPLE: React.CSSProperties = { ...S.cardValue, color: 'var(--ling-purple-lighter, #c4b5fd)' };
+const S_VAL_GREEN: React.CSSProperties = { ...S.cardValue, color: '#4ade80' };
+const S_VAL_LAVENDER: React.CSSProperties = { ...S.cardValue, color: '#a78bfa' };
+const S_VAL_RED: React.CSSProperties = { ...S.cardValue, color: '#f87171' };
