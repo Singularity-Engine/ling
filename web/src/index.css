@@ -40,6 +40,8 @@
   --ling-status-recovered-shadow: rgba(22, 163, 74, 0.3);
 
   /* 紫色常用透明度 */
+  --ling-purple-05: rgba(139, 92, 246, 0.05);
+  --ling-purple-08: rgba(139, 92, 246, 0.08);
   --ling-purple-15: rgba(139, 92, 246, 0.15);
   --ling-purple-20: rgba(139, 92, 246, 0.2);
   --ling-purple-25: rgba(139, 92, 246, 0.25);
@@ -136,6 +138,8 @@
   --ling-error-border: rgba(220, 38, 38, 0.2);
 
   /* 紫色常用透明度 */
+  --ling-purple-05: rgba(124, 58, 237, 0.04);
+  --ling-purple-08: rgba(124, 58, 237, 0.06);
   --ling-purple-15: rgba(124, 58, 237, 0.12);
   --ling-purple-20: rgba(124, 58, 237, 0.16);
   --ling-purple-25: rgba(124, 58, 237, 0.2);

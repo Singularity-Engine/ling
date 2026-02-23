@@ -2,6 +2,9 @@ import type { CSSProperties } from 'react';
 import { useState, useEffect, memo } from 'react';
 import { useAiStateRead, AiStateEnum } from '@/context/ai-state-context';
 
+// ── Timing ──
+const FADE_OUT_MS = 600; // unmount delay after fade-out animation ends
+
 // --- Module-level style constants ---
 
 const S_OVERLAY_BASE: CSSProperties = {
@@ -23,7 +26,7 @@ const S_ORB: CSSProperties = {
   width: 120,
   height: 120,
   borderRadius: '50%',
-  background: 'radial-gradient(circle, rgba(139,92,246,0.3) 0%, rgba(139,92,246,0.05) 70%, transparent 100%)',
+  background: 'radial-gradient(circle, var(--ling-purple-30) 0%, var(--ling-purple-05) 70%, transparent 100%)',
   animation: 'skeletonOrb 2s ease-in-out infinite',
   willChange: 'transform, opacity',
   display: 'flex',
@@ -36,7 +39,7 @@ const S_ORB_INNER: CSSProperties = {
   width: 48,
   height: 48,
   borderRadius: '50%',
-  background: 'rgba(139,92,246,0.2)',
+  background: 'var(--ling-purple-20)',
   animation: 'skeletonPulse 1.5s ease-in-out infinite',
 };
 
@@ -53,14 +56,14 @@ const S_BOTTOM_BAR_CONTAINER: CSSProperties = {
   left: 0,
   right: 0,
   padding: '12px 16px',
-  borderTop: '1px solid rgba(139,92,246,0.08)',
+  borderTop: '1px solid var(--ling-purple-08)',
 };
 
 const S_BOTTOM_BAR: CSSProperties = {
   height: 44,
   borderRadius: 22,
-  background: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(255,255,255,0.06)',
+  background: 'var(--ling-surface)',
+  border: '1px solid var(--ling-surface-border)',
   animation: 'skeletonPulse 1.5s ease-in-out infinite',
   overflow: 'hidden',
   position: 'relative',
@@ -69,7 +72,7 @@ const S_BOTTOM_BAR: CSSProperties = {
 const S_BOTTOM_BAR_SHIMMER: CSSProperties = {
   position: 'absolute',
   inset: 0,
-  background: 'linear-gradient(90deg, transparent, rgba(139,92,246,0.06), transparent)',
+  background: 'linear-gradient(90deg, transparent, var(--ling-purple-05), transparent)',
   animation: 'skeletonBarShimmer 2s ease-in-out infinite',
 };
 
@@ -78,7 +81,7 @@ const S_SKELETON_BAR_OUTER_0: CSSProperties = {
   width: 140,
   height: 10,
   borderRadius: 5,
-  background: 'rgba(255,255,255,0.06)',
+  background: 'var(--ling-surface)',
   animation: 'skeletonPulse 1.5s ease-in-out 0s infinite',
   overflow: 'hidden',
   position: 'relative',
@@ -87,7 +90,7 @@ const S_SKELETON_BAR_OUTER_0: CSSProperties = {
 const S_SKELETON_BAR_SHIMMER_0: CSSProperties = {
   position: 'absolute',
   inset: 0,
-  background: 'linear-gradient(90deg, transparent, rgba(139,92,246,0.08), transparent)',
+  background: 'linear-gradient(90deg, transparent, var(--ling-purple-08), transparent)',
   animation: 'skeletonBarShimmer 2s ease-in-out 0s infinite',
 };
 
@@ -95,7 +98,7 @@ const S_SKELETON_BAR_OUTER_1: CSSProperties = {
   width: 100,
   height: 10,
   borderRadius: 5,
-  background: 'rgba(255,255,255,0.06)',
+  background: 'var(--ling-surface)',
   animation: 'skeletonPulse 1.5s ease-in-out 0.15s infinite',
   overflow: 'hidden',
   position: 'relative',
@@ -104,7 +107,7 @@ const S_SKELETON_BAR_OUTER_1: CSSProperties = {
 const S_SKELETON_BAR_SHIMMER_1: CSSProperties = {
   position: 'absolute',
   inset: 0,
-  background: 'linear-gradient(90deg, transparent, rgba(139,92,246,0.08), transparent)',
+  background: 'linear-gradient(90deg, transparent, var(--ling-purple-08), transparent)',
   animation: 'skeletonBarShimmer 2s ease-in-out 0.15s infinite',
 };
 
@@ -120,7 +123,7 @@ export const LoadingSkeleton = memo(function LoadingSkeleton() {
   // Once loading completes, start fade-out, then unmount
   useEffect(() => {
     if (!isLoading) {
-      const timer = setTimeout(() => setVisible(false), 600);
+      const timer = setTimeout(() => setVisible(false), FADE_OUT_MS);
       return () => clearTimeout(timer);
     }
   }, [isLoading]);
@@ -128,14 +131,19 @@ export const LoadingSkeleton = memo(function LoadingSkeleton() {
   if (!visible) return null;
 
   return (
-    <div style={isLoading ? S_OVERLAY_LOADING : S_OVERLAY_FADING}>
+    <div
+      style={isLoading ? S_OVERLAY_LOADING : S_OVERLAY_FADING}
+      role="status"
+      aria-busy={isLoading}
+      aria-label={isLoading ? '加载中' : undefined}
+    >
       {/* Central pulsing orb — avatar placeholder */}
-      <div style={S_ORB}>
+      <div style={S_ORB} aria-hidden="true">
         <div style={S_ORB_INNER} />
       </div>
 
       {/* Skeleton text lines */}
-      <div style={S_TEXT_LINES}>
+      <div style={S_TEXT_LINES} aria-hidden="true">
         <div style={S_SKELETON_BAR_OUTER_0}>
           <div style={S_SKELETON_BAR_SHIMMER_0} />
         </div>
@@ -145,7 +153,7 @@ export const LoadingSkeleton = memo(function LoadingSkeleton() {
       </div>
 
       {/* Bottom bar skeleton — mimics InputBar */}
-      <div style={S_BOTTOM_BAR_CONTAINER}>
+      <div style={S_BOTTOM_BAR_CONTAINER} aria-hidden="true">
         <div style={S_BOTTOM_BAR}>
           <div style={S_BOTTOM_BAR_SHIMMER} />
         </div>
