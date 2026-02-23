@@ -171,7 +171,7 @@ export function CameraProvider({ children }: { children: ReactNode }) {
 
   const actionsValue = useMemo<CameraActions>(
     () => ({ startCamera, stopCamera, startBackgroundCamera, stopBackgroundCamera, setCameraConfig, videoRef }),
-    [startCamera, stopCamera, startBackgroundCamera, stopBackgroundCamera],
+    [startCamera, stopCamera, startBackgroundCamera, stopBackgroundCamera, setCameraConfig],
   );
 
   return (

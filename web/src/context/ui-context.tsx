@@ -53,7 +53,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
 
   const actions = useMemo(
     () => ({ setPricingOpen, setBillingModal, closeBillingModal }),
-    [closeBillingModal],
+    [setPricingOpen, setBillingModal, closeBillingModal],
   );
 
   const state = useMemo(

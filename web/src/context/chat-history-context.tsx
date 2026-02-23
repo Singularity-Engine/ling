@@ -320,6 +320,8 @@ export function ChatHistoryProvider({ children }: { children: ReactNode }) {
     [
       historyList,
       currentHistoryUid,
+      setHistoryList,
+      setCurrentHistoryUid,
       updateHistoryList,
     ],
   );
@@ -338,7 +340,7 @@ export function ChatHistoryProvider({ children }: { children: ReactNode }) {
       clearResponse,
       setForceNewMessage,
     }),
-    [appendResponse, clearResponse, setForceNewMessage],
+    [setFullResponse, appendResponse, clearResponse, setForceNewMessage],
   );
 
   // Context 4: streaming REF — stable getter, never triggers re-renders
