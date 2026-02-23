@@ -1,5 +1,4 @@
 /* eslint-disable import/order */
-/* eslint-disable no-use-before-define */
 import { useState, useEffect, useCallback } from 'react';
 import { BgUrlContextState } from '@/context/bgurl-context';
 import { defaultBaseUrl, defaultWsUrl } from '@/context/websocket-context';
@@ -116,26 +115,6 @@ export const useGeneralSettings = ({
   const originalConfName = confName;
 
   useEffect(() => {
-    setShowSubtitle(settings.showSubtitle);
-
-    const newBgUrl = settings.customBgUrl || settings.selectedBgUrl[0];
-    if (newBgUrl && bgUrlContext) {
-      const fullUrl = newBgUrl.startsWith('http') ? newBgUrl : `${baseUrl}${newBgUrl}`;
-      bgUrlContext.setBackgroundUrl(fullUrl);
-    }
-
-    onWsUrlChange(settings.wsUrl);
-    onBaseUrlChange(settings.baseUrl);
-
-    // Apply language change if it differs from current language
-    if (settings.language && settings.language[0] && settings.language[0] !== i18n.language) {
-      i18n.changeLanguage(settings.language[0]);
-    }
-    localStorage.setItem(IMAGE_COMPRESSION_QUALITY_KEY, settings.imageCompressionQuality.toString());
-    localStorage.setItem(IMAGE_MAX_WIDTH_KEY, settings.imageMaxWidth.toString());
-  }, [settings, bgUrlContext, baseUrl, onWsUrlChange, onBaseUrlChange, setShowSubtitle]);
-
-  useEffect(() => {
     if (confName) {
       const filename = getFilenameByName(confName);
       if (filename) {
@@ -149,41 +128,57 @@ export const useGeneralSettings = ({
     }
   }, [confName]);
 
-  // Add save/cancel effect
-  useEffect(() => {
-    if (!onSave || !onCancel) return;
-
-    const cleanupSave = onSave(() => {
-      handleSave();
-    });
-
-    const cleanupCancel = onCancel(() => {
-      handleCancel();
-    });
-
-    return () => {
-      cleanupSave?.();
-      cleanupCancel?.();
-    };
-  }, [onSave, onCancel]);
-
   const handleSettingChange = useCallback((
     key: keyof GeneralSettings,
     value: GeneralSettings[keyof GeneralSettings],
   ): void => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
+    setSettings((prev) => {
+      const next = { ...prev, [key]: value };
 
-    if (key === 'wsUrl') {
-      onWsUrlChange(value as string);
-    }
-    if (key === 'baseUrl') {
-      onBaseUrlChange(value as string);
-    }
-    // Immediately change language when it's updated
-    if (key === 'language' && Array.isArray(value) && value.length > 0) {
-      i18n.changeLanguage(value[0]);
-    }
-  }, [onWsUrlChange, onBaseUrlChange]);
+      // Apply per-key side-effects in the same tick (event-driven, not effect-driven).
+      // This replaces the old eager useEffect that ran ALL side-effects on every
+      // settings change — causing double-triggers for wsUrl/baseUrl/language and
+      // redundant calls when unrelated keys changed.
+      switch (key) {
+        case 'wsUrl':
+          onWsUrlChange(value as string);
+          break;
+        case 'baseUrl':
+          onBaseUrlChange(value as string);
+          break;
+        case 'language':
+          if (Array.isArray(value) && value.length > 0 && value[0] !== i18n.language) {
+            i18n.changeLanguage(value[0]);
+          }
+          break;
+        case 'showSubtitle':
+          setShowSubtitle(value as boolean);
+          break;
+        case 'customBgUrl':
+        case 'selectedBgUrl': {
+          const bgVal = key === 'customBgUrl'
+            ? (value as string)
+            : (Array.isArray(value) ? value[0] : '');
+          const resolvedBgUrl = bgVal || (key === 'customBgUrl' ? next.selectedBgUrl[0] : next.customBgUrl);
+          if (resolvedBgUrl && bgUrlContext) {
+            const fullUrl = resolvedBgUrl.startsWith('http') ? resolvedBgUrl : `${baseUrl}${resolvedBgUrl}`;
+            bgUrlContext.setBackgroundUrl(fullUrl);
+          }
+          break;
+        }
+        case 'imageCompressionQuality':
+          localStorage.setItem(IMAGE_COMPRESSION_QUALITY_KEY, String(value));
+          break;
+        case 'imageMaxWidth':
+          localStorage.setItem(IMAGE_MAX_WIDTH_KEY, String(value));
+          break;
+        default:
+          break;
+      }
+
+      return next;
+    });
+  }, [onWsUrlChange, onBaseUrlChange, setShowSubtitle, bgUrlContext, baseUrl]);
 
   const handleSave = useCallback((): void => {
     setSettings((current) => {
@@ -220,6 +215,25 @@ export const useGeneralSettings = ({
       return orig;
     });
   }, [bgUrlContext, onWsUrlChange, onBaseUrlChange, originalConfName, setConfName, setShowSubtitle, startBackgroundCamera, stopBackgroundCamera]);
+
+  // Register save/cancel callbacks with the settings panel.
+  // deps include handleSave/handleCancel so stale closures are avoided.
+  useEffect(() => {
+    if (!onSave || !onCancel) return;
+
+    const cleanupSave = onSave(() => {
+      handleSave();
+    });
+
+    const cleanupCancel = onCancel(() => {
+      handleCancel();
+    });
+
+    return () => {
+      cleanupSave?.();
+      cleanupCancel?.();
+    };
+  }, [onSave, onCancel, handleSave, handleCancel]);
 
   const handleCharacterPresetChange = useCallback((value: string[]): void => {
     const selectedFilename = value[0];

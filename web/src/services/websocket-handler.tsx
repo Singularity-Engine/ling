@@ -16,7 +16,7 @@ import { useConfig } from '@/context/character-config-context';
 import { useChatMessages, useHistoryList, useStreamingSetters } from '@/context/chat-history-context';
 import { toaster } from '@/components/ui/toaster';
 import { useVADState, useVADActions } from '@/context/vad-context';
-import { AiState, useAiStateRead, useAiStateActions } from "@/context/ai-state-context";
+import { AiState, useAiStateActions } from "@/context/ai-state-context";
 import { useLocalStorage } from '@/hooks/utils/use-local-storage';
 import { useGroup } from '@/context/group-context';
 import { useInterrupt } from '@/hooks/utils/use-interrupt';
@@ -208,7 +208,6 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const [wsState, setWsState] = useState<string>('CLOSED');
   const [gwUrl, setGwUrl] = useLocalStorage<string>('gwUrl', getDefaultGatewayUrl());
   const [baseUrl, setBaseUrl] = useLocalStorage<string>('baseUrl', defaultBaseUrl);
-  const { aiState, backendSynthComplete } = useAiStateRead();
   const { setAiState, setBackendSynthComplete } = useAiStateActions();
   const { setModelInfo } = useLive2DConfig();
   const { setSubtitleText } = useSubtitle();
