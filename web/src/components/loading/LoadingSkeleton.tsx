@@ -25,6 +25,7 @@ const S_ORB: CSSProperties = {
   borderRadius: '50%',
   background: 'radial-gradient(circle, rgba(139,92,246,0.3) 0%, rgba(139,92,246,0.05) 70%, transparent 100%)',
   animation: 'skeletonOrb 2s ease-in-out infinite',
+  willChange: 'transform, opacity',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',

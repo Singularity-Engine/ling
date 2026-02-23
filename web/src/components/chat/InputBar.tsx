@@ -38,7 +38,7 @@ const S_MIC_OFF: CSSProperties = {
 const S_MIC_ON: CSSProperties = {
   ...S_MIC_BASE,
   background: "rgba(239, 68, 68, 0.2)", border: "1px solid rgba(239, 68, 68, 0.4)",
-  color: "var(--ling-error)", animation: "micPulse 1.5s ease-in-out infinite",
+  color: "var(--ling-error)",
 };
 
 const S_SEND_BASE: CSSProperties = {
@@ -313,7 +313,7 @@ export const InputBar = memo(() => {
 
       <div style={S_INPUT_ROW}>
         <button
-          className="ling-mic-btn"
+          className={micOn ? "ling-mic-btn ling-mic-recording" : "ling-mic-btn"}
           onClick={handleMicToggle}
           aria-label={micOn ? t("chat.micOn") : t("chat.micOff")}
           aria-pressed={micOn}
