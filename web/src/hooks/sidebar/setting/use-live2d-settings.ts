@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { ModelInfo, useLive2DConfig } from '@/context/live2d-config-context';
+import { ModelInfo, useLive2DConfigRead, useLive2DConfigActions } from '@/context/live2d-config-context';
 
 export const useLive2dSettings = () => {
-  const Live2DConfigContext = useLive2DConfig();
+  const { modelInfo: contextModelInfo } = useLive2DConfigRead();
+  const { setModelInfo: contextSetModelInfo } = useLive2DConfigActions();
 
   const initialModelInfo: ModelInfo = {
     url: '',
@@ -14,24 +15,24 @@ export const useLive2dSettings = () => {
   };
 
   const [modelInfo, setModelInfoState] = useState<ModelInfo>(
-    Live2DConfigContext?.modelInfo || initialModelInfo,
+    contextModelInfo || initialModelInfo,
   );
   const [originalModelInfo, setOriginalModelInfo] = useState<ModelInfo>(
-    Live2DConfigContext?.modelInfo || initialModelInfo,
+    contextModelInfo || initialModelInfo,
   );
 
   useEffect(() => {
-    if (Live2DConfigContext?.modelInfo) {
-      if (JSON.stringify(Live2DConfigContext.modelInfo) !== JSON.stringify(originalModelInfo)) {
-        setOriginalModelInfo(Live2DConfigContext.modelInfo);
-        setModelInfoState(Live2DConfigContext.modelInfo);
+    if (contextModelInfo) {
+      if (JSON.stringify(contextModelInfo) !== JSON.stringify(originalModelInfo)) {
+        setOriginalModelInfo(contextModelInfo);
+        setModelInfoState(contextModelInfo);
       }
     }
-  }, [Live2DConfigContext?.modelInfo]);
+  }, [contextModelInfo]);
 
   useEffect(() => {
-    if (Live2DConfigContext && modelInfo) {
-      Live2DConfigContext.setModelInfo(modelInfo);
+    if (modelInfo) {
+      contextSetModelInfo(modelInfo);
     }
   }, [modelInfo.pointerInteractive, modelInfo.scrollToResize]);
 
@@ -40,15 +41,15 @@ export const useLive2dSettings = () => {
   };
 
   const handleSave = (): void => {
-    if (Live2DConfigContext && modelInfo) {
+    if (modelInfo) {
       setOriginalModelInfo(modelInfo);
     }
   };
 
   const handleCancel = (): void => {
     setModelInfoState(originalModelInfo);
-    if (Live2DConfigContext && originalModelInfo) {
-      Live2DConfigContext.setModelInfo(originalModelInfo);
+    if (originalModelInfo) {
+      contextSetModelInfo(originalModelInfo);
     }
   };
 

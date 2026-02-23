@@ -76,19 +76,26 @@ export interface ModelInfo {
 }
 
 /**
- * Live2D configuration context state interface
- * @interface Live2DConfigState
+ * Context 1 — Read-only Live2D config state.
+ * Changes when modelInfo or isLoading update.
  */
-interface Live2DConfigState {
+interface Live2DConfigReadType {
   modelInfo?: ModelInfo;
-  setModelInfo: (info: ModelInfo | undefined) => void;
   isLoading: boolean;
-  setIsLoading: (loading: boolean) => void;
 }
 
 /**
- * Default values and constants
+ * Context 2 — Stable action callbacks.
+ * setIsLoading is a React state-setter (identity-stable) and setModelInfo
+ * is wrapped in useCallback with stable deps, so this context value never
+ * changes after mount. Consumers that only WRITE subscribe here without
+ * re-renders on state changes.
  */
+interface Live2DConfigActionsType {
+  setModelInfo: (info: ModelInfo | undefined) => void;
+  setIsLoading: (loading: boolean) => void;
+}
+
 const DEFAULT_CONFIG = {
   modelInfo: {
     scrollToResize: true,
@@ -96,15 +103,11 @@ const DEFAULT_CONFIG = {
   isLoading: false,
 };
 
-/**
- * Create the Live2D configuration context
- */
-export const Live2DConfigContext = createContext<Live2DConfigState | null>(null);
+const Live2DConfigReadContext = createContext<Live2DConfigReadType | null>(null);
+const Live2DConfigActionsContext = createContext<Live2DConfigActionsType | null>(null);
 
 /**
  * Live2D Configuration Provider Component
- * @param {Object} props - Provider props
- * @param {React.ReactNode} props.children - Child components
  */
 export function Live2DConfigProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(DEFAULT_CONFIG.isLoading);
@@ -142,36 +145,46 @@ export function Live2DConfigProvider({ children }: { children: React.ReactNode }
     }));
   }, [setModelInfoState]);
 
-  const contextValue = useMemo(
-    () => ({
-      modelInfo,
-      setModelInfo,
-      isLoading,
-      setIsLoading,
-    }),
-    [modelInfo, setModelInfo, isLoading, setIsLoading],
+  const actions = useMemo(
+    () => ({ setModelInfo, setIsLoading }),
+    [setModelInfo],
+  );
+
+  const state = useMemo(
+    () => ({ modelInfo, isLoading }),
+    [modelInfo, isLoading],
   );
 
   return (
-    <Live2DConfigContext.Provider value={contextValue}>
-      {children}
-    </Live2DConfigContext.Provider>
+    <Live2DConfigActionsContext.Provider value={actions}>
+      <Live2DConfigReadContext.Provider value={state}>
+        {children}
+      </Live2DConfigReadContext.Provider>
+    </Live2DConfigActionsContext.Provider>
   );
 }
 
-/**
- * Custom hook to use the Live2D configuration context
- * @throws {Error} If used outside of Live2DConfigProvider
- */
-export function useLive2DConfig() {
-  const context = useContext(Live2DConfigContext);
-
-  if (!context) {
-    throw new Error('useLive2DConfig must be used within a Live2DConfigProvider');
-  }
-
-  return context;
+/** Subscribe to read-only Live2D config state (re-renders on state changes). */
+export function useLive2DConfigRead() {
+  const ctx = useContext(Live2DConfigReadContext);
+  if (!ctx) throw new Error('useLive2DConfigRead must be used within Live2DConfigProvider');
+  return ctx;
 }
 
-// Export the provider as default
+/** Subscribe to stable Live2D config actions (never causes re-renders). */
+export function useLive2DConfigActions() {
+  const ctx = useContext(Live2DConfigActionsContext);
+  if (!ctx) throw new Error('useLive2DConfigActions must be used within Live2DConfigProvider');
+  return ctx;
+}
+
+/**
+ * Combined hook — returns both read-only state and actions.
+ * Kept for backward compatibility with restricted files (hooks/utils/, components/canvas/).
+ * Prefer useLive2DConfigRead() or useLive2DConfigActions() for targeted subscriptions.
+ */
+export function useLive2DConfig() {
+  return { ...useLive2DConfigRead(), ...useLive2DConfigActions() };
+}
+
 export default Live2DConfigProvider;
