@@ -1,14 +1,13 @@
 /* eslint-disable no-shadow */
 import { useRef, useState } from 'react';
-import { useCamera } from '@/context/camera-context';
+import { useCameraState, useCameraActions } from '@/context/camera-context';
 
 export const useCameraPanel = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState<string>('');
   const [isHovering, setIsHovering] = useState(false);
-  const {
-    isStreaming, stream, startCamera, stopCamera,
-  } = useCamera();
+  const { isStreaming, stream } = useCameraState();
+  const { startCamera, stopCamera } = useCameraActions();
 
   const toggleCamera = async (): Promise<void> => {
     try {

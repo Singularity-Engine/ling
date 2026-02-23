@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { BgUrlContextState } from '@/context/bgurl-context';
 import { defaultBaseUrl, defaultWsUrl } from '@/context/websocket-context';
 import { useSubtitle } from '@/context/subtitle-context';
-import { useCamera } from '@/context/camera-context';
+import { useCameraActions } from '@/context/camera-context';
 import { useSwitchCharacter } from '@/hooks/utils/use-switch-character';
 import { useConfig } from '@/context/character-config-context';
 import i18n from 'i18next';
@@ -77,7 +77,7 @@ export const useGeneralSettings = ({
 }: UseGeneralSettingsProps) => {
   const { showSubtitle, setShowSubtitle } = useSubtitle();
   const { setUseCameraBackground } = bgUrlContext || {};
-  const { startBackgroundCamera, stopBackgroundCamera } = useCamera();
+  const { startBackgroundCamera, stopBackgroundCamera } = useCameraActions();
   const { configFiles, getFilenameByName } = useConfig();
   const { switchCharacter } = useSwitchCharacter();
 

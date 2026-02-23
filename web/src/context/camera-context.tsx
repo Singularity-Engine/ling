@@ -1,3 +1,24 @@
+/**
+ * Camera Context — dual-context split (State + Actions)
+ *
+ * State context: isStreaming, stream, isBackgroundStreaming,
+ *   backgroundStream, cameraConfig — re-renders consumers on change.
+ * Actions context: startCamera, stopCamera, startBackgroundCamera,
+ *   stopBackgroundCamera, setCameraConfig, videoRef — stable after mount,
+ *   never causes re-renders.
+ *
+ * Fixes vs. the original single-context implementation:
+ * - stream/backgroundStream tracked as React state (not bare ref values
+ *   snapshotted inside useMemo with wrong deps).
+ * - Callbacks read cameraConfig from a ref → no longer recreated on every
+ *   config change → no cascading context invalidation.
+ * - Components that only need actions (e.g. use-general-settings) are
+ *   shielded from streaming-state re-renders.
+ *
+ * useCamera() is kept for backward compatibility with restricted files
+ * (hooks/utils/use-media-capture.tsx) that cannot be modified.
+ */
+
 import {
   createContext,
   useContext,
@@ -5,7 +26,7 @@ import {
   useState,
   useMemo,
   useCallback,
-  ReactNode,
+  type ReactNode,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toaster } from '@/components/ui/toaster';
@@ -13,86 +34,76 @@ import { createLogger } from '@/utils/logger';
 
 const log = createLogger('Camera');
 
-/**
- * Camera configuration interface
- * @interface CameraConfig
- */
 interface CameraConfig {
   width: number;
   height: number;
 }
 
-/**
- * Camera context state interface
- * @interface CameraContextState
- */
-interface CameraContextState {
+// ── Context types ──────────────────────────────────────────────
+
+interface CameraState {
   isStreaming: boolean;
   stream: MediaStream | null;
-  startCamera: () => Promise<void>;
-  stopCamera: () => void;
-  cameraConfig: CameraConfig;
-  setCameraConfig: (config: CameraConfig) => void;
-  videoRef: React.RefObject<HTMLVideoElement>;
-  backgroundStream: MediaStream | null;
-  startBackgroundCamera: () => Promise<void>;
-  stopBackgroundCamera: () => void;
   isBackgroundStreaming: boolean;
+  backgroundStream: MediaStream | null;
+  cameraConfig: CameraConfig;
 }
 
-/**
- * Default values and constants
- */
+interface CameraActions {
+  startCamera: () => Promise<void>;
+  stopCamera: () => void;
+  startBackgroundCamera: () => Promise<void>;
+  stopBackgroundCamera: () => void;
+  setCameraConfig: (config: CameraConfig) => void;
+  videoRef: React.RefObject<HTMLVideoElement>;
+}
+
 const DEFAULT_CAMERA_CONFIG: CameraConfig = {
   width: 320,
   height: 240,
 };
 
-/**
- * Create the camera context
- */
-const CameraContext = createContext<CameraContextState | null>(null);
+const CameraStateContext = createContext<CameraState | null>(null);
+const CameraActionsContext = createContext<CameraActions | null>(null);
 
-/**
- * Camera Provider Component
- * @param {Object} props - Provider props
- * @param {React.ReactNode} props.children - Child components
- */
+// ── Provider ──────────────────────────────────────────────────
+
 export function CameraProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
-  // State management
+
+  // State — properly reactive, drives CameraStateContext
   const [isStreaming, setIsStreaming] = useState(false);
+  const [stream, setStream] = useState<MediaStream | null>(null);
   const [isBackgroundStreaming, setIsBackgroundStreaming] = useState(false);
-  const [cameraConfig, setCameraConfig] = useState<CameraConfig>(
-    DEFAULT_CAMERA_CONFIG,
-  );
-  const streamRef = useRef<MediaStream | null>(null);
-  const backgroundStreamRef = useRef<MediaStream | null>(null);
+  const [backgroundStream, setBackgroundStream] = useState<MediaStream | null>(null);
+  const [cameraConfig, setCameraConfig] = useState<CameraConfig>(DEFAULT_CAMERA_CONFIG);
+
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Start camera stream
+  // Ref mirror: callbacks read config from ref → avoids recreating
+  // startCamera/startBackgroundCamera when config changes.
+  const cameraConfigRef = useRef(cameraConfig);
+  cameraConfigRef.current = cameraConfig;
+
   const startCamera = useCallback(async () => {
     try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      if (!navigator.mediaDevices?.getUserMedia) {
         throw new Error(t('error.cameraApiNotSupported'));
       }
 
       const devices = await navigator.mediaDevices.enumerateDevices();
-      const hasCamera = devices.some((device) => device.kind === 'videoinput');
-      if (!hasCamera) {
+      if (!devices.some((d) => d.kind === 'videoinput')) {
         throw new Error(t('error.noCameraFound'));
       }
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: cameraConfig.width },
-          height: { ideal: cameraConfig.height },
-        },
+      const config = cameraConfigRef.current;
+      const ms = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: config.width }, height: { ideal: config.height } },
       });
 
-      streamRef.current = stream;
+      setStream(ms);
       if (videoRef.current) {
-        videoRef.current.srcObject = stream;
+        videoRef.current.srcObject = ms;
       }
       setIsStreaming(true);
     } catch (err) {
@@ -104,38 +115,33 @@ export function CameraProvider({ children }: { children: ReactNode }) {
       });
       throw err;
     }
-  }, [cameraConfig, t]);
+  }, [t]);
 
-  // Stop camera stream
   const stopCamera = useCallback(() => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-      setIsStreaming(false);
-      // stopStreamingToBackend();
-    }
+    setStream((prev) => {
+      if (prev) prev.getTracks().forEach((track) => track.stop());
+      return null;
+    });
+    setIsStreaming(false);
   }, []);
 
   const startBackgroundCamera = useCallback(async () => {
     try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      if (!navigator.mediaDevices?.getUserMedia) {
         throw new Error(t('error.cameraApiNotSupported'));
       }
 
       const devices = await navigator.mediaDevices.enumerateDevices();
-      const hasCamera = devices.some((device) => device.kind === 'videoinput');
-      if (!hasCamera) {
+      if (!devices.some((d) => d.kind === 'videoinput')) {
         throw new Error(t('error.noCameraFound'));
       }
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: cameraConfig.width },
-          height: { ideal: cameraConfig.height },
-        },
+      const config = cameraConfigRef.current;
+      const ms = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: config.width }, height: { ideal: config.height } },
       });
 
-      backgroundStreamRef.current = stream;
+      setBackgroundStream(ms);
       setIsBackgroundStreaming(true);
     } catch (err) {
       log.error('Failed to start background camera:', err);
@@ -146,51 +152,61 @@ export function CameraProvider({ children }: { children: ReactNode }) {
       });
       throw err;
     }
-  }, [cameraConfig, t]);
+  }, [t]);
 
   const stopBackgroundCamera = useCallback(() => {
-    if (backgroundStreamRef.current) {
-      backgroundStreamRef.current.getTracks().forEach((track) => track.stop());
-      backgroundStreamRef.current = null;
-      setIsBackgroundStreaming(false);
-    }
+    setBackgroundStream((prev) => {
+      if (prev) prev.getTracks().forEach((track) => track.stop());
+      return null;
+    });
+    setIsBackgroundStreaming(false);
   }, []);
 
-  // Memoized context value
-  const contextValue = useMemo(
-    () => ({
-      isStreaming,
-      stream: streamRef.current,
-      startCamera,
-      stopCamera,
-      cameraConfig,
-      setCameraConfig,
-      videoRef,
-      backgroundStream: backgroundStreamRef.current,
-      startBackgroundCamera,
-      stopBackgroundCamera,
-      isBackgroundStreaming,
-    }),
-    [isStreaming, startCamera, stopCamera, cameraConfig, isBackgroundStreaming, startBackgroundCamera, stopBackgroundCamera],
+  // ── Context values ──
+
+  const stateValue = useMemo<CameraState>(
+    () => ({ isStreaming, stream, isBackgroundStreaming, backgroundStream, cameraConfig }),
+    [isStreaming, stream, isBackgroundStreaming, backgroundStream, cameraConfig],
+  );
+
+  const actionsValue = useMemo<CameraActions>(
+    () => ({ startCamera, stopCamera, startBackgroundCamera, stopBackgroundCamera, setCameraConfig, videoRef }),
+    [startCamera, stopCamera, startBackgroundCamera, stopBackgroundCamera],
   );
 
   return (
-    <CameraContext.Provider value={contextValue}>
-      {children}
-    </CameraContext.Provider>
+    <CameraActionsContext.Provider value={actionsValue}>
+      <CameraStateContext.Provider value={stateValue}>
+        {children}
+      </CameraStateContext.Provider>
+    </CameraActionsContext.Provider>
   );
 }
 
+// ── Hooks ──────────────────────────────────────────────────────
+
+/** Subscribe to camera state (re-renders on streaming/config changes). */
+export function useCameraState() {
+  const ctx = useContext(CameraStateContext);
+  if (!ctx) throw new Error('useCameraState must be used within CameraProvider');
+  return ctx;
+}
+
+/** Subscribe to stable camera actions (never causes re-renders). */
+export function useCameraActions() {
+  const ctx = useContext(CameraActionsContext);
+  if (!ctx) throw new Error('useCameraActions must be used within CameraProvider');
+  return ctx;
+}
+
 /**
- * Custom hook to use the camera context
- * @throws {Error} If used outside of CameraProvider
+ * Legacy combined hook — kept for backward compatibility with restricted
+ * files (hooks/utils/*) that cannot be modified.
+ * Prefer useCameraState() / useCameraActions() in new code.
  */
 export function useCamera() {
-  const context = useContext(CameraContext);
-
-  if (!context) {
-    throw new Error('useCamera must be used within a CameraProvider');
-  }
-
-  return context;
+  const state = useContext(CameraStateContext);
+  const actions = useContext(CameraActionsContext);
+  if (!state || !actions) throw new Error('useCamera must be used within CameraProvider');
+  return { ...state, ...actions };
 }
