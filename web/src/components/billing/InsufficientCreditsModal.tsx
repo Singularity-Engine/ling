@@ -101,17 +101,6 @@ const InsufficientCreditsModal: React.FC = memo(function InsufficientCreditsModa
   // Track what to do after the exit animation finishes
   const afterCloseRef = useRef<(() => void) | null>(null);
 
-  // ESC to close
-  useEffect(() => {
-    if (!billingModal.open) return;
-    setClosing(false);
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') handleDismiss();
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [billingModal.open]); // handleDismiss is stable enough via closing guard
-
   // Clean up timer on unmount
   useEffect(() => () => { clearTimeout(closingTimer.current); }, []);
 
@@ -128,6 +117,21 @@ const InsufficientCreditsModal: React.FC = memo(function InsufficientCreditsModa
   }, [closeBillingModal, closing]);
 
   const handleDismiss = useCallback(() => startExit(), [startExit]);
+
+  // Keep a ref so the ESC listener always calls the latest handleDismiss
+  const handleDismissRef = useRef(handleDismiss);
+  handleDismissRef.current = handleDismiss;
+
+  // ESC to close
+  useEffect(() => {
+    if (!billingModal.open) return;
+    setClosing(false);
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleDismissRef.current();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [billingModal.open]);
 
   const handleBackdropClick = useCallback(
     (e: React.MouseEvent) => {
