@@ -7,7 +7,7 @@
 
 import { memo, useCallback, type CSSProperties } from 'react';
 import { useAuth } from '@/context/auth-context';
-import { useUI } from '@/context/ui-context';
+import { useUIActions } from '@/context/ui-context';
 
 // ── Pre-allocated style constants ──
 const S_BUTTON: CSSProperties = {
@@ -32,7 +32,7 @@ const S_TEXT_LOW: CSSProperties = { fontSize: '12px', fontWeight: 600, color: 'v
 
 const CreditsDisplay: React.FC = memo(() => {
   const { user } = useAuth();
-  const { setPricingOpen } = useUI();
+  const { setPricingOpen } = useUIActions();
   const openPricing = useCallback(() => setPricingOpen(true), [setPricingOpen]);
 
   if (!user) return null;

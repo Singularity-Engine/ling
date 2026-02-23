@@ -7,7 +7,7 @@
 
 import { memo, useCallback, useEffect, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useUI } from '@/context/ui-context';
+import { useUIState, useUIActions } from '@/context/ui-context';
 
 // ─── Style constants (avoid per-render allocation) ───
 
@@ -88,7 +88,8 @@ const S_BTN_SECONDARY: CSSProperties = {
 
 const InsufficientCreditsModal: React.FC = memo(function InsufficientCreditsModal() {
   const { t } = useTranslation();
-  const { billingModal, closeBillingModal, setPricingOpen } = useUI();
+  const { billingModal } = useUIState();
+  const { closeBillingModal, setPricingOpen } = useUIActions();
 
   // ESC to close
   useEffect(() => {

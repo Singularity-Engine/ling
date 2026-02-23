@@ -1,7 +1,7 @@
 import { memo, useState, useEffect, useCallback, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/auth-context";
-import { useUI } from "@/context/ui-context";
+import { useUIActions } from "@/context/ui-context";
 import { apiClient } from "@/services/api-client";
 import packageJson from "../../../package.json";
 import { createStyleInjector } from "@/utils/style-injection";
@@ -310,7 +310,7 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
   useEffect(ensureAboutStyles, []);
   const { t } = useTranslation();
   const { user, logout } = useAuth();
-  const { setPricingOpen } = useUI();
+  const { setPricingOpen } = useUIActions();
   const [portalLoading, setPortalLoading] = useState(false);
 
   const handleManageSubscription = useCallback(async () => {

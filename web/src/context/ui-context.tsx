@@ -2,6 +2,8 @@
  * UI 全局状态上下文
  *
  * 管理全局 UI 状态如定价页面开关、计费弹窗等。
+ * 拆分为 read-only state + stable actions 双 context，
+ * 避免只需 action 的消费者被 state 变化触发重渲染。
  */
 
 import {
@@ -23,15 +25,19 @@ export interface BillingModalState {
 
 // ── Context 类型 ──────────────────────────────────────────────
 
-interface UIContextType {
+interface UIState {
   pricingOpen: boolean;
-  setPricingOpen: (open: boolean) => void;
   billingModal: BillingModalState;
+}
+
+interface UIActionsType {
+  setPricingOpen: (open: boolean) => void;
   setBillingModal: (state: BillingModalState) => void;
   closeBillingModal: () => void;
 }
 
-const UIContext = createContext<UIContextType | null>(null);
+const UIStateContext = createContext<UIState | null>(null);
+const UIActionsContext = createContext<UIActionsType | null>(null);
 
 // ── Provider ──────────────────────────────────────────────────
 
@@ -45,22 +51,37 @@ export function UIProvider({ children }: { children: ReactNode }) {
     setBillingModal({ open: false });
   }, []);
 
-  const contextValue = useMemo(
-    () => ({ pricingOpen, setPricingOpen, billingModal, setBillingModal, closeBillingModal }),
-    [pricingOpen, billingModal, closeBillingModal],
+  const actions = useMemo(
+    () => ({ setPricingOpen, setBillingModal, closeBillingModal }),
+    [closeBillingModal],
+  );
+
+  const state = useMemo(
+    () => ({ pricingOpen, billingModal }),
+    [pricingOpen, billingModal],
   );
 
   return (
-    <UIContext.Provider value={contextValue}>
-      {children}
-    </UIContext.Provider>
+    <UIActionsContext.Provider value={actions}>
+      <UIStateContext.Provider value={state}>
+        {children}
+      </UIStateContext.Provider>
+    </UIActionsContext.Provider>
   );
 }
 
-// ── Hook ──────────────────────────────────────────────────────
+// ── Hooks ──────────────────────────────────────────────────────
 
-export function useUI(): UIContextType {
-  const ctx = useContext(UIContext);
-  if (!ctx) throw new Error('useUI must be used within UIProvider');
+/** Subscribe to read-only UI state (re-renders on state changes). */
+export function useUIState() {
+  const ctx = useContext(UIStateContext);
+  if (!ctx) throw new Error('useUIState must be used within UIProvider');
+  return ctx;
+}
+
+/** Subscribe to stable UI actions (never causes re-renders). */
+export function useUIActions() {
+  const ctx = useContext(UIActionsContext);
+  if (!ctx) throw new Error('useUIActions must be used within UIProvider');
   return ctx;
 }

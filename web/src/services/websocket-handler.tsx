@@ -27,10 +27,10 @@ import { gatewayConnector, GatewayState } from '@/services/gateway-connector';
 import { gatewayAdapter, GatewayMessageEvent } from '@/services/gateway-message-adapter';
 import { ttsService } from '@/services/tts-service';
 import { asrService } from '@/services/asr-service';
-import { useTTSState } from '@/context/tts-state-context';
+import { useTTSActions } from '@/context/tts-state-context';
 import { BRAND_NAME_SHORT, BRAND_NAME_DISPLAY, BRAND_AVATAR_NAME } from '@/constants/brand';
 import { useAuth } from '@/context/auth-context';
-import { useUI, type BillingModalState } from '@/context/ui-context';
+import { useUIActions, type BillingModalState } from '@/context/ui-context';
 import { apiClient } from '@/services/api-client';
 import i18next from 'i18next';
 import { createLogger } from '@/utils/logger';
@@ -204,9 +204,9 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const { setBrowserViewData } = useBrowser();
   const affinityContext = useAffinityActions();
   const { startTool, completeTool, failTool } = useToolActions();
-  const { markSynthStart, markSynthDone, markSynthError, markPlayStart, markPlayDone, reset: resetTTSState } = useTTSState();
+  const { markSynthStart, markSynthDone, markSynthError, markPlayStart, markPlayDone, reset: resetTTSState } = useTTSActions();
   const { updateCredits, user } = useAuth();
-  const { setBillingModal } = useUI();
+  const { setBillingModal } = useUIActions();
 
   autoStartMicOnConvEndRef.current = autoStartMicOnConvEnd;
 

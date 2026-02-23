@@ -2,7 +2,11 @@ import { createContext, useContext, useState, useCallback, useMemo, ReactNode } 
 
 export type TTSPhase = 'idle' | 'synthesizing' | 'playing' | 'error';
 
-interface TTSStateContextType {
+/**
+ * Context 1 — Read-only TTS state.
+ * Changes when synth/play counters or error state update.
+ */
+interface TTSState {
   phase: TTSPhase;
   /** Number of sentences currently being synthesized */
   pendingSynth: number;
@@ -10,7 +14,16 @@ interface TTSStateContextType {
   pendingPlay: number;
   /** Last error message (cleared on next successful synth) */
   lastError: string | null;
+}
 
+/**
+ * Context 2 — Stable action callbacks.
+ * All callbacks are created with useCallback (empty deps), so this
+ * context value never changes after mount. Consumers that only need
+ * to WRITE TTS state (e.g. websocket-handler) subscribe here
+ * without incurring re-renders on every state change.
+ */
+interface TTSActionsType {
   markSynthStart: () => void;
   markSynthDone: () => void;
   markSynthError: (msg: string) => void;
@@ -20,7 +33,8 @@ interface TTSStateContextType {
   reset: () => void;
 }
 
-const TTSStateContext = createContext<TTSStateContextType | null>(null);
+const TTSStateContext = createContext<TTSState | null>(null);
+const TTSActionsContext = createContext<TTSActionsType | null>(null);
 
 export function TTSStateProvider({ children }: { children: ReactNode }) {
   const [pendingSynth, setPendingSynth] = useState(0);
@@ -67,29 +81,35 @@ export function TTSStateProvider({ children }: { children: ReactNode }) {
     return 'idle';
   }, [pendingSynth, pendingPlay, lastError]);
 
-  const value = useMemo(() => ({
-    phase,
-    pendingSynth,
-    pendingPlay,
-    lastError,
-    markSynthStart,
-    markSynthDone,
-    markSynthError,
-    markPlayStart,
-    markPlayDone,
-    markPlayError,
-    reset,
-  }), [phase, pendingSynth, pendingPlay, lastError, markSynthStart, markSynthDone, markSynthError, markPlayStart, markPlayDone, markPlayError, reset]);
+  const actions = useMemo(
+    () => ({ markSynthStart, markSynthDone, markSynthError, markPlayStart, markPlayDone, markPlayError, reset }),
+    [markSynthStart, markSynthDone, markSynthError, markPlayStart, markPlayDone, markPlayError, reset],
+  );
+
+  const state = useMemo(
+    () => ({ phase, pendingSynth, pendingPlay, lastError }),
+    [phase, pendingSynth, pendingPlay, lastError],
+  );
 
   return (
-    <TTSStateContext.Provider value={value}>
-      {children}
-    </TTSStateContext.Provider>
+    <TTSActionsContext.Provider value={actions}>
+      <TTSStateContext.Provider value={state}>
+        {children}
+      </TTSStateContext.Provider>
+    </TTSActionsContext.Provider>
   );
 }
 
+/** Subscribe to read-only TTS state (re-renders on state changes). */
 export function useTTSState() {
   const ctx = useContext(TTSStateContext);
   if (!ctx) throw new Error('useTTSState must be used within TTSStateProvider');
+  return ctx;
+}
+
+/** Subscribe to stable TTS actions (never causes re-renders). */
+export function useTTSActions() {
+  const ctx = useContext(TTSActionsContext);
+  if (!ctx) throw new Error('useTTSActions must be used within TTSStateProvider');
   return ctx;
 }
