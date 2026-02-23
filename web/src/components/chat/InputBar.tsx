@@ -5,30 +5,6 @@ import { useChatMessagesActions } from "@/context/chat-history-context";
 import { useAiStateRead } from "@/context/ai-state-context";
 import { useInterrupt } from "@/components/canvas/live2d";
 import { useVADState, useVADActions } from "@/context/vad-context";
-import { createStyleInjector } from "@/utils/style-injection";
-
-
-// ── Deferred style injection (avoids module-level side effects) ──
-const ensureInputBarStyles = createStyleInjector({
-  id: "input-bar-styles",
-  css: `
-    @keyframes inputPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-    @keyframes micPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); } }
-    @keyframes sendSpin { to { transform: rotate(360deg); } }
-    .ling-textarea { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; color: white; font-size: 14px; padding: 10px 16px; min-height: 42px; max-height: 96px; resize: none; flex: 1; outline: none; font-family: inherit; line-height: 1.5; transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease; }
-    .ling-textarea::placeholder { color: rgba(255, 255, 255, 0.4); transition: color 0.2s ease; }
-    .ling-textarea:hover:not(:focus):not(:disabled) { border-color: rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.08); }
-    .ling-textarea:focus { border-color: rgba(139, 92, 246, 0.5); box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.25), 0 0 16px rgba(139, 92, 246, 0.12); background: rgba(255, 255, 255, 0.08); }
-    .ling-textarea:focus::placeholder { color: rgba(255, 255, 255, 0.3); }
-    .ling-textarea:disabled { opacity: 0.45; cursor: not-allowed; }
-    .ling-send-btn:not(:disabled):hover { filter: brightness(1.15); }
-    .ling-send-btn:not(:disabled):active { transform: scale(0.88); }
-    .ling-mic-btn:hover { filter: brightness(1.15); }
-    .ling-mic-btn:active { transform: scale(0.88); }
-    @keyframes inputShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 50% { transform: translateX(4px); } 75% { transform: translateX(-2px); } }
-    .ling-textarea.ling-shake { animation: inputShake 0.35s ease; border-color: rgba(239, 68, 68, 0.4) !important; box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important; }
-  `,
-});
 
 // ─── Static style constants (avoid per-render allocation during typing) ───
 
@@ -155,7 +131,6 @@ const AI_STATE_KEYS: Record<string, string> = {
 const MAX_LENGTH = 2000;
 
 export const InputBar = memo(() => {
-  useEffect(ensureInputBarStyles, []);
   const { t } = useTranslation();
   const [inputText, setInputText] = useState("");
   const isComposingRef = useRef(false);

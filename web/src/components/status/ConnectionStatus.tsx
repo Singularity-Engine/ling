@@ -3,24 +3,6 @@ import { useTranslation } from "react-i18next";
 import { useWebSocketState, useWebSocketActions } from "@/context/websocket-context";
 import { gatewayConnector, RECONNECT_MAX_RETRIES } from "@/services/gateway-connector";
 import { OVERLAY_COLORS } from "@/constants/colors";
-import { createStyleInjector } from "@/utils/style-injection";
-
-// ── Deferred keyframe injection (performance optimization) ──
-const KEYFRAMES_CSS = `
-    @keyframes connFadeIn {
-      from { opacity: 0; transform: translateY(-4px); }
-      to { opacity: 0.7; transform: translateY(0); }
-    }
-    @keyframes connPulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.8); }
-    }
-  `;
-
-const ensureKeyframeStyles = createStyleInjector({
-  id: "connection-status-keyframes",
-  css: KEYFRAMES_CSS,
-});
 
 // ── Pre-allocated style constants — eliminate per-render allocations ──
 const S_CONTAINER_BASE: CSSProperties = {
@@ -133,9 +115,6 @@ export const ConnectionStatus = memo(() => {
   const isOpen = wsState === "OPEN";
   const isConnecting = wsState === "CONNECTING";
   const isClosed = wsState === "CLOSED";
-
-  // Inject keyframe styles on component mount
-  useEffect(ensureKeyframeStyles, []);
 
   useEffect(() => {
     if (isOpen) {
