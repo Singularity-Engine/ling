@@ -117,8 +117,11 @@ export const AudioVisualizer = memo(() => {
     };
   }, [cleanup]);
 
-  // Render loop
+  // Render loop — demand-driven: only runs while `active` is true.
+  // Starts when audio connects, stops after all bars decay to zero.
+  // Avoids ~30fps of continuous invisible canvas rendering when idle.
   useEffect(() => {
+    if (!active) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx2d = canvas.getContext('2d');
@@ -208,9 +211,13 @@ export const AudioVisualizer = memo(() => {
       }
       ctx2d.globalAlpha = 1;
 
-      // If no analyser and no energy left, deactivate
+      // No audio source and all bars fully decayed → stop the render loop.
+      // It restarts when onAudioChange fires with a new element (setActive(true)).
       if (!analyser && !hasEnergy) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = 0;
         setActive(false);
+        return;
       }
     };
 
@@ -222,7 +229,7 @@ export const AudioVisualizer = memo(() => {
         rafRef.current = 0;
       }
     };
-  }, []);
+  }, [active]);
 
   // Resize canvas to match container
   useEffect(() => {

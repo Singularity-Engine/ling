@@ -130,10 +130,18 @@ export const StarField = memo(() => {
       pulsePhase: Math.random() * Math.PI * 2,
     }));
 
-    let frame = 0;
+    let time = 0;
+    let lastTs = 0;
+    const FRAME_INTERVAL = 1000 / 30; // 30fps — halves render cost; subtle animations don't need 60fps
 
-    const animate = () => {
-      frame++;
+    const animate = (timestamp: number) => {
+      animRef.current = requestAnimationFrame(animate);
+      if (lastTs && timestamp - lastTs < FRAME_INTERVAL) return;
+      // dt normalized to 60fps frame units — existing speed constants stay unchanged
+      const dt = lastTs ? Math.min((timestamp - lastTs) / 16.667, 4) : 1;
+      lastTs = timestamp;
+      time += dt;
+
       const w = cachedW;
       const h = cachedH;
       ctx.clearRect(0, 0, w, h);
@@ -141,8 +149,8 @@ export const StarField = memo(() => {
       // ── Nebula clouds (behind stars, very faint) ──
       for (const neb of nebulaeRef.current) {
         // Slow drift
-        neb.cx += neb.driftX;
-        neb.cy += neb.driftY;
+        neb.cx += neb.driftX * dt;
+        neb.cy += neb.driftY * dt;
         if (neb.cx > 1.4) neb.cx = -0.4;
         else if (neb.cx < -0.4) neb.cx = 1.4;
         if (neb.cy > 1.4) neb.cy = -0.4;
@@ -150,7 +158,7 @@ export const StarField = memo(() => {
 
         const alpha =
           neb.baseAlpha *
-          (0.6 + 0.4 * Math.sin(frame * neb.pulseSpeed + neb.pulsePhase));
+          (0.6 + 0.4 * Math.sin(time * neb.pulseSpeed + neb.pulsePhase));
         const cx = neb.cx * w;
         const cy = neb.cy * h;
         const rx = neb.rx * w;
@@ -178,7 +186,7 @@ export const StarField = memo(() => {
         star.alpha = prefersReducedMotion
           ? star.baseAlpha * 0.75
           : star.baseAlpha *
-            (0.5 + 0.5 * Math.sin(frame * star.twinkleSpeed + star.twinkleOffset));
+            (0.5 + 0.5 * Math.sin(time * star.twinkleSpeed + star.twinkleOffset));
 
         // Layer-based coloring via pre-computed prefix (avoids template-string per star per frame)
         const prefix = STAR_RGBA_PREFIX[star.layer];
