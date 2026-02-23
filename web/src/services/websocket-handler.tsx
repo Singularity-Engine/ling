@@ -28,6 +28,7 @@ import { ttsService } from '@/services/tts-service';
 import { asrService } from '@/services/asr-service';
 import { useTTSActions } from '@/context/tts-state-context';
 import { BRAND_NAME_SHORT, BRAND_NAME_DISPLAY, BRAND_AVATAR_NAME } from '@/constants/brand';
+import { MOBILE_BREAKPOINT } from '@/constants/breakpoints';
 import { useAuth } from '@/context/auth-context';
 import { useUIActions, type BillingModalState } from '@/context/ui-context';
 import { apiClient } from '@/services/api-client';
@@ -96,7 +97,7 @@ function mapGatewayState(state: GatewayState): string {
 
 // ─── Default model info for 灵 (Ling) — no longer fetched from backend ─
 
-const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+const isMobile = typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT;
 
 const modelBaseUrl = typeof window !== 'undefined'
   ? `${window.location.origin}/live2d-models/001`

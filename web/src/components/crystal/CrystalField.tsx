@@ -1,5 +1,6 @@
 import { memo, useMemo, useState, useEffect, useRef, type CSSProperties } from "react";
 import { useToolState } from "../../context/tool-state-context";
+import { useIsMobile } from "../../hooks/use-is-mobile";
 import { InfoCrystal } from "./InfoCrystal";
 
 const DESKTOP_POSITIONS: Record<number, CSSProperties> = {
@@ -44,20 +45,7 @@ const MOBILE_WRAP = buildWrapStyles(MOBILE_POSITIONS);
 
 export const CrystalField = memo(() => {
   const { recentResults, activeTools } = useToolState();
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
-
-  useEffect(() => {
-    let rafId = 0;
-    const onResize = () => {
-      if (rafId) return;
-      rafId = requestAnimationFrame(() => { rafId = 0; setIsMobile(window.innerWidth < 768); });
-    };
-    window.addEventListener("resize", onResize);
-    return () => {
-      cancelAnimationFrame(rafId);
-      window.removeEventListener("resize", onResize);
-    };
-  }, []);
+  const isMobile = useIsMobile();
 
   const limit = isMobile ? 2 : 4;
   const liveCrystals = useMemo(() => {
