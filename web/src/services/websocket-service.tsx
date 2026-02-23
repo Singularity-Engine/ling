@@ -49,10 +49,10 @@ export interface Actions {
 }
 
 export interface MessageEvent {
-  tool_id: any;
-  tool_name: any;
-  name: any;
-  status: any;
+  tool_id: string | undefined;
+  tool_name: string | undefined;
+  name: string | undefined;
+  status: string | undefined;
   content: string;
   timestamp: string;
   type: string;

@@ -285,8 +285,8 @@ class GatewayMessageAdapter {
   private emit(fields: Partial<GatewayMessageEvent> & { type: string }) {
     // In-place defaults avoid an intermediate spread object on every
     // streaming delta (~30fps). Only `content` needs a default; the
-    // remaining required MessageEvent fields (`tool_id`, `tool_name`,
-    // `name`, `status`) are typed as `any` and accept `undefined`.
+    // remaining MessageEvent fields (`tool_id`, `tool_name`,
+    // `name`, `status`) are typed as `string | undefined`.
     const event = fields as GatewayMessageEvent;
     event.content ??= '';
     this.message$.next(event);
