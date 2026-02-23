@@ -55,15 +55,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // 启动时检查已有 token
   useEffect(() => {
     const token = apiClient.getToken();
-    if (token) {
-      apiClient
-        .get<User>('/api/auth/me')
-        .then(setUser)
-        .catch(() => apiClient.clearTokens())
-        .finally(() => setIsLoading(false));
-    } else {
-      setIsLoading(false);
-    }
+    if (!token) { setIsLoading(false); return; }
+
+    const ac = new AbortController();
+    apiClient
+      .get<User>('/api/auth/me', ac.signal)
+      .then(setUser)
+      .catch(() => { if (!ac.signal.aborted) apiClient.clearTokens(); })
+      .finally(() => { if (!ac.signal.aborted) setIsLoading(false); });
+    return () => ac.abort();
   }, []);
 
   const login = useCallback(async (identifier: string, password: string) => {

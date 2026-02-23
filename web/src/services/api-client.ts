@@ -50,6 +50,7 @@ class ApiClient {
   async request<T = unknown>(
     path: string,
     options: RequestInit = {},
+    signal?: AbortSignal,
   ): Promise<T> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -64,6 +65,7 @@ class ApiClient {
     const res = await fetch(`${this.base}${path}`, {
       ...options,
       headers,
+      signal,
     });
 
     // 401 → 尝试 refresh，失败则跳转登录
@@ -75,6 +77,7 @@ class ApiClient {
         const retryRes = await fetch(`${this.base}${path}`, {
           ...options,
           headers,
+          signal,
         });
         if (retryRes.ok) {
           return retryRes.json();
@@ -96,29 +99,29 @@ class ApiClient {
     return res.json();
   }
 
-  async get<T = unknown>(path: string): Promise<T> {
-    return this.request<T>(path, { method: 'GET' });
+  async get<T = unknown>(path: string, signal?: AbortSignal): Promise<T> {
+    return this.request<T>(path, { method: 'GET' }, signal);
   }
 
-  async post<T = unknown>(path: string, body?: unknown): Promise<T> {
+  async post<T = unknown>(path: string, body?: unknown, signal?: AbortSignal): Promise<T> {
     return this.request<T>(path, {
       method: 'POST',
       body: body ? JSON.stringify(body) : undefined,
-    });
+    }, signal);
   }
 
-  async put<T = unknown>(path: string, body?: unknown): Promise<T> {
+  async put<T = unknown>(path: string, body?: unknown, signal?: AbortSignal): Promise<T> {
     return this.request<T>(path, {
       method: 'PUT',
       body: body ? JSON.stringify(body) : undefined,
-    });
+    }, signal);
   }
 
-  async del<T = unknown>(path: string, body?: unknown): Promise<T> {
+  async del<T = unknown>(path: string, body?: unknown, signal?: AbortSignal): Promise<T> {
     return this.request<T>(path, {
       method: 'DELETE',
       body: body ? JSON.stringify(body) : undefined,
-    });
+    }, signal);
   }
 
   // ── Billing ────────────────────────────────────────────

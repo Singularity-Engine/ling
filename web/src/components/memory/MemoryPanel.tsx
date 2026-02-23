@@ -150,26 +150,20 @@ export const MemoryPanel = memo(function MemoryPanel({ open, onClose }: MemoryPa
   const [closing, setClosing] = useState(false);
   const closingTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  const fetchMemories = useCallback(async () => {
-    if (!user) return;
+  useEffect(() => {
+    if (!open || !user) return;
+    setClosing(false);
     setLoading(true);
     setError('');
-    try {
-      const data = await apiClient.get<{ memories: MemoryEntry[] }>('/api/memory/list');
-      setMemories(data.memories || []);
-    } catch (err) {
-      setError(t('memory.loadError'));
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
 
-  useEffect(() => {
-    if (open) {
-      setClosing(false);
-      fetchMemories();
-    }
-  }, [open, fetchMemories]);
+    const ac = new AbortController();
+    apiClient.get<{ memories: MemoryEntry[] }>('/api/memory/list', ac.signal)
+      .then(data => { setMemories(data.memories || []); })
+      .catch(err => { if (!ac.signal.aborted) setError(t('memory.loadError')); })
+      .finally(() => { if (!ac.signal.aborted) setLoading(false); });
+
+    return () => ac.abort();
+  }, [open, user, t]);
 
   // Clean up timer on unmount
   useEffect(() => () => { clearTimeout(closingTimer.current); }, []);
