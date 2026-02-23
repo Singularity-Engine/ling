@@ -11,9 +11,10 @@ export class TaskQueue {
 
   private taskInterval: number;
 
-  private pendingComplete = false;
-
   private activeTasks = new Set<Promise<void>>();
+
+  /** Resolvers for waitForCompletion() — notified when the queue drains. */
+  private drainResolvers: (() => void)[] = [];
 
   constructor(taskIntervalMs = 3000) {
     this.taskInterval = taskIntervalMs;
@@ -28,13 +29,13 @@ export class TaskQueue {
     this.queue = [];
     this.activeTasks.clear();
     this.running = false;
+    this.notifyDrain();
   }
 
   private async runNextTask() {
     if (this.running || this.queue.length === 0) {
-      if (this.queue.length === 0 && this.activeTasks.size === 0 && this.pendingComplete) {
-        this.pendingComplete = false;
-        await new Promise(resolve => setTimeout(resolve, this.taskInterval));
+      if (this.queue.length === 0 && this.activeTasks.size === 0) {
+        this.notifyDrain();
       }
       return;
     }
@@ -62,18 +63,20 @@ export class TaskQueue {
     return this.queue.length > 0 || this.activeTasks.size > 0 || this.running;
   }
 
+  /**
+   * Returns a promise that resolves when the queue is fully drained.
+   * Uses event-driven notification instead of polling.
+   */
   public waitForCompletion(): Promise<void> {
-    this.pendingComplete = true;
-    return new Promise((resolve) => {
-      const check = () => {
-        if (!this.hasTask()) {
-          resolve();
-        } else {
-          setTimeout(check, 100);
-        }
-      };
-      check();
-    });
+    if (!this.hasTask()) return Promise.resolve();
+    return new Promise(resolve => { this.drainResolvers.push(resolve); });
+  }
+
+  private notifyDrain() {
+    if (this.drainResolvers.length === 0) return;
+    const resolvers = this.drainResolvers;
+    this.drainResolvers = [];
+    for (const resolve of resolvers) resolve();
   }
 }
 

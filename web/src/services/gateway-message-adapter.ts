@@ -121,16 +121,6 @@ class GatewayMessageAdapter {
   }
 
   /**
-   * Return accumulated texts from all active (interrupted) runs.
-   * Useful for detecting if a response was mid-stream when connection dropped.
-   */
-  getActiveTexts(): string[] {
-    return Array.from(this.activeRuns.values())
-      .map(run => run.accumulatedText)
-      .filter(text => text.length > 0);
-  }
-
-  /**
    * Clear state for all runs (e.g., on disconnect)
    */
   reset() {
@@ -293,25 +283,11 @@ class GatewayMessageAdapter {
   // ── Helpers ────────────────────────────────────────────────────
 
   private emit(partial: Partial<GatewayMessageEvent> & { type: string }) {
-    // Fill in missing fields with defaults to satisfy MessageEvent interface
-    const msg: GatewayMessageEvent = {
-      tool_id: undefined,
-      tool_name: undefined,
-      name: undefined,
-      status: undefined,
-      content: '',
-      timestamp: new Date().toISOString(),
-      ...partial,
-    } as GatewayMessageEvent;
-
-    this.message$.next(msg);
-  }
-
-  /**
-   * Get accumulated text for a run (useful for interrupt — sending partial text)
-   */
-  getRunText(runId: string): string {
-    return this.activeRuns.get(runId)?.accumulatedText || '';
+    // Direct property assignment avoids the intermediate defaults object +
+    // spread that previously ran on every streaming delta (~30fps).
+    // Timestamp is only created when the caller provides one (tool events).
+    (partial as GatewayMessageEvent).content ??= '';
+    this.message$.next(partial as GatewayMessageEvent);
   }
 
   /**

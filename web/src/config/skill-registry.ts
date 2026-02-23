@@ -75,7 +75,3 @@ export function getSkillsByTags(tags: string[]): SkillMeta[] {
     meta.tags.some(t => t === 'all' || tags.includes(t))
   );
 }
-
-export function getAllSkillMetas(): SkillMeta[] {
-  return Object.values(SKILL_META);
-}
