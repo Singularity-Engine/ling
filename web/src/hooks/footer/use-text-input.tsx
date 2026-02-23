@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useWebSocketActions } from '@/context/websocket-context';
 import { useAiStateRead } from '@/context/ai-state-context';
 import { useInterrupt } from '@/components/canvas/live2d';
 import { useChatMessages } from '@/context/chat-history-context';
 import { useVADState, useVADActions } from '@/context/vad-context';
 import { useMediaCapture } from '@/hooks/utils/use-media-capture';
+import { useLatest } from '@/utils/use-latest';
 
 export function useTextInput() {
   const [inputText, setInputText] = useState('');
@@ -17,11 +18,19 @@ export function useTextInput() {
   const { stopMic } = useVADActions();
   const { captureAllMedia } = useMediaCapture();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // React state setters are stable — useCallback with [] is safe
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setInputText(e.target.value);
-  };
+  }, []);
 
-  const handleSend = async () => {
+  // Capture frequently-changing values so handleSend/handleKeyPress stay stable
+  const latest = useLatest({
+    inputText, wsContext, aiState, interrupt,
+    appendHumanMessage, autoStopMic, stopMic, captureAllMedia, isComposing,
+  });
+
+  const handleSend = useCallback(async () => {
+    const { inputText, wsContext, aiState, interrupt, appendHumanMessage, autoStopMic, stopMic, captureAllMedia } = latest.current;
     if (!inputText.trim() || !wsContext) return;
     if (aiState === 'thinking-speaking') {
       interrupt();
@@ -38,19 +47,19 @@ export function useTextInput() {
 
     if (autoStopMic) stopMic();
     setInputText('');
-  };
+  }, [latest]);
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLElement>) => {
-    if (isComposing) return;
+  const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLElement>) => {
+    if (latest.current.isComposing) return;
 
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
-  };
+  }, [handleSend]);
 
-  const handleCompositionStart = () => setIsComposing(true);
-  const handleCompositionEnd = () => setIsComposing(false);
+  const handleCompositionStart = useCallback(() => setIsComposing(true), []);
+  const handleCompositionEnd = useCallback(() => setIsComposing(false), []);
 
   return {
     inputText,
