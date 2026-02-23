@@ -196,29 +196,23 @@ export const AffinityBadge = memo(() => {
     [config.beatSpeed],
   );
 
-  const levelLabelStyle = useMemo<CSSProperties>(
-    () => ({ ...S_LEVEL_LABEL_BASE, color: `${config.color}cc` }),
-    [config.color],
-  );
-
-  const panelStyle = useMemo<CSSProperties>(
-    () => ({
+  // Consolidate all config.color-dependent styles into a single memo
+  // (avoids 5 separate shallow-compare + object-creation cycles per render)
+  const configStyles = useMemo(() => ({
+    levelLabel: { ...S_LEVEL_LABEL_BASE, color: `${config.color}cc` } as CSSProperties,
+    panel: {
       ...S_PANEL_BASE,
       border: `1px solid ${config.color}38`,
       boxShadow: `0 12px 40px rgba(0,0,0,0.5), 0 0 24px ${config.color}15`,
-    }),
-    [config.color],
-  );
-
-  const panelLevelNameStyle = useMemo<CSSProperties>(
-    () => ({ ...S_PANEL_LEVEL_NAME, color: config.color }),
-    [config.color],
-  );
-
-  const panelScoreStyle = useMemo<CSSProperties>(
-    () => ({ ...S_PANEL_SCORE, color: config.color }),
-    [config.color],
-  );
+    } as CSSProperties,
+    panelLevelName: { ...S_PANEL_LEVEL_NAME, color: config.color } as CSSProperties,
+    panelScore: { ...S_PANEL_SCORE, color: config.color } as CSSProperties,
+    milestone: {
+      ...S_MILESTONE_BASE,
+      background: `linear-gradient(135deg, ${config.color}dd, ${config.color}99)`,
+      boxShadow: `0 4px 20px ${config.color}44`,
+    } as CSSProperties,
+  }), [config.color]);
 
   const progressFillStyle = useMemo<CSSProperties>(
     () => ({
@@ -228,15 +222,6 @@ export const AffinityBadge = memo(() => {
       boxShadow: `0 0 8px ${config.color}33`,
     }),
     [config.color, levelInfo.progressInLevel],
-  );
-
-  const milestoneStyle = useMemo<CSSProperties>(
-    () => ({
-      ...S_MILESTONE_BASE,
-      background: `linear-gradient(135deg, ${config.color}dd, ${config.color}99)`,
-      boxShadow: `0 4px 20px ${config.color}44`,
-    }),
-    [config.color],
   );
 
   const nextConfig = useMemo(
@@ -265,7 +250,7 @@ export const AffinityBadge = memo(() => {
           <span style={heartWrapStyle}>
             <HeartIcon color={config.heartColor} fillPercent={affinity} size={22} />
           </span>
-          <span style={levelLabelStyle}>
+          <span style={configStyles.levelLabel}>
             {t(config.i18nKey)}
           </span>
           <span style={hovered ? S_AFFINITY_VALUE_VISIBLE : S_AFFINITY_VALUE_HIDDEN}>
@@ -275,19 +260,19 @@ export const AffinityBadge = memo(() => {
 
         {/* Expanded panel */}
         {expanded && (
-          <div style={panelStyle}>
+          <div style={configStyles.panel}>
             {/* Header: heart + level info */}
             <div style={S_PANEL_HEADER}>
               <HeartIcon color={config.heartColor} fillPercent={affinity} size={32} />
               <div style={S_PANEL_FLEX1}>
-                <span style={panelLevelNameStyle}>
+                <span style={configStyles.panelLevelName}>
                   {t(config.i18nKey)}
                 </span>
                 <span style={S_PANEL_SUBLABEL}>
                   {t("affinity.label")}
                 </span>
               </div>
-              <span style={panelScoreStyle}>
+              <span style={configStyles.panelScore}>
                 {affinity}
               </span>
             </div>
@@ -327,7 +312,7 @@ export const AffinityBadge = memo(() => {
 
         {/* Milestone popup — hidden when expanded panel is open to avoid overlap */}
         {milestone && !expanded && (
-          <div style={milestoneStyle}>
+          <div style={configStyles.milestone}>
             <span style={S_MILESTONE_TEXT}>
               ✨ {milestone}
             </span>

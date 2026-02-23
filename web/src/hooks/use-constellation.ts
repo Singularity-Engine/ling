@@ -22,6 +22,10 @@ interface ConstellationState {
 
 const STORAGE_KEY = "ling-constellation-v1";
 
+// Timer for auto-clearing the "new skill" flag; tracked so rapid
+// discoveries cancel the previous pending clear.
+let newFlagTimer: ReturnType<typeof setTimeout>;
+
 function loadFromStorage(): DiscoveredSkill[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -70,9 +74,11 @@ export const useConstellation = create<ConstellationState>((set, get) => ({
       newSkillKey: isNewSkill ? key : null,
     });
 
-    // Auto-clear new flag after animation duration
+    // Auto-clear new flag after animation duration.
+    // Cancel any pending timer so rapid discoveries don't fire stale callbacks.
     if (isNewSkill) {
-      setTimeout(() => {
+      clearTimeout(newFlagTimer);
+      newFlagTimer = setTimeout(() => {
         set(state => state.newSkillKey === key ? { isNew: false, newSkillKey: null } : {});
       }, 2000);
     }
@@ -101,11 +107,17 @@ export const useConstellation = create<ConstellationState>((set, get) => ({
   },
 }));
 
-// Listen for CustomEvent from websocket-handler
+// Listen for CustomEvent from websocket-handler.
+// Stored as a named reference so HMR can remove the old listener
+// before re-registering (prevents duplicate handlers in dev).
+function onSkillUsed(e: Event) {
+  const detail = (e as CustomEvent).detail;
+  if (detail?.toolName) {
+    useConstellation.getState().recordSkillUse(detail.toolName);
+  }
+}
+
 if (typeof window !== 'undefined') {
-  window.addEventListener('constellation-skill-used', ((e: CustomEvent) => {
-    if (e.detail?.toolName) {
-      useConstellation.getState().recordSkillUse(e.detail.toolName);
-    }
-  }) as EventListener);
+  window.removeEventListener('constellation-skill-used', onSkillUsed);
+  window.addEventListener('constellation-skill-used', onSkillUsed);
 }

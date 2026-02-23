@@ -138,21 +138,24 @@ export function useAffinityEngine({ updateAffinity, showMilestone, showPointGain
       const clamped = Math.round(Math.max(MIN_AFFINITY, Math.min(MAX_AFFINITY, raw)) * 10) / 10;
       const newLevel = getLevel(clamped);
 
-      const newState: PersistedAffinity = {
-        affinity: clamped,
-        lastInteractionTs: now,
-        reachedLevels: [...prev.reachedLevels],
-      };
+      // Only clone reachedLevels when actually adding a new level;
+      // avoids allocating a throwaway array on every interaction.
+      let { reachedLevels } = prev;
 
-      // Level change → milestone
       if (newLevel !== prevLevel) {
         const msg = getLevelMilestone(newLevel);
-        if (msg && !newState.reachedLevels.includes(newLevel)) {
-          newState.reachedLevels.push(newLevel);
+        if (msg && !reachedLevels.includes(newLevel)) {
+          reachedLevels = [...reachedLevels, newLevel];
           // Delay milestone slightly so the bar animates first
           setTimeout(() => showMilestoneRef.current(msg), 400);
         }
       }
+
+      const newState: PersistedAffinity = {
+        affinity: clamped,
+        lastInteractionTs: now,
+        reachedLevels,
+      };
 
       stateRef.current = newState;
       saveState(newState);
