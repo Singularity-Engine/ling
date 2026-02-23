@@ -2,6 +2,7 @@
 import {
   Tabs,
   Button,
+  Spinner,
   DrawerRoot,
   DrawerContent,
   DrawerHeader,
@@ -11,17 +12,26 @@ import {
   DrawerBackdrop,
   DrawerCloseTrigger,
 } from '@chakra-ui/react';
-import { useState, useMemo, useCallback } from 'react';
+import { lazy, Suspense, useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CloseButton } from '@/components/ui/close-button';
 
 import { settingStyles } from './setting-styles';
-import General from './general';
-import Live2D from './live2d';
-import ASR from './asr';
-import TTS from './tts';
-import Agent from './agent';
-import About from './about';
+
+// Code-split tab panels — only loaded when their tab is first activated
+const General = lazy(() => import('./general'));
+const Live2D = lazy(() => import('./live2d'));
+const ASR = lazy(() => import('./asr'));
+const TTS = lazy(() => import('./tts'));
+const Agent = lazy(() => import('./agent'));
+const About = lazy(() => import('./about'));
+
+const S_SPINNER: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: '2rem 0',
+};
 
 interface SettingUIProps {
   open: boolean;
@@ -34,6 +44,9 @@ function SettingUI({ open, onClose }: SettingUIProps): JSX.Element {
   const [saveHandlers, setSaveHandlers] = useState<(() => void)[]>([]);
   const [cancelHandlers, setCancelHandlers] = useState<(() => void)[]>([]);
   const [activeTab, setActiveTab] = useState('general');
+
+  // Track which tabs have been visited — their panels stay mounted to preserve form state
+  const visitedTabs = useRef(new Set<string>(['general']));
 
   const handleSaveCallback = useCallback((handler: () => void) => {
     setSaveHandlers((prev) => [...prev, handler]);
@@ -59,39 +72,15 @@ function SettingUI({ open, onClose }: SettingUIProps): JSX.Element {
     onClose();
   }, [cancelHandlers, onClose]);
 
-  const tabsContent = useMemo(
-    () => (
-      <Tabs.ContentGroup>
-        <Tabs.Content value="general" {...settingStyles.settingUI.tabs.content}>
-          <General
-            onSave={handleSaveCallback}
-            onCancel={handleCancelCallback}
-          />
-        </Tabs.Content>
-        <Tabs.Content value="live2d" {...settingStyles.settingUI.tabs.content}>
-          <Live2D
-            onSave={handleSaveCallback}
-            onCancel={handleCancelCallback}
-          />
-        </Tabs.Content>
-        <Tabs.Content value="asr" {...settingStyles.settingUI.tabs.content}>
-          <ASR onSave={handleSaveCallback} onCancel={handleCancelCallback} />
-        </Tabs.Content>
-        <Tabs.Content value="tts" {...settingStyles.settingUI.tabs.content}>
-          <TTS />
-        </Tabs.Content>
-        <Tabs.Content value="agent" {...settingStyles.settingUI.tabs.content}>
-          <Agent
-            onSave={handleSaveCallback}
-            onCancel={handleCancelCallback}
-          />
-        </Tabs.Content>
-        <Tabs.Content value="about" {...settingStyles.settingUI.tabs.content}>
-          <About />
-        </Tabs.Content>
-      </Tabs.ContentGroup>
-    ),
-    [handleSaveCallback, handleCancelCallback],
+  const handleTabChange = useCallback((details: { value: string }) => {
+    visitedTabs.current.add(details.value);
+    setActiveTab(details.value);
+  }, []);
+
+  const fallback = (
+    <div style={S_SPINNER}>
+      <Spinner size="lg" color="blue.300" />
+    </div>
   );
 
   return (
@@ -117,7 +106,7 @@ function SettingUI({ open, onClose }: SettingUIProps): JSX.Element {
           <Tabs.Root
             defaultValue="general"
             value={activeTab}
-            onValueChange={(details) => setActiveTab(details.value)}
+            onValueChange={handleTabChange}
             {...settingStyles.settingUI.tabs.root}
           >
             <Tabs.List {...settingStyles.settingUI.tabs.list}>
@@ -159,7 +148,57 @@ function SettingUI({ open, onClose }: SettingUIProps): JSX.Element {
               </Tabs.Trigger>
             </Tabs.List>
 
-            {tabsContent}
+            <Tabs.ContentGroup>
+              <Tabs.Content value="general" {...settingStyles.settingUI.tabs.content}>
+                <Suspense fallback={fallback}>
+                  <General
+                    onSave={handleSaveCallback}
+                    onCancel={handleCancelCallback}
+                  />
+                </Suspense>
+              </Tabs.Content>
+              <Tabs.Content value="live2d" {...settingStyles.settingUI.tabs.content}>
+                {visitedTabs.current.has('live2d') && (
+                  <Suspense fallback={fallback}>
+                    <Live2D
+                      onSave={handleSaveCallback}
+                      onCancel={handleCancelCallback}
+                    />
+                  </Suspense>
+                )}
+              </Tabs.Content>
+              <Tabs.Content value="asr" {...settingStyles.settingUI.tabs.content}>
+                {visitedTabs.current.has('asr') && (
+                  <Suspense fallback={fallback}>
+                    <ASR onSave={handleSaveCallback} onCancel={handleCancelCallback} />
+                  </Suspense>
+                )}
+              </Tabs.Content>
+              <Tabs.Content value="tts" {...settingStyles.settingUI.tabs.content}>
+                {visitedTabs.current.has('tts') && (
+                  <Suspense fallback={fallback}>
+                    <TTS />
+                  </Suspense>
+                )}
+              </Tabs.Content>
+              <Tabs.Content value="agent" {...settingStyles.settingUI.tabs.content}>
+                {visitedTabs.current.has('agent') && (
+                  <Suspense fallback={fallback}>
+                    <Agent
+                      onSave={handleSaveCallback}
+                      onCancel={handleCancelCallback}
+                    />
+                  </Suspense>
+                )}
+              </Tabs.Content>
+              <Tabs.Content value="about" {...settingStyles.settingUI.tabs.content}>
+                {visitedTabs.current.has('about') && (
+                  <Suspense fallback={fallback}>
+                    <About />
+                  </Suspense>
+                )}
+              </Tabs.Content>
+            </Tabs.ContentGroup>
           </Tabs.Root>
         </DrawerBody>
 
