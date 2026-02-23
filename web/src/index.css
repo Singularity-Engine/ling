@@ -1164,6 +1164,8 @@ canvas {
 .ling-plan-btn:active { transform: scale(0.97); }
 .ling-credit-btn:hover { background: rgba(139, 92, 246, 0.18) !important; border-color: rgba(139, 92, 246, 0.4) !important; }
 .ling-credit-btn:active { transform: scale(0.97); }
+.ling-credits-display:hover { background: rgba(0, 0, 0, 0.45) !important; border-color: rgba(168, 85, 247, 0.3) !important; }
+.ling-credits-display:active { transform: scale(0.95); }
 
 /* ── Auth pages: input/button/link interactive states ── */
 .ling-auth-input:focus { border-color: var(--ling-purple-60) !important; background: rgba(255,255,255,0.09) !important; }
