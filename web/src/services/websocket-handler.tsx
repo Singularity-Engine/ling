@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 // eslint-disable-next-line object-curly-newline
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -259,6 +258,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const sessionKeyRef = useRef(getVisitorSessionKey(user?.id));
 
   // Update session key when user logs in / logs out
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- ref access via useLatest is intentionally excluded
   useEffect(() => {
     const newKey = getVisitorSessionKey(user?.id);
     if (newKey !== sessionKeyRef.current) {
@@ -290,6 +290,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const updateCreditsRef = useLatest(updateCredits);
   const setBillingModalRef = useLatest(setBillingModal);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- ref access via useLatest is intentionally excluded
   const checkBilling = useCallback(async (): Promise<boolean> => {
     const token = apiClient.getToken();
     if (!token) return true; // guest → allow, backend handles it
@@ -640,6 +641,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       }
       gatewayConnector.disconnect();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refs via useLatest; only gwUrl triggers reconnect
   }, [gwUrl]);
 
   // ─── Subscribe to Gateway events (stable — never tears down) ───
@@ -785,6 +787,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       messageSub.unsubscribe();
       reconnectSub.unsubscribe();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- subscribe once; all state via refs
   }, []); // Empty deps: subscribe once, never tear down
 
   // ─── TTS state refs (for stable useEffect access) ──────────────
@@ -890,6 +893,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     });
 
     return () => sub.unsubscribe();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- subscribe once; all state via refs
   }, []); // Stable: never tears down
 
   // ─── sendMessage: intercept ALL legacy message types ──────────
@@ -1161,6 +1165,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         log.debug('Unhandled sendMessage type:', message.type);
         return;
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- all state via refs; stable after mount
   }, []);
 
   const reconnect = useCallback(() => {

@@ -1,4 +1,3 @@
-/* eslint-disable no-else-return */
 import {
   createContext, useContext, useState, useMemo, useCallback, useRef, type ReactNode,
 } from 'react';
@@ -203,20 +202,20 @@ export function ChatHistoryProvider({ children }: { children: ReactNode }) {
           timestamp: toolMessageData.timestamp!,
         };
         return updatedMessages;
-      } else {
-        const newToolMessage: Message = {
-          id: toolMessageData.tool_id!,
-          role: 'ai',
-          type: 'tool_call_status',
-          name: toolMessageData.name || '',
-          tool_id: toolMessageData.tool_id,
-          tool_name: toolMessageData.tool_name,
-          status: toolMessageData.status,
-          content: toolMessageData.content || '',
-          timestamp: toolMessageData.timestamp!,
-        };
-        return trimMessages([...prevMessages, newToolMessage]);
       }
+
+      const newToolMessage: Message = {
+        id: toolMessageData.tool_id!,
+        role: 'ai',
+        type: 'tool_call_status',
+        name: toolMessageData.name || '',
+        tool_id: toolMessageData.tool_id,
+        tool_name: toolMessageData.tool_name,
+        status: toolMessageData.status,
+        content: toolMessageData.content || '',
+        timestamp: toolMessageData.timestamp!,
+      };
+      return trimMessages([...prevMessages, newToolMessage]);
     });
   }, []);
 
