@@ -220,9 +220,7 @@ export const Constellation = memo(() => {
     padding: 0,
     font: "inherit",
     color: "inherit",
-    animation: isNew
-      ? "constellationFlash 0.6s ease-out"
-      : "constellationPulse 3s ease-in-out infinite",
+    animation: isNew ? "constellationFlash 0.6s ease-out" : undefined,
     boxShadow: hovered ? `0 0 20px ${coreColor}55` : undefined,
     transition: "border-color 0.3s ease, box-shadow 0.3s ease",
   }), [isOpen, coreBorderColor, isNew, hovered, coreColor]);
@@ -303,6 +301,7 @@ export const Constellation = memo(() => {
 
       {/* ── Core button (always visible) ── */}
       <motion.button
+        className="constellation-core"
         onClick={toggleOpen}
         onMouseEnter={setHoveredTrue}
         onMouseLeave={setHoveredFalse}
