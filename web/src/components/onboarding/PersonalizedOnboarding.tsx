@@ -5,7 +5,7 @@
  * 收集用户兴趣和目标 skills → 种子星座 + 灵人格定制
  */
 
-import { useState, useCallback, useEffect, useMemo, type CSSProperties } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo, type CSSProperties } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import {
@@ -74,8 +74,8 @@ const S_DOT_BASE: CSSProperties = {
   borderRadius: "4px",
   transition: "width 0.3s ease, background-color 0.3s ease",
 };
-const S_DOT_ACTIVE: CSSProperties = { ...S_DOT_BASE, width: "24px", background: "#8b5cf6" };
-const S_DOT_DONE: CSSProperties = { ...S_DOT_BASE, width: "8px", background: "#6d28d9" };
+const S_DOT_ACTIVE: CSSProperties = { ...S_DOT_BASE, width: "24px", background: "var(--ling-purple)" };
+const S_DOT_DONE: CSSProperties = { ...S_DOT_BASE, width: "8px", background: "var(--ling-purple-deep)" };
 const S_DOT_PENDING: CSSProperties = { ...S_DOT_BASE, width: "8px", background: "rgba(255,255,255,0.15)" };
 
 const S_STEP_CONTENT: CSSProperties = { maxWidth: "480px", width: "100%", textAlign: "center" };
@@ -96,14 +96,14 @@ const S_BTN_BACK: CSSProperties = {
 };
 const S_BTN_NEXT: CSSProperties = {
   padding: "12px 32px", borderRadius: "12px",
-  border: "none", background: "#8b5cf6", color: "#fff",
+  border: "none", background: "var(--ling-purple)", color: "#fff",
   fontSize: "14px", fontWeight: 600,
   cursor: "pointer", transition: "background-color 0.2s, transform 0.2s",
 };
 
 // ── Step: Welcome ──
 const S_STAR_WRAP: CSSProperties = { marginBottom: "24px" };
-const S_STAR_SVG: CSSProperties = { filter: "drop-shadow(0 0 20px rgba(139,92,246,0.5))" };
+const S_STAR_SVG: CSSProperties = { filter: "drop-shadow(0 0 20px var(--ling-purple-50))" };
 const S_TITLE_LG: CSSProperties = {
   color: "#fff", fontSize: "28px", fontWeight: 700,
   margin: "0 0 12px", lineHeight: 1.3,
@@ -115,7 +115,7 @@ const S_DESC_WELCOME: CSSProperties = {
 };
 const S_BTN_START: CSSProperties = {
   padding: "14px 36px", borderRadius: "12px",
-  border: "none", background: "#8b5cf6", color: "#fff",
+  border: "none", background: "var(--ling-purple)", color: "#fff",
   fontSize: "15px", fontWeight: 600,
   cursor: "pointer", transition: "background-color 0.2s, transform 0.2s",
 };
@@ -323,14 +323,18 @@ export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingPro
     }
   }, [step]);
 
+  // Keep a ref so the ESC listener always calls the latest skip
+  const skipRef = useRef(skip);
+  skipRef.current = skip;
+
   // ESC to skip
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") skip();
+      if (e.key === "Escape") skipRef.current();
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [skip]);
+  }, []);
 
   const toggleInterest = useCallback((tag: string) => {
     setSelectedInterests(prev =>
