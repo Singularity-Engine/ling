@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useRef, useMemo, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useRef, useMemo, useEffect, type ReactNode } from "react";
 import { useAffinityEngine } from "@/hooks/use-affinity-engine";
 
 export interface PointGain {

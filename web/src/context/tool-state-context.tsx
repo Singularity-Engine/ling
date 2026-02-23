@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, useCallback, useRef, useEffect, useMemo, ReactNode } from "react";
+import { createContext, useContext, useReducer, useCallback, useRef, useEffect, useMemo, type ReactNode } from "react";
 import { getSkillKey } from "../config/skill-registry";
 
 export type ToolCategory = 'search' | 'code' | 'memory' | 'weather' | 'generic';

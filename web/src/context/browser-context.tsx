@@ -1,5 +1,5 @@
 import {
-  createContext, useContext, useState, useMemo, ReactNode, useCallback,
+  createContext, useContext, useState, useMemo, type ReactNode, useCallback,
 } from 'react';
 
 // Define browser view data structure

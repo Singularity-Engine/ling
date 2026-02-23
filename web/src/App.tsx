@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense, Component, ErrorInfo, type ReactNode, type CSSProperties } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense, Component, type ErrorInfo, type ReactNode, type CSSProperties } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 // framer-motion deferred: only loaded by lazy Constellation/Onboarding chunks
 import { Helmet } from "react-helmet-async";
@@ -44,7 +44,7 @@ const Constellation = lazy(() => import("./components/ability/Constellation").th
 import { LoadingSkeleton } from "./components/loading/LoadingSkeleton";
 import { Toaster, toaster } from "./components/ui/toaster";
 import { useWebSocketActions } from "./context/websocket-context";
-import { useKeyboardShortcuts, ShortcutDef } from "./hooks/use-keyboard-shortcuts";
+import { useKeyboardShortcuts, type ShortcutDef } from "./hooks/use-keyboard-shortcuts";
 import { NetworkStatusBanner } from "./components/effects/NetworkStatusBanner";
 import { TapParticles } from "./components/effects/TapParticles";
 import { useAffinityIdleExpression } from "./hooks/use-affinity-idle-expression";

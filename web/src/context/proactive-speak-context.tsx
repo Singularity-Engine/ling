@@ -1,5 +1,5 @@
 import {
-  createContext, useContext, ReactNode, useEffect, useRef, useCallback, useMemo,
+  createContext, useContext, type ReactNode, useEffect, useRef, useCallback, useMemo,
 } from 'react';
 import { useLocalStorage } from '@/hooks/utils/use-local-storage';
 import { useTriggerSpeak } from '@/hooks/utils/use-trigger-speak';

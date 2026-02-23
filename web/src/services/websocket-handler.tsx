@@ -1,11 +1,11 @@
 // eslint-disable-next-line object-curly-newline
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { MessageEvent } from '@/services/websocket-service';
+import type { MessageEvent } from '@/services/websocket-service';
 import {
   WebSocketStateContext, WebSocketActionsContext,
-  HistoryInfo, LegacyMessage, defaultBaseUrl,
+  type HistoryInfo, type LegacyMessage, defaultBaseUrl,
 } from '@/context/websocket-context';
-import { ModelInfo, useLive2DConfigActions } from '@/context/live2d-config-context';
+import { type ModelInfo, useLive2DConfigActions } from '@/context/live2d-config-context';
 import { useSubtitleActions } from '@/context/subtitle-context';
 import { audioTaskQueue } from '@/utils/task-queue';
 import { useAudioTask } from '@/components/canvas/live2d';
@@ -14,15 +14,15 @@ import { useConfigState, useConfigActions } from '@/context/character-config-con
 import { useChatMessagesActions, useHistoryListActions, useStreamingSetters } from '@/context/chat-history-context';
 import { toaster } from '@/components/ui/toaster';
 import { useVADState, useVADActions } from '@/context/vad-context';
-import { AiState, useAiStateActions } from "@/context/ai-state-context";
+import { type AiState, useAiStateActions } from "@/context/ai-state-context";
 import { useLocalStorage } from '@/hooks/utils/use-local-storage';
 import { useGroup } from '@/context/group-context';
 import { useInterrupt } from '@/hooks/utils/use-interrupt';
 import { useBrowser } from '@/context/browser-context';
 import { useAffinityActions } from '@/context/affinity-context';
 import { useToolActions, categorize } from '@/context/tool-state-context';
-import { gatewayConnector, GatewayState } from '@/services/gateway-connector';
-import { gatewayAdapter, GatewayMessageEvent } from '@/services/gateway-message-adapter';
+import { gatewayConnector, type GatewayState } from '@/services/gateway-connector';
+import { gatewayAdapter, type GatewayMessageEvent } from '@/services/gateway-message-adapter';
 import { ttsService } from '@/services/tts-service';
 import { asrService } from '@/services/asr-service';
 import { useTTSActions } from '@/context/tts-state-context';
