@@ -22,7 +22,7 @@ const S_CONTAINER_BASE: CSSProperties = {
 
 const S_CONTAINER_OPEN: CSSProperties = {
   ...S_CONTAINER_BASE,
-  border: "1px solid rgba(255,255,255,0.08)",
+  border: "1px solid var(--ling-surface-border)",
   cursor: "default",
   opacity: 0.7,
   animation: "connFadeIn 0.3s ease-out",
@@ -30,7 +30,7 @@ const S_CONTAINER_OPEN: CSSProperties = {
 
 const S_CONTAINER_OPEN_CLOSING: CSSProperties = {
   ...S_CONTAINER_BASE,
-  border: "1px solid rgba(255,255,255,0.08)",
+  border: "1px solid var(--ling-surface-border)",
   cursor: "default",
   opacity: 0.7,
   animation: "connFadeOut 0.3s ease-in forwards",
@@ -38,7 +38,7 @@ const S_CONTAINER_OPEN_CLOSING: CSSProperties = {
 
 const S_CONTAINER_CONNECTING: CSSProperties = {
   ...S_CONTAINER_BASE,
-  border: "1px solid rgba(255,255,255,0.08)",
+  border: "1px solid var(--ling-surface-border)",
   cursor: "default",
   opacity: 1,
 };
@@ -104,7 +104,7 @@ const S_LABEL_WARNING: CSSProperties = {
 
 const S_HINT: CSSProperties = {
   fontSize: "10px",
-  color: "rgba(255,255,255,0.35)",
+  color: "var(--ling-text-muted)",
   whiteSpace: "nowrap",
   lineHeight: 1,
 };
