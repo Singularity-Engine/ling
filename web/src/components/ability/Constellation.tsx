@@ -134,7 +134,7 @@ const StarButton = memo(function StarButton({
 
 // ── Main Constellation component ────────────────────────────────
 export const Constellation = memo(() => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { discovered, isNew, newSkillKey, clearNewFlag } = useConstellation();
   const { activeToolName } = useToolState();
   const [isOpen, setIsOpen] = useState(false);

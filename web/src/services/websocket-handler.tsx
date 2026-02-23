@@ -226,7 +226,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const { confUid } = useConfigState();
   const { setConfName, setConfUid, setConfigFiles } = useConfigActions();
   const [pendingModelInfo, setPendingModelInfo] = useState<ModelInfo | undefined>(undefined);
-  const { setSelfUid, setGroupMembers, setIsOwner } = useGroup();
+  const { setSelfUid } = useGroup();
   const { micOn, autoStartMicOnConvEnd } = useVADState();
   const { startMic, stopMic } = useVADActions();
   const autoStartMicOnConvEndRef = useLatest(autoStartMicOnConvEnd);
@@ -234,7 +234,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const { setBrowserViewData } = useBrowser();
   const affinityContext = useAffinityActions();
   const { startTool, completeTool, failTool } = useToolActions();
-  const { markSynthStart, markSynthDone, markSynthError, markPlayStart, markPlayDone, reset: resetTTSState } = useTTSActions();
+  const { markSynthStart, markSynthDone, markSynthError, markPlayStart, reset: resetTTSState } = useTTSActions();
   const { user } = useAuthState();
   const { updateCredits } = useAuthActions();
   const { setBillingModal } = useUIActions();
@@ -805,7 +805,6 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const markSynthDoneRef = useLatest(markSynthDone);
   const markSynthErrorRef = useLatest(markSynthError);
   const markPlayStartRef = useLatest(markPlayStart);
-  const markPlayDoneRef = useLatest(markPlayDone);
   const resetTTSStateRef = useLatest(resetTTSState);
 
   // ─── TTS: synthesize speech when full-text arrives ─────────────
