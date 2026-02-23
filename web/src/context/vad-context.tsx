@@ -130,6 +130,8 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
   autoStopMicRef.current = autoStopMic;
   autoStartMicRef.current = autoStartMicOn;
   autoStartMicOnConvEndRef.current = autoStartMicOnConvEnd;
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
 
   const isProcessingRef = useRef(false);
   const settingsRestartTimer = useRef<ReturnType<typeof setTimeout>>();
@@ -244,9 +246,9 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
     const newVAD = await MicVAD.new({
       model: "v5",
       preSpeechPadFrames: 20,
-      positiveSpeechThreshold: settings.positiveSpeechThreshold / 100,
-      negativeSpeechThreshold: settings.negativeSpeechThreshold / 100,
-      redemptionFrames: settings.redemptionFrames,
+      positiveSpeechThreshold: settingsRef.current.positiveSpeechThreshold / 100,
+      negativeSpeechThreshold: settingsRef.current.negativeSpeechThreshold / 100,
+      redemptionFrames: settingsRef.current.redemptionFrames,
       baseAssetPath: './libs/',
       onnxWASMBasePath: './libs/',
       onSpeechStart: handleSpeechStart,
@@ -287,13 +289,16 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
    * Update VAD settings and restart if active
    */
   const updateSettings = useCallback((newSettings: VADSettings) => {
+    settingsRef.current = newSettings;
     setSettings(newSettings);
     if (vadRef.current) {
-      stopMic();
+      // Debounce: defer the full stop+restart until user finishes adjusting,
+      // so rapid slider changes don't repeatedly destroy/recreate the VAD.
       if (settingsRestartTimer.current) clearTimeout(settingsRestartTimer.current);
       settingsRestartTimer.current = setTimeout(() => {
+        stopMic();
         startMic();
-      }, 100);
+      }, 300);
     }
   }, []);
 
