@@ -1155,6 +1155,16 @@ canvas {
 .ling-retry-btn:hover { background: var(--ling-purple-30) !important; border-color: var(--ling-purple-40) !important; color: var(--ling-purple-lighter) !important; }
 .ling-retry-btn:active { transform: scale(0.96); }
 
+/* ── Billing: modal & pricing button hover ── */
+.ling-billing-primary:hover { background: rgba(139, 92, 246, 0.8) !important; }
+.ling-billing-primary:active { transform: scale(0.96); }
+.ling-billing-secondary:hover { background: rgba(255,255,255,0.1) !important; border-color: rgba(255,255,255,0.22) !important; color: rgba(255,255,255,0.85) !important; }
+.ling-billing-secondary:active { transform: scale(0.96); }
+.ling-plan-btn:hover { filter: brightness(1.15); }
+.ling-plan-btn:active { transform: scale(0.97); }
+.ling-credit-btn:hover { background: rgba(139, 92, 246, 0.18) !important; border-color: rgba(139, 92, 246, 0.4) !important; }
+.ling-credit-btn:active { transform: scale(0.97); }
+
 /* === 主题 color-scheme === */
 :root {
   color-scheme: dark;

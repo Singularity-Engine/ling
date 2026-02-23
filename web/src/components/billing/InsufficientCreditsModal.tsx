@@ -175,15 +175,15 @@ const InsufficientCreditsModal: React.FC = memo(function InsufficientCreditsModa
 
         <div style={S_BTN_ROW}>
           {isGuestLimit ? (
-            <a href="/register" onClick={handleDismiss} style={S_BTN_PRIMARY}>
+            <a href="/register" onClick={handleDismiss} className="ling-billing-primary" style={S_BTN_PRIMARY}>
               {t('billing.registerFree')}
             </a>
           ) : (
-            <button onClick={handleViewPlans} style={S_BTN_PRIMARY}>
+            <button onClick={handleViewPlans} className="ling-billing-primary" style={S_BTN_PRIMARY}>
               {t('billing.viewPlans')}
             </button>
           )}
-          <button onClick={handleDismiss} style={S_BTN_SECONDARY}>
+          <button onClick={handleDismiss} className="ling-billing-secondary" style={S_BTN_SECONDARY}>
             {t('billing.maybeLater')}
           </button>
         </div>

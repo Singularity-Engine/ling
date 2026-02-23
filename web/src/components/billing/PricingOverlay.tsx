@@ -425,6 +425,7 @@ const PricingOverlay: React.FC = memo(() => {
                   </button>
                 ) : (
                   <button
+                    className={isCurrent ? undefined : 'ling-plan-btn'}
                     disabled={!!loading || isCurrent}
                     onClick={() =>
                       plan.key && handleCheckout('subscription', plan.key)
@@ -453,6 +454,7 @@ const PricingOverlay: React.FC = memo(() => {
             {CREDIT_PACKS.map((pack) => (
               <button
                 key={pack.credits}
+                className={currentPlan === 'free' ? undefined : 'ling-credit-btn'}
                 disabled={!!loading || currentPlan === 'free'}
                 onClick={() => handleCheckout('credits', undefined, pack.credits)}
                 style={creditBtnDynamic}
