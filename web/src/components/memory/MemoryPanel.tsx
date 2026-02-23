@@ -92,8 +92,20 @@ const S_CONTENT: CSSProperties = {
   flex: 1, overflowY: 'auto', padding: '16px 20px',
   display: 'flex', flexDirection: 'column', gap: '10px',
 };
-const S_LOADING: CSSProperties = { textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)' };
-const S_ERROR: CSSProperties = { textAlign: 'center', padding: '40px 0', color: 'rgba(248, 113, 113, 0.7)' };
+const S_LOADING: CSSProperties = {
+  textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)',
+  animation: 'memLoadPulse 1.5s ease-in-out infinite',
+};
+const S_ERROR: CSSProperties = {
+  textAlign: 'center', padding: '40px 0', color: 'rgba(248, 113, 113, 0.7)',
+  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+};
+const S_RETRY_BTN: CSSProperties = {
+  padding: '6px 18px', fontSize: '12px', fontWeight: 600,
+  color: 'rgba(248, 113, 113, 0.85)', background: 'rgba(248, 113, 113, 0.1)',
+  border: '1px solid rgba(248, 113, 113, 0.25)', borderRadius: '8px',
+  cursor: 'pointer', transition: 'background 0.15s ease, border-color 0.15s ease',
+};
 
 const S_EMPTY_WRAP: CSSProperties = { textAlign: 'center', padding: '60px 20px' };
 const S_EMPTY_ICON: CSSProperties = { fontSize: '48px', marginBottom: '16px', opacity: 0.5 };
@@ -151,20 +163,28 @@ export const MemoryPanel = memo(function MemoryPanel({ open, onClose }: MemoryPa
   const [closing, setClosing] = useState(false);
   const closingTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  useEffect(() => {
-    if (!open || !user) return;
-    setClosing(false);
+  const abortRef = useRef<AbortController>();
+
+  const fetchMemories = useCallback(() => {
+    if (!user) return;
+    abortRef.current?.abort();
+    const ac = new AbortController();
+    abortRef.current = ac;
     setLoading(true);
     setError('');
 
-    const ac = new AbortController();
     apiClient.get<{ memories: MemoryEntry[] }>('/api/memory/list', ac.signal)
       .then(data => { setMemories(data.memories || []); })
-      .catch(err => { if (!ac.signal.aborted) setError(t('memory.loadError')); })
+      .catch(() => { if (!ac.signal.aborted) setError(t('memory.loadError')); })
       .finally(() => { if (!ac.signal.aborted) setLoading(false); });
+  }, [user, t]);
 
-    return () => ac.abort();
-  }, [open, user, t]);
+  useEffect(() => {
+    if (!open || !user) return;
+    setClosing(false);
+    fetchMemories();
+    return () => { abortRef.current?.abort(); };
+  }, [open, user, fetchMemories]);
 
   // Clean up timer on unmount
   useEffect(() => () => { clearTimeout(closingTimer.current); }, []);
@@ -221,7 +241,12 @@ export const MemoryPanel = memo(function MemoryPanel({ open, onClose }: MemoryPa
           )}
 
           {error && (
-            <div style={S_ERROR}>{error}</div>
+            <div style={S_ERROR}>
+              <span>{error}</span>
+              <button type="button" style={S_RETRY_BTN} onClick={fetchMemories}>
+                {t('chat.retry')}
+              </button>
+            </div>
           )}
 
           {!user && (
