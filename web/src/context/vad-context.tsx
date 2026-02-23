@@ -136,10 +136,16 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
   const isProcessingRef = useRef(false);
   const settingsRestartTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  // Cleanup settings restart timer on unmount
+  // Cleanup on unmount — destroy VAD (releases microphone hardware) + clear timers.
+  // Without this, navigating away while mic is active leaks the MediaStream.
   useEffect(() => {
     return () => {
       if (settingsRestartTimer.current) clearTimeout(settingsRestartTimer.current);
+      if (vadRef.current) {
+        vadRef.current.pause();
+        vadRef.current.destroy();
+        vadRef.current = null;
+      }
     };
   }, []);
 
