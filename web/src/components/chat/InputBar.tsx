@@ -37,21 +37,21 @@ const S_MIC_OFF: CSSProperties = {
 };
 const S_MIC_ON: CSSProperties = {
   ...S_MIC_BASE,
-  background: "rgba(239, 68, 68, 0.2)", border: "1px solid rgba(239, 68, 68, 0.4)",
+  background: "var(--ling-error-bg)", border: "1px solid var(--ling-error-border)",
   color: "var(--ling-error)",
 };
 
 const S_SEND_BASE: CSSProperties = {
   width: "44px", height: "44px", borderRadius: "50%",
   display: "flex", alignItems: "center", justifyContent: "center",
-  color: "#fff",
+  color: "var(--ling-text-primary)",
   transition: "filter 0.2s ease, transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease", flexShrink: 0, padding: 0,
 };
 
 const S_SEND_SPEAKING: CSSProperties = {
   ...S_SEND_BASE,
-  background: "rgba(239, 68, 68, 0.2)",
-  border: "1px solid rgba(239, 68, 68, 0.3)",
+  background: "var(--ling-error-bg)",
+  border: "1px solid var(--ling-error-border)",
   cursor: "pointer",
 };
 const S_SEND_LOADING: CSSProperties = {
@@ -306,11 +306,9 @@ export const InputBar = memo(() => {
 
   return (
     <div style={S_BAR_WRAP}>
-      {stateText && (
-        <div style={S_STATE_ROW}>
-          <span style={S_STATE_TEXT}>{stateText}</span>
-        </div>
-      )}
+      <div style={S_STATE_ROW} role="status" aria-live="polite">
+        {stateText && <span style={S_STATE_TEXT}>{stateText}</span>}
+      </div>
 
       <div style={S_INPUT_ROW}>
         <button
