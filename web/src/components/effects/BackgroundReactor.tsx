@@ -231,8 +231,7 @@ export const BackgroundReactor = memo(() => {
   );
 
   return (
-    <>
-      {/* Keyframes injected at module level — no inline <style> needed */}
+    <div aria-hidden="true" style={{ display: 'contents' }}>
       <div style={glowStyle as CSSProperties} />
       <div style={ambientStyle} />
       <div style={vignetteStyle} />
@@ -252,7 +251,7 @@ export const BackgroundReactor = memo(() => {
       {levelTransition && (
         <div key={levelTransition.key} style={levelBloomStyle} />
       )}
-    </>
+    </div>
   );
 });
 

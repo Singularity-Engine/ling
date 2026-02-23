@@ -135,7 +135,7 @@ const S_AVATAR_USER: CSSProperties = { ...S_AVATAR, background: "var(--ling-avat
 
 // Static person-silhouette icon for user avatar — shared across all instances.
 const USER_ICON = (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
   </svg>
 );
@@ -225,10 +225,10 @@ const S_CURSOR: CSSProperties = {
 // Pre-created SVG icon elements — shared across all ChatBubble & CodeBlockHeader
 // instances to avoid redundant React.createElement overhead (50+ bubbles on mount).
 const ICON_COPY = (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
 );
 const ICON_CHECK = (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
 );
 
 interface ChatBubbleProps {
@@ -461,7 +461,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
             ) : (
               <div className="md-content" style={S_AI_MD}>
                 {renderedMarkdown}
-                {isStreaming && <span style={S_CURSOR} />}
+                {isStreaming && <span style={S_CURSOR} aria-hidden="true" />}
               </div>
             )}
             {isCollapsed && (
@@ -469,9 +469,9 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
             )}
           </div>
           {needsCollapse && (
-            <button onClick={toggleExpand} style={S_TOGGLE_BTN}>
+            <button onClick={toggleExpand} style={S_TOGGLE_BTN} aria-expanded={isExpanded}>
               {isExpanded ? i18next.t("chat.showLess") : i18next.t("chat.showMore")}
-              <span style={S_TOGGLE_ARROW}>{isExpanded ? "▲" : "▼"}</span>
+              <span aria-hidden="true" style={S_TOGGLE_ARROW}>{isExpanded ? "▲" : "▼"}</span>
             </button>
           )}
           {!isStreaming && content && (

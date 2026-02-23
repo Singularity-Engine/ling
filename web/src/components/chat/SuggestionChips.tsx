@@ -57,7 +57,7 @@ export const SuggestionChips = memo(function SuggestionChips({
 }) {
   if (!Array.isArray(chips) || chips.length === 0) return null;
   return (
-    <div style={centered ? S_CHIPS_CENTERED : S_CHIPS_LEFT}>
+    <div role="group" aria-label="Suggested replies" style={centered ? S_CHIPS_CENTERED : S_CHIPS_LEFT}>
       {chips.map((chip, i) => (
         <button
           key={chip}
