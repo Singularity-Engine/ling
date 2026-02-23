@@ -17,8 +17,10 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+/lib/
 lib64/
+# 不忽略前端 src/lib/ 目录
+!web/src/lib/
 parts/
 sdist/
 var/
