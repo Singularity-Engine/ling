@@ -1,5 +1,5 @@
 import {
-  createContext, useContext, useState, useMemo, useCallback,
+  createContext, useContext, useState, useMemo, useCallback, useRef,
 } from 'react';
 import { useLocalStorage } from '@/hooks/utils/use-local-storage';
 import { createLogger } from '@/utils/logger';
@@ -112,17 +112,20 @@ const Live2DConfigActionsContext = createContext<Live2DConfigActionsType | null>
 export function Live2DConfigProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(DEFAULT_CONFIG.isLoading);
 
-  const [modelInfo, setModelInfoState] = useLocalStorage<ModelInfo | undefined>(
+  const [modelInfo, rawSetModelInfo] = useLocalStorage<ModelInfo | undefined>(
     "modelInfo",
     DEFAULT_CONFIG.modelInfo,
     {
       filter: (value) => (value ? { ...value, url: "" } : value),
     },
   );
+  // useLocalStorage returns an unstable setter — stabilize via ref.
+  const setModelInfoRef = useRef(rawSetModelInfo);
+  setModelInfoRef.current = rawSetModelInfo;
 
   const setModelInfo = useCallback((info: ModelInfo | undefined) => {
     if (!info?.url) {
-      setModelInfoState(undefined);
+      setModelInfoRef.current(undefined);
       return;
     }
 
@@ -131,7 +134,7 @@ export function Live2DConfigProvider({ children }: { children: React.ReactNode }
     log.debug('Setting model info with default scale:', finalScale);
 
     // Use functional updater to read prev state — avoids stale closure over modelInfo
-    setModelInfoState((prev) => ({
+    setModelInfoRef.current((prev) => ({
       ...info,
       kScale: finalScale,
       pointerInteractive:
@@ -143,7 +146,7 @@ export function Live2DConfigProvider({ children }: { children: React.ReactNode }
           ? info.scrollToResize
           : (prev?.scrollToResize ?? true),
     }));
-  }, [setModelInfoState]);
+  }, []);
 
   const actions = useMemo(
     () => ({ setModelInfo, setIsLoading }),

@@ -25,10 +25,13 @@ const defaultSettings: ProactiveSpeakSettings = {
 export const ProactiveSpeakContext = createContext<ProactiveSpeakContextType | null>(null);
 
 export function ProactiveSpeakProvider({ children }: { children: ReactNode }) {
-  const [settings, setSettings] = useLocalStorage<ProactiveSpeakSettings>(
+  const [settings, rawSetSettings] = useLocalStorage<ProactiveSpeakSettings>(
     'proactiveSpeakSettings',
     defaultSettings,
   );
+  // useLocalStorage returns an unstable setter — stabilize via ref.
+  const setSettingsRef = useRef(rawSetSettings);
+  setSettingsRef.current = rawSetSettings;
 
   const { aiState } = useAiStateRead();
   const { sendTriggerSignal } = useTriggerSpeak();
@@ -69,8 +72,8 @@ export function ProactiveSpeakProvider({ children }: { children: ReactNode }) {
   }, [clearIdleTimer]);
 
   const updateSettings = useCallback((newSettings: ProactiveSpeakSettings) => {
-    setSettings(newSettings);
-  }, [setSettings]);
+    setSettingsRef.current(newSettings);
+  }, []);
 
   const contextValue = useMemo(() => ({
     settings,

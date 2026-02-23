@@ -1,5 +1,5 @@
 import {
-  createContext, useMemo, useContext, useState, useCallback,
+  createContext, useMemo, useContext, useState, useCallback, useRef,
 } from 'react';
 import { useLocalStorage } from '@/hooks/utils/use-local-storage';
 import { useWebSocketState } from './websocket-context';
@@ -57,9 +57,17 @@ export function BgUrlProvider({ children }: { children: React.ReactNode }) {
     [baseUrl],
   );
 
-  const [backgroundUrl, setBackgroundUrl] = useLocalStorage<string>(
+  const [backgroundUrl, rawSetBgUrl] = useLocalStorage<string>(
     'backgroundUrl',
     defaultBackground,
+  );
+  // useLocalStorage returns an unstable setter (new function each render).
+  // Stabilize via ref so downstream useCallback/useMemo deps stay constant.
+  const bgUrlSetterRef = useRef(rawSetBgUrl);
+  bgUrlSetterRef.current = rawSetBgUrl;
+  const setBackgroundUrl = useCallback(
+    (url: string) => bgUrlSetterRef.current(url),
+    [],
   );
 
   const [backgroundFiles, setBackgroundFiles] = useState<BackgroundFile[]>([]);
