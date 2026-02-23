@@ -1,6 +1,5 @@
 // eslint-disable-next-line object-curly-newline
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 import { MessageEvent } from '@/services/websocket-service';
 import {
   WebSocketStateContext, WebSocketActionsContext,
@@ -205,7 +204,6 @@ function GatewayDebugPanel() {
 // ─── Component ──────────────────────────────────────────────────
 
 function WebSocketHandler({ children }: { children: React.ReactNode }) {
-  const { t } = useTranslation();
   const [wsState, setWsState] = useState<string>('CLOSED');
   const [gwUrl, setGwUrl] = useLocalStorage<string>('gwUrl', getDefaultGatewayUrl());
   const [baseUrl, setBaseUrl] = useLocalStorage<string>('baseUrl', defaultBaseUrl);

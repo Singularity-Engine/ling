@@ -2,7 +2,6 @@ import { memo, useMemo, useState, useCallback, useRef, useEffect, type ReactNode
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlightLite from "@/utils/rehype-highlight-lite";
-import { useTranslation } from "react-i18next";
 import i18next from "i18next";
 import { toaster } from "@/components/ui/toaster";
 import { ToolResultCard } from "./ToolResultCard";
@@ -345,7 +344,6 @@ RelativeTime.displayName = "RelativeTime";
 
 export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolCall, toolName, toolStatus, isGreeting, skipEntryAnimation, senderChanged }: ChatBubbleProps) => {
   useEffect(ensureBubbleStyles, []);
-  const { t } = useTranslation();
   const isUser = role === "user";
   const [copied, setCopied] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -387,11 +385,11 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
     if (sel && sel.toString().length > 0) return;
     navigator.clipboard.writeText(contentRef.current).then(() => {
       setFlashing(true);
-      toaster.create({ title: t("chat.textCopied"), type: "success", duration: 1500 });
+      toaster.create({ title: i18next.t("chat.textCopied"), type: "success", duration: 1500 });
       clearTimeout(flashTimerRef.current);
       flashTimerRef.current = setTimeout(() => setFlashing(false), 350);
     });
-  }, [t]);
+  }, []);
 
   // Memoize markdown rendering — ReactMarkdown + plugins are expensive.
   // Avoids re-parsing when only non-content props (isStreaming, etc.) change.
@@ -455,7 +453,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
     );
   }
 
-  const aiInitial = !isUser ? t("chat.characterName").charAt(0) : "";
+  const aiInitial = !isUser ? i18next.t("chat.characterName").charAt(0) : "";
 
   return (
     <div className="ling-msg-row" style={outerStyle}>
@@ -463,11 +461,11 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
       <div style={isUser ? S_INNER_USER : S_INNER_AI} className="chat-bubble-wrap chat-msg-inner">
         {isUser ? (
           <span style={S_NAME_USER}>
-            {t("chat.you")}
+            {i18next.t("chat.you")}
           </span>
         ) : (
           <span style={S_NAME}>
-            {t("chat.characterName")}
+            {i18next.t("chat.characterName")}
           </span>
         )}
         <div style={S_REL}>
@@ -493,7 +491,7 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
           </div>
           {needsCollapse && (
             <button onClick={toggleExpand} style={S_TOGGLE_BTN}>
-              {isExpanded ? t("chat.showLess") : t("chat.showMore")}
+              {isExpanded ? i18next.t("chat.showLess") : i18next.t("chat.showMore")}
               <span style={S_TOGGLE_ARROW}>{isExpanded ? "▲" : "▼"}</span>
             </button>
           )}
@@ -501,8 +499,8 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
             <button
               onClick={handleCopy}
               className="chat-copy-btn"
-              aria-label={copied ? t("chat.copied") : t("chat.copy")}
-              title={copied ? t("chat.copied") : t("chat.copy")}
+              aria-label={copied ? i18next.t("chat.copied") : i18next.t("chat.copy")}
+              title={copied ? i18next.t("chat.copied") : i18next.t("chat.copy")}
               style={isUser
                 ? (copied ? S_COPY_USER_DONE : S_COPY_USER)
                 : (copied ? S_COPY_AI_DONE : S_COPY_AI)}

@@ -1,6 +1,6 @@
 import { memo, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
+import i18next from "i18next";
 import { TypingIndicator } from "./TypingIndicator";
 import { remarkPlugins, mdComponents } from "./ChatBubble";
 import { createStyleInjector } from "@/utils/style-injection";
@@ -88,7 +88,6 @@ interface ThinkingBubbleProps {
 
 export const ThinkingBubble = memo(({ content, isThinking, isStreaming }: ThinkingBubbleProps) => {
   useEffect(ensureThinkingStyles, []);
-  const { t } = useTranslation();
 
   // Track whether we just transitioned from thinking to streaming
   // so we can play the dots fade-out animation
@@ -117,13 +116,13 @@ export const ThinkingBubble = memo(({ content, isThinking, isStreaming }: Thinki
     }
   }, [isThinking, isStreaming]);
 
-  const aiInitial = t("chat.characterName").charAt(0);
+  const aiInitial = i18next.t("chat.characterName").charAt(0);
 
   return (
     <div className="ling-msg-row" style={S_OUTER}>
       <div className="ling-avatar" style={S_AVATAR_AI}>{aiInitial}</div>
       <div style={S_INNER} className="chat-msg-inner">
-        <span style={S_NAME}>{t("chat.characterName")}</span>
+        <span style={S_NAME}>{i18next.t("chat.characterName")}</span>
         <div className="ling-bubble ling-bubble-ai" style={S_BUBBLE}>
           {(isThinking || showDotsExit) && (
             <TypingIndicator fadeOut={showDotsExit} />
