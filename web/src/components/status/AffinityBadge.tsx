@@ -1,6 +1,6 @@
 import { memo, useState, useId, useMemo, useEffect, useRef, useCallback, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
-import { useAffinityState } from "@/context/affinity-context";
+import { useAffinityMeta } from "@/context/affinity-context";
 import { AFFINITY_LEVELS, DEFAULT_LEVEL } from "@/config/affinity-palette";
 import { LEVELS } from "@/hooks/use-affinity-engine";
 // Keyframes moved to static index.css — no runtime injection needed.
@@ -121,7 +121,7 @@ const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPerce
 };
 
 export const AffinityBadge = memo(() => {
-  const { affinity, level, milestone } = useAffinityState();
+  const { affinity, level, milestone } = useAffinityMeta();
   const [expanded, setExpanded] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [pressed, setPressed] = useState(false);

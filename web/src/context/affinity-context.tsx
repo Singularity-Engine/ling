@@ -8,14 +8,22 @@ export interface PointGain {
 }
 
 /**
- * Context 1 — Read-only affinity state.
- * Changes when affinity values, milestones, point gains, or expressions update.
- * Visual components (BackgroundReactor, AffinityBadge, InfoCrystal) subscribe here.
+ * Context 1a — Affinity meta state (moderate frequency).
+ * Changes when affinity value, level, or milestone updates (~1-2× per message).
+ * AffinityBadge, InfoCrystal, and idle-expression hook subscribe here.
  */
-interface AffinityState {
+interface AffinityMetaState {
   affinity: number;
   level: string;
   milestone: string | null;
+}
+
+/**
+ * Context 1b — Affinity effects state (high frequency).
+ * Changes on every point-gain append/remove, expression set/decay.
+ * Only BackgroundReactor subscribes here.
+ */
+interface AffinityEffectsState {
   pointGains: PointGain[];
   currentExpression: string | null;
   expressionIntensity: number;
@@ -37,7 +45,8 @@ interface AffinityActionsType {
   getCurrentExpression: () => string | null;
 }
 
-const AffinityStateContext = createContext<AffinityState | null>(null);
+const AffinityMetaContext = createContext<AffinityMetaState | null>(null);
+const AffinityEffectsContext = createContext<AffinityEffectsState | null>(null);
 const AffinityActionsContext = createContext<AffinityActionsType | null>(null);
 
 export function AffinityProvider({ children }: { children: ReactNode }) {
@@ -113,25 +122,57 @@ export function AffinityProvider({ children }: { children: ReactNode }) {
     [updateAffinity, showMilestone, showPointGain, setExpression, getCurrentExpression],
   );
 
-  const state = useMemo<AffinityState>(
-    () => ({ affinity, level, milestone, pointGains, currentExpression, expressionIntensity }),
-    [affinity, level, milestone, pointGains, currentExpression, expressionIntensity],
+  // Context 1a: meta — changes on affinity/level/milestone updates (moderate frequency)
+  const meta = useMemo<AffinityMetaState>(
+    () => ({ affinity, level, milestone }),
+    [affinity, level, milestone],
+  );
+
+  // Context 1b: effects — changes on pointGains/expression updates (high frequency)
+  const effects = useMemo<AffinityEffectsState>(
+    () => ({ pointGains, currentExpression, expressionIntensity }),
+    [pointGains, currentExpression, expressionIntensity],
   );
 
   return (
     <AffinityActionsContext.Provider value={actions}>
-      <AffinityStateContext.Provider value={state}>
-        {children}
-      </AffinityStateContext.Provider>
+      <AffinityMetaContext.Provider value={meta}>
+        <AffinityEffectsContext.Provider value={effects}>
+          {children}
+        </AffinityEffectsContext.Provider>
+      </AffinityMetaContext.Provider>
     </AffinityActionsContext.Provider>
   );
 }
 
-/** Subscribe to read-only affinity state (re-renders on state changes). */
-export function useAffinityState() {
-  const ctx = useContext(AffinityStateContext);
-  if (!ctx) throw new Error("useAffinityState must be used within AffinityProvider");
+/**
+ * Subscribe to affinity meta state (affinity, level, milestone).
+ * Re-renders only on moderate-frequency changes (~1-2× per message).
+ * Prefer this over useAffinityState() when you don't need effects.
+ */
+export function useAffinityMeta() {
+  const ctx = useContext(AffinityMetaContext);
+  if (!ctx) throw new Error("useAffinityMeta must be used within AffinityProvider");
   return ctx;
+}
+
+/**
+ * Subscribe to high-frequency affinity effects (pointGains, expression).
+ * Only BackgroundReactor and similar visual-effects components need this.
+ */
+export function useAffinityEffects() {
+  const ctx = useContext(AffinityEffectsContext);
+  if (!ctx) throw new Error("useAffinityEffects must be used within AffinityProvider");
+  return ctx;
+}
+
+/**
+ * Combined hook — returns both meta and effects state.
+ * Kept for backward compatibility. Prefer useAffinityMeta() or
+ * useAffinityEffects() for targeted subscriptions.
+ */
+export function useAffinityState() {
+  return { ...useAffinityMeta(), ...useAffinityEffects() };
 }
 
 /** Subscribe to stable affinity actions (never causes re-renders). */

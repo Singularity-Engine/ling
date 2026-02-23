@@ -1,7 +1,7 @@
 import { memo, useMemo, useRef, useState, useEffect, type CSSProperties } from 'react';
 import { useToolState } from '../../context/tool-state-context';
 import { useAiStateRead } from '../../context/ai-state-context';
-import { useAffinityState } from '../../context/affinity-context';
+import { useAffinityMeta, useAffinityEffects } from '../../context/affinity-context';
 import { AFFINITY_AMBIENT_TINTS, DEFAULT_LEVEL, type AffinityAmbientTint } from '../../config/affinity-palette';
 // Keyframes moved to static index.css — no runtime injection needed.
 
@@ -53,7 +53,8 @@ const LEVEL_BLOOM_BASE: CSSProperties = {
 export const BackgroundReactor = memo(() => {
   const { currentPhase } = useToolState();
   const { isThinkingSpeaking } = useAiStateRead();
-  const { level, pointGains, expressionIntensity } = useAffinityState();
+  const { level } = useAffinityMeta();
+  const { pointGains, expressionIntensity } = useAffinityEffects();
   const tint = AFFINITY_AMBIENT_TINTS[level] || DEFAULT_TINT;
 
   // ── Level transition detection ─────────────────────────────────
