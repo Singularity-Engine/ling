@@ -82,7 +82,10 @@ const S_SHIMMER: CSSProperties = { height: "2px", overflow: "hidden", position: 
 
 // ToolResultCard
 const S_TC_ICON: CSSProperties = { fontSize: "14px" };
-const S_TC_CONTENT: CSSProperties = { padding: "10px 14px" };
+const S_TC_CONTENT: CSSProperties = {
+  padding: "10px 14px",
+  animation: "toolContentReveal 0.2s ease-out",
+};
 const S_TC_COLLAPSED_WRAP: CSSProperties = { padding: "6px 14px 8px" };
 const S_TC_COLLAPSED_TEXT: CSSProperties = {
   fontSize: "12px", color: "rgba(255,255,255,0.4)", lineHeight: 1.5,

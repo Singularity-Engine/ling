@@ -24,6 +24,14 @@ const S_CONTAINER_OPEN: CSSProperties = {
   animation: "connFadeIn 0.3s ease-out",
 };
 
+const S_CONTAINER_OPEN_CLOSING: CSSProperties = {
+  ...S_CONTAINER_BASE,
+  border: "1px solid rgba(255,255,255,0.08)",
+  cursor: "default",
+  opacity: 0.7,
+  animation: "connFadeOut 0.3s ease-in forwards",
+};
+
 const S_CONTAINER_CONNECTING: CSSProperties = {
   ...S_CONTAINER_BASE,
   border: "1px solid rgba(255,255,255,0.08)",
@@ -108,9 +116,11 @@ export const ConnectionStatus = memo(() => {
   const { wsState } = useWebSocketState();
   const { reconnect } = useWebSocketActions();
   const [showConnected, setShowConnected] = useState(false);
+  const [closingConnected, setClosingConnected] = useState(false);
   const [reconnectAttempt, setReconnectAttempt] = useState(0);
   const [idleRetry, setIdleRetry] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   const isOpen = wsState === "OPEN";
   const isConnecting = wsState === "CONNECTING";
@@ -119,12 +129,19 @@ export const ConnectionStatus = memo(() => {
   useEffect(() => {
     if (isOpen) {
       setShowConnected(true);
-      timerRef.current = setTimeout(() => setShowConnected(false), 2000);
+      setClosingConnected(false);
+      timerRef.current = setTimeout(() => setClosingConnected(true), 1700);
+      closeTimerRef.current = setTimeout(() => {
+        setShowConnected(false);
+        setClosingConnected(false);
+      }, 2000);
     } else {
       setShowConnected(false);
+      setClosingConnected(false);
     }
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     };
   }, [isOpen]);
 
@@ -156,7 +173,7 @@ export const ConnectionStatus = memo(() => {
         : t("connection.disconnected");
 
   const containerStyle = isOpen
-    ? S_CONTAINER_OPEN
+    ? (closingConnected ? S_CONTAINER_OPEN_CLOSING : S_CONTAINER_OPEN)
     : isClosed
       ? S_CONTAINER_CLOSED
       : S_CONTAINER_CONNECTING;
