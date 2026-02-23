@@ -1,11 +1,11 @@
 /* eslint-disable import/order */
 import { useState, useEffect, useCallback } from 'react';
-import { BgUrlContextState } from '@/context/bgurl-context';
-import { defaultBaseUrl, defaultWsUrl } from '@/context/websocket-context';
+import { useBgUrlState, useBgUrlActions } from '@/context/bgurl-context';
+import { useWebSocket, defaultBaseUrl, defaultWsUrl } from '@/context/websocket-context';
 import { useSubtitle } from '@/context/subtitle-context';
 import { useCameraActions } from '@/context/camera-context';
 import { useSwitchCharacter } from '@/hooks/utils/use-switch-character';
-import { useConfigState } from '@/context/character-config-context';
+import { useConfigState, useConfigActions } from '@/context/character-config-context';
 import i18n from 'i18next';
 import { createLogger } from '@/utils/logger';
 
@@ -31,13 +31,6 @@ interface GeneralSettings {
 }
 
 interface UseGeneralSettingsProps {
-  bgUrlContext: BgUrlContextState | null
-  confName: string | undefined
-  setConfName: (name: string) => void
-  baseUrl: string
-  wsUrl: string
-  onWsUrlChange: (url: string) => void
-  onBaseUrlChange: (url: string) => void
   onSave?: (callback: () => void) => () => void
   onCancel?: (callback: () => void) => () => void
 }
@@ -65,26 +58,21 @@ const loadInitialImageMaxWidth = (): number => {
 };
 
 export const useGeneralSettings = ({
-  bgUrlContext,
-  confName,
-  setConfName,
-  baseUrl,
-  wsUrl,
-  onWsUrlChange,
-  onBaseUrlChange,
   onSave,
   onCancel,
 }: UseGeneralSettingsProps) => {
+  const { backgroundUrl, useCameraBackground } = useBgUrlState();
+  const { setBackgroundUrl, setUseCameraBackground } = useBgUrlActions();
+  const { confName, configFiles, getFilenameByName } = useConfigState();
+  const { setConfName } = useConfigActions();
+  const { wsUrl, setWsUrl, baseUrl, setBaseUrl } = useWebSocket();
   const { showSubtitle, setShowSubtitle } = useSubtitle();
-  const { setUseCameraBackground } = bgUrlContext || {};
   const { startBackgroundCamera, stopBackgroundCamera } = useCameraActions();
-  const { configFiles, getFilenameByName } = useConfigState();
   const { switchCharacter } = useSwitchCharacter();
 
   const getCurrentBgKey = (): string[] => {
-    if (!bgUrlContext?.backgroundUrl) return [];
-    const currentBgUrl = bgUrlContext.backgroundUrl;
-    const path = currentBgUrl.replace(baseUrl, '');
+    if (!backgroundUrl) return [];
+    const path = backgroundUrl.replace(baseUrl, '');
     return path.startsWith('/bg/') ? [path] : [];
   };
 
@@ -96,13 +84,13 @@ export const useGeneralSettings = ({
 
   const initialSettings: GeneralSettings = {
     language: [i18n.language || 'en'],
-    customBgUrl: !bgUrlContext?.backgroundUrl?.includes('/bg/')
-      ? bgUrlContext?.backgroundUrl || ''
+    customBgUrl: !backgroundUrl?.includes('/bg/')
+      ? backgroundUrl || ''
       : '',
     selectedBgUrl: getCurrentBgKey(),
-    backgroundUrl: bgUrlContext?.backgroundUrl || '',
+    backgroundUrl: backgroundUrl || '',
     selectedCharacterPreset: getCurrentCharacterFilename(),
-    useCameraBackground: bgUrlContext?.useCameraBackground || false,
+    useCameraBackground,
     wsUrl: wsUrl || defaultWsUrl,
     baseUrl: baseUrl || defaultBaseUrl,
     showSubtitle,
@@ -136,15 +124,12 @@ export const useGeneralSettings = ({
       const next = { ...prev, [key]: value };
 
       // Apply per-key side-effects in the same tick (event-driven, not effect-driven).
-      // This replaces the old eager useEffect that ran ALL side-effects on every
-      // settings change — causing double-triggers for wsUrl/baseUrl/language and
-      // redundant calls when unrelated keys changed.
       switch (key) {
         case 'wsUrl':
-          onWsUrlChange(value as string);
+          setWsUrl(value as string);
           break;
         case 'baseUrl':
-          onBaseUrlChange(value as string);
+          setBaseUrl(value as string);
           break;
         case 'language':
           if (Array.isArray(value) && value.length > 0 && value[0] !== i18n.language) {
@@ -160,9 +145,9 @@ export const useGeneralSettings = ({
             ? (value as string)
             : (Array.isArray(value) ? value[0] : '');
           const resolvedBgUrl = bgVal || (key === 'customBgUrl' ? next.selectedBgUrl[0] : next.customBgUrl);
-          if (resolvedBgUrl && bgUrlContext) {
+          if (resolvedBgUrl) {
             const fullUrl = resolvedBgUrl.startsWith('http') ? resolvedBgUrl : `${baseUrl}${resolvedBgUrl}`;
-            bgUrlContext.setBackgroundUrl(fullUrl);
+            setBackgroundUrl(fullUrl);
           }
           break;
         }
@@ -178,7 +163,7 @@ export const useGeneralSettings = ({
 
       return next;
     });
-  }, [onWsUrlChange, onBaseUrlChange, setShowSubtitle, bgUrlContext, baseUrl]);
+  }, [setWsUrl, setBaseUrl, setShowSubtitle, setBackgroundUrl, baseUrl]);
 
   const handleSave = useCallback((): void => {
     setSettings((current) => {
@@ -193,12 +178,10 @@ export const useGeneralSettings = ({
 
       // Restore all settings to original values
       setShowSubtitle(orig.showSubtitle);
-      if (bgUrlContext) {
-        bgUrlContext.setBackgroundUrl(orig.backgroundUrl);
-        bgUrlContext.setUseCameraBackground(orig.useCameraBackground);
-      }
-      onWsUrlChange(orig.wsUrl);
-      onBaseUrlChange(orig.baseUrl);
+      setBackgroundUrl(orig.backgroundUrl);
+      setUseCameraBackground(orig.useCameraBackground);
+      setWsUrl(orig.wsUrl);
+      setBaseUrl(orig.baseUrl);
 
       // Restore original character preset
       if (originalConfName) {
@@ -214,7 +197,7 @@ export const useGeneralSettings = ({
 
       return orig;
     });
-  }, [bgUrlContext, onWsUrlChange, onBaseUrlChange, originalConfName, setConfName, setShowSubtitle, startBackgroundCamera, stopBackgroundCamera]);
+  }, [setBackgroundUrl, setUseCameraBackground, setWsUrl, setBaseUrl, originalConfName, setConfName, setShowSubtitle, startBackgroundCamera, stopBackgroundCamera]);
 
   // Register save/cancel callbacks with the settings panel.
   // deps include handleSave/handleCancel so stale closures are avoided.
@@ -252,8 +235,6 @@ export const useGeneralSettings = ({
   }, [configFiles, confName, getFilenameByName, handleSettingChange, switchCharacter]);
 
   const handleCameraToggle = useCallback(async (checked: boolean) => {
-    if (!setUseCameraBackground) return;
-
     if (checked) {
       try {
         await startBackgroundCamera();

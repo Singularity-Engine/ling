@@ -1,12 +1,11 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { memo, useCallback, useEffect, useMemo } from "react";
+import { memo, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Stack, createListCollection } from "@chakra-ui/react";
-import { useBgUrlState, useBgUrlActions } from "@/context/bgurl-context";
+import { useBgUrlState } from "@/context/bgurl-context";
 import { settingStyles } from "./setting-styles";
-import { useConfigState, useConfigActions } from "@/context/character-config-context";
+import { useConfigState } from "@/context/character-config-context";
 import { useGeneralSettings } from "@/hooks/sidebar/setting/use-general-settings";
-import { useWebSocket } from "@/context/websocket-context";
 import { SelectField, SwitchField, InputField } from "./common";
 
 interface GeneralProps {
@@ -60,12 +59,7 @@ const useCollections = (t: (key: string) => string) => {
 
 const General = memo(function General({ onSave, onCancel }: GeneralProps): JSX.Element {
   const { t, i18n } = useTranslation();
-  const bgUrlState = useBgUrlState();
-  const bgUrlActions = useBgUrlActions();
-  const bgUrlContext = useMemo(() => ({ ...bgUrlState, ...bgUrlActions }), [bgUrlState, bgUrlActions]);
   const { confName } = useConfigState();
-  const { setConfName } = useConfigActions();
-  const { wsUrl, setWsUrl, baseUrl, setBaseUrl } = useWebSocket();
   const collections = useCollections(t);
 
   const {
@@ -75,17 +69,7 @@ const General = memo(function General({ onSave, onCancel }: GeneralProps): JSX.E
     handleCharacterPresetChange,
     showSubtitle,
     setShowSubtitle,
-  } = useGeneralSettings({
-    bgUrlContext,
-    confName,
-    setConfName,
-    baseUrl,
-    wsUrl,
-    onWsUrlChange: setWsUrl,
-    onBaseUrlChange: setBaseUrl,
-    onSave,
-    onCancel,
-  });
+  } = useGeneralSettings({ onSave, onCancel });
 
   // Sync settings.language with i18n — must be in useEffect, not render phase
   useEffect(() => {
