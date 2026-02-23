@@ -44,6 +44,7 @@ const S_MIC_ON: CSSProperties = {
 const S_SEND_BASE: CSSProperties = {
   width: "44px", height: "44px", borderRadius: "50%",
   display: "flex", alignItems: "center", justifyContent: "center",
+  color: "#fff",
   transition: "filter 0.2s ease, transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease", flexShrink: 0, padding: 0,
 };
 
@@ -55,17 +56,17 @@ const S_SEND_SPEAKING: CSSProperties = {
 };
 const S_SEND_LOADING: CSSProperties = {
   ...S_SEND_BASE,
-  background: "linear-gradient(135deg, #7c3aed, #5b21b6)",
+  background: "linear-gradient(135deg, var(--ling-purple), var(--ling-purple-deep))",
   border: "none",
   opacity: 0.7,
   cursor: "not-allowed",
 };
 const S_SEND_READY: CSSProperties = {
   ...S_SEND_BASE,
-  background: "linear-gradient(135deg, #8b5cf6, #6d28d9)",
+  background: "linear-gradient(135deg, var(--ling-purple), var(--ling-purple-deep))",
   border: "none",
   cursor: "pointer",
-  boxShadow: "0 0 14px rgba(139, 92, 246, 0.35), 0 0 4px rgba(139, 92, 246, 0.2)",
+  boxShadow: "0 0 14px var(--ling-purple-40), 0 0 4px var(--ling-purple-20)",
 };
 const S_SEND_OVERLIMIT: CSSProperties = {
   ...S_SEND_BASE,
@@ -103,19 +104,19 @@ const ICON_MIC = (
   </svg>
 );
 const ICON_SEND = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="22" y1="2" x2="11" y2="13" />
     <polygon points="22 2 15 22 11 13 2 9 22 2" />
   </svg>
 );
 const S_LOADING_SPIN: CSSProperties = { animation: "sendSpin 0.8s linear infinite" };
 const ICON_LOADING = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" style={S_LOADING_SPIN}>
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={S_LOADING_SPIN}>
     <path d="M12 2a10 10 0 0 1 10 10" />
   </svg>
 );
 const ICON_STOP = (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
     <rect x="6" y="6" width="12" height="12" rx="2" />
   </svg>
 );
