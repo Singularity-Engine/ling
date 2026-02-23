@@ -7,7 +7,7 @@ import type { MicVAD } from '@ricky0123/vad-web';
 import { useInterrupt } from '@/components/canvas/live2d';
 import { audioTaskQueue } from '@/utils/task-queue';
 import { useSendAudio } from '@/hooks/utils/use-send-audio';
-import { SubtitleContext } from './subtitle-context';
+import { useSubtitleActions } from './subtitle-context';
 import { useAiStateRead, useAiStateActions, type AiState } from './ai-state-context';
 import { useLocalStorage } from '@/hooks/utils/use-local-storage';
 import { toaster } from '@/components/ui/toaster';
@@ -112,7 +112,7 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
   // External hooks and contexts
   const { interrupt } = useInterrupt();
   const { sendAudioPartition } = useSendAudio();
-  const { setSubtitleText } = useContext(SubtitleContext)!;
+  const { setSubtitleText } = useSubtitleActions();
   const { aiState } = useAiStateRead();
   const { setAiState } = useAiStateActions();
 
