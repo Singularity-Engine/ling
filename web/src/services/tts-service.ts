@@ -177,6 +177,10 @@ class TTSService {
   ): Promise<{ volumes: number[]; mouthForms: number[] }> {
     try {
       const ctx = this.getAudioContext();
+      // Chrome auto-suspends AudioContext after ~60s of background; resume before use
+      if (ctx.state === 'suspended') {
+        await ctx.resume();
+      }
       const audioBuffer = await ctx.decodeAudioData(arrayBuffer.slice(0));
       return this.computeLipSyncData(audioBuffer);
     } catch (err) {

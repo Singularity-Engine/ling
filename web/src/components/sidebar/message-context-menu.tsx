@@ -46,6 +46,7 @@ const menuItemStyle = {
 export const MessageContextMenu = memo(function MessageContextMenu({ message, position, onClose }: MessageContextMenuProps) {
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const { sendMessage } = useWebSocket();
   const { messages } = useChatMessages();
 
@@ -67,6 +68,17 @@ export const MessageContextMenu = memo(function MessageContextMenu({ message, po
       document.removeEventListener('touchstart', handler, opts);
     };
   }, [onClose]);
+
+  // Clean up orphaned audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   // Close on Escape
   useEffect(() => {
@@ -130,8 +142,13 @@ export const MessageContextMenu = memo(function MessageContextMenu({ message, po
     try {
       const result = await ttsService.synthesize(text);
       if (result) {
-        // Play audio directly without Live2D lip sync dependency
+        // Stop any previous playback, then play new audio
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.src = '';
+        }
         const audio = new Audio(`data:audio/mp3;base64,${result.audioBase64}`);
+        audioRef.current = audio;
         audio.play().catch((err) => log.error('Playback error:', err));
       }
     } catch (err) {

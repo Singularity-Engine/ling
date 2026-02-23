@@ -381,24 +381,3 @@ export function useStreamingRef() {
   return ctx;
 }
 
-/**
- * Backward-compatible hook — merges all contexts.
- * ⚠️ Subscribes to streaming VALUE + messages + historyList, so consumers
- * re-render on ALL changes (~60fps during streaming).
- * Prefer useChatMessages() + useHistoryList() + useStreamingSetters() for new code.
- */
-export function useChatHistory() {
-  const msgs = useContext(MessagesContext);
-  const hist = useContext(HistoryListContext);
-  const streamVal = useContext(StreamingValueContext);
-  const streamSet = useContext(StreamingSetterContext);
-
-  if (!msgs || !hist || !streamVal || !streamSet) {
-    throw new Error('useChatHistory must be used within a ChatHistoryProvider');
-  }
-
-  return useMemo(
-    () => ({ ...msgs, ...hist, ...streamVal, ...streamSet }),
-    [msgs, hist, streamVal, streamSet],
-  );
-}
