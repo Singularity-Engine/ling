@@ -224,6 +224,10 @@ export const ChatArea = memo(() => {
   const isConnectedRef = useRef(isConnected);
   isConnectedRef.current = isConnected;
 
+  // Focus-timer ref — cleared on unmount to avoid DOM ops after teardown.
+  const focusTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => { clearTimeout(focusTimerRef.current); }, []);
+
   // Memoize dedup so it only recalculates when messages change, not on every streaming delta
   const dedupedMessages = useMemo(
     () =>
@@ -292,7 +296,7 @@ export const ChatArea = memo(() => {
       appendHumanMessage(text);
       sendMessage({ type: "text-input", text, images: EMPTY_IMAGES });
       // Focus textarea so the user is ready to type when AI responds
-      setTimeout(() => {
+      focusTimerRef.current = setTimeout(() => {
         (document.querySelector(".ling-textarea") as HTMLElement)?.focus();
       }, 0);
     },

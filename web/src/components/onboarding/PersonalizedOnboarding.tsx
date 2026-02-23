@@ -270,6 +270,11 @@ export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingPro
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
 
+  // Timer ref for the 400ms exit animation delay — cleared on unmount
+  // to prevent onComplete firing after the component is torn down.
+  const exitTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => { clearTimeout(exitTimerRef.current); }, []);
+
   // Memory is always included
   const alwaysIncluded = "memory";
 
@@ -298,13 +303,13 @@ export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingPro
     // Seed constellation
     seedSkills(allGoals);
 
-    setTimeout(onComplete, 400);
+    exitTimerRef.current = setTimeout(onComplete, 400);
   }, [onComplete, selectedInterests, selectedGoals, seedSkills]);
 
   const skip = useCallback(() => {
     setExiting(true);
     sessionStorage.setItem(STORAGE_KEY, "true");
-    setTimeout(onComplete, 400);
+    exitTimerRef.current = setTimeout(onComplete, 400);
   }, [onComplete]);
 
   const goNext = useCallback(() => {
