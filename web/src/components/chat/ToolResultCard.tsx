@@ -1,28 +1,5 @@
-import { memo, useState, useEffect, useMemo, useCallback, type CSSProperties } from "react";
+import { memo, useState, useMemo, useCallback, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
-import { createStyleInjector } from "@/utils/style-injection";
-
-// ── Deferred style injection (avoids module-level side effects) ──
-const ensureToolCardStyles = createStyleInjector({
-  id: "tool-card-styles",
-  css: `
-    .tool-code-scroll::-webkit-scrollbar { height: 3px; }
-    .tool-code-scroll::-webkit-scrollbar-thumb { background: var(--ling-purple-30); border-radius: 2px; }
-    @keyframes toolShimmer {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(200%); }
-    }
-    @keyframes toolPulse {
-      0%, 100% { opacity: 0.4; }
-      50% { opacity: 1; }
-    }
-    @keyframes toolStatusPop {
-      0% { transform: scale(0.6); opacity: 0; }
-      60% { transform: scale(1.15); }
-      100% { transform: scale(1); opacity: 1; }
-    }
-  `,
-});
 
 const COLLAPSE_CHAR_THRESHOLD = 200;
 const COLLAPSE_LINE_THRESHOLD = 8;
@@ -261,7 +238,6 @@ const ShimmerBar = memo(({ accent }: { accent: string }) => (
 ShimmerBar.displayName = "ShimmerBar";
 
 export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCardProps) => {
-  useEffect(ensureToolCardStyles, []);
   const category = useMemo(() => getToolCategory(toolName), [toolName]);
   const codeBlocks = useMemo(() => extractCodeBlocks(content), [content]);
   const hasCode = codeBlocks.length > 0;

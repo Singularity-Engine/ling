@@ -6,36 +6,10 @@ import { ThinkingBubble } from "./ThinkingBubble";
 import { TimeSeparator, shouldShowSeparator } from "./TimeSeparator";
 import { useChatMessagesState, useChatMessagesActions, useStreamingValue, useStreamingRef } from "@/context/chat-history-context";
 import type { Message } from "@/services/websocket-service";
-import { createStyleInjector } from "@/utils/style-injection";
 
 import { useAiStateRead } from "@/context/ai-state-context";
 import { useWebSocketState, useWebSocketActions } from "@/context/websocket-context";
 import { useChatScroll } from "@/hooks/use-chat-scroll";
-
-// ── Deferred style injection (performance optimization) ──
-const CHAT_STYLES_CSS = `
-    .chat-area-scroll::-webkit-scrollbar { width: 4px; }
-    .chat-area-scroll::-webkit-scrollbar-track { background: transparent; }
-    .chat-area-scroll::-webkit-scrollbar-thumb { background: var(--ling-purple-30); border-radius: 2px; }
-    @keyframes chatFadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes emptyItemFadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes emptyHintFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 0.6; transform: translateY(0); } }
-    @keyframes emptyStateFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-    @keyframes emptyStateFadeOut { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(-12px) scale(0.96); } }
-    @keyframes scrollBtnIn { from { opacity: 0; transform: translateY(12px) scale(0.8); } to { opacity: 1; transform: translateY(0) scale(1); } }
-    @keyframes scrollBtnPulse { 0%, 100% { box-shadow: 0 2px 12px var(--ling-purple-30); } 50% { box-shadow: 0 2px 20px var(--ling-purple-50); } }
-    @keyframes chipFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes greetingBubbleIn { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
-    .welcome-chip { transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease; }
-    .welcome-chip:hover { background: var(--ling-purple-25) !important; border-color: var(--ling-purple-30) !important; transform: translateY(-1px); }
-    .welcome-chip:active { transform: scale(0.97); }
-    .chat-msg-item { contain: layout paint style; }
-  `;
-
-const ensureChatStyles = createStyleInjector({
-  id: "chat-area-styles",
-  css: CHAT_STYLES_CSS,
-});
 
 // Touch-only device detection (no hover capability = phone/tablet)
 const isTouchDevice =
@@ -469,9 +443,6 @@ export const ChatArea = memo(() => {
   const { wsState } = useWebSocketState();
   const { sendMessage } = useWebSocketActions();
   const { t } = useTranslation();
-
-  // Inject chat area styles
-  useEffect(ensureChatStyles, []);
 
   const {
     scrollRef, bottomRef, scrollParent,

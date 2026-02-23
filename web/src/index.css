@@ -806,6 +806,60 @@ canvas {
   background: var(--ling-stripe-bg);
 }
 
+/* === Chat pipeline — animations & interaction styles ===
+ * Moved from runtime createStyleInjector to static CSS.
+ * Previously each component injected its own <style> on first mount,
+ * costing 5 useEffect hooks and ~3KB of JS-embedded CSS strings. */
+
+/* ── ChatArea: container, welcome state, scroll-to-bottom ── */
+.chat-area-scroll::-webkit-scrollbar { width: 4px; }
+.chat-area-scroll::-webkit-scrollbar-track { background: transparent; }
+.chat-area-scroll::-webkit-scrollbar-thumb { background: var(--ling-purple-30); border-radius: 2px; }
+@keyframes chatFadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes emptyItemFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes emptyHintFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 0.6; transform: translateY(0); } }
+@keyframes emptyStateFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes emptyStateFadeOut { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(-12px) scale(0.96); } }
+@keyframes scrollBtnIn { from { opacity: 0; transform: translateY(12px) scale(0.8); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes scrollBtnPulse { 0%, 100% { box-shadow: 0 2px 12px var(--ling-purple-30); } 50% { box-shadow: 0 2px 20px var(--ling-purple-50); } }
+@keyframes chipFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes greetingBubbleIn { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.welcome-chip { transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease; }
+.welcome-chip:hover { background: var(--ling-purple-25) !important; border-color: var(--ling-purple-30) !important; transform: translateY(-1px); }
+.welcome-chip:active { transform: scale(0.97); }
+.chat-msg-item { contain: layout paint style; }
+
+/* ── ChatBubble: message entry, copy button, timestamps ── */
+@keyframes bubbleFadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes streamingCursor { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
+@keyframes bubbleCopyFlash { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.97); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
+.chat-copy-btn { opacity: 0; }
+.chat-bubble-wrap:hover .chat-copy-btn { opacity: 1; }
+.chat-copy-btn:hover { color: var(--ling-text-secondary) !important; background: var(--ling-surface) !important; }
+.chat-copy-btn:active { transform: scale(0.88); color: var(--ling-text-secondary) !important; background: var(--ling-surface-hover) !important; }
+.chat-bubble-ts { opacity: 0; transition: opacity 0.2s ease; }
+.ling-msg-row:hover .chat-bubble-ts { opacity: 1; }
+@media (hover: none) { .chat-copy-btn { opacity: 0.5; } .chat-bubble-ts { opacity: 0.7; } }
+@media (max-width: 768px) { .chat-copy-btn { right: 4px !important; left: auto !important; top: -24px !important; } }
+@media (max-width: 480px) { .ling-avatar { display: none !important; } }
+
+/* ── ThinkingBubble: streaming entry, text fade ── */
+@keyframes thinkingBubbleIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes textFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── TypingIndicator: thinking dots ── */
+@keyframes typingFadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes thinkingDot { 0%, 80%, 100% { opacity: 0.35; transform: translateY(0) scale(0.85); } 40% { opacity: 1; transform: translateY(-6px) scale(1.1); } }
+@keyframes thinkingPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); } 50% { box-shadow: 0 0 12px 2px rgba(139, 92, 246, 0.08); } }
+@keyframes thinkingFadeOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.92); } }
+
+/* ── ToolResultCard: tool call visualization ── */
+.tool-code-scroll::-webkit-scrollbar { height: 3px; }
+.tool-code-scroll::-webkit-scrollbar-thumb { background: var(--ling-purple-30); border-radius: 2px; }
+@keyframes toolShimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+@keyframes toolPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+@keyframes toolStatusPop { 0% { transform: scale(0.6); opacity: 0; } 60% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
+
 /* === 主题 color-scheme === */
 :root {
   color-scheme: dark;

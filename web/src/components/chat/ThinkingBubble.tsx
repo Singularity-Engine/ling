@@ -3,22 +3,6 @@ import ReactMarkdown from "react-markdown";
 import i18next from "i18next";
 import { TypingIndicator } from "./TypingIndicator";
 import { remarkPlugins, mdComponents } from "./ChatBubble";
-import { createStyleInjector } from "@/utils/style-injection";
-
-// ── Deferred style injection (avoids module-level side effects) ──
-const ensureThinkingStyles = createStyleInjector({
-  id: "thinking-bubble-styles",
-  css: `
-    @keyframes thinkingBubbleIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes textFadeIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-  `,
-});
 
 // ─── Static style constants (avoid per-render allocation during ~60fps streaming) ───
 
@@ -87,8 +71,6 @@ interface ThinkingBubbleProps {
 }
 
 export const ThinkingBubble = memo(({ content, isThinking, isStreaming }: ThinkingBubbleProps) => {
-  useEffect(ensureThinkingStyles, []);
-
   // Track whether we just transitioned from thinking to streaming
   // so we can play the dots fade-out animation
   const wasThinkingRef = useRef(false);

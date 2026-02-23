@@ -1,29 +1,4 @@
-import { useEffect, type CSSProperties } from "react";
-import { memo } from "react";
-import { createStyleInjector } from "@/utils/style-injection";
-
-// ── Deferred style injection (avoids module-level side effects) ──
-const ensureTypingStyles = createStyleInjector({
-  id: "typing-indicator-styles",
-  css: `
-    @keyframes typingFadeInUp {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes thinkingDot {
-      0%, 80%, 100% { opacity: 0.35; transform: translateY(0) scale(0.85); }
-      40% { opacity: 1; transform: translateY(-6px) scale(1.1); }
-    }
-    @keyframes thinkingPulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
-      50% { box-shadow: 0 0 12px 2px rgba(139, 92, 246, 0.08); }
-    }
-    @keyframes thinkingFadeOut {
-      from { opacity: 1; transform: scale(1); }
-      to   { opacity: 0; transform: scale(0.92); }
-    }
-  `,
-});
+import { memo, type CSSProperties } from "react";
 
 const DOT_COLORS = [
   "linear-gradient(135deg, #a78bfa, #8b5cf6)",
@@ -67,7 +42,6 @@ interface TypingIndicatorProps {
 }
 
 export const TypingIndicator = memo(({ fadeOut }: TypingIndicatorProps) => {
-  useEffect(ensureTypingStyles, []);
   return (
     <div style={fadeOut ? S_WRAP_OUT : S_WRAP_IN}>
       {DOT_INDICES.map((i) => (

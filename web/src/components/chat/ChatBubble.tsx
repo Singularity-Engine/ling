@@ -5,7 +5,6 @@ import rehypeHighlightLite from "@/utils/rehype-highlight-lite";
 import i18next from "i18next";
 import { toaster } from "@/components/ui/toaster";
 import { ToolResultCard } from "./ToolResultCard";
-import { createStyleInjector } from "@/utils/style-injection";
 
 export const remarkPlugins = [remarkGfm];
 const rehypePlugins = [rehypeHighlightLite];
@@ -115,25 +114,6 @@ export const mdComponents = {
 const COLLAPSE_CHAR_THRESHOLD = 500;
 const COLLAPSE_LINE_THRESHOLD = 12;
 const COLLAPSED_MAX_HEIGHT = 320; // ~12 lines at 14px * 1.7 line-height + paragraph gaps
-
-// ── Deferred style injection (avoids module-level side effects) ──
-const ensureBubbleStyles = createStyleInjector({
-  id: "chat-bubble-styles",
-  css: `
-    @keyframes bubbleFadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes streamingCursor { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
-    @keyframes bubbleCopyFlash { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.97); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
-    .chat-copy-btn { opacity: 0; }
-    .chat-bubble-wrap:hover .chat-copy-btn { opacity: 1; }
-    .chat-copy-btn:hover { color: var(--ling-text-secondary) !important; background: var(--ling-surface) !important; }
-    .chat-copy-btn:active { transform: scale(0.88); color: var(--ling-text-secondary) !important; background: var(--ling-surface-hover) !important; }
-    .chat-bubble-ts { opacity: 0; transition: opacity 0.2s ease; }
-    .ling-msg-row:hover .chat-bubble-ts { opacity: 1; }
-    @media (hover: none) { .chat-copy-btn { opacity: 0.5; } .chat-bubble-ts { opacity: 0.7; } }
-    @media (max-width: 768px) { .chat-copy-btn { right: 4px !important; left: auto !important; top: -24px !important; } }
-    @media (max-width: 480px) { .ling-avatar { display: none !important; } }
-  `,
-});
 
 // ─── Static style constants (avoid per-render allocation across 50+ messages) ───
 
@@ -343,7 +323,6 @@ const RelativeTime = memo(({ timestamp, style }: { timestamp: string; style: CSS
 RelativeTime.displayName = "RelativeTime";
 
 export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolCall, toolName, toolStatus, isGreeting, skipEntryAnimation, senderChanged }: ChatBubbleProps) => {
-  useEffect(ensureBubbleStyles, []);
   const isUser = role === "user";
   const [copied, setCopied] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
