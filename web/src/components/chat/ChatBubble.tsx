@@ -146,7 +146,6 @@ const S_BUBBLE_USER: CSSProperties = {
   padding: "12px 18px", borderRadius: "18px 18px 4px 18px",
   background: "var(--ling-bubble-user-bg)",
   border: "1px solid var(--ling-bubble-user-border)",
-  backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
   overflow: "hidden", transition: "background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
   boxShadow: "0 2px 12px var(--ling-bubble-user-shadow)",
 };
@@ -155,7 +154,6 @@ const S_BUBBLE_AI: CSSProperties = {
   background: "var(--ling-bubble-ai-bg)",
   border: "1px solid var(--ling-bubble-ai-border)",
   borderLeft: "3px solid var(--ling-bubble-ai-accent)",
-  backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
   overflow: "hidden", transition: "background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
   boxShadow: "0 1px 8px var(--ling-bubble-ai-shadow)",
 };

@@ -27,7 +27,6 @@ const S_BUBBLE: CSSProperties = {
   padding: "12px 18px", borderRadius: "18px 18px 18px 4px",
   background: "var(--ling-bubble-ai-bg)", border: "1px solid var(--ling-bubble-ai-border)",
   borderLeft: "3px solid var(--ling-bubble-ai-accent)",
-  backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
   boxShadow: "0 1px 8px var(--ling-bubble-ai-shadow)",
   transition: "box-shadow 0.2s ease, background 0.2s ease",
   overflow: "hidden", minHeight: "20px", position: "relative",

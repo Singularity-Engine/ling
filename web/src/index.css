@@ -623,6 +623,12 @@ canvas {
 
 /* === 移动端触摸优化 === */
 @media (max-width: 768px) {
+  /* 移动端关闭气泡 backdrop-filter — 50+ 个 blur 层在滚动时导致 GPU 过载 */
+  .ling-bubble {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
   /* 长文本气泡在移动端更宽，避免 500+ 字消息过窄过高 */
   .chat-msg-inner {
     max-width: 90% !important;
@@ -912,6 +918,14 @@ canvas {
 .welcome-chip:hover { background: var(--ling-purple-25) !important; border-color: var(--ling-purple-30) !important; transform: translateY(-1px); }
 .welcome-chip:active { transform: scale(0.97); }
 .welcome-chip:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
+/* Glassmorphism — moved from JS inline styles to CSS so mobile media query
+ * can disable it.  backdrop-filter: blur() on every bubble (50+ items) is
+ * the single most expensive compositing cost during scroll.  Removing it on
+ * mobile halves GPU draw calls and eliminates scroll jank on mid-range devices. */
+.ling-bubble {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
 .chat-msg-item { contain: layout paint style; }
 
 /* ── ChatBubble: message entry, copy button, timestamps ── */
