@@ -100,7 +100,7 @@ const S_NEW_DOT: CSSProperties = {
 
 // ─── Empty-state style constants ───
 
-const _S_EMPTY_BASE: CSSProperties = {
+const S_EMPTY_WRAP: CSSProperties = {
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
@@ -110,12 +110,8 @@ const _S_EMPTY_BASE: CSSProperties = {
   gap: "20px",
 };
 
-const S_EMPTY_WRAP: CSSProperties = {
-  ..._S_EMPTY_BASE,
-};
-
 const S_EMPTY_WRAP_EXIT: CSSProperties = {
-  ..._S_EMPTY_BASE,
+  ...S_EMPTY_WRAP,
   animation: "emptyStateFadeOut 0.35s ease-in forwards",
   pointerEvents: "none",
   position: "absolute",

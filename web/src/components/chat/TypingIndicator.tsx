@@ -13,6 +13,7 @@ const S_WRAP_BASE: CSSProperties = {
   alignItems: "center",
   gap: "6px",
   padding: "4px 2px",
+  filter: "drop-shadow(0 1px 3px rgba(139, 92, 246, 0.25))",
 };
 
 const S_WRAP_IN: CSSProperties = {
@@ -33,7 +34,6 @@ const S_DOTS: CSSProperties[] = DOT_INDICES.map((i) => ({
   borderRadius: "50%",
   background: DOT_COLORS[i],
   animation: `thinkingDot 1.4s ease-in-out ${i * 0.2}s infinite`,
-  boxShadow: "0 1px 4px rgba(139, 92, 246, 0.25)",
 }));
 
 interface TypingIndicatorProps {
