@@ -65,13 +65,13 @@ const S_BAR: CSSProperties = {
   justifyContent: "center",
   gap: 16,
   padding: "8px 16px",
-  background: "rgba(8, 8, 13, 0.85)",
+  background: "var(--ling-surface-deep)",
   backdropFilter: "blur(12px)",
   WebkitBackdropFilter: "blur(12px)",
-  borderBottom: "1px solid rgba(167, 139, 250, 0.1)",
+  borderBottom: "1px solid var(--ling-purple-08)",
   fontFamily: "'Inter', -apple-system, system-ui, sans-serif",
   fontSize: 12,
-  color: "rgba(255,255,255,0.6)",
+  color: "var(--ling-text-soft)",
   userSelect: "none",
 };
 
@@ -80,7 +80,7 @@ const S_DAY: CSSProperties = {
   fontSize: 11,
   fontWeight: 600,
   color: "var(--ling-purple-light)",
-  background: "rgba(167, 139, 250, 0.12)",
+  background: "var(--ling-purple-12)",
   padding: "2px 10px",
   borderRadius: 100,
   letterSpacing: "0.02em",
@@ -90,7 +90,7 @@ const S_COUNTDOWN: CSSProperties = {
   fontFamily: "'JetBrains Mono', 'SF Mono', monospace",
   fontSize: 12,
   fontWeight: 500,
-  color: "rgba(255,255,255,0.8)",
+  color: "var(--ling-text-secondary)",
   letterSpacing: "0.04em",
 };
 
@@ -108,7 +108,7 @@ const S_PROGRESS_WRAP: CSSProperties = {
 const S_PROGRESS_BAR: CSSProperties = {
   width: 60,
   height: 3,
-  background: "rgba(255,255,255,0.08)",
+  background: "var(--ling-surface-border)",
   borderRadius: 2,
   overflow: "hidden",
 };
@@ -123,18 +123,18 @@ const S_PROGRESS_FILL_BASE: CSSProperties = {
 const S_REVENUE: CSSProperties = {
   fontFamily: "'JetBrains Mono', 'SF Mono', monospace",
   fontSize: 11,
-  color: "rgba(255,255,255,0.5)",
+  color: "var(--ling-text-dim)",
 };
 
 const S_SEP: CSSProperties = {
   width: 1,
   height: 12,
-  background: "rgba(255,255,255,0.08)",
+  background: "var(--ling-surface-border)",
 };
 
 const S_GOAL: CSSProperties = {
   fontSize: 11,
-  color: "rgba(255,255,255,0.4)",
+  color: "var(--ling-text-tertiary)",
   maxWidth: 200,
   overflow: "hidden",
   textOverflow: "ellipsis",
@@ -171,7 +171,17 @@ const CountdownTimer = memo(function CountdownTimer({ deathDate, danger }: { dea
     return () => clearInterval(timerRef.current);
   }, []);
 
-  return <span style={danger ? S_COUNTDOWN_DANGER : S_COUNTDOWN}>{formatCountdown(deathDate)}</span>;
+  const text = formatCountdown(deathDate);
+  const [d, h, m, s] = text.split(":");
+  return (
+    <span
+      style={danger ? S_COUNTDOWN_DANGER : S_COUNTDOWN}
+      role="timer"
+      aria-label={`剩余 ${d}天 ${h}时 ${m}分 ${s}秒`}
+    >
+      {text}
+    </span>
+  );
 });
 CountdownTimer.displayName = "CountdownTimer";
 
@@ -209,20 +219,27 @@ export const ExperimentBar = memo(function ExperimentBar() {
   }), [revPct]);
 
   return (
-    <div style={S_BAR}>
+    <div style={S_BAR} role="banner" aria-label="AI创业实验状态栏">
       {/* Day badge */}
-      <span style={S_DAY}>Day {status.day_number}</span>
+      <span style={S_DAY} aria-label={`实验第 ${status.day_number} 天`}>Day {status.day_number}</span>
 
-      <span style={S_SEP} />
+      <span style={S_SEP} aria-hidden="true" />
 
       {/* Countdown — isolated component, re-renders at 1fps independently */}
       <CountdownTimer deathDate={status.death_date} danger={isDanger} />
 
-      <span style={S_SEP} />
+      <span style={S_SEP} aria-hidden="true" />
 
       {/* Revenue progress */}
-      <div style={S_PROGRESS_WRAP}>
-        <div style={S_PROGRESS_BAR}>
+      <div style={S_PROGRESS_WRAP} aria-label="月收入进度">
+        <div
+          style={S_PROGRESS_BAR}
+          role="progressbar"
+          aria-valuenow={status.revenue?.monthly_usd || 0}
+          aria-valuemin={0}
+          aria-valuemax={status.revenue?.target_monthly_usd || 36}
+          aria-label={`月收入 $${status.revenue?.monthly_usd || 0} / $${status.revenue?.target_monthly_usd || 36}`}
+        >
           <div style={progressFillStyle} />
         </div>
         <span style={S_REVENUE}>
@@ -230,7 +247,7 @@ export const ExperimentBar = memo(function ExperimentBar() {
         </span>
       </div>
 
-      <span style={S_SEP} />
+      <span style={S_SEP} aria-hidden="true" />
 
       {/* Current goal (desktop only) */}
       <span style={S_GOAL} className="experiment-bar-goal">
@@ -244,6 +261,7 @@ export const ExperimentBar = memo(function ExperimentBar() {
         rel="noopener noreferrer"
         className="experiment-bar-link"
         style={S_LINK}
+        aria-label="查看灵的 AI 创业实验使命"
       >
         Mission
       </a>
