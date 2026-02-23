@@ -247,6 +247,7 @@ const ShimmerBar = memo(({ accent }: { accent: string }) => (
 ShimmerBar.displayName = "ShimmerBar";
 
 export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCardProps) => {
+  const { t } = useTranslation();
   const category = useMemo(() => getToolCategory(toolName), [toolName]);
   const codeBlocks = useMemo(() => extractCodeBlocks(content), [content]);
   const hasCode = codeBlocks.length > 0;

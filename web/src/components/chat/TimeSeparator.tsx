@@ -13,11 +13,11 @@ const S_OUTER: CSSProperties = {
 const S_LINE: CSSProperties = {
   flex: 1,
   height: "1px",
-  background: "linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent)",
+  background: "linear-gradient(to right, transparent, var(--ling-surface-hover), transparent)",
 };
 const S_LABEL: CSSProperties = {
   fontSize: "11px",
-  color: "rgba(255, 255, 255, 0.45)",
+  color: "var(--ling-text-muted)",
   whiteSpace: "nowrap",
   letterSpacing: "0.5px",
   userSelect: "none",
