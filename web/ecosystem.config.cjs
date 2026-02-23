@@ -3,7 +3,7 @@ module.exports = {
     {
       name: "ling-frontend",
       script: "serve",
-      args: "-s dist -l 3001 --no-clipboard",
+      args: ["-s", "dist", "-l", "3001", "--no-clipboard"],
       env: {
         NO_UPDATE_NOTIFIER: "1",
       },
