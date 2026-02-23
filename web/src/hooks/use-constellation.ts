@@ -123,3 +123,14 @@ if (typeof window !== 'undefined') {
   window.removeEventListener('constellation-skill-used', onSkillUsed);
   window.addEventListener('constellation-skill-used', onSkillUsed);
 }
+
+// Vite HMR: the remove/add pattern above can't remove the OLD listener
+// because the function reference changes on module re-execution.
+// import.meta.hot.dispose runs with the OLD module scope, so it captures
+// the correct reference and prevents duplicate handlers accumulating.
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    window.removeEventListener('constellation-skill-used', onSkillUsed);
+    clearTimeout(newFlagTimer);
+  });
+}

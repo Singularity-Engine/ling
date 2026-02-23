@@ -659,7 +659,7 @@ function StepReady({
                 key={i}
                 x1={item.cx} y1={item.cy}
                 x2={next.cx} y2={next.cy}
-                stroke="rgba(139,92,246,0.15)"
+                stroke="var(--ling-purple-15)"
                 strokeWidth="1"
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
