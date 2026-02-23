@@ -536,6 +536,11 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   // ─── Connect to Gateway on mount / URL change ─────────────────
 
   useEffect(() => {
+    // Guard: prevent stale async work after cleanup (gwUrl change / unmount)
+    let aborted = false;
+    // Track landing listener so cleanup can remove it if event hasn't fired yet
+    let landingListener: (() => void) | null = null;
+
     // Connect to Gateway
     gatewayConnector.connect({
       url: gwUrl,
@@ -543,6 +548,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       clientId: 'webchat-ui',
       displayName: BRAND_AVATAR_NAME,
     }).then(() => {
+      if (aborted) return;
       log.debug('Gateway connected!');
 
       // Initialize: set model info directly (no backend fetch needed)
@@ -558,29 +564,30 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
       // Helper: send auto-greeting (used when no previous history exists)
       const sendGreetingIfNeeded = () => {
-        if (!greetingSentRef.current) {
-          const sendGreeting = () => {
-            if (greetingSentRef.current) return;
-            greetingSentRef.current = true;
-            setAiState('thinking-speaking');
-            const greetingMsg = buildGreetingContext();
-            gatewayConnector.sendChat(sessionKeyRef.current, greetingMsg).catch((err) => {
-              log.debug('Auto-greeting failed:', err);
-              setAiState('idle');
-            });
-          };
+        if (aborted || greetingSentRef.current) return;
+        const sendGreeting = () => {
+          if (aborted || greetingSentRef.current) return;
+          greetingSentRef.current = true;
+          setAiState('thinking-speaking');
+          const greetingMsg = buildGreetingContext();
+          gatewayConnector.sendChat(sessionKeyRef.current, greetingMsg).catch((err) => {
+            log.debug('Auto-greeting failed:', err);
+            if (!aborted) setAiState('idle');
+          });
+        };
 
-          if (sessionStorage.getItem('ling-visited')) {
+        if (sessionStorage.getItem('ling-visited')) {
+          sendGreeting();
+          setGreetingExpression(2000);
+        } else {
+          const onLandingComplete = () => {
             sendGreeting();
-            setGreetingExpression(2000);
-          } else {
-            const onLandingComplete = () => {
-              sendGreeting();
-              setGreetingExpression(800);
-              window.removeEventListener('ling-landing-complete', onLandingComplete);
-            };
-            window.addEventListener('ling-landing-complete', onLandingComplete);
-          }
+            setGreetingExpression(800);
+            window.removeEventListener('ling-landing-complete', onLandingComplete);
+            landingListener = null;
+          };
+          landingListener = onLandingComplete;
+          window.addEventListener('ling-landing-complete', onLandingComplete);
         }
       };
 
@@ -589,6 +596,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         .then(() =>
           gatewayConnector.getChatHistory(sessionKeyRef.current)
             .then((res) => {
+              if (aborted) return;
               const payload = res.payload;
               if (payload?.messages?.length && payload.messages.length > 0) {
                 setMessagesRef.current(payload.messages);
@@ -598,9 +606,10 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
               }
               sendGreetingIfNeeded();
             })
-            .catch(() => sendGreetingIfNeeded()),
+            .catch(() => { if (!aborted) sendGreetingIfNeeded(); }),
         )
         .catch((err) => {
+          if (aborted) return;
           // Session doesn't exist yet — chat.send will create it on first message
           log.debug('resolveSession failed (will create on first chat):', err.message);
           sendGreetingIfNeeded();
@@ -615,6 +624,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         timestamp: new Date().toISOString(),
       }]);
     }).catch((err) => {
+      if (aborted) return;
       log.error('Gateway connection failed:', err);
       toaster.create({
         title: i18next.t('notification.connectionFailed', { error: err.message }),
@@ -624,6 +634,10 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
     });
 
     return () => {
+      aborted = true;
+      if (landingListener) {
+        window.removeEventListener('ling-landing-complete', landingListener);
+      }
       gatewayConnector.disconnect();
     };
   }, [gwUrl]);
