@@ -1,5 +1,5 @@
 import { ChangeEvent, KeyboardEvent } from 'react';
-import { useChatMessages } from '@/context/chat-history-context';
+import { useChatMessagesState } from '@/context/chat-history-context';
 import { useVADState, useVADActions } from '@/context/vad-context';
 import { useMicToggle } from '@/hooks/utils/use-mic-toggle';
 import { useTextInput } from '@/hooks/footer/use-text-input';
@@ -17,7 +17,7 @@ export function useInputSubtitle() {
 
   } = useTextInput();
 
-  const { messages } = useChatMessages();
+  const { messages } = useChatMessagesState();
   const { autoStartMicOn } = useVADState();
   const { startMic } = useVADActions();
   const { handleMicToggle, micOn } = useMicToggle();

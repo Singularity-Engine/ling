@@ -12,7 +12,7 @@ import { audioTaskQueue } from '@/utils/task-queue';
 import { useAudioTask } from '@/components/canvas/live2d';
 import { useBgUrlActions } from '@/context/bgurl-context';
 import { useConfigState, useConfigActions } from '@/context/character-config-context';
-import { useChatMessages, useHistoryList, useStreamingSetters } from '@/context/chat-history-context';
+import { useChatMessagesActions, useHistoryList, useStreamingSetters } from '@/context/chat-history-context';
 import { toaster } from '@/components/ui/toaster';
 import { useVADState, useVADActions } from '@/context/vad-context';
 import { AiState, useAiStateActions } from "@/context/ai-state-context";
@@ -211,7 +211,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const { setAiState, setBackendSynthComplete } = useAiStateActions();
   const { setModelInfo } = useLive2DConfigActions();
   const { setSubtitleText } = useSubtitleActions();
-  const { appendHumanMessage, appendAIMessage, appendOrUpdateToolCallMessage } = useChatMessages();
+  const { appendHumanMessage, appendAIMessage, appendOrUpdateToolCallMessage } = useChatMessagesActions();
   const { clearResponse, setForceNewMessage, setFullResponse } = useStreamingSetters();
   const { addAudioTask } = useAudioTask();
   const { setBackgroundFiles } = useBgUrlActions();
@@ -240,7 +240,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const {
     setCurrentHistoryUid, setHistoryList,
   } = useHistoryList();
-  const { setMessages } = useChatMessages();
+  const { setMessages } = useChatMessagesActions();
 
   // ─── Refs for stable callback access ─────────────────────────
   // Direct assignment keeps refs current without useEffect overhead.

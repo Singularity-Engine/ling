@@ -8,13 +8,22 @@ import { createLogger } from '@/utils/logger';
 const log = createLogger('ChatHistory');
 
 /**
- * Context 1a — Chat messages & message mutators.
- * Changes only when a message is added/removed/replaced.
- * Chat-rendering components (ChatArea, InputBar, etc.) subscribe here
- * and are shielded from historyList changes.
+ * Context 1a-state — Read-only messages array.
+ * Changes on every message add/remove/replace.
+ * Only components that RENDER messages (ChatArea, App) subscribe here.
  */
-interface MessagesState {
+interface MessagesStateValue {
   messages: Message[];
+}
+
+/**
+ * Context 1a-actions — Stable message mutators.
+ * All callbacks use useCallback with [] deps, so this context value
+ * never changes after mount. Consumers that only WRITE messages
+ * (websocket-handler, InputBar, use-text-input) subscribe here
+ * without re-rendering on every message change.
+ */
+interface MessagesActionsValue {
   appendHumanMessage: (content: string) => void;
   appendAIMessage: (content: string, name?: string, avatar?: string) => void;
   appendOrUpdateToolCallMessage: (toolMessageData: Partial<Message>) => void;
@@ -85,7 +94,8 @@ const DEFAULT_HISTORY = {
   fullResponse: '',
 };
 
-const MessagesContext = createContext<MessagesState | null>(null);
+const MessagesStateContext = createContext<MessagesStateValue | null>(null);
+const MessagesActionsContext = createContext<MessagesActionsValue | null>(null);
 const HistoryListContext = createContext<HistoryListState | null>(null);
 const StreamingValueContext = createContext<StreamingValueState | null>(null);
 const StreamingSetterContext = createContext<StreamingSetterState | null>(null);
@@ -263,24 +273,22 @@ export function ChatHistoryProvider({ children }: { children: ReactNode }) {
 
   // ── Context values ──
 
-  // Context 1a: messages only — changes on message add/remove/replace
-  const messagesValue = useMemo(
+  // Context 1a-state: read-only messages — changes on message add/remove/replace
+  const messagesStateValue = useMemo(
+    () => ({ messages }),
+    [messages],
+  );
+
+  // Context 1a-actions: stable mutators — never changes after mount
+  const messagesActionsValue = useMemo(
     () => ({
-      messages,
       appendHumanMessage,
       appendAIMessage,
       appendOrUpdateToolCallMessage,
       popLastHumanMessage,
       setMessages,
     }),
-    [
-      messages,
-      appendHumanMessage,
-      appendAIMessage,
-      appendOrUpdateToolCallMessage,
-      popLastHumanMessage,
-      setMessages,
-    ],
+    [appendHumanMessage, appendAIMessage, appendOrUpdateToolCallMessage, popLastHumanMessage, setMessages],
   );
 
   // Context 1b: history list — changes on sidebar preview / session switch
@@ -323,30 +331,44 @@ export function ChatHistoryProvider({ children }: { children: ReactNode }) {
   );
 
   return (
-    <MessagesContext.Provider value={messagesValue}>
-      <HistoryListContext.Provider value={historyValue}>
-        <StreamingSetterContext.Provider value={streamSetters}>
-          <StreamingValueContext.Provider value={streamValue}>
-            <StreamingRefContext.Provider value={streamRefValue}>
-              {children}
-            </StreamingRefContext.Provider>
-          </StreamingValueContext.Provider>
-        </StreamingSetterContext.Provider>
-      </HistoryListContext.Provider>
-    </MessagesContext.Provider>
+    <MessagesActionsContext.Provider value={messagesActionsValue}>
+      <MessagesStateContext.Provider value={messagesStateValue}>
+        <HistoryListContext.Provider value={historyValue}>
+          <StreamingSetterContext.Provider value={streamSetters}>
+            <StreamingValueContext.Provider value={streamValue}>
+              <StreamingRefContext.Provider value={streamRefValue}>
+                {children}
+              </StreamingRefContext.Provider>
+            </StreamingValueContext.Provider>
+          </StreamingSetterContext.Provider>
+        </HistoryListContext.Provider>
+      </MessagesStateContext.Provider>
+    </MessagesActionsContext.Provider>
   );
 }
 
 // ─── Hooks ──────────────────────────────────────────────────────────
 
+/** Read-only messages — re-renders on every message add/remove/replace. */
+export function useChatMessagesState() {
+  const ctx = useContext(MessagesStateContext);
+  if (!ctx) throw new Error('useChatMessagesState must be used within ChatHistoryProvider');
+  return ctx;
+}
+
+/** Stable message mutators — never causes re-renders. */
+export function useChatMessagesActions() {
+  const ctx = useContext(MessagesActionsContext);
+  if (!ctx) throw new Error('useChatMessagesActions must be used within ChatHistoryProvider');
+  return ctx;
+}
+
 /**
- * Messages only — shielded from both streaming AND historyList re-renders.
- * Prefer this for chat-rendering components (ChatArea, InputBar, etc.).
+ * Combined hook — returns both state and actions.
+ * Prefer useChatMessagesState() or useChatMessagesActions() for targeted subscriptions.
  */
 export function useChatMessages() {
-  const ctx = useContext(MessagesContext);
-  if (!ctx) throw new Error('useChatMessages must be used within ChatHistoryProvider');
-  return ctx;
+  return { ...useChatMessagesState(), ...useChatMessagesActions() };
 }
 
 /**

@@ -4,7 +4,7 @@ import { Virtuoso } from "react-virtuoso";
 import { ChatBubble } from "./ChatBubble";
 import { ThinkingBubble } from "./ThinkingBubble";
 import { TimeSeparator, shouldShowSeparator } from "./TimeSeparator";
-import { useChatMessages, useStreamingValue, useStreamingRef } from "@/context/chat-history-context";
+import { useChatMessagesState, useChatMessagesActions, useStreamingValue, useStreamingRef } from "@/context/chat-history-context";
 import type { Message } from "@/services/websocket-service";
 import { createStyleInjector } from "@/utils/style-injection";
 
@@ -461,7 +461,8 @@ const StreamingFooter = memo(function StreamingFooter({
 StreamingFooter.displayName = "StreamingFooter";
 
 export const ChatArea = memo(() => {
-  const { messages, appendHumanMessage } = useChatMessages();
+  const { messages } = useChatMessagesState();
+  const { appendHumanMessage } = useChatMessagesActions();
   const { getFullResponse } = useStreamingRef();
   const { isThinkingSpeaking } = useAiStateRead();
   const { wsState } = useWebSocketState();

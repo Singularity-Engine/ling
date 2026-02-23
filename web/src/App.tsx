@@ -13,7 +13,7 @@ import { SubtitleProvider } from "./context/subtitle-context";
 import { BgUrlProvider } from "./context/bgurl-context";
 import WebSocketHandler from "./services/websocket-handler";
 import { CameraProvider } from "./context/camera-context";
-import { ChatHistoryProvider, useChatMessages, useHistoryList } from "./context/chat-history-context";
+import { ChatHistoryProvider, useChatMessagesState, useHistoryList } from "./context/chat-history-context";
 import { CharacterConfigProvider } from "./context/character-config-context";
 import { VADProvider, useVADState, useVADActions } from "./context/vad-context";
 import { Live2D, useInterrupt } from "./components/canvas/live2d";
@@ -256,7 +256,7 @@ function MainContent(): JSX.Element {
   const { startMic, stopMic } = useVADActions();
   const { sendMessage } = useWebSocketActions();
   const { interrupt } = useInterrupt();
-  const { messages } = useChatMessages();
+  const { messages } = useChatMessagesState();
   const { currentHistoryUid, updateHistoryList } = useHistoryList();
 
   // Ref mirrors so createNewChat and shortcuts stay stable across state changes.

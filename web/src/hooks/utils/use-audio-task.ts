@@ -5,7 +5,7 @@ import { useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAiStateRead, useAiStateActions } from '@/context/ai-state-context';
 import { useSubtitleActions } from '@/context/subtitle-context';
-import { useChatMessages, useStreamingSetters } from '@/context/chat-history-context';
+import { useChatMessagesActions, useStreamingSetters } from '@/context/chat-history-context';
 import { audioTaskQueue } from '@/utils/task-queue';
 import { audioManager } from '@/utils/audio-manager';
 import { createLogger } from '@/utils/logger';
@@ -35,7 +35,7 @@ export const useAudioTask = () => {
   const { aiState, backendSynthComplete } = useAiStateRead();
   const { setBackendSynthComplete } = useAiStateActions();
   const { setSubtitleText } = useSubtitleActions();
-  const { appendAIMessage } = useChatMessages();
+  const { appendAIMessage } = useChatMessagesActions();
   const { appendResponse } = useStreamingSetters();
   const { setExpression } = useLive2DExpression();
 
