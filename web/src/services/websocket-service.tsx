@@ -1,7 +1,5 @@
-/* eslint-disable global-require */
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable no-use-before-define */
 import { Subject } from 'rxjs';
+import i18next from 'i18next';
 import { ModelInfo } from '@/context/live2d-config-context';
 import { HistoryInfo } from '@/context/websocket-context';
 import { ConfigFile } from '@/context/character-config-context';
@@ -94,17 +92,6 @@ export interface MessageEvent {
   };
 }
 
-// Get translation function for error messages
-const getTranslation = () => {
-  try {
-    const i18next = require('i18next').default;
-    return i18next.t.bind(i18next);
-  } catch (e) {
-    // Fallback if i18next is not available
-    return (key: string) => key;
-  }
-};
-
 class WebSocketService {
   private static instance: WebSocketService;
 
@@ -162,7 +149,7 @@ class WebSocketService {
         } catch (error) {
           console.error('Failed to parse WebSocket message:', error);
           toaster.create({
-            title: `${getTranslation()('error.failedParseWebSocket')}: ${error}`,
+            title: `${i18next.t('error.failedParseWebSocket')}: ${error}`,
             type: "error",
             duration: 2000,
           });
@@ -189,9 +176,9 @@ class WebSocketService {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
     } else {
-      console.warn('WebSocket is not open. Unable to send message:', message);
+      if (import.meta.env.DEV) console.warn('WebSocket is not open. Unable to send message:', message);
       toaster.create({
-        title: getTranslation()('error.websocketNotOpen'),
+        title: i18next.t('error.websocketNotOpen'),
         type: 'error',
         duration: 2000,
       });
