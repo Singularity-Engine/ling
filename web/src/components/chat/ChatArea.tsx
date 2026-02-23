@@ -80,7 +80,9 @@ const S_SCROLL_BTN: CSSProperties = {
 
 const S_SCROLL_BTN_PULSE: CSSProperties = {
   ...S_SCROLL_BTN,
+  boxShadow: "0 2px 20px var(--ling-purple-50)",
   animation: "scrollBtnIn 0.25s ease-out, scrollBtnPulse 2s ease-in-out infinite",
+  willChange: "opacity",
 };
 
 const S_NEW_DOT: CSSProperties = {
