@@ -281,6 +281,7 @@ body {
   background: rgba(139, 92, 246, 0.5) !important;
   border-color: rgba(139, 92, 246, 0.7) !important;
 }
+.ling-action-btn:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
 
 @keyframes landingBtnSpin {
   to { transform: rotate(360deg); }
@@ -445,6 +446,7 @@ body {
 .ling-conn-closed {
   transition: background 0.15s ease, border-color 0.15s ease;
 }
+.ling-conn-closed:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
 .ling-conn-closed:hover {
   background: var(--ling-surface-elevated) !important;
   border-color: var(--ling-error) !important;
@@ -547,6 +549,8 @@ body {
 .ling-mic-btn:active {
   transform: scale(0.88);
 }
+.ling-send-btn:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
+.ling-mic-btn:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
 /* Light theme: darken-on-hover instead of brighten (buttons are already light) */
 [data-theme="light"] .ling-send-btn:not(:disabled):hover {
   filter: brightness(0.92);
@@ -899,6 +903,7 @@ canvas {
 .welcome-chip { transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease; }
 .welcome-chip:hover { background: var(--ling-purple-25) !important; border-color: var(--ling-purple-30) !important; transform: translateY(-1px); }
 .welcome-chip:active { transform: scale(0.97); }
+.welcome-chip:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
 .chat-msg-item { contain: layout paint style; }
 
 /* ── ChatBubble: message entry, copy button, timestamps ── */
@@ -1161,6 +1166,7 @@ canvas {
 /* ── MemoryPanel: hover interactions + staggered card entrance ── */
 .ling-mem-close:hover { background: rgba(255,255,255,0.06) !important; color: rgba(255,255,255,0.6) !important; }
 .ling-mem-close:active { background: rgba(255,255,255,0.08) !important; color: rgba(255,255,255,0.7) !important; transform: scale(0.9); }
+.ling-mem-close:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
 .ling-memory-card:hover { background: rgba(255,255,255,0.07) !important; border-left-color: rgba(139,92,246,0.55) !important; }
 @keyframes memCardIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes memLoadPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.8; } }
@@ -1172,6 +1178,7 @@ canvas {
 /* ── StreamingFooter: retry button hover ── */
 .ling-retry-btn:hover { background: var(--ling-purple-30) !important; border-color: var(--ling-purple-40) !important; color: var(--ling-purple-lighter) !important; }
 .ling-retry-btn:active { transform: scale(0.96); }
+.ling-retry-btn:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
 
 /* ── Billing: modal & pricing button hover ── */
 .ling-billing-primary:hover { background: rgba(139, 92, 246, 0.8) !important; }
@@ -1188,10 +1195,12 @@ canvas {
 .ling-pricing-manage:active { transform: scale(0.97); color: rgba(255,255,255,0.5) !important; }
 .ling-credits-display:hover { background: rgba(0, 0, 0, 0.45) !important; border-color: rgba(168, 85, 247, 0.3) !important; }
 .ling-credits-display:active { transform: scale(0.95); }
+.ling-credits-display:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
 
 /* ── AffinityBadge: button hover/active + value reveal ── */
 .ling-affinity-btn:hover { background: rgba(0, 0, 0, 0.45) !important; border-color: var(--ling-accent) !important; }
 .ling-affinity-btn:active { background: rgba(0, 0, 0, 0.55) !important; transform: scale(0.95); }
+.ling-affinity-btn:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
 .ling-affinity-btn:hover .ling-affinity-value { max-width: 40px !important; opacity: 1 !important; }
 
 /* ── Onboarding: button & card hover/active feedback ── */
