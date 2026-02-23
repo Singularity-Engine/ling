@@ -367,7 +367,7 @@ class GatewayConnector {
         }
 
         // ── Hello OK ──
-        const helloPayload = frame.payload as HelloOkPayload | undefined;
+        const helloPayload = frame.payload as unknown as HelloOkPayload | undefined;
         if (frame.type === 'res' && frame.ok === true && helloPayload?.type === 'hello-ok') {
           this.connId = helloPayload?.server?.connId || null;
           const wasReconnecting = this.reconnectAttempts > 0 || this.inIdleRetry;

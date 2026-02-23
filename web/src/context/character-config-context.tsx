@@ -68,7 +68,8 @@ export function CharacterConfigProvider({ children }: { children: React.ReactNod
   );
 
   useEffect(() => {
-    window.api?.updateConfigFiles?.(configFiles);
+    // Electron preload API expects Record<string, string> but Gateway branch uses ConfigFile[]
+    window.api?.updateConfigFiles?.(configFiles as unknown as Record<string, string>);
   }, [configFiles]);
 
   return (

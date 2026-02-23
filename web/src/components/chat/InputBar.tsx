@@ -340,7 +340,7 @@ export const InputBar = memo(() => {
 
         <button
           className="ling-send-btn"
-          onClick={isAiSpeaking ? interrupt : handleSend}
+          onClick={isAiSpeaking ? () => interrupt() : handleSend}
           disabled={!isAiSpeaking && !canSend}
           aria-label={isAiSpeaking ? t("chat.stopReply") : !isConnected ? t("chat.sendDisconnected") : t("chat.sendMessage")}
           title={isAiSpeaking ? t("chat.stopReply") : !isConnected ? t("chat.sendDisconnected") : t("chat.sendMessage")}

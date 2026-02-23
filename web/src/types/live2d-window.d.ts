@@ -32,9 +32,16 @@ interface Live2DManager {
   getModel(index: number): Live2DModel | null;
 }
 
+/** Minimal LAppAdapter interface for non-WebSDK code.
+ *  Only includes methods used outside of restricted files. */
+interface LAppAdapterLike {
+  setExpression(name: string): void;
+  getExpressionName(index: number): string | null;
+}
+
 interface Window {
   /** Returns the singleton LAppAdapter (set in main.tsx) */
-  getLAppAdapter?(): unknown;
+  getLAppAdapter?(): LAppAdapterLike;
   /** Returns the Live2D model manager (set by WebSDK) */
   getLive2DManager?(): Live2DManager | null;
   /** The LAppLive2DManager class itself (exposed by WebSDK) */

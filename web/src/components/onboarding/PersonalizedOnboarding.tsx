@@ -374,7 +374,7 @@ function StepWelcome({ t, onNext }: { t: (k: string) => string; onNext: () => vo
 function StepInterests({
   t, selected, onToggle,
 }: {
-  t: (k: string) => string;
+  t: (k: string, opts?: Record<string, string>) => string;
   selected: string[];
   onToggle: (tag: string) => void;
 }) {
