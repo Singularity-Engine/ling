@@ -38,6 +38,14 @@
   /* 覆盖层 */
   --ling-overlay-dim: rgba(0, 0, 0, 0.2);
   --ling-overlay-backdrop: rgba(0, 0, 0, 0.4);
+  --ling-overlay-modal: rgba(0, 0, 0, 0.7);
+
+  /* 模态框 */
+  --ling-modal-bg: rgba(20, 8, 40, 0.95);
+  --ling-modal-border: var(--ling-purple-30);
+  --ling-btn-ghost-border: rgba(255, 255, 255, 0.12);
+  --ling-btn-ghost-bg: rgba(255, 255, 255, 0.05);
+  --ling-btn-ghost-color: rgba(255, 255, 255, 0.6);
 
   /* 状态横幅 */
   --ling-status-offline-bg: rgba(220, 38, 38, 0.75);
@@ -145,6 +153,14 @@
   --ling-error: #dc2626;
   --ling-error-bg: rgba(220, 38, 38, 0.1);
   --ling-error-border: rgba(220, 38, 38, 0.2);
+
+  /* 模态框 */
+  --ling-overlay-modal: rgba(0, 0, 0, 0.45);
+  --ling-modal-bg: rgba(255, 255, 255, 0.96);
+  --ling-modal-border: var(--ling-purple-25);
+  --ling-btn-ghost-border: rgba(0, 0, 0, 0.12);
+  --ling-btn-ghost-bg: rgba(0, 0, 0, 0.04);
+  --ling-btn-ghost-color: rgba(0, 0, 0, 0.55);
 
   /* 紫色常用透明度 */
   --ling-purple-05: rgba(124, 58, 237, 0.04);

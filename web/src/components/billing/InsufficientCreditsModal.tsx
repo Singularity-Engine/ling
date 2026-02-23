@@ -17,7 +17,7 @@ const S_BACKDROP_BASE: CSSProperties = {
   position: 'fixed',
   inset: 0,
   zIndex: 10000,
-  background: 'rgba(0, 0, 0, 0.7)',
+  background: 'var(--ling-overlay-modal)',
   backdropFilter: 'blur(8px)',
   WebkitBackdropFilter: 'blur(8px)',
   display: 'flex',
@@ -29,8 +29,8 @@ const S_BACKDROP_OPEN: CSSProperties = { ...S_BACKDROP_BASE, animation: 'overlay
 const S_BACKDROP_CLOSING: CSSProperties = { ...S_BACKDROP_BASE, animation: `overlayFadeOut ${EXIT_MS}ms ease-in forwards` };
 
 const S_CARD_BASE: CSSProperties = {
-  background: 'rgba(20, 8, 40, 0.95)',
-  border: '1px solid var(--ling-purple-30)',
+  background: 'var(--ling-modal-bg)',
+  border: '1px solid var(--ling-modal-border)',
   borderRadius: '20px',
   padding: '32px',
   maxWidth: '400px',
@@ -46,14 +46,14 @@ const S_ICON: CSSProperties = {
 };
 
 const S_TITLE: CSSProperties = {
-  color: '#fff',
+  color: 'var(--ling-text-primary)',
   fontSize: '20px',
   fontWeight: 700,
   margin: '0 0 12px',
 };
 
 const S_MESSAGE: CSSProperties = {
-  color: 'rgba(255,255,255,0.6)',
+  color: 'var(--ling-text-soft)',
   fontSize: '14px',
   lineHeight: 1.6,
   margin: '0 0 24px',
@@ -70,7 +70,7 @@ const S_BTN_PRIMARY: CSSProperties = {
   borderRadius: '12px',
   border: 'none',
   background: 'var(--ling-purple-60)',
-  color: '#fff',
+  color: 'var(--ling-text-primary)',
   fontSize: '14px',
   fontWeight: 600,
   cursor: 'pointer',
@@ -81,9 +81,9 @@ const S_BTN_PRIMARY: CSSProperties = {
 const S_BTN_SECONDARY: CSSProperties = {
   padding: '12px 24px',
   borderRadius: '12px',
-  border: '1px solid rgba(255,255,255,0.12)',
-  background: 'rgba(255,255,255,0.05)',
-  color: 'rgba(255,255,255,0.6)',
+  border: '1px solid var(--ling-btn-ghost-border)',
+  background: 'var(--ling-btn-ghost-bg)',
+  color: 'var(--ling-btn-ghost-color)',
   fontSize: '14px',
   fontWeight: 600,
   cursor: 'pointer',
@@ -100,9 +100,15 @@ const InsufficientCreditsModal: React.FC = memo(function InsufficientCreditsModa
   const closingTimer = useRef<ReturnType<typeof setTimeout>>();
   // Track what to do after the exit animation finishes
   const afterCloseRef = useRef<(() => void) | null>(null);
+  const primaryRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null);
 
   // Clean up timer on unmount
   useEffect(() => () => { clearTimeout(closingTimer.current); }, []);
+
+  // Auto-focus primary CTA when modal opens
+  useEffect(() => {
+    if (billingModal.open) primaryRef.current?.focus();
+  }, [billingModal.open]);
 
   const startExit = useCallback((afterDone?: () => void) => {
     if (closing) return;
@@ -168,26 +174,48 @@ const InsufficientCreditsModal: React.FC = memo(function InsufficientCreditsModa
 
   return (
     <div style={closing ? S_BACKDROP_CLOSING : S_BACKDROP_OPEN} onClick={handleBackdropClick}>
-      <div style={closing ? S_CARD_CLOSING : S_CARD_OPEN} role="dialog" aria-modal="true" aria-labelledby="billing-modal-title">
-        <div style={S_ICON}>{icon}</div>
+      <div
+        style={closing ? S_CARD_CLOSING : S_CARD_OPEN}
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="billing-modal-title"
+        aria-describedby="billing-modal-desc"
+      >
+        <div style={S_ICON} aria-hidden="true">{icon}</div>
 
         <h3 id="billing-modal-title" style={S_TITLE}>{title}</h3>
 
-        <p style={S_MESSAGE}>
+        <p id="billing-modal-desc" style={S_MESSAGE}>
           {billingModal.message || defaultMessage}
         </p>
 
         <div style={S_BTN_ROW}>
           {isGuestLimit ? (
-            <a href="/register" onClick={handleDismiss} className="ling-billing-primary" style={S_BTN_PRIMARY}>
+            <a
+              ref={primaryRef as React.Ref<HTMLAnchorElement>}
+              href="/register"
+              onClick={handleDismiss}
+              className="ling-billing-primary"
+              style={S_BTN_PRIMARY}
+            >
               {t('billing.registerFree')}
             </a>
           ) : (
-            <button onClick={handleViewPlans} className="ling-billing-primary" style={S_BTN_PRIMARY}>
+            <button
+              ref={primaryRef as React.Ref<HTMLButtonElement>}
+              onClick={handleViewPlans}
+              className="ling-billing-primary"
+              style={S_BTN_PRIMARY}
+            >
               {t('billing.viewPlans')}
             </button>
           )}
-          <button onClick={handleDismiss} className="ling-billing-secondary" style={S_BTN_SECONDARY}>
+          <button
+            onClick={handleDismiss}
+            className="ling-billing-secondary"
+            style={S_BTN_SECONDARY}
+            aria-label={t('billing.maybeLater')}
+          >
             {t('billing.maybeLater')}
           </button>
         </div>
