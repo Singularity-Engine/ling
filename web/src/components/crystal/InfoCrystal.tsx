@@ -27,8 +27,7 @@ const STATUS_ICONS: Record<string, string> = {
 // Transition string for smooth level changes via @property
 const LEVEL_TRANSITION = [
   "--cg-r 0.8s ease", "--cg-g 0.8s ease", "--cg-b 0.8s ease",
-  "--cb-lo 0.8s ease", "--cb-hi 0.8s ease",
-  "--cb-lo-a 0.8s ease", "--cb-hi-a 0.8s ease",
+  "--cb-hi 0.8s ease", "--cb-hi-a 0.8s ease",
   "--c-scale 0.8s ease", "--c-bg-alpha 0.8s ease", "--c-blur 0.8s ease",
 ].join(", ");
 
@@ -63,7 +62,7 @@ const _S_CARD_BASE: CSSProperties = {
   minHeight: "80px", maxHeight: "200px",
   background: "rgba(10, 0, 21, var(--c-bg-alpha))",
   backdropFilter: "blur(var(--c-blur))", borderRadius: "16px",
-  padding: "14px 16px", color: "white", cursor: "pointer", overflow: "hidden",
+  padding: "14px 16px", color: "white", cursor: "pointer",
 };
 const _S_SHIMMER_OUTER_BASE: CSSProperties = {
   position: "absolute", inset: 0, borderRadius: "16px",
@@ -183,15 +182,14 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
     "--cg-r": glowR,
     "--cg-g": glowG,
     "--cg-b": glowB,
-    "--cb-lo": `${Math.round(10 * theme.breatheIntensity)}px`,
     "--cb-hi": `${Math.round(22 * theme.breatheIntensity)}px`,
-    "--cb-lo-a": +(0.12 * theme.breatheIntensity).toFixed(2),
     "--cb-hi-a": +(0.30 * theme.breatheIntensity).toFixed(2),
     "--cf-range": `${-theme.floatRange}px`,
     "--c-scale": theme.scale,
     "--c-bg-alpha": theme.bgAlpha,
     "--c-blur": `${theme.blur}px`,
-  }), [glowR, glowG, glowB, theme.breatheIntensity, theme.floatRange, theme.scale, theme.bgAlpha, theme.blur]);
+    "--crystal-delay": `${animDelay}s`,
+  }), [glowR, glowG, glowB, theme.breatheIntensity, theme.floatRange, theme.scale, theme.bgAlpha, theme.blur, animDelay]);
 
   // ─── Expanded overlay ────────────────────────────────────────
 
@@ -240,12 +238,12 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
     // conflict with hover scale/rotateY changes.
     transform: `perspective(800px) rotateY(${currentRotateY}deg) scale(calc(var(--ce-scale) * ${currentScale})) translateY(calc(var(--ce-y) + var(--cf-y)))`,
     animation: [
-      // Position 0: enter or none — keeps positions 1&2 stable so
-      // crystalBreathe and crystalFloat don't restart when entered flips.
+      // Position 0: enter or none — keeps position 1 stable so
+      // crystalFloat doesn't restart when entered flips.
+      // crystalBreathe is now GPU-driven via ::after (see .ling-crystal-card in CSS).
       entered
         ? "none 0s"
         : `crystalEnter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${animDelay}s backwards`,
-      `crystalBreathe 3s ease-in-out ${animDelay}s infinite`,
       `crystalFloat ${floatDur}s ease-in-out ${animDelay + 0.6}s infinite`,
     ].join(", "),
     transition: `transform 0.25s ease, border-color 0.3s ease, ${LEVEL_TRANSITION}`,
@@ -255,6 +253,7 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
   return (
     <>
       <div
+        className="ling-crystal-card"
         style={cardStyle}
         onClick={handleClick}
         onMouseEnter={onEnter}

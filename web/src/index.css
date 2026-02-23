@@ -1084,13 +1084,11 @@ canvas {
 }
 
 /* ── InfoCrystal: @property for smooth affinity transitions + keyframes ── */
-@property --cg-r { syntax: '<number>'; inherits: false; initial-value: 96; }
-@property --cg-g { syntax: '<number>'; inherits: false; initial-value: 165; }
-@property --cg-b { syntax: '<number>'; inherits: false; initial-value: 250; }
-@property --cb-lo { syntax: '<length>'; inherits: false; initial-value: 10px; }
-@property --cb-hi { syntax: '<length>'; inherits: false; initial-value: 22px; }
-@property --cb-lo-a { syntax: '<number>'; inherits: false; initial-value: 0.12; }
-@property --cb-hi-a { syntax: '<number>'; inherits: false; initial-value: 0.30; }
+@property --cg-r { syntax: '<number>'; inherits: true; initial-value: 96; }
+@property --cg-g { syntax: '<number>'; inherits: true; initial-value: 165; }
+@property --cg-b { syntax: '<number>'; inherits: true; initial-value: 250; }
+@property --cb-hi { syntax: '<length>'; inherits: true; initial-value: 22px; }
+@property --cb-hi-a { syntax: '<number>'; inherits: true; initial-value: 0.30; }
 @property --cf-y { syntax: '<length>'; inherits: false; initial-value: 0px; }
 @property --c-scale { syntax: '<number>'; inherits: false; initial-value: 1; }
 @property --c-bg-alpha { syntax: '<number>'; inherits: false; initial-value: 0.60; }
@@ -1103,9 +1101,23 @@ canvas {
   from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
   to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
-@keyframes crystalBreathe {
-  0%, 100% { box-shadow: 0 0 var(--cb-lo) rgba(var(--cg-r), var(--cg-g), var(--cg-b), var(--cb-lo-a)); }
-  50%      { box-shadow: 0 0 var(--cb-hi) rgba(var(--cg-r), var(--cg-g), var(--cg-b), var(--cb-hi-a)); }
+/* crystalBreathe — GPU-friendly glow via ::after opacity (avoids per-frame box-shadow repaint) */
+@keyframes crystalBreatheOpacity {
+  0%, 100% { opacity: 0; }
+  50%      { opacity: 1; }
+}
+.ling-crystal-card { position: relative; }
+.ling-crystal-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 var(--cb-hi) rgba(var(--cg-r), var(--cg-g), var(--cg-b), var(--cb-hi-a));
+  opacity: 0;
+  animation: crystalBreatheOpacity 3s ease-in-out infinite;
+  animation-delay: var(--crystal-delay, 0s);
+  pointer-events: none;
+  will-change: opacity;
 }
 @keyframes crystalEnter {
   from { opacity: 0; --ce-scale: 0.5; --ce-y: 40px; }
