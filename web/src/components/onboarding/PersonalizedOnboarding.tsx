@@ -507,7 +507,7 @@ function StepInterests({
 function StepGoals({
   t, lang, skills, selected, onToggle,
 }: {
-  t: (k: string) => string;
+  t: (k: string, opts?: Record<string, string>) => string;
   lang: string;
   skills: SkillMeta[];
   selected: string[];

@@ -100,6 +100,7 @@ export const useGeneralSettings = ({
   };
 
   const [settings, setSettings] = useState<GeneralSettings>(initialSettings);
+  const [originalSettings, setOriginalSettings] = useState<GeneralSettings>(initialSettings);
   const originalConfName = confName;
 
   useEffect(() => {

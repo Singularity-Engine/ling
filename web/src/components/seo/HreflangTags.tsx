@@ -18,12 +18,12 @@ export function HreflangTags({ canonicalUrl }: HreflangTagsProps) {
           <link
             key={lng}
             rel="alternate"
-            hreflang={hreflang}
+            hrefLang={hreflang}
             href={canonicalUrl}
           />
         );
       })}
-      <link rel="alternate" hreflang="x-default" href={canonicalUrl} />
+      <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
     </Helmet>
   );
 }
