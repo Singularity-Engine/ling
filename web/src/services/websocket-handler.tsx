@@ -11,8 +11,8 @@ import { ModelInfo, useLive2DConfigActions } from '@/context/live2d-config-conte
 import { useSubtitleActions } from '@/context/subtitle-context';
 import { audioTaskQueue } from '@/utils/task-queue';
 import { useAudioTask } from '@/components/canvas/live2d';
-import { useBgUrl } from '@/context/bgurl-context';
-import { useConfig } from '@/context/character-config-context';
+import { useBgUrlActions } from '@/context/bgurl-context';
+import { useConfigState, useConfigActions } from '@/context/character-config-context';
 import { useChatMessages, useHistoryList, useStreamingSetters } from '@/context/chat-history-context';
 import { toaster } from '@/components/ui/toaster';
 import { useVADState, useVADActions } from '@/context/vad-context';
@@ -214,8 +214,9 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const { appendHumanMessage, appendAIMessage, appendOrUpdateToolCallMessage } = useChatMessages();
   const { clearResponse, setForceNewMessage, setFullResponse } = useStreamingSetters();
   const { addAudioTask } = useAudioTask();
-  const bgUrlContext = useBgUrl();
-  const { confUid, setConfName, setConfUid, setConfigFiles } = useConfig();
+  const { setBackgroundFiles } = useBgUrlActions();
+  const { confUid } = useConfigState();
+  const { setConfName, setConfUid, setConfigFiles } = useConfigActions();
   const [pendingModelInfo, setPendingModelInfo] = useState<ModelInfo | undefined>(undefined);
   const { setSelfUid, setGroupMembers, setIsOwner } = useGroup();
   const { micOn, autoStartMicOnConvEnd } = useVADState();
@@ -571,7 +572,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
       // Phase 6: Pre-populate config files and backgrounds locally
       setConfigFiles(DEFAULT_CONFIG_FILES);
-      bgUrlContext?.setBackgroundFiles(DEFAULT_BACKGROUNDS);
+      setBackgroundFiles(DEFAULT_BACKGROUNDS);
 
       // Helper: send auto-greeting (used when no previous history exists)
       const sendGreetingIfNeeded = () => {

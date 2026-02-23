@@ -6,7 +6,7 @@ import { MainContainer, ChatContainer, MessageList as ChatMessageList, Message a
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import { useChatMessages } from '@/context/chat-history-context';
 import { Global } from '@emotion/react';
-import { useConfig } from '@/context/character-config-context';
+import { useConfigState } from '@/context/character-config-context';
 import { useWebSocket } from '@/context/websocket-context';
 import { FaTools, FaCheck, FaTimes } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
@@ -94,7 +94,7 @@ const S_LOAD_MORE_BTN: React.CSSProperties = {
 const ChatHistoryPanel = memo(function ChatHistoryPanel(): JSX.Element {
   const { t } = useTranslation();
   const { messages } = useChatMessages();
-  const { confName } = useConfig();
+  const { confName } = useConfigState();
   const { baseUrl } = useWebSocket();
   const userName = "Me";
 

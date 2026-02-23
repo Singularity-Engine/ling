@@ -4,7 +4,6 @@ import {
 
 /**
  * Character configuration file interface
- * @interface ConfigFile
  */
 export interface ConfigFile {
   filename: string;
@@ -12,21 +11,32 @@ export interface ConfigFile {
 }
 
 /**
- * Character configuration context state interface
- * @interface CharacterConfigState
+ * Read-only character config state.
+ * Changes when confName, confUid, or configFiles update.
  */
-interface CharacterConfigState {
+interface ConfigState {
   confName: string;
   confUid: string;
   configFiles: ConfigFile[];
-  setConfName: (name: string) => void;
-  setConfUid: (uid: string) => void;
-  setConfigFiles: (files: ConfigFile[]) => void;
   getFilenameByName: (name: string) => string | undefined;
 }
 
 /**
- * Default values and constants
+ * Stable action callbacks.
+ * All callbacks are useState setters (intrinsically stable), so this
+ * context value never changes after mount.
+ */
+interface ConfigActions {
+  setConfName: (name: string) => void;
+  setConfUid: (uid: string) => void;
+  setConfigFiles: (files: ConfigFile[]) => void;
+}
+
+const ConfigStateContext = createContext<ConfigState | null>(null);
+const ConfigActionsContext = createContext<ConfigActions | null>(null);
+
+/**
+ * Default values
  */
 const DEFAULT_CONFIG = {
   confName: '',
@@ -35,14 +45,7 @@ const DEFAULT_CONFIG = {
 };
 
 /**
- * Create the character configuration context
- */
-export const ConfigContext = createContext<CharacterConfigState | null>(null);
-
-/**
  * Character Configuration Provider Component
- * @param {Object} props - Provider props
- * @param {React.ReactNode} props.children - Child components
  */
 export function CharacterConfigProvider({ children }: { children: React.ReactNode }) {
   const [confName, setConfName] = useState<string>(DEFAULT_CONFIG.confName);
@@ -54,18 +57,14 @@ export function CharacterConfigProvider({ children }: { children: React.ReactNod
     [configFiles],
   );
 
-  // Memoized context value
-  const contextValue = useMemo(
-    () => ({
-      confName,
-      confUid,
-      configFiles,
-      setConfName,
-      setConfUid,
-      setConfigFiles,
-      getFilenameByName,
-    }),
+  const state = useMemo<ConfigState>(
+    () => ({ confName, confUid, configFiles, getFilenameByName }),
     [confName, confUid, configFiles, getFilenameByName],
+  );
+
+  const actions = useMemo<ConfigActions>(
+    () => ({ setConfName, setConfUid, setConfigFiles }),
+    [],
   );
 
   useEffect(() => {
@@ -73,22 +72,33 @@ export function CharacterConfigProvider({ children }: { children: React.ReactNod
   }, [configFiles]);
 
   return (
-    <ConfigContext.Provider value={contextValue}>
-      {children}
-    </ConfigContext.Provider>
+    <ConfigActionsContext.Provider value={actions}>
+      <ConfigStateContext.Provider value={state}>
+        {children}
+      </ConfigStateContext.Provider>
+    </ConfigActionsContext.Provider>
   );
 }
 
+/** Subscribe to read-only config state (re-renders on state changes). */
+export function useConfigState() {
+  const ctx = useContext(ConfigStateContext);
+  if (!ctx) throw new Error('useConfigState must be used within a CharacterConfigProvider');
+  return ctx;
+}
+
+/** Subscribe to stable config actions (never causes re-renders). */
+export function useConfigActions() {
+  const ctx = useContext(ConfigActionsContext);
+  if (!ctx) throw new Error('useConfigActions must be used within a CharacterConfigProvider');
+  return ctx;
+}
+
 /**
- * Custom hook to use the character configuration context
- * @throws {Error} If used outside of CharacterConfigProvider
+ * Combined hook — returns both state and actions.
+ * Kept for backward compatibility with restricted files (hooks/utils/).
+ * Prefer useConfigState() or useConfigActions() for targeted subscriptions.
  */
 export function useConfig() {
-  const context = useContext(ConfigContext);
-
-  if (!context) {
-    throw new Error('useConfig must be used within a CharacterConfigProvider');
-  }
-
-  return context;
+  return { ...useConfigState(), ...useConfigActions() };
 }

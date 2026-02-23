@@ -2,9 +2,9 @@
 import { memo, useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Stack, createListCollection } from "@chakra-ui/react";
-import { useBgUrl } from "@/context/bgurl-context";
+import { useBgUrlState, useBgUrlActions } from "@/context/bgurl-context";
 import { settingStyles } from "./setting-styles";
-import { useConfig } from "@/context/character-config-context";
+import { useConfigState, useConfigActions } from "@/context/character-config-context";
 import { useGeneralSettings } from "@/hooks/sidebar/setting/use-general-settings";
 import { useWebSocket } from "@/context/websocket-context";
 import { SelectField, SwitchField, InputField } from "./common";
@@ -24,8 +24,8 @@ const LANGUAGE_COLLECTION = createListCollection({
 
 // Memoized collections — avoids recreating on every render
 const useCollections = (t: (key: string) => string) => {
-  const { backgroundFiles } = useBgUrl() || {};
-  const { configFiles } = useConfig();
+  const { backgroundFiles } = useBgUrlState();
+  const { configFiles } = useConfigState();
 
   const themes = useMemo(() => createListCollection({
     items: [
@@ -60,8 +60,11 @@ const useCollections = (t: (key: string) => string) => {
 
 const General = memo(function General({ onSave, onCancel }: GeneralProps): JSX.Element {
   const { t, i18n } = useTranslation();
-  const bgUrlContext = useBgUrl();
-  const { confName, setConfName } = useConfig();
+  const bgUrlState = useBgUrlState();
+  const bgUrlActions = useBgUrlActions();
+  const bgUrlContext = useMemo(() => ({ ...bgUrlState, ...bgUrlActions }), [bgUrlState, bgUrlActions]);
+  const { confName } = useConfigState();
+  const { setConfName } = useConfigActions();
   const { wsUrl, setWsUrl, baseUrl, setBaseUrl } = useWebSocket();
   const collections = useCollections(t);
 

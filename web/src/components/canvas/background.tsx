@@ -1,13 +1,13 @@
 import { memo, useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { canvasStyles } from './canvas-styles';
 import { useCameraState, useCameraActions } from '@/context/camera-context';
-import { useBgUrl } from '@/context/bgurl-context';
+import { useBgUrlState } from '@/context/bgurl-context';
 
 const Background = memo(({ children }: { children?: React.ReactNode }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { backgroundStream, isBackgroundStreaming } = useCameraState();
   const { startBackgroundCamera, stopBackgroundCamera } = useCameraActions();
-  const { useCameraBackground, backgroundUrl } = useBgUrl();
+  const { useCameraBackground, backgroundUrl } = useBgUrlState();
   const [bgLoaded, setBgLoaded] = useState(false);
 
   const handleBgLoad = useCallback(() => setBgLoaded(true), []);

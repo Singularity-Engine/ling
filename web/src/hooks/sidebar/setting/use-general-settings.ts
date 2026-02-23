@@ -5,7 +5,7 @@ import { defaultBaseUrl, defaultWsUrl } from '@/context/websocket-context';
 import { useSubtitle } from '@/context/subtitle-context';
 import { useCameraActions } from '@/context/camera-context';
 import { useSwitchCharacter } from '@/hooks/utils/use-switch-character';
-import { useConfig } from '@/context/character-config-context';
+import { useConfigState } from '@/context/character-config-context';
 import i18n from 'i18next';
 import { createLogger } from '@/utils/logger';
 
@@ -78,7 +78,7 @@ export const useGeneralSettings = ({
   const { showSubtitle, setShowSubtitle } = useSubtitle();
   const { setUseCameraBackground } = bgUrlContext || {};
   const { startBackgroundCamera, stopBackgroundCamera } = useCameraActions();
-  const { configFiles, getFilenameByName } = useConfig();
+  const { configFiles, getFilenameByName } = useConfigState();
   const { switchCharacter } = useSwitchCharacter();
 
   const getCurrentBgKey = (): string[] => {

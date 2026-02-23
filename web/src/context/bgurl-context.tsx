@@ -14,31 +14,41 @@ interface BackgroundFile {
 }
 
 /**
- * Background URL context state interface
- * @interface BgUrlContextState
+ * Read-only background state.
+ * Changes when backgroundUrl, backgroundFiles, or useCameraBackground update.
  */
-export interface BgUrlContextState {
+interface BgUrlState {
   backgroundUrl: string;
-  setBackgroundUrl: (url: string) => void;
   backgroundFiles: BackgroundFile[];
+  isDefaultBackground: boolean;
+  useCameraBackground: boolean;
+}
+
+/**
+ * Stable action callbacks.
+ * All callbacks use useCallback with stable deps, so this context value
+ * never changes after mount. Consumers that only WRITE subscribe here.
+ */
+interface BgUrlActions {
+  setBackgroundUrl: (url: string) => void;
   setBackgroundFiles: (files: BackgroundFile[]) => void;
   resetBackground: () => void;
   addBackgroundFile: (file: BackgroundFile) => void;
   removeBackgroundFile: (name: string) => void;
-  isDefaultBackground: boolean;
-  useCameraBackground: boolean;
   setUseCameraBackground: (use: boolean) => void;
 }
 
 /**
- * Create the background URL context
+ * Combined type — kept for backward compatibility with restricted files
+ * and use-general-settings which accepts the full context as a prop.
  */
-const BgUrlContext = createContext<BgUrlContextState | null>(null);
+export type BgUrlContextState = BgUrlState & BgUrlActions;
+
+const BgUrlStateContext = createContext<BgUrlState | null>(null);
+const BgUrlActionsContext = createContext<BgUrlActions | null>(null);
 
 /**
  * Background URL Provider Component
- * @param {Object} props - Provider props
- * @param {React.ReactNode} props.children - Child components
  */
 export function BgUrlProvider({ children }: { children: React.ReactNode }) {
   const { baseUrl } = useWebSocket();
@@ -47,31 +57,25 @@ export function BgUrlProvider({ children }: { children: React.ReactNode }) {
     [baseUrl],
   );
 
-  // Local storage for persistent background URL
   const [backgroundUrl, setBackgroundUrl] = useLocalStorage<string>(
     'backgroundUrl',
     defaultBackground,
   );
 
-  // State for background files list
   const [backgroundFiles, setBackgroundFiles] = useState<BackgroundFile[]>([]);
 
-  // Reset background to default
   const resetBackground = useCallback(() => {
     setBackgroundUrl(defaultBackground);
   }, [setBackgroundUrl, defaultBackground]);
 
-  // Add new background file
   const addBackgroundFile = useCallback((file: BackgroundFile) => {
     setBackgroundFiles((prev) => [...prev, file]);
   }, []);
 
-  // Remove background file
   const removeBackgroundFile = useCallback((name: string) => {
-    setBackgroundFiles((prev) => prev.filter((file) => file.name !== name));
+    setBackgroundFiles((prev) => prev.filter((f) => f.name !== name));
   }, []);
 
-  // Check if current background is default
   const isDefaultBackground = useMemo(
     () => backgroundUrl === defaultBackground,
     [backgroundUrl, defaultBackground],
@@ -79,37 +83,50 @@ export function BgUrlProvider({ children }: { children: React.ReactNode }) {
 
   const [useCameraBackground, setUseCameraBackground] = useState<boolean>(false);
 
-  // Memoized context value
-  const contextValue = useMemo(() => ({
+  const state = useMemo<BgUrlState>(() => ({
     backgroundUrl,
-    setBackgroundUrl,
     backgroundFiles,
+    isDefaultBackground,
+    useCameraBackground,
+  }), [backgroundUrl, backgroundFiles, isDefaultBackground, useCameraBackground]);
+
+  const actions = useMemo<BgUrlActions>(() => ({
+    setBackgroundUrl,
     setBackgroundFiles,
     resetBackground,
     addBackgroundFile,
     removeBackgroundFile,
-    isDefaultBackground,
-    useCameraBackground,
     setUseCameraBackground,
-  }), [backgroundUrl, setBackgroundUrl, backgroundFiles, resetBackground, addBackgroundFile, removeBackgroundFile, isDefaultBackground, useCameraBackground]);
+  }), [setBackgroundUrl, resetBackground, addBackgroundFile, removeBackgroundFile]);
 
   return (
-    <BgUrlContext.Provider value={contextValue}>
-      {children}
-    </BgUrlContext.Provider>
+    <BgUrlActionsContext.Provider value={actions}>
+      <BgUrlStateContext.Provider value={state}>
+        {children}
+      </BgUrlStateContext.Provider>
+    </BgUrlActionsContext.Provider>
   );
 }
 
+/** Subscribe to read-only background state (re-renders on state changes). */
+export function useBgUrlState() {
+  const ctx = useContext(BgUrlStateContext);
+  if (!ctx) throw new Error('useBgUrlState must be used within a BgUrlProvider');
+  return ctx;
+}
+
+/** Subscribe to stable background actions (never causes re-renders). */
+export function useBgUrlActions() {
+  const ctx = useContext(BgUrlActionsContext);
+  if (!ctx) throw new Error('useBgUrlActions must be used within a BgUrlProvider');
+  return ctx;
+}
+
 /**
- * Custom hook to use the background URL context
- * @throws {Error} If used outside of BgUrlProvider
+ * Combined hook — returns both state and actions.
+ * Kept for backward compatibility with restricted files (hooks/canvas/).
+ * Prefer useBgUrlState() or useBgUrlActions() for targeted subscriptions.
  */
 export function useBgUrl() {
-  const context = useContext(BgUrlContext);
-
-  if (!context) {
-    throw new Error('useBgUrl must be used within a BgUrlProvider');
-  }
-
-  return context;
+  return { ...useBgUrlState(), ...useBgUrlActions() };
 }
