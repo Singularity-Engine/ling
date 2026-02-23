@@ -22,7 +22,7 @@ const S_OVERLAY_BASE: React.CSSProperties = {
   position: 'fixed',
   inset: 0,
   zIndex: 9999,
-  background: 'rgba(0, 0, 0, 0.85)',
+  background: 'var(--ling-overlay-heavy)',
   backdropFilter: 'blur(12px)',
   WebkitBackdropFilter: 'blur(12px)',
   display: 'flex',
@@ -48,7 +48,7 @@ const closeBtnStyle: React.CSSProperties = {
   right: '0',
   background: 'none',
   border: 'none',
-  color: 'rgba(255,255,255,0.5)',
+  color: 'var(--ling-text-dim)',
   fontSize: '28px',
   cursor: 'pointer',
   padding: '4px',
@@ -57,8 +57,8 @@ const closeBtnStyle: React.CSSProperties = {
 };
 
 const titleContainerStyle: React.CSSProperties = { textAlign: 'center', marginBottom: '32px' };
-const titleStyle: React.CSSProperties = { color: '#fff', fontSize: '28px', fontWeight: 700, margin: 0 };
-const subtitleStyle: React.CSSProperties = { color: 'rgba(255,255,255,0.5)', fontSize: '14px', marginTop: '8px' };
+const titleStyle: React.CSSProperties = { color: 'var(--ling-text-primary)', fontSize: '28px', fontWeight: 700, margin: 0 };
+const subtitleStyle: React.CSSProperties = { color: 'var(--ling-text-dim)', fontSize: '14px', marginTop: '8px' };
 
 const planGridStyle: React.CSSProperties = {
   display: 'grid',
@@ -72,7 +72,7 @@ const popularBadgeBase: React.CSSProperties = {
   top: '-12px',
   left: '50%',
   transform: 'translateX(-50%)',
-  color: '#fff',
+  color: 'var(--ling-text-primary)',
   fontSize: '11px',
   fontWeight: 700,
   padding: '4px 16px',
@@ -82,14 +82,14 @@ const popularBadgeBase: React.CSSProperties = {
 };
 
 const planInfoStyle: React.CSSProperties = { marginBottom: '16px' };
-const planSubtitleStyle: React.CSSProperties = { color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '4px 0 0' };
+const planSubtitleStyle: React.CSSProperties = { color: 'var(--ling-text-tertiary)', fontSize: '12px', margin: '4px 0 0' };
 const planPriceContainerStyle: React.CSSProperties = { marginBottom: '20px' };
-const planPriceStyle: React.CSSProperties = { color: '#fff', fontSize: '32px', fontWeight: 700 };
-const planPeriodStyle: React.CSSProperties = { color: 'rgba(255,255,255,0.4)', fontSize: '14px' };
+const planPriceStyle: React.CSSProperties = { color: 'var(--ling-text-primary)', fontSize: '32px', fontWeight: 700 };
+const planPeriodStyle: React.CSSProperties = { color: 'var(--ling-text-tertiary)', fontSize: '14px' };
 
 const featureListStyle: React.CSSProperties = { listStyle: 'none', padding: 0, margin: '0 0 20px', flex: 1 };
 const featureItemStyle: React.CSSProperties = {
-  color: 'rgba(255,255,255,0.7)',
+  color: 'var(--ling-text-soft)',
   fontSize: '13px',
   padding: '4px 0',
   display: 'flex',
@@ -100,32 +100,32 @@ const featureItemStyle: React.CSSProperties = {
 const freeBtnStyle: React.CSSProperties = {
   padding: '10px',
   borderRadius: '10px',
-  border: '1px solid rgba(255,255,255,0.1)',
+  border: '1px solid var(--ling-surface-hover)',
   background: 'transparent',
-  color: 'rgba(255,255,255,0.3)',
+  color: 'var(--ling-text-muted)',
   fontSize: '14px',
   fontWeight: 600,
   cursor: 'default',
 };
 
 const creditSectionStyle: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.03)',
-  border: '1px solid rgba(255,255,255,0.08)',
+  background: 'var(--ling-surface-subtle)',
+  border: '1px solid var(--ling-surface-border)',
   borderRadius: '16px',
   padding: '24px',
 };
 
-const creditTitleStyle: React.CSSProperties = { color: 'rgba(255,255,255,0.8)', fontSize: '16px', fontWeight: 600, margin: '0 0 16px' };
-const creditDescStyle: React.CSSProperties = { color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: '-8px 0 16px' };
+const creditTitleStyle: React.CSSProperties = { color: 'var(--ling-text-secondary)', fontSize: '16px', fontWeight: 600, margin: '0 0 16px' };
+const creditDescStyle: React.CSSProperties = { color: 'var(--ling-text-tertiary)', fontSize: '12px', margin: '-8px 0 16px' };
 const creditFlexStyle: React.CSSProperties = { display: 'flex', gap: '12px', flexWrap: 'wrap' };
 const creditAmountStyle: React.CSSProperties = { fontSize: '20px', fontWeight: 700 };
-const creditPriceStyle: React.CSSProperties = { fontSize: '14px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' };
-const creditNoteStyle: React.CSSProperties = { color: 'rgba(255,255,255,0.3)', fontSize: '12px', marginTop: '12px', textAlign: 'center' };
+const creditPriceStyle: React.CSSProperties = { fontSize: '14px', color: 'var(--ling-btn-ghost-color)', marginTop: '4px' };
+const creditNoteStyle: React.CSSProperties = { color: 'var(--ling-text-muted)', fontSize: '12px', marginTop: '12px', textAlign: 'center' };
 const manageLinkContainerStyle: React.CSSProperties = { textAlign: 'center', marginTop: '16px' };
 const manageLinkStyle: React.CSSProperties = {
   background: 'none',
   border: 'none',
-  color: 'rgba(255,255,255,0.4)',
+  color: 'var(--ling-text-tertiary)',
   fontSize: '13px',
   cursor: 'pointer',
   textDecoration: 'underline',
@@ -218,10 +218,10 @@ const CREDIT_PACKS = [
 
 const planCardStyles = PLANS.map((plan) => ({
   card: {
-    background: 'rgba(255,255,255,0.04)',
+    background: 'var(--ling-surface-subtle)',
     border: plan.popular
       ? `2px solid ${plan.color}`
-      : '1px solid rgba(255,255,255,0.1)',
+      : '1px solid var(--ling-surface-hover)',
     borderRadius: '16px',
     padding: '24px',
     display: 'flex',
@@ -247,8 +247,8 @@ const creditBtnBase: React.CSSProperties = {
   padding: '16px',
   borderRadius: '12px',
   border: '1px solid var(--ling-purple-20)',
-  background: 'rgba(139, 92, 246, 0.08)',
-  color: '#fff',
+  background: 'var(--ling-purple-08)',
+  color: 'var(--ling-text-primary)',
   textAlign: 'center',
   transition: 'background 0.2s, border-color 0.2s',
 };
@@ -268,9 +268,9 @@ function getPlanBtnStyleCached(
     s = {
       ...planBtnBase,
       background: isCurrent
-        ? 'rgba(255,255,255,0.08)'
+        ? 'var(--ling-surface-border)'
         : plan.popular ? plan.color : `${plan.color}33`,
-      color: isCurrent ? 'rgba(255,255,255,0.4)' : '#fff',
+      color: isCurrent ? 'var(--ling-text-tertiary)' : 'var(--ling-text-primary)',
       cursor: isCurrent ? 'default' : hasLoading ? 'wait' : 'pointer',
     };
     _planBtnCache.set(key, s);
@@ -426,7 +426,7 @@ const PricingOverlay: React.FC = memo(() => {
                 </ul>
 
                 {plan.isFree ? (
-                  <button disabled style={freeBtnStyle}>
+                  <button disabled style={freeBtnStyle} aria-label={`${plan.name} — free plan`}>
                     {isCurrent ? 'Current Plan' : 'Free'}
                   </button>
                 ) : (
@@ -437,6 +437,8 @@ const PricingOverlay: React.FC = memo(() => {
                       plan.key && handleCheckout('subscription', plan.key)
                     }
                     style={getPlanBtnStyleCached(plan, idx, isCurrent, !!loading)}
+                    aria-label={isCurrent ? `${plan.name} — current plan` : `Upgrade to ${plan.name} for ${plan.price}${plan.period}`}
+                    aria-busy={loading === plan.key}
                   >
                     {isCurrent
                       ? 'Current Plan'
@@ -464,6 +466,8 @@ const PricingOverlay: React.FC = memo(() => {
                 disabled={!!loading || currentPlan === 'free'}
                 onClick={() => handleCheckout('credits', undefined, pack.credits)}
                 style={creditBtnDynamic}
+                aria-label={`Buy ${pack.credits} credits for ${pack.price}`}
+                aria-busy={loading === `credits-${pack.credits}`}
               >
                 <div style={creditAmountStyle}>✦ {pack.credits}</div>
                 <div style={creditPriceStyle}>
@@ -482,7 +486,7 @@ const PricingOverlay: React.FC = memo(() => {
         {/* Manage subscription */}
         {currentPlan !== 'free' && (
           <div style={manageLinkContainerStyle}>
-            <button className="ling-pricing-manage" onClick={handlePortal} style={manageLinkStyle}>
+            <button className="ling-pricing-manage" onClick={handlePortal} style={manageLinkStyle} aria-label="Manage subscription via Stripe portal">
               Manage Subscription
             </button>
           </div>

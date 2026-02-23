@@ -39,6 +39,7 @@
   --ling-overlay-dim: rgba(0, 0, 0, 0.2);
   --ling-overlay-backdrop: rgba(0, 0, 0, 0.4);
   --ling-overlay-modal: rgba(0, 0, 0, 0.7);
+  --ling-overlay-heavy: rgba(0, 0, 0, 0.85);
 
   /* 模态框 */
   --ling-modal-bg: rgba(20, 8, 40, 0.95);
@@ -1238,12 +1239,15 @@ canvas {
 .ling-billing-secondary:active { transform: scale(0.96); }
 .ling-plan-btn:hover { filter: brightness(1.15); }
 .ling-plan-btn:active { transform: scale(0.97); }
-.ling-credit-btn:hover { background: rgba(139, 92, 246, 0.18) !important; border-color: rgba(139, 92, 246, 0.4) !important; }
+.ling-credit-btn:hover { background: var(--ling-purple-20) !important; border-color: var(--ling-purple-40) !important; }
 .ling-credit-btn:active { transform: scale(0.97); }
-.ling-pricing-close:hover { color: rgba(255,255,255,0.85) !important; }
-.ling-pricing-close:active { transform: scale(0.85); color: rgba(255,255,255,0.6) !important; }
-.ling-pricing-manage:hover { color: rgba(255,255,255,0.7) !important; }
-.ling-pricing-manage:active { transform: scale(0.97); color: rgba(255,255,255,0.5) !important; }
+.ling-credit-btn:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
+.ling-pricing-close:hover { color: var(--ling-text-secondary) !important; }
+.ling-pricing-close:active { transform: scale(0.85); color: var(--ling-btn-ghost-color) !important; }
+.ling-pricing-close:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
+.ling-pricing-manage:hover { color: var(--ling-text-soft) !important; }
+.ling-pricing-manage:active { transform: scale(0.97); color: var(--ling-text-dim) !important; }
+.ling-pricing-manage:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
 .ling-credits-display:hover { background: rgba(0, 0, 0, 0.45) !important; border-color: rgba(168, 85, 247, 0.3) !important; }
 .ling-credits-display:active { transform: scale(0.95); }
 .ling-credits-display:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
