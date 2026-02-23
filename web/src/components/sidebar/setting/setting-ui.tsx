@@ -41,36 +41,41 @@ interface SettingUIProps {
 
 function SettingUI({ open, onClose }: SettingUIProps): JSX.Element {
   const { t } = useTranslation();
-  const [saveHandlers, setSaveHandlers] = useState<(() => void)[]>([]);
-  const [cancelHandlers, setCancelHandlers] = useState<(() => void)[]>([]);
   const [activeTab, setActiveTab] = useState('general');
 
   // Track which tabs have been visited — their panels stay mounted to preserve form state
   const visitedTabs = useRef(new Set<string>(['general']));
 
+  // Ref-based handler Sets — registration/unregistration is invisible to React
+  // (no state updates, no re-renders, O(1) add/delete).  Handlers are read at
+  // call-time inside handleSave/handleCancel, so they're always up-to-date.
+  const saveHandlersRef = useRef(new Set<() => void>());
+  const cancelHandlersRef = useRef(new Set<() => void>());
+
   const handleSaveCallback = useCallback((handler: () => void) => {
-    setSaveHandlers((prev) => [...prev, handler]);
-    return (): void => {
-      setSaveHandlers((prev) => prev.filter((h) => h !== handler));
-    };
+    saveHandlersRef.current.add(handler);
+    return (): void => { saveHandlersRef.current.delete(handler); };
   }, []);
 
   const handleCancelCallback = useCallback((handler: () => void) => {
-    setCancelHandlers((prev) => [...prev, handler]);
-    return (): void => {
-      setCancelHandlers((prev) => prev.filter((h) => h !== handler));
-    };
+    cancelHandlersRef.current.add(handler);
+    return (): void => { cancelHandlersRef.current.delete(handler); };
   }, []);
 
+  // Ref mirrors onClose so the callbacks below stay perfectly stable — they
+  // never recreate when the parent passes a new onClose reference.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   const handleSave = useCallback((): void => {
-    saveHandlers.forEach((handler) => handler());
-    onClose();
-  }, [saveHandlers, onClose]);
+    saveHandlersRef.current.forEach((handler) => handler());
+    onCloseRef.current();
+  }, []);
 
   const handleCancel = useCallback((): void => {
-    cancelHandlers.forEach((handler) => handler());
-    onClose();
-  }, [cancelHandlers, onClose]);
+    cancelHandlersRef.current.forEach((handler) => handler());
+    onCloseRef.current();
+  }, []);
 
   const handleTabChange = useCallback((details: { value: string }) => {
     visitedTabs.current.add(details.value);
