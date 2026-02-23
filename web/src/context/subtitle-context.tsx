@@ -3,21 +3,23 @@ import {
 } from 'react';
 
 /**
- * Subtitle context state interface
- * @interface SubtitleState
+ * Context 1 — Read-only subtitle state.
+ * Changes when subtitleText or showSubtitle update.
  */
-interface SubtitleState {
-  /** Current subtitle text */
-  subtitleText: string
+interface SubtitleReadType {
+  subtitleText: string;
+  showSubtitle: boolean;
+}
 
-  /** Set subtitle text */
-  setSubtitleText: (text: string) => void
-
-  /** Whether to show subtitle */
-  showSubtitle: boolean
-
-  /** Toggle subtitle visibility */
-  setShowSubtitle: (show: boolean) => void
+/**
+ * Context 2 — Stable action callbacks.
+ * All callbacks are React state-setters (identity-stable), so this
+ * context value never changes after mount. Consumers that only
+ * WRITE subtitle state subscribe here without re-renders on state changes.
+ */
+interface SubtitleActionsType {
+  setSubtitleText: (text: string) => void;
+  setShowSubtitle: (show: boolean) => void;
 }
 
 /**
@@ -28,51 +30,55 @@ const DEFAULT_SUBTITLE = {
         + 'Ahh, you must be amazed by my awesomeness, right? right?',
 };
 
-/**
- * Create the subtitle context
- */
-export const SubtitleContext = createContext<SubtitleState | null>(null);
+const SubtitleReadContext = createContext<SubtitleReadType | null>(null);
+const SubtitleActionsContext = createContext<SubtitleActionsType | null>(null);
 
 /**
  * Subtitle Provider Component
  * Manages the subtitle display text state
- *
- * @param {Object} props - Provider props
- * @param {React.ReactNode} props.children - Child components
  */
 export const SubtitleProvider = memo(({ children }: { children: React.ReactNode }) => {
-  // State management
   const [subtitleText, setSubtitleText] = useState<string>(DEFAULT_SUBTITLE.text);
   const [showSubtitle, setShowSubtitle] = useState<boolean>(true);
 
-  // Memoized context value
-  const contextValue = useMemo(
-    () => ({
-      subtitleText,
-      setSubtitleText,
-      showSubtitle,
-      setShowSubtitle,
-    }),
+  const actions = useMemo(
+    () => ({ setSubtitleText, setShowSubtitle }),
+    [],
+  );
+
+  const state = useMemo(
+    () => ({ subtitleText, showSubtitle }),
     [subtitleText, showSubtitle],
   );
 
   return (
-    <SubtitleContext.Provider value={contextValue}>
-      {children}
-    </SubtitleContext.Provider>
+    <SubtitleActionsContext.Provider value={actions}>
+      <SubtitleReadContext.Provider value={state}>
+        {children}
+      </SubtitleReadContext.Provider>
+    </SubtitleActionsContext.Provider>
   );
 });
 
+/** Subscribe to read-only subtitle state (re-renders on state changes). */
+export function useSubtitleRead() {
+  const ctx = useContext(SubtitleReadContext);
+  if (!ctx) throw new Error('useSubtitleRead must be used within SubtitleProvider');
+  return ctx;
+}
+
+/** Subscribe to stable subtitle actions (never causes re-renders). */
+export function useSubtitleActions() {
+  const ctx = useContext(SubtitleActionsContext);
+  if (!ctx) throw new Error('useSubtitleActions must be used within SubtitleProvider');
+  return ctx;
+}
+
 /**
- * Custom hook to use the subtitle context
- * @throws {Error} If used outside of SubtitleProvider
+ * Combined hook — returns both read-only state and actions.
+ * Kept for backward compatibility with restricted files (hooks/utils/, hooks/canvas/).
+ * Prefer useSubtitleRead() or useSubtitleActions() for targeted subscriptions.
  */
 export function useSubtitle() {
-  const context = useContext(SubtitleContext);
-
-  if (!context) {
-    throw new Error('useSubtitle must be used within a SubtitleProvider');
-  }
-
-  return context;
+  return { ...useSubtitleRead(), ...useSubtitleActions() };
 }

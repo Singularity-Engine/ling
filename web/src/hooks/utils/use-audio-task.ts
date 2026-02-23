@@ -4,7 +4,7 @@
 import { useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAiStateRead, useAiStateActions } from '@/context/ai-state-context';
-import { useSubtitle } from '@/context/subtitle-context';
+import { useSubtitleActions } from '@/context/subtitle-context';
 import { useChatMessages, useStreamingSetters } from '@/context/chat-history-context';
 import { audioTaskQueue } from '@/utils/task-queue';
 import { audioManager } from '@/utils/audio-manager';
@@ -34,7 +34,7 @@ export const useAudioTask = () => {
   const { t } = useTranslation();
   const { aiState, backendSynthComplete } = useAiStateRead();
   const { setBackendSynthComplete } = useAiStateActions();
-  const { setSubtitleText } = useSubtitle();
+  const { setSubtitleText } = useSubtitleActions();
   const { appendAIMessage } = useChatMessages();
   const { appendResponse } = useStreamingSetters();
   const { setExpression } = useLive2DExpression();

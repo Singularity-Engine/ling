@@ -8,7 +8,7 @@ import {
   WebSocketContext, HistoryInfo, LegacyMessage, defaultBaseUrl,
 } from '@/context/websocket-context';
 import { ModelInfo, useLive2DConfig } from '@/context/live2d-config-context';
-import { useSubtitle } from '@/context/subtitle-context';
+import { useSubtitleActions } from '@/context/subtitle-context';
 import { audioTaskQueue } from '@/utils/task-queue';
 import { useAudioTask } from '@/components/canvas/live2d';
 import { useBgUrl } from '@/context/bgurl-context';
@@ -210,7 +210,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const [baseUrl, setBaseUrl] = useLocalStorage<string>('baseUrl', defaultBaseUrl);
   const { setAiState, setBackendSynthComplete } = useAiStateActions();
   const { setModelInfo } = useLive2DConfig();
-  const { setSubtitleText } = useSubtitle();
+  const { setSubtitleText } = useSubtitleActions();
   const { appendHumanMessage, appendAIMessage, appendOrUpdateToolCallMessage } = useChatMessages();
   const { clearResponse, setForceNewMessage, setFullResponse } = useStreamingSetters();
   const { addAudioTask } = useAudioTask();

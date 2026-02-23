@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { canvasStyles } from './canvas-styles';
 import { useSubtitleDisplay } from '@/hooks/canvas/use-subtitle-display';
-import { useSubtitle } from '@/context/subtitle-context';
+import { useSubtitleRead } from '@/context/subtitle-context';
 
 // Type definitions
 interface SubtitleTextProps {
@@ -20,7 +20,7 @@ SubtitleText.displayName = 'SubtitleText';
 // Main component
 const Subtitle = memo((): JSX.Element | null => {
   const { subtitleText, isLoaded } = useSubtitleDisplay();
-  const { showSubtitle } = useSubtitle();
+  const { showSubtitle } = useSubtitleRead();
 
   if (!isLoaded || !subtitleText || !showSubtitle) return null;
 
