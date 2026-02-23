@@ -34,6 +34,7 @@ import { useUIActions, type BillingModalState } from '@/context/ui-context';
 import { apiClient } from '@/services/api-client';
 import i18next from 'i18next';
 import { createLogger } from '@/utils/logger';
+import { useLatest } from '@/utils/use-latest';
 
 // ─── Gateway configuration ──────────────────────────────────────
 
@@ -221,7 +222,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const { setSelfUid, setGroupMembers, setIsOwner } = useGroup();
   const { micOn, autoStartMicOnConvEnd } = useVADState();
   const { startMic, stopMic } = useVADActions();
-  const autoStartMicOnConvEndRef = useRef(autoStartMicOnConvEnd);
+  const autoStartMicOnConvEndRef = useLatest(autoStartMicOnConvEnd);
   const { interrupt } = useInterrupt();
   const { setBrowserViewData } = useBrowser();
   const affinityContext = useAffinityActions();
@@ -229,8 +230,6 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const { markSynthStart, markSynthDone, markSynthError, markPlayStart, markPlayDone, reset: resetTTSState } = useTTSActions();
   const { updateCredits, user } = useAuth();
   const { setBillingModal } = useUIActions();
-
-  autoStartMicOnConvEndRef.current = autoStartMicOnConvEnd;
 
   useEffect(() => {
     if (pendingModelInfo && confUid) {
@@ -248,26 +247,13 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   // Direct assignment keeps refs current without useEffect overhead.
   // Safe: ref writes in render don't affect the render tree.
 
-  const appendHumanMessageRef = useRef(appendHumanMessage);
-  appendHumanMessageRef.current = appendHumanMessage;
-
-  const setMessagesRef = useRef(setMessages);
-  setMessagesRef.current = setMessages;
-
-  const setHistoryListRef = useRef(setHistoryList);
-  setHistoryListRef.current = setHistoryList;
-
-  const setCurrentHistoryUidRef = useRef(setCurrentHistoryUid);
-  setCurrentHistoryUidRef.current = setCurrentHistoryUid;
-
-  const setAiStateRef = useRef(setAiState);
-  setAiStateRef.current = setAiState;
-
-  const setSubtitleTextRef = useRef(setSubtitleText);
-  setSubtitleTextRef.current = setSubtitleText;
-
-  const clearResponseRef = useRef(clearResponse);
-  clearResponseRef.current = clearResponse;
+  const appendHumanMessageRef = useLatest(appendHumanMessage);
+  const setMessagesRef = useLatest(setMessages);
+  const setHistoryListRef = useLatest(setHistoryList);
+  const setCurrentHistoryUidRef = useLatest(setCurrentHistoryUid);
+  const setAiStateRef = useLatest(setAiState);
+  const setSubtitleTextRef = useLatest(setSubtitleText);
+  const clearResponseRef = useLatest(clearResponse);
 
   // Per-visitor session key — bound to user account when logged in
   const sessionKeyRef = useRef(getVisitorSessionKey(user?.id));
@@ -299,14 +285,10 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   }, [user?.id]);
 
   // ─── Billing check ──────────────────────────────────────────
-  const userRef = useRef(user);
-  userRef.current = user;
-
+  const userRef = useLatest(user);
   const billingInFlightRef = useRef(false);
-  const updateCreditsRef = useRef(updateCredits);
-  updateCreditsRef.current = updateCredits;
-  const setBillingModalRef = useRef(setBillingModal);
-  setBillingModalRef.current = setBillingModal;
+  const updateCreditsRef = useLatest(updateCredits);
+  const setBillingModalRef = useLatest(setBillingModal);
 
   const checkBilling = useCallback(async (): Promise<boolean> => {
     const token = apiClient.getToken();
@@ -648,8 +630,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
   // ─── Subscribe to Gateway events (stable — never tears down) ───
 
-  const handleWebSocketMessageRef = useRef(handleWebSocketMessage);
-  handleWebSocketMessageRef.current = handleWebSocketMessage;
+  const handleWebSocketMessageRef = useLatest(handleWebSocketMessage);
 
   useEffect(() => {
     // Subscribe to Gateway state changes — track transitions for user notifications
@@ -794,24 +775,17 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
   // ─── TTS state refs (for stable useEffect access) ──────────────
 
-  const markSynthStartRef = useRef(markSynthStart);
-  markSynthStartRef.current = markSynthStart;
-  const markSynthDoneRef = useRef(markSynthDone);
-  markSynthDoneRef.current = markSynthDone;
-  const markSynthErrorRef = useRef(markSynthError);
-  markSynthErrorRef.current = markSynthError;
-  const markPlayStartRef = useRef(markPlayStart);
-  markPlayStartRef.current = markPlayStart;
-  const markPlayDoneRef = useRef(markPlayDone);
-  markPlayDoneRef.current = markPlayDone;
-  const resetTTSStateRef = useRef(resetTTSState);
-  resetTTSStateRef.current = resetTTSState;
+  const markSynthStartRef = useLatest(markSynthStart);
+  const markSynthDoneRef = useLatest(markSynthDone);
+  const markSynthErrorRef = useLatest(markSynthError);
+  const markPlayStartRef = useLatest(markPlayStart);
+  const markPlayDoneRef = useLatest(markPlayDone);
+  const resetTTSStateRef = useLatest(resetTTSState);
 
   // ─── TTS: synthesize speech when full-text arrives ─────────────
 
   const lastTtsTextRef = useRef('');
-  const addAudioTaskRef = useRef(addAudioTask);
-  addAudioTaskRef.current = addAudioTask;
+  const addAudioTaskRef = useLatest(addAudioTask);
 
   // Synthesis queue: serialize synthesis calls to preserve sentence order
   const synthQueueRef = useRef<Promise<void>>(Promise.resolve());
@@ -820,8 +794,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   // Only show TTS error toast once per conversation to avoid spam
   const ttsErrorShownRef = useRef(false);
   // Track current expression for TTS audio tasks
-  const currentExpressionRef = useRef<string | null>(null);
-  currentExpressionRef.current = affinityContext.currentExpression;
+  const currentExpressionRef = useLatest(affinityContext.currentExpression);
 
   useEffect(() => {
     const sub = gatewayAdapter.message$.subscribe((msg) => {
