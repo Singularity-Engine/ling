@@ -129,6 +129,19 @@ export const AudioVisualizer = memo(() => {
 
     const dataArray = new Uint8Array(FFT_SIZE / 2);
     const decay = decayRef.current;
+    const dpr = window.devicePixelRatio || 1;
+    const gap = 2;
+
+    // Cached bar layout + gradient — only recomputed when canvas dimensions
+    // change (resize events). Eliminates per-frame Math.floor, gradient
+    // creation, and radii array allocation at 30fps.
+    let layoutW = 0;
+    let layoutH = 0;
+    let barWidth = 0;
+    let effectiveBarWidth = 0;
+    let startX = 0;
+    let barRadii: [number, number, number, number] = [0, 0, 0, 0];
+    let cachedGradient: CanvasGradient | null = null;
 
     let lastTime = 0;
     const FRAME_INTERVAL = 1000 / 30; // Cap at 30fps to stay lightweight
@@ -139,8 +152,12 @@ export const AudioVisualizer = memo(() => {
       if (timestamp - lastTime < FRAME_INTERVAL) return;
       lastTime = timestamp;
 
-      const w = canvas.width;
-      const h = canvas.height;
+      // Use CSS-pixel dimensions: canvas stores physical pixels (CSS × DPR)
+      // after the resize handler applies ctx.scale(dpr). Drawing in physical-
+      // pixel coordinates inflated bars by DPR on HiDPI screens, clipping the
+      // right portion off-screen.
+      const w = canvas.width / dpr;
+      const h = canvas.height / dpr;
       ctx2d.clearRect(0, 0, w, h);
 
       const analyser = analyserRef.current;
@@ -148,21 +165,27 @@ export const AudioVisualizer = memo(() => {
         analyser.getByteFrequencyData(dataArray);
       }
 
-      const binCount = dataArray.length;
-      const barWidth = Math.floor(w / BAR_COUNT);
-      const gap = 2;
-      const effectiveBarWidth = barWidth - gap;
-      const startX = Math.floor((w - BAR_COUNT * barWidth) / 2);
+      // Recompute layout + gradient only when canvas dimensions change
+      if (w !== layoutW || h !== layoutH) {
+        layoutW = w;
+        layoutH = h;
+        barWidth = Math.floor(w / BAR_COUNT);
+        effectiveBarWidth = barWidth - gap;
+        startX = Math.floor((w - BAR_COUNT * barWidth) / 2);
+        const r = Math.min(effectiveBarWidth / 2, 3);
+        barRadii = [r, r, 0, 0]; // rounded top, flat bottom
 
+        cachedGradient = ctx2d.createLinearGradient(0, h, 0, 0);
+        cachedGradient.addColorStop(0, 'rgba(139, 92, 246, 0.75)');
+        cachedGradient.addColorStop(0.5, 'rgba(99, 102, 241, 0.6)');
+        cachedGradient.addColorStop(1, 'rgba(96, 165, 250, 0.45)');
+      }
+
+      const binCount = dataArray.length;
       let hasEnergy = false;
 
-      // One shared gradient per frame instead of 32 per-bar allocations.
-      // Per-bar opacity is controlled via globalAlpha (see below).
-      const sharedGradient = ctx2d.createLinearGradient(0, h, 0, 0);
-      sharedGradient.addColorStop(0, 'rgba(139, 92, 246, 0.75)');
-      sharedGradient.addColorStop(0.5, 'rgba(99, 102, 241, 0.6)');
-      sharedGradient.addColorStop(1, 'rgba(96, 165, 250, 0.45)');
-      ctx2d.fillStyle = sharedGradient;
+      // Per-bar opacity is controlled via globalAlpha; gradient is shared.
+      ctx2d.fillStyle = cachedGradient!;
 
       for (let i = 0; i < BAR_COUNT; i++) {
         // Map bar index to frequency bin range (weighted toward lower frequencies)
@@ -198,15 +221,7 @@ export const AudioVisualizer = memo(() => {
 
         ctx2d.globalAlpha = val;
         ctx2d.beginPath();
-        const radius = Math.min(effectiveBarWidth / 2, 3);
-        // Rounded top rectangle
-        ctx2d.moveTo(x + radius, y);
-        ctx2d.lineTo(x + effectiveBarWidth - radius, y);
-        ctx2d.quadraticCurveTo(x + effectiveBarWidth, y, x + effectiveBarWidth, y + radius);
-        ctx2d.lineTo(x + effectiveBarWidth, h);
-        ctx2d.lineTo(x, h);
-        ctx2d.lineTo(x, y + radius);
-        ctx2d.quadraticCurveTo(x, y, x + radius, y);
+        ctx2d.roundRect(x, y, effectiveBarWidth, barHeight, barRadii);
         ctx2d.fill();
       }
       ctx2d.globalAlpha = 1;
