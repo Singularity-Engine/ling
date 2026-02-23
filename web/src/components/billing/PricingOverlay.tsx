@@ -261,9 +261,15 @@ const PricingOverlay: React.FC = memo(() => {
     return () => window.removeEventListener('keydown', handler);
   }, [pricingOpen, setPricingOpen]);
 
-  if (!pricingOpen) return null;
+  const currentPlan = user?.plan || 'free';
 
-  const handleCheckout = async (
+  const handleClose = useCallback(() => setPricingOpen(false), [setPricingOpen]);
+  const handleOverlayClick = useCallback(
+    (e: React.MouseEvent) => { if (e.target === e.currentTarget) setPricingOpen(false); },
+    [setPricingOpen],
+  );
+
+  const handleCheckout = useCallback(async (
     type: 'subscription' | 'credits',
     plan?: string,
     credits?: number,
@@ -294,9 +300,9 @@ const PricingOverlay: React.FC = memo(() => {
     } finally {
       setLoading(null);
     }
-  };
+  }, []);
 
-  const handlePortal = async () => {
+  const handlePortal = useCallback(async () => {
     try {
       const data = await apiClient.get<{ portal_url?: string }>('/api/stripe/portal');
       if (data.portal_url) {
@@ -310,15 +316,7 @@ const PricingOverlay: React.FC = memo(() => {
         duration: 4000,
       });
     }
-  };
-
-  const currentPlan = user?.plan || 'free';
-
-  const handleClose = useCallback(() => setPricingOpen(false), [setPricingOpen]);
-  const handleOverlayClick = useCallback(
-    (e: React.MouseEvent) => { if (e.target === e.currentTarget) setPricingOpen(false); },
-    [setPricingOpen],
-  );
+  }, []);
 
   // Dynamic button styles that depend on runtime state
   const getPlanBtnStyle = useCallback(
@@ -338,6 +336,8 @@ const PricingOverlay: React.FC = memo(() => {
     cursor: currentPlan === 'free' ? 'not-allowed' : loading ? 'wait' : 'pointer',
     opacity: currentPlan === 'free' ? 0.4 : 1,
   }), [currentPlan, loading]);
+
+  if (!pricingOpen) return null;
 
   return (
     <div style={overlayStyle} onClick={handleOverlayClick}>
