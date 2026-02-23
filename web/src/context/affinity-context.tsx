@@ -41,14 +41,16 @@ const AffinityStateContext = createContext<AffinityState | null>(null);
 const AffinityActionsContext = createContext<AffinityActionsType | null>(null);
 
 export function AffinityProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AffinityState>({
-    affinity: 50,
-    level: "neutral",
-    milestone: null,
-    pointGains: [],
-    currentExpression: null,
-    expressionIntensity: 0,
-  });
+  // Split into individual useState so React can bail out when a setter
+  // receives the same primitive value, and useMemo below keeps the context
+  // reference stable when unrelated fields change.
+  const [affinity, setAffinityVal] = useState(50);
+  const [level, setLevelVal] = useState("neutral");
+  const [milestone, setMilestoneVal] = useState<string | null>(null);
+  const [pointGains, setPointGains] = useState<PointGain[]>([]);
+  const [currentExpression, setCurrentExpr] = useState<string | null>(null);
+  const [expressionIntensity, setExprIntensity] = useState(0);
+
   const milestoneTimer = useRef<ReturnType<typeof setTimeout>>();
   const expressionDecayTimer = useRef<ReturnType<typeof setTimeout>>();
   const pointGainIdRef = useRef(0);
@@ -64,24 +66,25 @@ export function AffinityProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const updateAffinity = useCallback((affinity: number, level: string) => {
-    setState(prev => ({ ...prev, affinity, level }));
+  const updateAffinity = useCallback((aff: number, lvl: string) => {
+    setAffinityVal(aff);
+    setLevelVal(lvl);
   }, []);
 
   const showMilestone = useCallback((message: string) => {
     if (milestoneTimer.current) clearTimeout(milestoneTimer.current);
-    setState(prev => ({ ...prev, milestone: message }));
+    setMilestoneVal(message);
     milestoneTimer.current = setTimeout(() => {
-      setState(prev => ({ ...prev, milestone: null }));
+      setMilestoneVal(null);
     }, 5000);
   }, []);
 
   const showPointGain = useCallback((delta: number, streak: boolean) => {
     const id = ++pointGainIdRef.current;
-    setState(prev => ({ ...prev, pointGains: [...prev.pointGains, { id, delta, streak }] }));
+    setPointGains(prev => [...prev, { id, delta, streak }]);
     const timer = setTimeout(() => {
       pointGainTimers.current.delete(timer);
-      setState(prev => ({ ...prev, pointGains: prev.pointGains.filter(p => p.id !== id) }));
+      setPointGains(prev => prev.filter(p => p.id !== id));
     }, 1500);
     pointGainTimers.current.add(timer);
   }, []);
@@ -89,11 +92,13 @@ export function AffinityProvider({ children }: { children: ReactNode }) {
   const setExpression = useCallback((expression: string, intensity: number) => {
     if (expressionDecayTimer.current) clearTimeout(expressionDecayTimer.current);
     currentExpressionRef.current = expression;
-    setState(prev => ({ ...prev, currentExpression: expression, expressionIntensity: intensity }));
+    setCurrentExpr(expression);
+    setExprIntensity(intensity);
     // Decay expression intensity back to 0 after 8 seconds
     expressionDecayTimer.current = setTimeout(() => {
       currentExpressionRef.current = null;
-      setState(prev => ({ ...prev, currentExpression: null, expressionIntensity: 0 }));
+      setCurrentExpr(null);
+      setExprIntensity(0);
     }, 8000);
   }, []);
 
@@ -105,6 +110,11 @@ export function AffinityProvider({ children }: { children: ReactNode }) {
   const actions = useMemo(
     () => ({ updateAffinity, showMilestone, showPointGain, setExpression, getCurrentExpression }),
     [updateAffinity, showMilestone, showPointGain, setExpression, getCurrentExpression],
+  );
+
+  const state = useMemo<AffinityState>(
+    () => ({ affinity, level, milestone, pointGains, currentExpression, expressionIntensity }),
+    [affinity, level, milestone, pointGains, currentExpression, expressionIntensity],
   );
 
   return (
