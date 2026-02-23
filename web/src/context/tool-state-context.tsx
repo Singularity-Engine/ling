@@ -37,7 +37,6 @@ interface ToolStateReadonly {
  */
 interface ToolActionsType {
   startTool: (tool: Omit<ToolCall, 'id' | 'startTime' | 'status'> & { id?: string; status?: ToolCall['status'] }) => void;
-  updateTool: (id: string, update: Partial<ToolCall>) => void;
   completeTool: (id: string, result: string) => void;
   failTool: (id: string, error: string) => void;
   clearResults: () => void;
@@ -73,7 +72,6 @@ interface ToolReducerState {
 
 type ToolAction =
   | { type: 'start'; tool: ToolCall }
-  | { type: 'update'; id: string; update: Partial<ToolCall> }
   | { type: 'complete'; id: string; result: string }
   | { type: 'fail'; id: string; error: string }
   | { type: 'removeRecent'; id: string }
@@ -98,10 +96,6 @@ function toolReducer(state: ToolReducerState, action: ToolAction): ToolReducerSt
   switch (action.type) {
     case 'start': {
       const next = [...state.activeTools, action.tool];
-      return { ...state, activeTools: next, currentPhase: inferPhase(next) ?? state.currentPhase };
-    }
-    case 'update': {
-      const next = state.activeTools.map(t => t.id === action.id ? { ...t, ...action.update } : t);
       return { ...state, activeTools: next, currentPhase: inferPhase(next) ?? state.currentPhase };
     }
     case 'complete': {
@@ -197,10 +191,6 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const updateTool = useCallback((id: string, update: Partial<ToolCall>) => {
-    dispatch({ type: 'update', id, update });
-  }, []);
-
   const completeTool = useCallback((id: string, result: string) => {
     dispatch({ type: 'complete', id, result });
     scheduleRemoval(id);
@@ -229,8 +219,9 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
   const dominantCategory = useMemo(() => computeDominant(state.activeTools), [state.activeTools]);
   const activeToolName = useMemo(() => state.activeTools.length > 0 ? state.activeTools[0].name : null, [state.activeTools]);
 
-  // Demo trigger: window.__triggerToolDemo('search') in browser console
+  // Demo trigger: window.__triggerToolDemo('search') in browser console (dev only)
   useEffect(() => {
+    if (!import.meta.env.DEV) return;
     const timers = demoTimers.current;
     const trackTimeout = (fn: () => void, ms: number) => {
       const id = setTimeout(() => { timers.delete(id); fn(); }, ms);
@@ -260,11 +251,10 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
   // Context 2: stable actions — all callbacks have stable deps, never changes
   const actionsValue = useMemo(() => ({
     startTool,
-    updateTool,
     completeTool,
     failTool,
     clearResults,
-  }), [startTool, updateTool, completeTool, failTool, clearResults]);
+  }), [startTool, completeTool, failTool, clearResults]);
 
   return (
     <ToolActionsContext.Provider value={actionsValue}>

@@ -1,6 +1,5 @@
-import React, { useContext, useCallback, useMemo, useRef } from 'react';
+import React, { useContext } from 'react';
 import { wsService } from '@/services/websocket-service';
-import { useLocalStorage } from '@/hooks/utils/use-local-storage';
 
 // 动态判断连接地址
 function getDefaultUrls() {
@@ -109,46 +108,3 @@ export function useWebSocket() {
 
 export const defaultWsUrl = DEFAULT_WS_URL;
 export const defaultBaseUrl = DEFAULT_BASE_URL;
-
-export function WebSocketProvider({ children }: { children: React.ReactNode }) {
-  const [wsUrl, rawSetWsUrl] = useLocalStorage('wsUrl', DEFAULT_WS_URL);
-  const [baseUrl, rawSetBaseUrl] = useLocalStorage('baseUrl', DEFAULT_BASE_URL);
-  // useLocalStorage returns unstable setters — stabilize via refs.
-  const setWsUrlRef = useRef(rawSetWsUrl);
-  setWsUrlRef.current = rawSetWsUrl;
-  const setBaseUrlRef = useRef(rawSetBaseUrl);
-  setBaseUrlRef.current = rawSetBaseUrl;
-  const wsUrlRef = useRef(wsUrl);
-  wsUrlRef.current = wsUrl;
-
-  const handleSetWsUrl = useCallback((url: string) => {
-    setWsUrlRef.current(url);
-    wsService.connect(url);
-  }, []);
-
-  const setBaseUrl = useCallback(
-    (url: string) => setBaseUrlRef.current(url),
-    [],
-  );
-
-  const stateValue = useMemo(() => ({
-    wsState: 'CLOSED' as const,
-    wsUrl,
-    baseUrl,
-  }), [wsUrl, baseUrl]);
-
-  const actionsValue = useMemo(() => ({
-    sendMessage: wsService.sendMessage.bind(wsService),
-    reconnect: () => wsService.connect(wsUrlRef.current),
-    setWsUrl: handleSetWsUrl,
-    setBaseUrl,
-  }), [handleSetWsUrl, setBaseUrl]);
-
-  return (
-    <WebSocketStateContext.Provider value={stateValue}>
-      <WebSocketActionsContext.Provider value={actionsValue}>
-        {children}
-      </WebSocketActionsContext.Provider>
-    </WebSocketStateContext.Provider>
-  );
-}

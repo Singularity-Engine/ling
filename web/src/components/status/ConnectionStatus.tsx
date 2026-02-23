@@ -185,30 +185,28 @@ export const ConnectionStatus = memo(() => {
   const Tag = isClosed ? "button" : "div";
 
   return (
-    <>
-      <Tag
-        onClick={isClosed ? reconnect : undefined}
-        style={containerStyle}
-        className={isClosed ? "ling-conn-closed" : undefined}
-      >
-        {/* Status dot */}
-        <div style={dotStyle} />
+    <Tag
+      onClick={isClosed ? reconnect : undefined}
+      style={containerStyle}
+      className={isClosed ? "ling-conn-closed" : undefined}
+    >
+      {/* Status dot */}
+      <div style={dotStyle} />
 
-        {/* Label */}
-        {!isOpen && (
-          <span style={isClosed ? S_LABEL_ERROR : S_LABEL_WARNING}>
-            {label}
-          </span>
-        )}
+      {/* Label */}
+      {!isOpen && (
+        <span style={isClosed ? S_LABEL_ERROR : S_LABEL_WARNING}>
+          {label}
+        </span>
+      )}
 
-        {/* Click hint for disconnected state */}
-        {isClosed && (
-          <span style={S_HINT}>
-            {t("connection.clickRetry")}
-          </span>
-        )}
-      </Tag>
-    </>
+      {/* Click hint for disconnected state */}
+      {isClosed && (
+        <span style={S_HINT}>
+          {t("connection.clickRetry")}
+        </span>
+      )}
+    </Tag>
   );
 });
 
