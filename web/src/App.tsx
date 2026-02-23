@@ -47,7 +47,7 @@ import { NetworkStatusBanner } from "./components/effects/NetworkStatusBanner";
 import { TapParticles } from "./components/effects/TapParticles";
 import { useAffinityIdleExpression } from "./hooks/use-affinity-idle-expression";
 import { useIsMobile } from "./hooks/use-is-mobile";
-import { AuthProvider, useAuth } from "./context/auth-context";
+import { AuthProvider, useAuthState, useAuthActions } from "./context/auth-context";
 import { UIProvider } from "./context/ui-context";
 import CreditsDisplay from "./components/billing/CreditsDisplay";
 import { ExperimentBar } from "./components/experiment/ExperimentBar";
@@ -600,7 +600,7 @@ function MainContent(): JSX.Element {
  * 放在 AuthProvider 内部，当 auth 初始化完成后平滑淡出 fallback。
  */
 function DismissFallback() {
-  const { isLoading } = useAuth();
+  const { isLoading } = useAuthState();
   useEffect(() => {
     if (!isLoading) {
       const el = document.getElementById('loading-fallback');
@@ -615,7 +615,7 @@ function DismissFallback() {
 
 /** 已登录时阻止访问 login/register */
 function GuestOnly({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuthState();
   if (isLoading) return null;
   if (isAuthenticated) return <Navigate to="/" replace />;
   return <>{children}</>;
@@ -623,7 +623,7 @@ function GuestOnly({ children }: { children: ReactNode }) {
 
 /** 处理 Stripe checkout 回调 */
 function useCheckoutCallback() {
-  const { refreshUser } = useAuth();
+  const { refreshUser } = useAuthActions();
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const checkout = params.get('checkout');

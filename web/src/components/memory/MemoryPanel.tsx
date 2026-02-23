@@ -8,8 +8,8 @@
 import { memo, useState, useEffect, useCallback, useRef, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiClient } from '@/services/api-client';
-import { useAuth } from '@/context/auth-context';
-import { createStyleInjector } from '@/utils/style-injection';
+import { useAuthState } from '@/context/auth-context';
+// Hover styles moved to static index.css — no runtime injection needed.
 
 interface MemoryEntry {
   id: string;
@@ -24,16 +24,6 @@ interface MemoryPanelProps {
 }
 
 const EXIT_DURATION = 250; // ms — matches slideOutRight animation
-
-// ── Deferred style injection (avoids module-level side effects) ──
-const ensureMemoryPanelStyles = createStyleInjector({
-  id: 'memory-panel-styles',
-  css: `
-    .ling-mem-close:hover { background: rgba(255,255,255,0.06) !important; color: rgba(255,255,255,0.6) !important; }
-    .ling-mem-close:active { background: rgba(255,255,255,0.08) !important; color: rgba(255,255,255,0.7) !important; transform: scale(0.9); }
-    .ling-memory-card:hover { background: rgba(255,255,255,0.07) !important; border-left-color: rgba(139,92,246,0.55) !important; }
-  `,
-});
 
 // ─── Static style constants (avoid per-render allocation) ───
 
@@ -141,9 +131,8 @@ const DATE_OPTS: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }
 // ─── Component ───
 
 export const MemoryPanel = memo(function MemoryPanel({ open, onClose }: MemoryPanelProps) {
-  useEffect(ensureMemoryPanelStyles, []);
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user } = useAuthState();
   const [memories, setMemories] = useState<MemoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

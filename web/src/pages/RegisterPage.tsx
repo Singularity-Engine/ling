@@ -2,12 +2,12 @@ import { useState, type FormEvent } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/context/auth-context';
+import { useAuthActions } from '@/context/auth-context';
 import { ApiError } from '@/services/api-client';
 
 export function RegisterPage() {
   const { t } = useTranslation();
-  const { register } = useAuth();
+  const { register } = useAuthActions();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');

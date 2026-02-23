@@ -8,7 +8,7 @@
 import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { apiClient } from '@/services/api-client';
 import { useUIState, useUIActions } from '@/context/ui-context';
-import { useAuth } from '@/context/auth-context';
+import { useAuthState } from '@/context/auth-context';
 import { toaster } from '@/components/ui/toaster';
 import { createLogger } from '@/utils/logger';
 
@@ -248,7 +248,7 @@ const creditBtnBase: React.CSSProperties = {
 const PricingOverlay: React.FC = memo(() => {
   const { pricingOpen } = useUIState();
   const { setPricingOpen } = useUIActions();
-  const { user } = useAuth();
+  const { user } = useAuthState();
   const [loading, setLoading] = useState<string | null>(null);
 
   // ESC to close

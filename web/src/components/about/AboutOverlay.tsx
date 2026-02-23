@@ -1,34 +1,10 @@
 import { memo, useState, useEffect, useCallback, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "@/context/auth-context";
+import { useAuthState, useAuthActions } from "@/context/auth-context";
 import { useUIActions } from "@/context/ui-context";
 import { apiClient } from "@/services/api-client";
 import packageJson from "../../../package.json";
-import { createStyleInjector } from "@/utils/style-injection";
-
-// ── Deferred style injection (avoids module-level side effects) ──
-const ensureAboutStyles = createStyleInjector({
-  id: "about-overlay-styles",
-  css: `
-    @keyframes aboutFadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes aboutSlideIn { from { opacity: 0; transform: translateY(12px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
-    .about-link {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 6px 14px; border-radius: 8px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 12px; text-decoration: none;
-      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-      cursor: pointer;
-    }
-    .about-link:hover {
-      background: rgba(139, 92, 246, 0.2);
-      border-color: rgba(139, 92, 246, 0.4);
-      color: var(--ling-purple-lighter);
-    }
-  `,
-});
+// Keyframes & class styles moved to static index.css — no runtime injection needed.
 
 // ─── Static data ───
 
@@ -307,9 +283,9 @@ const S_COPYRIGHT: CSSProperties = {
 // ─── Component ───
 
 export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
-  useEffect(ensureAboutStyles, []);
   const { t } = useTranslation();
-  const { user, logout } = useAuth();
+  const { user } = useAuthState();
+  const { logout } = useAuthActions();
   const { setPricingOpen } = useUIActions();
   const [portalLoading, setPortalLoading] = useState(false);
 

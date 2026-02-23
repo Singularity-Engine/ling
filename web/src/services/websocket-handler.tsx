@@ -28,7 +28,7 @@ import { asrService } from '@/services/asr-service';
 import { useTTSActions } from '@/context/tts-state-context';
 import { BRAND_NAME_SHORT, BRAND_NAME_DISPLAY, BRAND_AVATAR_NAME } from '@/constants/brand';
 import { MOBILE_BREAKPOINT } from '@/constants/breakpoints';
-import { useAuth } from '@/context/auth-context';
+import { useAuthState, useAuthActions } from '@/context/auth-context';
 import { useUIActions, type BillingModalState } from '@/context/ui-context';
 import { apiClient } from '@/services/api-client';
 import i18next from 'i18next';
@@ -226,7 +226,8 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const affinityContext = useAffinityActions();
   const { startTool, completeTool, failTool } = useToolActions();
   const { markSynthStart, markSynthDone, markSynthError, markPlayStart, markPlayDone, reset: resetTTSState } = useTTSActions();
-  const { updateCredits, user } = useAuth();
+  const { user } = useAuthState();
+  const { updateCredits } = useAuthActions();
   const { setBillingModal } = useUIActions();
 
   useEffect(() => {

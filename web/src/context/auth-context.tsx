@@ -2,6 +2,8 @@
  * 灵认证上下文
  *
  * 提供 login / register / logout / refreshUser 以及当前用户状态。
+ * 拆分为 read-only state + stable actions 双 context，
+ * 避免只需 action 的消费者被 state 变化触发重渲染。
  */
 
 import {
@@ -28,10 +30,13 @@ export interface User {
   subscription_status: string;
 }
 
-interface AuthContextType {
+interface AuthState {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+}
+
+interface AuthActionsType {
   login(identifier: string, password: string): Promise<void>;
   register(
     email: string,
@@ -44,7 +49,8 @@ interface AuthContextType {
   updateCredits(balance: number): void;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthStateContext = createContext<AuthState | null>(null);
+const AuthActionsContext = createContext<AuthActionsType | null>(null);
 
 // ── Provider ──────────────────────────────────────────────────
 
@@ -118,39 +124,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser((prev) => prev ? { ...prev, credits_balance: balance } : prev);
   }, []);
 
-  const value = useMemo<AuthContextType>(
-    () => ({
-      user,
-      isLoading,
-      isAuthenticated: !!user,
-      login,
-      register,
-      logout,
-      refreshUser,
-      updateCredits,
-    }),
-    [user, isLoading, login, register, logout, refreshUser, updateCredits],
+  const actions = useMemo<AuthActionsType>(
+    () => ({ login, register, logout, refreshUser, updateCredits }),
+    [login, register, logout, refreshUser, updateCredits],
+  );
+
+  const state = useMemo<AuthState>(
+    () => ({ user, isLoading, isAuthenticated: !!user }),
+    [user, isLoading],
   );
 
   return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+    <AuthActionsContext.Provider value={actions}>
+      <AuthStateContext.Provider value={state}>
+        {children}
+      </AuthStateContext.Provider>
+    </AuthActionsContext.Provider>
   );
 }
 
 // ── Hooks ─────────────────────────────────────────────────────
 
-export function useAuth(): AuthContextType {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth 必须在 AuthProvider 内使用');
+/** Subscribe to read-only auth state (re-renders on state changes). */
+export function useAuthState(): AuthState {
+  const ctx = useContext(AuthStateContext);
+  if (!ctx) throw new Error('useAuthState 必须在 AuthProvider 内使用');
   return ctx;
 }
 
+/** Subscribe to stable auth actions (never causes re-renders). */
+export function useAuthActions(): AuthActionsType {
+  const ctx = useContext(AuthActionsContext);
+  if (!ctx) throw new Error('useAuthActions 必须在 AuthProvider 内使用');
+  return ctx;
+}
+
+/** Combined hook for backward compatibility. Prefer useAuthState / useAuthActions. */
+export function useAuth() {
+  return { ...useAuthState(), ...useAuthActions() };
+}
+
 export function useUser(): User | null {
-  return useAuth().user;
+  return useAuthState().user;
 }
 
 export function useIsAuthenticated(): boolean {
-  return useAuth().isAuthenticated;
+  return useAuthState().isAuthenticated;
 }
