@@ -283,7 +283,7 @@ class TTSService {
   }
 
   private getAudioContext(): AudioContext {
-    if (!this.audioContext) {
+    if (!this.audioContext || this.audioContext.state === 'closed') {
       this.audioContext = new AudioContext();
     }
     return this.audioContext;
