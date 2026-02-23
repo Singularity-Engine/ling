@@ -230,7 +230,10 @@
     "noResponse": "Ling doesn't seem to be responding — try sending again?",
     "retry": "Retry",
     "showMore": "Show more",
-    "showLess": "Show less"
+    "showLess": "Show less",
+    "toolRunning": "Running",
+    "toolCompleted": "Completed",
+    "toolError": "Error"
   },
   "connection": {
     "connected": "Connected",
@@ -339,7 +342,8 @@
     "scrollToLatest": "Scroll to latest",
     "newMessages": "New messages",
     "collapseChat": "Collapse chat",
-    "expandChat": "Expand chat"
+    "expandChat": "Expand chat",
+    "suggestedReplies": "Suggested replies"
   },
   "billing": {
     "dailyLimitTitle": "You've reached today's limit",

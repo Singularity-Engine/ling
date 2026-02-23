@@ -229,7 +229,7 @@ const StatusIndicator = memo(({ status, accent }: { status: string; accent: stri
   if (status === "running") {
     const dots = getDotStyles(accent);
     return (
-      <span style={S_SI_DOTS} role="status" aria-label="Running">
+      <span style={S_SI_DOTS} role="status" aria-label={i18next.t("chat.toolRunning")}>
         {dots.map((dotStyle, i) => (
           <span key={i} style={dotStyle} />
         ))}
@@ -237,9 +237,9 @@ const StatusIndicator = memo(({ status, accent }: { status: string; accent: stri
     );
   }
   if (status === "completed") {
-    return <span style={S_SI_DONE} aria-label="Completed">✓</span>;
+    return <span style={S_SI_DONE} aria-label={i18next.t("chat.toolCompleted")}>✓</span>;
   }
-  return <span style={S_SI_ERROR} aria-label="Error">✕</span>;
+  return <span style={S_SI_ERROR} aria-label={i18next.t("chat.toolError")}>✕</span>;
 });
 StatusIndicator.displayName = "StatusIndicator";
 

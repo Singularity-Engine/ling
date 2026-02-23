@@ -1,4 +1,5 @@
 import { memo, type CSSProperties } from "react";
+import i18next from "i18next";
 
 // ─── Style constants (avoid per-render allocation) ───
 
@@ -57,7 +58,7 @@ export const SuggestionChips = memo(function SuggestionChips({
 }) {
   if (!Array.isArray(chips) || chips.length === 0) return null;
   return (
-    <div role="group" aria-label="Suggested replies" style={centered ? S_CHIPS_CENTERED : S_CHIPS_LEFT}>
+    <div role="group" aria-label={i18next.t("ui.suggestedReplies")} style={centered ? S_CHIPS_CENTERED : S_CHIPS_LEFT}>
       {chips.map((chip, i) => (
         <button
           key={chip}

@@ -230,7 +230,10 @@
     "noResponse": "灵似乎暂时没有回应，试试重新发送？",
     "retry": "重试",
     "showMore": "展开全文",
-    "showLess": "收起"
+    "showLess": "收起",
+    "toolRunning": "运行中",
+    "toolCompleted": "已完成",
+    "toolError": "错误"
   },
   "connection": {
     "connected": "已连接",
@@ -339,7 +342,8 @@
     "scrollToLatest": "滚动到最新消息",
     "newMessages": "新消息",
     "collapseChat": "收起对话",
-    "expandChat": "展开对话"
+    "expandChat": "展开对话",
+    "suggestedReplies": "推荐话题"
   },
   "billing": {
     "dailyLimitTitle": "今日聊天次数已用完",

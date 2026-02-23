@@ -230,7 +230,10 @@
     "noResponse": "Ling이 응답하지 않는 것 같아요 — 다시 보내 볼까요?",
     "retry": "다시 시도",
     "showMore": "더 보기",
-    "showLess": "접기"
+    "showLess": "접기",
+    "toolRunning": "실행 중",
+    "toolCompleted": "완료",
+    "toolError": "오류"
   },
   "connection": {
     "connected": "연결됨",
@@ -362,7 +365,8 @@
     "scrollToLatest": "최신 메시지로 이동",
     "newMessages": "새 메시지",
     "collapseChat": "채팅 접기",
-    "expandChat": "채팅 펼치기"
+    "expandChat": "채팅 펼치기",
+    "suggestedReplies": "추천 답변"
   },
   "billing": {
     "dailyLimitTitle": "오늘 사용량을 다 썼어요",

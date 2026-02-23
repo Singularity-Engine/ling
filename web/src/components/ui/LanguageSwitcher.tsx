@@ -130,7 +130,7 @@ export const LanguageSwitcher = memo(() => {
       </button>
 
       {open && (
-        <div style={S_DROPDOWN} role="listbox" aria-label="Language" onKeyDown={handleKeyDown}>
+        <div style={S_DROPDOWN} role="listbox" aria-label={i18n.t("settings.general.language")} onKeyDown={handleKeyDown}>
           {SUPPORTED_LANGUAGES.map((lng) => (
             <button
               key={lng}

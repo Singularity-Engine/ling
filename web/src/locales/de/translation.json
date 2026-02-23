@@ -230,7 +230,10 @@
     "noResponse": "Ling scheint nicht zu antworten — versuch es nochmal?",
     "retry": "Erneut versuchen",
     "showMore": "Mehr anzeigen",
-    "showLess": "Weniger anzeigen"
+    "showLess": "Weniger anzeigen",
+    "toolRunning": "Läuft",
+    "toolCompleted": "Abgeschlossen",
+    "toolError": "Fehler"
   },
   "connection": {
     "connected": "Verbunden",
@@ -339,7 +342,8 @@
     "scrollToLatest": "Zum Neuesten scrollen",
     "newMessages": "Neue Nachrichten",
     "collapseChat": "Chat einklappen",
-    "expandChat": "Chat ausklappen"
+    "expandChat": "Chat ausklappen",
+    "suggestedReplies": "Vorgeschlagene Antworten"
   },
   "billing": {
     "dailyLimitTitle": "Du hast dein Tageslimit erreicht",

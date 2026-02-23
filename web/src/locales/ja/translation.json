@@ -230,7 +230,10 @@
     "noResponse": "リンから応答がないようです。もう一度送信してみますか？",
     "retry": "再試行",
     "showMore": "もっと見る",
-    "showLess": "閉じる"
+    "showLess": "閉じる",
+    "toolRunning": "実行中",
+    "toolCompleted": "完了",
+    "toolError": "エラー"
   },
   "connection": {
     "connected": "接続済み",
@@ -339,7 +342,8 @@
     "scrollToLatest": "最新までスクロール",
     "newMessages": "新しいメッセージ",
     "collapseChat": "チャットを折りたたむ",
-    "expandChat": "チャットを展開"
+    "expandChat": "チャットを展開",
+    "suggestedReplies": "おすすめの返答"
   },
   "billing": {
     "dailyLimitTitle": "本日の利用回数に達しました",

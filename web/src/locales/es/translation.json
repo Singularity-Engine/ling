@@ -230,7 +230,10 @@
     "noResponse": "Parece que Ling no responde, ?intentas enviar de nuevo?",
     "retry": "Reintentar",
     "showMore": "Ver mas",
-    "showLess": "Ver menos"
+    "showLess": "Ver menos",
+    "toolRunning": "Ejecutando",
+    "toolCompleted": "Completado",
+    "toolError": "Error"
   },
   "connection": {
     "connected": "Conectado",
@@ -362,7 +365,8 @@
     "scrollToLatest": "Ir al mas reciente",
     "newMessages": "Nuevos mensajes",
     "collapseChat": "Contraer chat",
-    "expandChat": "Expandir chat"
+    "expandChat": "Expandir chat",
+    "suggestedReplies": "Respuestas sugeridas"
   },
   "billing": {
     "dailyLimitTitle": "Alcanzaste el limite de hoy",

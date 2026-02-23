@@ -230,7 +230,10 @@
     "noResponse": "Parece que a Ling n\u00e3o est\u00e1 respondendo \u2014 tente enviar novamente?",
     "retry": "Tentar novamente",
     "showMore": "Mostrar mais",
-    "showLess": "Mostrar menos"
+    "showLess": "Mostrar menos",
+    "toolRunning": "Executando",
+    "toolCompleted": "Concluído",
+    "toolError": "Erro"
   },
   "connection": {
     "connected": "Conectado",
@@ -362,7 +365,8 @@
     "scrollToLatest": "Ir para a mais recente",
     "newMessages": "Novas mensagens",
     "collapseChat": "Recolher chat",
-    "expandChat": "Expandir chat"
+    "expandChat": "Expandir chat",
+    "suggestedReplies": "Respostas sugeridas"
   },
   "billing": {
     "dailyLimitTitle": "Voc\u00ea atingiu o limite di\u00e1rio",

@@ -86,7 +86,7 @@ const CodeBlockHeader = memo(function CodeBlockHeader({ lang, code }: { lang: st
   return (
     <div className="code-block-header">
       {label && <span className="code-block-lang">{label}</span>}
-      <button onClick={handleCopy} className="code-block-copy" aria-label={copied ? "Copied" : "Copy code"}>
+      <button onClick={handleCopy} className="code-block-copy" aria-label={copied ? i18next.t("chat.copied") : i18next.t("chat.copyCode")}>
         {copied ? ICON_CHECK : ICON_COPY}
       </button>
     </div>

@@ -230,7 +230,10 @@
     "noResponse": "Ling ne semble pas repondre — reessaie d'envoyer ?",
     "retry": "Reessayer",
     "showMore": "Voir plus",
-    "showLess": "Voir moins"
+    "showLess": "Voir moins",
+    "toolRunning": "En cours",
+    "toolCompleted": "Terminé",
+    "toolError": "Erreur"
   },
   "connection": {
     "connected": "Connecte",
@@ -362,7 +365,8 @@
     "scrollToLatest": "Aller au dernier message",
     "newMessages": "Nouveaux messages",
     "collapseChat": "Replier le chat",
-    "expandChat": "Developper le chat"
+    "expandChat": "Developper le chat",
+    "suggestedReplies": "Réponses suggérées"
   },
   "billing": {
     "dailyLimitTitle": "Tu as atteint la limite du jour",
