@@ -11,7 +11,7 @@ import { audioTaskQueue } from '@/utils/task-queue';
 import { useAudioTask } from '@/components/canvas/live2d';
 import { useBgUrlActions } from '@/context/bgurl-context';
 import { useConfigState, useConfigActions } from '@/context/character-config-context';
-import { useChatMessagesActions, useHistoryList, useStreamingSetters } from '@/context/chat-history-context';
+import { useChatMessagesActions, useHistoryListActions, useStreamingSetters } from '@/context/chat-history-context';
 import { toaster } from '@/components/ui/toaster';
 import { useVADState, useVADActions } from '@/context/vad-context';
 import { AiState, useAiStateActions } from "@/context/ai-state-context";
@@ -239,7 +239,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
   const {
     setCurrentHistoryUid, setHistoryList,
-  } = useHistoryList();
+  } = useHistoryListActions();
   const { setMessages } = useChatMessagesActions();
 
   // ─── Refs for stable callback access ─────────────────────────

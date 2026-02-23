@@ -34,13 +34,23 @@ interface MessagesActionsValue {
 }
 
 /**
- * Context 1b — History list & session management.
- * Changes when sidebar history preview updates (updateHistoryList) or
- * the active conversation switches.  Only sidebar / App subscribe here.
+ * Context 1b-state — History list read-only state.
+ * Changes when sidebar history preview updates or the active conversation switches.
+ * Only components that RENDER history (sidebar, App) subscribe here.
  */
-interface HistoryListState {
+interface HistoryListReadState {
   historyList: HistoryInfo[];
   currentHistoryUid: string | null;
+}
+
+/**
+ * Context 1b-actions — Stable history mutators.
+ * All callbacks are state-setters or useCallback with stable deps, so this
+ * context value never changes after mount. Consumers that only WRITE history
+ * state (e.g. websocket-handler) subscribe here without re-rendering on
+ * every history change.
+ */
+interface HistoryListActionsState {
   setHistoryList: (
     value: HistoryInfo[] | ((prev: HistoryInfo[]) => HistoryInfo[])
   ) => void;
@@ -108,7 +118,8 @@ const DEFAULT_HISTORY = {
 
 const MessagesStateContext = createContext<MessagesStateValue | null>(null);
 const MessagesActionsContext = createContext<MessagesActionsValue | null>(null);
-const HistoryListContext = createContext<HistoryListState | null>(null);
+const HistoryListStateContext = createContext<HistoryListReadState | null>(null);
+const HistoryListActionsContext = createContext<HistoryListActionsState | null>(null);
 const StreamingValueContext = createContext<StreamingValueState | null>(null);
 const StreamingSetterContext = createContext<StreamingSetterState | null>(null);
 const StreamingRefContext = createContext<StreamingRefState | null>(null);
@@ -308,22 +319,16 @@ export function ChatHistoryProvider({ children }: { children: ReactNode }) {
     [appendHumanMessage, appendAIMessage, appendOrUpdateToolCallMessage, popLastHumanMessage, setMessages],
   );
 
-  // Context 1b: history list — changes on sidebar preview / session switch
-  const historyValue = useMemo(
-    () => ({
-      historyList,
-      currentHistoryUid,
-      setHistoryList,
-      setCurrentHistoryUid,
-      updateHistoryList,
-    }),
-    [
-      historyList,
-      currentHistoryUid,
-      setHistoryList,
-      setCurrentHistoryUid,
-      updateHistoryList,
-    ],
+  // Context 1b-state: history read-only state — changes on sidebar preview / session switch
+  const historyStateValue = useMemo(
+    () => ({ historyList, currentHistoryUid }),
+    [historyList, currentHistoryUid],
+  );
+
+  // Context 1b-actions: stable history mutators — never changes after mount
+  const historyActionsValue = useMemo(
+    () => ({ setHistoryList, setCurrentHistoryUid, updateHistoryList }),
+    [setHistoryList, setCurrentHistoryUid, updateHistoryList],
   );
 
   // Context 2: streaming VALUE — changes ~60fps during streaming
@@ -359,15 +364,17 @@ export function ChatHistoryProvider({ children }: { children: ReactNode }) {
     <MessagesActionsContext.Provider value={messagesActionsValue}>
       <MessagesStateContext.Provider value={messagesStateValue}>
         <MessagesRefContext.Provider value={messagesRefValue}>
-          <HistoryListContext.Provider value={historyValue}>
-            <StreamingSetterContext.Provider value={streamSetters}>
-              <StreamingValueContext.Provider value={streamValue}>
-                <StreamingRefContext.Provider value={streamRefValue}>
-                  {children}
-                </StreamingRefContext.Provider>
-              </StreamingValueContext.Provider>
-            </StreamingSetterContext.Provider>
-          </HistoryListContext.Provider>
+          <HistoryListActionsContext.Provider value={historyActionsValue}>
+            <HistoryListStateContext.Provider value={historyStateValue}>
+              <StreamingSetterContext.Provider value={streamSetters}>
+                <StreamingValueContext.Provider value={streamValue}>
+                  <StreamingRefContext.Provider value={streamRefValue}>
+                    {children}
+                  </StreamingRefContext.Provider>
+                </StreamingValueContext.Provider>
+              </StreamingSetterContext.Provider>
+            </HistoryListStateContext.Provider>
+          </HistoryListActionsContext.Provider>
         </MessagesRefContext.Provider>
       </MessagesStateContext.Provider>
     </MessagesActionsContext.Provider>
@@ -399,13 +406,32 @@ export function useChatMessages() {
 }
 
 /**
- * History list & session management — sidebar, App, and history drawer.
- * Shielded from message changes and streaming re-renders.
+ * History list read-only state — re-renders on history list / session changes.
+ * Use for components that RENDER the sidebar or display current session info.
+ */
+export function useHistoryListState() {
+  const ctx = useContext(HistoryListStateContext);
+  if (!ctx) throw new Error('useHistoryListState must be used within ChatHistoryProvider');
+  return ctx;
+}
+
+/**
+ * Stable history mutators — never triggers re-renders.
+ * Use for components that only WRITE history state (e.g. websocket-handler).
+ */
+export function useHistoryListActions() {
+  const ctx = useContext(HistoryListActionsContext);
+  if (!ctx) throw new Error('useHistoryListActions must be used within ChatHistoryProvider');
+  return ctx;
+}
+
+/**
+ * Combined hook — returns both state and actions.
+ * Kept for backward compatibility with components that need both.
+ * Prefer useHistoryListState() or useHistoryListActions() for targeted subscriptions.
  */
 export function useHistoryList() {
-  const ctx = useContext(HistoryListContext);
-  if (!ctx) throw new Error('useHistoryList must be used within ChatHistoryProvider');
-  return ctx;
+  return { ...useHistoryListState(), ...useHistoryListActions() };
 }
 
 /** Streaming response VALUE — subscribes to ~60fps updates during streaming. */
