@@ -38,7 +38,7 @@ const S_OVERLAY: CSSProperties = {
 const S_BACKDROP_BASE: CSSProperties = {
   position: 'absolute',
   inset: 0,
-  background: 'rgba(0, 0, 0, 0.4)',
+  background: 'var(--ling-overlay-backdrop)',
   backdropFilter: 'blur(4px)',
   WebkitBackdropFilter: 'blur(4px)',
   transition: `opacity ${EXIT_DURATION}ms ease`,
@@ -51,13 +51,13 @@ const S_PANEL_BASE: CSSProperties = {
   width: '100%',
   maxWidth: 'min(400px, 100vw)',
   height: '100%',
-  background: 'rgba(10, 0, 21, 0.92)',
+  background: 'var(--ling-surface-deep)',
   backdropFilter: 'blur(24px)',
   WebkitBackdropFilter: 'blur(24px)',
   borderLeft: '1px solid var(--ling-purple-20)',
   borderTopLeftRadius: '16px',
   borderBottomLeftRadius: '16px',
-  boxShadow: '0 12px 40px rgba(0,0,0,0.5), 0 0 24px rgba(139,92,246,0.1)',
+  boxShadow: '0 12px 40px rgba(0,0,0,0.5), 0 0 24px var(--ling-purple-08)',
   display: 'flex',
   flexDirection: 'column',
 };
@@ -70,18 +70,18 @@ const S_HEADER: CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  background: 'rgba(139, 92, 246, 0.04)',
+  background: 'var(--ling-purple-05)',
 };
 const S_TITLE_ROW: CSSProperties = { display: 'flex', alignItems: 'center', gap: '8px' };
-const S_TITLE: CSSProperties = { color: '#fff', fontSize: '18px', fontWeight: 700, margin: 0, letterSpacing: '0.2px' };
+const S_TITLE: CSSProperties = { color: 'var(--ling-text-primary)', fontSize: '18px', fontWeight: 700, margin: 0, letterSpacing: '0.2px' };
 const S_BADGE: CSSProperties = {
-  fontSize: '11px', fontWeight: 600, color: 'rgba(167,139,250,0.85)',
-  background: 'rgba(139,92,246,0.14)', padding: '2px 8px', borderRadius: '8px', fontFamily: 'monospace',
+  fontSize: '11px', fontWeight: 600, color: 'var(--ling-purple-light)',
+  background: 'var(--ling-purple-15)', padding: '2px 8px', borderRadius: '8px', fontFamily: 'monospace',
 };
-const S_SUBTITLE: CSSProperties = { color: 'rgba(255,255,255,0.5)', fontSize: '12px', margin: '4px 0 0' };
+const S_SUBTITLE: CSSProperties = { color: 'var(--ling-text-dim)', fontSize: '12px', margin: '4px 0 0' };
 
 const S_CLOSE_BTN: CSSProperties = {
-  background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)',
+  background: 'none', border: 'none', color: 'var(--ling-text-tertiary)',
   fontSize: '24px', cursor: 'pointer', padding: '10px',
   minWidth: '44px', minHeight: '44px',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -93,34 +93,34 @@ const S_CONTENT: CSSProperties = {
   display: 'flex', flexDirection: 'column', gap: '10px',
 };
 const S_LOADING: CSSProperties = {
-  textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)',
+  textAlign: 'center', padding: '40px 0', color: 'var(--ling-text-tertiary)',
   animation: 'memLoadPulse 1.5s ease-in-out infinite',
 };
 const S_ERROR: CSSProperties = {
-  textAlign: 'center', padding: '40px 0', color: 'rgba(248, 113, 113, 0.7)',
+  textAlign: 'center', padding: '40px 0', color: 'var(--ling-error)',
   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
 };
 const S_RETRY_BTN: CSSProperties = {
   padding: '6px 18px', fontSize: '12px', fontWeight: 600,
-  color: 'rgba(248, 113, 113, 0.85)', background: 'rgba(248, 113, 113, 0.1)',
-  border: '1px solid rgba(248, 113, 113, 0.25)', borderRadius: '8px',
+  color: 'var(--ling-error)', background: 'var(--ling-error-bg)',
+  border: '1px solid var(--ling-error-border)', borderRadius: '8px',
   cursor: 'pointer', transition: 'background 0.15s ease, border-color 0.15s ease',
 };
 
 const S_EMPTY_WRAP: CSSProperties = { textAlign: 'center', padding: '60px 20px' };
 const S_EMPTY_ICON: CSSProperties = { fontSize: '48px', marginBottom: '16px', opacity: 0.5 };
-const S_EMPTY_TITLE: CSSProperties = { color: 'rgba(255,255,255,0.75)', fontSize: '16px', fontWeight: 600, margin: '0 0 8px' };
-const S_EMPTY_DESC: CSSProperties = { color: 'rgba(255,255,255,0.55)', fontSize: '13px', lineHeight: 1.6 };
+const S_EMPTY_TITLE: CSSProperties = { color: 'var(--ling-text-secondary)', fontSize: '16px', fontWeight: 600, margin: '0 0 8px' };
+const S_EMPTY_DESC: CSSProperties = { color: 'var(--ling-text-dim)', fontSize: '13px', lineHeight: 1.6 };
 const S_EMPTY_DESC_MB: CSSProperties = { ...S_EMPTY_DESC, marginBottom: '16px' };
 const S_REGISTER_LINK: CSSProperties = {
   display: 'inline-block', padding: '8px 20px', borderRadius: '12px',
-  background: 'var(--ling-purple-50)', color: '#fff',
+  background: 'var(--ling-purple-50)', color: 'var(--ling-text-primary)',
   fontSize: '13px', fontWeight: 600, textDecoration: 'none', transition: 'opacity 0.2s',
 };
 
 const S_CARD_BASE: CSSProperties = {
-  padding: '14px 16px', background: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(255,255,255,0.07)', borderLeft: '3px solid rgba(139,92,246,0.35)',
+  padding: '14px 16px', background: 'var(--ling-overlay-4)',
+  border: '1px solid var(--ling-surface-border)', borderLeft: '3px solid var(--ling-purple-30)',
   borderRadius: '12px', transition: 'background 0.2s ease, border-color 0.2s ease, transform 0.2s ease', cursor: 'default',
 };
 
@@ -135,20 +135,20 @@ function getCardStyle(index: number): CSSProperties {
   }
   return s;
 }
-const S_CARD_TEXT: CSSProperties = { color: 'rgba(255,255,255,0.88)', fontSize: '13px', lineHeight: 1.7, margin: 0 };
+const S_CARD_TEXT: CSSProperties = { color: 'var(--ling-text-primary)', fontSize: '13px', lineHeight: 1.7, margin: 0 };
 const S_CARD_META: CSSProperties = { display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' };
-const S_CARD_DATE: CSSProperties = { color: 'rgba(255,255,255,0.45)', fontSize: '11px' };
+const S_CARD_DATE: CSSProperties = { color: 'var(--ling-text-tertiary)', fontSize: '11px' };
 const S_CARD_GROUP: CSSProperties = {
-  fontSize: '10px', color: 'rgba(167,139,250,0.8)', background: 'rgba(139,92,246,0.12)',
+  fontSize: '10px', color: 'var(--ling-purple-light)', background: 'var(--ling-purple-12)',
   padding: '2px 7px', borderRadius: '6px', letterSpacing: '0.3px', fontWeight: 500,
 };
 
 const S_FOOTER: CSSProperties = {
-  padding: '12px 20px', borderTop: '1px solid rgba(139, 92, 246, 0.12)',
-  textAlign: 'center', background: 'rgba(139, 92, 246, 0.03)',
+  padding: '12px 20px', borderTop: '1px solid var(--ling-purple-12)',
+  textAlign: 'center', background: 'var(--ling-purple-05)',
 };
-const S_FOOTER_TEXT: CSSProperties = { color: 'rgba(255,255,255,0.45)', fontSize: '11px' };
-const S_FOOTER_BOLD: CSSProperties = { color: 'rgba(196, 181, 253, 0.6)' };
+const S_FOOTER_TEXT: CSSProperties = { color: 'var(--ling-text-tertiary)', fontSize: '11px' };
+const S_FOOTER_BOLD: CSSProperties = { color: 'var(--ling-purple-60)' };
 
 const DATE_OPTS: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
 
@@ -212,12 +212,12 @@ export const MemoryPanel = memo(function MemoryPanel({ open, onClose }: MemoryPa
       <div style={closing ? S_BACKDROP_CLOSING : S_BACKDROP_OPEN} aria-hidden="true" />
 
       {/* Panel */}
-      <div style={closing ? S_PANEL_CLOSING : S_PANEL_OPEN} role="dialog" aria-modal="true" aria-label={t('memory.title')}>
+      <div style={closing ? S_PANEL_CLOSING : S_PANEL_OPEN} role="dialog" aria-modal="true" aria-labelledby="memory-panel-title">
         {/* Header */}
         <header style={S_HEADER}>
           <div>
             <div style={S_TITLE_ROW}>
-              <h3 style={S_TITLE}>{t('memory.title')}</h3>
+              <h3 id="memory-panel-title" style={S_TITLE}>{t('memory.title')}</h3>
               {memories.length > 0 && (
                 <span style={S_BADGE}>{memories.length}</span>
               )}
@@ -237,11 +237,11 @@ export const MemoryPanel = memo(function MemoryPanel({ open, onClose }: MemoryPa
         {/* Content */}
         <div className="ling-memory-scroll" style={S_CONTENT}>
           {loading && (
-            <div style={S_LOADING}>{t('memory.loading')}</div>
+            <div style={S_LOADING} role="status" aria-live="polite">{t('memory.loading')}</div>
           )}
 
           {error && (
-            <div style={S_ERROR}>
+            <div style={S_ERROR} role="alert">
               <span>{error}</span>
               <button type="button" style={S_RETRY_BTN} onClick={fetchMemories}>
                 {t('chat.retry')}

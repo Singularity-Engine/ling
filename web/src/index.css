@@ -37,6 +37,7 @@
 
   /* 覆盖层 */
   --ling-overlay-dim: rgba(0, 0, 0, 0.2);
+  --ling-overlay-backdrop: rgba(0, 0, 0, 0.4);
 
   /* 状态横幅 */
   --ling-status-offline-bg: rgba(220, 38, 38, 0.75);
