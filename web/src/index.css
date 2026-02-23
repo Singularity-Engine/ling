@@ -1185,6 +1185,11 @@ canvas {
 .ling-credits-display:hover { background: rgba(0, 0, 0, 0.45) !important; border-color: rgba(168, 85, 247, 0.3) !important; }
 .ling-credits-display:active { transform: scale(0.95); }
 
+/* ── AffinityBadge: button hover/active + value reveal ── */
+.ling-affinity-btn:hover { background: rgba(0, 0, 0, 0.45) !important; border-color: var(--ling-accent) !important; }
+.ling-affinity-btn:active { background: rgba(0, 0, 0, 0.55) !important; transform: scale(0.95); }
+.ling-affinity-btn:hover .ling-affinity-value { max-width: 40px !important; opacity: 1 !important; }
+
 /* ── Onboarding: button & card hover/active feedback ── */
 .ling-ob-skip:hover { color: rgba(255,255,255,0.65) !important; border-color: rgba(255,255,255,0.2) !important; }
 .ling-ob-skip:active { transform: scale(0.96); }

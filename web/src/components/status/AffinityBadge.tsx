@@ -43,12 +43,6 @@ const S_AFFINITY_VALUE_HIDDEN: CSSProperties = {
   whiteSpace: "nowrap",
 };
 
-const S_AFFINITY_VALUE_VISIBLE: CSSProperties = {
-  ...S_AFFINITY_VALUE_HIDDEN,
-  maxWidth: "40px",
-  opacity: 1,
-};
-
 const S_PANEL_BASE: CSSProperties = {
   position: "absolute",
   top: "100%",
@@ -126,8 +120,6 @@ export const AffinityBadge = memo(() => {
   const { affinity, level, milestone } = useAffinityMeta();
   const [expanded, setExpanded] = useState(false);
   const [panelClosing, setPanelClosing] = useState(false);
-  const [hovered, setHovered] = useState(false);
-  const [pressed, setPressed] = useState(false);
   const panelCloseTimer = useRef<ReturnType<typeof setTimeout>>();
   const { t } = useTranslation();
 
@@ -161,10 +153,6 @@ export const AffinityBadge = memo(() => {
     if (expanded || panelClosing) { closePanel(); } else { setExpanded(true); }
   }, [expanded, panelClosing, closePanel]);
 
-  const onMouseEnter = useCallback(() => setHovered(true), []);
-  const onMouseLeave = useCallback(() => { setHovered(false); setPressed(false); }, []);
-  const onMouseDown = useCallback(() => setPressed(true), []);
-  const onMouseUp = useCallback(() => setPressed(false), []);
 
   // Close expanded panel on outside click
   const handleClickOutside = useCallback((e: MouseEvent) => {
@@ -179,13 +167,13 @@ export const AffinityBadge = memo(() => {
     }
   }, [expanded, handleClickOutside]);
 
-  // ── Computed styles (depend on hover/press/config state) ──
+  // ── Computed styles ──
   const btnStyle = useMemo<CSSProperties>(() => ({
     ...S_BTN_BASE,
-    background: pressed ? "rgba(0, 0, 0, 0.55)" : hovered ? "rgba(0, 0, 0, 0.45)" : "rgba(0, 0, 0, 0.35)",
-    border: hovered ? `1px solid ${config.color}44` : "1px solid rgba(255,255,255,0.08)",
-    transform: pressed ? "scale(0.95)" : "scale(1)",
-  }), [pressed, hovered, config.color]);
+    background: "rgba(0, 0, 0, 0.35)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    '--ling-accent': `${config.color}44`,
+  } as CSSProperties), [config.color]);
 
   const heartWrapStyle = useMemo<CSSProperties>(
     () => ({ ...S_HEART_WRAP, animation: `heartbeat ${config.beatSpeed} ease-in-out infinite` }),
@@ -242,10 +230,7 @@ export const AffinityBadge = memo(() => {
         {/* Heart button */}
         <button
           onClick={toggleExpanded}
-          onMouseEnter={onMouseEnter}
-          onMouseLeave={onMouseLeave}
-          onMouseDown={onMouseDown}
-          onMouseUp={onMouseUp}
+          className="ling-affinity-btn"
           aria-label={t("affinity.label")}
           style={btnStyle}
         >
@@ -255,7 +240,7 @@ export const AffinityBadge = memo(() => {
           <span style={configStyles.levelLabel}>
             {t(config.i18nKey)}
           </span>
-          <span style={hovered ? S_AFFINITY_VALUE_VISIBLE : S_AFFINITY_VALUE_HIDDEN}>
+          <span className="ling-affinity-value" style={S_AFFINITY_VALUE_HIDDEN}>
             {affinity}
           </span>
         </button>
