@@ -966,11 +966,16 @@ canvas {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ── AboutOverlay: fade/slide + link styles ── */
-@keyframes aboutFadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes aboutSlideIn {
+/* ── Shared overlay fade/slide (About, Pricing, Billing modals) ── */
+@keyframes overlayFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes overlayFadeOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes overlaySlideIn {
   from { opacity: 0; transform: translateY(12px) scale(0.96); }
   to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes overlaySlideOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(12px) scale(0.96); }
 }
 .about-link {
   display: inline-flex; align-items: center; gap: 6px;

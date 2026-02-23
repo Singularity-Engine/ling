@@ -5,13 +5,15 @@
  * CTA 按钮引导用户查看定价页面。
  */
 
-import { memo, useCallback, useEffect, type CSSProperties } from 'react';
+import { memo, useState, useCallback, useEffect, useRef, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUIState, useUIActions } from '@/context/ui-context';
 
+const EXIT_MS = 200;
+
 // ─── Style constants (avoid per-render allocation) ───
 
-const S_BACKDROP: CSSProperties = {
+const S_BACKDROP_BASE: CSSProperties = {
   position: 'fixed',
   inset: 0,
   zIndex: 10000,
@@ -23,8 +25,10 @@ const S_BACKDROP: CSSProperties = {
   justifyContent: 'center',
   padding: '20px',
 };
+const S_BACKDROP_OPEN: CSSProperties = { ...S_BACKDROP_BASE, animation: 'overlayFadeIn 0.2s ease-out' };
+const S_BACKDROP_CLOSING: CSSProperties = { ...S_BACKDROP_BASE, animation: `overlayFadeOut ${EXIT_MS}ms ease-in forwards` };
 
-const S_CARD: CSSProperties = {
+const S_CARD_BASE: CSSProperties = {
   background: 'rgba(20, 8, 40, 0.95)',
   border: '1px solid rgba(139, 92, 246, 0.3)',
   borderRadius: '20px',
@@ -33,6 +37,8 @@ const S_CARD: CSSProperties = {
   width: '100%',
   textAlign: 'center',
 };
+const S_CARD_OPEN: CSSProperties = { ...S_CARD_BASE, animation: 'overlaySlideIn 0.25s ease-out' };
+const S_CARD_CLOSING: CSSProperties = { ...S_CARD_BASE, animation: `overlaySlideOut ${EXIT_MS}ms ease-in forwards` };
 
 const S_ICON: CSSProperties = {
   fontSize: '48px',
@@ -90,30 +96,51 @@ const InsufficientCreditsModal: React.FC = memo(function InsufficientCreditsModa
   const { t } = useTranslation();
   const { billingModal } = useUIState();
   const { closeBillingModal, setPricingOpen } = useUIActions();
+  const [closing, setClosing] = useState(false);
+  const closingTimer = useRef<ReturnType<typeof setTimeout>>();
+  // Track what to do after the exit animation finishes
+  const afterCloseRef = useRef<(() => void) | null>(null);
 
   // ESC to close
   useEffect(() => {
     if (!billingModal.open) return;
+    setClosing(false);
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeBillingModal();
+      if (e.key === 'Escape') handleDismiss();
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [billingModal.open, closeBillingModal]);
+  }, [billingModal.open]); // handleDismiss is stable enough via closing guard
+
+  // Clean up timer on unmount
+  useEffect(() => () => { clearTimeout(closingTimer.current); }, []);
+
+  const startExit = useCallback((afterDone?: () => void) => {
+    if (closing) return;
+    afterCloseRef.current = afterDone ?? null;
+    setClosing(true);
+    closingTimer.current = setTimeout(() => {
+      setClosing(false);
+      closeBillingModal();
+      afterCloseRef.current?.();
+      afterCloseRef.current = null;
+    }, EXIT_MS);
+  }, [closeBillingModal, closing]);
+
+  const handleDismiss = useCallback(() => startExit(), [startExit]);
 
   const handleBackdropClick = useCallback(
     (e: React.MouseEvent) => {
-      if (e.target === e.currentTarget) closeBillingModal();
+      if (e.target === e.currentTarget) handleDismiss();
     },
-    [closeBillingModal],
+    [handleDismiss],
   );
 
   const handleViewPlans = useCallback(() => {
-    closeBillingModal();
-    setPricingOpen(true);
-  }, [closeBillingModal, setPricingOpen]);
+    startExit(() => setPricingOpen(true));
+  }, [startExit, setPricingOpen]);
 
-  if (!billingModal.open) return null;
+  if (!billingModal.open && !closing) return null;
 
   const isDailyLimit = billingModal.reason === 'daily_limit_reached';
   const isToolQuota = billingModal.reason === 'tool_quota_reached';
@@ -136,8 +163,8 @@ const InsufficientCreditsModal: React.FC = memo(function InsufficientCreditsModa
         : t('billing.insufficientCreditsMessage');
 
   return (
-    <div style={S_BACKDROP} onClick={handleBackdropClick}>
-      <div style={S_CARD}>
+    <div style={closing ? S_BACKDROP_CLOSING : S_BACKDROP_OPEN} onClick={handleBackdropClick}>
+      <div style={closing ? S_CARD_CLOSING : S_CARD_OPEN}>
         <div style={S_ICON}>{icon}</div>
 
         <h3 style={S_TITLE}>{title}</h3>
@@ -148,7 +175,7 @@ const InsufficientCreditsModal: React.FC = memo(function InsufficientCreditsModa
 
         <div style={S_BTN_ROW}>
           {isGuestLimit ? (
-            <a href="/register" onClick={closeBillingModal} style={S_BTN_PRIMARY}>
+            <a href="/register" onClick={handleDismiss} style={S_BTN_PRIMARY}>
               {t('billing.registerFree')}
             </a>
           ) : (
@@ -156,7 +183,7 @@ const InsufficientCreditsModal: React.FC = memo(function InsufficientCreditsModa
               {t('billing.viewPlans')}
             </button>
           )}
-          <button onClick={closeBillingModal} style={S_BTN_SECONDARY}>
+          <button onClick={handleDismiss} style={S_BTN_SECONDARY}>
             {t('billing.maybeLater')}
           </button>
         </div>

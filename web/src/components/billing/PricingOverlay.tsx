@@ -5,18 +5,20 @@
  * 从 ui-context 的 pricingOpen 控制显示/隐藏。
  */
 
-import { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
 import { apiClient } from '@/services/api-client';
 import { useUIState, useUIActions } from '@/context/ui-context';
 import { useAuthState } from '@/context/auth-context';
 import { toaster } from '@/components/ui/toaster';
 import { createLogger } from '@/utils/logger';
 
+const EXIT_MS = 200; // matches overlayFadeOut / overlaySlideOut duration
+
 const log = createLogger('Pricing');
 
 /* ── Module-level style constants (allocated once, never GC'd) ── */
 
-const overlayStyle: React.CSSProperties = {
+const S_OVERLAY_BASE: React.CSSProperties = {
   position: 'fixed',
   inset: 0,
   zIndex: 9999,
@@ -29,12 +31,16 @@ const overlayStyle: React.CSSProperties = {
   padding: '20px',
   overflow: 'auto',
 };
+const S_OVERLAY_OPEN: React.CSSProperties = { ...S_OVERLAY_BASE, animation: 'overlayFadeIn 0.2s ease-out' };
+const S_OVERLAY_CLOSING: React.CSSProperties = { ...S_OVERLAY_BASE, animation: `overlayFadeOut ${EXIT_MS}ms ease-in forwards` };
 
-const innerWrapperStyle: React.CSSProperties = {
+const S_INNER_BASE: React.CSSProperties = {
   maxWidth: '1100px',
   width: '100%',
   position: 'relative',
 };
+const S_INNER_OPEN: React.CSSProperties = { ...S_INNER_BASE, animation: 'overlaySlideIn 0.25s ease-out' };
+const S_INNER_CLOSING: React.CSSProperties = { ...S_INNER_BASE, animation: `overlaySlideOut ${EXIT_MS}ms ease-in forwards` };
 
 const closeBtnStyle: React.CSSProperties = {
   position: 'absolute',
@@ -250,23 +256,37 @@ const PricingOverlay: React.FC = memo(() => {
   const { setPricingOpen } = useUIActions();
   const { user } = useAuthState();
   const [loading, setLoading] = useState<string | null>(null);
+  const [closing, setClosing] = useState(false);
+  const closingTimer = useRef<ReturnType<typeof setTimeout>>();
 
   // ESC to close
   useEffect(() => {
     if (!pricingOpen) return;
+    setClosing(false);
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setPricingOpen(false);
+      if (e.key === 'Escape') handleClose();
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [pricingOpen, setPricingOpen]);
+  }, [pricingOpen]); // handleClose is stable via ref below
+
+  // Clean up timer on unmount
+  useEffect(() => () => { clearTimeout(closingTimer.current); }, []);
 
   const currentPlan = user?.plan || 'free';
 
-  const handleClose = useCallback(() => setPricingOpen(false), [setPricingOpen]);
+  const handleClose = useCallback(() => {
+    if (closing) return;
+    setClosing(true);
+    closingTimer.current = setTimeout(() => {
+      setClosing(false);
+      setPricingOpen(false);
+    }, EXIT_MS);
+  }, [setPricingOpen, closing]);
+
   const handleOverlayClick = useCallback(
-    (e: React.MouseEvent) => { if (e.target === e.currentTarget) setPricingOpen(false); },
-    [setPricingOpen],
+    (e: React.MouseEvent) => { if (e.target === e.currentTarget) handleClose(); },
+    [handleClose],
   );
 
   const handleCheckout = useCallback(async (
@@ -337,11 +357,11 @@ const PricingOverlay: React.FC = memo(() => {
     opacity: currentPlan === 'free' ? 0.4 : 1,
   }), [currentPlan, loading]);
 
-  if (!pricingOpen) return null;
+  if (!pricingOpen && !closing) return null;
 
   return (
-    <div style={overlayStyle} onClick={handleOverlayClick}>
-      <div style={innerWrapperStyle}>
+    <div style={closing ? S_OVERLAY_CLOSING : S_OVERLAY_OPEN} onClick={handleOverlayClick}>
+      <div style={closing ? S_INNER_CLOSING : S_INNER_OPEN}>
         {/* Close button */}
         <button onClick={handleClose} style={closeBtnStyle}>
           ×

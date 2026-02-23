@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useCallback, type CSSProperties } from "react";
+import { memo, useState, useEffect, useCallback, useRef, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuthState, useAuthActions } from "@/context/auth-context";
 import { useUIActions } from "@/context/ui-context";
@@ -51,9 +51,11 @@ const PLAN_COLORS: Record<string, string> = {
   eternal: "#f59e0b",
 };
 
+const EXIT_MS = 200;
+
 // ─── Style constants (avoid per-render allocation) ───
 
-const S_BACKDROP: CSSProperties = {
+const S_BACKDROP_BASE: CSSProperties = {
   position: "fixed",
   inset: 0,
   zIndex: 9999,
@@ -63,10 +65,11 @@ const S_BACKDROP: CSSProperties = {
   background: "rgba(0, 0, 0, 0.6)",
   backdropFilter: "blur(8px)",
   WebkitBackdropFilter: "blur(8px)",
-  animation: "aboutFadeIn 0.2s ease-out",
 };
+const S_BACKDROP_OPEN: CSSProperties = { ...S_BACKDROP_BASE, animation: "overlayFadeIn 0.2s ease-out" };
+const S_BACKDROP_CLOSING: CSSProperties = { ...S_BACKDROP_BASE, animation: `overlayFadeOut ${EXIT_MS}ms ease-in forwards` };
 
-const S_CARD: CSSProperties = {
+const S_CARD_BASE: CSSProperties = {
   background: "rgba(10, 0, 21, 0.95)",
   border: "1px solid rgba(139, 92, 246, 0.3)",
   borderRadius: "16px",
@@ -74,9 +77,10 @@ const S_CARD: CSSProperties = {
   width: "100%",
   maxWidth: "min(380px, calc(100vw - 32px))",
   boxShadow: "0 24px 80px rgba(0, 0, 0, 0.5), 0 0 40px rgba(139, 92, 246, 0.1)",
-  animation: "aboutSlideIn 0.25s ease-out",
   textAlign: "center",
 };
+const S_CARD_OPEN: CSSProperties = { ...S_CARD_BASE, animation: "overlaySlideIn 0.25s ease-out" };
+const S_CARD_CLOSING: CSSProperties = { ...S_CARD_BASE, animation: `overlaySlideOut ${EXIT_MS}ms ease-in forwards` };
 
 const S_PRODUCT_NAME: CSSProperties = {
   color: "#e0d4ff",
@@ -288,6 +292,25 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
   const { logout } = useAuthActions();
   const { setPricingOpen } = useUIActions();
   const [portalLoading, setPortalLoading] = useState(false);
+  const [closing, setClosing] = useState(false);
+  const closingTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  // Reset closing state when opened
+  useEffect(() => {
+    if (open) setClosing(false);
+  }, [open]);
+
+  // Clean up timer on unmount
+  useEffect(() => () => { clearTimeout(closingTimer.current); }, []);
+
+  const handleClose = useCallback(() => {
+    if (closing) return;
+    setClosing(true);
+    closingTimer.current = setTimeout(() => {
+      setClosing(false);
+      onClose();
+    }, EXIT_MS);
+  }, [onClose, closing]);
 
   const handleManageSubscription = useCallback(async () => {
     setPortalLoading(true);
@@ -297,21 +320,21 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
     } catch {
       // If no Stripe account linked, just open pricing
       setPricingOpen(true);
-      onClose();
+      handleClose();
     } finally {
       setPortalLoading(false);
     }
-  }, [setPricingOpen, onClose]);
+  }, [setPricingOpen, handleClose]);
 
   const handleUpgrade = useCallback(() => {
     setPricingOpen(true);
-    onClose();
-  }, [setPricingOpen, onClose]);
+    handleClose();
+  }, [setPricingOpen, handleClose]);
 
   const handleLogout = useCallback(() => {
     logout();
-    onClose();
-  }, [logout, onClose]);
+    handleClose();
+  }, [logout, handleClose]);
 
   const stopPropagation = useCallback(
     (e: React.MouseEvent) => e.stopPropagation(),
@@ -320,13 +343,13 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
 
   // ESC to close — handled globally by useKeyboardShortcuts in App.tsx
 
-  if (!open) return null;
+  if (!open && !closing) return null;
 
   const planColor = PLAN_COLORS[user?.plan ?? "free"] || PLAN_COLORS.free;
 
   return (
-    <div style={S_BACKDROP} onClick={onClose}>
-      <div onClick={stopPropagation} style={S_CARD}>
+    <div style={closing ? S_BACKDROP_CLOSING : S_BACKDROP_OPEN} onClick={handleClose}>
+      <div onClick={stopPropagation} style={closing ? S_CARD_CLOSING : S_CARD_OPEN}>
         {/* Product name */}
         <h2 style={S_PRODUCT_NAME}>{t("about.name")}</h2>
 
