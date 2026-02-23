@@ -3,8 +3,10 @@ module.exports = {
     {
       name: "ling-frontend",
       script: "serve",
-      args: ["-s", "dist", "-l", "3001", "--no-clipboard"],
       env: {
+        PM2_SERVE_PATH: "dist",
+        PM2_SERVE_PORT: 3001,
+        PM2_SERVE_SPA: "true",
         NO_UPDATE_NOTIFIER: "1",
       },
       // Prevent tight restart loops when port is still occupied
