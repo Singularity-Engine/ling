@@ -199,7 +199,7 @@ const S_BTN_PRIMARY: CSSProperties = {
   fontSize: "12px",
   fontWeight: 600,
   cursor: "pointer",
-  transition: "opacity 0.2s",
+  transition: "background 0.2s ease, transform 0.15s ease",
 };
 
 const S_BTN_MANAGE: CSSProperties = {
@@ -211,7 +211,7 @@ const S_BTN_MANAGE: CSSProperties = {
   color: "rgba(255,255,255,0.6)",
   fontSize: "12px",
   cursor: "pointer",
-  transition: "opacity 0.2s",
+  transition: "background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease",
 };
 
 const S_BTN_MANAGE_LOADING: CSSProperties = {
@@ -227,7 +227,7 @@ const S_BTN_SIGNOUT: CSSProperties = {
   color: "rgba(255,255,255,0.35)",
   fontSize: "12px",
   cursor: "pointer",
-  transition: "opacity 0.2s",
+  transition: "background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease",
 };
 
 const S_GUEST_BOX: CSSProperties = {
@@ -263,7 +263,7 @@ const S_LOGIN_LINK: CSSProperties = {
   cursor: "pointer",
   textDecoration: "none",
   textAlign: "center",
-  transition: "opacity 0.2s",
+  transition: "background 0.2s ease, transform 0.15s ease",
 };
 
 const S_REGISTER_LINK: CSSProperties = {
@@ -278,7 +278,7 @@ const S_REGISTER_LINK: CSSProperties = {
   cursor: "pointer",
   textDecoration: "none",
   textAlign: "center",
-  transition: "opacity 0.2s",
+  transition: "background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease",
 };
 
 const S_LINKS_ROW: CSSProperties = {
@@ -397,11 +397,12 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
             <div style={S_EMAIL}>{user.email}</div>
             <div style={S_BTN_ROW}>
               {user.plan === "free" ? (
-                <button onClick={handleUpgrade} style={S_BTN_PRIMARY}>
+                <button className="about-btn-primary" onClick={handleUpgrade} style={S_BTN_PRIMARY}>
                   {t("about.upgrade")}
                 </button>
               ) : (
                 <button
+                  className="about-btn-outline"
                   onClick={handleManageSubscription}
                   disabled={portalLoading}
                   style={portalLoading ? S_BTN_MANAGE_LOADING : S_BTN_MANAGE}
@@ -409,7 +410,7 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
                   {portalLoading ? "..." : t("about.manageSubscription")}
                 </button>
               )}
-              <button onClick={handleLogout} style={S_BTN_SIGNOUT}>
+              <button className="about-btn-outline" onClick={handleLogout} style={S_BTN_SIGNOUT}>
                 {t("about.signOut")}
               </button>
             </div>
@@ -418,10 +419,10 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
           <div style={S_GUEST_BOX}>
             <p style={S_GUEST_PROMPT}>{t("about.guestPrompt")}</p>
             <div style={S_GUEST_BTN_ROW}>
-              <a href="/login" style={S_LOGIN_LINK}>
+              <a className="about-btn-primary" href="/login" style={S_LOGIN_LINK}>
                 {t("about.loginButton")}
               </a>
-              <a href="/register" style={S_REGISTER_LINK}>
+              <a className="about-btn-outline" href="/register" style={S_REGISTER_LINK}>
                 {t("about.registerButton")}
               </a>
             </div>

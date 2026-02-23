@@ -1086,6 +1086,11 @@ canvas {
   border-color: rgba(139, 92, 246, 0.4);
   color: var(--ling-purple-lighter);
 }
+.about-btn-primary:hover { background: rgba(139, 92, 246, 0.65) !important; }
+.about-btn-primary:active { transform: scale(0.97); }
+.about-btn-outline:hover { background: rgba(255, 255, 255, 0.08) !important; border-color: rgba(255, 255, 255, 0.2) !important; color: rgba(255, 255, 255, 0.8) !important; }
+.about-btn-outline:active { transform: scale(0.97); }
+.about-btn-primary:focus-visible, .about-btn-outline:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
 
 /* ── InfoCrystal: @property for smooth affinity transitions + keyframes ── */
 @property --cg-r { syntax: '<number>'; inherits: true; initial-value: 96; }
