@@ -10,7 +10,8 @@
  * 从 /api/public/status 或本地 fallback 获取数据。
  */
 
-import { useState, useEffect, useCallback, useMemo, memo, type CSSProperties } from "react";
+import { useState, useEffect, useCallback, useReducer, useRef, useMemo, memo, type CSSProperties } from "react";
+import { createStyleInjector } from "@/utils/style-injection";
 
 // ── Types ──
 
@@ -50,6 +51,12 @@ const FALLBACK: ExperimentStatus = {
 };
 
 const REFRESH_MS = 5 * 60 * 1000; // 5 min
+
+// ── Deferred style injection (hover via CSS avoids inline event handlers) ──
+const ensureBarStyles = createStyleInjector({
+  id: "experiment-bar-styles",
+  css: `.experiment-bar-link:hover { opacity: 1 !important; }`,
+});
 
 // ── Styles ──
 
@@ -91,6 +98,11 @@ const S_COUNTDOWN: CSSProperties = {
   fontWeight: 500,
   color: "rgba(255,255,255,0.8)",
   letterSpacing: "0.04em",
+};
+
+const S_COUNTDOWN_DANGER: CSSProperties = {
+  ...S_COUNTDOWN,
+  color: "#f87171",
 };
 
 const S_PROGRESS_WRAP: CSSProperties = {
@@ -144,15 +156,36 @@ const S_LINK: CSSProperties = {
   transition: "opacity 0.2s",
 };
 
-const S_DANGER: CSSProperties = {
-  color: "#f87171",
-};
+// ── CountdownTimer: isolated re-renders at 1fps, avoids re-rendering the entire bar ──
+
+function formatCountdown(deathDate: string): string {
+  const diff = new Date(deathDate).getTime() - Date.now();
+  if (diff <= 0) return "00:00:00:00";
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  return `${String(d).padStart(2, "0")}:${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+const CountdownTimer = memo(function CountdownTimer({ deathDate, danger }: { deathDate: string; danger: boolean }) {
+  const [, tick] = useReducer((x: number) => x + 1, 0);
+  const timerRef = useRef<ReturnType<typeof setInterval>>();
+
+  useEffect(() => {
+    timerRef.current = setInterval(tick, 1000);
+    return () => clearInterval(timerRef.current);
+  }, []);
+
+  return <span style={danger ? S_COUNTDOWN_DANGER : S_COUNTDOWN}>{formatCountdown(deathDate)}</span>;
+});
+CountdownTimer.displayName = "CountdownTimer";
 
 // ── Component ──
 
 export const ExperimentBar = memo(function ExperimentBar() {
+  useEffect(ensureBarStyles, []);
   const [status, setStatus] = useState<ExperimentStatus>(FALLBACK);
-  const [countdown, setCountdown] = useState("");
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -173,37 +206,10 @@ export const ExperimentBar = memo(function ExperimentBar() {
     return () => clearInterval(id);
   }, [fetchStatus]);
 
-  // Countdown ticker
-  useEffect(() => {
-    function tick() {
-      const death = new Date(status.death_date).getTime();
-      const diff = death - Date.now();
-      if (diff <= 0) {
-        setCountdown("00:00:00:00");
-        return;
-      }
-      const d = Math.floor(diff / 86400000);
-      const h = Math.floor((diff % 86400000) / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      setCountdown(
-        `${String(d).padStart(2, "0")}:${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
-      );
-    }
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [status.death_date]);
-
   const isDanger = status.days_remaining <= 7;
   const revPct = Math.min(
     ((status.revenue?.monthly_usd || 0) / (status.revenue?.target_monthly_usd || 36)) * 100,
     100
-  );
-
-  const countdownStyle = useMemo<CSSProperties>(
-    () => (isDanger ? { ...S_COUNTDOWN, ...S_DANGER } : S_COUNTDOWN),
-    [isDanger],
   );
 
   const progressFillStyle = useMemo<CSSProperties>(() => ({
@@ -218,10 +224,8 @@ export const ExperimentBar = memo(function ExperimentBar() {
 
       <span style={S_SEP} />
 
-      {/* Countdown */}
-      <span style={countdownStyle}>
-        {countdown}
-      </span>
+      {/* Countdown — isolated component, re-renders at 1fps independently */}
+      <CountdownTimer deathDate={status.death_date} danger={isDanger} />
 
       <span style={S_SEP} />
 
@@ -242,14 +246,13 @@ export const ExperimentBar = memo(function ExperimentBar() {
         {status.current_goal}
       </span>
 
-      {/* Mission link */}
+      {/* Mission link — hover via CSS class, avoids inline event handler allocation */}
       <a
         href="https://sngxai.com"
         target="_blank"
         rel="noopener noreferrer"
+        className="experiment-bar-link"
         style={S_LINK}
-        onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
-        onMouseLeave={e => (e.currentTarget.style.opacity = "0.8")}
       >
         Mission
       </a>
