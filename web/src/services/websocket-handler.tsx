@@ -815,8 +815,8 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const synthesizedRef = useRef(new Set<string>());
   // Only show TTS error toast once per conversation to avoid spam
   const ttsErrorShownRef = useRef(false);
-  // Track current expression for TTS audio tasks
-  const currentExpressionRef = useLatest(affinityContext.currentExpression);
+  // Read current expression for TTS audio tasks (stable getter from ref)
+  const getCurrentExpressionRef = useLatest(affinityContext.getCurrentExpression);
 
   useEffect(() => {
     const sub = gatewayAdapter.message$.subscribe((msg) => {
@@ -849,7 +849,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
               if (result) {
                 markSynthDoneRef.current();
                 markPlayStartRef.current();
-                const expr = currentExpressionRef.current;
+                const expr = getCurrentExpressionRef.current();
                 addAudioTaskRef.current({
                   audioBase64: result.audioBase64,
                   volumes: result.volumes,

@@ -13,7 +13,7 @@ import { SubtitleProvider } from "./context/subtitle-context";
 import { BgUrlProvider } from "./context/bgurl-context";
 import WebSocketHandler from "./services/websocket-handler";
 import { CameraProvider } from "./context/camera-context";
-import { ChatHistoryProvider, useMessagesRef, useHistoryList } from "./context/chat-history-context";
+import { ChatHistoryProvider, useMessagesRef, useHistoryListState, useHistoryListActions } from "./context/chat-history-context";
 import { CharacterConfigProvider } from "./context/character-config-context";
 import { VADProvider, useVADState, useVADActions } from "./context/vad-context";
 import { Live2D, useInterrupt } from "./components/canvas/live2d";
@@ -290,7 +290,8 @@ function MainContent(): JSX.Element {
   // subscribing MainContent to every message update (avoids ~N re-renders
   // per conversation turn where N = number of messages added).
   const { getMessages } = useMessagesRef();
-  const { currentHistoryUid, updateHistoryList } = useHistoryList();
+  const { currentHistoryUid } = useHistoryListState();
+  const { updateHistoryList } = useHistoryListActions();
 
   // Ref mirrors so createNewChat and shortcuts stay stable across state changes.
   // Without this, every mic toggle or history switch recreates callbacks →

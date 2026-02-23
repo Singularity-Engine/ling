@@ -64,20 +64,28 @@ export const StreamingFooter = memo(function StreamingFooter({
   const isConnectedRef = useRef(isConnected);
   isConnectedRef.current = isConnected;
 
+  // Derive last-AI-message content and last-message role from dedupedMessages once,
+  // so downstream memos only recompute when these derived values actually change
+  // (avoids redundant findLast scans on every throttled displayResponse tick).
+  const lastAiContent = useMemo(() => {
+    const msg = dedupedMessages.findLast(m => m.role === 'ai');
+    return msg?.content ?? '';
+  }, [dedupedMessages]);
+
+  const lastMsgRole = dedupedMessages[dedupedMessages.length - 1]?.role;
+
   const showStreaming = useMemo(() => {
     if (!isStreaming) return false;
-    const lastAiMsg = dedupedMessages.findLast(m => m.role === 'ai');
-    return !(lastAiMsg && lastAiMsg.content && displayResponse === lastAiMsg.content);
-  }, [isStreaming, dedupedMessages, displayResponse]);
+    return !(lastAiContent && displayResponse === lastAiContent);
+  }, [isStreaming, lastAiContent, displayResponse]);
 
   // Mirror into parent ref so ChatArea's itemContent can read it for skipEntryAnimation
   useEffect(() => { wasStreamingRef.current = showStreaming; }, [showStreaming, wasStreamingRef]);
 
   const awaitingReply = useMemo(() => {
     if (isThinkingSpeaking || isStreaming || !isConnected) return false;
-    const lastMsg = dedupedMessages[dedupedMessages.length - 1];
-    return lastMsg?.role === "human";
-  }, [dedupedMessages, isThinkingSpeaking, isStreaming, isConnected]);
+    return lastMsgRole === "human";
+  }, [lastMsgRole, isThinkingSpeaking, isStreaming, isConnected]);
 
   const [awaitingTimedOut, setAwaitingTimedOut] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
