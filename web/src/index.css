@@ -81,6 +81,17 @@
   --ling-md-pre-code: rgba(255, 255, 255, 0.85);
   --ling-md-blockquote-color: rgba(255, 255, 255, 0.7);
   --ling-md-heading-color: rgba(255, 255, 255, 0.95);
+
+  /* 输入栏（InputBar 内联样式引用） */
+  --ling-input-bar-bg: rgba(255, 255, 255, 0.03);
+  --ling-input-hover-border: rgba(255, 255, 255, 0.18);
+  --ling-input-hover-bg: rgba(255, 255, 255, 0.08);
+  --ling-input-hint: rgba(255, 255, 255, 0.2);
+  --ling-input-counter: rgba(255, 255, 255, 0.25);
+  --ling-input-counter-warn: rgba(251, 191, 36, 0.7);
+  --ling-btn-muted-bg: rgba(255, 255, 255, 0.06);
+  --ling-btn-muted-border: rgba(255, 255, 255, 0.08);
+  --ling-btn-muted-color: rgba(255, 255, 255, 0.5);
 }
 
 /* === 亮色主题变量 === */
@@ -166,6 +177,17 @@
   --ling-md-pre-code: rgba(0, 0, 0, 0.75);
   --ling-md-blockquote-color: rgba(0, 0, 0, 0.6);
   --ling-md-heading-color: rgba(0, 0, 0, 0.9);
+
+  /* 输入栏 */
+  --ling-input-bar-bg: rgba(0, 0, 0, 0.02);
+  --ling-input-hover-border: rgba(124, 58, 237, 0.25);
+  --ling-input-hover-bg: rgba(0, 0, 0, 0.06);
+  --ling-input-hint: rgba(0, 0, 0, 0.25);
+  --ling-input-counter: rgba(0, 0, 0, 0.3);
+  --ling-input-counter-warn: rgba(217, 119, 6, 0.75);
+  --ling-btn-muted-bg: rgba(0, 0, 0, 0.04);
+  --ling-btn-muted-border: rgba(0, 0, 0, 0.1);
+  --ling-btn-muted-color: rgba(0, 0, 0, 0.4);
 }
 
 /* === 全局基础 === */
@@ -424,7 +446,7 @@ body {
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 .ling-conn-closed:hover {
-  background: rgba(0, 0, 0, 0.55) !important;
+  background: var(--ling-surface-elevated) !important;
   border-color: var(--ling-error) !important;
 }
 
@@ -457,10 +479,10 @@ body {
   75% { transform: translateX(-2px); }
 }
 .ling-textarea {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--ling-btn-muted-bg);
+  border: 1px solid var(--ling-btn-muted-border);
   border-radius: 16px;
-  color: white;
+  color: var(--ling-text-primary);
   font-size: 14px;
   padding: 10px 16px;
   min-height: 42px;
@@ -473,20 +495,20 @@ body {
   transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
 .ling-textarea::placeholder {
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--ling-placeholder-color);
   transition: color 0.2s ease;
 }
 .ling-textarea:hover:not(:focus):not(:disabled) {
-  border-color: rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--ling-input-hover-border);
+  background: var(--ling-input-hover-bg);
 }
 .ling-textarea:focus {
-  border-color: rgba(139, 92, 246, 0.5);
-  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.25), 0 0 16px rgba(139, 92, 246, 0.12);
-  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--ling-purple-50);
+  box-shadow: 0 0 0 1px var(--ling-purple-25), 0 0 16px var(--ling-purple-15);
+  background: var(--ling-input-hover-bg);
 }
 .ling-textarea:focus::placeholder {
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--ling-text-muted);
 }
 .ling-textarea:disabled {
   opacity: 0.45;
@@ -503,6 +525,13 @@ body {
 }
 .ling-mic-btn:active {
   transform: scale(0.88);
+}
+/* Light theme: darken-on-hover instead of brighten (buttons are already light) */
+[data-theme="light"] .ling-send-btn:not(:disabled):hover {
+  filter: brightness(0.92);
+}
+[data-theme="light"] .ling-mic-btn:hover {
+  filter: brightness(0.92);
 }
 .ling-textarea.ling-shake {
   animation: inputShake 0.35s ease;

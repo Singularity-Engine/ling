@@ -10,13 +10,13 @@ import { useVADState, useVADActions } from "@/context/vad-context";
 
 const S_BAR_WRAP: CSSProperties = {
   padding: "10px 16px",
-  background: "rgba(255, 255, 255, 0.03)",
+  background: "var(--ling-input-bar-bg)",
   paddingBottom: "calc(10px + env(safe-area-inset-bottom, 0px))",
 };
 
 const S_STATE_ROW: CSSProperties = { display: "flex", justifyContent: "center", marginBottom: "6px" };
 const S_STATE_TEXT: CSSProperties = {
-  fontSize: "11px", color: "rgba(139, 92, 246, 0.7)",
+  fontSize: "11px", color: "var(--ling-purple-70)",
   animation: "inputPulse 1.5s ease-in-out infinite",
 };
 
@@ -32,8 +32,8 @@ const S_MIC_BASE: CSSProperties = {
 };
 const S_MIC_OFF: CSSProperties = {
   ...S_MIC_BASE,
-  background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)",
-  color: "rgba(255,255,255,0.5)", animation: "none",
+  background: "var(--ling-btn-muted-bg)", border: "1px solid var(--ling-btn-muted-border)",
+  color: "var(--ling-btn-muted-color)", animation: "none",
 };
 const S_MIC_ON: CSSProperties = {
   ...S_MIC_BASE,
@@ -69,15 +69,15 @@ const S_SEND_READY: CSSProperties = {
 };
 const S_SEND_OVERLIMIT: CSSProperties = {
   ...S_SEND_BASE,
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.06)",
+  background: "var(--ling-btn-muted-bg)",
+  border: "1px solid var(--ling-btn-muted-bg)",
   opacity: 0.4,
   cursor: "not-allowed",
 };
 const S_SEND_IDLE: CSSProperties = {
   ...S_SEND_BASE,
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.08)",
+  background: "var(--ling-btn-muted-bg)",
+  border: "1px solid var(--ling-btn-muted-border)",
   cursor: "not-allowed",
 };
 
@@ -86,10 +86,10 @@ const S_HINTS_ROW: CSSProperties = {
   display: "flex", justifyContent: "space-between",
   boxSizing: "border-box",
 };
-const S_MD_HINT: CSSProperties = { fontSize: "10px", color: "rgba(255,255,255,0.2)" };
+const S_MD_HINT: CSSProperties = { fontSize: "10px", color: "var(--ling-input-hint)" };
 const S_CHAR_BASE: CSSProperties = { fontSize: "10px", transition: "color 0.2s" };
-const S_CHAR_NORMAL: CSSProperties = { ...S_CHAR_BASE, color: "rgba(255,255,255,0.25)" };
-const S_CHAR_WARN: CSSProperties = { ...S_CHAR_BASE, color: "rgba(251, 191, 36, 0.7)" };
+const S_CHAR_NORMAL: CSSProperties = { ...S_CHAR_BASE, color: "var(--ling-input-counter)" };
+const S_CHAR_WARN: CSSProperties = { ...S_CHAR_BASE, color: "var(--ling-input-counter-warn)" };
 const S_CHAR_OVER: CSSProperties = { ...S_CHAR_BASE, color: "var(--ling-error)" };
 
 // Pre-created SVG icon elements — shared across all renders to avoid
