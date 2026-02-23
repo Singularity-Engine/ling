@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef } from "react";
+import { memo, useEffect, useRef, type CSSProperties } from "react";
 
 interface Star {
   x: number;
@@ -54,6 +54,15 @@ const STAR_LAYERS = [
 // Pre-computed star color prefixes per layer (avoids template-string allocation per star per frame)
 // Layer 0 (far): purpleMix=10 → r=210, g=210 | Layer 1 (mid): 25 → 225,225 | Layer 2 (near): 40 → 240,240
 const STAR_RGBA_PREFIX = ["rgba(210,210,255,", "rgba(225,225,255,", "rgba(240,240,255,"];
+
+// Static canvas style — avoids recreating the object on every render.
+const S_CANVAS: CSSProperties = {
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+  pointerEvents: "none",
+};
 
 export const StarField = memo(() => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -242,8 +251,6 @@ export const StarField = memo(() => {
 
         return true;
       });
-
-      animRef.current = requestAnimationFrame(animate);
     };
 
     animRef.current = requestAnimationFrame(animate);
@@ -256,16 +263,7 @@ export const StarField = memo(() => {
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: "absolute",
-        inset: 0,
-        width: "100%",
-        height: "100%",
-        pointerEvents: "none",
-      }}
-    />
+    <canvas ref={canvasRef} style={S_CANVAS} />
   );
 });
 
