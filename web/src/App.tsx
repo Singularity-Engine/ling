@@ -43,6 +43,7 @@ import { useKeyboardShortcuts, ShortcutDef } from "./hooks/use-keyboard-shortcut
 import { NetworkStatusBanner } from "./components/effects/NetworkStatusBanner";
 import { TapParticles } from "./components/effects/TapParticles";
 import { useAffinityIdleExpression } from "./hooks/use-affinity-idle-expression";
+import { useIsMobile } from "./hooks/use-is-mobile";
 import { AuthProvider, useAuth } from "./context/auth-context";
 import { UIProvider } from "./context/ui-context";
 import CreditsDisplay from "./components/billing/CreditsDisplay";
@@ -245,7 +246,7 @@ const ICON_CHEVRON_UP = (
 function MainContent(): JSX.Element {
   const { t } = useTranslation();
   const [chatExpanded, setChatExpanded] = useState(true);
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  const isMobile = useIsMobile();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [memoryOpen, setMemoryOpen] = useState(false);
@@ -269,22 +270,22 @@ function MainContent(): JSX.Element {
   const micOnRef = useRef(micOn);
   micOnRef.current = micOn;
 
+  // Update --vh CSS variable on resize (used for mobile viewport height).
+  // isMobile detection is handled by the shared useIsMobile() hook.
   useEffect(() => {
-    const handleResize = () => {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty("--vh", `${vh}px`);
-      setIsMobile(window.innerWidth < 768);
+    const updateVh = () => {
+      document.documentElement.style.setProperty("--vh", `${window.innerHeight * 0.01}px`);
     };
-    handleResize();
+    updateVh();
     let rafId = 0;
-    const throttledResize = () => {
+    const throttled = () => {
       if (rafId) return;
-      rafId = requestAnimationFrame(() => { rafId = 0; handleResize(); });
+      rafId = requestAnimationFrame(() => { rafId = 0; updateVh(); });
     };
-    window.addEventListener("resize", throttledResize);
+    window.addEventListener("resize", throttled);
     return () => {
       cancelAnimationFrame(rafId);
-      window.removeEventListener("resize", throttledResize);
+      window.removeEventListener("resize", throttled);
     };
   }, []);
 
