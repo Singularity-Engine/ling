@@ -54,7 +54,7 @@ const S_PANEL_BASE: CSSProperties = {
   background: 'rgba(10, 0, 21, 0.92)',
   backdropFilter: 'blur(24px)',
   WebkitBackdropFilter: 'blur(24px)',
-  borderLeft: '1px solid rgba(139, 92, 246, 0.2)',
+  borderLeft: '1px solid var(--ling-purple-20)',
   borderTopLeftRadius: '16px',
   borderBottomLeftRadius: '16px',
   boxShadow: '0 12px 40px rgba(0,0,0,0.5), 0 0 24px rgba(139,92,246,0.1)',
@@ -66,7 +66,7 @@ const S_PANEL_CLOSING: CSSProperties = { ...S_PANEL_BASE, animation: `slideOutRi
 
 const S_HEADER: CSSProperties = {
   padding: '18px 20px',
-  borderBottom: '1px solid rgba(139, 92, 246, 0.15)',
+  borderBottom: '1px solid var(--ling-purple-15)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
@@ -114,7 +114,7 @@ const S_EMPTY_DESC: CSSProperties = { color: 'rgba(255,255,255,0.55)', fontSize:
 const S_EMPTY_DESC_MB: CSSProperties = { ...S_EMPTY_DESC, marginBottom: '16px' };
 const S_REGISTER_LINK: CSSProperties = {
   display: 'inline-block', padding: '8px 20px', borderRadius: '12px',
-  background: 'rgba(139, 92, 246, 0.5)', color: '#fff',
+  background: 'var(--ling-purple-50)', color: '#fff',
   fontSize: '13px', fontWeight: 600, textDecoration: 'none', transition: 'opacity 0.2s',
 };
 

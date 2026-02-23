@@ -119,7 +119,7 @@ const S: Record<string, React.CSSProperties> = {
   page: {
     width: '100vw',
     minHeight: '100dvh',
-    background: '#0a0015',
+    background: 'var(--ling-bg-deep)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -191,7 +191,7 @@ const S: Record<string, React.CSSProperties> = {
     width: 8,
     height: 8,
     borderRadius: '50%',
-    background: '#4ade80',
+    background: 'var(--ling-success)',
     boxShadow: '0 0 8px rgba(34,197,94,0.6)',
     animation: 'pulse 2s ease-in-out infinite',
   },
@@ -210,7 +210,7 @@ const S: Record<string, React.CSSProperties> = {
   },
   errorText: {
     fontSize: 13,
-    color: '#f87171',
+    color: 'var(--ling-error)',
     margin: '0 0 8px',
   },
   backLink: {
@@ -226,6 +226,6 @@ const S_CARD_GREEN: React.CSSProperties = { ...S.card, borderColor: 'rgba(34,197
 const S_CARD_LAVENDER: React.CSSProperties = { ...S.card, borderColor: 'rgba(167,139,250,0.4)' };
 const S_CARD_RED: React.CSSProperties = { ...S.card, borderColor: 'rgba(239,68,68,0.4)' };
 const S_VAL_PURPLE: React.CSSProperties = { ...S.cardValue, color: 'var(--ling-purple-lighter, #c4b5fd)' };
-const S_VAL_GREEN: React.CSSProperties = { ...S.cardValue, color: '#4ade80' };
-const S_VAL_LAVENDER: React.CSSProperties = { ...S.cardValue, color: '#a78bfa' };
-const S_VAL_RED: React.CSSProperties = { ...S.cardValue, color: '#f87171' };
+const S_VAL_GREEN: React.CSSProperties = { ...S.cardValue, color: 'var(--ling-success)' };
+const S_VAL_LAVENDER: React.CSSProperties = { ...S.cardValue, color: 'var(--ling-purple-light)' };
+const S_VAL_RED: React.CSSProperties = { ...S.cardValue, color: 'var(--ling-error)' };

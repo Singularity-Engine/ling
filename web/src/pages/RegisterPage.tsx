@@ -214,7 +214,7 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
   },
   checkbox: {
-    accentColor: '#8b5cf6',
+    accentColor: 'var(--ling-purple)',
     width: 16,
     height: 16,
     flexShrink: 0,

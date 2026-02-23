@@ -8,7 +8,7 @@ const S_OVERLAY_BASE: CSSProperties = {
   position: 'absolute',
   inset: 0,
   zIndex: 15,
-  background: '#0a0015',
+  background: 'var(--ling-bg-deep)',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

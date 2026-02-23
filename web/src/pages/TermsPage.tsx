@@ -68,7 +68,7 @@ const styles: Record<string, React.CSSProperties> = {
   page: {
     width: '100vw',
     minHeight: '100dvh',
-    background: '#0a0015',
+    background: 'var(--ling-bg-deep)',
     display: 'flex',
     justifyContent: 'center',
     padding: '40px 20px',

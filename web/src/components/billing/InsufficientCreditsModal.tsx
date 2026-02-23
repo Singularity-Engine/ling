@@ -30,7 +30,7 @@ const S_BACKDROP_CLOSING: CSSProperties = { ...S_BACKDROP_BASE, animation: `over
 
 const S_CARD_BASE: CSSProperties = {
   background: 'rgba(20, 8, 40, 0.95)',
-  border: '1px solid rgba(139, 92, 246, 0.3)',
+  border: '1px solid var(--ling-purple-30)',
   borderRadius: '20px',
   padding: '32px',
   maxWidth: '400px',
@@ -69,7 +69,7 @@ const S_BTN_PRIMARY: CSSProperties = {
   padding: '12px 24px',
   borderRadius: '12px',
   border: 'none',
-  background: 'rgba(139, 92, 246, 0.6)',
+  background: 'var(--ling-purple-60)',
   color: '#fff',
   fontSize: '14px',
   fontWeight: 600,

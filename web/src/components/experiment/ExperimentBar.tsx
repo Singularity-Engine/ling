@@ -79,7 +79,7 @@ const S_DAY: CSSProperties = {
   fontFamily: "'JetBrains Mono', 'SF Mono', monospace",
   fontSize: 11,
   fontWeight: 600,
-  color: "#a78bfa",
+  color: "var(--ling-purple-light)",
   background: "rgba(167, 139, 250, 0.12)",
   padding: "2px 10px",
   borderRadius: 100,
@@ -96,7 +96,7 @@ const S_COUNTDOWN: CSSProperties = {
 
 const S_COUNTDOWN_DANGER: CSSProperties = {
   ...S_COUNTDOWN,
-  color: "#f87171",
+  color: "var(--ling-error)",
 };
 
 const S_PROGRESS_WRAP: CSSProperties = {
@@ -115,7 +115,7 @@ const S_PROGRESS_BAR: CSSProperties = {
 
 const S_PROGRESS_FILL_BASE: CSSProperties = {
   height: "100%",
-  background: "linear-gradient(90deg, #a78bfa, #c4b5fd)",
+  background: "linear-gradient(90deg, var(--ling-purple-light), var(--ling-purple-lighter))",
   borderRadius: 2,
   transition: "width 1s ease",
 };
@@ -143,7 +143,7 @@ const S_GOAL: CSSProperties = {
 
 const S_LINK: CSSProperties = {
   fontSize: 11,
-  color: "#a78bfa",
+  color: "var(--ling-purple-light)",
   textDecoration: "none",
   fontWeight: 500,
   opacity: 0.8,

@@ -82,7 +82,7 @@ const rootLog = createLogger("App");
 // ─── ErrorBoundary style constants (avoid per-render allocation on error screen) ───
 
 const S_EB_WRAP: CSSProperties = {
-  width: '100vw', height: '100vh', background: '#0a0015',
+  width: '100vw', height: '100vh', background: 'var(--ling-bg-deep)',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
   fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
 };
@@ -92,7 +92,7 @@ const S_EB_TITLE: CSSProperties = { color: 'var(--ling-purple-lighter)', marginB
 const S_EB_DESC: CSSProperties = { color: 'rgba(255,255,255,0.5)', fontSize: 14, marginBottom: 24, lineHeight: 1.6 };
 const S_EB_BTN_ROW: CSSProperties = { display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' };
 const _EB_BTN: CSSProperties = { padding: '10px 24px', borderRadius: 8, fontSize: 14, cursor: 'pointer', border: 'none', transition: 'opacity 0.2s' };
-const S_EB_BTN_PRIMARY: CSSProperties = { ..._EB_BTN, background: 'rgba(139,92,246,0.5)', color: '#fff' };
+const S_EB_BTN_PRIMARY: CSSProperties = { ..._EB_BTN, background: 'var(--ling-purple-50)', color: '#fff' };
 const S_EB_BTN_SECONDARY: CSSProperties = { ..._EB_BTN, background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.12)' };
 const S_EB_DETAIL_TOGGLE: CSSProperties = { marginTop: 20, background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: 12, cursor: 'pointer' };
 const S_EB_DETAIL_PRE: CSSProperties = {
@@ -148,7 +148,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
 
 const S_ROOT: CSSProperties = {
   position: "relative", height: "100dvh", width: "100vw",
-  background: "#0a0015", overflow: "hidden",
+  background: "var(--ling-bg-deep)", overflow: "hidden",
 };
 const S_LAYER_STARFIELD: CSSProperties = { position: "absolute", inset: 0, zIndex: -1, contain: "strict" };
 const S_LAYER_LIVE2D: CSSProperties = { position: "absolute", inset: 0, zIndex: 0, contain: "strict" };
@@ -189,9 +189,9 @@ const _ACTION_BTN: CSSProperties = {
   backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", padding: 0,
 };
 const S_BTN_D_OFF: CSSProperties = { ..._ACTION_BTN, width: "42px", height: "42px", background: WHITE_ALPHA.BUTTON_BG, border: `1px solid ${WHITE_ALPHA.BORDER}` };
-const S_BTN_D_ON: CSSProperties = { ..._ACTION_BTN, width: "42px", height: "42px", background: "rgba(139,92,246,0.4)", border: "1px solid rgba(139,92,246,0.6)" };
+const S_BTN_D_ON: CSSProperties = { ..._ACTION_BTN, width: "42px", height: "42px", background: "var(--ling-purple-40)", border: "1px solid var(--ling-purple-60)" };
 const S_BTN_M_OFF: CSSProperties = { ..._ACTION_BTN, width: "44px", height: "44px", background: WHITE_ALPHA.BUTTON_BG, border: `1px solid ${WHITE_ALPHA.BORDER}` };
-const S_BTN_M_ON: CSSProperties = { ..._ACTION_BTN, width: "44px", height: "44px", background: "rgba(139,92,246,0.4)", border: "1px solid rgba(139,92,246,0.6)" };
+const S_BTN_M_ON: CSSProperties = { ..._ACTION_BTN, width: "44px", height: "44px", background: "var(--ling-purple-40)", border: "1px solid var(--ling-purple-60)" };
 function btnStyle(mobile: boolean, active: boolean): CSSProperties {
   if (mobile) return active ? S_BTN_M_ON : S_BTN_M_OFF;
   return active ? S_BTN_D_ON : S_BTN_D_OFF;
@@ -230,7 +230,7 @@ const S_CONSTELLATION_POS: CSSProperties = {
 const S_INPUT_BAR_BG: CSSProperties = {
   background: "rgba(10, 0, 21, 0.55)",
   backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
-  borderTop: "1px solid rgba(139, 92, 246, 0.15)",
+  borderTop: "1px solid var(--ling-purple-15)",
 };
 
 // Fallback styles for SectionErrorBoundary

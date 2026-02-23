@@ -246,7 +246,7 @@ const creditBtnBase: React.CSSProperties = {
   flex: '1 1 140px',
   padding: '16px',
   borderRadius: '12px',
-  border: '1px solid rgba(139, 92, 246, 0.2)',
+  border: '1px solid var(--ling-purple-20)',
   background: 'rgba(139, 92, 246, 0.08)',
   color: '#fff',
   textAlign: 'center',
