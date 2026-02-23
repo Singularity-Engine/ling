@@ -55,6 +55,19 @@ export interface AgentEventPayload {
   data?: Record<string, unknown>;
 }
 
+// ─── Type Guards ─────────────────────────────────────────────────
+
+function isHelloOkPayload(value: unknown): value is HelloOkPayload {
+  if (!value || typeof value !== 'object') return false;
+  return (value as Record<string, unknown>).type === 'hello-ok';
+}
+
+function isAgentEventPayload(value: unknown): value is AgentEventPayload {
+  if (!value || typeof value !== 'object') return false;
+  const v = value as Record<string, unknown>;
+  return v.data === undefined || typeof v.data === 'object';
+}
+
 export interface ChatHistoryPayload {
   messages?: Array<{ role: string; content: string; timestamp?: string }>;
 }
@@ -367,9 +380,8 @@ class GatewayConnector {
         }
 
         // ── Hello OK ──
-        const helloPayload = frame.payload as unknown as HelloOkPayload | undefined;
-        if (frame.type === 'res' && frame.ok === true && helloPayload?.type === 'hello-ok') {
-          this.connId = helloPayload?.server?.connId || null;
+        if (frame.type === 'res' && frame.ok === true && isHelloOkPayload(frame.payload)) {
+          this.connId = frame.payload.server?.connId || null;
           const wasReconnecting = this.reconnectAttempts > 0 || this.inIdleRetry;
           this.reconnectAttempts = 0;
           this.inIdleRetry = false;
@@ -411,7 +423,7 @@ class GatewayConnector {
 
         // ── Agent events ──
         if (frame.type === 'event' && (frame.event === 'agent.event' || frame.event === 'agent')) {
-          const payload = (frame.payload || {}) as AgentEventPayload;
+          const payload = isAgentEventPayload(frame.payload) ? frame.payload : {} as AgentEventPayload;
           const agentEvent: GatewayAgentEvent = {
             runId: payload.runId || '',
             stream: (payload.stream as GatewayAgentEvent['stream']) || 'lifecycle',
