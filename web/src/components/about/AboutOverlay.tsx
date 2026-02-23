@@ -169,6 +169,14 @@ const S_PLAN_BADGE_BASE: CSSProperties = {
   borderRadius: "6px",
 };
 
+// Pre-computed per-plan badge styles (PLAN_COLORS is static, avoids per-render allocation)
+const PLAN_BADGE_STYLES: Record<string, CSSProperties> = Object.fromEntries(
+  Object.entries(PLAN_COLORS).map(([plan, color]) => [
+    plan,
+    { ...S_PLAN_BADGE_BASE, color, background: `${color}15` },
+  ]),
+);
+
 const S_EMAIL: CSSProperties = {
   fontSize: "11px",
   color: "rgba(255,255,255,0.3)",
@@ -345,8 +353,6 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
 
   if (!open && !closing) return null;
 
-  const planColor = PLAN_COLORS[user?.plan ?? "free"] || PLAN_COLORS.free;
-
   return (
     <div style={closing ? S_BACKDROP_CLOSING : S_BACKDROP_OPEN} onClick={handleClose}>
       <div onClick={stopPropagation} style={closing ? S_CARD_CLOSING : S_CARD_OPEN} role="dialog" aria-modal="true" aria-labelledby="about-title">
@@ -376,11 +382,7 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
                 {user.display_name || user.username}
               </span>
               <span
-                style={{
-                  ...S_PLAN_BADGE_BASE,
-                  color: planColor,
-                  background: `${planColor}15`,
-                }}
+                style={PLAN_BADGE_STYLES[user.plan] || PLAN_BADGE_STYLES.free}
               >
                 {PLAN_LABELS[user.plan] || "Free"}
               </span>

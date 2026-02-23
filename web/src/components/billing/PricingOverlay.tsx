@@ -251,6 +251,31 @@ const creditBtnBase: React.CSSProperties = {
   transition: 'background 0.2s, border-color 0.2s',
 };
 
+// Lazy-cached plan button styles — avoids per-render allocation in .map()
+// Key: "planIdx:isCurrent:hasLoading" → at most 4×2×2 = 16 entries
+const _planBtnCache = new Map<string, React.CSSProperties>();
+function getPlanBtnStyleCached(
+  plan: typeof PLANS[number],
+  idx: number,
+  isCurrent: boolean,
+  hasLoading: boolean,
+): React.CSSProperties {
+  const key = `${idx}:${isCurrent}:${hasLoading}`;
+  let s = _planBtnCache.get(key);
+  if (!s) {
+    s = {
+      ...planBtnBase,
+      background: isCurrent
+        ? 'rgba(255,255,255,0.08)'
+        : plan.popular ? plan.color : `${plan.color}33`,
+      color: isCurrent ? 'rgba(255,255,255,0.4)' : '#fff',
+      cursor: isCurrent ? 'default' : hasLoading ? 'wait' : 'pointer',
+    };
+    _planBtnCache.set(key, s);
+  }
+  return s;
+}
+
 const PricingOverlay: React.FC = memo(() => {
   const { pricingOpen } = useUIState();
   const { setPricingOpen } = useUIActions();
@@ -338,19 +363,7 @@ const PricingOverlay: React.FC = memo(() => {
     }
   }, []);
 
-  // Dynamic button styles that depend on runtime state
-  const getPlanBtnStyle = useCallback(
-    (plan: typeof PLANS[number], isCurrent: boolean): React.CSSProperties => ({
-      ...planBtnBase,
-      background: isCurrent
-        ? 'rgba(255,255,255,0.08)'
-        : plan.popular ? plan.color : `${plan.color}33`,
-      color: isCurrent ? 'rgba(255,255,255,0.4)' : '#fff',
-      cursor: isCurrent ? 'default' : loading ? 'wait' : 'pointer',
-    }),
-    [loading],
-  );
-
+  // Pre-computed credit button styles (4 combos: free/paid × loading/idle)
   const creditBtnDynamic = useMemo((): React.CSSProperties => ({
     ...creditBtnBase,
     cursor: currentPlan === 'free' ? 'not-allowed' : loading ? 'wait' : 'pointer',
@@ -416,7 +429,7 @@ const PricingOverlay: React.FC = memo(() => {
                     onClick={() =>
                       plan.key && handleCheckout('subscription', plan.key)
                     }
-                    style={getPlanBtnStyle(plan, isCurrent)}
+                    style={getPlanBtnStyleCached(plan, idx, isCurrent, !!loading)}
                   >
                     {isCurrent
                       ? 'Current Plan'

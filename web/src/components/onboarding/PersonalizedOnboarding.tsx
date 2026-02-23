@@ -141,6 +141,7 @@ const S_CHECK_BADGE: CSSProperties = {
   position: "absolute", top: 6, right: 6, width: 18, height: 18,
   borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
 };
+const S_CHECK_ML: CSSProperties = { marginLeft: 4 };
 
 // ── Step: Goals ──
 const S_SUB_GOALS: CSSProperties = {
@@ -556,7 +557,7 @@ function StepGoals({
                 {meta.label[lang as "en" | "zh"]}
               </span>
               {isSelected && (
-                <LuCheck size={14} color={meta.color} style={{ marginLeft: 4 }} />
+                <LuCheck size={14} color={meta.color} style={S_CHECK_ML} />
               )}
             </button>
           );

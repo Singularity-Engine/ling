@@ -78,6 +78,16 @@ function createParticles(
   return particles;
 }
 
+const S_CANVAS: React.CSSProperties = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100vw",
+  height: "100vh",
+  pointerEvents: "none",
+  zIndex: 1,
+};
+
 interface ParticleCanvasProps {
   phase: ParticlePhase;
   /** Mutable ref to 0-1 progress within the current phase (read-only for us) */
@@ -265,15 +275,7 @@ export const ParticleCanvas = memo(function ParticleCanvas({
   return (
     <canvas
       ref={canvasRef}
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        pointerEvents: "none",
-        zIndex: 1,
-      }}
+      style={S_CANVAS}
     />
   );
 });
