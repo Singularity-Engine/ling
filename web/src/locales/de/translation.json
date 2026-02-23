@@ -213,6 +213,7 @@
     "codeCopied": "Code kopiert",
     "copy": "Kopieren",
     "copied": "Kopiert",
+    "copyFailed": "Kopieren fehlgeschlagen",
     "toolCollapse": "Einklappen",
     "toolExpand": "Ausklappen",
     "toolExpandLines": "{{count}} weitere Zeilen anzeigen",

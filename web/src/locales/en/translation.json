@@ -213,6 +213,7 @@
     "codeCopied": "Code copied",
     "copy": "Copy",
     "copied": "Copied",
+    "copyFailed": "Failed to copy",
     "toolCollapse": "Collapse",
     "toolExpand": "Expand",
     "toolExpandLines": "Expand {{count}} more lines",

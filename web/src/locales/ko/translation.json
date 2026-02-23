@@ -213,6 +213,7 @@
     "codeCopied": "코드가 복사되었어요",
     "copy": "복사",
     "copied": "복사되었어요",
+    "copyFailed": "복사에 실패했어요",
     "toolCollapse": "접기",
     "toolExpand": "펼치기",
     "toolExpandLines": "{{count}}줄 더 보기",

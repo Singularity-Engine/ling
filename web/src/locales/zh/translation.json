@@ -213,6 +213,7 @@
     "codeCopied": "已复制代码",
     "copy": "复制",
     "copied": "已复制",
+    "copyFailed": "复制失败",
     "toolCollapse": "收起",
     "toolExpand": "展开",
     "toolExpandLines": "展开剩余 {{count}} 行",

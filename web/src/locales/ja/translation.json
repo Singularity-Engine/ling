@@ -213,6 +213,7 @@
     "codeCopied": "コードをコピーしました",
     "copy": "コピー",
     "copied": "コピーしました",
+    "copyFailed": "コピーに失敗しました",
     "toolCollapse": "折りたたむ",
     "toolExpand": "展開する",
     "toolExpandLines": "残り {{count}} 行を展開",

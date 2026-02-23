@@ -213,6 +213,7 @@
     "codeCopied": "Code copie",
     "copy": "Copier",
     "copied": "Copie",
+    "copyFailed": "Échec de la copie",
     "toolCollapse": "Replier",
     "toolExpand": "Deplier",
     "toolExpandLines": "Deplier {{count}} lignes de plus",

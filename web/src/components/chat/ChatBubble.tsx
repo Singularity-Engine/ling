@@ -78,7 +78,9 @@ const CodeBlockHeader = memo(function CodeBlockHeader({ lang, code }: { lang: st
       setCopied(true);
       clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => setCopied(false), 1500);
-    }, () => { /* clipboard denied */ });
+    }, () => {
+      toaster.create({ title: i18next.t("chat.copyFailed"), type: "error", duration: 2000 });
+    });
   }, [code]);
 
   return (
@@ -348,7 +350,9 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
       setCopied(true);
       clearTimeout(copyTimerRef.current);
       copyTimerRef.current = setTimeout(() => setCopied(false), 1500);
-    }, () => { /* clipboard denied */ });
+    }, () => {
+      toaster.create({ title: i18next.t("chat.copyFailed"), type: "error", duration: 2000 });
+    });
   }, []);
 
   const contentRef = useRef(content);
@@ -367,7 +371,9 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
       toaster.create({ title: i18next.t("chat.textCopied"), type: "success", duration: 1500 });
       clearTimeout(flashTimerRef.current);
       flashTimerRef.current = setTimeout(() => setFlashing(false), 350);
-    }, () => { /* clipboard denied */ });
+    }, () => {
+      toaster.create({ title: i18next.t("chat.copyFailed"), type: "error", duration: 2000 });
+    });
   }, []);
 
   // Memoize markdown rendering — ReactMarkdown + plugins are expensive.
