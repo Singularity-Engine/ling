@@ -129,9 +129,9 @@ export const StreamingFooter = memo(function StreamingFooter({
       )}
 
       {awaitingTimedOut && !isStreaming && !showTyping && (
-        <div style={S_TIMEOUT_WRAP}>
+        <div style={S_TIMEOUT_WRAP} role="status" aria-live="polite">
           <span style={S_TIMEOUT_TEXT}>{t("chat.noResponse")}</span>
-          <button onClick={handleRetry} style={S_RETRY_BTN}>
+          <button className="ling-retry-btn" onClick={handleRetry} style={S_RETRY_BTN}>
             {t("chat.retry")}
           </button>
         </div>

@@ -106,11 +106,23 @@ const S_REGISTER_LINK: CSSProperties = {
   fontSize: '13px', fontWeight: 600, textDecoration: 'none', transition: 'opacity 0.2s',
 };
 
-const S_CARD: CSSProperties = {
+const S_CARD_BASE: CSSProperties = {
   padding: '14px 16px', background: 'rgba(255,255,255,0.04)',
   border: '1px solid rgba(255,255,255,0.07)', borderLeft: '3px solid rgba(139,92,246,0.35)',
-  borderRadius: '12px', transition: 'background 0.2s ease, border-color 0.2s ease', cursor: 'default',
+  borderRadius: '12px', transition: 'background 0.2s ease, border-color 0.2s ease, transform 0.2s ease', cursor: 'default',
 };
+
+// Cached per-index card styles with staggered entrance animation (capped at 12 to avoid excessive delays)
+const _cardStyleCache = new Map<number, CSSProperties>();
+function getCardStyle(index: number): CSSProperties {
+  let s = _cardStyleCache.get(index);
+  if (!s) {
+    const delay = Math.min(index, 12) * 0.04;
+    s = { ...S_CARD_BASE, animation: `memCardIn 0.35s ease-out ${delay}s both` };
+    _cardStyleCache.set(index, s);
+  }
+  return s;
+}
 const S_CARD_TEXT: CSSProperties = { color: 'rgba(255,255,255,0.88)', fontSize: '13px', lineHeight: 1.7, margin: 0 };
 const S_CARD_META: CSSProperties = { display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' };
 const S_CARD_DATE: CSSProperties = { color: 'rgba(255,255,255,0.45)', fontSize: '11px' };
@@ -231,8 +243,8 @@ export const MemoryPanel = memo(function MemoryPanel({ open, onClose }: MemoryPa
             </div>
           )}
 
-          {memories.map((memory) => (
-            <div key={memory.id} className="ling-memory-card" style={S_CARD}>
+          {memories.map((memory, i) => (
+            <div key={memory.id} className="ling-memory-card" style={getCardStyle(i)}>
               <p style={S_CARD_TEXT}>{memory.content}</p>
               <div style={S_CARD_META}>
                 <span style={S_CARD_DATE}>

@@ -433,7 +433,7 @@ export const ChatArea = memo(() => {
       )}
       {hiddenCount > 0 && (
         <div style={S_LOAD_MORE_WRAP}>
-          <button onClick={handleLoadMore} style={S_LOAD_MORE_BTN}>
+          <button className="ling-load-more" onClick={handleLoadMore} style={S_LOAD_MORE_BTN}>
             {t("chat.loadOlder", { count: hiddenCount })}
           </button>
         </div>
