@@ -1,4 +1,4 @@
-import { memo, useEffect, useState, useCallback, useRef, type CSSProperties } from "react";
+import { memo, useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 
 const EMOJIS = ["❤️", "💜", "✨", "💫", "🩷"];
 const PARTICLE_COUNT = 5;
@@ -30,6 +30,9 @@ export const TapParticles = memo(() => {
   const [particles, setParticles] = useState<Particle[]>([]);
   const idRef = useRef(0);
   const downRef = useRef<{ x: number; y: number; t: number } | null>(null);
+  const timersRef = useRef(new Set<ReturnType<typeof setTimeout>>());
+
+  useEffect(() => () => { timersRef.current.forEach(clearTimeout); }, []);
 
   const spawn = useCallback((clientX: number, clientY: number) => {
     const batch: Particle[] = Array.from({ length: PARTICLE_COUNT }, () => {
@@ -48,10 +51,12 @@ export const TapParticles = memo(() => {
       };
     });
     setParticles(prev => [...prev, ...batch]);
-    setTimeout(() => {
+    const timer = setTimeout(() => {
+      timersRef.current.delete(timer);
       const ids = new Set(batch.map(p => p.id));
       setParticles(prev => prev.filter(p => !ids.has(p.id)));
     }, PARTICLE_LIFETIME_MS + 300);
+    timersRef.current.add(timer);
   }, []);
 
   useEffect(() => {

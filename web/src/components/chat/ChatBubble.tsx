@@ -70,12 +70,16 @@ function extractTextContent(node: ReactNode): string {
 
 const CodeBlockHeader = memo(function CodeBlockHeader({ lang, code }: { lang: string | null; code: string }) {
   const [copied, setCopied] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
   const label = lang ? (LANG_LABELS[lang.toLowerCase()] || lang) : null;
+
+  useEffect(() => () => { clearTimeout(timerRef.current); }, []);
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(code).then(() => {
       setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => setCopied(false), 1500);
     });
   }, [code]);
 
@@ -337,11 +341,16 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
 
   const [flashing, setFlashing] = useState(false);
   const bubbleRef = useRef<HTMLDivElement>(null);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const flashTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => () => { clearTimeout(copyTimerRef.current); clearTimeout(flashTimerRef.current); }, []);
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(contentRef.current).then(() => {
       setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => setCopied(false), 1500);
     });
   }, []);
 
@@ -359,7 +368,8 @@ export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolC
     navigator.clipboard.writeText(contentRef.current).then(() => {
       setFlashing(true);
       toaster.create({ title: t("chat.textCopied"), type: "success", duration: 1500 });
-      setTimeout(() => setFlashing(false), 350);
+      clearTimeout(flashTimerRef.current);
+      flashTimerRef.current = setTimeout(() => setFlashing(false), 350);
     });
   }, [t]);
 
