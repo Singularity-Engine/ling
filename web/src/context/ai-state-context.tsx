@@ -134,7 +134,7 @@ export function AiStateProvider({ children }: { children: ReactNode }) {
 
   const actions = useMemo(
     () => ({ setAiState, setBackendSynthComplete, resetState }),
-    [setAiState, resetState],
+    [setAiState, setBackendSynthComplete, resetState],
   );
 
   const state = useMemo(
