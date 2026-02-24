@@ -268,9 +268,9 @@ export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCar
   // Pre-compute key + defaultCollapsed once per content change,
   // avoiding redundant .slice() / .split("\n") in the render path.
   const codeBlocksMeta = useMemo(
-    () => codeBlocks.map((block) => ({
+    () => codeBlocks.map((block, i) => ({
       block,
-      key: `${block.lang}:${block.code.slice(0, 48)}`,
+      key: `cb-${i}-${block.lang}`,
       defaultCollapsed: block.code.split("\n").length > COLLAPSE_LINE_THRESHOLD,
     })),
     [codeBlocks],

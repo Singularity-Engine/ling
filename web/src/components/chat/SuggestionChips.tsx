@@ -70,7 +70,7 @@ export const SuggestionChips = memo(function SuggestionChips({
     <div role="group" aria-label={i18next.t("ui.suggestedReplies")} style={centered ? S_CHIPS_CENTERED : S_CHIPS_LEFT}>
       {chips.map((chip, i) => (
         <button
-          key={chip}
+          key={`${i}-${chip}`}
           className="welcome-chip"
           data-chip={chip}
           onClick={handleClick}

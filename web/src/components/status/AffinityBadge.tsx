@@ -154,19 +154,27 @@ export const AffinityBadge = memo(() => {
   // Clean up timer on unmount
   useEffect(() => () => { clearTimeout(panelCloseTimer.current); }, []);
 
+  // Ref mirrors — let closePanel / toggleExpanded read the latest state
+  // without depending on it, keeping callbacks stable and avoiding a
+  // 3-level cascade: closePanel → toggle/outside/keydown → effect.
+  const panelClosingRef = useRef(panelClosing);
+  panelClosingRef.current = panelClosing;
+  const expandedRef = useRef(expanded);
+  expandedRef.current = expanded;
+
   // ── Stabilized event handlers ──
   const closePanel = useCallback(() => {
-    if (panelClosing || !expanded) return;
+    if (panelClosingRef.current || !expandedRef.current) return;
     setPanelClosing(true);
     panelCloseTimer.current = setTimeout(() => {
       setPanelClosing(false);
       setExpanded(false);
     }, PANEL_EXIT_DURATION);
-  }, [panelClosing, expanded]);
+  }, []);
 
   const toggleExpanded = useCallback(() => {
-    if (expanded || panelClosing) { closePanel(); } else { setExpanded(true); }
-  }, [expanded, panelClosing, closePanel]);
+    if (expandedRef.current || panelClosingRef.current) { closePanel(); } else { setExpanded(true); }
+  }, [closePanel]);
 
 
   // Close expanded panel on outside click or Escape
