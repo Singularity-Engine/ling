@@ -16,6 +16,9 @@ const PHASE_COLORS = {
 
 const DEFAULT_TINT: AffinityAmbientTint = AFFINITY_AMBIENT_TINTS[DEFAULT_LEVEL];
 
+/** Must exceed the longest CSS animation in bgLevelBloom (1.8s) */
+const LEVEL_TRANSITION_MS = 2000;
+
 // ── Module-level base styles for one-shot animation overlays ──
 // Static properties are hoisted here; dynamic `background` is merged via useMemo.
 const BLOOM_BURST_BASE: CSSProperties = {
@@ -50,6 +53,9 @@ const LEVEL_BLOOM_BASE: CSSProperties = {
   willChange: 'opacity, transform',
 };
 
+/** Wrapper style — transparent container that doesn't generate a box */
+const S_CONTENTS: CSSProperties = { display: 'contents' };
+
 export const BackgroundReactor = memo(() => {
   const { currentPhase } = useToolState();
   const { isThinkingSpeaking } = useAiStateRead();
@@ -70,7 +76,7 @@ export const BackgroundReactor = memo(() => {
       prevLevelRef.current = level;
       transitionKeyRef.current++;
       setLevelTransition({ key: transitionKeyRef.current, color: tint.color });
-      const timer = setTimeout(() => setLevelTransition(null), 2000);
+      const timer = setTimeout(() => setLevelTransition(null), LEVEL_TRANSITION_MS);
       return () => clearTimeout(timer);
     }
   }, [level, tint.color]);
@@ -234,7 +240,7 @@ export const BackgroundReactor = memo(() => {
   );
 
   return (
-    <div aria-hidden="true" style={{ display: 'contents' }}>
+    <div aria-hidden="true" style={S_CONTENTS}>
       <div style={glowStyle as CSSProperties} />
       <div style={ambientStyle} />
       <div style={vignetteStyle} />

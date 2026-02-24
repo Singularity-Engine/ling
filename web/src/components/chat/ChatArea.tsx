@@ -24,6 +24,8 @@ const isTouchDevice =
  * Messages beyond this window still exist in state (up to MAX_MESSAGES=200).
  */
 const RENDER_WINDOW = 80;
+/** Must match the CSS duration of emptyStateFadeOut (0.35s) */
+const EMPTY_EXIT_MS = 350;
 const EMPTY_IMAGES: never[] = [];
 
 // ─── Static style constants (avoid per-render allocation during ~30fps streaming) ───
@@ -35,6 +37,13 @@ const S_CONTAINER: CSSProperties = {
   padding: "var(--ling-space-4) 0",
   position: "relative",
   overscrollBehavior: "contain",
+};
+
+/** Snap-back style: applied after drag release while spring animation plays */
+const S_CONTAINER_SNAPBACK: CSSProperties = {
+  ...S_CONTAINER,
+  transform: "translateY(0)",
+  transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
 };
 
 const S_LOAD_MORE_WRAP: CSSProperties = {
@@ -195,6 +204,9 @@ const S_KEYBOARD_HINT: CSSProperties = {
   animation: "emptyHintFadeIn var(--ling-duration-slow) var(--ling-ease-enter) 0.55s both",
 };
 
+/** Module-level noop — avoids useCallback overhead for optional callbacks */
+const NOOP = () => {};
+
 // ─── ChatArea ───
 
 interface ChatAreaProps {
@@ -218,10 +230,9 @@ export const ChatArea = memo(({ onCollapse }: ChatAreaProps) => {
   } = useChatScroll(messages, getFullResponse);
 
   // Swipe-to-collapse gesture (mobile only)
-  const collapseNoop = useCallback(() => {}, []);
   const { showPill, dragOffset, isDragging, handlers: swipeHandlers } = useSwipeCollapse({
     scrollRef,
-    onCollapse: onCollapse ?? collapseNoop,
+    onCollapse: onCollapse ?? NOOP,
     enabled: !!onCollapse && isTouchDevice,
   });
 
@@ -242,6 +253,15 @@ export const ChatArea = memo(({ onCollapse }: ChatAreaProps) => {
   // Focus-timer ref — cleared on unmount to avoid DOM ops after teardown.
   const focusTimerRef = useRef<ReturnType<typeof setTimeout>>();
   useEffect(() => () => { clearTimeout(focusTimerRef.current); }, []);
+
+  // Memoize container style — avoids allocating a new object on every streaming
+  // frame (~30fps) when drag state hasn't changed.  During active drag the memo
+  // recomputes only when dragOffset changes; at rest it returns S_CONTAINER.
+  const containerStyle = useMemo<CSSProperties>(() => {
+    if (isDragging) return { ...S_CONTAINER, transform: `translateY(${dragOffset}px)` };
+    if (dragOffset !== 0) return S_CONTAINER_SNAPBACK;
+    return S_CONTAINER;
+  }, [isDragging, dragOffset]);
 
   // Memoize dedup so it only recalculates when messages change, not on every streaming delta
   const dedupedMessages = useMemo(
@@ -266,7 +286,7 @@ export const ChatArea = memo(({ onCollapse }: ChatAreaProps) => {
   useEffect(() => {
     if (prevEmptyRef.current && !isEmpty) {
       setEmptyExiting(true);
-      const timer = setTimeout(() => setEmptyExiting(false), 350);
+      const timer = setTimeout(() => setEmptyExiting(false), EMPTY_EXIT_MS);
       return () => clearTimeout(timer);
     }
     prevEmptyRef.current = isEmpty;
@@ -410,7 +430,7 @@ export const ChatArea = memo(({ onCollapse }: ChatAreaProps) => {
       role="log"
       aria-label={t("ui.chatMessages")}
       aria-live="polite"
-      style={isDragging ? { ...S_CONTAINER, transform: `translateY(${dragOffset}px)` } : dragOffset === 0 ? S_CONTAINER : { ...S_CONTAINER, transform: "translateY(0)", transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)" }}
+      style={containerStyle}
       {...swipeHandlers}
     >
       {/* Swipe pill indicator */}

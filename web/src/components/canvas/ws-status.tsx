@@ -35,12 +35,22 @@ const WebSocketStatus = memo((): JSX.Element => {
     cursor: isDisconnected ? 'pointer' : 'default',
   }), [color, isDisconnected]);
 
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (isDisconnected && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      handleClick();
+    }
+  }, [isDisconnected, handleClick]);
+
   return (
     <div
       style={containerStyle}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      role={isDisconnected ? 'button' : 'status'}
+      tabIndex={isDisconnected ? 0 : undefined}
     >
       <MemoizedStatusContent textKey={textKey} />
     </div>

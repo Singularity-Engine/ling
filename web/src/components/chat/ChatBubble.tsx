@@ -107,7 +107,7 @@ const CodeBlockHeader = memo(function CodeBlockHeader({ lang, code }: { lang: st
     navigator.clipboard.writeText(code).then(() => {
       setCopied(true);
       clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => setCopied(false), 1500);
+      timerRef.current = setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
     }, () => {
       toaster.create({ title: i18next.t("chat.copyFailed"), type: "error", duration: 2000 });
     });
@@ -145,6 +145,8 @@ export const mdComponents = {
 // ─── Long-message collapse thresholds ───
 const COLLAPSE_CHAR_THRESHOLD = 500;
 const COLLAPSE_LINE_THRESHOLD = 12;
+/** Duration the "copied" feedback icon stays visible before reverting */
+const COPY_FEEDBACK_MS = 1500;
 // Static person-silhouette icon for user avatar — shared across all instances.
 const USER_ICON = (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -282,7 +284,7 @@ export const ChatBubble = memo(({ role, content: rawContent, timestamp, isStream
     navigator.clipboard.writeText(contentRef.current).then(() => {
       setCopied(true);
       clearTimeout(copyTimerRef.current);
-      copyTimerRef.current = setTimeout(() => setCopied(false), 1500);
+      copyTimerRef.current = setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
     }, () => {
       toaster.create({ title: i18next.t("chat.copyFailed"), type: "error", duration: 2000 });
     });

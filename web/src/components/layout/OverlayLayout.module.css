@@ -13,7 +13,7 @@
 .root {
   position: relative;
   height: 100dvh;
-  width: 100vw;
+  width: 100%;
   background: var(--ling-bg-deep);
   overflow: hidden;
 }
@@ -385,7 +385,7 @@
 
 @keyframes overlaySlideUp {
   from { opacity: 0; transform: translateY(var(--ling-space-5)); }
-  to { opacity: 1; transform: translateY(calc(-1 * var(--kb-offset, 0px))); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes vignetteIn {
@@ -394,6 +394,6 @@
 }
 
 @keyframes toolbarFadeIn {
-  from { opacity: 0; transform: translateY(-8px); }
+  from { opacity: 0; transform: translateY(calc(-1 * var(--ling-space-2))); }
   to { opacity: 1; transform: translateY(0); }
 }

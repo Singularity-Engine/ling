@@ -24,6 +24,8 @@ const MAX_ZOOM = 3.0;         // Maximum zoom factor (300% of base)
 const EASING_FACTOR = 0.3;    // Controls animation smoothness
 const WHEEL_ZOOM_STEP = 0.05; // Zoom change per wheel tick
 const ZOOM_EPSILON = 0.001;   // Stop animating below this diff
+/** Retry delay when container reports zero size during layout transitions */
+const ZERO_SIZE_RETRY_MS = 600;
 
 interface UseLive2DResizeProps {
   containerRef: RefObject<HTMLDivElement>;
@@ -77,6 +79,7 @@ export const useLive2DResize = ({
   const animationFrameIdRef = useRef<number | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isResizingRef = useRef<boolean>(false);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Zoom state: zoomFactor is relative to the SDK's bbox-fitted base scale.
   // baseScaleRef captures _modelMatrix._tr[0] when the user first zooms,
@@ -200,6 +203,7 @@ export const useLive2DResize = ({
       cancelAnimationFrame(animationFrameIdRef.current);
       animationFrameIdRef.current = null;
     }
+    if (retryTimerRef.current) { clearTimeout(retryTimerRef.current); retryTimerRef.current = null; }
   }, []);
 
   /**
@@ -241,8 +245,11 @@ export const useLive2DResize = ({
         log.debug('Container bounds not available in window mode.');
       }
       if (width === 0 || height === 0) {
-        log.debug('Width or Height is zero, skipping canvas/delegate update.');
+        log.debug('Width or Height is zero, queuing retry after transition.');
         isResizingRef.current = false;
+        // Retry after CSS transitions complete — container may be mid-layout-switch
+        if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+        retryTimerRef.current = setTimeout(() => { retryTimerRef.current = null; handleResize(); }, ZERO_SIZE_RETRY_MS);
         return;
       }
 
@@ -293,7 +300,7 @@ export const useLive2DResize = ({
     return undefined;
   }, [handleWheel, canvasRef]);
 
-  // Clean up animations on unmount
+  // Clean up animations + retry timer on unmount
   useEffect(() => () => {
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
@@ -302,6 +309,10 @@ export const useLive2DResize = ({
     if (animationFrameIdRef.current !== null) {
       cancelAnimationFrame(animationFrameIdRef.current);
       animationFrameIdRef.current = null;
+    }
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = null;
     }
   }, []);
 
