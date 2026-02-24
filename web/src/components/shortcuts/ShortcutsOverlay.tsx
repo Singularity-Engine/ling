@@ -128,11 +128,13 @@ export const ShortcutsOverlay = memo(({ open, onClose }: ShortcutsOverlayProps) 
     if (e.key === "Escape") handleClose();
   }, [handleClose]);
 
+  const stopPropagation = useCallback((e: React.MouseEvent) => e.stopPropagation(), []);
+
   if (!open && !closing) return null;
 
   return (
     <div style={closing ? S_BACKDROP_CLOSING : S_BACKDROP_OPEN} onClick={handleBackdropClick}>
-      <div ref={cardRef} tabIndex={-1} onKeyDown={handleKeyDown} onClick={(e) => e.stopPropagation()} style={closing ? S_CARD_CLOSING : S_CARD_OPEN} role="dialog" aria-modal="true" aria-labelledby="shortcuts-title">
+      <div ref={cardRef} tabIndex={-1} onKeyDown={handleKeyDown} onClick={stopPropagation} style={closing ? S_CARD_CLOSING : S_CARD_OPEN} role="dialog" aria-modal="true" aria-labelledby="shortcuts-title">
         <h2 id="shortcuts-title" style={S_HEADING}>{t("shortcuts.title")}</h2>
 
         <div style={S_LIST}>

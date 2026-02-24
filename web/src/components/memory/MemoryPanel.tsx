@@ -5,7 +5,7 @@
  * 通过 Engine BFF 代理调用 EverMemOS memory_search API。
  */
 
-import { memo, useState, useEffect, useCallback, useRef, type CSSProperties } from 'react';
+import { memo, useState, useEffect, useCallback, useRef, useMemo, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiClient } from '@/services/api-client';
 import { useAuthState } from '@/context/AuthContext';
@@ -202,6 +202,13 @@ export const MemoryPanel = memo(function MemoryPanel({ open, onClose }: MemoryPa
     if (e.target === e.currentTarget) handleClose();
   }, [handleClose]);
 
+  // Pre-compute formatted dates so we don't call new Date() + toLocaleDateString()
+  // for every card on every re-render (e.g. closing animation triggers re-render).
+  const formattedDates = useMemo(
+    () => new Map(memories.map(m => [m.id, new Date(m.created_at).toLocaleDateString(undefined, DATE_OPTS)])),
+    [memories],
+  );
+
   // ESC to close — handled globally by useKeyboardShortcuts in App.tsx
 
   if (!open && !closing) return null;
@@ -273,7 +280,7 @@ export const MemoryPanel = memo(function MemoryPanel({ open, onClose }: MemoryPa
               <p style={S_CARD_TEXT}>{memory.content}</p>
               <div style={S_CARD_META}>
                 <span style={S_CARD_DATE}>
-                  {new Date(memory.created_at).toLocaleDateString(undefined, DATE_OPTS)}
+                  {formattedDates.get(memory.id)}
                 </span>
                 {memory.group_id && (
                   <span style={S_CARD_GROUP}>{memory.group_id}</span>

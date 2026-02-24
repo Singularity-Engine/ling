@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { useState, useEffect, memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAiStateRead, AiStateEnum } from '@/context/AiStateContext';
 
 // ── Timing ──
@@ -116,6 +117,7 @@ const S_SKELETON_BAR_SHIMMER_1: CSSProperties = {
  * Fades out gracefully once aiState leaves LOADING.
  */
 export const LoadingSkeleton = memo(function LoadingSkeleton() {
+  const { t } = useTranslation();
   const { aiState } = useAiStateRead();
   const isLoading = aiState === AiStateEnum.LOADING;
   const [visible, setVisible] = useState(true);
@@ -135,7 +137,7 @@ export const LoadingSkeleton = memo(function LoadingSkeleton() {
       style={isLoading ? S_OVERLAY_LOADING : S_OVERLAY_FADING}
       role="status"
       aria-busy={isLoading}
-      aria-label={isLoading ? '加载中' : undefined}
+      aria-label={isLoading ? t('chat.loading') : undefined}
     >
       {/* Central pulsing orb — avatar placeholder */}
       <div style={S_ORB} aria-hidden="true">
