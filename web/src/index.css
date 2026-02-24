@@ -1333,13 +1333,17 @@ canvas {
   border: 1px solid var(--ling-surface-hover);
   color: var(--ling-text-soft);
   font-size: 12px; text-decoration: none;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
   cursor: pointer;
 }
 .about-link:hover {
   background: var(--ling-purple-20);
   border-color: var(--ling-purple-40);
   color: var(--ling-purple-lighter);
+  transform: translateY(-1px);
+}
+.about-link:active {
+  transform: translateY(0);
 }
 .about-btn-primary:hover { background: var(--ling-purple-60) !important; }
 .about-btn-primary:active { transform: scale(0.97); }

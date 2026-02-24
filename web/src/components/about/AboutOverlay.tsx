@@ -415,6 +415,7 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
                   className="about-btn-outline"
                   onClick={handleManageSubscription}
                   disabled={portalLoading}
+                  aria-busy={portalLoading}
                   style={portalLoading ? S_BTN_MANAGE_LOADING : S_BTN_MANAGE}
                 >
                   {portalLoading ? "..." : t("about.manageSubscription")}
@@ -448,6 +449,7 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
+              aria-label={t("about.externalLink", { name: t(link.labelKey) })}
             >
               {link.icon}
               {t(link.labelKey)}

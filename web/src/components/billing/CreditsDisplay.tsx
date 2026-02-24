@@ -57,7 +57,7 @@ const CreditsDisplay: React.FC = memo(() => {
       className="ling-credits-display"
       style={S_BUTTON}
       aria-label={t("billing.creditsAriaLabel", { count: Math.floor(balance) })}
-      title={`Credits: ${balance}`}
+      title={t("billing.creditsTooltip", { count: Math.floor(balance) })}
     >
       <span aria-hidden="true" style={isLow ? S_ICON_LOW : S_ICON_NORMAL}>✦</span>
       <span style={isLow ? S_TEXT_LOW : S_TEXT_NORMAL}>{Math.floor(balance)}</span>

@@ -366,10 +366,11 @@ export const LandingAnimation = memo(function LandingAnimation({ onComplete }: L
             onClick={handleSkip}
             className="landing-start-btn"
             disabled={exiting || !showButton}
+            aria-busy={exiting}
             tabIndex={showButton ? 0 : -1}
             style={startBtnStyle}
           >
-            {exiting && <span style={spinnerStyle} />}
+            {exiting && <span style={spinnerStyle} aria-hidden="true" />}
             {t("landing.startChat")}
             {!exiting && (
               <span className="landing-btn-arrow" style={arrowStyle}>
