@@ -194,16 +194,18 @@ function MainContent(): JSX.Element {
     };
     updateVh();
     let rafId = 0;
+    let fsTimerId: ReturnType<typeof setTimeout>;
     const throttled = () => {
       if (rafId) return;
       rafId = requestAnimationFrame(() => { rafId = 0; updateVh(); });
     };
     // Fullscreen transitions may not fire resize — listen explicitly
-    const onFullscreenChange = () => { setTimeout(throttled, 100); };
+    const onFullscreenChange = () => { fsTimerId = setTimeout(throttled, 100); };
     window.addEventListener("resize", throttled);
     document.addEventListener("fullscreenchange", onFullscreenChange);
     document.addEventListener("webkitfullscreenchange", onFullscreenChange);
     return () => {
+      clearTimeout(fsTimerId);
       cancelAnimationFrame(rafId);
       window.removeEventListener("resize", throttled);
       document.removeEventListener("fullscreenchange", onFullscreenChange);

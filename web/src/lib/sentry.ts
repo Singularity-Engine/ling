@@ -5,6 +5,10 @@
  * Keeps bundle impact minimal by importing @sentry/react only when needed.
  */
 
+import { createLogger } from '../utils/logger';
+
+const log = createLogger('Sentry');
+
 let initialized = false;
 
 export async function initSentry(): Promise<void> {
@@ -39,7 +43,7 @@ export async function initSentry(): Promise<void> {
     initialized = true;
   } catch (e) {
     // Sentry init failed — not critical, just log
-    console.warn('[Sentry] init failed:', e);
+    log.warn('init failed:', e);
   }
 }
 

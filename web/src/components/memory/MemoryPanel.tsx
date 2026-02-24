@@ -153,6 +153,28 @@ const S_FOOTER_BOLD: CSSProperties = { color: 'var(--ling-purple-60)' };
 
 const DATE_OPTS: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
 
+// ─── MemoryCard (memo'd to avoid re-render when parent state changes) ───
+
+interface MemoryCardProps {
+  memory: MemoryEntry;
+  index: number;
+  formattedDate: string | undefined;
+}
+
+const MemoryCard = memo(function MemoryCard({ memory, index, formattedDate }: MemoryCardProps) {
+  return (
+    <div className="ling-memory-card" style={getCardStyle(index)}>
+      <p style={S_CARD_TEXT}>{memory.content}</p>
+      <div style={S_CARD_META}>
+        <span style={S_CARD_DATE}>{formattedDate}</span>
+        {memory.group_id && (
+          <span style={S_CARD_GROUP}>{memory.group_id}</span>
+        )}
+      </div>
+    </div>
+  );
+});
+
 // ─── Component ───
 
 export const MemoryPanel = memo(function MemoryPanel({ open, onClose }: MemoryPanelProps) {
@@ -281,17 +303,12 @@ export const MemoryPanel = memo(function MemoryPanel({ open, onClose }: MemoryPa
           )}
 
           {memories.map((memory, i) => (
-            <div key={memory.id} className="ling-memory-card" style={getCardStyle(i)}>
-              <p style={S_CARD_TEXT}>{memory.content}</p>
-              <div style={S_CARD_META}>
-                <span style={S_CARD_DATE}>
-                  {formattedDates.get(memory.id)}
-                </span>
-                {memory.group_id && (
-                  <span style={S_CARD_GROUP}>{memory.group_id}</span>
-                )}
-              </div>
-            </div>
+            <MemoryCard
+              key={memory.id}
+              memory={memory}
+              index={i}
+              formattedDate={formattedDates.get(memory.id)}
+            />
           ))}
         </div>
 

@@ -379,7 +379,7 @@ export const LandingAnimation = memo(function LandingAnimation({ onComplete }: L
           </button>
           <span style={hintStyle}>
             <span className="landing-hint-mobile">{t("landing.tapHint", "Tap to start")}</span>
-            <span className="landing-hint-desktop">Press Enter ↵</span>
+            <span className="landing-hint-desktop">{t("landing.enterHint")}</span>
           </span>
           {/* Feature pills */}
           <div className="landing-feature-pills">
