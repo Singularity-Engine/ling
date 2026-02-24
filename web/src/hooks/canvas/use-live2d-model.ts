@@ -1,9 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable no-use-before-define */
 /* eslint-disable no-param-reassign */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// @ts-nocheck
 import { useEffect, useRef, useCallback, useState, RefObject } from "react";
 import { ModelInfo } from "@/context/Live2dConfigContext";
 import { updateModelConfig } from '../../../WebSDK/src/lappdefine';
@@ -63,6 +59,8 @@ export const playAudioWithLipSync = (audioPath: string, modelIndex = 0): Promise
   const fullPath = `/Resources/${audioPath}`;
   const audio = new Audio(fullPath);
 
+  // Use { once: true } so listeners auto-remove after firing,
+  // preventing accumulation of orphaned Audio elements + listeners.
   audio.addEventListener('canplaythrough', () => {
     const model = live2dManager.getModel(modelIndex);
     if (model) {
@@ -75,15 +73,17 @@ export const playAudioWithLipSync = (audioPath: string, modelIndex = 0): Promise
     } else {
       reject(new Error(`Model index ${modelIndex} not found`));
     }
-  });
+  }, { once: true });
 
   audio.addEventListener('ended', () => {
+    audio.src = '';
     resolve();
-  });
+  }, { once: true });
 
   audio.addEventListener('error', () => {
+    audio.src = '';
     reject(new Error(`Failed to load audio: ${fullPath}`));
-  });
+  }, { once: true });
 
   audio.load();
 });
@@ -101,7 +101,7 @@ export const useLive2DModel = ({
   const modelPositionRef = useRef<Position>({ x: 0, y: 0 });
   const prevModelUrlRef = useRef<string | null>(null);
   const isHoveringModelRef = useRef(false);
-  const electronApi = (window as any).electron;
+  const electronApi = window.electron;
 
   // --- State for Tap vs Drag ---
   const mouseDownTimeRef = useRef<number>(0);
@@ -111,7 +111,7 @@ export const useLive2DModel = ({
 
   useEffect(() => {
     const currentUrl = modelInfo?.url;
-    const sdkScale = (window as any).LAppDefine?.CurrentKScale;
+    const sdkScale = window.LAppDefine?.CurrentKScale;
     const modelScale = modelInfo?.kScale !== undefined ? Number(modelInfo.kScale) : undefined;
 
     const needsUpdate = currentUrl &&
@@ -128,8 +128,8 @@ export const useLive2DModel = ({
           updateModelConfig(baseUrl, modelDir, modelFileName, Number(modelInfo.kScale));
 
           setTimeout(() => {
-            if ((window as any).LAppLive2DManager?.releaseInstance) {
-              (window as any).LAppLive2DManager.releaseInstance();
+            if (window.LAppLive2DManager?.releaseInstance) {
+              window.LAppLive2DManager.releaseInstance();
             }
             initializeLive2D();
           }, 500);
@@ -141,7 +141,7 @@ export const useLive2DModel = ({
   }, [modelInfo?.url, modelInfo?.kScale]);
 
   const getModelPosition = useCallback(() => {
-    const adapter = (window as any).getLAppAdapter?.();
+    const adapter = window.getLAppAdapter?.();
     if (adapter) {
       const model = adapter.getModel();
       if (model && model._modelMatrix) {
@@ -156,7 +156,7 @@ export const useLive2DModel = ({
   }, []);
 
   const setModelPosition = useCallback((x: number, y: number) => {
-    const adapter = (window as any).getLAppAdapter?.();
+    const adapter = window.getLAppAdapter?.();
     if (adapter) {
       const model = adapter.getModel();
       if (model && model._modelMatrix) {
@@ -182,28 +182,8 @@ export const useLive2DModel = ({
     return () => clearTimeout(timer);
   }, [modelInfo?.url, getModelPosition]);
 
-  const getCanvasScale = useCallback(() => {
-    const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-    if (!canvas) return { width: 1, height: 1, scale: 1 };
-
-    const { width } = canvas;
-    const { height } = canvas;
-    const scale = width / canvas.clientWidth;
-
-    return { width, height, scale };
-  }, []);
-
-  const screenToModelPosition = useCallback((screenX: number, screenY: number) => {
-    const { width, height, scale } = getCanvasScale();
-
-    const x = ((screenX * scale) / width) * 2 - 1;
-    const y = -((screenY * scale) / height) * 2 + 1;
-
-    return { x, y };
-  }, [getCanvasScale]);
-
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
-    const adapter = (window as any).getLAppAdapter?.();
+    const adapter = window.getLAppAdapter?.();
     if (!adapter || !canvasRef.current) return;
 
     const model = adapter.getModel();
@@ -245,7 +225,7 @@ export const useLive2DModel = ({
   }, [canvasRef, modelInfo]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    const adapter = (window as any).getLAppAdapter?.();
+    const adapter = window.getLAppAdapter?.();
     const view = LAppDelegate.getInstance().getView();
     const model = adapter?.getModel();
 
@@ -337,7 +317,7 @@ export const useLive2DModel = ({
   }, [isPet, isDragging, electronApi, canvasRef]);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
-    const adapter = (window as any).getLAppAdapter?.();
+    const adapter = window.getLAppAdapter?.();
     const model = adapter?.getModel();
     const view = LAppDelegate.getInstance().getView();
 
@@ -414,14 +394,14 @@ export const useLive2DModel = ({
     if (!import.meta.env.DEV) return;
 
     const getAdapterAndModel = () => {
-      const adapter = (window as any).getLAppAdapter?.();
+      const adapter = window.getLAppAdapter?.();
       if (!adapter) { console.error('Live2D adapter not available'); return null; }
       const model = adapter.getModel();
       if (!model) { console.error('Live2D model not available'); return null; }
       return model;
     };
 
-    (window as any).Live2DDebug = {
+    window.Live2DDebug = {
       playMotion: (motionGroup: string, motionIndex: number = 0, priority: number = 3) => {
         const model = getAdapterAndModel();
         if (!model) return false;
@@ -445,14 +425,14 @@ export const useLive2DModel = ({
         const model = getAdapterAndModel();
         if (!model) return null;
         try {
-          const motionGroups: any[] = [];
+          const motionGroups: { name: string; count: number; motions: { index: number; file: string }[] }[] = [];
           const groups = model._modelSetting?._json?.FileReferences?.Motions;
           if (groups) {
             for (const groupName in groups) {
               const motions = groups[groupName];
               motionGroups.push({
                 name: groupName, count: motions.length,
-                motions: motions.map((m: any, i: number) => ({ index: i, file: m.File })),
+                motions: motions.map((m: { File: string }, i: number) => ({ index: i, file: m.File })),
               });
             }
           }
@@ -467,7 +447,7 @@ export const useLive2DModel = ({
 
     console.log('Live2D Debug functions exposed to window.Live2DDebug');
 
-    return () => { delete (window as any).Live2DDebug; };
+    return () => { delete window.Live2DDebug; };
   }, []);
 
   return {

@@ -225,6 +225,7 @@ export const ChatArea = memo(({ onCollapse }: ChatAreaProps) => {
   });
 
   // Track empty-state exit animation: keep showing for 350ms with fade-out
+  const [emptyExiting, setEmptyExiting] = useState(false);
   const prevEmptyRef = useRef(true);
 
   // true during the render immediately after streaming ends — lets us skip

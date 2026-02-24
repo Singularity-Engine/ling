@@ -233,7 +233,8 @@ export const StarField = memo(() => {
       ctx.globalAlpha = 1;
 
       // ── Meteors (disabled under prefers-reduced-motion) ──
-      if (!prefersReducedMotion && Math.random() < 0.002 && meteorsRef.current.length < 2) {
+      // dt-scaled probability: ~0.002 per 60fps frame → consistent spawn rate
+      if (!prefersReducedMotion && Math.random() < 0.002 * dt && meteorsRef.current.length < 2) {
         meteorsRef.current.push({
           x: Math.random() * w * 0.8,
           y: Math.random() * h * 0.3,
@@ -246,9 +247,9 @@ export const StarField = memo(() => {
       }
 
       meteorsRef.current = meteorsRef.current.filter((m) => {
-        m.x += Math.cos(m.angle) * m.speed;
-        m.y += Math.sin(m.angle) * m.speed;
-        m.alpha -= m.decay;
+        m.x += Math.cos(m.angle) * m.speed * dt;
+        m.y += Math.sin(m.angle) * m.speed * dt;
+        m.alpha -= m.decay * dt;
 
         if (m.alpha <= 0) return false;
 
