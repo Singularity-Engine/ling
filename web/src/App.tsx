@@ -1,11 +1,13 @@
-import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense, Component, type ErrorInfo, type ReactNode, type CSSProperties } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, Suspense, Component, type ErrorInfo, type ReactNode, type CSSProperties } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
 
+import { lazyRetry } from "./utils/lazy-retry";
+
 // Lazy-loaded: only shown on first visit (before sessionStorage 'ling-visited' is set).
-const LandingAnimation = lazy(() => import("./components/landing/LandingAnimation").then(m => ({ default: m.LandingAnimation })));
+const LandingAnimation = lazyRetry(() => import("./components/landing/LandingAnimation").then(m => ({ default: m.LandingAnimation })));
 
 import { useMessagesRef, useHistoryListState, useHistoryListActions } from "./context/ChatHistoryContext";
 import { useVADState, useVADActions } from "./context/VadContext";
@@ -33,18 +35,18 @@ import { focusTextarea } from "./utils/dom";
 import "./index.css";
 
 // ─── Lazy-loaded overlays & modals (chunk loads on first use) ───
-const ShortcutsOverlay = lazy(() => import("./components/shortcuts/ShortcutsOverlay").then(m => ({ default: m.ShortcutsOverlay })));
-const AboutOverlay = lazy(() => import("./components/about/AboutOverlay").then(m => ({ default: m.AboutOverlay })));
-const MemoryPanel = lazy(() => import("./components/memory/MemoryPanel").then(m => ({ default: m.MemoryPanel })));
-const PricingOverlay = lazy(() => import("./components/billing/PricingOverlay"));
-const InsufficientCreditsModal = lazy(() => import("./components/billing/InsufficientCreditsModal"));
-const PersonalizedOnboarding = lazy(() => import("./components/onboarding/PersonalizedOnboarding").then(m => ({ default: m.PersonalizedOnboarding })));
+const ShortcutsOverlay = lazyRetry(() => import("./components/shortcuts/ShortcutsOverlay").then(m => ({ default: m.ShortcutsOverlay })));
+const AboutOverlay = lazyRetry(() => import("./components/about/AboutOverlay").then(m => ({ default: m.AboutOverlay })));
+const MemoryPanel = lazyRetry(() => import("./components/memory/MemoryPanel").then(m => ({ default: m.MemoryPanel })));
+const PricingOverlay = lazyRetry(() => import("./components/billing/PricingOverlay"));
+const InsufficientCreditsModal = lazyRetry(() => import("./components/billing/InsufficientCreditsModal"));
+const PersonalizedOnboarding = lazyRetry(() => import("./components/onboarding/PersonalizedOnboarding").then(m => ({ default: m.PersonalizedOnboarding })));
 
 // ─── Lazy-loaded route pages ───
-const LoginPage = lazy(() => import("./pages/LoginPage").then(m => ({ default: m.LoginPage })));
-const RegisterPage = lazy(() => import("./pages/RegisterPage").then(m => ({ default: m.RegisterPage })));
-const TermsPage = lazy(() => import("./pages/TermsPage").then(m => ({ default: m.TermsPage })));
-const DashboardPage = lazy(() => import("./pages/DashboardPage").then(m => ({ default: m.DashboardPage })));
+const LoginPage = lazyRetry(() => import("./pages/LoginPage").then(m => ({ default: m.LoginPage })));
+const RegisterPage = lazyRetry(() => import("./pages/RegisterPage").then(m => ({ default: m.RegisterPage })));
+const TermsPage = lazyRetry(() => import("./pages/TermsPage").then(m => ({ default: m.TermsPage })));
+const DashboardPage = lazyRetry(() => import("./pages/DashboardPage").then(m => ({ default: m.DashboardPage })));
 
 // Inlined to avoid eagerly importing the full onboarding module
 const shouldShowOnboarding = () => !sessionStorage.getItem(SS_ONBOARDING_DONE);

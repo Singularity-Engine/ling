@@ -203,6 +203,7 @@ export const ConnectionStatus = memo(() => {
 
   return (
     <Tag
+      {...(isClosed ? { type: "button" as const } : {})}
       onClick={isClosed ? reconnect : undefined}
       style={containerStyle}
       className={isClosed ? "ling-conn-closed" : undefined}

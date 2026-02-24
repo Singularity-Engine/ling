@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, useMemo, memo, lazy, Suspense, type CSSProperties } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo, memo, Suspense, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { SectionErrorBoundary } from "../error/SectionErrorBoundary";
 import { Live2D } from "../canvas/live2d";
@@ -18,10 +18,11 @@ import { useChatMessagesState, useChatMessagesActions } from "@/context/ChatHist
 import { useWebSocketState, useWebSocketActions } from "@/context/WebsocketContext";
 import { useAiStateRead } from "@/context/AiStateContext";
 import { focusTextarea } from "@/utils/dom";
+import { lazyRetry } from "@/utils/lazy-retry";
 import styles from "./SplitLayout.module.css";
 
-const ChatArea = lazy(() => import("../chat/ChatArea").then(m => ({ default: m.ChatArea })));
-const Constellation = lazy(() => import("../ability/Constellation").then(m => ({ default: m.Constellation })));
+const ChatArea = lazyRetry(() => import("../chat/ChatArea").then(m => ({ default: m.ChatArea })));
+const Constellation = lazyRetry(() => import("../ability/Constellation").then(m => ({ default: m.Constellation })));
 const EMPTY_IMAGES: never[] = [];
 
 interface SplitBounds {

@@ -6,6 +6,7 @@
  */
 
 import { memo, useState, useEffect, useCallback, useRef, useMemo, type CSSProperties } from 'react';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useTranslation } from 'react-i18next';
 import { apiClient } from '@/services/api-client';
 import { useAuthState } from '@/context/AuthContext';
@@ -162,6 +163,10 @@ export const MemoryPanel = memo(function MemoryPanel({ open, onClose }: MemoryPa
   const [error, setError] = useState('');
   const [closing, setClosing] = useState(false);
   const closingTimer = useRef<ReturnType<typeof setTimeout>>();
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Focus-trap: keep Tab/Shift+Tab within the panel
+  useFocusTrap(panelRef, open && !closing);
 
   const abortRef = useRef<AbortController>();
 
@@ -219,7 +224,7 @@ export const MemoryPanel = memo(function MemoryPanel({ open, onClose }: MemoryPa
       <div style={closing ? S_BACKDROP_CLOSING : S_BACKDROP_OPEN} aria-hidden="true" />
 
       {/* Panel */}
-      <div style={closing ? S_PANEL_CLOSING : S_PANEL_OPEN} role="dialog" aria-modal="true" aria-labelledby="memory-panel-title">
+      <div ref={panelRef} style={closing ? S_PANEL_CLOSING : S_PANEL_OPEN} role="dialog" aria-modal="true" aria-labelledby="memory-panel-title">
         {/* Header */}
         <header style={S_HEADER}>
           <div>

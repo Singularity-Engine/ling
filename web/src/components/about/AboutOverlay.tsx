@@ -1,4 +1,5 @@
 import { memo, useState, useEffect, useCallback, useRef, type CSSProperties } from "react";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useTranslation } from "react-i18next";
 import { useAuthState, useAuthActions } from "@/context/AuthContext";
 import { useUIActions } from "@/context/UiContext";
@@ -309,6 +310,15 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
   const [portalLoading, setPortalLoading] = useState(false);
   const [closing, setClosing] = useState(false);
   const closingTimer = useRef<ReturnType<typeof setTimeout>>();
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Focus-trap: keep Tab/Shift+Tab within the dialog
+  useFocusTrap(dialogRef, open && !closing);
+
+  // Move focus into the dialog when it opens
+  useEffect(() => {
+    if (open) requestAnimationFrame(() => dialogRef.current?.focus());
+  }, [open]);
 
   // Reset closing state when opened
   useEffect(() => {
@@ -362,7 +372,7 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
 
   return (
     <div style={closing ? S_BACKDROP_CLOSING : S_BACKDROP_OPEN} onClick={handleClose}>
-      <div onClick={stopPropagation} style={closing ? S_CARD_CLOSING : S_CARD_OPEN} role="dialog" aria-modal="true" aria-labelledby="about-title">
+      <div ref={dialogRef} tabIndex={-1} onClick={stopPropagation} style={closing ? S_CARD_CLOSING : S_CARD_OPEN} role="dialog" aria-modal="true" aria-labelledby="about-title">
         {/* Product name */}
         <h2 id="about-title" style={S_PRODUCT_NAME}>{t("about.name")}</h2>
 

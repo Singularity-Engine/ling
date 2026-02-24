@@ -1,9 +1,10 @@
-import { memo, useMemo, useState, useCallback, useRef, useEffect, lazy, Suspense, type ReactNode, type CSSProperties } from "react";
+import { memo, useMemo, useState, useCallback, useRef, useEffect, Suspense, type ReactNode, type CSSProperties } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlightLite from "@/utils/rehype-highlight-lite";
 import i18next from "i18next";
 import { toaster } from "@/components/ui/toaster";
+import { lazyRetry } from "@/utils/lazy-retry";
 import { ToolResultCard, type ToolStatus } from "./ToolResultCard";
 import {
   S_OUTER_USER, S_OUTER_AI, S_OUTER_USER_GAP, S_OUTER_AI_GAP,
@@ -17,7 +18,7 @@ import {
   S_MEMORY_MARKER, S_MEMORY_DETAIL,
 } from "./ChatBubble.styles";
 
-const ShareCard = lazy(() => import("./ShareCard").then(m => ({ default: m.ShareCard })));
+const ShareCard = lazyRetry(() => import("./ShareCard").then(m => ({ default: m.ShareCard })));
 
 export const remarkPlugins = [remarkGfm];
 const rehypePlugins = [rehypeHighlightLite];

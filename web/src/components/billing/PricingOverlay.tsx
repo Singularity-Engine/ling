@@ -11,6 +11,7 @@ import { useUIState, useUIActions } from '@/context/UiContext';
 import { useAuthState } from '@/context/AuthContext';
 import { toaster } from '@/components/ui/toaster';
 import { createLogger } from '@/utils/logger';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 const EXIT_MS = 200; // matches overlayFadeOut / overlaySlideOut duration
 
@@ -285,6 +286,15 @@ const PricingOverlay: React.FC = memo(() => {
   const [loading, setLoading] = useState<string | null>(null);
   const [closing, setClosing] = useState(false);
   const closingTimer = useRef<ReturnType<typeof setTimeout>>();
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Focus-trap: keep Tab/Shift+Tab within the dialog
+  useFocusTrap(dialogRef, pricingOpen && !closing);
+
+  // Move focus into the dialog when it opens
+  useEffect(() => {
+    if (pricingOpen) requestAnimationFrame(() => dialogRef.current?.focus());
+  }, [pricingOpen]);
 
   // Clean up timer on unmount
   useEffect(() => () => { clearTimeout(closingTimer.current); }, []);
@@ -380,7 +390,7 @@ const PricingOverlay: React.FC = memo(() => {
 
   return (
     <div style={closing ? S_OVERLAY_CLOSING : S_OVERLAY_OPEN} onClick={handleOverlayClick}>
-      <div style={closing ? S_INNER_CLOSING : S_INNER_OPEN} role="dialog" aria-modal="true" aria-labelledby="pricing-title">
+      <div ref={dialogRef} tabIndex={-1} style={closing ? S_INNER_CLOSING : S_INNER_OPEN} role="dialog" aria-modal="true" aria-labelledby="pricing-title">
         {/* Close button */}
         <button className="ling-pricing-close" onClick={handleClose} style={closeBtnStyle} aria-label="Close">
           ×

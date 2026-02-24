@@ -57,14 +57,15 @@ export function shouldShowSeparator(
   return Math.abs(diff) > 5 * 60 * 1000;
 }
 
-export const TimeSeparator = memo(({ timestamp }: { timestamp: string }) => (
-  <div className="ling-time-sep" style={S_OUTER}>
-    <div style={S_LINE} />
-    <span style={S_LABEL}>
-      {formatSeparatorTime(timestamp)}
-    </span>
-    <div style={S_LINE} />
-  </div>
-));
+export const TimeSeparator = memo(({ timestamp }: { timestamp: string }) => {
+  const label = formatSeparatorTime(timestamp);
+  return (
+    <div className="ling-time-sep" style={S_OUTER} role="separator" aria-label={label}>
+      <div style={S_LINE} aria-hidden="true" />
+      <span style={S_LABEL}>{label}</span>
+      <div style={S_LINE} aria-hidden="true" />
+    </div>
+  );
+});
 
 TimeSeparator.displayName = "TimeSeparator";

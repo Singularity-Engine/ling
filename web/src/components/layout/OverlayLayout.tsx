@@ -8,7 +8,7 @@
  * received as props from MainContent in App.tsx.
  */
 
-import React, { lazy, Suspense, useMemo, type CSSProperties } from "react";
+import React, { Suspense, useMemo, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
 import { SectionErrorBoundary } from "../error/SectionErrorBoundary";
@@ -25,10 +25,11 @@ import { CrystalField } from "../crystal/CrystalField";
 import { TapParticles } from "../effects/TapParticles";
 import { LoadingSkeleton } from "../loading/LoadingSkeleton";
 import { ICON_CHAT, ICON_MEMORY, ICON_INFO, ICON_CHEVRON_UP, ICON_MENU, ICON_CLOSE } from "./overlay-icons";
+import { lazyRetry } from "@/utils/lazy-retry";
 import styles from "./OverlayLayout.module.css";
 
-const ChatArea = lazy(() => import("../chat/ChatArea").then(m => ({ default: m.ChatArea })));
-const Constellation = lazy(() => import("../ability/Constellation").then(m => ({ default: m.Constellation })));
+const ChatArea = lazyRetry(() => import("../chat/ChatArea").then(m => ({ default: m.ChatArea })));
+const Constellation = lazyRetry(() => import("../ability/Constellation").then(m => ({ default: m.Constellation })));
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
