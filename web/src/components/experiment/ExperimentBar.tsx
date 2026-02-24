@@ -122,6 +122,8 @@ const S_REVENUE: CSSProperties = {
   color: "var(--ling-text-dim)",
 };
 
+const S_REVENUE_MINI: CSSProperties = { ...S_REVENUE, fontSize: 10 };
+
 const S_SEP: CSSProperties = {
   width: 1,
   height: 12,
@@ -246,7 +248,7 @@ export const ExperimentBar = memo(function ExperimentBar() {
       <div style={S_BAR_MINI} role="banner" aria-label="AI创业实验状态栏">
         <span style={S_DAY} aria-label={`实验第 ${status.day_number} 天`}>Day {status.day_number}</span>
         <span style={S_SEP} aria-hidden="true" />
-        <span style={{ ...S_REVENUE, fontSize: 10 }}>{status.days_remaining}d left</span>
+        <span style={S_REVENUE_MINI}>{status.days_remaining}d left</span>
       </div>
     );
   }

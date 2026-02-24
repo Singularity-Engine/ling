@@ -1,7 +1,7 @@
 /* eslint-disable no-shadow */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { memo, useRef, useEffect, useState } from "react";
+import { memo, useRef, useEffect, useState, useCallback, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { useLive2DConfig } from "@/context/Live2dConfigContext";
 import { useIpcHandlers } from "@/hooks/utils/use-ipc-handlers";
@@ -18,6 +18,53 @@ import { useWebSocket } from "@/context/WebsocketContext";
 interface Live2DProps {
   showSidebar?: boolean;
 }
+
+// ── Hoisted styles — avoids allocating new objects every frame (~30fps) ──
+
+const S_CONTAINER_BASE: CSSProperties = {
+  width: "100%", height: "100%", overflow: "hidden",
+  position: "relative", touchAction: "none",
+};
+const S_CONTAINER: Record<string, CSSProperties> = {
+  "auto_default":   { ...S_CONTAINER_BASE, pointerEvents: "auto", cursor: "default" },
+  "auto_grabbing":  { ...S_CONTAINER_BASE, pointerEvents: "auto", cursor: "grabbing" },
+  "none_default":   { ...S_CONTAINER_BASE, pointerEvents: "none", cursor: "default" },
+  "none_grabbing":  { ...S_CONTAINER_BASE, pointerEvents: "none", cursor: "grabbing" },
+};
+
+const S_CANVAS_BASE: CSSProperties = { width: "100%", height: "100%", display: "block" };
+const S_CANVAS: Record<string, CSSProperties> = {
+  "auto_default":   { ...S_CANVAS_BASE, pointerEvents: "auto", cursor: "default" },
+  "auto_grabbing":  { ...S_CANVAS_BASE, pointerEvents: "auto", cursor: "grabbing" },
+  "none_default":   { ...S_CANVAS_BASE, pointerEvents: "none", cursor: "default" },
+  "none_grabbing":  { ...S_CANVAS_BASE, pointerEvents: "none", cursor: "grabbing" },
+};
+
+const S_OVERLAY: CSSProperties = {
+  position: "absolute", inset: 0,
+  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+  background: "rgba(10, 0, 21, 0.85)", backdropFilter: "blur(8px)", zIndex: 10,
+};
+
+const S_SPINNER: CSSProperties = {
+  width: 48, height: 48, borderRadius: "50%",
+  border: "3px solid transparent", borderTopColor: "#8b5cf6",
+  animation: "live2d-spin 1s linear infinite",
+};
+
+const S_LOADING_TEXT: CSSProperties = {
+  marginTop: 16, color: "rgba(255,255,255,0.6)", fontSize: 14,
+};
+
+const S_ERROR_TEXT: CSSProperties = {
+  color: "rgba(255,255,255,0.7)", fontSize: 14, marginBottom: 12,
+};
+
+const S_RETRY_BTN: CSSProperties = {
+  padding: "8px 24px", background: "rgba(139, 92, 246, 0.3)",
+  border: "1px solid rgba(139, 92, 246, 0.6)", borderRadius: 8,
+  color: "#c4b5fd", fontSize: 14, cursor: "pointer",
+};
 
 export const Live2D = memo(
   ({ showSidebar }: Live2DProps): JSX.Element => {
@@ -76,109 +123,46 @@ export const Live2D = memo(
     // 判断是否需要显示加载覆盖层
     const showOverlay = wsState !== 'OPEN' || !modelInfo?.url;
 
-    const handleContextMenu = (e: React.MouseEvent) => {
-      if (!isPet) {
-        return;
-      }
-
+    const handleContextMenu = useCallback((e: React.MouseEvent) => {
+      if (!isPet) return;
       e.preventDefault();
       if (import.meta.env.DEV) console.log('[ContextMenu] (Pet Mode) Right-click detected, requesting menu...');
       window.api?.showContextMenu?.();
-    };
+    }, [isPet]);
+
+    const handleRetry = useCallback(() => {
+      setShowRetry(false);
+      reconnect();
+    }, [reconnect]);
+
+    // Style variant key — avoids inline object allocation at ~30fps
+    const varKey = `${isPet && forceIgnoreMouse ? "none" : "auto"}_${isDragging ? "grabbing" : "default"}`;
 
     return (
       <div
-        ref={internalContainerRef} // Ref for useLive2DResize if it observes this element
+        ref={internalContainerRef}
         id="live2d-internal-wrapper"
-        style={{
-          width: "100%",
-          height: "100%",
-          pointerEvents: isPet && forceIgnoreMouse ? "none" : "auto",
-          overflow: "hidden",
-          position: "relative",
-          cursor: isDragging ? "grabbing" : "default",
-          touchAction: "none",
-        }}
+        style={S_CONTAINER[varKey]}
         onContextMenu={handleContextMenu}
         {...handlers}
       >
         <canvas
           id="canvas"
           ref={canvasRef}
-          style={{
-            width: "100%",
-            height: "100%",
-            pointerEvents: isPet && forceIgnoreMouse ? "none" : "auto",
-            display: "block",
-            cursor: isDragging ? "grabbing" : "default",
-          }}
+          style={S_CANVAS[varKey]}
         />
         {showOverlay && (
-          <div
-            role="status"
-            aria-live="polite"
-            style={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "rgba(10, 0, 21, 0.85)",
-              backdropFilter: "blur(8px)",
-              zIndex: 10,
-            }}
-          >
+          <div role="status" aria-live="polite" style={S_OVERLAY}>
             {!showRetry ? (
               <>
-                <div
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: "50%",
-                    border: "3px solid transparent",
-                    borderTopColor: "#8b5cf6",
-                    animation: "live2d-spin 1s linear infinite",
-                  }}
-                />
-                <span
-                  style={{
-                    marginTop: 16,
-                    color: "rgba(255,255,255,0.6)",
-                    fontSize: 14,
-                  }}
-                >
-                  {t('loading.awakeningLing')}
-                </span>
+                <div style={S_SPINNER} />
+                <span style={S_LOADING_TEXT}>{t('loading.awakeningLing')}</span>
                 <style>{`@keyframes live2d-spin{to{transform:rotate(360deg)}}`}</style>
               </>
             ) : (
               <>
-                <span
-                  style={{
-                    color: "rgba(255,255,255,0.7)",
-                    fontSize: 14,
-                    marginBottom: 12,
-                  }}
-                >
-                  {t('loading.connectionInterrupted')}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowRetry(false);
-                    reconnect();
-                  }}
-                  style={{
-                    padding: "8px 24px",
-                    background: "rgba(139, 92, 246, 0.3)",
-                    border: "1px solid rgba(139, 92, 246, 0.6)",
-                    borderRadius: 8,
-                    color: "#c4b5fd",
-                    fontSize: 14,
-                    cursor: "pointer",
-                  }}
-                >
+                <span style={S_ERROR_TEXT}>{t('loading.connectionInterrupted')}</span>
+                <button type="button" onClick={handleRetry} style={S_RETRY_BTN}>
                   {t('loading.reconnect')}
                 </button>
               </>
