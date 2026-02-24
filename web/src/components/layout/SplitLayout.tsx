@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, useMemo, lazy, Suspense, type CSSProperties } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo, memo, lazy, Suspense, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { SectionErrorBoundary } from "../error/SectionErrorBoundary";
 import { Live2D } from "../canvas/live2d";
@@ -36,7 +36,7 @@ interface SplitLayoutProps {
  * Left: Live2D character panel (fixed px width, 360-500).
  * Right: Chat + toolbar.
  */
-export function SplitLayout({ firstMinutePhase }: SplitLayoutProps): JSX.Element {
+export const SplitLayout = memo(function SplitLayout({ firstMinutePhase }: SplitLayoutProps): JSX.Element {
   const { t } = useTranslation();
   const { messages } = useChatMessagesState();
   const { appendHumanMessage } = useChatMessagesActions();
@@ -286,4 +286,4 @@ export function SplitLayout({ firstMinutePhase }: SplitLayoutProps): JSX.Element
       </div>
     </div>
   );
-}
+});

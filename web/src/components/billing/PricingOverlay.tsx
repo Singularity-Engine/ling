@@ -51,20 +51,20 @@ const closeBtnStyle: React.CSSProperties = {
   color: 'var(--ling-text-dim)',
   fontSize: '28px',
   cursor: 'pointer',
-  padding: '4px',
+  padding: 'var(--ling-space-1)',
   lineHeight: 1,
-  transition: 'color 0.2s, transform 0.2s',
+  transition: `color var(--ling-duration-fast), transform var(--ling-duration-fast)`,
 };
 
-const titleContainerStyle: React.CSSProperties = { textAlign: 'center', marginBottom: '32px' };
-const titleStyle: React.CSSProperties = { color: 'var(--ling-text-primary)', fontSize: '28px', fontWeight: 700, margin: 0 };
-const subtitleStyle: React.CSSProperties = { color: 'var(--ling-text-dim)', fontSize: '14px', marginTop: '8px' };
+const titleContainerStyle: React.CSSProperties = { textAlign: 'center', marginBottom: 'var(--ling-space-8)' };
+const titleStyle: React.CSSProperties = { color: 'var(--ling-text-primary)', fontSize: 'var(--ling-font-3xl)', fontWeight: 700, margin: 0 };
+const subtitleStyle: React.CSSProperties = { color: 'var(--ling-text-dim)', fontSize: 'var(--ling-font-md)', marginTop: 'var(--ling-space-2)' };
 
 const planGridStyle: React.CSSProperties = {
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
-  gap: '16px',
-  marginBottom: '32px',
+  gap: 'var(--ling-space-4)',
+  marginBottom: 'var(--ling-space-8)',
 };
 
 const popularBadgeBase: React.CSSProperties = {
@@ -73,28 +73,28 @@ const popularBadgeBase: React.CSSProperties = {
   left: '50%',
   transform: 'translateX(-50%)',
   color: 'var(--ling-text-primary)',
-  fontSize: '11px',
+  fontSize: 'var(--ling-font-xs)',
   fontWeight: 700,
-  padding: '4px 16px',
-  borderRadius: '12px',
+  padding: 'var(--ling-space-1) var(--ling-space-4)',
+  borderRadius: 'var(--ling-radius-md)',
   textTransform: 'uppercase',
   letterSpacing: '0.5px',
 };
 
-const planInfoStyle: React.CSSProperties = { marginBottom: '16px' };
-const planSubtitleStyle: React.CSSProperties = { color: 'var(--ling-text-tertiary)', fontSize: '12px', margin: '4px 0 0' };
-const planPriceContainerStyle: React.CSSProperties = { marginBottom: '20px' };
+const planInfoStyle: React.CSSProperties = { marginBottom: 'var(--ling-space-4)' };
+const planSubtitleStyle: React.CSSProperties = { color: 'var(--ling-text-tertiary)', fontSize: 'var(--ling-font-sm)', margin: 'var(--ling-space-1) 0 0' };
+const planPriceContainerStyle: React.CSSProperties = { marginBottom: 'var(--ling-space-5)' };
 const planPriceStyle: React.CSSProperties = { color: 'var(--ling-text-primary)', fontSize: '32px', fontWeight: 700 };
-const planPeriodStyle: React.CSSProperties = { color: 'var(--ling-text-tertiary)', fontSize: '14px' };
+const planPeriodStyle: React.CSSProperties = { color: 'var(--ling-text-tertiary)', fontSize: 'var(--ling-font-md)' };
 
-const featureListStyle: React.CSSProperties = { listStyle: 'none', padding: 0, margin: '0 0 20px', flex: 1 };
+const featureListStyle: React.CSSProperties = { listStyle: 'none', padding: 0, margin: '0 0 var(--ling-space-5)', flex: 1 };
 const featureItemStyle: React.CSSProperties = {
   color: 'var(--ling-text-soft)',
-  fontSize: '13px',
-  padding: '4px 0',
+  fontSize: 'var(--ling-font-13)',
+  padding: 'var(--ling-space-1) 0',
   display: 'flex',
   alignItems: 'flex-start',
-  gap: '8px',
+  gap: 'var(--ling-space-2)',
 };
 
 const freeBtnStyle: React.CSSProperties = {
@@ -103,7 +103,7 @@ const freeBtnStyle: React.CSSProperties = {
   border: '1px solid var(--ling-surface-hover)',
   background: 'transparent',
   color: 'var(--ling-text-muted)',
-  fontSize: '14px',
+  fontSize: 'var(--ling-font-md)',
   fontWeight: 600,
   cursor: 'default',
 };
@@ -111,25 +111,25 @@ const freeBtnStyle: React.CSSProperties = {
 const creditSectionStyle: React.CSSProperties = {
   background: 'var(--ling-surface-subtle)',
   border: '1px solid var(--ling-surface-border)',
-  borderRadius: '16px',
-  padding: '24px',
+  borderRadius: 'var(--ling-radius-lg)',
+  padding: 'var(--ling-space-6)',
 };
 
-const creditTitleStyle: React.CSSProperties = { color: 'var(--ling-text-secondary)', fontSize: '16px', fontWeight: 600, margin: '0 0 16px' };
-const creditDescStyle: React.CSSProperties = { color: 'var(--ling-text-tertiary)', fontSize: '12px', margin: '-8px 0 16px' };
-const creditFlexStyle: React.CSSProperties = { display: 'flex', gap: '12px', flexWrap: 'wrap' };
-const creditAmountStyle: React.CSSProperties = { fontSize: '20px', fontWeight: 700 };
-const creditPriceStyle: React.CSSProperties = { fontSize: '14px', color: 'var(--ling-btn-ghost-color)', marginTop: '4px' };
-const creditNoteStyle: React.CSSProperties = { color: 'var(--ling-text-muted)', fontSize: '12px', marginTop: '12px', textAlign: 'center' };
-const manageLinkContainerStyle: React.CSSProperties = { textAlign: 'center', marginTop: '16px' };
+const creditTitleStyle: React.CSSProperties = { color: 'var(--ling-text-secondary)', fontSize: 'var(--ling-font-lg)', fontWeight: 600, margin: '0 0 var(--ling-space-4)' };
+const creditDescStyle: React.CSSProperties = { color: 'var(--ling-text-tertiary)', fontSize: 'var(--ling-font-sm)', margin: 'calc(-1 * var(--ling-space-2)) 0 var(--ling-space-4)' };
+const creditFlexStyle: React.CSSProperties = { display: 'flex', gap: 'var(--ling-space-3)', flexWrap: 'wrap' };
+const creditAmountStyle: React.CSSProperties = { fontSize: 'var(--ling-font-xl)', fontWeight: 700 };
+const creditPriceStyle: React.CSSProperties = { fontSize: 'var(--ling-font-md)', color: 'var(--ling-btn-ghost-color)', marginTop: 'var(--ling-space-1)' };
+const creditNoteStyle: React.CSSProperties = { color: 'var(--ling-text-muted)', fontSize: 'var(--ling-font-sm)', marginTop: 'var(--ling-space-3)', textAlign: 'center' };
+const manageLinkContainerStyle: React.CSSProperties = { textAlign: 'center', marginTop: 'var(--ling-space-4)' };
 const manageLinkStyle: React.CSSProperties = {
   background: 'none',
   border: 'none',
   color: 'var(--ling-text-tertiary)',
-  fontSize: '13px',
+  fontSize: 'var(--ling-font-13)',
   cursor: 'pointer',
   textDecoration: 'underline',
-  transition: 'color 0.2s, transform 0.2s',
+  transition: `color var(--ling-duration-fast), transform var(--ling-duration-fast)`,
 };
 
 const PLANS = [

@@ -57,19 +57,19 @@ const S_EB_WRAP: CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'center',
   fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
 };
-const S_EB_INNER: CSSProperties = { maxWidth: 'min(440px, calc(100vw - 32px))', textAlign: 'center', padding: '32px 16px' };
-const S_EB_EMOJI: CSSProperties = { fontSize: 48, marginBottom: 16, opacity: 0.8 };
-const S_EB_TITLE: CSSProperties = { color: 'var(--ling-purple-lighter)', marginBottom: 8, fontSize: 20, fontWeight: 600 };
-const S_EB_DESC: CSSProperties = { color: 'rgba(255,255,255,0.5)', fontSize: 14, marginBottom: 24, lineHeight: 1.6 };
-const S_EB_BTN_ROW: CSSProperties = { display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' };
-const _EB_BTN: CSSProperties = { padding: '10px 24px', borderRadius: 8, fontSize: 14, cursor: 'pointer', border: 'none', transition: 'opacity 0.2s' };
+const S_EB_INNER: CSSProperties = { maxWidth: 'min(440px, calc(100vw - var(--ling-space-8)))', textAlign: 'center', padding: 'var(--ling-space-8) var(--ling-space-4)' };
+const S_EB_EMOJI: CSSProperties = { fontSize: 'var(--ling-font-hero)', marginBottom: 'var(--ling-space-4)', opacity: 0.8 };
+const S_EB_TITLE: CSSProperties = { color: 'var(--ling-purple-lighter)', marginBottom: 'var(--ling-space-2)', fontSize: 'var(--ling-font-xl)', fontWeight: 600 };
+const S_EB_DESC: CSSProperties = { color: 'var(--ling-text-dim)', fontSize: 'var(--ling-font-md)', marginBottom: 'var(--ling-space-6)', lineHeight: 1.6 };
+const S_EB_BTN_ROW: CSSProperties = { display: 'flex', gap: 'var(--ling-space-3)', justifyContent: 'center', flexWrap: 'wrap' };
+const _EB_BTN: CSSProperties = { padding: 'var(--ling-space-3) var(--ling-space-6)', borderRadius: 'var(--ling-radius-8)', fontSize: 'var(--ling-font-md)', cursor: 'pointer', border: 'none', transition: `opacity var(--ling-duration-fast)` };
 const S_EB_BTN_PRIMARY: CSSProperties = { ..._EB_BTN, background: 'var(--ling-purple-50)', color: '#fff' };
-const S_EB_BTN_SECONDARY: CSSProperties = { ..._EB_BTN, background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.12)' };
-const S_EB_DETAIL_TOGGLE: CSSProperties = { marginTop: 20, background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: 12, cursor: 'pointer' };
+const S_EB_BTN_SECONDARY: CSSProperties = { ..._EB_BTN, background: 'var(--ling-overlay-8)', color: 'var(--ling-text-soft)', border: '1px solid var(--ling-overlay-12)' };
+const S_EB_DETAIL_TOGGLE: CSSProperties = { marginTop: 'var(--ling-space-5)', background: 'none', border: 'none', color: 'var(--ling-text-muted)', fontSize: 'var(--ling-font-sm)', cursor: 'pointer' };
 const S_EB_DETAIL_PRE: CSSProperties = {
-  marginTop: 12, textAlign: 'left', color: 'rgba(255,107,107,0.7)',
-  fontSize: 11, fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all',
-  maxHeight: 200, overflow: 'auto', background: MISC_COLORS.ERROR_BG, padding: 12, borderRadius: 8,
+  marginTop: 'var(--ling-space-3)', textAlign: 'left', color: 'rgba(255,107,107,0.7)',
+  fontSize: 'var(--ling-font-xs)', fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+  maxHeight: 200, overflow: 'auto', background: MISC_COLORS.ERROR_BG, padding: 'var(--ling-space-3)', borderRadius: 'var(--ling-radius-8)',
 };
 
 // Error Boundary
@@ -121,11 +121,11 @@ const MENU_EXIT_MS = 250;
 // Landing → main content transition
 const S_MAIN_VISIBLE: CSSProperties = {
   opacity: 1, transform: "scale(1)",
-  transition: "opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
+  transition: "opacity 0.7s var(--ling-ease-default), transform 0.7s var(--ling-ease-default)",
 };
 const S_MAIN_HIDDEN: CSSProperties = {
   opacity: 0, transform: "scale(0.97)",
-  transition: "opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
+  transition: "opacity 0.7s var(--ling-ease-default), transform 0.7s var(--ling-ease-default)",
 };
 
 
@@ -565,7 +565,7 @@ function MainApp() {
 // CSS-only page transition: lightweight fade-in on route change.
 // Replaces framer-motion AnimatePresence to defer the ~30KB library
 // from the critical path (now only loaded by lazy Constellation chunk).
-const S_PAGE_WRAP: CSSProperties = { minHeight: "100dvh", animation: "pageFadeIn 0.2s ease-in-out" };
+const S_PAGE_WRAP: CSSProperties = { minHeight: "100dvh", animation: "pageFadeIn var(--ling-duration-fast) var(--ling-ease-default)" };
 
 function AnimatedRoutes(): JSX.Element {
   const location = useLocation();

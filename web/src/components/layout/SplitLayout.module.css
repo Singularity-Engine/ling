@@ -63,12 +63,12 @@
 [data-theme="light"] .divider:hover::before {
   width: 2px;
   background: var(--ling-purple-50);
-  box-shadow: 0 0 4px rgba(139, 92, 246, 0.15);
+  box-shadow: 0 0 var(--ling-space-1) var(--ling-purple-15);
 }
 [data-theme="light"] .dividerDragging::before {
   width: 2px;
   background: var(--ling-purple-60);
-  box-shadow: 0 0 8px rgba(139, 92, 246, 0.2);
+  box-shadow: 0 0 var(--ling-space-2) var(--ling-purple-20);
 }
 
 /* Wider grab area for easier interaction */
@@ -77,18 +77,18 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  left: -6px;
-  right: -6px;
+  left: calc(-1 * var(--ling-radius-sm));
+  right: calc(-1 * var(--ling-radius-sm));
 }
 
 .dividerDragging {
-  width: 8px;
+  width: var(--ling-space-2);
 }
 
 .dividerDragging::before {
   width: 2px;
   background: var(--ling-purple-60);
-  box-shadow: 0 0 12px var(--ling-purple-30);
+  box-shadow: 0 0 var(--ling-space-3) var(--ling-purple-30);
 }
 
 /* ── Right panel: Chat + Toolbar ── */
@@ -118,16 +118,16 @@
   align-items: center;
   padding: var(--ling-space-2);
   border-radius: var(--ling-radius-xl);
-  background: rgba(0, 0, 0, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--ling-overlay-dim);
+  border: 1px solid var(--ling-surface);
   gap: var(--ling-space-2);
 }
 
 .toolbarDivider {
-  width: 24px;
+  width: var(--ling-space-6);
   height: 1px;
-  background: rgba(255, 255, 255, 0.08);
-  margin: 4px 0;
+  background: var(--ling-overlay-8);
+  margin: var(--ling-space-1) 0;
 }
 
 /* ── Chat area wrapper in split mode ── */
@@ -149,7 +149,7 @@
 .inputSection {
   flex-shrink: 0;
   position: relative;
-  background: rgba(10, 0, 21, 0.55);
+  background: var(--ling-input-section-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--ling-purple-15);
@@ -168,10 +168,10 @@
 }
 
 .emptyLogo {
-  font-size: 48px;
-  font-weight: 700;
+  font-size: var(--ling-font-hero);
+  font-weight: var(--ling-weight-bold);
   color: var(--ling-purple-light);
-  text-shadow: 0 0 32px var(--ling-purple-40), 0 0 64px var(--ling-purple-15);
+  text-shadow: 0 0 var(--ling-space-8) var(--ling-purple-40), 0 0 64px var(--ling-purple-15);
   animation: splitEmptyBreathe 4s ease-in-out infinite;
   user-select: none;
   opacity: 0.6;
@@ -214,7 +214,7 @@
 
 /* ── Animations ── */
 @keyframes splitEmptyFadeIn {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(var(--ling-space-3)); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -235,7 +235,7 @@
 /* ── Constellation positioning in split mode ── */
 .constellationWrap {
   position: absolute;
-  bottom: calc(100% + 12px);
+  bottom: calc(100% + var(--ling-space-3));
   left: var(--ling-space-4);
   z-index: 26;
   pointer-events: auto;
@@ -249,7 +249,7 @@
 .root[data-first-minute="greeting"] .emptyText,
 .root[data-first-minute="greeting"] .emptyChips {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(var(--ling-space-2));
 }
 
 /* During greeting: logo pulses stronger */
@@ -260,11 +260,11 @@
 
 /* During inviting: text + chips fade in with stagger */
 .root[data-first-minute="inviting"] .emptyText {
-  animation: splitEmptyFadeIn 0.5s var(--ling-ease-enter) 0.1s both;
+  animation: splitEmptyFadeIn var(--ling-duration-slow) var(--ling-ease-enter) 0.1s both;
 }
 
 .root[data-first-minute="inviting"] .emptyChips {
-  animation: splitEmptyFadeIn 0.5s var(--ling-ease-enter) 0.3s both;
+  animation: splitEmptyFadeIn var(--ling-duration-slow) var(--ling-ease-enter) 0.3s both;
 }
 
 /* ── Inline style extractions (P2-14) ── */
@@ -287,13 +287,13 @@
 .chatErrorFallback {
   padding: var(--ling-space-4);
   text-align: center;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--ling-text-dim);
   font-size: var(--ling-font-sm);
 }
 
 .inputErrorFallback {
-  padding: 12px var(--ling-space-4);
-  color: rgba(255, 255, 255, 0.3);
+  padding: var(--ling-space-3) var(--ling-space-4);
+  color: var(--ling-text-muted);
   font-size: var(--ling-font-sm);
   text-align: center;
 }

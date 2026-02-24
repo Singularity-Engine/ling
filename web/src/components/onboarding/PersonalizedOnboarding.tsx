@@ -54,87 +54,87 @@ const S_OVERLAY_BASE: CSSProperties = {
   position: "fixed",
   inset: 0,
   zIndex: 10001,
-  background: "rgba(0, 0, 0, 0.85)",
+  background: "var(--ling-overlay-heavy)",
   backdropFilter: "blur(20px)",
   WebkitBackdropFilter: "blur(20px)",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  padding: "20px",
-  transition: "opacity 0.4s ease",
+  padding: "var(--ling-space-5)",
+  transition: `opacity var(--ling-duration-slow)`,
 };
 const S_OVERLAY_VISIBLE: CSSProperties = { ...S_OVERLAY_BASE, opacity: 1 };
 const S_OVERLAY_EXITING: CSSProperties = { ...S_OVERLAY_BASE, opacity: 0 };
 
-const S_DOTS_ROW: CSSProperties = { display: "flex", gap: "8px", marginBottom: "32px" };
+const S_DOTS_ROW: CSSProperties = { display: "flex", gap: "var(--ling-space-2)", marginBottom: "var(--ling-space-8)" };
 
 const S_DOT_BASE: CSSProperties = {
-  height: "8px",
-  borderRadius: "4px",
-  transition: "width 0.3s ease, background-color 0.3s ease",
+  height: "var(--ling-space-2)",
+  borderRadius: "var(--ling-space-1)",
+  transition: `width var(--ling-duration-normal), background-color var(--ling-duration-normal)`,
 };
-const S_DOT_ACTIVE: CSSProperties = { ...S_DOT_BASE, width: "24px", background: "var(--ling-purple)" };
-const S_DOT_DONE: CSSProperties = { ...S_DOT_BASE, width: "8px", background: "var(--ling-purple-deep)" };
-const S_DOT_PENDING: CSSProperties = { ...S_DOT_BASE, width: "8px", background: "rgba(255,255,255,0.15)" };
+const S_DOT_ACTIVE: CSSProperties = { ...S_DOT_BASE, width: "var(--ling-space-6)", background: "var(--ling-purple)" };
+const S_DOT_DONE: CSSProperties = { ...S_DOT_BASE, width: "var(--ling-space-2)", background: "var(--ling-purple-deep)" };
+const S_DOT_PENDING: CSSProperties = { ...S_DOT_BASE, width: "var(--ling-space-2)", background: "var(--ling-overlay-12)" };
 
 const S_STEP_CONTENT: CSSProperties = { maxWidth: "480px", width: "100%", textAlign: "center" };
 
-const S_NAV_ROW: CSSProperties = { display: "flex", gap: "12px", marginTop: "32px" };
+const S_NAV_ROW: CSSProperties = { display: "flex", gap: "var(--ling-space-3)", marginTop: "var(--ling-space-8)" };
 
 const S_BTN_SKIP: CSSProperties = {
-  padding: "12px 24px", borderRadius: "12px",
-  border: "1px solid rgba(255,255,255,0.1)", background: "transparent",
-  color: "rgba(255,255,255,0.4)", fontSize: "14px",
-  cursor: "pointer", transition: "color 0.2s, border-color 0.2s",
+  padding: "var(--ling-space-3) var(--ling-space-6)", borderRadius: "var(--ling-radius-md)",
+  border: "1px solid var(--ling-overlay-8)", background: "transparent",
+  color: "var(--ling-text-dim)", fontSize: "var(--ling-font-md)",
+  cursor: "pointer", transition: `color var(--ling-duration-fast), border-color var(--ling-duration-fast)`,
 };
 const S_BTN_BACK: CSSProperties = {
-  padding: "12px 24px", borderRadius: "12px",
-  border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.05)",
-  color: "rgba(255,255,255,0.6)", fontSize: "14px",
-  cursor: "pointer", transition: "color 0.2s, background-color 0.2s, border-color 0.2s",
+  padding: "var(--ling-space-3) var(--ling-space-6)", borderRadius: "var(--ling-radius-md)",
+  border: "1px solid var(--ling-overlay-12)", background: "var(--ling-overlay-4)",
+  color: "var(--ling-text-soft)", fontSize: "var(--ling-font-md)",
+  cursor: "pointer", transition: `color var(--ling-duration-fast), background-color var(--ling-duration-fast), border-color var(--ling-duration-fast)`,
 };
 const S_BTN_NEXT: CSSProperties = {
-  padding: "12px 32px", borderRadius: "12px",
+  padding: "var(--ling-space-3) var(--ling-space-8)", borderRadius: "var(--ling-radius-md)",
   border: "none", background: "var(--ling-purple)", color: "#fff",
-  fontSize: "14px", fontWeight: 600,
-  cursor: "pointer", transition: "background-color 0.2s, transform 0.2s",
+  fontSize: "var(--ling-font-md)", fontWeight: 600,
+  cursor: "pointer", transition: `background-color var(--ling-duration-fast), transform var(--ling-duration-fast)`,
 };
 
 // ── Step: Welcome ──
-const S_STAR_WRAP: CSSProperties = { marginBottom: "24px" };
+const S_STAR_WRAP: CSSProperties = { marginBottom: "var(--ling-space-6)" };
 const S_STAR_SVG: CSSProperties = { filter: "drop-shadow(0 0 20px var(--ling-purple-50))" };
 const S_TITLE_LG: CSSProperties = {
-  color: "#fff", fontSize: "28px", fontWeight: 700,
-  margin: "0 0 12px", lineHeight: 1.3,
+  color: "#fff", fontSize: "var(--ling-font-3xl)", fontWeight: 700,
+  margin: "0 0 var(--ling-space-3)", lineHeight: 1.3,
 };
 const S_DESC_WELCOME: CSSProperties = {
-  color: "rgba(255,255,255,0.5)", fontSize: "15px",
-  lineHeight: 1.7, margin: "0 0 32px", maxWidth: "360px",
+  color: "var(--ling-text-dim)", fontSize: "var(--ling-font-15)",
+  lineHeight: 1.7, margin: "0 0 var(--ling-space-8)", maxWidth: "360px",
   marginLeft: "auto", marginRight: "auto",
 };
 const S_BTN_START: CSSProperties = {
-  padding: "14px 36px", borderRadius: "12px",
+  padding: "var(--ling-space-4) 36px", borderRadius: "var(--ling-radius-md)",
   border: "none", background: "var(--ling-purple)", color: "#fff",
-  fontSize: "15px", fontWeight: 600,
-  cursor: "pointer", transition: "background-color 0.2s, transform 0.2s",
+  fontSize: "var(--ling-font-15)", fontWeight: 600,
+  cursor: "pointer", transition: `background-color var(--ling-duration-fast), transform var(--ling-duration-fast)`,
 };
 
 // ── Step: Interests ──
 const S_TITLE_MD: CSSProperties = {
-  color: "#fff", fontSize: "24px", fontWeight: 700, margin: "0 0 8px",
+  color: "#fff", fontSize: "var(--ling-font-2xl)", fontWeight: 700, margin: "0 0 var(--ling-space-2)",
 };
 const S_SUB_INTERESTS: CSSProperties = {
-  color: "rgba(255,255,255,0.4)", fontSize: "14px", margin: "0 0 28px",
+  color: "var(--ling-text-dim)", fontSize: "var(--ling-font-md)", margin: "0 0 var(--ling-space-7)",
 };
 const S_GRID_INTERESTS: CSSProperties = {
   display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
-  gap: "12px", maxWidth: "min(400px, 100%)", margin: "0 auto",
+  gap: "var(--ling-space-3)", maxWidth: "min(400px, 100%)", margin: "0 auto",
 };
 const S_CARD_BASE: CSSProperties = {
-  position: "relative", padding: "20px 12px", borderRadius: "16px",
-  display: "flex", flexDirection: "column", alignItems: "center", gap: "8px",
-  cursor: "pointer", transition: "border-color 0.2s ease, background-color 0.2s ease",
+  position: "relative", padding: "var(--ling-space-5) var(--ling-space-3)", borderRadius: "var(--ling-radius-lg)",
+  display: "flex", flexDirection: "column", alignItems: "center", gap: "var(--ling-space-2)",
+  cursor: "pointer", transition: `border-color var(--ling-duration-fast), background-color var(--ling-duration-fast)`,
   font: "inherit", color: "inherit",
 };
 const S_CHECK_BADGE: CSSProperties = {
@@ -145,22 +145,22 @@ const S_CHECK_ML: CSSProperties = { marginLeft: 4 };
 
 // ── Step: Goals ──
 const S_SUB_GOALS: CSSProperties = {
-  color: "rgba(255,255,255,0.4)", fontSize: "14px", margin: "0 0 24px",
+  color: "var(--ling-text-dim)", fontSize: "var(--ling-font-md)", margin: "0 0 var(--ling-space-6)",
 };
 const S_GRID_GOALS: CSSProperties = {
   display: "flex", flexWrap: "wrap", gap: "10px",
   justifyContent: "center", maxWidth: "min(440px, 100%)", margin: "0 auto",
 };
 const S_MEMORY_INNER: CSSProperties = { textAlign: "left", flex: 1 };
-const S_MEMORY_NOTE: CSSProperties = { fontSize: "11px", color: "rgba(255,255,255,0.4)", marginTop: 2 };
+const S_MEMORY_NOTE: CSSProperties = { fontSize: "var(--ling-font-xs)", color: "var(--ling-text-dim)", marginTop: 2 };
 const S_GOAL_CARD_BASE: CSSProperties = {
-  position: "relative", padding: "12px 18px", borderRadius: "14px",
-  display: "flex", alignItems: "center", gap: "8px",
-  transition: "border-color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease",
+  position: "relative", padding: "var(--ling-space-3) 18px", borderRadius: "14px",
+  display: "flex", alignItems: "center", gap: "var(--ling-space-2)",
+  transition: `border-color var(--ling-duration-fast), background-color var(--ling-duration-fast), opacity var(--ling-duration-fast)`,
   font: "inherit", color: "inherit",
 };
 const S_MAX_GOALS: CSSProperties = {
-  fontSize: "12px", color: "rgba(255,255,255,0.3)", marginTop: "12px",
+  fontSize: "var(--ling-font-sm)", color: "var(--ling-text-muted)", marginTop: "var(--ling-space-3)",
 };
 
 // ─── Lazy-cached dynamic styles (avoids per-render allocation in .map()) ───
@@ -187,7 +187,7 @@ function getLabelStyle(color: string, isSelected: boolean): CSSProperties {
   let s = _labelCache.get(key);
   if (!s) {
     s = {
-      fontSize: "13px",
+      fontSize: "var(--ling-font-13)",
       color: isSelected ? color : "rgba(255,255,255,0.6)",
       fontWeight: isSelected ? 600 : 400,
     };

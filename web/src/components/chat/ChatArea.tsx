@@ -31,29 +31,29 @@ const S_CONTAINER: CSSProperties = {
   maxHeight: "inherit",
   overflowY: "auto",
   overflowX: "hidden",
-  padding: "16px 0",
+  padding: "var(--ling-space-4) 0",
   position: "relative",
   overscrollBehavior: "contain",
 };
 
 const S_LOAD_MORE_WRAP: CSSProperties = {
-  display: "flex", justifyContent: "center", padding: "8px 0 12px",
+  display: "flex", justifyContent: "center", padding: "var(--ling-space-2) 0 var(--ling-space-3)",
 };
 
 const S_LOAD_MORE_BTN: CSSProperties = {
   background: "var(--ling-surface)",
   border: "1px solid var(--ling-surface-hover)",
-  borderRadius: "16px",
-  padding: "6px 16px",
+  borderRadius: "var(--ling-radius-lg)",
+  padding: "var(--ling-radius-sm) var(--ling-space-4)",
   color: "var(--ling-text-secondary)",
-  fontSize: "12px",
+  fontSize: "var(--ling-font-sm)",
   cursor: "pointer",
-  transition: "background 0.2s ease, border-color 0.2s ease, color 0.2s ease",
+  transition: `background var(--ling-duration-fast), border-color var(--ling-duration-fast), color var(--ling-duration-fast)`,
 };
 
 const S_SCROLL_WRAP: CSSProperties = {
   position: "sticky",
-  bottom: "12px",
+  bottom: "var(--ling-space-3)",
   display: "flex",
   justifyContent: "center",
   pointerEvents: "none",
@@ -66,15 +66,15 @@ const S_SCROLL_BTN: CSSProperties = {
   borderRadius: "50%",
   background: "var(--ling-purple-85)",
   color: "var(--ling-text-primary)",
-  fontSize: "16px",
+  fontSize: "var(--ling-font-lg)",
   lineHeight: 1,
   border: "1px solid var(--ling-purple-40)",
   backdropFilter: "blur(12px)",
   WebkitBackdropFilter: "blur(12px)",
   boxShadow: "0 2px 12px var(--ling-purple-30)",
   cursor: "pointer",
-  transition: "transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease",
-  animation: "scrollBtnIn 0.25s ease-out",
+  transition: `transform var(--ling-duration-fast), box-shadow var(--ling-duration-fast), background var(--ling-duration-fast)`,
+  animation: "scrollBtnIn 0.25s var(--ling-ease-enter)",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -84,7 +84,7 @@ const S_SCROLL_BTN: CSSProperties = {
 const S_SCROLL_BTN_PULSE: CSSProperties = {
   ...S_SCROLL_BTN,
   boxShadow: "0 2px 20px var(--ling-purple-50)",
-  animation: "scrollBtnIn 0.25s ease-out, scrollBtnPulse 2s ease-in-out 0.3s infinite",
+  animation: "scrollBtnIn 0.25s var(--ling-ease-enter), scrollBtnPulse 2s ease-in-out 0.3s infinite",
 };
 
 const S_NEW_DOT: CSSProperties = {
@@ -107,8 +107,8 @@ const S_EMPTY_WRAP: CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   height: "100%",
-  padding: "24px 16px",
-  gap: "20px",
+  padding: "var(--ling-space-6) var(--ling-space-4)",
+  gap: "var(--ling-space-5)",
 };
 
 const S_EMPTY_WRAP_EXIT: CSSProperties = {
@@ -121,7 +121,7 @@ const S_EMPTY_WRAP_EXIT: CSSProperties = {
 };
 
 const S_EMPTY_GLYPH: CSSProperties = {
-  fontSize: "36px",
+  fontSize: "var(--ling-font-display)",
   fontWeight: 700,
   color: "var(--ling-purple-light)",
   textShadow: "0 0 24px var(--ling-purple-40), 0 0 48px var(--ling-purple-15)",
@@ -135,19 +135,19 @@ const S_WELCOME_CARD: CSSProperties = {
   backdropFilter: "blur(16px)",
   WebkitBackdropFilter: "blur(16px)",
   border: "1px solid var(--ling-surface-border)",
-  borderRadius: "16px",
+  borderRadius: "var(--ling-radius-lg)",
   padding: "18px 22px",
   maxWidth: "320px",
   width: "100%",
   textAlign: "center",
   display: "flex",
   flexDirection: "column",
-  gap: "8px",
-  animation: "chatFadeInUp 0.5s ease-out 0.2s both",
+  gap: "var(--ling-space-2)",
+  animation: "chatFadeInUp var(--ling-duration-slow) var(--ling-ease-enter) 0.2s both",
 };
 
 const S_WELCOME_TITLE: CSSProperties = {
-  fontSize: "15px",
+  fontSize: "var(--ling-font-15)",
   color: "var(--ling-purple-text)",
   fontWeight: 500,
   letterSpacing: "0.3px",
@@ -155,43 +155,43 @@ const S_WELCOME_TITLE: CSSProperties = {
 };
 
 const S_WELCOME_SUB: CSSProperties = {
-  fontSize: "12px",
+  fontSize: "var(--ling-font-sm)",
   color: "var(--ling-text-muted)",
 };
 
 const S_TAGLINE: CSSProperties = {
-  fontSize: "13px",
+  fontSize: "var(--ling-font-13)",
   color: "var(--ling-text-muted)",
   letterSpacing: "1px",
   marginTop: "-14px",
   marginBottom: "-4px",
-  animation: "chatFadeInUp 0.5s ease-out 0.1s both",
+  animation: "chatFadeInUp var(--ling-duration-slow) var(--ling-ease-enter) 0.1s both",
 };
 
 const S_CAPS_ROW: CSSProperties = {
   display: "flex",
-  gap: "8px",
+  gap: "var(--ling-space-2)",
   justifyContent: "center",
   flexWrap: "wrap",
-  marginBottom: "-8px",
-  animation: "chatFadeInUp 0.5s ease-out 0.35s both",
+  marginBottom: "calc(-1 * var(--ling-space-2))",
+  animation: "chatFadeInUp var(--ling-duration-slow) var(--ling-ease-enter) 0.35s both",
 };
 
 const S_CAP_TAG: CSSProperties = {
-  fontSize: "11px",
+  fontSize: "var(--ling-font-xs)",
   color: "var(--ling-purple-light)",
   background: "var(--ling-purple-15)",
   border: "1px solid var(--ling-purple-15)",
-  borderRadius: "12px",
-  padding: "4px 12px",
+  borderRadius: "var(--ling-radius-md)",
+  padding: "var(--ling-space-1) var(--ling-space-3)",
   letterSpacing: "0.3px",
 };
 
 const S_KEYBOARD_HINT: CSSProperties = {
-  fontSize: "11px",
+  fontSize: "var(--ling-font-xs)",
   color: "var(--ling-text-muted)",
   letterSpacing: "0.3px",
-  animation: "emptyHintFadeIn 0.5s ease-out 0.55s both",
+  animation: "emptyHintFadeIn var(--ling-duration-slow) var(--ling-ease-enter) 0.55s both",
 };
 
 // ─── ChatArea ───

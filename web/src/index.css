@@ -98,7 +98,11 @@
   --ling-overlay-4: rgba(255, 255, 255, 0.04);
   --ling-overlay-8: rgba(255, 255, 255, 0.08);
   --ling-overlay-12: rgba(255, 255, 255, 0.12);
+  --ling-overlay-20: rgba(255, 255, 255, 0.2);
   --ling-stripe-bg: rgba(255, 255, 255, 0.02);
+
+  /* 输入区背景（SplitLayout + OverlayLayout 共用） */
+  --ling-input-section-bg: rgba(10, 0, 21, 0.55);
 
   /* 全局背景（供 body 引用） */
   --ling-body-bg: linear-gradient(180deg, var(--ling-bg-deep) 0%, var(--ling-bg-mid) 50%, var(--ling-bg-warm) 100%);
@@ -142,17 +146,22 @@
   --ling-space-4: 16px;
   --ling-space-5: 20px;
   --ling-space-6: 24px;
+  --ling-space-7: 28px;
   --ling-space-8: 32px;
   --ling-space-10: 40px;
 
   /* ── Design Token: Font Size Scale ── */
   --ling-font-xs: 11px;
   --ling-font-sm: 12px;
+  --ling-font-13: 13px;
   --ling-font-md: 14px;
+  --ling-font-15: 15px;
   --ling-font-lg: 16px;
   --ling-font-xl: 20px;
   --ling-font-2xl: 24px;
+  --ling-font-3xl: 28px;
   --ling-font-display: 36px;
+  --ling-font-hero: 48px;
 
   /* ── Design Token: Font Weight ── */
   --ling-weight-normal: 400;
@@ -162,6 +171,7 @@
 
   /* ── Design Token: Border Radius (柔圆, 遵循调性宪法) ── */
   --ling-radius-sm: 6px;
+  --ling-radius-8: 8px;
   --ling-radius-md: 12px;
   --ling-radius-lg: 16px;
   --ling-radius-xl: 20px;
@@ -283,7 +293,11 @@
   --ling-overlay-4: rgba(0, 0, 0, 0.04);
   --ling-overlay-8: rgba(0, 0, 0, 0.06);
   --ling-overlay-12: rgba(0, 0, 0, 0.08);
+  --ling-overlay-20: rgba(0, 0, 0, 0.12);
   --ling-stripe-bg: rgba(0, 0, 0, 0.03);
+
+  /* 输入区背景 */
+  --ling-input-section-bg: rgba(245, 240, 255, 0.75);
 
   /* 全局背景 */
   --ling-body-bg: linear-gradient(180deg, var(--ling-bg-deep) 0%, var(--ling-bg-mid) 50%, var(--ling-bg-warm) 100%);
@@ -649,10 +663,10 @@ body {
 .ling-textarea {
   background: var(--ling-btn-muted-bg);
   border: 1px solid var(--ling-btn-muted-border);
-  border-radius: 16px;
+  border-radius: var(--ling-radius-lg);
   color: var(--ling-text-primary);
-  font-size: 14px;
-  padding: 10px 16px;
+  font-size: var(--ling-font-md);
+  padding: 10px var(--ling-space-4);
   min-height: 42px;
   max-height: 96px;
   resize: none;
@@ -660,7 +674,7 @@ body {
   outline: none;
   font-family: inherit;
   line-height: 1.5;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  transition: border-color var(--ling-duration-normal), box-shadow var(--ling-duration-normal), background var(--ling-duration-normal);
 }
 .ling-textarea::placeholder {
   color: var(--ling-placeholder-color);
@@ -886,7 +900,7 @@ canvas {
   position: relative;
   margin: 0.5em 0;
   border: 1px solid var(--ling-purple-25);
-  border-radius: 6px;
+  border-radius: var(--ling-radius-sm);
   overflow: hidden;
   background: var(--ling-code-bg);
 }
@@ -905,13 +919,13 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 16px;
+  padding: var(--ling-space-1) var(--ling-space-4);
   background: var(--ling-overlay-4);
   border-bottom: 1px solid var(--ling-purple-15);
   min-height: 28px;
 }
 .md-content .code-block-lang {
-  font-size: 11px;
+  font-size: var(--ling-font-xs);
   font-weight: 500;
   color: var(--ling-text-tertiary);
   letter-spacing: 0.3px;
@@ -921,12 +935,12 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: var(--ling-space-8);
+  height: var(--ling-space-8);
   margin-left: auto;
   background: transparent;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--ling-radius-sm);
   cursor: pointer;
   padding: 0;
   color: var(--ling-text-tertiary);
