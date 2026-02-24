@@ -4,7 +4,7 @@ import remarkGfm from "remark-gfm";
 import rehypeHighlightLite from "@/utils/rehype-highlight-lite";
 import i18next from "i18next";
 import { toaster } from "@/components/ui/toaster";
-import { ToolResultCard } from "./ToolResultCard";
+import { ToolResultCard, type ToolStatus } from "./ToolResultCard";
 import {
   S_OUTER_USER, S_OUTER_AI, S_OUTER_USER_GAP, S_OUTER_AI_GAP,
   S_AVATAR_AI, S_AVATAR_USER,
@@ -170,7 +170,7 @@ interface ChatBubbleProps {
   isStreaming?: boolean;
   isToolCall?: boolean;
   toolName?: string;
-  toolStatus?: string;
+  toolStatus?: ToolStatus;
   isGreeting?: boolean;
   skipEntryAnimation?: boolean;
   senderChanged?: boolean;

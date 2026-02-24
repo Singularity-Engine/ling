@@ -26,7 +26,7 @@ const S_STATE_TEXT_WARN: CSSProperties = {
 
 const S_INPUT_ROW: CSSProperties = {
   display: "flex", alignItems: "flex-end", gap: "8px",
-  maxWidth: "720px", margin: "0 auto",
+  maxWidth: "var(--ling-chat-input-max-width, 860px)", margin: "0 auto",
 };
 
 const S_MIC_BASE: CSSProperties = {
@@ -87,12 +87,12 @@ const S_SEND_IDLE: CSSProperties = {
 };
 
 const S_HINTS_ROW: CSSProperties = {
-  maxWidth: "720px", margin: "2px auto 0", paddingLeft: "52px",
+  maxWidth: "var(--ling-chat-input-max-width, 860px)", margin: "2px auto 0", paddingLeft: "52px",
   display: "flex", justifyContent: "space-between",
   boxSizing: "border-box",
 };
 const S_MD_HINT: CSSProperties = { fontSize: "10px", color: "var(--ling-input-hint)" };
-const S_CHAR_BASE: CSSProperties = { fontSize: "10px", transition: "color 0.2s" };
+const S_CHAR_BASE: CSSProperties = { fontSize: "10px", transition: "color 0.2s ease" };
 const S_CHAR_NORMAL: CSSProperties = { ...S_CHAR_BASE, color: "var(--ling-input-counter)" };
 const S_CHAR_WARN: CSSProperties = { ...S_CHAR_BASE, color: "var(--ling-input-counter-warn)" };
 const S_CHAR_OVER: CSSProperties = { ...S_CHAR_BASE, color: "var(--ling-error)" };

@@ -54,11 +54,11 @@ const rootLog = createLogger("App");
 // ─── ErrorBoundary style constants (avoid per-render allocation on error screen) ───
 
 const S_EB_WRAP: CSSProperties = {
-  width: '100vw', height: '100vh', background: 'var(--ling-bg-deep)',
+  width: '100%', height: '100vh', background: 'var(--ling-bg-deep)',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
   fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
 };
-const S_EB_INNER: CSSProperties = { maxWidth: 'min(440px, calc(100vw - var(--ling-space-8)))', textAlign: 'center', padding: 'var(--ling-space-8) var(--ling-space-4)' };
+const S_EB_INNER: CSSProperties = { maxWidth: 'min(440px, calc(100% - var(--ling-space-8)))', textAlign: 'center', padding: 'var(--ling-space-8) var(--ling-space-4)' };
 const S_EB_EMOJI: CSSProperties = { fontSize: 'var(--ling-font-hero)', marginBottom: 'var(--ling-space-4)', opacity: 0.8 };
 const S_EB_TITLE: CSSProperties = { color: 'var(--ling-purple-lighter)', marginBottom: 'var(--ling-space-2)', fontSize: 'var(--ling-font-xl)', fontWeight: 600 };
 const S_EB_DESC: CSSProperties = { color: 'var(--ling-text-dim)', fontSize: 'var(--ling-font-md)', marginBottom: 'var(--ling-space-6)', lineHeight: 1.6 };

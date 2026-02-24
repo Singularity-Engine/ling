@@ -66,7 +66,7 @@ export function TermsPage() {
 
 const styles: Record<string, React.CSSProperties> = {
   page: {
-    width: '100vw',
+    width: '100%',
     minHeight: '100dvh',
     background: 'var(--ling-bg-deep)',
     display: 'flex',

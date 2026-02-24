@@ -139,10 +139,13 @@ const CATEGORY_CARD_STYLES = Object.fromEntries(
 ) as Record<string, ReturnType<typeof buildCategoryStyles>>;
 const ERROR_CARD_STYLES = buildCategoryStyles(ERROR_COLORS);
 
+/** Finite set of tool execution states (replaces loose `string`). */
+export type ToolStatus = 'running' | 'completed' | 'error';
+
 interface ToolResultCardProps {
   toolName: string;
   content: string;
-  status: string;
+  status: ToolStatus;
 }
 
 const CODE_BLOCK_RE = /```(\w*)\n?([\s\S]*?)```/g;
@@ -231,7 +234,7 @@ const CodeBlock = memo(({ lang, code, defaultCollapsed }: { lang: string; code: 
 CodeBlock.displayName = "CodeBlock";
 
 /* Status indicator with animation */
-const StatusIndicator = memo(({ status, accent }: { status: string; accent: string }) => {
+const StatusIndicator = memo(({ status, accent }: { status: ToolStatus; accent: string }) => {
   if (status === "running") {
     const dots = getDotStyles(accent);
     return (

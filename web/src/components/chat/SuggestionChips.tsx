@@ -8,14 +8,14 @@ const S_CHIPS_CENTERED: CSSProperties = {
   flexWrap: "wrap",
   justifyContent: "center",
   gap: "8px",
-  maxWidth: "min(340px, 100%)",
+  maxWidth: "min(var(--ling-chat-chips-max-width, 420px), 100%)",
 };
 
 const S_CHIPS_LEFT: CSSProperties = {
   display: "flex",
   flexWrap: "wrap",
   gap: "8px",
-  maxWidth: "min(340px, 100%)",
+  maxWidth: "min(var(--ling-chat-chips-max-width, 420px), 100%)",
   padding: "4px 16px 12px",
 };
 

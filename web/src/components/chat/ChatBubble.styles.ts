@@ -93,9 +93,9 @@ export const S_TOGGLE_BTN: CSSProperties = {
 };
 export const S_TOGGLE_ARROW: CSSProperties = { fontSize: "10px" };
 
-export const S_TOOL_WRAP: CSSProperties = { padding: "0 var(--ling-space-4)", marginBottom: "var(--ling-space-3)", maxWidth: "min(90%, 620px)" };
-export const S_INNER_USER: CSSProperties = { maxWidth: "min(78%, 560px)", minWidth: 0 };
-export const S_INNER_AI: CSSProperties = { maxWidth: "min(82%, 620px)", minWidth: 0 };
+export const S_TOOL_WRAP: CSSProperties = { padding: "0 var(--ling-space-4)", marginBottom: "var(--ling-space-3)", maxWidth: "min(92%, var(--ling-chat-tool-max-width, 860px))" };
+export const S_INNER_USER: CSSProperties = { maxWidth: "min(84%, var(--ling-chat-user-max-width, 760px))", minWidth: 0 };
+export const S_INNER_AI: CSSProperties = { maxWidth: "min(88%, var(--ling-chat-ai-max-width, 860px))", minWidth: 0 };
 export const S_REL: CSSProperties = { position: "relative" };
 export const S_CURSOR: CSSProperties = {
   display: "inline-block", width: "2px", height: "var(--ling-font-md)", background: "var(--ling-purple)",

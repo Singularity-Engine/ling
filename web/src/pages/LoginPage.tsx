@@ -86,7 +86,7 @@ export function LoginPage() {
 
 const styles: Record<string, React.CSSProperties> = {
   page: {
-    width: '100vw',
+    width: '100%',
     height: '100dvh',
     background: 'var(--ling-bg-deep)',
     display: 'flex',
