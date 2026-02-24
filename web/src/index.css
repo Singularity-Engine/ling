@@ -422,6 +422,8 @@ body {
   to { opacity: 0; transform: translateX(20px); }
 }
 
+/* Memory panel scroll containment — prevent scroll chaining through overlay */
+.ling-memory-scroll { overscroll-behavior: contain; }
 /* Memory panel custom scrollbar */
 .ling-memory-scroll::-webkit-scrollbar { width: 4px; }
 .ling-memory-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -1113,6 +1115,7 @@ canvas {
  * costing 5 useEffect hooks and ~3KB of JS-embedded CSS strings. */
 
 /* ── ChatArea: container, welcome state, scroll-to-bottom ── */
+.chat-area-scroll { overscroll-behavior: contain; }
 .chat-area-scroll::-webkit-scrollbar { width: 4px; }
 .chat-area-scroll::-webkit-scrollbar-track { background: transparent; }
 .chat-area-scroll::-webkit-scrollbar-thumb { background: var(--ling-purple-30); border-radius: 2px; }

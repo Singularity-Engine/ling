@@ -87,7 +87,8 @@
 }
 
 .cardImage {
-  max-width: min(360px, calc(100vw - 48px));
+  width: min(360px, calc(100vw - 48px));
+  aspect-ratio: 3 / 4; /* matches canvas 720×960 */
   border-radius: var(--ling-radius-lg);
   box-shadow: var(--ling-shadow-lg);
 }

@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { trackEvent } from "@/utils/track-event";
 import { createLogger } from "@/utils/logger";
@@ -31,11 +31,18 @@ const CARD = {
   TAG_GAP: 40, BRAND_OFFSET: 60, PARTICLES: 20,
 } as const;
 
+// Extracted to avoid per-render object allocation in JSX
+const S_SPINNER: CSSProperties = { animation: "sendSpin 1s linear infinite" };
+
 // ─── Canvas card rendering (offscreen) ───
 async function renderShareCard(
   content: string,
   avatarUrl: string,
   brandUrl: string,
+  /** Localised single character shown when avatar image fails to load */
+  fallbackInitial: string,
+  /** Localised narrative tag rendered below quote, e.g. "— 灵和我说的" */
+  narrativeTag: string,
 ): Promise<Blob> {
   const { WIDTH: W, HEIGHT: H, DPR } = CARD;
 
@@ -98,7 +105,7 @@ async function renderShareCard(
     ctx.fillStyle = "rgba(167, 139, 250, 0.9)";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("灵", avatarX, CARD.AVATAR_Y);
+    ctx.fillText(fallbackInitial, avatarX, CARD.AVATAR_Y);
   }
 
   // Content text
@@ -141,7 +148,7 @@ async function renderShareCard(
   const tagY = CARD.TEXT_START_Y + lines.length * lineHeight + CARD.TAG_GAP;
   ctx.font = "italic 16px -apple-system, sans-serif";
   ctx.fillStyle = "rgba(167, 139, 250, 0.6)";
-  ctx.fillText("— 灵和我说的", W / 2, tagY);
+  ctx.fillText(narrativeTag, W / 2, tagY);
 
   // Bottom brand bar
   const barY = H - CARD.BRAND_OFFSET;
@@ -170,6 +177,13 @@ const ActionMenu = memo(function ActionMenu({ onCopy, onShare, onClose }: Action
 
   const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
+  // Stable callback ref for the first menu button — avoids re-creating a
+  // closure on every render (the previous inline ref did).
+  const setFirstMenuItemRef = useCallback((el: HTMLButtonElement | null) => {
+    firstRef.current = el;
+    menuItemsRef.current[0] = el;
+  }, []);
+
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
       e.preventDefault();
@@ -189,8 +203,16 @@ const ActionMenu = memo(function ActionMenu({ onCopy, onShare, onClose }: Action
     }
   }, [onClose]);
 
-  const setMenuItemRef = useCallback((index: number) => (el: HTMLButtonElement | null) => {
-    menuItemsRef.current[index] = el;
+  // Cache ref-setter functions so React doesn't see a new function each render
+  // and trigger the clean-up/re-assign cycle on every update.
+  const menuRefCache = useRef(new Map<number, (el: HTMLButtonElement | null) => void>());
+  const getMenuItemRef = useCallback((index: number) => {
+    let fn = menuRefCache.current.get(index);
+    if (!fn) {
+      fn = (el: HTMLButtonElement | null) => { menuItemsRef.current[index] = el; };
+      menuRefCache.current.set(index, fn);
+    }
+    return fn;
   }, []);
 
   return (
@@ -203,15 +225,15 @@ const ActionMenu = memo(function ActionMenu({ onCopy, onShare, onClose }: Action
         aria-label={t("share.menuTitle", "Actions")}
         onKeyDown={handleKeyDown}
       >
-        <button ref={(el) => { firstRef.current = el; menuItemsRef.current[0] = el; }} className={styles.actionMenuItem} role="menuitem" onClick={onCopy}>
+        <button ref={setFirstMenuItemRef} className={styles.actionMenuItem} role="menuitem" onClick={onCopy}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           {t("chat.copy", "Copy")}
         </button>
-        <button ref={setMenuItemRef(1)} className={styles.actionMenuItem} role="menuitem" onClick={onShare}>
+        <button ref={getMenuItemRef(1)} className={styles.actionMenuItem} role="menuitem" onClick={onShare}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
           {t("share.shareCard", "Share as card")}
         </button>
-        <button ref={setMenuItemRef(2)} className={styles.actionMenuCancel} role="menuitem" onClick={onClose}>
+        <button ref={getMenuItemRef(2)} className={styles.actionMenuCancel} role="menuitem" onClick={onClose}>
           {t("ui.cancel", "Cancel")}
         </button>
       </div>
@@ -285,6 +307,8 @@ export const ShareCard = memo(function ShareCard({ content, isOpen, onClose, mod
         content,
         "/avatar-ling.png",
         "ling.sngxai.com",
+        t("share.avatarFallback", "灵"),
+        t("share.narrativeTag", "— 灵和我说的"),
       );
 
       if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
@@ -354,12 +378,12 @@ export const ShareCard = memo(function ShareCard({ content, isOpen, onClose, mod
   return (
     <div className={styles.cardPreview}>
       <button className={styles.cardCloseBtn} onClick={handleClose} aria-label={t("ui.close", "Close")}>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
 
       {generating ? (
         <div className={styles.generating} role="status" aria-busy="true" aria-label={t("share.generating", "Generating...")}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: "sendSpin 1s linear infinite" }} aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={S_SPINNER} aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
           {t("share.generating", "Generating...")}
         </div>
       ) : genError ? (
@@ -371,7 +395,7 @@ export const ShareCard = memo(function ShareCard({ content, isOpen, onClose, mod
         </div>
       ) : imageUrl ? (
         <>
-          <img src={imageUrl} alt={t("share.cardAlt", "Share card")} className={styles.cardImage} />
+          <img src={imageUrl} alt={t("share.cardAlt", "Share card")} className={styles.cardImage} width={360} height={480} />
           <div className={styles.cardActions}>
             <button className={styles.cardSaveBtn} onClick={handleSave}>
               {t("share.save", "Save")}
