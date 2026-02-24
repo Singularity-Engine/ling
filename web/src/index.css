@@ -518,6 +518,12 @@ body {
   border-color: var(--ling-error) !important;
 }
 
+/* Action button active feedback (mobile touch) */
+.ling-action-btn:active {
+  transform: scale(0.92);
+  opacity: 0.8;
+}
+
 /* Mobile menu item hover/active */
 .ling-menu-item:hover {
   background: var(--ling-surface) !important;

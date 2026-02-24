@@ -171,7 +171,7 @@ const _GROUP_BASE: CSSProperties = {
   padding: "6px", borderRadius: "20px",
   background: OVERLAY_COLORS.LIGHT, border: `1px solid ${WHITE_ALPHA.LIGHT_BORDER}`,
 };
-const S_GROUP_D: CSSProperties = { ..._GROUP_BASE, gap: "8px" };
+const S_GROUP_D: CSSProperties = { ..._GROUP_BASE, gap: "6px" };
 
 // Desktop: separator line between status and action buttons in unified capsule
 const S_TOOLBAR_DIVIDER: CSSProperties = {
@@ -198,6 +198,7 @@ const S_MENU_BACKDROP: CSSProperties = {
   background: "rgba(0,0,0,0.4)",
   backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
   transition: `opacity ${MENU_EXIT_MS}ms ease`,
+  touchAction: "none",
 };
 
 // Mobile: slide-in menu panel
@@ -209,6 +210,7 @@ const S_MOBILE_MENU: CSSProperties = {
   borderLeft: `1px solid ${WHITE_ALPHA.LIGHT_BORDER}`,
   display: "flex", flexDirection: "column",
   animation: "slideInRight 0.25s ease-out",
+  overscrollBehavior: "contain",
 };
 const S_MOBILE_MENU_CLOSING: CSSProperties = {
   ...S_MOBILE_MENU,
@@ -244,6 +246,7 @@ const S_MENU_ITEM: CSSProperties = {
   color: "rgba(255,255,255,0.7)", fontSize: 15,
   cursor: "pointer", width: "100%", textAlign: "left" as const,
   fontFamily: "inherit",
+  transition: "background 0.15s ease",
 };
 
 // Mobile menu: separator
@@ -255,7 +258,7 @@ const S_MENU_SEP: CSSProperties = {
 // Action button style variants (mobile/desktop × active/inactive)
 const _ACTION_BTN: CSSProperties = {
   borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
-  cursor: "pointer", transition: "background 0.3s ease, border-color 0.3s ease",
+  cursor: "pointer", transition: "background 0.3s ease, border-color 0.3s ease, transform 0.12s ease, opacity 0.12s ease",
   backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", padding: 0,
 };
 const S_BTN_D_OFF: CSSProperties = { ..._ACTION_BTN, width: "42px", height: "42px", background: WHITE_ALPHA.BUTTON_BG, border: `1px solid ${WHITE_ALPHA.BORDER}` };
@@ -370,6 +373,8 @@ function MainContent(): JSX.Element {
   const [menuClosing, setMenuClosing] = useState(false);
   const [kbOffset, setKbOffset] = useState(0);
   const menuTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const menuPanelRef = useRef<HTMLDivElement>(null);
 
   // Auth state for low-balance badge on mobile hamburger
   const { user } = useAuthState();
@@ -471,8 +476,25 @@ function MainContent(): JSX.Element {
     menuTimerRef.current = setTimeout(() => {
       setMenuClosing(false);
       setMenuOpen(false);
+      hamburgerRef.current?.focus();
     }, MENU_EXIT_MS);
   }, [menuClosing]);
+
+  // Focus trap: keep Tab cycling inside mobile menu
+  const handleMenuKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key !== "Tab" || !menuPanelRef.current) return;
+    const focusable = menuPanelRef.current.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+    } else {
+      if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  }, []);
   const handleExpandKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleChat(); }
   }, [toggleChat]);
@@ -551,6 +573,7 @@ function MainContent(): JSX.Element {
           clearTimeout(menuTimerRef.current);
           setMenuClosing(false);
           setMenuOpen(false);
+          hamburgerRef.current?.focus();
         } else if (shortcutsOpenRef.current || aboutOpenRef.current || memoryOpenRef.current) {
           setShortcutsOpen(false);
           setAboutOpen(false);
@@ -641,9 +664,12 @@ function MainContent(): JSX.Element {
             {ICON_CHAT}
           </button>
           <button
+            ref={hamburgerRef}
             className="ling-action-btn"
             onClick={openMenu}
-            aria-label="Menu"
+            aria-label={t("ui.menu", "Menu")}
+            aria-expanded={menuOpen || menuClosing}
+            aria-haspopup="dialog"
             style={{ ...btnStyle(true, menuOpen || menuClosing), position: "relative" as const }}
           >
             {ICON_MENU}
@@ -698,25 +724,35 @@ function MainContent(): JSX.Element {
       {/* ===== Mobile slide-in menu ===== */}
       {(menuOpen || menuClosing) && isMobile && (
         <>
+          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
           <div
-            style={{ ...S_MENU_BACKDROP, opacity: menuClosing ? 0 : 1 }}
+            aria-hidden="true"
+            style={{ ...S_MENU_BACKDROP, opacity: menuClosing ? 0 : 1, animation: menuClosing ? undefined : "pageFadeIn 0.2s ease-out" }}
             onClick={closeMenu}
           />
-          <div style={menuClosing ? S_MOBILE_MENU_CLOSING : S_MOBILE_MENU}>
+          {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+          <div
+            ref={menuPanelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("ui.menu", "Menu")}
+            style={menuClosing ? S_MOBILE_MENU_CLOSING : S_MOBILE_MENU}
+            onKeyDown={handleMenuKeyDown}
+          >
             <div style={S_MENU_HEADER}>
               <button
                 className="ling-action-btn"
                 onClick={closeMenu}
-                aria-label="Close"
+                aria-label={t("ui.close", "Close")}
                 style={btnStyle(true, false)}
+                autoFocus
               >
                 {ICON_CLOSE}
               </button>
             </div>
             <SectionErrorBoundary name="MenuStatus">
               <div style={S_MENU_STATUS}>
-                {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-                <div onClick={closeMenu}><CreditsDisplay /></div>
+                <CreditsDisplay />
                 <AffinityBadge />
                 <ConnectionStatus />
               </div>
