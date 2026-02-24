@@ -96,11 +96,13 @@ class BaseTool(ABC):
                 # 调用工具执行
                 result = await self.execute(**kwargs)
                 self.log_execution(kwargs, result)
-                # 异步记录到 EverMemOS（不阻塞工具返回）
+                # 异步记录到 EverMemOS（不阻塞工具返回）— 附带触发者 user_id
                 try:
                     from .evermemos_client import record_tool_call
+                    from ..bff_integration.auth.user_context import UserContextManager
+                    _current_uid = UserContextManager.get_current_user_id() or "unknown"
                     asyncio.create_task(
-                        record_tool_call(self.name, kwargs, result, success=True)
+                        record_tool_call(self.name, kwargs, result, success=True, user_id=_current_uid)
                     )
                 except Exception:
                     pass  # EverMemOS 不可用不影响工具执行
@@ -110,11 +112,13 @@ class BaseTool(ABC):
                 self.logger.error(f"❌ {error_msg}")
                 import traceback
                 traceback.print_exc()
-                # 记录失败的工具调用
+                # 记录失败的工具调用 — 附带触发者 user_id
                 try:
                     from .evermemos_client import record_tool_call
+                    from ..bff_integration.auth.user_context import UserContextManager
+                    _current_uid = UserContextManager.get_current_user_id() or "unknown"
                     asyncio.create_task(
-                        record_tool_call(self.name, kwargs, error_msg, success=False)
+                        record_tool_call(self.name, kwargs, error_msg, success=False, user_id=_current_uid)
                     )
                 except Exception:
                     pass

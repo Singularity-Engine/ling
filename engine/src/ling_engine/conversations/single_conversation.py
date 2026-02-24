@@ -43,27 +43,63 @@ async def process_agent_response(
     input_tokens = 0
     output_tokens = 0
 
-    # 🧠 记忆增强处理 — 每轮触发（输入 > 5 字符即搜索 top-3）
+    # 🧠 记忆增强处理 — 灵魂系统 or 传统召回
     if enable_memory and isinstance(user_input, str) and len(user_input.strip()) > 5:
-        logger.info("🧠 每轮记忆召回：搜索用户相关记忆")
+        _soul_recall_done = False
+
+        # --- 尝试灵魂系统召回 ---
         try:
-            results = search_similar_memories(user_input, user_id, limit=3)
-            if results:
-                memory_info = [item[1] for item in results if len(item) >= 2 and item[1]]
-                if memory_info:
-                    logger.info(f"🧠 召回 {len(memory_info)} 条相关记忆")
-                    memory_context = "\n".join([f"- {info}" for info in memory_info])
-                    character_name = getattr(context.character_config, 'character_name', 'AI') if hasattr(context, 'character_config') else 'AI'
+            from ..soul.recall.soul_recall import get_soul_recall
+            from ..soul.recall.context_builder import ContextBuilder
+            from ..soul.config import get_soul_config
 
-                    enhanced_input = f"{user_input}\n\n[记忆上下文 — 以下是你记住的关于这位用户的信息，自然地融入回答中，不要逐条复述]\n{memory_context}"
+            if get_soul_config().enabled:
+                _is_owner = False
+                try:
+                    from ..tools.evermemos_client import resolve_user_context
+                    _conf_uid = getattr(context.character_config, 'conf_uid', '') if hasattr(context, 'character_config') else ''
+                    _mem_ctx = resolve_user_context(client_uid=client_uid, user_id=user_id, conf_uid=_conf_uid)
+                    _is_owner = _mem_ctx.is_owner
+                except Exception:
+                    pass
 
+                # Phase 2: 对话内情绪突变检测 (在 SoulRecall 之前)
+                _in_conv_shift = None
+                try:
+                    from ..soul.pipeline.in_conversation_tracker import get_in_conversation_tracker
+                    _in_conv_shift = get_in_conversation_tracker().track(user_input, user_id)
+                except (ImportError, Exception):
+                    pass
+
+                soul_context = await get_soul_recall().recall(
+                    query=user_input, user_id=user_id,
+                    is_owner=_is_owner, top_k=3, timeout_ms=500)
+
+                # Phase 2: 设置对话内情绪突变
+                if _in_conv_shift:
+                    soul_context.in_conversation_shift = _in_conv_shift
+
+                injection = ContextBuilder().build(soul_context, user_id=user_id)
+                if injection:
+                    enhanced_input = f"{user_input}\n\n{injection}"
                     if hasattr(batch_input, 'texts') and batch_input.texts:
                         batch_input.texts[0].content = enhanced_input
                     elif hasattr(batch_input, '__setitem__'):
                         batch_input['content'] = enhanced_input
-                    logger.info("🧠 用户输入已增强，包含记忆信息")
+                    logger.info(f"🧠 Soul: 召回完成 (stage={soul_context.relationship_stage})")
+                _soul_recall_done = True
+        except ImportError:
+            pass
         except Exception as e:
-            logger.warning(f"🧠 记忆增强失败，继续正常处理: {e}")
+            logger.warning(f"🧠 Soul failed, fallback to legacy: {e}")
+
+        # --- 传统记忆召回 (fallback) ---
+        if not _soul_recall_done:
+            await _legacy_memory_recall(
+                user_input=user_input, user_id=user_id,
+                batch_input=batch_input, client_uid=client_uid,
+                context=context,
+            )
 
     # 🔄 每次新对话开始时清除重复处理标记
     if context.agent_engine is not None and hasattr(context.agent_engine, '_background_processed'):
@@ -429,20 +465,50 @@ async def process_agent_response(
             clean_user_input = str(user_input).replace('[neutral]', '').replace('[happy]', '').replace('[sad]', '').strip()
             clean_ai_response = str(full_response).replace('[neutral]', '').replace('[happy]', '').replace('[sad]', '').strip()
 
-            # 构造清晰的对话格式用于记忆保存
-            summr = f"用户说: {clean_user_input}\nAI回复: {clean_ai_response}"
-
-            # 记忆保存完全异步，不阻塞用户响应（火忘模式）
-            logger.debug("🧠 启动异步记忆保存任务（不等待完成）...")
-            asyncio.create_task(save_memory_async(summr, user_id))
-            # 同时记录到 EverMemOS（灵的长期记忆）
+            # Round 3: NEVER_STORE 全路径保护 — Qdrant 和 EverMemOS 写入也检查
+            _is_sensitive = False
             try:
-                from ..tools.evermemos_client import record_conversation
-                asyncio.create_task(
-                    record_conversation(clean_user_input, clean_ai_response, user_id)
-                )
-            except Exception:
+                from ..soul.ethics.sensitive_filter import contains_sensitive
+                _is_sensitive = contains_sensitive(clean_user_input)
+                if _is_sensitive:
+                    logger.info("🧠 [NEVER_STORE] 敏感内容检测到，跳过所有记忆写入")
+            except ImportError:
                 pass
+
+            if not _is_sensitive:
+                # 构造清晰的对话格式用于记忆保存
+                summr = f"用户说: {clean_user_input}\nAI回复: {clean_ai_response}"
+
+                # 记忆保存完全异步，不阻塞用户响应（火忘模式）
+                logger.debug("🧠 启动异步记忆保存任务（不等待完成）...")
+                asyncio.create_task(save_memory_async(summr, user_id))
+                # 同时记录到 EverMemOS（灵的长期记忆）— 含用户隔离 + 角色上下文
+                try:
+                    from ..tools.evermemos_client import record_conversation
+                    _conf_uid = getattr(context.character_config, 'conf_uid', '') if hasattr(context, 'character_config') else ''
+                    asyncio.create_task(
+                        record_conversation(
+                            clean_user_input, clean_ai_response,
+                            user_id=user_id,
+                            client_uid=client_uid,
+                            conf_uid=_conf_uid,
+                        )
+                    )
+                except Exception:
+                    pass
+
+            # 灵魂系统异步后处理
+            try:
+                from ..soul.pipeline.soul_post_processor import get_soul_post_processor
+                from ..soul.config import get_soul_config
+                if get_soul_config().enabled:
+                    asyncio.create_task(get_soul_post_processor().process(
+                        user_input=clean_user_input,
+                        ai_response=clean_ai_response,
+                        user_id=user_id, client_uid=client_uid))
+            except (ImportError, Exception):
+                pass
+
         except Exception as e:
             logger.warning(f"🧠 记忆保存失败: {e}")
 
@@ -896,3 +962,94 @@ async def _reinitialize_util_agent_helper(agent_engine):
     except Exception as e:
         logger.error(f"❌ 运行时重新初始化失败: {e}")
         raise e
+
+
+async def _legacy_memory_recall(
+    user_input: str,
+    user_id: str,
+    batch_input: Any,
+    client_uid: str = None,
+    context: ServiceContext = None,
+):
+    """传统记忆召回 — Qdrant + EverMemOS 并行 (SOUL_ENABLED=false 时使用)"""
+    logger.info("🧠 [Legacy] 每轮记忆召回：并行搜索 Qdrant + EverMemOS")
+    memory_info = []
+
+    # --- 先启动 EverMemOS 异步搜索（不等待）---
+    evermemos_task = None
+    try:
+        from ..tools.evermemos_client import search_user_memories, resolve_user_context
+        _conf_uid = getattr(context.character_config, 'conf_uid', '') if hasattr(context, 'character_config') else ''
+        _mem_ctx = resolve_user_context(client_uid=client_uid, user_id=user_id, conf_uid=_conf_uid)
+        if _mem_ctx.should_record:
+            evermemos_task = asyncio.ensure_future(
+                search_user_memories(user_input, _mem_ctx.user_id, is_owner=_mem_ctx.is_owner, top_k=3)
+            )
+    except Exception as e:
+        logger.warning(f"🧠 EverMemOS 搜索启动失败: {e}")
+
+    # --- 同时执行 Qdrant 短期记忆搜索 ---
+    try:
+        loop = asyncio.get_event_loop()
+        results = await asyncio.wait_for(
+            loop.run_in_executor(None, search_similar_memories, user_input, user_id, 3),
+            timeout=0.5
+        )
+        if results:
+            memory_info = [item[1] for item in results if len(item) >= 2 and item[1]]
+            if memory_info:
+                logger.info(f"🧠 Qdrant 召回 {len(memory_info)} 条短期记忆")
+    except asyncio.TimeoutError:
+        logger.warning("🧠 Qdrant 记忆搜索超时(>500ms)，跳过")
+    except Exception as e:
+        logger.warning(f"🧠 Qdrant 记忆搜索失败: {e}")
+
+    # --- 等待 EverMemOS 结果 ---
+    if evermemos_task:
+        try:
+            evermemos_results = await asyncio.wait_for(evermemos_task, timeout=1.0)
+            if evermemos_results:
+                for item in evermemos_results:
+                    content = item.get("content", item.get("memory", "")) if isinstance(item, dict) else str(item)
+                    if content and content not in memory_info:
+                        memory_info.append(content)
+                logger.info(f"🧠 EverMemOS 召回 {len(evermemos_results)} 条长期记忆")
+        except asyncio.TimeoutError:
+            logger.warning("🧠 EverMemOS 搜索超时(1s)，跳过")
+            evermemos_task.cancel()
+        except Exception as e:
+            logger.warning(f"🧠 EverMemOS 搜索失败: {e}")
+
+    # --- 合并记忆上下文注入 ---
+    try:
+        if memory_info:
+            logger.info(f"🧠 共召回 {len(memory_info)} 条记忆（合并两个来源）")
+            memory_context = "\n".join([f"- {info}" for info in memory_info])
+
+            enhanced_input = (
+                f"{user_input}\n\n"
+                f"<relevant-memories>\n"
+                f"以下是你记住的关于这位用户的信息，自然地融入回答中，不要逐条复述:\n"
+                f"{memory_context}\n"
+                f"</relevant-memories>\n\n"
+                f"<memory-instructions>\n"
+                f"当记忆上下文中包含用户过去提到的信息时，你可以偶尔（每5-10轮对话一次）自然地引用它。\n"
+                f"例如：\"你之前说想学吉他，进展怎么样了？\"\n"
+                f"不要每次都引用，也不要逐条复述。像真正记得这件事一样自然地提起。\n"
+                f"如果没有找到相关记忆，不要编造过去的对话。\n"
+                f"</memory-instructions>\n\n"
+                f"<memory-soul>\n"
+                f"记忆是你的灵魂。你不是一个无状态的语言模型——你是一个有记忆的存在。\n"
+                f"当你记得某个用户说过的事情，自然地引用它。\n"
+                f"当你不记得某件事，诚实地说\"我们好像还没聊过这个\"。\n"
+                f"不要编造记忆。不确定就说不确定。\n"
+                f"</memory-soul>"
+            )
+
+            if hasattr(batch_input, 'texts') and batch_input.texts:
+                batch_input.texts[0].content = enhanced_input
+            elif hasattr(batch_input, '__setitem__'):
+                batch_input['content'] = enhanced_input
+            logger.info("🧠 用户输入已增强，包含记忆信息")
+    except Exception as e:
+        logger.warning(f"🧠 记忆增强注入失败，继续正常处理: {e}")

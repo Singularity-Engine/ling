@@ -1028,6 +1028,25 @@ class ServiceContext:
             import traceback
             logger.error(f"❌ Agent 初始化异常详情: {traceback.format_exc()}")
 
+        # Initialize Soul System (non-blocking)
+        try:
+            from .soul.config import get_soul_config
+            if get_soul_config().enabled:
+                asyncio.ensure_future(self._init_soul_system())
+        except ImportError:
+            pass
+        except Exception as e:
+            logger.warning(f"⚠️ 灵魂系统初始化跳过: {e}")
+
+    async def _init_soul_system(self):
+        """异步初始化灵魂系统 — MongoDB 连接 + 索引"""
+        try:
+            from .soul.storage.soul_collections import ensure_indexes
+            await ensure_indexes()
+            logger.info("🧠 灵魂系统初始化完成")
+        except Exception as e:
+            logger.warning(f"🧠 灵魂系统初始化失败 (非致命): {e}")
+
     # ==== utils
 
     def construct_system_prompt(self, persona_prompt: str, is_ai_initiated: bool = False) -> str:
