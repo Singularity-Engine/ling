@@ -14,6 +14,12 @@ import { useEffect, useRef, useState } from "react";
  * timeline markers for the UI to respond to.
  */
 
+// ── Timeline delays (ms) ──
+const GREETING_DELAY  =  2_000;  // Character wave gesture
+const INVITING_DELAY  =  4_000;  // Chat area appears with welcome + chips
+const NUDGE_DELAY     = 15_000;  // No interaction → character tilts head
+const WAITING_DELAY   = 30_000;  // No interaction → idle "still here" motion
+
 export type FirstMinutePhase =
   | "loading"     // 0-2s
   | "greeting"    // 2-4s: character wave
@@ -49,22 +55,22 @@ export function useFirstMinute(): FirstMinuteState {
         setPhase("greeting");
         playGreetingSound(); // Sound interface placeholder
       }
-    }, 2000));
+    }, GREETING_DELAY));
 
     // 4s: inviting phase
     timers.push(setTimeout(() => {
       if (!interactedRef.current) setPhase("inviting");
-    }, 4000));
+    }, INVITING_DELAY));
 
     // 15s: nudge
     timers.push(setTimeout(() => {
       if (!interactedRef.current) setPhase("nudge");
-    }, 15000));
+    }, NUDGE_DELAY));
 
     // 30s: waiting
     timers.push(setTimeout(() => {
       if (!interactedRef.current) setPhase("waiting");
-    }, 30000));
+    }, WAITING_DELAY));
 
     // Listen for interaction
     const onInteract = () => {

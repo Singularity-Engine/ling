@@ -26,9 +26,8 @@ export function initAnalytics(): void {
 
   // gtag init
   window.dataLayer = window.dataLayer || [];
-  window.gtag = function () {
-    // eslint-disable-next-line prefer-rest-params
-    window.dataLayer.push(arguments);
+  window.gtag = (...args: unknown[]) => {
+    window.dataLayer.push(args);
   };
   window.gtag('js', new Date());
   window.gtag('config', id);

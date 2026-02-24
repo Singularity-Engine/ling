@@ -2,7 +2,7 @@
 
 .root {
   display: grid;
-  grid-template-columns: var(--split-left, var(--ling-split-left-default)) 1fr;
+  grid-template-columns: var(--split-left, var(--ling-split-left-default)) var(--ling-split-divider) 1fr;
   height: 100dvh;
   width: 100vw;
   background: var(--ling-bg-deep);

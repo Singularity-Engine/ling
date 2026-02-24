@@ -29,6 +29,7 @@ import { createLogger } from "./utils/logger";
 import { MISC_COLORS } from "./constants/colors";
 import { SS_ONBOARDING_DONE, SS_VISITED } from "./constants/storage-keys";
 import { captureError } from "./lib/sentry";
+import { focusTextarea } from "./utils/dom";
 import "./index.css";
 
 // ─── Lazy-loaded overlays & modals (chunk loads on first use) ───
@@ -321,10 +322,7 @@ function MainContent(): JSX.Element {
     {
       key: "/",
       labelKey: "shortcuts.focusInput",
-      action: () => {
-        const textarea = document.querySelector<HTMLTextAreaElement>(".ling-textarea");
-        textarea?.focus();
-      },
+      action: () => { focusTextarea(); },
     },
     {
       key: "mod+j",

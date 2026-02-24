@@ -17,6 +17,7 @@ import { SuggestionChips } from "../chat/SuggestionChips";
 import { useChatMessagesState, useChatMessagesActions } from "@/context/ChatHistoryContext";
 import { useWebSocketState, useWebSocketActions } from "@/context/WebsocketContext";
 import { useAiStateRead } from "@/context/AiStateContext";
+import { focusTextarea } from "@/utils/dom";
 import styles from "./SplitLayout.module.css";
 
 const ChatArea = lazy(() => import("../chat/ChatArea").then(m => ({ default: m.ChatArea })));
@@ -149,9 +150,7 @@ export const SplitLayout = memo(function SplitLayout({ firstMinutePhase }: Split
       if (!isConnectedRef.current) return;
       appendHumanMessage(text);
       sendMessage({ type: "text-input", text, images: EMPTY_IMAGES });
-      setTimeout(() => {
-        (document.querySelector(".ling-textarea") as HTMLElement)?.focus();
-      }, 0);
+      setTimeout(focusTextarea, 0);
     },
     [appendHumanMessage, sendMessage]
   );

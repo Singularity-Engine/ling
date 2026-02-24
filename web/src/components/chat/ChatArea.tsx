@@ -12,6 +12,7 @@ import { useAiStateRead } from "@/context/AiStateContext";
 import { useWebSocketState, useWebSocketActions } from "@/context/WebsocketContext";
 import { useChatScroll } from "@/hooks/useChatScroll";
 import { useSwipeCollapse } from "@/hooks/useSwipeCollapse";
+import { focusTextarea } from "@/utils/dom";
 
 // Touch-only device detection (no hover capability = phone/tablet)
 const isTouchDevice =
@@ -310,9 +311,7 @@ export const ChatArea = memo(({ onCollapse }: ChatAreaProps) => {
       appendHumanMessage(text);
       sendMessage({ type: "text-input", text, images: EMPTY_IMAGES });
       // Focus textarea so the user is ready to type when AI responds
-      focusTimerRef.current = setTimeout(() => {
-        (document.querySelector(".ling-textarea") as HTMLElement)?.focus();
-      }, 0);
+      focusTimerRef.current = setTimeout(focusTextarea, 0);
     },
     [appendHumanMessage, sendMessage]
   );
