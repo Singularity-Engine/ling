@@ -398,9 +398,9 @@ export const useLive2DModel = ({
 
     const getAdapterAndModel = () => {
       const adapter = window.getLAppAdapter?.();
-      if (!adapter) { console.error('Live2D adapter not available'); return null; }
+      if (!adapter) { log.error('Live2D adapter not available'); return null; }
       const model = adapter.getModel();
-      if (!model) { console.error('Live2D model not available'); return null; }
+      if (!model) { log.error('Live2D model not available'); return null; }
       return model;
     };
 
@@ -409,20 +409,20 @@ export const useLive2DModel = ({
         const model = getAdapterAndModel();
         if (!model) return false;
         try {
-          console.log(`Playing motion: group="${motionGroup}", index=${motionIndex}, priority=${priority}`);
+          log.debug(`Playing motion: group="${motionGroup}", index=${motionIndex}, priority=${priority}`);
           const result = model.startMotion(motionGroup, motionIndex, priority);
-          console.log('Motion start result:', result);
+          log.debug('Motion start result:', result);
           return result;
-        } catch (error) { console.error('Error playing motion:', error); return false; }
+        } catch (error) { log.error('Error playing motion:', error); return false; }
       },
       playRandomMotion: (motionGroup: string, priority: number = 3) => {
         const model = getAdapterAndModel();
         if (!model) return false;
         try {
           const result = model.startRandomMotion(motionGroup, priority);
-          console.log('Random motion result:', result);
+          log.debug('Random motion result:', result);
           return result;
-        } catch (error) { console.error('Error playing random motion:', error); return false; }
+        } catch (error) { log.error('Error playing random motion:', error); return false; }
       },
       getMotionInfo: () => {
         const model = getAdapterAndModel();
@@ -439,16 +439,16 @@ export const useLive2DModel = ({
               });
             }
           }
-          console.log('Available motion groups:', motionGroups);
+          log.debug('Available motion groups:', motionGroups);
           return motionGroups;
-        } catch (error) { console.error('Error getting motion info:', error); return null; }
+        } catch (error) { log.error('Error getting motion info:', error); return null; }
       },
-      help: () => console.log(
+      help: () => log.debug(
         'Live2DDebug: .getMotionInfo() | .playMotion(group, index, priority) | .playRandomMotion(group, priority)'
       ),
     };
 
-    console.log('Live2D Debug functions exposed to window.Live2DDebug');
+    log.debug('Live2D Debug functions exposed to window.Live2DDebug');
 
     return () => { delete window.Live2DDebug; };
   }, []);

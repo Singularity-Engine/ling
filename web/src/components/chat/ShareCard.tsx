@@ -1,7 +1,10 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { trackEvent } from "@/utils/track-event";
+import { createLogger } from "@/utils/logger";
 import styles from "./ShareCard.module.css";
+
+const log = createLogger('ShareCard');
 
 // ─── Privacy detection patterns ───
 const PRIVACY_PATTERNS = [
@@ -288,7 +291,7 @@ export const ShareCard = memo(function ShareCard({ content, isOpen, onClose, mod
       setImageUrl(url);
       trackEvent("share_card_generated");
     } catch (err) {
-      console.error("Failed to generate share card:", err);
+      log.error("Failed to generate share card:", err);
     } finally {
       setGenerating(false);
     }

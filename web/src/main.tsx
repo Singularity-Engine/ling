@@ -7,6 +7,9 @@ import { LAppAdapter } from '../WebSDK/src/lappadapter';
 import './i18n';
 import { initSentry } from './lib/sentry';
 import { initAnalytics } from './lib/analytics';
+import { createLogger } from './utils/logger';
+
+const log = createLogger('Main');
 
 const originalConsoleWarn = console.warn;
 console.warn = (...args) => {
@@ -35,6 +38,6 @@ if (typeof window !== 'undefined') {
   // Load Live2D Core in background (preloaded via <link rel="preload"> in index.html)
   const script = document.createElement('script');
   script.src = './libs/live2dcubismcore.js';
-  script.onerror = (error) => console.error('Failed to load Live2D Cubism Core:', error);
+  script.onerror = (error) => log.error('Failed to load Live2D Cubism Core:', error);
   document.head.appendChild(script);
 }

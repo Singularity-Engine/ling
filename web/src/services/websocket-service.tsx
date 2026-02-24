@@ -4,6 +4,9 @@ import { ModelInfo } from '@/context/Live2dConfigContext';
 import { HistoryInfo } from '@/context/WebsocketContext';
 import { ConfigFile } from '@/context/CharacterConfigContext';
 import { toaster } from '@/components/ui/toaster';
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('WebSocket');
 
 export interface DisplayText {
   text: string;
@@ -147,7 +150,7 @@ class WebSocketService {
           const message = JSON.parse(event.data);
           this.messageSubject.next(message);
         } catch (error) {
-          console.error('Failed to parse WebSocket message:', error);
+          log.error('Failed to parse WebSocket message:', error);
           toaster.create({
             title: `${i18next.t('error.failedParseWebSocket')}: ${error}`,
             type: "error",
@@ -166,7 +169,7 @@ class WebSocketService {
         this.stateSubject.next('CLOSED');
       };
     } catch (error) {
-      console.error('Failed to connect to WebSocket:', error);
+      log.error('Failed to connect to WebSocket:', error);
       this.currentState = 'CLOSED';
       this.stateSubject.next('CLOSED');
     }
@@ -176,7 +179,7 @@ class WebSocketService {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
     } else {
-      if (import.meta.env.DEV) console.warn('WebSocket is not open. Unable to send message:', message);
+      log.warn('WebSocket is not open. Unable to send message:', message);
       toaster.create({
         title: i18next.t('error.websocketNotOpen'),
         type: 'error',
