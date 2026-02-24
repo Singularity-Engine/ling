@@ -63,7 +63,7 @@ const S_BACKDROP_BASE: CSSProperties = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  background: "rgba(0, 0, 0, 0.6)",
+  background: "var(--ling-overlay-modal)",
   backdropFilter: "blur(8px)",
   WebkitBackdropFilter: "blur(8px)",
 };
@@ -71,20 +71,20 @@ const S_BACKDROP_OPEN: CSSProperties = { ...S_BACKDROP_BASE, animation: "overlay
 const S_BACKDROP_CLOSING: CSSProperties = { ...S_BACKDROP_BASE, animation: `overlayFadeOut ${EXIT_MS}ms ease-in forwards` };
 
 const S_CARD_BASE: CSSProperties = {
-  background: "rgba(10, 0, 21, 0.95)",
-  border: "1px solid rgba(139, 92, 246, 0.3)",
+  background: "var(--ling-modal-bg)",
+  border: "1px solid var(--ling-modal-border)",
   borderRadius: "16px",
   padding: "28px clamp(20px, 5vw, 36px)",
   width: "100%",
   maxWidth: "min(380px, calc(100vw - 32px))",
-  boxShadow: "0 24px 80px rgba(0, 0, 0, 0.5), 0 0 40px rgba(139, 92, 246, 0.1)",
+  boxShadow: "0 24px 80px rgba(0, 0, 0, 0.5), 0 0 40px var(--ling-purple-08)",
   textAlign: "center",
 };
 const S_CARD_OPEN: CSSProperties = { ...S_CARD_BASE, animation: "overlaySlideIn 0.25s ease-out" };
 const S_CARD_CLOSING: CSSProperties = { ...S_CARD_BASE, animation: `overlaySlideOut ${EXIT_MS}ms ease-in forwards` };
 
 const S_PRODUCT_NAME: CSSProperties = {
-  color: "#e0d4ff",
+  color: "var(--ling-purple-text)",
   fontSize: "22px",
   fontWeight: 700,
   marginBottom: "4px",
@@ -114,7 +114,7 @@ const S_META_ROW: CSSProperties = {
 
 const S_VERSION_LABEL: CSSProperties = {
   fontSize: "11px",
-  color: "rgba(255, 255, 255, 0.4)",
+  color: "var(--ling-placeholder-color)",
   textTransform: "uppercase",
   letterSpacing: "1px",
 };
@@ -122,7 +122,7 @@ const S_VERSION_LABEL: CSSProperties = {
 const S_VERSION_BADGE: CSSProperties = {
   fontSize: "12px",
   color: "rgba(139, 92, 246, 0.8)",
-  background: "rgba(139, 92, 246, 0.12)",
+  background: "var(--ling-purple-12)",
   padding: "2px 10px",
   borderRadius: "10px",
   fontFamily: "monospace",
@@ -130,20 +130,20 @@ const S_VERSION_BADGE: CSSProperties = {
 
 const S_TECH_LABEL: CSSProperties = {
   fontSize: "11px",
-  color: "rgba(255, 255, 255, 0.35)",
+  color: "var(--ling-text-muted)",
 };
 
 const S_DIVIDER: CSSProperties = {
   height: "1px",
-  background: "linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.3), transparent)",
+  background: "linear-gradient(90deg, transparent, var(--ling-purple-30), transparent)",
   marginBottom: "18px",
 };
 
 const S_ACCOUNT_BOX: CSSProperties = {
   marginBottom: "18px",
   padding: "12px 16px",
-  background: "rgba(255,255,255,0.05)",
-  border: "1px solid rgba(255,255,255,0.08)",
+  background: "var(--ling-btn-ghost-bg)",
+  border: "1px solid var(--ling-surface-border)",
   borderRadius: "12px",
   textAlign: "left",
 };
@@ -156,7 +156,7 @@ const S_ACCOUNT_HEADER: CSSProperties = {
 };
 
 const S_DISPLAY_NAME: CSSProperties = {
-  color: "rgba(255,255,255,0.7)",
+  color: "var(--ling-text-soft)",
   fontSize: "13px",
   fontWeight: 600,
 };
@@ -180,7 +180,7 @@ const PLAN_BADGE_STYLES: Record<string, CSSProperties> = Object.fromEntries(
 
 const S_EMAIL: CSSProperties = {
   fontSize: "11px",
-  color: "rgba(255,255,255,0.3)",
+  color: "var(--ling-text-muted)",
   marginBottom: "10px",
 };
 
@@ -194,7 +194,7 @@ const S_BTN_PRIMARY: CSSProperties = {
   padding: "6px 12px",
   borderRadius: "8px",
   border: "none",
-  background: "rgba(139, 92, 246, 0.5)",
+  background: "var(--ling-purple-50)",
   color: "#fff",
   fontSize: "12px",
   fontWeight: 600,
@@ -206,9 +206,9 @@ const S_BTN_MANAGE: CSSProperties = {
   flex: 1,
   padding: "6px 12px",
   borderRadius: "8px",
-  border: "1px solid rgba(255,255,255,0.1)",
+  border: "1px solid var(--ling-btn-ghost-border)",
   background: "transparent",
-  color: "rgba(255,255,255,0.6)",
+  color: "var(--ling-btn-ghost-color)",
   fontSize: "12px",
   cursor: "pointer",
   transition: "background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease",
@@ -222,9 +222,9 @@ const S_BTN_MANAGE_LOADING: CSSProperties = {
 const S_BTN_SIGNOUT: CSSProperties = {
   padding: "6px 12px",
   borderRadius: "8px",
-  border: "1px solid rgba(255,255,255,0.08)",
+  border: "1px solid var(--ling-surface-border)",
   background: "transparent",
-  color: "rgba(255,255,255,0.35)",
+  color: "var(--ling-text-muted)",
   fontSize: "12px",
   cursor: "pointer",
   transition: "background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease",
@@ -233,14 +233,14 @@ const S_BTN_SIGNOUT: CSSProperties = {
 const S_GUEST_BOX: CSSProperties = {
   marginBottom: "18px",
   padding: "12px 16px",
-  background: "rgba(255,255,255,0.05)",
-  border: "1px solid rgba(255,255,255,0.08)",
+  background: "var(--ling-btn-ghost-bg)",
+  border: "1px solid var(--ling-surface-border)",
   borderRadius: "12px",
   textAlign: "center",
 };
 
 const S_GUEST_PROMPT: CSSProperties = {
-  color: "rgba(255,255,255,0.5)",
+  color: "var(--ling-text-dim)",
   fontSize: "13px",
   margin: "0 0 10px",
 };
@@ -256,7 +256,7 @@ const S_LOGIN_LINK: CSSProperties = {
   padding: "8px 16px",
   borderRadius: "8px",
   border: "none",
-  background: "rgba(139, 92, 246, 0.5)",
+  background: "var(--ling-purple-50)",
   color: "#fff",
   fontSize: "13px",
   fontWeight: 600,
@@ -270,7 +270,7 @@ const S_REGISTER_LINK: CSSProperties = {
   flex: 1,
   padding: "8px 16px",
   borderRadius: "8px",
-  border: "1px solid rgba(139, 92, 246, 0.4)",
+  border: "1px solid var(--ling-purple-40)",
   background: "transparent",
   color: "rgba(196, 181, 253, 0.8)",
   fontSize: "13px",
@@ -296,7 +296,7 @@ const S_LANG_ROW: CSSProperties = {
 
 const S_COPYRIGHT: CSSProperties = {
   fontSize: "11px",
-  color: "rgba(139, 92, 246, 0.5)",
+  color: "var(--ling-purple-50)",
 };
 
 // ─── Component ───

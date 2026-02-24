@@ -518,6 +518,14 @@ body {
   border-color: var(--ling-error) !important;
 }
 
+/* Mobile menu item hover/active */
+.ling-menu-item:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+.ling-menu-item:active {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
 /* ConnectionStatus — keyframe animations (core always-rendered component) */
 @keyframes connFadeIn {
   from { opacity: 0; transform: translateY(-4px); }
@@ -1172,21 +1180,21 @@ canvas {
 .about-link {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 6px 14px; border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.7);
+  background: var(--ling-surface);
+  border: 1px solid var(--ling-surface-hover);
+  color: var(--ling-text-soft);
   font-size: 12px; text-decoration: none;
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   cursor: pointer;
 }
 .about-link:hover {
-  background: rgba(139, 92, 246, 0.2);
-  border-color: rgba(139, 92, 246, 0.4);
+  background: var(--ling-purple-20);
+  border-color: var(--ling-purple-40);
   color: var(--ling-purple-lighter);
 }
-.about-btn-primary:hover { background: rgba(139, 92, 246, 0.65) !important; }
+.about-btn-primary:hover { background: var(--ling-purple-60) !important; }
 .about-btn-primary:active { transform: scale(0.97); }
-.about-btn-outline:hover { background: rgba(255, 255, 255, 0.08) !important; border-color: rgba(255, 255, 255, 0.2) !important; color: rgba(255, 255, 255, 0.8) !important; }
+.about-btn-outline:hover { background: var(--ling-surface-border) !important; border-color: rgba(255, 255, 255, 0.2) !important; color: var(--ling-text-secondary) !important; }
 .about-btn-outline:active { transform: scale(0.97); }
 .about-btn-primary:focus-visible, .about-btn-outline:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
 

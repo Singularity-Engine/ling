@@ -165,14 +165,6 @@ const S_TOOLBAR_D: CSSProperties = {
   position: "absolute", top: "52px", right: "12px", zIndex: 20,
   display: "flex", flexDirection: "column", alignItems: "center", gap: "12px",
 };
-const S_TOOLBAR_M: CSSProperties = {
-  position: "absolute",
-  top: "max(44px, calc(env(safe-area-inset-top, 0px) + 36px))",
-  right: "max(8px, env(safe-area-inset-right, 0px))",
-  zIndex: 20,
-  display: "flex", flexDirection: "column", alignItems: "center", gap: "8px",
-};
-
 // Status / action group capsules
 const _GROUP_BASE: CSSProperties = {
   display: "flex", flexDirection: "column", alignItems: "center",
@@ -180,7 +172,85 @@ const _GROUP_BASE: CSSProperties = {
   background: OVERLAY_COLORS.LIGHT, border: `1px solid ${WHITE_ALPHA.LIGHT_BORDER}`,
 };
 const S_GROUP_D: CSSProperties = { ..._GROUP_BASE, gap: "8px" };
-const S_GROUP_M: CSSProperties = { ..._GROUP_BASE, gap: "6px" };
+
+// Desktop: separator line between status and action buttons in unified capsule
+const S_TOOLBAR_DIVIDER: CSSProperties = {
+  width: "24px", height: "1px",
+  background: "rgba(255,255,255,0.08)",
+  margin: "4px 0",
+};
+
+// Mobile: compact trigger area (connection dot + hamburger)
+const S_MOBILE_TRIGGER: CSSProperties = {
+  position: "absolute",
+  top: "max(44px, calc(env(safe-area-inset-top, 0px) + 36px))",
+  right: "max(8px, env(safe-area-inset-right, 0px))",
+  zIndex: 20,
+  display: "flex", alignItems: "center", gap: "6px",
+};
+
+// Mobile: menu exit animation duration
+const MENU_EXIT_MS = 250;
+
+// Mobile: menu backdrop
+const S_MENU_BACKDROP: CSSProperties = {
+  position: "fixed", inset: 0, zIndex: 50,
+  background: "rgba(0,0,0,0.4)",
+  backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
+  transition: `opacity ${MENU_EXIT_MS}ms ease`,
+};
+
+// Mobile: slide-in menu panel
+const S_MOBILE_MENU: CSSProperties = {
+  position: "fixed", top: 0, right: 0, bottom: 0,
+  width: "min(260px, 75vw)", zIndex: 51,
+  background: "rgba(10, 0, 21, 0.94)",
+  backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+  borderLeft: `1px solid ${WHITE_ALPHA.LIGHT_BORDER}`,
+  display: "flex", flexDirection: "column",
+  animation: "slideInRight 0.25s ease-out",
+};
+const S_MOBILE_MENU_CLOSING: CSSProperties = {
+  ...S_MOBILE_MENU,
+  animation: `slideOutRight ${MENU_EXIT_MS}ms ease-in forwards`,
+};
+
+// Mobile: low-balance badge on hamburger button
+const S_MENU_BADGE: CSSProperties = {
+  position: "absolute", top: "4px", right: "4px",
+  width: "8px", height: "8px", borderRadius: "50%",
+  background: "var(--ling-error)",
+  border: "2px solid rgba(10, 0, 21, 0.8)",
+  pointerEvents: "none",
+};
+
+// Mobile menu: header with close button
+const S_MENU_HEADER: CSSProperties = {
+  display: "flex", justifyContent: "flex-end",
+  padding: "max(48px, calc(env(safe-area-inset-top, 0px) + 40px)) 12px 8px",
+};
+
+// Mobile menu: status row
+const S_MENU_STATUS: CSSProperties = {
+  display: "flex", alignItems: "center", gap: "8px",
+  padding: "8px 12px", flexWrap: "wrap",
+};
+
+// Mobile menu: action item button
+const S_MENU_ITEM: CSSProperties = {
+  display: "flex", alignItems: "center", gap: "12px",
+  padding: "14px 16px", borderRadius: "12px",
+  background: "transparent", border: "none",
+  color: "rgba(255,255,255,0.7)", fontSize: 15,
+  cursor: "pointer", width: "100%", textAlign: "left" as const,
+  fontFamily: "inherit",
+};
+
+// Mobile menu: separator
+const S_MENU_SEP: CSSProperties = {
+  height: 1, background: "rgba(255,255,255,0.06)",
+  margin: "4px 12px",
+};
 
 // Action button style variants (mobile/desktop × active/inactive)
 const _ACTION_BTN: CSSProperties = {
@@ -275,6 +345,19 @@ const ICON_CHEVRON_UP = (
     <polyline points="18 15 12 9 6 15" />
   </svg>
 );
+const ICON_MENU = (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="4" y1="7" x2="20" y2="7" />
+    <line x1="4" y1="12" x2="20" y2="12" />
+    <line x1="4" y1="17" x2="20" y2="17" />
+  </svg>
+);
+const ICON_CLOSE = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
 
 function MainContent(): JSX.Element {
   const { t } = useTranslation();
@@ -283,7 +366,16 @@ function MainContent(): JSX.Element {
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [memoryOpen, setMemoryOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuClosing, setMenuClosing] = useState(false);
   const [kbOffset, setKbOffset] = useState(0);
+  const menuTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // Auth state for low-balance badge on mobile hamburger
+  const { user } = useAuthState();
+  const showCreditsBadge = isMobile && !!user && !!user.plan && user.plan !== 'free'
+    && user.role !== 'owner' && user.role !== 'admin'
+    && (user.credits_balance ?? 0) <= 10;
 
   // Contexts for keyboard shortcuts
   const { micOn } = useVADState();
@@ -323,6 +415,8 @@ function MainContent(): JSX.Element {
       window.removeEventListener("resize", throttled);
     };
   }, []);
+
+  useEffect(() => () => { clearTimeout(menuTimerRef.current); }, []);
 
   useEffect(() => {
     document.documentElement.style.overflow = "hidden";
@@ -370,6 +464,15 @@ function MainContent(): JSX.Element {
   const closeShortcuts = useCallback(() => setShortcutsOpen(false), []);
   const closeAbout = useCallback(() => setAboutOpen(false), []);
   const closeMemory = useCallback(() => setMemoryOpen(false), []);
+  const openMenu = useCallback(() => setMenuOpen(true), []);
+  const closeMenu = useCallback(() => {
+    if (menuClosing) return;
+    setMenuClosing(true);
+    menuTimerRef.current = setTimeout(() => {
+      setMenuClosing(false);
+      setMenuOpen(false);
+    }, MENU_EXIT_MS);
+  }, [menuClosing]);
   const handleExpandKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleChat(); }
   }, [toggleChat]);
@@ -394,6 +497,8 @@ function MainContent(): JSX.Element {
   memoryOpenRef.current = memoryOpen;
   const chatExpandedRef = useRef(chatExpanded);
   chatExpandedRef.current = chatExpanded;
+  const menuOpenRef = useRef(menuOpen);
+  menuOpenRef.current = menuOpen;
 
   // Keyboard shortcuts definition
   const shortcuts: ShortcutDef[] = useMemo(() => [
@@ -442,7 +547,11 @@ function MainContent(): JSX.Element {
         // Let context menus handle their own Escape
         if (document.querySelector('[role="menu"]')) return false;
         // Cascade: close overlays first, then collapse chat panel
-        if (shortcutsOpenRef.current || aboutOpenRef.current || memoryOpenRef.current) {
+        if (menuOpenRef.current) {
+          clearTimeout(menuTimerRef.current);
+          setMenuClosing(false);
+          setMenuOpen(false);
+        } else if (shortcutsOpenRef.current || aboutOpenRef.current || memoryOpenRef.current) {
           setShortcutsOpen(false);
           setAboutOpen(false);
           setMemoryOpen(false);
@@ -515,51 +624,123 @@ function MainContent(): JSX.Element {
       <div style={S_GROUND_GRADIENT} />
 
       {/* ===== Layer 1.5: 右侧工具栏 ===== */}
-      <div style={isMobile ? S_TOOLBAR_M : S_TOOLBAR_D}>
-        {/* ── Status indicators group ── */}
-        <SectionErrorBoundary name="StatusGroup">
-          <div style={isMobile ? S_GROUP_M : S_GROUP_D}>
-            <CreditsDisplay />
-            <AffinityBadge />
+      {isMobile ? (
+        /* ── Mobile: connection dot + chat toggle + hamburger ── */
+        <div style={S_MOBILE_TRIGGER}>
+          <SectionErrorBoundary name="StatusGroup">
             <ConnectionStatus />
-          </div>
-        </SectionErrorBoundary>
-
-        {/* ── Action buttons group ── */}
-        <div style={isMobile ? S_GROUP_M : S_GROUP_D}>
+          </SectionErrorBoundary>
           <button
             className="ling-action-btn"
             data-active={chatExpanded}
             onClick={toggleChat}
             aria-label={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}
             aria-pressed={chatExpanded}
-            title={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}
-            style={btnStyle(isMobile, chatExpanded)}
+            style={btnStyle(true, chatExpanded)}
           >
             {ICON_CHAT}
           </button>
           <button
             className="ling-action-btn"
-            data-active={memoryOpen}
-            onClick={openMemory}
-            aria-label={t("memory.title")}
-            title={t("memory.title")}
-            style={btnStyle(isMobile, memoryOpen)}
+            onClick={openMenu}
+            aria-label="Menu"
+            style={{ ...btnStyle(true, menuOpen || menuClosing), position: "relative" as const }}
           >
-            {ICON_MEMORY}
-          </button>
-          <button
-            className="ling-action-btn"
-            data-active={aboutOpen}
-            onClick={openAbout}
-            aria-label={t("shortcuts.showAbout")}
-            title={t("shortcuts.showAbout")}
-            style={btnStyle(isMobile, aboutOpen)}
-          >
-            {ICON_INFO}
+            {ICON_MENU}
+            {showCreditsBadge && <div style={S_MENU_BADGE} />}
           </button>
         </div>
-      </div>
+      ) : (
+        /* ── Desktop: unified capsule ── */
+        <div style={S_TOOLBAR_D}>
+          <SectionErrorBoundary name="Toolbar">
+            <div style={S_GROUP_D}>
+              <CreditsDisplay />
+              <AffinityBadge />
+              <ConnectionStatus />
+              <div style={S_TOOLBAR_DIVIDER} />
+              <button
+                className="ling-action-btn"
+                data-active={chatExpanded}
+                onClick={toggleChat}
+                aria-label={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}
+                aria-pressed={chatExpanded}
+                title={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}
+                style={btnStyle(false, chatExpanded)}
+              >
+                {ICON_CHAT}
+              </button>
+              <button
+                className="ling-action-btn"
+                data-active={memoryOpen}
+                onClick={openMemory}
+                aria-label={t("memory.title")}
+                title={t("memory.title")}
+                style={btnStyle(false, memoryOpen)}
+              >
+                {ICON_MEMORY}
+              </button>
+              <button
+                className="ling-action-btn"
+                data-active={aboutOpen}
+                onClick={openAbout}
+                aria-label={t("shortcuts.showAbout")}
+                title={t("shortcuts.showAbout")}
+                style={btnStyle(false, aboutOpen)}
+              >
+                {ICON_INFO}
+              </button>
+            </div>
+          </SectionErrorBoundary>
+        </div>
+      )}
+
+      {/* ===== Mobile slide-in menu ===== */}
+      {(menuOpen || menuClosing) && isMobile && (
+        <>
+          <div
+            style={{ ...S_MENU_BACKDROP, opacity: menuClosing ? 0 : 1 }}
+            onClick={closeMenu}
+          />
+          <div style={menuClosing ? S_MOBILE_MENU_CLOSING : S_MOBILE_MENU}>
+            <div style={S_MENU_HEADER}>
+              <button
+                className="ling-action-btn"
+                onClick={closeMenu}
+                aria-label="Close"
+                style={btnStyle(true, false)}
+              >
+                {ICON_CLOSE}
+              </button>
+            </div>
+            <SectionErrorBoundary name="MenuStatus">
+              <div style={S_MENU_STATUS}>
+                {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+                <div onClick={closeMenu}><CreditsDisplay /></div>
+                <AffinityBadge />
+                <ConnectionStatus />
+              </div>
+            </SectionErrorBoundary>
+            <div style={S_MENU_SEP} />
+            <button
+              className="ling-menu-item"
+              style={S_MENU_ITEM}
+              onClick={() => { openMemory(); closeMenu(); }}
+            >
+              {ICON_MEMORY}
+              <span>{t("memory.title")}</span>
+            </button>
+            <button
+              className="ling-menu-item"
+              style={S_MENU_ITEM}
+              onClick={() => { openAbout(); closeMenu(); }}
+            >
+              {ICON_INFO}
+              <span>{t("shortcuts.showAbout")}</span>
+            </button>
+          </div>
+        </>
+      )}
 
       {/* ===== Layer 2: 浮动聊天区域 ===== */}
       <div style={chatOuterStyle}>
