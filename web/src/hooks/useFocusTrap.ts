@@ -15,9 +15,15 @@ export function useFocusTrap(containerRef: RefObject<HTMLElement | null>, active
     const focusableSelector =
       'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+    // Cache focusable elements; invalidate only when DOM children change.
+    let focusables = container.querySelectorAll<HTMLElement>(focusableSelector);
+    const observer = new MutationObserver(() => {
+      focusables = container.querySelectorAll<HTMLElement>(focusableSelector);
+    });
+    observer.observe(container, { childList: true, subtree: true });
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Tab") return;
-      const focusables = container.querySelectorAll<HTMLElement>(focusableSelector);
       if (focusables.length === 0) return;
 
       const first = focusables[0];
@@ -37,6 +43,9 @@ export function useFocusTrap(containerRef: RefObject<HTMLElement | null>, active
     };
 
     container.addEventListener("keydown", handleKeyDown);
-    return () => container.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      container.removeEventListener("keydown", handleKeyDown);
+      observer.disconnect();
+    };
   }, [containerRef, active]);
 }

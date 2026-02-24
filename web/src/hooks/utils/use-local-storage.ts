@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { createLogger } from '@/utils/logger';
 
 const log = createLogger('LocalStorage');
@@ -21,16 +21,20 @@ export function useLocalStorage<T>(
     }
   });
 
-  const setValue = (value: T | ((val: T) => T)) => {
+  // useCallback ensures a stable reference; functional setStoredValue
+  // avoids stale-closure reads of `storedValue`.
+  const setValue = useCallback((value: T | ((val: T) => T)) => {
     try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      const filteredValue = options?.filter ? options.filter(valueToStore) : valueToStore;
-      setStoredValue(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(filteredValue));
+      setStoredValue(prev => {
+        const valueToStore = value instanceof Function ? value(prev) : value;
+        const filteredValue = options?.filter ? options.filter(valueToStore) : valueToStore;
+        window.localStorage.setItem(key, JSON.stringify(filteredValue));
+        return valueToStore;
+      });
     } catch (error) {
       log.error(`Error setting localStorage key "${key}":`, error);
     }
-  };
+  }, [key, options]);
 
   return [storedValue, setValue] as const;
 }

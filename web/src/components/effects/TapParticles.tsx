@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { prefersReducedMotion } from "@/utils/reduced-motion";
 
 const EMOJIS = ["❤️", "💜", "✨", "💫", "🩷"];
 const PARTICLE_COUNT = 5;
@@ -36,7 +37,7 @@ export const TapParticles = memo(() => {
 
   const spawn = useCallback((clientX: number, clientY: number) => {
     // Skip particle animation for users who prefer reduced motion
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (prefersReducedMotion()) return;
     const batch: Particle[] = Array.from({ length: PARTICLE_COUNT }, () => {
       const scale = 0.7 + Math.random() * 0.6;
       return {

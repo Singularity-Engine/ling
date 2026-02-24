@@ -1,9 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { memo, useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { ParticleCanvas, type ParticlePhase } from "./ParticleCanvas";
-
-const prefersReducedMotion = () =>
-  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+import { prefersReducedMotion } from "@/utils/reduced-motion";
 
 interface LandingAnimationProps {
   onComplete: () => void;
