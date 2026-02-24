@@ -1,6 +1,7 @@
 """
 灵魂后处理器 — 异步处理对话后的记忆写入
 修复: NEVER_STORE 检查, 情感关键词跳过逻辑, 并发控制, gather 异常检查
+SOTA: +Graphiti 图谱写入, +Mem0 对话记忆写入
 """
 
 import asyncio
@@ -95,7 +96,7 @@ class SoulPostProcessor:
             except Exception as e:
                 logger.debug(f"[Soul] Dependency check failed (non-fatal): {e}")
 
-            # 4. 并行写入 (try/finally 防泄漏)
+            # 4. 并行写入 (try/finally 防泄漏) — SOTA: +Graphiti +Mem0
             try:
                 results = await asyncio.gather(
                     self._write_emotion(extracted, user_id),
@@ -104,10 +105,14 @@ class SoulPostProcessor:
                     self._detect_breakthrough(extracted, user_id),
                     self._write_story(extracted, user_id),
                     self._write_graph(extracted, user_id),
+                    self._write_graphiti(extracted, user_id),          # SOTA: Graphiti 时序图谱
+                    self._write_mem0(user_input, ai_response, user_id),  # SOTA: Mem0 对话记忆
                     return_exceptions=True,
                 )
-                # Round 2: 遍历检查异常
-                task_names = ["emotion", "importance", "relationship", "breakthrough", "story", "graph"]
+                task_names = [
+                    "emotion", "importance", "relationship", "breakthrough",
+                    "story", "graph", "graphiti", "mem0",
+                ]
                 for i, r in enumerate(results):
                     if isinstance(r, Exception):
                         logger.warning(f"[Soul] PostProcessor {task_names[i]} write failed: {r}")
@@ -201,6 +206,46 @@ class SoulPostProcessor:
                 await asyncio.gather(*edge_tasks, return_exceptions=True)
         except Exception as e:
             logger.debug(f"[Soul] Graph write failed: {e}")
+
+    async def _write_graphiti(self, extracted, user_id: str):
+        """SOTA: 写入 Graphiti 时序知识图谱
+
+        通过 GraphitiAdapter 写入, 不可用时静默跳过 (MongoDB fallback 在 _write_graph 中)。
+        """
+        if not extracted.semantic_graph:
+            return
+        try:
+            from ..config import get_soul_config
+            cfg = get_soul_config()
+            if not cfg.graphiti_enabled:
+                return
+
+            from ..adapters.graphiti_adapter import get_graphiti_adapter
+            adapter = get_graphiti_adapter()
+            graph = extracted.semantic_graph
+            nodes = graph.get("nodes", [])[:3]
+            edges = graph.get("edges", [])[:2]
+            await adapter.write_graph_extraction(user_id, nodes, edges)
+        except Exception as e:
+            logger.debug(f"[Soul] Graphiti write failed (non-fatal): {e}")
+
+    async def _write_mem0(self, user_input: str, ai_response: str, user_id: str):
+        """SOTA: 写入 Mem0 对话记忆
+
+        Mem0 内部自动提取实体和事实, 无需手动处理。
+        敏感内容过滤在 Mem0Adapter 内部执行。
+        """
+        try:
+            from ..config import get_soul_config
+            cfg = get_soul_config()
+            if not cfg.mem0_enabled:
+                return
+
+            from ..adapters.mem0_adapter import get_mem0_adapter
+            adapter = get_mem0_adapter()
+            await adapter.write_conversation(user_input, ai_response, user_id)
+        except Exception as e:
+            logger.debug(f"[Soul] Mem0 write failed (non-fatal): {e}")
 
     async def _detect_breakthrough(self, extracted, user_id: str):
         """检测突破性事件 — 高情感强度 + 高重要度 = 关系里程碑"""

@@ -37,8 +37,28 @@ class SoulConfig:
         self.decay_flashbulb_intensity = float(os.environ.get("SOUL_FLASHBULB_INTENSITY", "0.8"))
         self.consolidation_batch_size = int(os.environ.get("SOUL_CONSOLIDATION_BATCH_SIZE", "100"))
 
+        # SOTA: Graphiti 时序知识图谱
+        self.graphiti_enabled = os.environ.get("GRAPHITI_ENABLED", "false").lower() in ("true", "1", "yes")
+        self.graphiti_url = os.environ.get("GRAPHITI_URL", "bolt://localhost:7687")
+        self.graphiti_timeout_ms = int(os.environ.get("GRAPHITI_TIMEOUT_MS", "200"))
+
+        # SOTA: Mem0 语义记忆
+        self.mem0_enabled = os.environ.get("MEM0_ENABLED", "false").lower() in ("true", "1", "yes")
+        self.mem0_api_url = os.environ.get("MEM0_API_URL", "http://localhost:8050")
+        self.mem0_timeout_ms = int(os.environ.get("MEM0_TIMEOUT_MS", "300"))
+
+        # SOTA: 召回扩展
+        self.recall_timeout_ms_extended = int(os.environ.get("SOUL_RECALL_TIMEOUT_MS", "600"))  # 12 路需更多时间
+        self.enable_port_registry = os.environ.get("SOUL_PORT_REGISTRY", "false").lower() in ("true", "1", "yes")
+
         if self.enabled:
-            logger.info(f"[Soul] 灵魂系统已启用 (MongoDB: {self.mongo_url}/{self.mongo_database})")
+            extras = []
+            if self.graphiti_enabled:
+                extras.append(f"Graphiti: {self.graphiti_url}")
+            if self.mem0_enabled:
+                extras.append(f"Mem0: {self.mem0_api_url}")
+            extra_str = f", {', '.join(extras)}" if extras else ""
+            logger.info(f"[Soul] 灵魂系统已启用 (MongoDB: {self.mongo_url}/{self.mongo_database}{extra_str})")
         else:
             logger.info("[Soul] 灵魂系统未启用 (SOUL_ENABLED != true)")
 

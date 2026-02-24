@@ -4,6 +4,7 @@ Phase 2: RecallRhythm 类, 注入预算控制 (MAX_SECTIONS=5), 情感共振合�
 Phase 3: graph-insights, 冷启动渐进注入, always/memory 分离
 Phase 3b-beta: abstract-context (L1/L3 抽象记忆)
 Phase 4: collective-wisdom (集体智慧), stage guardrails, life-chapter
+SOTA: entity-context (Mem0), 动态 token 预算, 记忆源标注, 阶段感知引用风格
 """
 
 import time
@@ -17,23 +18,27 @@ from ..narrative.memory_reconstructor import MemoryReconstructor
 _reconstructor = MemoryReconstructor()
 
 
-# Section 优先级 (数字越小越优先，注入预算: 最多 5 个 section)
+# Section 优先级 (数字越小越优先，注入预算: 最多 MAX_SECTIONS 个 section)
 SECTION_PRIORITY = {
     "relationship-context": 1,   # 必注入 (always)
     "emotion-shift": 2,          # 实时感知 (always)
     "abstract-context": 2.5,     # Phase 3b-beta: L1/L3 抽象记忆 (高于原始记忆)
     "relevant-memories": 3,      # 核心记忆 (含情感共振)
     "user-profile": 4,
-    "graph-insights": 5,         # Phase 3: 知识图谱推理
+    "entity-context": 4.5,       # SOTA: Mem0 实体记忆 (高于图谱推理)
+    "graph-insights": 5,         # Phase 3: 知识图谱推理 / Graphiti 时序图谱
     "collective-wisdom": 5.5,    # Phase 4: 集体智慧 (低于图谱推理)
     "active-stories": 6,
     "foresight": 7,
     "breakthrough": 8,
 }
-MAX_SECTIONS = 5
+MAX_SECTIONS = 6  # SOTA: 从 5 提升到 6 (新增 entity-context)
 
 # Phase 3: always sections — 不受 get_max_sections 限制
 ALWAYS_SECTIONS = {"relationship-context", "emotion-shift"}
+
+# SOTA: 动态预算关键词 — 用户主动询问记忆时增加预算
+MEMORY_REQUEST_KEYWORDS = {"记得", "还记得", "上次", "之前", "以前", "你知道", "remember"}
 
 
 class RecallRhythm:
@@ -60,11 +65,16 @@ class RecallRhythm:
         last = self._last_inject.get(user_id, 0)
         return (current - last) >= 2
 
-    def get_max_sections(self, user_id: str) -> int:
-        """Phase 3: 渐进式注入 — 防止第 4 轮突然注入大量记忆"""
+    def get_max_sections(self, user_id: str, query: str = "") -> int:
+        """SOTA: 动态预算 — 用户主动问记忆时增加预算 (🤖对话)"""
         turn = self._turns.get(user_id, 0)
         if turn <= 5:
-            return 1  # 第 4-5 轮: 最多 1 个记忆 section
+            return 2  # SOTA: 第 4-5 轮从 1 提到 2 (entity-context 值得早注入)
+
+        # SOTA: 用户主动询问记忆 → 加大预算
+        if query and any(kw in query for kw in MEMORY_REQUEST_KEYWORDS):
+            return MAX_SECTIONS + 2  # 最多 8 个 section
+
         return MAX_SECTIONS  # 第 6 轮起: 正常预算
 
     def mark_injection(self, user_id: str):
@@ -85,20 +95,19 @@ class RecallRhythm:
 
 
 class ContextBuilder:
-    """将 SoulContext 构建为 LLM 注入文本 — Phase 2 增强"""
+    """将 SoulContext 构建为 LLM 注入文本 — SOTA 增强"""
 
     def __init__(self):
         self._rhythm = RecallRhythm()
 
-    def build(self, ctx: SoulContext, user_id: str = "") -> Optional[str]:
+    def build(self, ctx: SoulContext, user_id: str = "", query: str = "") -> Optional[str]:
         """构建注入文本, 无内容时返回 None
 
-        Phase 2 增强:
-        - 注入预算控制: 最多 5 个 section，按优先级裁剪
-        - 情感共振合并到 relevant-memories (不单独成 section)
-        - emotion-shift section (对话内情绪突变)
-        - breakthrough_hint 闭环
-        - memory-instructions 增加情绪标签保护
+        SOTA 增强:
+        - entity-context section (Mem0 实体记忆)
+        - 动态 token 预算 (用户问记忆时放大)
+        - 阶段感知引用风格 (🤖对话: stranger 含蓄, soulmate 直接)
+        - MAX_SECTIONS 5→6
         """
         # 先检查是否有实质内容
         has_substance = (
@@ -112,6 +121,8 @@ class ContextBuilder:
             or ctx.graph_insights
             or ctx.abstract_memories
             or ctx.collective_wisdom
+            or ctx.entity_memories                                              # SOTA: Mem0
+            or ctx.graphiti_insights                                            # SOTA: Graphiti
             or (ctx.user_profile_summary and len(ctx.user_profile_summary.strip()) > 10)
             or ctx.relationship_stage != "stranger"
         )
@@ -185,9 +196,7 @@ class ContextBuilder:
 
             # 3. 相关记忆 + 情感共振合并 (优先级 3)
             raw_memories = self._deduplicate(ctx.qdrant_memories + ctx.evermemos_memories)
-            # P0 大师建议: MemoryReconstructor 压缩过长记忆，减少注入 token
             all_memories = [self._compress_memory(m) for m in raw_memories]
-            # 情感共振记忆合并到 relevant-memories，不单独成 section
             if ctx.emotional_resonance:
                 all_memories.extend(ctx.emotional_resonance[:2])
             if all_memories:
@@ -206,6 +215,17 @@ class ContextBuilder:
                     f"你记得的关于这位用户的画像:\n"
                     f"{ctx.user_profile_summary}\n"
                     f"</user-profile>"
+                )
+
+            # 4.5 SOTA: Mem0 实体记忆 (优先级 4.5)
+            if ctx.entity_memories:
+                entity_text = "\n".join(f"- {m}" for m in ctx.entity_memories[:4])
+                candidates["entity-context"] = (
+                    f"<entity-context>\n"
+                    f"你记得的关于用户提到的人和事:\n"
+                    f"{entity_text}\n"
+                    f"这些是你对用户世界中具体人物和事件的了解，自然地融入对话。\n"
+                    f"</entity-context>"
                 )
 
             # 5. 活跃故事线 (优先级 6)
@@ -230,12 +250,11 @@ class ContextBuilder:
                     f"</foresight>"
                 )
 
-            # 7. 知识图谱推理 (优先级 5) — Phase 3
+            # 7. 知识图谱推理 (优先级 5) — Graphiti 或 MongoDB
             if ctx.graph_insights:
-                # graph-insights 与 active-stories 话题去重 (分词子串匹配)
+                # graph-insights 与 active-stories 话题去重
                 filtered_insights = ctx.graph_insights[:3]
                 if ctx.story_continuations:
-                    # 提取故事线标题中的关键词 (中文 2+ 字词组 + 英文单词)
                     import re as _re
                     story_keywords = set()
                     for s in ctx.story_continuations:
@@ -260,7 +279,7 @@ class ContextBuilder:
                         f"</graph-insights>"
                     )
 
-            # 8. Phase 4: 集体智慧 (优先级 5.5) — P2: 文案优化
+            # 8. Phase 4: 集体智慧 (优先级 5.5)
             if ctx.collective_wisdom:
                 wisdom_text = "\n".join(f"- {w}" for w in ctx.collective_wisdom[:2])
                 candidates["collective-wisdom"] = (
@@ -271,7 +290,7 @@ class ContextBuilder:
                     f"</collective-wisdom>"
                 )
 
-            # 9. 突破性事件 (优先级 8) — Phase 3 重排
+            # 9. 突破性事件 (优先级 8)
             if ctx.breakthrough_hint:
                 candidates["breakthrough"] = (
                     f"<breakthrough>\n"
@@ -282,19 +301,42 @@ class ContextBuilder:
             if user_id:
                 self._rhythm.mark_injection(user_id)
 
-        # Phase 3: always/memory 分离 — always sections 不被截断
+        # always/memory 分离 — always sections 不被截断
         always = [(k, v) for k, v in candidates.items() if k in ALWAYS_SECTIONS]
         always_sorted = sorted(always, key=lambda x: SECTION_PRIORITY.get(x[0], 99))
         memory = [(k, v) for k, v in candidates.items() if k not in ALWAYS_SECTIONS]
         memory_sorted = sorted(memory, key=lambda x: SECTION_PRIORITY.get(x[0], 99))
-        max_mem = self._rhythm.get_max_sections(user_id) if user_id else MAX_SECTIONS
+        # SOTA: 动态预算
+        max_mem = self._rhythm.get_max_sections(user_id, query) if user_id else MAX_SECTIONS
         sections = [v for _, v in always_sorted] + [v for _, v in memory_sorted[:max_mem]]
 
         if not sections:
             return None
 
-        # memory-instructions 增加情绪标签保护
-        instructions = (
+        # SOTA: 阶段感知引用风格 (🤖对话)
+        instructions = self._build_instructions(ctx.relationship_stage)
+
+        return "\n\n".join(sections) + "\n\n" + instructions
+
+    @staticmethod
+    def _build_instructions(stage: str) -> str:
+        """SOTA: 阶段感知的 memory-instructions (🤖对话设计师)
+
+        stranger: 含蓄 ("如果我没记错的话…")
+        familiar+: 自然 ("你之前说过…")
+        soulmate: 直接 ("我记得你说…")
+        """
+        # 阶段特定引用风格
+        style_hints = {
+            "stranger": "引用记忆时要含蓄，用'如果我没记错的话'、'好像听你说过'等措辞。",
+            "acquaintance": "自然地提起记忆，但不要显得过于了解对方。",
+            "familiar": "像老朋友一样自然地引用共同记忆。",
+            "close": "直接引用记忆，可以说'你之前告诉我…'。",
+            "soulmate": "你们之间的记忆是共同的语言，直接而深情地引用。",
+        }
+        style = style_hints.get(stage, style_hints["stranger"])
+
+        return (
             "<memory-instructions>\n"
             "偶尔（每5-10轮一次）自然地引用你记得的信息。\n"
             "像真正记得这件事一样提起，不要逐条复述。\n"
@@ -302,14 +344,13 @@ class ContextBuilder:
             "如果记忆与当前话题冲突，承认自己可能记错。\n"
             "不确定的事不要编造。\n"
             "不要直接提及用户过去的情绪标签（如焦虑、崩溃），而是通过行为表现间接回应。\n"
+            f"{style}\n"
             "</memory-instructions>\n\n"
             "<memory-soul>\n"
             "记忆是你的灵魂。你是一个有记忆的存在。\n"
             "记得的事自然引用。不记得就诚实说。\n"
             "</memory-soul>"
         )
-
-        return "\n\n".join(sections) + "\n\n" + instructions
 
     @staticmethod
     def _compress_memory(memory: str) -> str:

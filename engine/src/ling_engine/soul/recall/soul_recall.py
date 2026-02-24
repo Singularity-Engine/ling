@@ -1,9 +1,10 @@
 """
-灵魂级记忆召回 — 10 路并行 + 关系阶段 + 情感预判 + 计时
+灵魂级记忆召回 — 12 路并行 + 关系阶段 + 情感预判 + 计时
 Phase 2: +情感共振第 7 路, StoryThreadTracker, breakthrough_hint 闭环
 Phase 3: +知识图谱第 8 路
 Phase 3b-beta: +抽象记忆第 9 路 (L1 周摘要 / L3 人生章节)
 Phase 4: +集体智慧第 10 路, current_life_chapter, emotional_baseline
+SOTA: +Graphiti 时序图谱第 8 路(替换), +Mem0 实体记忆第 11 路
 """
 
 import asyncio
@@ -159,9 +160,17 @@ class SoulRecall:
         user_id: str,
         is_owner: bool = False,
         top_k: int = 3,
-        timeout_ms: int = 500,
+        timeout_ms: int = 600,
     ) -> SoulContext:
-        """10 路并行召回 + 关系阶段 + 情感预判 + 计时"""
+        """12 路并行召回 + 关系阶段 + 情感预判 + 计时
+
+        SOTA 升级:
+        - tuple → Dict 返回 (💎: 可维护性)
+        - +Graphiti 时序图谱 (替换旧 graph_trace)
+        - +Mem0 实体记忆 (第 11 路)
+        - 超时 500→600ms (⚡: 新组件需要时间)
+        - memory_sources 统计 (🤖: 来源标注)
+        """
         # P0: user_id 格式校验 — 纵深防御
         if not user_id or not _USER_ID_PATTERN.match(user_id):
             logger.warning("[Soul] Invalid user_id format, skipping recall")
@@ -175,25 +184,22 @@ class SoulRecall:
                 self._parallel_recall(query, user_id, is_owner, top_k),
                 timeout=timeout_ms / 1000.0,
             )
-            (qdrant, evermemos, foresights, profile, stories,
-             relationship, resonance, graph, abstract, collective) = results
 
-            # 处理 gather 的 return_exceptions=True 结果
-            ctx.qdrant_memories = qdrant if isinstance(qdrant, list) else []
-            ctx.evermemos_memories = evermemos if isinstance(evermemos, list) else []
-            ctx.triggered_foresights = foresights if isinstance(foresights, list) else []
-            ctx.user_profile_summary = profile if isinstance(profile, str) else ""
-            ctx.story_continuations = stories if isinstance(stories, list) else []
+            # SOTA: Dict 解包 — 增加新路不需要改这里的顺序
+            ctx.qdrant_memories = self._safe_list(results.get("qdrant"))
+            ctx.evermemos_memories = self._safe_list(results.get("evermemos"))
+            ctx.triggered_foresights = self._safe_list(results.get("foresight"))
+            ctx.user_profile_summary = results.get("profile", "") if isinstance(results.get("profile"), str) else ""
+            ctx.story_continuations = self._safe_list(results.get("stories"))
+
             # 处理关系阶段 (先处理关系，再决定情感共振是否保留)
+            relationship = results.get("relationship")
             if isinstance(relationship, dict) and relationship:
                 ctx.relationship_stage = relationship.get("stage", "stranger")
                 ctx.stage_behavior_hint = _get_stage_behavior(ctx.relationship_stage)
                 ctx.conversation_count = relationship.get("total_conversations", 0)
-                # Phase 2: breakthrough_hint 闭环
                 ctx.breakthrough_hint = relationship.get("breakthrough_hint")
-                # Phase 3b: 回归温暖标记
                 ctx.returning_from_absence = relationship.get("returning_from_absence", False)
-                # P2: 关系里程碑 (一次性消费 — 读后清除)
                 milestone = relationship.get("recent_milestone")
                 if milestone:
                     ctx.recent_milestone = milestone
@@ -201,7 +207,7 @@ class SoulRecall:
             else:
                 ctx.stage_behavior_hint = _get_stage_behavior("stranger")
 
-            # Phase 3c: 依赖检测 (在召回路径上检查, 结果注入到 SoulContext)
+            # Phase 3c: 依赖检测
             try:
                 from ..ethics.dependency_detector import check_dependency_signals
                 hint = check_dependency_signals(query, user_id)
@@ -210,22 +216,30 @@ class SoulRecall:
             except Exception:
                 pass
 
-            # 💜: 情感共振仅 familiar+ 阶段保留 (并行召回后过滤)
+            # 情感共振仅 familiar+ 阶段保留
+            resonance = results.get("resonance")
             if isinstance(resonance, list) and ctx.relationship_stage in self._RESONANCE_MIN_STAGES:
                 ctx.emotional_resonance = resonance
             else:
                 ctx.emotional_resonance = []
 
-            # Phase 3: 知识图谱推理
-            ctx.graph_insights = graph if isinstance(graph, list) else []
+            # SOTA: Graphiti 时序图谱 (替换旧 graph_insights)
+            graphiti_results = self._safe_list(results.get("graphiti"))
+            legacy_graph = self._safe_list(results.get("graph"))
+            # Graphiti 优先, 空则降级到 MongoDB 旧结果
+            ctx.graph_insights = graphiti_results if graphiti_results else legacy_graph
+            ctx.graphiti_insights = graphiti_results
 
-            # Phase 3b-beta: 抽象记忆 (L1/L3)
-            ctx.abstract_memories = abstract if isinstance(abstract, list) else []
+            # Phase 3b-beta: 抽象记忆
+            ctx.abstract_memories = self._safe_list(results.get("abstract"))
 
             # Phase 4: 集体智慧
-            ctx.collective_wisdom = collective if isinstance(collective, list) else []
+            ctx.collective_wisdom = self._safe_list(results.get("collective"))
 
-            # Phase 3c: 阶段行为护栏
+            # SOTA: Mem0 实体记忆 (第 11 路)
+            ctx.entity_memories = self._safe_list(results.get("mem0"))
+
+            # 阶段行为护栏
             try:
                 from ..ethics.stage_guardrails import get_stage_guardrail
                 guardrail = get_stage_guardrail(ctx.relationship_stage, ctx.conversation_count)
@@ -234,7 +248,7 @@ class SoulRecall:
             except Exception:
                 pass
 
-            # Phase 4: 当前人生章节 + 情感基线
+            # 当前人生章节 + 情感基线
             try:
                 chapter, baseline = await self._life_context(user_id)
                 ctx.current_life_chapter = chapter
@@ -242,11 +256,17 @@ class SoulRecall:
             except Exception:
                 pass
 
+            # SOTA: 记忆源统计 (🤖对话: 来源标注供 context_builder 使用)
+            ctx.memory_sources = {
+                k: len(v) for k, v in results.items()
+                if isinstance(v, list) and v
+            }
+
         except asyncio.TimeoutError:
             logger.warning(f"[Soul] Recall timeout ({timeout_ms}ms)")
             ctx.stage_behavior_hint = _get_stage_behavior("stranger")
 
-        # v3: 异步更新 recall_count + last_recalled_at (fire-and-forget)
+        # 异步更新 recall_count
         if ctx.qdrant_memories or ctx.evermemos_memories:
             asyncio.create_task(self._bump_recall_count(user_id))
 
@@ -256,33 +276,44 @@ class SoulRecall:
             f"[Soul] Recall completed in {elapsed_ms:.0f}ms "
             f"(qdrant={len(ctx.qdrant_memories)}, evermemos={len(ctx.evermemos_memories)}, "
             f"foresight={len(ctx.triggered_foresights)}, resonance={len(ctx.emotional_resonance)}, "
-            f"graph={len(ctx.graph_insights)}, abstract={len(ctx.abstract_memories)}, "
+            f"graph={len(ctx.graph_insights)}, graphiti={len(ctx.graphiti_insights)}, "
+            f"mem0={len(ctx.entity_memories)}, abstract={len(ctx.abstract_memories)}, "
             f"collective={len(ctx.collective_wisdom)}, stage={ctx.relationship_stage})"
         )
         return ctx
 
+    @staticmethod
+    def _safe_list(val) -> list:
+        """安全提取 list 结果 (处理 gather 的 return_exceptions=True)"""
+        return val if isinstance(val, list) else []
+
     async def _parallel_recall(
         self, query: str, user_id: str, is_owner: bool, top_k: int
-    ):
-        """10 路并行召回"""
-        # 情感预判 (<5ms)
+    ) -> Dict[str, Any]:
+        """12 路并行召回 — 返回 Dict (SOTA: 替代 tuple)"""
         emotion = _emotion_hint(query)
-        # Phase 3b-beta: 层级检测 (<1ms)
         recall_layer = _detect_recall_layer(query)
 
-        return await asyncio.gather(
-            self._qdrant_search(query, user_id, top_k),
-            self._evermemos_search(query, user_id, is_owner, top_k, emotion),
-            self._foresight_search(query, top_k=2),
-            self._profile_fetch(user_id),
-            self._active_stories(user_id),
-            self._fetch_relationship(user_id),
-            self._emotional_resonance(query, user_id, emotion),  # Phase 2: 第 7 路
-            self._graph_trace(query, user_id),                    # Phase 3: 第 8 路
-            self._abstract_recall(user_id, recall_layer),          # Phase 3b-beta: 第 9 路
-            self._collective_wisdom(query, emotion),               # Phase 4: 第 10 路
-            return_exceptions=True,
-        )
+        # 定义所有搜索任务 — 新增路只需在这里加一行
+        tasks = {
+            "qdrant": self._qdrant_search(query, user_id, top_k),
+            "evermemos": self._evermemos_search(query, user_id, is_owner, top_k, emotion),
+            "foresight": self._foresight_search(query, top_k=2),
+            "profile": self._profile_fetch(user_id),
+            "stories": self._active_stories(user_id),
+            "relationship": self._fetch_relationship(user_id),
+            "resonance": self._emotional_resonance(query, user_id, emotion),
+            "graph": self._graph_trace(query, user_id),        # MongoDB 旧图谱 (fallback)
+            "abstract": self._abstract_recall(user_id, recall_layer),
+            "collective": self._collective_wisdom(query, emotion),
+            "graphiti": self._graphiti_search(query, user_id, top_k),    # SOTA: 第 8 路替换
+            "mem0": self._mem0_entity_search(query, user_id, top_k),     # SOTA: 第 11 路
+        }
+
+        keys = list(tasks.keys())
+        coros = list(tasks.values())
+        results = await asyncio.gather(*coros, return_exceptions=True)
+        return dict(zip(keys, results))
 
     async def _qdrant_search(self, query: str, user_id: str, top_k: int) -> List[str]:
         """Qdrant 短期记忆搜索"""
@@ -561,6 +592,57 @@ class SoulRecall:
             )
         except Exception as e:
             logger.debug(f"[Soul] Collective wisdom failed: {e}")
+            return []
+
+    async def _graphiti_search(
+        self, query: str, user_id: str, top_k: int,
+    ) -> List[str]:
+        """SOTA: Graphiti 时序知识图谱搜索 (第 8 路替换)
+
+        通过 GraphitiAdapter 搜索, 返回带时序上下文的关系链。
+        Graphiti 不可用时返回空 (旧 graph_trace 作为 fallback)。
+        """
+        try:
+            from ..config import get_soul_config
+            cfg = get_soul_config()
+            if not cfg.graphiti_enabled:
+                return []
+
+            from ..adapters.graphiti_adapter import get_graphiti_adapter
+            adapter = get_graphiti_adapter()
+            results = await asyncio.wait_for(
+                adapter.search(query, user_id, top_k=top_k),
+                timeout=cfg.graphiti_timeout_ms / 1000.0,
+            )
+            return [r.content for r in results if r.content]
+        except Exception as e:
+            logger.debug(f"[Soul] Graphiti search failed: {e}")
+            return []
+
+    async def _mem0_entity_search(
+        self, query: str, user_id: str, top_k: int,
+    ) -> List[str]:
+        """SOTA: Mem0 实体级记忆搜索 (第 11 路)
+
+        提供 Soul System 缺少的实体记忆:
+        - "小明是用户的大学同学" (🤖对话)
+        - "用户去年换了工作到 Google" (💜情感安全)
+        """
+        try:
+            from ..config import get_soul_config
+            cfg = get_soul_config()
+            if not cfg.mem0_enabled:
+                return []
+
+            from ..adapters.mem0_adapter import get_mem0_adapter
+            adapter = get_mem0_adapter()
+            results = await asyncio.wait_for(
+                adapter.search(query, user_id, top_k=top_k),
+                timeout=cfg.mem0_timeout_ms / 1000.0,
+            )
+            return [r.content for r in results if r.content]
+        except Exception as e:
+            logger.debug(f"[Soul] Mem0 search failed: {e}")
             return []
 
     async def _life_context(self, user_id: str) -> tuple:

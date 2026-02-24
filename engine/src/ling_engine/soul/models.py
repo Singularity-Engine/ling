@@ -156,3 +156,7 @@ class SoulContext(BaseModel):
     emotional_baseline: str = "neutral"                                   # 情感基线
     # P2: 关系里程碑
     recent_milestone: Optional[str] = None                                # 阶段升级提示
+    # SOTA: Graphiti 时序图谱 + Mem0 实体记忆
+    graphiti_insights: List[str] = Field(default_factory=list)            # Graphiti 时序关系
+    entity_memories: List[str] = Field(default_factory=list)              # Mem0 实体级记忆
+    memory_sources: Dict[str, int] = Field(default_factory=dict)          # 各路召回数量统计
