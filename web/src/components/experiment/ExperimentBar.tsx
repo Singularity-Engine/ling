@@ -113,9 +113,11 @@ const S_PROGRESS_BAR: CSSProperties = {
 
 const S_PROGRESS_FILL_BASE: CSSProperties = {
   height: "100%",
+  width: "100%",
   background: "linear-gradient(90deg, var(--ling-purple-light), var(--ling-purple-lighter))",
   borderRadius: 2,
-  transition: "width 1s ease",
+  transformOrigin: "left",
+  transition: "transform 1s ease",
 };
 
 const S_REVENUE: CSSProperties = {
@@ -242,7 +244,7 @@ export const ExperimentBar = memo(function ExperimentBar() {
 
   const progressFillStyle = useMemo<CSSProperties>(() => ({
     ...S_PROGRESS_FILL_BASE,
-    width: `${Math.max(revPct, 2)}%`,
+    transform: `scaleX(${Math.max(revPct, 2) / 100})`,
   }), [revPct]);
 
   // Minimal bar for new users — just Day badge

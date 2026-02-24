@@ -1308,6 +1308,9 @@ canvas {
 /* ── ExperimentBar: link hover ── */
 .experiment-bar-link:hover { opacity: 1 !important; }
 
+/* ── WebSocketStatus: hover feedback when clickable ── */
+.ling-ws-status[data-clickable]:hover { opacity: 0.8; }
+
 /* ── ShortcutsOverlay: fade/slide ── */
 @keyframes shortcutsFadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes shortcutsSlideIn {
