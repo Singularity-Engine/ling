@@ -55,6 +55,7 @@ export const TypingIndicator = memo(({ fadeOut }: TypingIndicatorProps) => {
   return (
     <div
       role="status"
+      aria-atomic="true"
       aria-label={t("chat.aiThinking")}
       style={fadeOut ? S_WRAP_OUT : S_WRAP_IN}
     >

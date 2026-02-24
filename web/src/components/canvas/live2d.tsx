@@ -153,6 +153,7 @@ export const Live2D = memo(
           id="canvas"
           ref={canvasRef}
           style={S_CANVAS[varKey]}
+          aria-hidden="true"
         />
         {showOverlay && (
           <div role="status" aria-live="polite" style={S_OVERLAY}>
@@ -160,7 +161,6 @@ export const Live2D = memo(
               <>
                 <div style={S_SPINNER} />
                 <span style={S_LOADING_TEXT}>{t('loading.awakeningLing')}</span>
-                <style>{`@keyframes live2d-spin{to{transform:rotate(360deg)}}`}</style>
               </>
             ) : (
               <>

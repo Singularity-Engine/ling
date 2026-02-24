@@ -247,9 +247,9 @@ const StatusIndicator = memo(({ status, accent }: { status: ToolStatus; accent: 
     );
   }
   if (status === "completed") {
-    return <span style={S_SI_DONE} aria-label={i18next.t("chat.toolCompleted")}>✓</span>;
+    return <span style={S_SI_DONE} role="status" aria-label={i18next.t("chat.toolCompleted")}>✓</span>;
   }
-  return <span style={S_SI_ERROR} aria-label={i18next.t("chat.toolError")}>✕</span>;
+  return <span style={S_SI_ERROR} role="status" aria-label={i18next.t("chat.toolError")}>✕</span>;
 });
 StatusIndicator.displayName = "StatusIndicator";
 

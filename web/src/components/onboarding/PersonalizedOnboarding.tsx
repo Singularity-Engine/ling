@@ -6,6 +6,7 @@
  */
 
 import { useState, useCallback, useEffect, useRef, useMemo, type CSSProperties } from "react";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import {
@@ -70,13 +71,16 @@ const S_OVERLAY_EXITING: CSSProperties = { ...S_OVERLAY_BASE, opacity: 0 };
 const S_DOTS_ROW: CSSProperties = { display: "flex", gap: "var(--ling-space-2)", marginBottom: "var(--ling-space-8)" };
 
 const S_DOT_BASE: CSSProperties = {
+  width: "var(--ling-space-6)",
   height: "var(--ling-space-2)",
   borderRadius: "var(--ling-space-1)",
-  transition: `width var(--ling-duration-normal), background-color var(--ling-duration-normal)`,
+  transformOrigin: "center",
+  willChange: "transform",
+  transition: `transform var(--ling-duration-normal), background-color var(--ling-duration-normal)`,
 };
-const S_DOT_ACTIVE: CSSProperties = { ...S_DOT_BASE, width: "var(--ling-space-6)", background: "var(--ling-purple)" };
-const S_DOT_DONE: CSSProperties = { ...S_DOT_BASE, width: "var(--ling-space-2)", background: "var(--ling-purple-deep)" };
-const S_DOT_PENDING: CSSProperties = { ...S_DOT_BASE, width: "var(--ling-space-2)", background: "var(--ling-overlay-12)" };
+const S_DOT_ACTIVE: CSSProperties = { ...S_DOT_BASE, transform: "scaleX(1)", background: "var(--ling-purple)" };
+const S_DOT_DONE: CSSProperties = { ...S_DOT_BASE, transform: "scaleX(0.333)", background: "var(--ling-purple-deep)" };
+const S_DOT_PENDING: CSSProperties = { ...S_DOT_BASE, transform: "scaleX(0.333)", background: "var(--ling-overlay-12)" };
 
 const S_STEP_CONTENT: CSSProperties = { maxWidth: "480px", width: "100%", textAlign: "center" };
 
@@ -269,6 +273,15 @@ export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingPro
   const [exiting, setExiting] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Focus-trap: keep Tab/Shift+Tab within the dialog
+  useFocusTrap(dialogRef, !exiting);
+
+  // Move focus into the dialog when it opens
+  useEffect(() => {
+    requestAnimationFrame(() => dialogRef.current?.focus());
+  }, []);
 
   // Timer ref for the 400ms exit animation delay — cleared on unmount
   // to prevent onComplete firing after the component is torn down.
@@ -358,7 +371,7 @@ export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingPro
   const TOTAL_STEPS = 4;
 
   return (
-    <div style={exiting ? S_OVERLAY_EXITING : S_OVERLAY_VISIBLE} role="dialog" aria-modal="true" aria-label={t("onboarding.welcome")}>
+    <div ref={dialogRef} tabIndex={-1} style={exiting ? S_OVERLAY_EXITING : S_OVERLAY_VISIBLE} role="dialog" aria-modal="true" aria-label={t("onboarding.welcome")}>
       {/* Progress dots */}
       <div style={S_DOTS_ROW} role="group" aria-label={t("onboarding.stepProgress", { current: String(step + 1), total: String(TOTAL_STEPS) })}>
         {Array.from({ length: TOTAL_STEPS }).map((_, i) => (

@@ -1451,7 +1451,7 @@ canvas {
 .ling-affinity-btn:hover { background: rgba(0, 0, 0, 0.45) !important; border-color: var(--ling-accent) !important; }
 .ling-affinity-btn:active { background: rgba(0, 0, 0, 0.55) !important; transform: scale(0.95); }
 .ling-affinity-btn:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
-.ling-affinity-btn:hover .ling-affinity-value { max-width: 40px !important; opacity: 1 !important; }
+.ling-affinity-btn:hover .ling-affinity-value { transform: scaleX(1) !important; opacity: 1 !important; }
 
 /* ── Onboarding: button & card hover/active feedback ── */
 .ling-ob-skip:hover { color: rgba(255,255,255,0.65) !important; border-color: rgba(255,255,255,0.2) !important; }
@@ -1544,6 +1544,9 @@ canvas {
 .ling-swipe-pill[data-visible="true"] {
   opacity: 1;
 }
+
+/* === Live2D loading spinner === */
+@keyframes live2d-spin { to { transform: rotate(360deg); } }
 
 /* === Reduced motion 无障碍 === */
 @media (prefers-reduced-motion: reduce) {

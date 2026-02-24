@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { memo, useState, useCallback, useMemo, type CSSProperties } from "react";
+import { memo, useState, useCallback, useMemo, useRef, useEffect, type CSSProperties } from "react";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useAffinityMeta } from "@/context/AffinityContext";
 import { AFFINITY_CRYSTAL_THEMES, CATEGORY_COLORS, DEFAULT_LEVEL, type AffinityCrystalTheme } from "@/config/affinity-palette";
 // @property rules + keyframes moved to static index.css — no runtime injection needed.
@@ -142,10 +143,19 @@ interface InfoCrystalProps {
 export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) => {
   const [expanded, setExpanded] = useState(false);
   const { t } = useTranslation();
+  const expandedRef_ = useRef<HTMLDivElement>(null);
   const [hovered, setHovered] = useState(false);
   const [pressed, setPressed] = useState(false);
   const [entered, setEntered] = useState(false);
   const { level } = useAffinityMeta();
+
+  // Focus-trap: keep Tab/Shift+Tab within the expanded dialog
+  useFocusTrap(expandedRef_, expanded);
+
+  // Move focus into the dialog when expanded
+  useEffect(() => {
+    if (expanded) requestAnimationFrame(() => expandedRef_.current?.focus());
+  }, [expanded]);
 
   const theme = AFFINITY_CRYSTAL_THEMES[level] || DEFAULT_THEME;
 
@@ -206,13 +216,14 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
         <div style={S_OVERLAY} onClick={handleOverlayClick} onKeyDown={onOverlayKeyDown} />
         {/* Expanded card */}
         <div
+          ref={expandedRef_}
           role="dialog"
           aria-modal="true"
           aria-label={tool.name}
           style={getExpandCardStyle(color, theme.glow)}
           onClick={handleClick}
           onKeyDown={onKeyDown}
-          tabIndex={0}
+          tabIndex={-1}
         >
           {/* Header */}
           <div style={S_EXP_HEADER}>

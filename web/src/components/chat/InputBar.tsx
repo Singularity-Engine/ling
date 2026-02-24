@@ -153,12 +153,19 @@ export const InputBar = memo(() => {
   const sentWhileBusyRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  /** Resize textarea to fit content (max 96px). Shared by input, fill, and send-fail handlers. */
+  /** Resize textarea to fit content (max 96px). Shared by input, fill, and send-fail handlers.
+   *  Wrapped in rAF to coalesce rapid input events and avoid forced synchronous reflow per keystroke. */
+  const resizeRafRef = useRef(0);
   const resizeTextarea = useCallback((el: HTMLTextAreaElement | null) => {
     if (!el) return;
-    el.style.height = "auto";
-    el.style.height = Math.min(el.scrollHeight, 96) + "px";
+    cancelAnimationFrame(resizeRafRef.current);
+    resizeRafRef.current = requestAnimationFrame(() => {
+      el.style.height = "auto";
+      el.style.height = Math.min(el.scrollHeight, 96) + "px";
+    });
   }, []);
+  // Cleanup pending rAF on unmount
+  useEffect(() => () => { cancelAnimationFrame(resizeRafRef.current); }, []);
   const { wsState } = useWebSocketState();
   const { sendMessage } = useWebSocketActions();
   const { appendHumanMessage, popLastHumanMessage } = useChatMessagesActions();

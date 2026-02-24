@@ -39,9 +39,12 @@ const S_AFFINITY_VALUE_HIDDEN: CSSProperties = {
   fontFamily: "monospace",
   fontWeight: 500,
   overflow: "hidden",
-  maxWidth: "0px",
+  transform: "scaleX(0)",
+  transformOrigin: "left",
   opacity: 0,
-  transition: "max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+  width: "40px",
+  willChange: "transform, opacity",
+  transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
   whiteSpace: "nowrap",
 };
 
@@ -305,7 +308,7 @@ export const AffinityBadge = memo(() => {
                   {levelInfo.current.min}–{levelInfo.current.max === 101 ? 100 : levelInfo.current.max}
                 </span>
               </div>
-              <div style={S_PROGRESS_TRACK} role="progressbar" aria-valuenow={Math.round(levelInfo.progressInLevel)} aria-valuemin={0} aria-valuemax={100}>
+              <div style={S_PROGRESS_TRACK} role="progressbar" aria-valuenow={Math.round(levelInfo.progressInLevel)} aria-valuemin={0} aria-valuemax={100} aria-label={t("affinity.currentLevel")}>
                 <div style={progressFillStyle} />
               </div>
             </div>

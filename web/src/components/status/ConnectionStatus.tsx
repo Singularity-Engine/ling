@@ -207,9 +207,9 @@ export const ConnectionStatus = memo(() => {
       onClick={isClosed ? reconnect : undefined}
       style={containerStyle}
       className={isClosed ? "ling-conn-closed" : undefined}
-      role="status"
-      aria-live="polite"
-      aria-label={label}
+      {...(isClosed
+        ? { "aria-label": label }
+        : { role: "status" as const, "aria-live": "polite" as const, "aria-label": label })}
     >
       {/* Status dot */}
       <div style={dotStyle} aria-hidden="true" />

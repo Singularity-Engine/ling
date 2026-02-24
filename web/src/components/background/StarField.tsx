@@ -290,7 +290,7 @@ export const StarField = memo(() => {
   }, []);
 
   return (
-    <canvas ref={canvasRef} style={S_CANVAS} />
+    <canvas ref={canvasRef} style={S_CANVAS} aria-hidden="true" />
   );
 });
 

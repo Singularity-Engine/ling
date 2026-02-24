@@ -434,7 +434,7 @@ export const ChatArea = memo(({ onCollapse }: ChatAreaProps) => {
     >
       {/* Swipe pill indicator */}
       {showPill && (
-        <div className="ling-swipe-pill" role="button" aria-label={t("ui.collapseSwipe", "Collapse chat panel")} tabIndex={-1} />
+        <div className="ling-swipe-pill" aria-hidden="true" />
       )}
       {(isEmpty || emptyExiting) && (
         <div style={emptyExiting ? S_EMPTY_WRAP_EXIT : S_EMPTY_WRAP}>
