@@ -11,6 +11,7 @@ import type { Message } from "@/services/websocket-service";
 import { useAiStateRead } from "@/context/ai-state-context";
 import { useWebSocketState, useWebSocketActions } from "@/context/websocket-context";
 import { useChatScroll } from "@/hooks/use-chat-scroll";
+import { useSwipeCollapse } from "@/hooks/use-swipe-collapse";
 
 // Touch-only device detection (no hover capability = phone/tablet)
 const isTouchDevice =
@@ -196,7 +197,12 @@ const S_KEYBOARD_HINT: CSSProperties = {
 
 // ─── ChatArea ───
 
-export const ChatArea = memo(() => {
+interface ChatAreaProps {
+  /** Mobile only: callback to collapse the chat panel via swipe-down gesture */
+  onCollapse?: () => void;
+}
+
+export const ChatArea = memo(({ onCollapse }: ChatAreaProps) => {
   const { messages } = useChatMessagesState();
   const { appendHumanMessage } = useChatMessagesActions();
   const { getFullResponse } = useStreamingRef();
@@ -211,8 +217,15 @@ export const ChatArea = memo(() => {
     scrollToBottom,
   } = useChatScroll(messages, getFullResponse);
 
+  // Swipe-to-collapse gesture (mobile only)
+  const collapseNoop = useCallback(() => {}, []);
+  const { showPill, dragOffset, isDragging, handlers: swipeHandlers } = useSwipeCollapse({
+    scrollRef,
+    onCollapse: onCollapse ?? collapseNoop,
+    enabled: !!onCollapse && isTouchDevice,
+  });
+
   // Track empty-state exit animation: keep showing for 350ms with fade-out
-  const [emptyExiting, setEmptyExiting] = useState(false);
   const prevEmptyRef = useRef(true);
 
   // true during the render immediately after streaming ends — lets us skip
@@ -398,8 +411,13 @@ export const ChatArea = memo(() => {
       role="log"
       aria-label={t("ui.chatMessages")}
       aria-live="polite"
-      style={S_CONTAINER}
+      style={isDragging ? { ...S_CONTAINER, transform: `translateY(${dragOffset}px)` } : dragOffset === 0 ? S_CONTAINER : { ...S_CONTAINER, transform: "translateY(0)", transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)" }}
+      {...swipeHandlers}
     >
+      {/* Swipe pill indicator */}
+      {showPill && (
+        <div className="ling-swipe-pill" role="button" aria-label={t("ui.collapseSwipe", "Collapse chat panel")} tabIndex={-1} />
+      )}
       {(isEmpty || emptyExiting) && (
         <div style={emptyExiting ? S_EMPTY_WRAP_EXIT : S_EMPTY_WRAP}>
           <span style={S_EMPTY_GLYPH}>{t("loading.glyph")}</span>

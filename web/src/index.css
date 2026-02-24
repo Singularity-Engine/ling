@@ -134,6 +134,67 @@
   --ling-tool-code: #10b981;
   --ling-tool-code-bg: rgba(16, 185, 129, 0.08);
   --ling-tool-code-border: rgba(16, 185, 129, 0.2);
+
+  /* ── Design Token: Spacing Scale (4px base) ── */
+  --ling-space-1: 4px;
+  --ling-space-2: 8px;
+  --ling-space-3: 12px;
+  --ling-space-4: 16px;
+  --ling-space-5: 20px;
+  --ling-space-6: 24px;
+  --ling-space-8: 32px;
+  --ling-space-10: 40px;
+
+  /* ── Design Token: Font Size Scale ── */
+  --ling-font-xs: 11px;
+  --ling-font-sm: 12px;
+  --ling-font-md: 14px;
+  --ling-font-lg: 16px;
+  --ling-font-xl: 20px;
+  --ling-font-2xl: 24px;
+  --ling-font-display: 36px;
+
+  /* ── Design Token: Font Weight ── */
+  --ling-weight-normal: 400;
+  --ling-weight-medium: 500;
+  --ling-weight-semibold: 600;
+  --ling-weight-bold: 700;
+
+  /* ── Design Token: Border Radius (柔圆, 遵循调性宪法) ── */
+  --ling-radius-sm: 6px;
+  --ling-radius-md: 12px;
+  --ling-radius-lg: 16px;
+  --ling-radius-xl: 20px;
+  --ling-radius-full: 9999px;
+
+  /* ── Design Token: Shadow (微光风格) ── */
+  --ling-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --ling-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+  --ling-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --ling-shadow-glow: 0 0 20px var(--ling-purple-20);
+
+  /* ── Design Token: Motion (呼吸感曲线) ── */
+  --ling-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ling-ease-enter: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ling-ease-exit: cubic-bezier(0.4, 0.0, 1.0, 1.0);
+  --ling-duration-fast: 150ms;
+  --ling-duration-normal: 300ms;
+  --ling-duration-slow: 500ms;
+
+  /* ── Design Token: Warm Accent (设计调性宪法: 温暖) ── */
+  --ling-warm-accent: #f5c77e;
+  --ling-warm-soft: rgba(245, 199, 126, 0.15);
+  /* 候选2: --ling-warm-accent-alt1: #e8a87c (peach) */
+  /* 候选3: --ling-warm-accent-alt2: #f0c9a0 (soft amber) */
+
+  /* ── Design Token: Split Layout ── */
+  --ling-split-left-min: 360px;
+  --ling-split-left-max: 500px;
+  --ling-split-left-default: 420px;
+  --ling-split-divider: 4px;
+
+  /* ── Design Token: Border ── */
+  --ling-border: rgba(255, 255, 255, 0.08);
 }
 
 /* === 亮色主题变量 === */
@@ -254,6 +315,12 @@
   --ling-tool-code: #059669;
   --ling-tool-code-bg: rgba(5, 150, 105, 0.06);
   --ling-tool-code-border: rgba(5, 150, 105, 0.15);
+
+  /* Design Token overrides for light theme */
+  --ling-shadow-glow: 0 0 20px rgba(124, 58, 237, 0.12);
+  --ling-warm-accent: #d97706;
+  --ling-warm-soft: rgba(217, 119, 6, 0.1);
+  --ling-border: rgba(0, 0, 0, 0.1);
 }
 
 /* === 全局基础 === */
@@ -683,6 +750,10 @@ input::placeholder, textarea::placeholder {
 }
 
 /* === 聚焦环 === */
+/* Suppress default focus ring for mouse/touch users; keyboard-only gets focus-visible */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
 *:focus-visible {
   outline: 2px solid var(--ling-purple-50);
   outline-offset: 2px;
@@ -720,6 +791,28 @@ canvas {
   /* 代码块限高——移动端避免出现过高的滚动区 */
   .md-content .code-block-wrap pre {
     max-height: 350px;
+  }
+
+  /* 触摸目标优化: 复制按钮最小 44×44px */
+  .chat-copy-btn {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+  .code-block-copy {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  /* 消息气泡间距增加到 12px */
+  .chat-msg-item {
+    margin-bottom: 4px;
+  }
+
+  /* scrollToBottom 按钮 44px */
+  .ling-scroll-btn {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 18px !important;
   }
 
   /* Landing 动画移动端优化 */
@@ -1376,6 +1469,20 @@ canvas {
     padding-left: 12px;
     padding-right: 12px;
   }
+}
+
+/* === Swipe-to-collapse pill indicator === */
+.ling-swipe-pill {
+  width: 40px;
+  height: 4px;
+  border-radius: var(--ling-radius-full);
+  background: var(--ling-purple-40);
+  margin: 8px auto 4px;
+  opacity: 0;
+  transition: opacity var(--ling-duration-fast) var(--ling-ease-default);
+}
+.ling-swipe-pill[data-visible="true"] {
+  opacity: 1;
 }
 
 /* === Reduced motion 无障碍 === */

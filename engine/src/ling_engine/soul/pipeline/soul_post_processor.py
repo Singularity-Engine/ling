@@ -71,6 +71,25 @@ class SoulPostProcessor:
             if not extracted:
                 return
 
+            # 3.5 Phase 3c: 依赖检测 (在写入前, 利用提取结果)
+            try:
+                from ..ethics.dependency_detector import check_dependency_signals
+                from datetime import datetime, timezone
+                emotion_intensity = extracted.emotion.emotion_intensity if extracted.emotion else 0.0
+                is_negative = (
+                    extracted.emotion
+                    and extracted.emotion.user_emotion in ("sadness", "anxiety", "anger")
+                )
+                today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+                check_dependency_signals(
+                    user_input, user_id,
+                    emotion_intensity=emotion_intensity,
+                    is_negative=bool(is_negative),
+                    today_str=today,
+                )
+            except Exception as e:
+                logger.debug(f"[Soul] Dependency check failed (non-fatal): {e}")
+
             # 4. 并行写入 (try/finally 防泄漏)
             try:
                 results = await asyncio.gather(
@@ -110,14 +129,23 @@ class SoulPostProcessor:
             logger.debug(f"[Soul] Emotion write failed: {e}")
 
     async def _write_importance(self, extracted, user_id: str):
-        """写入重要度到 MongoDB"""
+        """写入重要度到 MongoDB — v3: 包含 is_flashbulb 标记"""
         if not extracted.importance or extracted.importance.score < 0.2:
             return
         try:
             from ..storage.soul_collections import get_collection, IMPORTANCE
+            from ..config import get_soul_config
             coll = await get_collection(IMPORTANCE)
             if coll is None:
                 return
+
+            # v3: flashbulb 三重条件: peak + intensity >= threshold + importance >= 0.7
+            cfg = get_soul_config()
+            if (extracted.emotion
+                    and extracted.emotion.is_emotional_peak
+                    and extracted.emotion.emotion_intensity >= cfg.decay_flashbulb_intensity
+                    and extracted.importance.score >= 0.7):
+                extracted.importance.is_flashbulb = True
 
             doc = extracted.importance.model_dump()
             doc["user_id"] = user_id
@@ -200,7 +228,7 @@ class SoulPostProcessor:
                 {"user_id": user_id},
                 {"$push": {"breakthrough_events": {"$each": [event], "$slice": -20}}},
             )
-            logger.info(f"[Soul] Breakthrough event detected for {user_id}: {extracted.emotion.user_emotion} ({extracted.emotion.emotion_intensity:.1f})")
+            logger.info(f"[Soul] Breakthrough event detected for {user_id[:8]}...: {extracted.emotion.user_emotion} ({extracted.emotion.emotion_intensity:.1f})")
         except Exception as e:
             logger.debug(f"[Soul] Breakthrough detection failed: {e}")
 
@@ -226,6 +254,10 @@ class SoulPostProcessor:
             existing = await coll.find_one({"user_id": user_id})
 
             if existing:
+                # Phase 3b: 回归温暖 — 冷却后首次互动给予 1.5x 权重加成
+                if existing.get("cooling_warned"):
+                    total_weight *= 1.5
+
                 # 更新
                 update_ops = {
                     "$inc": {

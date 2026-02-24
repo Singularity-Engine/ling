@@ -183,8 +183,34 @@ CountdownTimer.displayName = "CountdownTimer";
 
 // ── Component ──
 
+const LS_INTERACTED_KEY = "ling-has-interacted";
+const S_BAR_MINI: CSSProperties = {
+  ...S_BAR,
+  gap: 8,
+  padding: "5px 16px",
+  opacity: 0.7,
+  animation: "connFadeIn 0.4s ease-out",
+};
+
 export const ExperimentBar = memo(function ExperimentBar() {
   const [status, setStatus] = useState<ExperimentStatus>(FALLBACK);
+
+  // Progressive disclosure: show minimal bar until user has interacted
+  const [hasInteracted, setHasInteracted] = useState(() =>
+    typeof localStorage !== "undefined" && localStorage.getItem(LS_INTERACTED_KEY) === "1"
+  );
+
+  // Listen for first message sent to mark as interacted
+  useEffect(() => {
+    if (hasInteracted) return;
+    const handler = () => {
+      localStorage.setItem(LS_INTERACTED_KEY, "1");
+      setHasInteracted(true);
+    };
+    // Listen for custom event dispatched when user sends first message
+    window.addEventListener("ling-user-interacted", handler);
+    return () => window.removeEventListener("ling-user-interacted", handler);
+  }, [hasInteracted]);
 
   // Fetch on mount + interval; AbortController cancels in-flight requests on unmount
   useEffect(() => {
@@ -213,6 +239,17 @@ export const ExperimentBar = memo(function ExperimentBar() {
     ...S_PROGRESS_FILL_BASE,
     width: `${Math.max(revPct, 2)}%`,
   }), [revPct]);
+
+  // Minimal bar for new users — just Day badge
+  if (!hasInteracted) {
+    return (
+      <div style={S_BAR_MINI} role="banner" aria-label="AI创业实验状态栏">
+        <span style={S_DAY} aria-label={`实验第 ${status.day_number} 天`}>Day {status.day_number}</span>
+        <span style={S_SEP} aria-hidden="true" />
+        <span style={{ ...S_REVENUE, fontSize: 10 }}>{status.days_remaining}d left</span>
+      </div>
+    );
+  }
 
   return (
     <div style={S_BAR} role="banner" aria-label="AI创业实验状态栏">

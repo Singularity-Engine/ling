@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import { MOBILE_BREAKPOINT } from "@/constants/breakpoints";
+import { MOBILE_BREAKPOINT, SPLIT_BREAKPOINT, SPLIT_HYSTERESIS } from "@/constants/breakpoints";
 
 /**
  * Shared mobile breakpoint detection — single RAF-throttled resize listener
@@ -15,15 +15,22 @@ import { MOBILE_BREAKPOINT } from "@/constants/breakpoints";
 
 let _rafId = 0;
 let _isMobile = typeof window !== "undefined" && window.innerWidth < MOBILE_BREAKPOINT;
+let _isDesktop = typeof window !== "undefined" && window.innerWidth >= SPLIT_BREAKPOINT + SPLIT_HYSTERESIS;
 const _listeners = new Set<() => void>();
 
 function _onResize() {
   if (_rafId) return;
   _rafId = requestAnimationFrame(() => {
     _rafId = 0;
-    const next = window.innerWidth < MOBILE_BREAKPOINT;
-    if (next !== _isMobile) {
-      _isMobile = next;
+    const w = window.innerWidth;
+    const nextMobile = w < MOBILE_BREAKPOINT;
+    // Hysteresis: split→overlay at SPLIT_BREAKPOINT, overlay→split at SPLIT_BREAKPOINT + SPLIT_HYSTERESIS
+    const nextDesktop = _isDesktop
+      ? w >= SPLIT_BREAKPOINT           // already desktop: drop at SPLIT_BREAKPOINT
+      : w >= SPLIT_BREAKPOINT + SPLIT_HYSTERESIS; // not desktop: enter at +50px
+    if (nextMobile !== _isMobile || nextDesktop !== _isDesktop) {
+      _isMobile = nextMobile;
+      _isDesktop = nextDesktop;
       _listeners.forEach(fn => fn());
     }
   });
@@ -43,10 +50,19 @@ function subscribe(onStoreChange: () => void): () => void {
   };
 }
 
-function getSnapshot(): boolean {
+function getMobileSnapshot(): boolean {
   return _isMobile;
 }
 
+function getDesktopSnapshot(): boolean {
+  return _isDesktop;
+}
+
 export function useIsMobile(): boolean {
-  return useSyncExternalStore(subscribe, getSnapshot);
+  return useSyncExternalStore(subscribe, getMobileSnapshot);
+}
+
+/** Desktop = split layout mode (≥ 1024px with 50px hysteresis) */
+export function useIsDesktop(): boolean {
+  return useSyncExternalStore(subscribe, getDesktopSnapshot);
 }

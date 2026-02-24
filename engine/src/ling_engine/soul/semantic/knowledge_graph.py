@@ -167,6 +167,7 @@ class KnowledgeGraph:
         """$graphLookup 从起始节点追踪关系链
 
         只返回 strength > 0.6 的边链路 (置信度门槛)。
+        对涉及的节点做 confidence 过滤 (低 confidence 节点的链路不输出)。
         输出加不确定措辞。远期链路 (>90天) 描述更模糊。
         timeout: 200ms
         """
@@ -201,6 +202,9 @@ class KnowledgeGraph:
                 {"$limit": limit},
             ]
 
+            # 预加载涉及节点的 confidence (批量查询，不逐个)
+            node_confidence = await self._batch_node_confidence(user_id, start_label)
+
             results = []
             async for doc in coll.aggregate(pipeline):
                 # 直接边
@@ -208,6 +212,11 @@ class KnowledgeGraph:
                 tgt = doc.get("target_label", "")
                 rel = doc.get("relation", "related")
                 last_upd = doc.get("last_updated")
+
+                # confidence 过滤: 涉及的节点 confidence < 0.3 则跳过
+                if self._low_confidence(src, node_confidence) or \
+                   self._low_confidence(tgt, node_confidence):
+                    continue
 
                 desc = self._format_trace(src, tgt, rel, last_upd)
                 if desc:
@@ -219,6 +228,9 @@ class KnowledgeGraph:
                     c_tgt = chain_item.get("target_label", "")
                     c_rel = chain_item.get("relation", "related")
                     c_upd = chain_item.get("last_updated")
+                    if self._low_confidence(c_src, node_confidence) or \
+                       self._low_confidence(c_tgt, node_confidence):
+                        continue
                     desc = self._format_trace(c_src, c_tgt, c_rel, c_upd)
                     if desc:
                         results.append(desc)
@@ -227,6 +239,37 @@ class KnowledgeGraph:
         except Exception as e:
             logger.debug(f"[Soul] KG trace_context failed: {e}")
             return []
+
+    async def _batch_node_confidence(
+        self, user_id: str, start_label: str,
+    ) -> Dict[str, float]:
+        """批量查询起始标签相关节点的 confidence (读时计算)"""
+        nodes_coll = await self._get_nodes_coll()
+        if nodes_coll is None:
+            return {}
+        try:
+            cursor = nodes_coll.find(
+                {"user_id": user_id},
+                projection={"label": 1, "mention_count": 1, "last_confirmed": 1, "_id": 0},
+                limit=50,
+            )
+            conf_map = {}
+            async for doc in cursor:
+                label = doc.get("label", "")
+                mc = doc.get("mention_count", 1)
+                lc = doc.get("last_confirmed")
+                if label and lc:
+                    conf_map[label] = _calc_confidence(mc, lc)
+            return conf_map
+        except Exception:
+            return {}
+
+    @staticmethod
+    def _low_confidence(label: str, conf_map: Dict[str, float]) -> bool:
+        """检查节点是否 confidence 过低 (< 0.3 视为不可靠)"""
+        if not label or label not in conf_map:
+            return False  # 未知节点不过滤 (可能是边上的 label 未收录为节点)
+        return conf_map[label] < 0.3
 
     @staticmethod
     def _format_trace(
@@ -265,25 +308,43 @@ class KnowledgeGraph:
     async def find_matching_labels(
         self, user_id: str, query: str, limit: int = 2,
     ) -> List[str]:
-        """用 MongoDB $regex 在查询层过滤，不全表扫描
+        """从用户消息中提取概念词，用 $or + $regex 匹配知识图谱节点
 
+        分词策略: 提取英文单词(含 C++/.NET 等) + 中文 2-4 字词组。
         按 mention_count 降序排序，频繁提及的概念优先匹配。
-        用 re.escape() 转义特殊字符 (C++, .NET, $100)。
+        用 re.escape() 转义特殊字符。
         """
         coll = await self._get_nodes_coll()
         if coll is None:
             return []
 
         try:
-            # 提取查询中可能的概念词 (取前几个有意义的词)
-            # 简单策略: 用查询的关键部分做子串匹配
-            query_clean = query.strip()[:50]
+            query_clean = query.strip()[:100]
             if not query_clean:
                 return []
 
-            escaped = re.escape(query_clean)
+            # 分词: 英文单词(含特殊字符如 C++, .NET) + 中文 2-4 字词组
+            tokens = re.findall(r'[a-zA-Z][a-zA-Z0-9+#.]*|[\u4e00-\u9fff]{2,4}', query_clean)
+            if not tokens:
+                return []
+
+            # 去重 + 取前 5 个 token
+            seen = set()
+            unique_tokens = []
+            for t in tokens:
+                t_lower = t.lower()
+                if t_lower not in seen:
+                    seen.add(t_lower)
+                    unique_tokens.append(t)
+            unique_tokens = unique_tokens[:5]
+
+            # $or 查询: 任一 token 匹配即命中
+            regex_filters = [
+                {"label": {"$regex": re.escape(t), "$options": "i"}}
+                for t in unique_tokens
+            ]
             cursor = coll.find(
-                {"user_id": user_id, "label": {"$regex": escaped, "$options": "i"}},
+                {"user_id": user_id, "$or": regex_filters},
                 sort=[("mention_count", -1)],
                 limit=limit,
             )

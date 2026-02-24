@@ -234,7 +234,9 @@
     "toolRunning": "En cours",
     "toolCompleted": "Terminé",
     "toolError": "Erreur",
-    "toolResult": "Résultat d'outil"
+    "toolResult": "Résultat d'outil",
+    "memoryMarker": "Basé sur la mémoire",
+    "remembers": "Se souvient"
   },
   "connection": {
     "connected": "Connecte",
@@ -258,7 +260,9 @@
     "milestoneClose": "Ling se sent plus proche de toi...",
     "milestoneDevoted": "Ling t'est entierement devouee 💕",
     "currentLevel": "Niveau actuel",
-    "nextLevel": "Suivant :"
+    "nextLevel": "Suivant :",
+    "daysTogether": "Ensemble depuis {{count}} jour",
+    "daysTogether_other": "Ensemble depuis {{count}} jours"
   },
   "capability": {
     "search": "Recherche",
@@ -367,7 +371,13 @@
     "newMessages": "Nouveaux messages",
     "collapseChat": "Replier le chat",
     "expandChat": "Developper le chat",
-    "suggestedReplies": "Réponses suggérées"
+    "suggestedReplies": "Réponses suggérées",
+    "characterPanel": "Personnage",
+    "resizeDivider": "Redimensionner les panneaux",
+    "splitEmptyWelcome": "Discutez avec Ling...",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "collapseSwipe": "Réduire le panneau de chat"
   },
   "billing": {
     "dailyLimitTitle": "Tu as atteint la limite du jour",
@@ -522,5 +532,16 @@
     "back": "Retour",
     "maxGoals": "Jusqu'a {{max}} selections",
     "stepProgress": "Etape {{current}} sur {{total}}"
+  },
+  "share": {
+    "menuTitle": "Actions",
+    "shareCard": "Partager en carte",
+    "cardTitle": "Ling a dit...",
+    "privacyWarning": "Ce message peut contenir des informations personnelles. Veuillez vérifier avant de partager.",
+    "generating": "Génération...",
+    "cardAlt": "Carte de partage",
+    "save": "Enregistrer",
+    "share": "Partager",
+    "continueShare": "Continuer le partage"
   }
 }

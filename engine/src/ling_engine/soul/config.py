@@ -31,6 +31,12 @@ class SoulConfig:
         self.graph_max_depth = int(os.environ.get("SOUL_GRAPH_MAX_DEPTH", "2"))
         self.graph_trace_timeout_ms = int(os.environ.get("SOUL_GRAPH_TRACE_TIMEOUT_MS", "200"))
 
+        # Phase 3b: 记忆整理
+        self.decay_base_rate = float(os.environ.get("SOUL_DECAY_BASE_RATE", "0.03"))
+        self.decay_emotion_weight = float(os.environ.get("SOUL_DECAY_EMOTION_WEIGHT", "0.5"))
+        self.decay_flashbulb_intensity = float(os.environ.get("SOUL_FLASHBULB_INTENSITY", "0.8"))
+        self.consolidation_batch_size = int(os.environ.get("SOUL_CONSOLIDATION_BATCH_SIZE", "100"))
+
         if self.enabled:
             logger.info(f"[Soul] 灵魂系统已启用 (MongoDB: {self.mongo_url}/{self.mongo_database})")
         else:

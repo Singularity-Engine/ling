@@ -234,7 +234,9 @@
     "toolRunning": "Executando",
     "toolCompleted": "Concluído",
     "toolError": "Erro",
-    "toolResult": "Resultado da ferramenta"
+    "toolResult": "Resultado da ferramenta",
+    "memoryMarker": "Baseado em memória",
+    "remembers": "Lembrou"
   },
   "connection": {
     "connected": "Conectado",
@@ -258,7 +260,9 @@
     "milestoneClose": "Ling se sente mais pr\u00f3xima de voc\u00ea...",
     "milestoneDevoted": "Ling \u00e9 devotada a voc\u00ea \ud83d\udc95",
     "currentLevel": "N\u00edvel atual",
-    "nextLevel": "Pr\u00f3ximo:"
+    "nextLevel": "Pr\u00f3ximo:",
+    "daysTogether": "Juntos h\u00e1 {{count}} dia",
+    "daysTogether_other": "Juntos h\u00e1 {{count}} dias"
   },
   "capability": {
     "search": "Pesquisa",
@@ -367,7 +371,13 @@
     "newMessages": "Novas mensagens",
     "collapseChat": "Recolher chat",
     "expandChat": "Expandir chat",
-    "suggestedReplies": "Respostas sugeridas"
+    "suggestedReplies": "Respostas sugeridas",
+    "characterPanel": "Personagem",
+    "resizeDivider": "Redimensionar painéis",
+    "splitEmptyWelcome": "Comece a conversar com Ling...",
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "collapseSwipe": "Fechar painel de chat"
   },
   "billing": {
     "dailyLimitTitle": "Voc\u00ea atingiu o limite di\u00e1rio",
@@ -522,5 +532,16 @@
     "back": "Voltar",
     "maxGoals": "At\u00e9 {{max}} sele\u00e7\u00f5es",
     "stepProgress": "Passo {{current}} de {{total}}"
+  },
+  "share": {
+    "menuTitle": "A\u00e7\u00f5es",
+    "shareCard": "Compartilhar como cart\u00e3o",
+    "cardTitle": "Ling disse...",
+    "privacyWarning": "Esta mensagem pode conter informa\u00e7\u00f5es pessoais. Revise antes de compartilhar.",
+    "generating": "Gerando...",
+    "cardAlt": "Cart\u00e3o de compartilhamento",
+    "save": "Salvar",
+    "share": "Compartilhar",
+    "continueShare": "Continuar compartilhando"
   }
 }

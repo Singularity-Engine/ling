@@ -1,8 +1,10 @@
 """
-记忆透明度 — Phase 3 实现
+记忆透明度 — Phase 4 实现
 
 让用户了解灵记住了什么、如何使用记忆、以及如何删除记忆。
-覆盖 6 个 MongoDB 集合: emotions, stories, importance, relationships, semantic_nodes, semantic_edges
+覆盖 11 个 MongoDB 集合: emotions, stories, importance, relationships,
+semantic_nodes, semantic_edges, weekly_digests, monthly_themes, life_chapters,
+collective_patterns, self_narrative
 """
 
 from typing import List, Dict, Any, Optional
@@ -10,11 +12,13 @@ from loguru import logger
 
 
 async def get_user_memory_summary(user_id: str) -> Optional[Dict[str, Any]]:
-    """查询全部 6 个集合返回分类统计"""
+    """查询全部 11 个集合返回分类统计"""
     try:
         from ..storage.soul_collections import (
             get_collection, EMOTIONS, STORIES, IMPORTANCE,
             RELATIONSHIPS, SEMANTIC_NODES, SEMANTIC_EDGES,
+            WEEKLY_DIGESTS, MONTHLY_THEMES, LIFE_CHAPTERS,
+            COLLECTIVE_PATTERNS, SELF_NARRATIVE,
         )
 
         collections = {
@@ -24,6 +28,11 @@ async def get_user_memory_summary(user_id: str) -> Optional[Dict[str, Any]]:
             "relationships": RELATIONSHIPS,
             "knowledge_nodes": SEMANTIC_NODES,
             "knowledge_edges": SEMANTIC_EDGES,
+            "weekly_digests": WEEKLY_DIGESTS,
+            "monthly_themes": MONTHLY_THEMES,
+            "life_chapters": LIFE_CHAPTERS,
+            "collective_patterns": COLLECTIVE_PATTERNS,
+            "self_narrative": SELF_NARRATIVE,
         }
 
         summary = {}
@@ -112,6 +121,9 @@ async def list_user_memories(
                         **{k: v for k, v in doc.items()
                            if k not in ("user_id", "node_id")},
                     }
+                    # Phase 3b: importance 类别标记 decayed 条目为"已淡化"
+                    if cat_name == "importance" and doc.get("decayed"):
+                        entry["status"] = "已淡化"
                     results.append(entry)
             except Exception as e:
                 logger.debug(f"[Transparency] List {cat_name} failed: {e}")
@@ -170,9 +182,10 @@ async def delete_user_memory(user_id: str, memory_id: str) -> bool:
 
 
 async def delete_all_user_memories(user_id: str) -> int:
-    """GDPR 遗忘权 — 全部 6 个集合 delete_many
+    """GDPR 遗忘权 — 全部 11 个集合 delete_many
 
     执行后调用 InConversationTracker.reset(user_id) 清除内存状态。
+    COLLECTIVE_PATTERNS 和 SELF_NARRATIVE 不含 user_id (匿名/灵自有), 不删除。
     TODO: EverMemOS 原始记忆需单独 API 删除 (待 EverMemOS 提供批量删除接口)。
     """
     total = 0
@@ -180,10 +193,13 @@ async def delete_all_user_memories(user_id: str) -> int:
         from ..storage.soul_collections import (
             get_collection, EMOTIONS, STORIES, IMPORTANCE,
             RELATIONSHIPS, SEMANTIC_NODES, SEMANTIC_EDGES,
+            WEEKLY_DIGESTS, MONTHLY_THEMES, LIFE_CHAPTERS,
         )
 
+        # COLLECTIVE_PATTERNS/SELF_NARRATIVE 不含 user_id, 无需删除
         for coll_name in [EMOTIONS, STORIES, IMPORTANCE, RELATIONSHIPS,
-                          SEMANTIC_NODES, SEMANTIC_EDGES]:
+                          SEMANTIC_NODES, SEMANTIC_EDGES,
+                          WEEKLY_DIGESTS, MONTHLY_THEMES, LIFE_CHAPTERS]:
             coll = await get_collection(coll_name)
             if coll is None:
                 continue
@@ -208,10 +224,57 @@ async def delete_all_user_memories(user_id: str) -> int:
 
 
 async def export_user_data(user_id: str) -> Dict[str, Any]:
-    """GDPR Article 20 数据可携权 — Phase 3a stub
+    """GDPR Article 20 数据可携权
 
-    遍历 6 集合, find({"user_id": user_id}), 投影掉 _id。
+    遍历 11 集合, find({"user_id": user_id}), 投影掉 _id。
+    COLLECTIVE_PATTERNS/SELF_NARRATIVE 不含 user_id, 不导出 (匿名/灵自有)。
     返回 JSON-serializable 的完整数据包。
     """
-    logger.debug(f"[Transparency] Data export requested for {user_id} (stub)")
-    return {}
+    try:
+        from ..storage.soul_collections import (
+            get_collection, EMOTIONS, STORIES, IMPORTANCE,
+            RELATIONSHIPS, SEMANTIC_NODES, SEMANTIC_EDGES,
+            WEEKLY_DIGESTS, MONTHLY_THEMES, LIFE_CHAPTERS,
+        )
+
+        # 只导出含 user_id 的集合 (COLLECTIVE_PATTERNS/SELF_NARRATIVE 不含 user_id)
+        collections = {
+            "emotions": EMOTIONS,
+            "stories": STORIES,
+            "importance": IMPORTANCE,
+            "relationships": RELATIONSHIPS,
+            "knowledge_nodes": SEMANTIC_NODES,
+            "knowledge_edges": SEMANTIC_EDGES,
+            "weekly_digests": WEEKLY_DIGESTS,
+            "monthly_themes": MONTHLY_THEMES,
+            "life_chapters": LIFE_CHAPTERS,
+        }
+
+        export = {"user_id": user_id}
+        for key, coll_name in collections.items():
+            coll = await get_collection(coll_name)
+            if coll is None:
+                export[key] = []
+                continue
+            try:
+                cursor = coll.find(
+                    {"user_id": user_id},
+                    projection={"_id": 0},
+                )
+                docs = []
+                async for doc in cursor:
+                    # datetime → ISO string for JSON serialization
+                    for k, v in doc.items():
+                        if hasattr(v, 'isoformat'):
+                            doc[k] = v.isoformat()
+                    docs.append(doc)
+                export[key] = docs
+            except Exception as e:
+                logger.debug(f"[Transparency] Export {key} failed: {e}")
+                export[key] = []
+
+        logger.info(f"[Transparency] Data exported for {user_id}")
+        return export
+    except Exception as e:
+        logger.warning(f"[Transparency] Data export failed: {e}")
+        return {}

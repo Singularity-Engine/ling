@@ -5,6 +5,7 @@ import { useChatMessagesActions } from "@/context/chat-history-context";
 import { useAiStateRead } from "@/context/ai-state-context";
 import { useInterrupt } from "@/components/canvas/live2d";
 import { useVADState, useVADActions } from "@/context/vad-context";
+import { trackEvent } from "@/utils/track-event";
 
 // ─── Static style constants (avoid per-render allocation during typing) ───
 
@@ -240,6 +241,7 @@ export const InputBar = memo(() => {
       text: text,
       images: [],
     });
+    trackEvent("message_sent", { source: "input_bar" });
 
     setInputText("");
     if (textareaRef.current) {

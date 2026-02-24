@@ -8,6 +8,14 @@ from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 
 
+class MemoryLayer(str, Enum):
+    """记忆抽象层级 — Phase 4"""
+    RAW_EPISODE = "L0"       # 原始对话 (EverMemOS episode)
+    WEEKLY_DIGEST = "L1"     # 周摘要
+    MONTHLY_THEME = "L2"     # 月度主题
+    LIFE_CHAPTER = "L3"      # 人生章节
+
+
 class RelationshipStage(str, Enum):
     STRANGER = "stranger"
     ACQUAINTANCE = "acquaintance"
@@ -52,6 +60,10 @@ class StoryThread(BaseModel):
     theme: str = ""
     tension: str = ""
     arc_position: str = "setup"
+    arc_pattern: str = ""                                        # Phase 2 扩展: hero_journey/recurring_struggle/gradual_growth
+    predicted_next_beat: Optional[str] = None                    # Phase 2 扩展: 预测下一个叙事节拍
+    related_threads: List[str] = Field(default_factory=list)     # Phase 2 扩展: 关联故事线 ID
+    relation_type: str = ""                                      # cause_effect/parallel/competing
     episode_ids: List[str] = Field(default_factory=list)
     key_moments: List[str] = Field(default_factory=list)
     expected_next: Optional[str] = None
@@ -63,6 +75,7 @@ class StoryThread(BaseModel):
 class ImportanceScore(BaseModel):
     """多因子重要度评分"""
     user_id: str
+    episode_id: str = ""                                        # v3: 关联的 EverMemOS episode ID
     score: float = 0.0  # 0-1
     emotional: float = 0.0
     novelty: float = 0.0
@@ -70,6 +83,11 @@ class ImportanceScore(BaseModel):
     actionable: float = 0.0
     recency: float = 0.0
     summary: str = ""
+    is_flashbulb: bool = False                                  # v3: 闪光灯记忆标记 (永不衰减)
+    mention_span_days: int = 0                                  # v3: 间隔效应 (被多次提及的间隔天数)
+    linked_memory_count: int = 0                                # v3: 连接密度 (知识图谱边数)
+    recall_count: int = 0                                       # Phase 4: 被召回次数
+    last_recalled_at: Optional[datetime] = None                 # v3: 上次被召回时间
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -122,3 +140,15 @@ class SoulContext(BaseModel):
     breakthrough_hint: Optional[str] = None                            # 突破性事件提示
     # Phase 3: 深层灵魂
     graph_insights: List[str] = Field(default_factory=list)              # 第 8 路: 知识图谱推理
+    # Phase 3b: 回归温暖
+    returning_from_absence: bool = False                                  # 冷却后首次互动
+    # Phase 3b-beta: 抽象记忆
+    abstract_memories: List[str] = Field(default_factory=list)             # 第 9 路: L1/L3 抽象记忆
+    # Phase 3c: 依赖检测
+    dependency_hint: Optional[str] = None                                 # 温和提醒文案
+    # Phase 3c: 阶段行为护栏
+    ethical_guardrails: Optional[str] = None                              # 阶段伦理提示
+    # Phase 4: 集体灵魂
+    collective_wisdom: List[str] = Field(default_factory=list)            # 第 10 路: 集体智慧
+    current_life_chapter: Optional[str] = None                            # 当前人生章节摘要
+    emotional_baseline: str = "neutral"                                   # 情感基线

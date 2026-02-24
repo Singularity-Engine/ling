@@ -11,6 +11,14 @@ RELATIONSHIPS = "soul_relationships"
 # Phase 3: 知识图谱
 SEMANTIC_NODES = "soul_semantic_nodes"
 SEMANTIC_EDGES = "soul_semantic_edges"
+# Phase 3b: 抽象层级 + 整理日志
+WEEKLY_DIGESTS = "soul_weekly_digests"
+MONTHLY_THEMES = "soul_monthly_themes"
+LIFE_CHAPTERS = "soul_life_chapters"
+CONSOLIDATION_LOG = "soul_consolidation_log"
+# Phase 4: 集体灵魂
+COLLECTIVE_PATTERNS = "soul_collective_patterns"
+SELF_NARRATIVE = "soul_self_narrative"
 
 _indexes_created = False
 
@@ -104,6 +112,33 @@ async def ensure_indexes():
             [("user_id", 1), ("target_id", 1)],
             background=True,
         )
+
+        # Phase 3b: 抽象层级索引
+        await db[WEEKLY_DIGESTS].create_index(
+            [("user_id", 1), ("week_start", -1)],
+            unique=True, background=True)
+        await db[MONTHLY_THEMES].create_index(
+            [("user_id", 1), ("month", 1)],
+            unique=True, background=True)
+        await db[LIFE_CHAPTERS].create_index(
+            [("user_id", 1), ("started_at", -1)],
+            background=True)
+
+        # Phase 3b: 整理日志 (只保留 TTL 索引, 不另建普通索引)
+        await db[CONSOLIDATION_LOG].create_index(
+            "run_date", expireAfterSeconds=90 * 86400, background=True)
+
+        # Phase 4: 集体模式
+        await db[COLLECTIVE_PATTERNS].create_index(
+            "pattern_id", unique=True, background=True)
+        await db[COLLECTIVE_PATTERNS].create_index(
+            [("category", 1), ("confidence", -1)], background=True)
+        await db[COLLECTIVE_PATTERNS].create_index(
+            "tags", background=True)
+
+        # Phase 4: 灵的自我叙事
+        await db[SELF_NARRATIVE].create_index(
+            "month", unique=True, background=True)
 
         # Phase 3: 数据保留 TTL 索引
         # soul_emotions: 180 天自动过期

@@ -1,0 +1,307 @@
+/* SplitLayout — Desktop split view: Live2D left / Chat right */
+
+.root {
+  display: grid;
+  grid-template-columns: var(--split-left, var(--ling-split-left-default)) 1fr;
+  height: 100dvh;
+  width: 100vw;
+  background: var(--ling-bg-deep);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Left panel: Live2D character ── */
+.leftPanel {
+  position: relative;
+  overflow: hidden;
+  contain: strict;
+  min-width: var(--ling-split-left-min);
+  max-width: var(--ling-split-left-max);
+}
+
+/* ── Divider: draggable separator ── */
+.divider {
+  position: relative;
+  width: var(--ling-split-divider);
+  cursor: col-resize;
+  z-index: 10;
+  background: transparent;
+  flex-shrink: 0;
+  touch-action: none;
+  /* Visual depth line */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+  background: var(--ling-border);
+  transition: background var(--ling-duration-fast) var(--ling-ease-default),
+              width var(--ling-duration-fast) var(--ling-ease-default);
+}
+
+/* Dark theme: glow effect on hover */
+:root .divider:hover::before,
+.divider[aria-valuenow]::before {
+  width: 2px;
+  background: var(--ling-purple-40);
+  box-shadow: var(--ling-shadow-glow);
+}
+
+/* Light theme: subtle border instead of glow, with hover feedback */
+[data-theme="light"] .divider::before {
+  background: var(--ling-border);
+  box-shadow: none;
+}
+[data-theme="light"] .divider:hover::before {
+  width: 2px;
+  background: var(--ling-purple-50);
+  box-shadow: 0 0 4px rgba(139, 92, 246, 0.15);
+}
+[data-theme="light"] .dividerDragging::before {
+  width: 2px;
+  background: var(--ling-purple-60);
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.2);
+}
+
+/* Wider grab area for easier interaction */
+.divider::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -6px;
+  right: -6px;
+}
+
+.dividerDragging {
+  width: 8px;
+}
+
+.dividerDragging::before {
+  width: 2px;
+  background: var(--ling-purple-60);
+  box-shadow: 0 0 12px var(--ling-purple-30);
+}
+
+/* ── Right panel: Chat + Toolbar ── */
+.rightPanel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  contain: layout paint;
+}
+
+/* ── Right panel toolbar ── */
+.toolbar {
+  position: absolute;
+  top: var(--ling-space-3);
+  right: var(--ling-space-3);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ling-space-3);
+}
+
+.toolbarGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--ling-space-2);
+  border-radius: var(--ling-radius-xl);
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  gap: var(--ling-space-2);
+}
+
+.toolbarDivider {
+  width: 24px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 4px 0;
+}
+
+/* ── Chat area wrapper in split mode ── */
+.chatSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.chatInner {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  /* No mask gradient in split mode — full height chat */
+}
+
+.inputSection {
+  flex-shrink: 0;
+  position: relative;
+  background: rgba(10, 0, 21, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--ling-purple-15);
+}
+
+/* ── Empty state: warm welcome ── */
+.emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ling-space-6);
+  padding: var(--ling-space-8);
+  animation: splitEmptyFadeIn 0.6s var(--ling-ease-enter) both;
+}
+
+.emptyLogo {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--ling-purple-light);
+  text-shadow: 0 0 32px var(--ling-purple-40), 0 0 64px var(--ling-purple-15);
+  animation: splitEmptyBreathe 4s ease-in-out infinite;
+  user-select: none;
+  opacity: 0.6;
+}
+
+.emptyText {
+  font-size: var(--ling-font-lg);
+  color: var(--ling-text-dim);
+  text-align: center;
+  max-width: 280px;
+  line-height: 1.6;
+}
+
+.emptyChips {
+  display: flex;
+  gap: var(--ling-space-2);
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 360px;
+}
+
+/* ── Glow bleed from left panel through divider ── */
+.glowBleed {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -20px;
+  width: 40px;
+  background: radial-gradient(ellipse at left center, var(--ling-purple-08), transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── ExperimentBar positioned on right panel only ── */
+.experimentBar {
+  position: relative;
+  z-index: 5;
+  flex-shrink: 0;
+}
+
+/* ── Animations ── */
+@keyframes splitEmptyFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes splitEmptyBreathe {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.02); }
+}
+
+/* ── Transition for layout mode switch ── */
+.leftPanel {
+  transition: width var(--ling-duration-slow) var(--ling-ease-default);
+}
+
+.rightPanel {
+  transition: opacity var(--ling-duration-normal) var(--ling-ease-enter);
+}
+
+/* ── Constellation positioning in split mode ── */
+.constellationWrap {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: var(--ling-space-4);
+  z-index: 26;
+  pointer-events: auto;
+}
+
+/* ── First-minute experience: stagger entrance ── */
+
+/* During loading/greeting: hide chips, dim text */
+.root[data-first-minute="loading"] .emptyText,
+.root[data-first-minute="loading"] .emptyChips {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+/* During greeting: logo pulses stronger */
+.root[data-first-minute="greeting"] .emptyLogo {
+  animation: splitEmptyBreathe 2s ease-in-out infinite;
+  opacity: 0.8;
+}
+
+.root[data-first-minute="greeting"] .emptyText {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.root[data-first-minute="greeting"] .emptyChips {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+/* During inviting: text + chips fade in with stagger */
+.root[data-first-minute="inviting"] .emptyText {
+  animation: splitEmptyFadeIn 0.5s var(--ling-ease-enter) 0.1s both;
+}
+
+.root[data-first-minute="inviting"] .emptyChips {
+  animation: splitEmptyFadeIn 0.5s var(--ling-ease-enter) 0.3s both;
+}
+
+/* ── Inline style extractions (P2-14) ── */
+.starfieldBg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  contain: strict;
+}
+
+.effectsLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+}
+
+.chatErrorFallback {
+  padding: var(--ling-space-4);
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: var(--ling-font-sm);
+}
+
+.inputErrorFallback {
+  padding: 12px var(--ling-space-4);
+  color: rgba(255, 255, 255, 0.3);
+  font-size: var(--ling-font-sm);
+  text-align: center;
+}

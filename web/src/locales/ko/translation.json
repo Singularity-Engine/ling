@@ -234,7 +234,9 @@
     "toolRunning": "실행 중",
     "toolCompleted": "완료",
     "toolError": "오류",
-    "toolResult": "도구 결과"
+    "toolResult": "도구 결과",
+    "memoryMarker": "기억 기반",
+    "remembers": "기억했어요"
   },
   "connection": {
     "connected": "연결됨",
@@ -258,7 +260,8 @@
     "milestoneClose": "Ling이 당신과 더 가까워진 것 같아요...",
     "milestoneDevoted": "Ling이 당신에게 마음을 다하고 있어요",
     "currentLevel": "현재 단계",
-    "nextLevel": "다음:"
+    "nextLevel": "다음:",
+    "daysTogether": "함께한 지 {{count}}일"
   },
   "capability": {
     "search": "검색",
@@ -367,7 +370,13 @@
     "newMessages": "새 메시지",
     "collapseChat": "채팅 접기",
     "expandChat": "채팅 펼치기",
-    "suggestedReplies": "추천 답변"
+    "suggestedReplies": "추천 답변",
+    "characterPanel": "캐릭터",
+    "resizeDivider": "패널 크기 조정",
+    "splitEmptyWelcome": "灵과 채팅을 시작하세요...",
+    "cancel": "취소",
+    "close": "닫기",
+    "collapseSwipe": "채팅 패널 접기"
   },
   "billing": {
     "dailyLimitTitle": "오늘 사용량을 다 썼어요",
@@ -522,5 +531,16 @@
     "back": "뒤로",
     "maxGoals": "최대 {{max}}개까지 선택",
     "stepProgress": "{{total}}단계 중 {{current}}단계"
+  },
+  "share": {
+    "menuTitle": "작업",
+    "shareCard": "카드로 공유",
+    "cardTitle": "灵이 말한 것...",
+    "privacyWarning": "이 메시지에 개인정보가 포함되어 있을 수 있습니다. 공유 전에 확인해 주세요.",
+    "generating": "생성 중...",
+    "cardAlt": "공유 카드",
+    "save": "저장",
+    "share": "공유",
+    "continueShare": "공유 계속하기"
   }
 }

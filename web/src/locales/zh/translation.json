@@ -234,7 +234,9 @@
     "toolRunning": "运行中",
     "toolCompleted": "已完成",
     "toolError": "错误",
-    "toolResult": "工具结果"
+    "toolResult": "工具结果",
+    "memoryMarker": "基于记忆",
+    "remembers": "灵记住了"
   },
   "connection": {
     "connected": "已连接",
@@ -258,7 +260,8 @@
     "milestoneClose": "灵觉得和你越来越亲近了...",
     "milestoneDevoted": "灵对你全心全意 💕",
     "currentLevel": "当前等级",
-    "nextLevel": "下一级:"
+    "nextLevel": "下一级:",
+    "daysTogether": "相识 {{count}} 天"
   },
   "capability": {
     "search": "搜索",
@@ -344,7 +347,13 @@
     "newMessages": "新消息",
     "collapseChat": "收起对话",
     "expandChat": "展开对话",
-    "suggestedReplies": "推荐话题"
+    "suggestedReplies": "推荐话题",
+    "characterPanel": "角色",
+    "resizeDivider": "调整面板大小",
+    "splitEmptyWelcome": "和灵聊点什么吧...",
+    "cancel": "取消",
+    "close": "关闭",
+    "collapseSwipe": "收起聊天面板"
   },
   "billing": {
     "dailyLimitTitle": "今日聊天次数已用完",
@@ -499,5 +508,16 @@
     "back": "返回",
     "maxGoals": "最多选 {{max}} 个",
     "stepProgress": "第 {{current}} 步，共 {{total}} 步"
+  },
+  "share": {
+    "menuTitle": "操作",
+    "shareCard": "分享为卡片",
+    "cardTitle": "灵和我说的",
+    "privacyWarning": "此消息可能包含个人信息，分享前请确认。",
+    "generating": "生成中...",
+    "cardAlt": "分享卡片",
+    "save": "保存",
+    "share": "分享",
+    "continueShare": "继续分享"
   }
 }

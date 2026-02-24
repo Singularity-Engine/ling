@@ -234,7 +234,9 @@
     "toolRunning": "Running",
     "toolCompleted": "Completed",
     "toolError": "Error",
-    "toolResult": "Tool result"
+    "toolResult": "Tool result",
+    "memoryMarker": "Based on memory",
+    "remembers": "Remembered"
   },
   "connection": {
     "connected": "Connected",
@@ -258,7 +260,9 @@
     "milestoneClose": "Ling feels closer to you...",
     "milestoneDevoted": "Ling is devoted to you 💕",
     "currentLevel": "Current level",
-    "nextLevel": "Next:"
+    "nextLevel": "Next:",
+    "daysTogether": "Together for {{count}} day",
+    "daysTogether_other": "Together for {{count}} days"
   },
   "capability": {
     "search": "Search",
@@ -344,7 +348,13 @@
     "newMessages": "New messages",
     "collapseChat": "Collapse chat",
     "expandChat": "Expand chat",
-    "suggestedReplies": "Suggested replies"
+    "suggestedReplies": "Suggested replies",
+    "characterPanel": "Character",
+    "resizeDivider": "Resize panels",
+    "splitEmptyWelcome": "Start chatting with Ling...",
+    "cancel": "Cancel",
+    "close": "Close",
+    "collapseSwipe": "Collapse chat panel"
   },
   "billing": {
     "dailyLimitTitle": "You've reached today's limit",
@@ -499,5 +509,16 @@
     "back": "Back",
     "maxGoals": "Up to {{max}} selections",
     "stepProgress": "Step {{current}} of {{total}}"
+  },
+  "share": {
+    "menuTitle": "Actions",
+    "shareCard": "Share as card",
+    "cardTitle": "Ling said...",
+    "privacyWarning": "This message may contain personal information. Please review before sharing.",
+    "generating": "Generating...",
+    "cardAlt": "Share card",
+    "save": "Save",
+    "share": "Share",
+    "continueShare": "Continue sharing"
   }
 }

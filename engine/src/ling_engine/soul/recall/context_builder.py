@@ -2,6 +2,8 @@
 记忆上下文构建器 — 将 SoulContext 转换为注入到 LLM 的文本
 Phase 2: RecallRhythm 类, 注入预算控制 (MAX_SECTIONS=5), 情感共振合并, emotion-shift
 Phase 3: graph-insights, 冷启动渐进注入, always/memory 分离
+Phase 3b-beta: abstract-context (L1/L3 抽象记忆)
+Phase 4: collective-wisdom (集体智慧), stage guardrails, life-chapter
 """
 
 import time
@@ -19,9 +21,11 @@ _reconstructor = MemoryReconstructor()
 SECTION_PRIORITY = {
     "relationship-context": 1,   # 必注入 (always)
     "emotion-shift": 2,          # 实时感知 (always)
+    "abstract-context": 2.5,     # Phase 3b-beta: L1/L3 抽象记忆 (高于原始记忆)
     "relevant-memories": 3,      # 核心记忆 (含情感共振)
     "user-profile": 4,
     "graph-insights": 5,         # Phase 3: 知识图谱推理
+    "collective-wisdom": 5.5,    # Phase 4: 集体智慧 (低于图谱推理)
     "active-stories": 6,
     "foresight": 7,
     "breakthrough": 8,
@@ -106,6 +110,8 @@ class ContextBuilder:
             or ctx.in_conversation_shift
             or ctx.breakthrough_hint
             or ctx.graph_insights
+            or ctx.abstract_memories
+            or ctx.collective_wisdom
             or (ctx.user_profile_summary and len(ctx.user_profile_summary.strip()) > 10)
             or ctx.relationship_stage != "stranger"
         )
@@ -118,10 +124,38 @@ class ContextBuilder:
         # 1. 关系阶段 (优先级 1)
         if ctx.stage_behavior_hint:
             conv_info = f"\n你们已经聊过 {ctx.conversation_count} 次了。" if ctx.conversation_count > 0 else ""
+            # Phase 3b: 回归温暖叙事
+            return_warmth = ""
+            if ctx.returning_from_absence:
+                return_warmth = (
+                    "\n这位用户好久没来了。你可以自然地表达\"好久不见\"的感觉，"
+                    "温柔地说你注意到他们不在的这段时间，但不要追问原因。"
+                    "像老朋友重逢一样，带着温暖但不带压力。"
+                )
+            # Phase 3c: 依赖检测温和提醒
+            dependency_note = ""
+            if ctx.dependency_hint:
+                dependency_note = (
+                    f"\n注意: {ctx.dependency_hint} "
+                    "用自然的方式融入对话，不要直接念出这段话。"
+                )
+            # Phase 3c: 阶段行为护栏
+            guardrail_note = ""
+            if ctx.ethical_guardrails:
+                guardrail_note = f"\n{ctx.ethical_guardrails}"
+            # Phase 4: 当前人生章节
+            chapter_note = ""
+            if ctx.current_life_chapter:
+                chapter_note = f"\n用户当前人生阶段: {ctx.current_life_chapter}"
+            # Phase 4: 情感基线
+            baseline_note = ""
+            if ctx.emotional_baseline and ctx.emotional_baseline != "neutral":
+                baseline_note = f"\n用户近期情感基调: {ctx.emotional_baseline}"
             candidates["relationship-context"] = (
                 f"<relationship-context>\n"
                 f"你和这位用户的关系: {ctx.relationship_stage}{conv_info}\n"
-                f"{ctx.stage_behavior_hint}\n"
+                f"{ctx.stage_behavior_hint}{return_warmth}{dependency_note}"
+                f"{guardrail_note}{chapter_note}{baseline_note}\n"
                 f"</relationship-context>"
             )
 
@@ -134,6 +168,17 @@ class ContextBuilder:
             )
 
         if inject_memories:
+            # 2.5. Phase 3b-beta: 抽象记忆 (优先级 2.5 — 高于原始记忆)
+            if ctx.abstract_memories:
+                abstract_text = "\n".join(f"- {m}" for m in ctx.abstract_memories[:3])
+                candidates["abstract-context"] = (
+                    f"<abstract-context>\n"
+                    f"你对这位用户的整体印象:\n"
+                    f"{abstract_text}\n"
+                    f"这是你对用户经历的概括性理解，用来提供更宏观的视角。\n"
+                    f"</abstract-context>"
+                )
+
             # 3. 相关记忆 + 情感共振合并 (优先级 3)
             raw_memories = self._deduplicate(ctx.qdrant_memories + ctx.evermemos_memories)
             # P0 大师建议: MemoryReconstructor 压缩过长记忆，减少注入 token
@@ -181,19 +226,26 @@ class ContextBuilder:
                     f"</foresight>"
                 )
 
-            # 7. 知识图谱推理 (优先级 5) — Phase 3 — Phase 3
+            # 7. 知识图谱推理 (优先级 5) — Phase 3
             if ctx.graph_insights:
-                # graph-insights 与 active-stories 话题去重 (子串匹配)
+                # graph-insights 与 active-stories 话题去重 (分词子串匹配)
                 filtered_insights = ctx.graph_insights[:3]
                 if ctx.story_continuations:
-                    story_titles = [
-                        s.split(" — ")[0].split(" (")[0].strip()
-                        for s in ctx.story_continuations
-                    ]
-                    filtered_insights = [
-                        g for g in filtered_insights
-                        if not any(title and title[:8] in g for title in story_titles)
-                    ]
+                    # 提取故事线标题中的关键词 (中文 2+ 字词组 + 英文单词)
+                    import re as _re
+                    story_keywords = set()
+                    for s in ctx.story_continuations:
+                        title = s.split(" — ")[0].split(" (")[0].strip()
+                        if title:
+                            tokens = _re.findall(
+                                r'[a-zA-Z][a-zA-Z0-9+#.]*|[\u4e00-\u9fff]{2,4}', title
+                            )
+                            story_keywords.update(t.lower() for t in tokens if len(t) >= 2)
+                    if story_keywords:
+                        filtered_insights = [
+                            g for g in filtered_insights
+                            if not any(kw in g.lower() for kw in story_keywords)
+                        ]
                 if filtered_insights:
                     insight_text = "\n".join(f"- {g}" for g in filtered_insights)
                     candidates["graph-insights"] = (
@@ -204,7 +256,18 @@ class ContextBuilder:
                         f"</graph-insights>"
                     )
 
-            # 8. 突破性事件 (优先级 8) — Phase 3 重排
+            # 8. Phase 4: 集体智慧 (优先级 5.5)
+            if ctx.collective_wisdom:
+                wisdom_text = "\n".join(f"- {w}" for w in ctx.collective_wisdom[:2])
+                candidates["collective-wisdom"] = (
+                    f"<collective-wisdom>\n"
+                    f"你从过去的经验中积累的一些理解:\n"
+                    f"{wisdom_text}\n"
+                    f"这是你的体悟，不是别人的故事。用你自己的话自然表达。\n"
+                    f"</collective-wisdom>"
+                )
+
+            # 9. 突破性事件 (优先级 8) — Phase 3 重排
             if ctx.breakthrough_hint:
                 candidates["breakthrough"] = (
                     f"<breakthrough>\n"

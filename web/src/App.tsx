@@ -1,61 +1,32 @@
 import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense, Component, type ErrorInfo, type ReactNode, type CSSProperties } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
-// framer-motion deferred: only loaded by lazy Constellation/Onboarding chunks
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
+
 // Lazy-loaded: only shown on first visit (before sessionStorage 'ling-visited' is set).
-// Avoids bundling the particle canvas + typewriter animation code for returning visitors.
 const LandingAnimation = lazy(() => import("./components/landing/LandingAnimation").then(m => ({ default: m.LandingAnimation })));
-import { AiStateProvider } from "./context/ai-state-context";
-import { Live2DConfigProvider } from "./context/live2d-config-context";
-import { SubtitleProvider } from "./context/subtitle-context";
-import { BgUrlProvider } from "./context/bgurl-context";
-import WebSocketHandler from "./services/websocket-handler";
-import { CameraProvider } from "./context/camera-context";
-import { ChatHistoryProvider, useMessagesRef, useHistoryListState, useHistoryListActions } from "./context/chat-history-context";
-import { CharacterConfigProvider } from "./context/character-config-context";
-import { VADProvider, useVADState, useVADActions } from "./context/vad-context";
-import { Live2D, useInterrupt } from "./components/canvas/live2d";
-import { ProactiveSpeakProvider } from "./context/proactive-speak-context";
-import { ScreenCaptureProvider } from "./context/screen-capture-context";
-import { GroupProvider } from "./context/group-context";
-import { BrowserProvider } from "./context/browser-context";
-import { ModeProvider } from "./context/mode-context";
-import { ThemeProvider } from "./context/theme-context";
-// Lazy-loaded: ChatArea pulls in ChatBubble → react-markdown + remark + rehype
-// (~273KB vendor-markdown chunk), deferring it from the critical path.
-const ChatArea = lazy(() => import("./components/chat/ChatArea").then(m => ({ default: m.ChatArea })));
-import { InputBar } from "./components/chat/InputBar";
-import { AffinityBadge } from "./components/status/AffinityBadge";
-import { ConnectionStatus } from "./components/status/ConnectionStatus";
-import { AffinityProvider } from "./context/affinity-context";
-import { ToolStateProvider } from "./context/tool-state-context";
-import { TTSStateProvider } from "./context/tts-state-context";
-import { StarField } from "./components/background/StarField";
+
+import { useMessagesRef, useHistoryListState, useHistoryListActions } from "./context/chat-history-context";
+import { useVADState, useVADActions } from "./context/vad-context";
+import { useInterrupt } from "./components/canvas/live2d";
 import { HreflangTags } from "./components/seo/HreflangTags";
 import { StructuredData } from "./components/seo/StructuredData";
 import { LOCALE_MAP, type SupportedLanguage, SUPPORTED_LANGUAGES } from "./i18n";
-import { BackgroundReactor } from "./components/effects/BackgroundReactor";
-import { AudioVisualizer } from "./components/effects/AudioVisualizer";
-import { CrystalField } from "./components/crystal/CrystalField";
-// Lazy-loaded: Constellation pulls in framer-motion (~30KB), deferred to first render (desktop only).
-const Constellation = lazy(() => import("./components/ability/Constellation").then(m => ({ default: m.Constellation })));
-import { LoadingSkeleton } from "./components/loading/LoadingSkeleton";
 import { Toaster, toaster } from "./components/ui/toaster";
 import { useWebSocketActions } from "./context/websocket-context";
 import { useKeyboardShortcuts, type ShortcutDef } from "./hooks/use-keyboard-shortcuts";
 import { NetworkStatusBanner } from "./components/effects/NetworkStatusBanner";
-import { TapParticles } from "./components/effects/TapParticles";
 import { useAffinityIdleExpression } from "./hooks/use-affinity-idle-expression";
-import { useIsMobile } from "./hooks/use-is-mobile";
+import { useFirstMinute } from "./hooks/use-first-minute";
+import { useIsMobile, useIsDesktop } from "./hooks/use-is-mobile";
+import { SplitLayout } from "./components/layout/SplitLayout";
+import { OverlayLayout } from "./components/layout/OverlayLayout";
+import { Providers } from "./components/layout/Providers";
 import { AuthProvider, useAuthState, useAuthActions } from "./context/auth-context";
-import { UIProvider } from "./context/ui-context";
-import CreditsDisplay from "./components/billing/CreditsDisplay";
-import { ExperimentBar } from "./components/experiment/ExperimentBar";
 import { SectionErrorBoundary } from "./components/error/SectionErrorBoundary";
 import { createLogger } from "./utils/logger";
-import { OVERLAY_COLORS, WHITE_ALPHA, MISC_COLORS } from "./constants/colors";
+import { MISC_COLORS } from "./constants/colors";
 import { SS_ONBOARDING_DONE, SS_VISITED } from "./constants/storage-keys";
 import { captureError } from "./lib/sentry";
 import "./index.css";
@@ -144,171 +115,8 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
   }
 }
 
-// ─── Static style constants (avoid per-render allocation in MainContent) ───
-
-const S_ROOT: CSSProperties = {
-  position: "relative", height: "100dvh", width: "100vw",
-  background: "var(--ling-bg-deep)", overflow: "hidden",
-};
-const S_LAYER_STARFIELD: CSSProperties = { position: "absolute", inset: 0, zIndex: -1, contain: "strict" };
-const S_LAYER_LIVE2D: CSSProperties = { position: "absolute", inset: 0, zIndex: 0, contain: "strict" };
-const S_LAYER_EFFECTS: CSSProperties = { position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none", overflow: "hidden", contain: "strict" };
-
-const S_GROUND_GRADIENT: CSSProperties = {
-  position: "absolute", bottom: 0, left: 0, right: 0,
-  height: "44dvh", zIndex: 22, pointerEvents: "none", contain: "strict",
-  background: "linear-gradient(to bottom, transparent 0%, rgba(10,0,21,0.02) 12%, rgba(10,0,21,0.07) 24%, rgba(10,0,21,0.16) 36%, rgba(10,0,21,0.28) 48%, rgba(10,0,21,0.42) 60%, rgba(10,0,21,0.56) 72%, rgba(10,0,21,0.68) 84%, rgba(10,0,21,0.78) 94%, rgba(10,0,21,0.82) 100%)",
-};
-
-// Right toolbar positioning — desktop / mobile variants
-const S_TOOLBAR_D: CSSProperties = {
-  position: "absolute", top: "52px", right: "12px", zIndex: 20,
-  display: "flex", flexDirection: "column", alignItems: "center", gap: "12px",
-};
-// Status / action group capsules
-const _GROUP_BASE: CSSProperties = {
-  display: "flex", flexDirection: "column", alignItems: "center",
-  padding: "6px", borderRadius: "20px",
-  background: OVERLAY_COLORS.LIGHT, border: `1px solid ${WHITE_ALPHA.LIGHT_BORDER}`,
-};
-const S_GROUP_D: CSSProperties = { ..._GROUP_BASE, gap: "6px" };
-
-// Desktop: separator line between status and action buttons in unified capsule
-const S_TOOLBAR_DIVIDER: CSSProperties = {
-  width: "24px", height: "1px",
-  background: "rgba(255,255,255,0.08)",
-  margin: "4px 0",
-};
-
-// Mobile: compact trigger area (connection dot + hamburger)
-const S_MOBILE_TRIGGER: CSSProperties = {
-  position: "absolute",
-  top: "max(44px, calc(env(safe-area-inset-top, 0px) + 36px))",
-  right: "max(8px, env(safe-area-inset-right, 0px))",
-  zIndex: 20,
-  display: "flex", alignItems: "center", gap: "6px",
-};
-
-// Mobile: menu exit animation duration
+// Mobile: menu exit animation duration (used by closeMenu timer)
 const MENU_EXIT_MS = 250;
-
-// Mobile: menu backdrop
-const S_MENU_BACKDROP: CSSProperties = {
-  position: "fixed", inset: 0, zIndex: 50,
-  background: "rgba(0,0,0,0.4)",
-  backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
-  transition: `opacity ${MENU_EXIT_MS}ms ease`,
-  touchAction: "none",
-};
-
-// Mobile: slide-in menu panel
-const S_MOBILE_MENU: CSSProperties = {
-  position: "fixed", top: 0, right: 0, bottom: 0,
-  width: "min(260px, 75vw)", zIndex: 51,
-  background: "rgba(10, 0, 21, 0.94)",
-  backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-  borderLeft: `1px solid ${WHITE_ALPHA.LIGHT_BORDER}`,
-  display: "flex", flexDirection: "column",
-  animation: "slideInRight 0.25s ease-out",
-  overscrollBehavior: "contain",
-};
-const S_MOBILE_MENU_CLOSING: CSSProperties = {
-  ...S_MOBILE_MENU,
-  animation: `slideOutRight ${MENU_EXIT_MS}ms ease-in forwards`,
-};
-
-// Mobile: low-balance badge on hamburger button
-const S_MENU_BADGE: CSSProperties = {
-  position: "absolute", top: "4px", right: "4px",
-  width: "8px", height: "8px", borderRadius: "50%",
-  background: "var(--ling-error)",
-  border: "2px solid rgba(10, 0, 21, 0.8)",
-  pointerEvents: "none",
-};
-
-// Mobile menu: header with close button
-const S_MENU_HEADER: CSSProperties = {
-  display: "flex", justifyContent: "flex-end",
-  padding: "max(48px, calc(env(safe-area-inset-top, 0px) + 40px)) 12px 8px",
-};
-
-// Mobile menu: status row
-const S_MENU_STATUS: CSSProperties = {
-  display: "flex", alignItems: "center", gap: "8px",
-  padding: "8px 12px", flexWrap: "wrap",
-};
-
-// Mobile menu: action item button
-const S_MENU_ITEM: CSSProperties = {
-  display: "flex", alignItems: "center", gap: "12px",
-  padding: "14px 16px", borderRadius: "12px",
-  background: "transparent", border: "none",
-  color: "rgba(255,255,255,0.7)", fontSize: 15,
-  cursor: "pointer", width: "100%", textAlign: "left" as const,
-  fontFamily: "inherit",
-  transition: "background 0.15s ease",
-};
-
-// Mobile menu: separator
-const S_MENU_SEP: CSSProperties = {
-  height: 1, background: "rgba(255,255,255,0.06)",
-  margin: "4px 12px",
-};
-
-// Action button style variants (mobile/desktop × active/inactive)
-const _ACTION_BTN: CSSProperties = {
-  borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
-  cursor: "pointer", transition: "background 0.3s ease, border-color 0.3s ease, transform 0.12s ease, opacity 0.12s ease",
-  backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", padding: 0,
-};
-const S_BTN_D_OFF: CSSProperties = { ..._ACTION_BTN, width: "42px", height: "42px", background: WHITE_ALPHA.BUTTON_BG, border: `1px solid ${WHITE_ALPHA.BORDER}` };
-const S_BTN_D_ON: CSSProperties = { ..._ACTION_BTN, width: "42px", height: "42px", background: "var(--ling-purple-40)", border: "1px solid var(--ling-purple-60)" };
-const S_BTN_M_OFF: CSSProperties = { ..._ACTION_BTN, width: "44px", height: "44px", background: WHITE_ALPHA.BUTTON_BG, border: `1px solid ${WHITE_ALPHA.BORDER}` };
-const S_BTN_M_ON: CSSProperties = { ..._ACTION_BTN, width: "44px", height: "44px", background: "var(--ling-purple-40)", border: "1px solid var(--ling-purple-60)" };
-function btnStyle(mobile: boolean, active: boolean): CSSProperties {
-  if (mobile) return active ? S_BTN_M_ON : S_BTN_M_OFF;
-  return active ? S_BTN_D_ON : S_BTN_D_OFF;
-}
-
-// Chat area expand/collapse variants
-const _CHAT_INNER: CSSProperties = {
-  overflow: "hidden", position: "relative", pointerEvents: "auto",
-  transition: "max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-  willChange: "max-height, opacity",
-  maskImage: "linear-gradient(to bottom, transparent 0%, black 15%)",
-  WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 15%)",
-};
-const S_CHAT_D_OPEN: CSSProperties = { ..._CHAT_INNER, maxHeight: "40dvh", opacity: 1 };
-const S_CHAT_M_OPEN: CSSProperties = { ..._CHAT_INNER, maxHeight: "35dvh", opacity: 1 };
-const S_CHAT_CLOSED: CSSProperties = { ..._CHAT_INNER, maxHeight: "0px", opacity: 0 };
-function chatInnerStyle(mobile: boolean, expanded: boolean): CSSProperties {
-  if (!expanded) return S_CHAT_CLOSED;
-  return mobile ? S_CHAT_M_OPEN : S_CHAT_D_OPEN;
-}
-
-// Chat area outer — base for useMemo (kbOffset is numeric, needs runtime style)
-const S_CHAT_OUTER_BASE: CSSProperties = {
-  position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 25,
-  display: "flex", flexDirection: "column", pointerEvents: "none",
-};
-
-const S_EXPAND_HANDLE: CSSProperties = {
-  pointerEvents: "auto", display: "flex", justifyContent: "center",
-  padding: "6px 0", cursor: "pointer",
-};
-const S_INPUT_SECTION: CSSProperties = { flexShrink: 0, pointerEvents: "auto", position: "relative" as const };
-const S_CONSTELLATION_POS: CSSProperties = {
-  position: "absolute", bottom: "calc(100% + 12px)", left: 16, zIndex: 26, pointerEvents: "auto",
-};
-const S_INPUT_BAR_BG: CSSProperties = {
-  background: "rgba(10, 0, 21, 0.55)",
-  backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
-  borderTop: "1px solid var(--ling-purple-15)",
-};
-
-// Fallback styles for SectionErrorBoundary
-const S_FALLBACK_CHAT: CSSProperties = { padding: "16px", textAlign: "center", color: "rgba(255,255,255,0.4)", fontSize: 13 };
-const S_FALLBACK_INPUT: CSSProperties = { padding: "12px 16px", color: "rgba(255,255,255,0.3)", fontSize: 13, textAlign: "center" };
 
 // Landing → main content transition
 const S_MAIN_VISIBLE: CSSProperties = {
@@ -320,52 +128,25 @@ const S_MAIN_HIDDEN: CSSProperties = {
   transition: "opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
 };
 
-// Pre-created SVG icon elements — shared across all renders
-const ICON_CHAT = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-  </svg>
-);
-const ICON_MEMORY = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.58-3.25 3.93" />
-    <path d="M8.24 4.47A4 4 0 0 1 12 2" />
-    <path d="M12 9v1" />
-    <path d="M4.93 4.93l.7.7" />
-    <path d="M19.07 4.93l-.7.7" />
-    <path d="M12 22c-4.97 0-9-2.69-9-6v-2c0-3.31 4.03-6 9-6s9 2.69 9 6v2c0 3.31-4.03 6-9 6z" />
-  </svg>
-);
-const ICON_INFO = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10" />
-    <line x1="12" y1="16" x2="12" y2="12" />
-    <line x1="12" y1="8" x2="12.01" y2="8" />
-  </svg>
-);
-const ICON_CHEVRON_UP = (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(139,92,246,0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="18 15 12 9 6 15" />
-  </svg>
-);
-const ICON_MENU = (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="4" y1="7" x2="20" y2="7" />
-    <line x1="4" y1="12" x2="20" y2="12" />
-    <line x1="4" y1="17" x2="20" y2="17" />
-  </svg>
-);
-const ICON_CLOSE = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);
 
 function MainContent(): JSX.Element {
-  const { t } = useTranslation();
-  const [chatExpanded, setChatExpanded] = useState(true);
   const isMobile = useIsMobile();
+  const isDesktop = useIsDesktop();
+
+  // First-minute experience orchestration
+  const { phase: firstMinutePhase } = useFirstMinute();
+  // For new visitors on overlay (mobile/tablet): start collapsed, auto-expand at "inviting" phase
+  const [chatExpanded, setChatExpanded] = useState(() => {
+    const visitCount = parseInt(sessionStorage.getItem("ling-visit-count") || "0", 10);
+    return visitCount > 0; // returning visitors start expanded, new visitors start collapsed
+  });
+  const autoExpandedRef = useRef(false);
+  useEffect(() => {
+    if (firstMinutePhase === "inviting" && !autoExpandedRef.current && !isDesktop) {
+      autoExpandedRef.current = true;
+      setChatExpanded(true);
+    }
+  }, [firstMinutePhase, isDesktop]);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [memoryOpen, setMemoryOpen] = useState(false);
@@ -462,6 +243,7 @@ function MainContent(): JSX.Element {
   const toggleChat = useCallback(() => {
     setChatExpanded(prev => !prev);
   }, []);
+  const collapseChat = useCallback(() => setChatExpanded(false), []);
 
   // Stable open/close handlers — prevents defeating memo on ShortcutsOverlay, AboutOverlay, MemoryPanel
   const openMemory = useCallback(() => setMemoryOpen(true), []);
@@ -596,238 +378,36 @@ function MainContent(): JSX.Element {
   useKeyboardShortcuts(shortcuts);
   useAffinityIdleExpression();
 
-  // Memoize only the kbOffset-dependent style (numeric, can't pre-compute variants)
-  const chatOuterStyle = useMemo<CSSProperties>(() => ({
-    ...S_CHAT_OUTER_BASE,
-    transform: kbOffset > 0 ? `translateY(-${kbOffset}px)` : "none",
-    transition: kbOffset > 0 ? "none" : "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-  }), [kbOffset]);
-
   return (
-    <div style={S_ROOT}>
-      {/* ===== Layer -2: 实验状态栏 ===== */}
-      <SectionErrorBoundary name="ExperimentBar">
-        <ExperimentBar />
-      </SectionErrorBoundary>
-
-      {/* ===== Layer -1: 星空背景 ===== */}
-      <div style={S_LAYER_STARFIELD}>
-        <StarField />
-      </div>
-
-      {/* ===== Layer 0: Live2D 全屏 ===== */}
-      <SectionErrorBoundary name="Live2D">
-        <div style={S_LAYER_LIVE2D}>
-          <Live2D />
-        </div>
-      </SectionErrorBoundary>
-
-      {/* ===== Layer 0+: Live2D 点击粒子 ===== */}
-      <TapParticles />
-
-      {/* ===== Layer 0.5: 工具状态反馈层 ===== */}
-      <SectionErrorBoundary name="Effects">
-        <div style={S_LAYER_EFFECTS}>
-          <BackgroundReactor />
-          <AudioVisualizer />
-        </div>
-      </SectionErrorBoundary>
-
-      {/* ===== Layer 0.8: 加载骨架屏 ===== */}
-      <LoadingSkeleton />
-
-      {/* Live2D 已有内置 loading overlay (live2d.tsx)，不需要额外的 */}
-
-      {/* ===== Layer 1: 工具结果水晶 ===== */}
-      <SectionErrorBoundary name="CrystalField">
-        <CrystalField />
-      </SectionErrorBoundary>
-
-      {/* ===== Layer 1.8: 底部渐变遮罩 (Ground Plane) ===== */}
-      <div style={S_GROUND_GRADIENT} />
-
-      {/* ===== Layer 1.5: 右侧工具栏 ===== */}
-      {isMobile ? (
-        /* ── Mobile: connection dot + chat toggle + hamburger ── */
-        <div style={S_MOBILE_TRIGGER}>
-          <SectionErrorBoundary name="StatusGroup">
-            <ConnectionStatus />
-          </SectionErrorBoundary>
-          <button
-            className="ling-action-btn"
-            data-active={chatExpanded}
-            onClick={toggleChat}
-            aria-label={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}
-            aria-pressed={chatExpanded}
-            style={btnStyle(true, chatExpanded)}
-          >
-            {ICON_CHAT}
-          </button>
-          <button
-            ref={hamburgerRef}
-            className="ling-action-btn"
-            onClick={openMenu}
-            aria-label={t("ui.menu", "Menu")}
-            aria-expanded={menuOpen || menuClosing}
-            aria-haspopup="dialog"
-            style={{ ...btnStyle(true, menuOpen || menuClosing), position: "relative" as const }}
-          >
-            {ICON_MENU}
-            {showCreditsBadge && <div style={S_MENU_BADGE} />}
-          </button>
-        </div>
+    <>
+      {/* ===== Desktop split layout (≥ 1024px) ===== */}
+      {isDesktop ? (
+        <SplitLayout />
       ) : (
-        /* ── Desktop: unified capsule ── */
-        <div style={S_TOOLBAR_D}>
-          <SectionErrorBoundary name="Toolbar">
-            <div style={S_GROUP_D}>
-              <CreditsDisplay />
-              <AffinityBadge />
-              <ConnectionStatus />
-              <div style={S_TOOLBAR_DIVIDER} />
-              <button
-                className="ling-action-btn"
-                data-active={chatExpanded}
-                onClick={toggleChat}
-                aria-label={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}
-                aria-pressed={chatExpanded}
-                title={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}
-                style={btnStyle(false, chatExpanded)}
-              >
-                {ICON_CHAT}
-              </button>
-              <button
-                className="ling-action-btn"
-                data-active={memoryOpen}
-                onClick={openMemory}
-                aria-label={t("memory.title")}
-                title={t("memory.title")}
-                style={btnStyle(false, memoryOpen)}
-              >
-                {ICON_MEMORY}
-              </button>
-              <button
-                className="ling-action-btn"
-                data-active={aboutOpen}
-                onClick={openAbout}
-                aria-label={t("shortcuts.showAbout")}
-                title={t("shortcuts.showAbout")}
-                style={btnStyle(false, aboutOpen)}
-              >
-                {ICON_INFO}
-              </button>
-            </div>
-          </SectionErrorBoundary>
-        </div>
+        <OverlayLayout
+          isMobile={isMobile}
+          chatExpanded={chatExpanded}
+          kbOffset={kbOffset}
+          menuOpen={menuOpen}
+          menuClosing={menuClosing}
+          showCreditsBadge={showCreditsBadge}
+          memoryActive={memoryOpen}
+          aboutActive={aboutOpen}
+          toggleChat={toggleChat}
+          collapseChat={collapseChat}
+          openMenu={openMenu}
+          closeMenu={closeMenu}
+          openMemory={openMemory}
+          openAbout={openAbout}
+          handleMenuKeyDown={handleMenuKeyDown}
+          handleExpandKeyDown={handleExpandKeyDown}
+          hamburgerRef={hamburgerRef}
+          menuPanelRef={menuPanelRef}
+          firstMinutePhase={firstMinutePhase}
+        />
       )}
 
-      {/* ===== Mobile slide-in menu ===== */}
-      {(menuOpen || menuClosing) && isMobile && (
-        <>
-          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-          <div
-            aria-hidden="true"
-            style={{ ...S_MENU_BACKDROP, opacity: menuClosing ? 0 : 1, animation: menuClosing ? undefined : "pageFadeIn 0.2s ease-out" }}
-            onClick={closeMenu}
-          />
-          {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
-          <div
-            ref={menuPanelRef}
-            role="dialog"
-            aria-modal="true"
-            aria-label={t("ui.menu", "Menu")}
-            style={menuClosing ? S_MOBILE_MENU_CLOSING : S_MOBILE_MENU}
-            onKeyDown={handleMenuKeyDown}
-          >
-            <div style={S_MENU_HEADER}>
-              <button
-                className="ling-action-btn"
-                onClick={closeMenu}
-                aria-label={t("ui.close", "Close")}
-                style={btnStyle(true, false)}
-                autoFocus
-              >
-                {ICON_CLOSE}
-              </button>
-            </div>
-            <SectionErrorBoundary name="MenuStatus">
-              <div style={S_MENU_STATUS}>
-                <CreditsDisplay />
-                <AffinityBadge />
-                <ConnectionStatus />
-              </div>
-            </SectionErrorBoundary>
-            <div style={S_MENU_SEP} />
-            <button
-              className="ling-menu-item"
-              style={S_MENU_ITEM}
-              onClick={() => { openMemory(); closeMenu(); }}
-            >
-              {ICON_MEMORY}
-              <span>{t("memory.title")}</span>
-            </button>
-            <button
-              className="ling-menu-item"
-              style={S_MENU_ITEM}
-              onClick={() => { openAbout(); closeMenu(); }}
-            >
-              {ICON_INFO}
-              <span>{t("shortcuts.showAbout")}</span>
-            </button>
-          </div>
-        </>
-      )}
-
-      {/* ===== Layer 2: 浮动聊天区域 ===== */}
-      <div style={chatOuterStyle}>
-        <div style={chatInnerStyle(isMobile, chatExpanded)}>
-          <SectionErrorBoundary name="ChatArea" fallback={
-            <div style={S_FALLBACK_CHAT}>{t("error.chatRenderFailed")}</div>
-          }>
-            <Suspense fallback={null}>
-              <ChatArea />
-            </Suspense>
-          </SectionErrorBoundary>
-        </div>
-
-        {!chatExpanded && !isMobile && (
-          <div
-            role="button"
-            tabIndex={0}
-            aria-label={t("ui.expandChat")}
-            style={S_EXPAND_HANDLE}
-            onClick={toggleChat}
-            onKeyDown={handleExpandKeyDown}
-          >
-            {ICON_CHEVRON_UP}
-          </div>
-        )}
-
-        <div style={S_INPUT_SECTION}>
-          {/* 星座 — 浮在 InputBar 左上方 (lazy: defers framer-motion chunk) */}
-          {!isMobile && (
-            <SectionErrorBoundary name="Constellation">
-              <div style={S_CONSTELLATION_POS}>
-                <Suspense fallback={null}>
-                  <Constellation />
-                </Suspense>
-              </div>
-            </SectionErrorBoundary>
-          )}
-          <SectionErrorBoundary name="InputBar" fallback={
-            <div style={S_INPUT_BAR_BG}>
-              <div style={S_FALLBACK_INPUT}>{i18next.t("error.inputBarFailed")}</div>
-            </div>
-          }>
-            <div style={S_INPUT_BAR_BG}>
-              <InputBar />
-            </div>
-          </SectionErrorBoundary>
-        </div>
-
-      </div>
-
-      {/* ===== Layer 99: 快捷键帮助浮层 (lazy-loaded on first open) ===== */}
+      {/* ===== Layer 99: 快捷键帮助浮层 (shared across both layouts) ===== */}
       {shortcutsOpen && (
         <SectionErrorBoundary name="ShortcutsOverlay">
           <Suspense fallback={null}>
@@ -849,7 +429,7 @@ function MainContent(): JSX.Element {
           </Suspense>
         </SectionErrorBoundary>
       )}
-    </div>
+    </>
   );
 }
 
@@ -950,67 +530,31 @@ function MainApp() {
       </Helmet>
       <HreflangTags canonicalUrl="https://ling.sngxai.com/" />
       <StructuredData />
-      <UIProvider>
-      <ThemeProvider>
-      <ModeProvider>
-        <CameraProvider>
-          <ScreenCaptureProvider>
-            <CharacterConfigProvider>
-              <ChatHistoryProvider>
-                <AiStateProvider>
-                  <ProactiveSpeakProvider>
-                    <Live2DConfigProvider>
-                      <SubtitleProvider>
-                        <VADProvider>
-                          <BgUrlProvider>
-                            <GroupProvider>
-                              <BrowserProvider>
-                                <ToolStateProvider>
-                                  <TTSStateProvider>
-                                  <AffinityProvider>
-                                    <WebSocketHandler>
-                                      <div style={landingExiting || !showLanding ? S_MAIN_VISIBLE : S_MAIN_HIDDEN}>
-                                        <MainContent />
-                                      </div>
-                                    </WebSocketHandler>
-                                  </AffinityProvider>
-                                  </TTSStateProvider>
-                                </ToolStateProvider>
-                              </BrowserProvider>
-                            </GroupProvider>
-                          </BgUrlProvider>
-                        </VADProvider>
-                      </SubtitleProvider>
-                    </Live2DConfigProvider>
-                  </ProactiveSpeakProvider>
-                </AiStateProvider>
-              </ChatHistoryProvider>
-            </CharacterConfigProvider>
-          </ScreenCaptureProvider>
-        </CameraProvider>
-      </ModeProvider>
-      </ThemeProvider>
+      <Providers>
+        <div style={landingExiting || !showLanding ? S_MAIN_VISIBLE : S_MAIN_HIDDEN}>
+          <MainContent />
+        </div>
 
-      {showLanding && (
-        <Suspense fallback={null}>
-          <LandingAnimation onComplete={handleLandingComplete} />
-        </Suspense>
-      )}
-
-      <SectionErrorBoundary name="BillingOverlays">
-        <Suspense fallback={null}>
-          <PricingOverlay />
-          <InsufficientCreditsModal />
-        </Suspense>
-      </SectionErrorBoundary>
-      {showOnboarding && (
-        <SectionErrorBoundary name="Onboarding">
+        {showLanding && (
           <Suspense fallback={null}>
-            <PersonalizedOnboarding onComplete={closeOnboarding} />
+            <LandingAnimation onComplete={handleLandingComplete} />
+          </Suspense>
+        )}
+
+        <SectionErrorBoundary name="BillingOverlays">
+          <Suspense fallback={null}>
+            <PricingOverlay />
+            <InsufficientCreditsModal />
           </Suspense>
         </SectionErrorBoundary>
-      )}
-      </UIProvider>
+        {showOnboarding && (
+          <SectionErrorBoundary name="Onboarding">
+            <Suspense fallback={null}>
+              <PersonalizedOnboarding onComplete={closeOnboarding} />
+            </Suspense>
+          </SectionErrorBoundary>
+        )}
+      </Providers>
 
       <NetworkStatusBanner />
       <Toaster />

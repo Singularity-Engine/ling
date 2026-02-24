@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAffinityMeta } from "@/context/affinity-context";
 import { AFFINITY_LEVELS, DEFAULT_LEVEL } from "@/config/affinity-palette";
 import { LEVELS } from "@/hooks/use-affinity-engine";
+import { trackEvent } from "@/utils/track-event";
 // Keyframes moved to static index.css — no runtime injection needed.
 
 const PANEL_EXIT_DURATION = 200; // ms — matches fadeOutUp animation
@@ -116,12 +117,26 @@ const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPerce
   );
 };
 
+const LS_FIRST_VISIT_KEY = "ling-first-visit";
+
+function getDaysTogether(): number {
+  let stored = localStorage.getItem(LS_FIRST_VISIT_KEY);
+  if (!stored) {
+    stored = new Date().toISOString();
+    localStorage.setItem(LS_FIRST_VISIT_KEY, stored);
+    trackEvent("first_visit");
+  }
+  const firstVisit = new Date(stored).getTime();
+  return Math.max(1, Math.floor((Date.now() - firstVisit) / 86400000));
+}
+
 export const AffinityBadge = memo(() => {
   const { affinity, level, milestone } = useAffinityMeta();
   const [expanded, setExpanded] = useState(false);
   const [panelClosing, setPanelClosing] = useState(false);
   const panelCloseTimer = useRef<ReturnType<typeof setTimeout>>();
   const { t } = useTranslation();
+  const [daysTogether] = useState(getDaysTogether);
 
   const config = useMemo(() => AFFINITY_LEVELS[level] || AFFINITY_LEVELS[DEFAULT_LEVEL], [level]);
 
@@ -285,6 +300,11 @@ export const AffinityBadge = memo(() => {
               <div style={S_PROGRESS_TRACK} role="progressbar" aria-valuenow={Math.round(levelInfo.progressInLevel)} aria-valuemin={0} aria-valuemax={100}>
                 <div style={progressFillStyle} />
               </div>
+            </div>
+
+            {/* Relationship stats */}
+            <div style={{ display: "flex", gap: "12px", marginBottom: "12px", fontSize: "11px", color: "var(--ling-text-dim)" }}>
+              <span>{t("affinity.daysTogether", { count: daysTogether })}</span>
             </div>
 
             {/* Next level hint */}
