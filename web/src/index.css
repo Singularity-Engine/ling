@@ -326,6 +326,7 @@
 /* === 全局基础 === */
 html {
   background: var(--ling-bg-deep) !important;
+  transition: background-color 0.35s ease;
 }
 body, html {
   margin: 0;
@@ -338,6 +339,8 @@ body, html {
   color: var(--ling-body-color);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* 主题切换平滑过渡 */
+  transition: background-color 0.35s ease, color 0.35s ease;
 }
 
 /* 防止 iOS 橡皮筋滚动 */
@@ -1079,9 +1082,9 @@ canvas {
 .ling-load-more:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
 @keyframes chipFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes greetingBubbleIn { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
-.welcome-chip { transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease; }
-.welcome-chip:hover { background: var(--ling-purple-25) !important; border-color: var(--ling-purple-30) !important; transform: translateY(-1px); }
-.welcome-chip:active { transform: scale(0.97); }
+.welcome-chip { transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; }
+.welcome-chip:hover { background: var(--ling-purple-25) !important; border-color: var(--ling-purple-30) !important; transform: translateY(-2px) scale(1.03); box-shadow: 0 4px 12px var(--ling-purple-15); }
+.welcome-chip:active { transform: scale(0.97); box-shadow: none; }
 .welcome-chip:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
 /* Glassmorphism — moved from JS inline styles to CSS so mobile media query
  * can disable it.  backdrop-filter: blur() on every bubble (50+ items) is

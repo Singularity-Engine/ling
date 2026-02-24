@@ -71,8 +71,8 @@ const S_COPY_BASE: CSSProperties = {
 };
 export const S_COPY_AI: CSSProperties = { ...S_COPY_BASE, right: "-36px" };
 export const S_COPY_USER: CSSProperties = { ...S_COPY_BASE, left: "-36px" };
-export const S_COPY_AI_DONE: CSSProperties = { ...S_COPY_AI, color: "var(--ling-success)" };
-export const S_COPY_USER_DONE: CSSProperties = { ...S_COPY_USER, color: "var(--ling-success)" };
+export const S_COPY_AI_DONE: CSSProperties = { ...S_COPY_AI, color: "var(--ling-success)", transform: "scale(1.15)" };
+export const S_COPY_USER_DONE: CSSProperties = { ...S_COPY_USER, color: "var(--ling-success)", transform: "scale(1.15)" };
 
 export const S_COLLAPSE_MASK: CSSProperties = {
   position: "absolute", bottom: 0, left: 0, right: 0, height: "64px",

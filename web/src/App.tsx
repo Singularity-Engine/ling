@@ -382,7 +382,7 @@ function MainContent(): JSX.Element {
     <>
       {/* ===== Desktop split layout (≥ 1024px) ===== */}
       {isDesktop ? (
-        <SplitLayout />
+        <SplitLayout firstMinutePhase={firstMinutePhase} />
       ) : (
         <OverlayLayout
           isMobile={isMobile}
@@ -391,8 +391,8 @@ function MainContent(): JSX.Element {
           menuOpen={menuOpen}
           menuClosing={menuClosing}
           showCreditsBadge={showCreditsBadge}
-          memoryActive={memoryOpen}
-          aboutActive={aboutOpen}
+          memoryOpen={memoryOpen}
+          aboutOpen={aboutOpen}
           toggleChat={toggleChat}
           collapseChat={collapseChat}
           openMenu={openMenu}

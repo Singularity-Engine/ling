@@ -243,9 +243,11 @@
 
 /* ── First-minute experience: stagger entrance ── */
 
-/* During loading/greeting: hide chips, dim text */
+/* During loading/greeting: hide text + chips */
 .root[data-first-minute="loading"] .emptyText,
-.root[data-first-minute="loading"] .emptyChips {
+.root[data-first-minute="loading"] .emptyChips,
+.root[data-first-minute="greeting"] .emptyText,
+.root[data-first-minute="greeting"] .emptyChips {
   opacity: 0;
   transform: translateY(8px);
 }
@@ -254,16 +256,6 @@
 .root[data-first-minute="greeting"] .emptyLogo {
   animation: splitEmptyBreathe 2s ease-in-out infinite;
   opacity: 0.8;
-}
-
-.root[data-first-minute="greeting"] .emptyText {
-  opacity: 0;
-  transform: translateY(8px);
-}
-
-.root[data-first-minute="greeting"] .emptyChips {
-  opacity: 0;
-  transform: translateY(8px);
 }
 
 /* During inviting: text + chips fade in with stagger */

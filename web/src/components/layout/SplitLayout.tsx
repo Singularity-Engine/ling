@@ -17,7 +17,6 @@ import { SuggestionChips } from "../chat/SuggestionChips";
 import { useChatMessagesState, useChatMessagesActions } from "@/context/chat-history-context";
 import { useWebSocketState, useWebSocketActions } from "@/context/websocket-context";
 import { useAiStateRead } from "@/context/ai-state-context";
-import { useFirstMinute } from "@/hooks/use-first-minute";
 import styles from "./SplitLayout.module.css";
 
 const ChatArea = lazy(() => import("../chat/ChatArea").then(m => ({ default: m.ChatArea })));
@@ -27,12 +26,17 @@ const LS_KEY = "ling-split-width";
 const EMPTY_IMAGES: never[] = [];
 const clampSplitWidth = (w: number) => Math.max(360, Math.min(500, w));
 
+interface SplitLayoutProps {
+  /** First-minute experience phase — passed from MainContent to avoid duplicate timers */
+  firstMinutePhase?: string;
+}
+
 /**
  * SplitLayout — Desktop (≥1024px) left-right split.
  * Left: Live2D character panel (fixed px width, 360-500).
  * Right: Chat + toolbar.
  */
-export function SplitLayout(): JSX.Element {
+export function SplitLayout({ firstMinutePhase }: SplitLayoutProps): JSX.Element {
   const { t } = useTranslation();
   const { messages } = useChatMessagesState();
   const { appendHumanMessage } = useChatMessagesActions();
@@ -42,9 +46,6 @@ export function SplitLayout(): JSX.Element {
   const isConnected = wsState === "OPEN";
   const isConnectedRef = useRef(isConnected);
   isConnectedRef.current = isConnected;
-
-  // First-minute experience phase — used for stagger entrance on empty state
-  const { phase: firstMinutePhase } = useFirstMinute();
 
   // Split width state with localStorage persistence
   const [splitWidth, setSplitWidth] = useState(() => {

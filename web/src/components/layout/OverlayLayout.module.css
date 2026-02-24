@@ -1,0 +1,330 @@
+/* OverlayLayout — Mobile/tablet overlay mode */
+
+/* ── Root ── */
+.root {
+  position: relative;
+  height: 100dvh;
+  width: 100vw;
+  background: var(--ling-bg-deep);
+  overflow: hidden;
+}
+
+/* ── Absolute layers ── */
+.layerStarfield {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  contain: strict;
+}
+
+.layerLive2d {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  contain: strict;
+}
+
+.layerEffects {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+}
+
+/* ── Ground gradient ── */
+.groundGradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 58dvh;
+  z-index: 22;
+  pointer-events: none;
+  contain: strict;
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    rgba(10, 0, 21, 0.02) 12%,
+    rgba(10, 0, 21, 0.07) 24%,
+    rgba(10, 0, 21, 0.16) 36%,
+    rgba(10, 0, 21, 0.28) 48%,
+    rgba(10, 0, 21, 0.42) 60%,
+    rgba(10, 0, 21, 0.56) 72%,
+    rgba(10, 0, 21, 0.68) 84%,
+    rgba(10, 0, 21, 0.78) 94%,
+    rgba(10, 0, 21, 0.82) 100%
+  );
+}
+
+/* ── Desktop/tablet toolbar ── */
+.toolbarDesktop {
+  position: absolute;
+  top: 52px;
+  right: 12px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.toolbarGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 6px;
+}
+
+.toolbarDivider {
+  width: 24px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 4px 0;
+}
+
+/* ── Mobile trigger buttons ── */
+.mobileTrigger {
+  position: absolute;
+  top: max(44px, calc(env(safe-area-inset-top, 0px) + 36px));
+  right: max(8px, env(safe-area-inset-right, 0px));
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Action buttons (shared base) ── */
+.actionBtn {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s ease, border-color 0.3s ease,
+              transform 0.12s ease, opacity 0.12s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 0;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.actionBtn[data-active="true"] {
+  background: var(--ling-purple-40);
+  border-color: var(--ling-purple-60);
+}
+
+.actionBtnDesktop {
+  width: 42px;
+  height: 42px;
+}
+
+.actionBtnMobile {
+  width: 44px;
+  height: 44px;
+}
+
+/* Hamburger button: relative position for badge overlay */
+.hamburgerBtn {
+  position: relative;
+}
+
+/* ── Mobile menu ── */
+.menuBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: opacity 250ms ease;
+  touch-action: none;
+  animation: pageFadeIn 0.2s ease-out;
+}
+
+.menuBackdropClosing {
+  opacity: 0;
+  animation: none;
+}
+
+.mobileMenu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(260px, 75vw);
+  z-index: 51;
+  background: rgba(10, 0, 21, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  animation: slideInRight 0.25s ease-out;
+  overscroll-behavior: contain;
+}
+
+.mobileMenuClosing {
+  animation: slideOutRight 250ms ease-in forwards;
+}
+
+.menuBadge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ling-error);
+  border: 2px solid rgba(10, 0, 21, 0.8);
+  pointer-events: none;
+}
+
+.menuHeader {
+  display: flex;
+  justify-content: flex-end;
+  padding: max(48px, calc(env(safe-area-inset-top, 0px) + 40px)) 12px 8px;
+}
+
+.menuStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  flex-wrap: wrap;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 15px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+
+.menuSep {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 4px 12px;
+}
+
+/* ── Chat area ── */
+.chatOuter {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  transform: translateY(calc(-1 * var(--kb-offset, 0px)));
+  transition: var(--kb-transition, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.chatInner {
+  overflow: hidden;
+  position: relative;
+  pointer-events: auto;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: max-height, opacity;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 25%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 25%);
+}
+
+.chatInner[data-state="closed"] {
+  max-height: 0;
+  opacity: 0;
+}
+
+.chatInner[data-state="desktop-open"] {
+  max-height: 40dvh;
+  opacity: 1;
+}
+
+.chatInner[data-state="mobile-open"] {
+  max-height: 50dvh;
+  opacity: 1;
+}
+
+.expandHandle {
+  pointer-events: auto;
+  display: flex;
+  justify-content: center;
+  padding: 6px 0;
+  cursor: pointer;
+}
+
+/* ── Input section ── */
+.inputSection {
+  flex-shrink: 0;
+  pointer-events: auto;
+  position: relative;
+}
+
+.constellationWrap {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 16px;
+  z-index: 26;
+  pointer-events: auto;
+}
+
+.inputBarBg {
+  background: rgba(10, 0, 21, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--ling-purple-15);
+}
+
+/* ── Fallback states ── */
+.chatFallback {
+  padding: var(--ling-space-4);
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: var(--ling-font-sm);
+}
+
+.inputFallback {
+  padding: 12px var(--ling-space-4);
+  color: rgba(255, 255, 255, 0.3);
+  font-size: var(--ling-font-sm);
+  text-align: center;
+}
+
+/* ── First-minute experience (overlay mode) ── */
+
+/* Greeting phase: gentle ground gradient pulse */
+.root[data-first-minute="greeting"] .groundGradient {
+  animation: overlayGroundPulse 3s ease-in-out infinite;
+}
+
+/* Inviting phase: chat outer entrance */
+.root[data-first-minute="inviting"] .chatOuter {
+  animation: overlaySlideUp 0.5s var(--ling-ease-enter) both;
+}
+
+@keyframes overlayGroundPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+@keyframes overlaySlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(calc(-1 * var(--kb-offset, 0px))); }
+}

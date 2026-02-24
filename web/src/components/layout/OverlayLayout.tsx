@@ -24,161 +24,10 @@ import { AudioVisualizer } from "../effects/AudioVisualizer";
 import { CrystalField } from "../crystal/CrystalField";
 import { TapParticles } from "../effects/TapParticles";
 import { LoadingSkeleton } from "../loading/LoadingSkeleton";
-import { OVERLAY_COLORS, WHITE_ALPHA } from "@/constants/colors";
+import styles from "./OverlayLayout.module.css";
 
 const ChatArea = lazy(() => import("../chat/ChatArea").then(m => ({ default: m.ChatArea })));
 const Constellation = lazy(() => import("../ability/Constellation").then(m => ({ default: m.Constellation })));
-
-// ─── Inline style constants ───────────────────────────────────────────────────
-
-const S_ROOT: CSSProperties = {
-  position: "relative", height: "100dvh", width: "100vw",
-  background: "var(--ling-bg-deep)", overflow: "hidden",
-};
-const S_LAYER_STARFIELD: CSSProperties = { position: "absolute", inset: 0, zIndex: -1, contain: "strict" };
-const S_LAYER_LIVE2D: CSSProperties = { position: "absolute", inset: 0, zIndex: 0, contain: "strict" };
-const S_LAYER_EFFECTS: CSSProperties = { position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none", overflow: "hidden", contain: "strict" };
-
-const S_GROUND_GRADIENT: CSSProperties = {
-  position: "absolute", bottom: 0, left: 0, right: 0,
-  height: "58dvh", zIndex: 22, pointerEvents: "none", contain: "strict",
-  background: "linear-gradient(to bottom, transparent 0%, rgba(10,0,21,0.02) 12%, rgba(10,0,21,0.07) 24%, rgba(10,0,21,0.16) 36%, rgba(10,0,21,0.28) 48%, rgba(10,0,21,0.42) 60%, rgba(10,0,21,0.56) 72%, rgba(10,0,21,0.68) 84%, rgba(10,0,21,0.78) 94%, rgba(10,0,21,0.82) 100%)",
-};
-
-const S_TOOLBAR_D: CSSProperties = {
-  position: "absolute", top: "52px", right: "12px", zIndex: 20,
-  display: "flex", flexDirection: "column", alignItems: "center", gap: "12px",
-};
-const _GROUP_BASE: CSSProperties = {
-  display: "flex", flexDirection: "column", alignItems: "center",
-  padding: "6px", borderRadius: "20px",
-  background: OVERLAY_COLORS.LIGHT, border: `1px solid ${WHITE_ALPHA.LIGHT_BORDER}`,
-};
-const S_GROUP_D: CSSProperties = { ..._GROUP_BASE, gap: "6px" };
-
-const S_TOOLBAR_DIVIDER: CSSProperties = {
-  width: "24px", height: "1px",
-  background: "rgba(255,255,255,0.08)",
-  margin: "4px 0",
-};
-
-const S_MOBILE_TRIGGER: CSSProperties = {
-  position: "absolute",
-  top: "max(44px, calc(env(safe-area-inset-top, 0px) + 36px))",
-  right: "max(8px, env(safe-area-inset-right, 0px))",
-  zIndex: 20,
-  display: "flex", alignItems: "center", gap: "6px",
-};
-
-const MENU_EXIT_MS = 250;
-
-const S_MENU_BACKDROP: CSSProperties = {
-  position: "fixed", inset: 0, zIndex: 50,
-  background: "rgba(0,0,0,0.4)",
-  backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
-  transition: `opacity ${MENU_EXIT_MS}ms ease`,
-  touchAction: "none",
-};
-
-const S_MOBILE_MENU: CSSProperties = {
-  position: "fixed", top: 0, right: 0, bottom: 0,
-  width: "min(260px, 75vw)", zIndex: 51,
-  background: "rgba(10, 0, 21, 0.94)",
-  backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-  borderLeft: `1px solid ${WHITE_ALPHA.LIGHT_BORDER}`,
-  display: "flex", flexDirection: "column",
-  animation: "slideInRight 0.25s ease-out",
-  overscrollBehavior: "contain",
-};
-const S_MOBILE_MENU_CLOSING: CSSProperties = {
-  ...S_MOBILE_MENU,
-  animation: `slideOutRight ${MENU_EXIT_MS}ms ease-in forwards`,
-};
-
-const S_MENU_BADGE: CSSProperties = {
-  position: "absolute", top: "4px", right: "4px",
-  width: "8px", height: "8px", borderRadius: "50%",
-  background: "var(--ling-error)",
-  border: "2px solid rgba(10, 0, 21, 0.8)",
-  pointerEvents: "none",
-};
-
-const S_MENU_HEADER: CSSProperties = {
-  display: "flex", justifyContent: "flex-end",
-  padding: "max(48px, calc(env(safe-area-inset-top, 0px) + 40px)) 12px 8px",
-};
-
-const S_MENU_STATUS: CSSProperties = {
-  display: "flex", alignItems: "center", gap: "8px",
-  padding: "8px 12px", flexWrap: "wrap",
-};
-
-const S_MENU_ITEM: CSSProperties = {
-  display: "flex", alignItems: "center", gap: "12px",
-  padding: "14px 16px", borderRadius: "12px",
-  background: "transparent", border: "none",
-  color: "rgba(255,255,255,0.7)", fontSize: 15,
-  cursor: "pointer", width: "100%", textAlign: "left" as const,
-  fontFamily: "inherit",
-  transition: "background 0.15s ease",
-};
-
-const S_MENU_SEP: CSSProperties = {
-  height: 1, background: "rgba(255,255,255,0.06)",
-  margin: "4px 12px",
-};
-
-const _ACTION_BTN: CSSProperties = {
-  borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
-  cursor: "pointer", transition: "background 0.3s ease, border-color 0.3s ease, transform 0.12s ease, opacity 0.12s ease",
-  backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", padding: 0,
-};
-const S_BTN_D_OFF: CSSProperties = { ..._ACTION_BTN, width: "42px", height: "42px", background: WHITE_ALPHA.BUTTON_BG, border: `1px solid ${WHITE_ALPHA.BORDER}` };
-const S_BTN_D_ON: CSSProperties = { ..._ACTION_BTN, width: "42px", height: "42px", background: "var(--ling-purple-40)", border: "1px solid var(--ling-purple-60)" };
-const S_BTN_M_OFF: CSSProperties = { ..._ACTION_BTN, width: "44px", height: "44px", background: WHITE_ALPHA.BUTTON_BG, border: `1px solid ${WHITE_ALPHA.BORDER}` };
-const S_BTN_M_ON: CSSProperties = { ..._ACTION_BTN, width: "44px", height: "44px", background: "var(--ling-purple-40)", border: "1px solid var(--ling-purple-60)" };
-function btnStyle(mobile: boolean, active: boolean): CSSProperties {
-  if (mobile) return active ? S_BTN_M_ON : S_BTN_M_OFF;
-  return active ? S_BTN_D_ON : S_BTN_D_OFF;
-}
-
-const _CHAT_INNER: CSSProperties = {
-  overflow: "hidden", position: "relative", pointerEvents: "auto",
-  transition: "max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-  willChange: "max-height, opacity",
-  maskImage: "linear-gradient(to bottom, transparent 0%, black 25%)",
-  WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 25%)",
-};
-const S_CHAT_D_OPEN: CSSProperties = { ..._CHAT_INNER, maxHeight: "40dvh", opacity: 1 };
-const S_CHAT_M_OPEN: CSSProperties = { ..._CHAT_INNER, maxHeight: "50dvh", opacity: 1 };
-const S_CHAT_CLOSED: CSSProperties = { ..._CHAT_INNER, maxHeight: "0px", opacity: 0 };
-function chatInnerStyle(mobile: boolean, expanded: boolean): CSSProperties {
-  if (!expanded) return S_CHAT_CLOSED;
-  return mobile ? S_CHAT_M_OPEN : S_CHAT_D_OPEN;
-}
-
-const S_CHAT_OUTER_BASE: CSSProperties = {
-  position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 25,
-  display: "flex", flexDirection: "column", pointerEvents: "none",
-};
-
-const S_EXPAND_HANDLE: CSSProperties = {
-  pointerEvents: "auto", display: "flex", justifyContent: "center",
-  padding: "6px 0", cursor: "pointer",
-};
-
-const S_INPUT_SECTION: CSSProperties = { flexShrink: 0, pointerEvents: "auto", position: "relative" as const };
-const S_CONSTELLATION_POS: CSSProperties = {
-  position: "absolute", bottom: "calc(100% + 12px)", left: 16, zIndex: 26, pointerEvents: "auto",
-};
-const S_INPUT_BAR_BG: CSSProperties = {
-  background: "rgba(10, 0, 21, 0.55)",
-  backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
-  borderTop: "1px solid var(--ling-purple-15)",
-};
-
-const S_FALLBACK_CHAT: CSSProperties = { padding: "16px", textAlign: "center", color: "rgba(255,255,255,0.4)", fontSize: 13 };
-const S_FALLBACK_INPUT: CSSProperties = { padding: "12px 16px", color: "rgba(255,255,255,0.3)", fontSize: 13, textAlign: "center" };
 
 // ─── Icon constants ───────────────────────────────────────────────────────────
 
@@ -223,6 +72,19 @@ const ICON_CLOSE = (
   </svg>
 );
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Button className: global ling-action-btn + module size class */
+function btnClass(mobile: boolean): string {
+  return `ling-action-btn ${styles.actionBtn} ${mobile ? styles.actionBtnMobile : styles.actionBtnDesktop}`;
+}
+
+/** Chat inner data-state attribute for CSS-driven max-height */
+function chatState(mobile: boolean, expanded: boolean): string {
+  if (!expanded) return "closed";
+  return mobile ? "mobile-open" : "desktop-open";
+}
+
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 export interface OverlayLayoutProps {
@@ -232,8 +94,8 @@ export interface OverlayLayoutProps {
   menuOpen: boolean;
   menuClosing: boolean;
   showCreditsBadge: boolean;
-  memoryActive: boolean;
-  aboutActive: boolean;
+  memoryOpen: boolean;
+  aboutOpen: boolean;
   toggleChat: () => void;
   collapseChat: () => void;
   openMenu: () => void;
@@ -257,8 +119,8 @@ export const OverlayLayout = React.memo(function OverlayLayout({
   menuOpen,
   menuClosing,
   showCreditsBadge,
-  memoryActive,
-  aboutActive,
+  memoryOpen,
+  aboutOpen,
   toggleChat,
   collapseChat,
   openMenu,
@@ -273,27 +135,27 @@ export const OverlayLayout = React.memo(function OverlayLayout({
 }: OverlayLayoutProps) {
   const { t } = useTranslation();
 
-  const chatOuterStyle = useMemo<CSSProperties>(() => ({
-    ...S_CHAT_OUTER_BASE,
-    transform: kbOffset > 0 ? `translateY(-${kbOffset}px)` : "none",
-    transition: kbOffset > 0 ? "none" : "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-  }), [kbOffset]);
+  // CSS variables for keyboard offset — drives chatOuter transform via CSS
+  const chatOuterVars = useMemo<CSSProperties>(() => ({
+    '--kb-offset': kbOffset > 0 ? `${kbOffset}px` : '0px',
+    '--kb-transition': kbOffset > 0 ? 'none' : undefined,
+  } as CSSProperties), [kbOffset]);
 
   return (
-    <div style={S_ROOT} data-first-minute={firstMinutePhase}>
+    <div className={styles.root} data-first-minute={firstMinutePhase}>
       {/* ===== Layer -2: ExperimentBar ===== */}
       <SectionErrorBoundary name="ExperimentBar">
         <ExperimentBar />
       </SectionErrorBoundary>
 
       {/* ===== Layer -1: StarField ===== */}
-      <div style={S_LAYER_STARFIELD}>
+      <div className={styles.layerStarfield}>
         <StarField />
       </div>
 
       {/* ===== Layer 0: Live2D ===== */}
       <SectionErrorBoundary name="Live2D">
-        <div style={S_LAYER_LIVE2D}>
+        <div className={styles.layerLive2d}>
           <Live2D />
         </div>
       </SectionErrorBoundary>
@@ -303,7 +165,7 @@ export const OverlayLayout = React.memo(function OverlayLayout({
 
       {/* ===== Layer 0.5: Effects ===== */}
       <SectionErrorBoundary name="Effects">
-        <div style={S_LAYER_EFFECTS}>
+        <div className={styles.layerEffects}>
           <BackgroundReactor />
           <AudioVisualizer />
         </div>
@@ -318,75 +180,71 @@ export const OverlayLayout = React.memo(function OverlayLayout({
       </SectionErrorBoundary>
 
       {/* ===== Layer 1.8: Ground gradient ===== */}
-      <div style={S_GROUND_GRADIENT} />
+      <div className={styles.groundGradient} />
 
       {/* ===== Layer 1.5: Toolbar ===== */}
       {isMobile ? (
         /* ── Mobile: connection dot + chat toggle + hamburger ── */
-        <div style={S_MOBILE_TRIGGER}>
+        <div className={styles.mobileTrigger}>
           <SectionErrorBoundary name="StatusGroup">
             <ConnectionStatus />
           </SectionErrorBoundary>
           <button
-            className="ling-action-btn"
+            className={btnClass(true)}
             data-active={chatExpanded}
             onClick={toggleChat}
             aria-label={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}
             aria-pressed={chatExpanded}
-            style={btnStyle(true, chatExpanded)}
           >
             {ICON_CHAT}
           </button>
           <button
             ref={hamburgerRef}
-            className="ling-action-btn"
+            className={`${btnClass(true)} ${styles.hamburgerBtn}`}
+            data-active={menuOpen || menuClosing}
             onClick={openMenu}
             aria-label={t("ui.menu", "Menu")}
             aria-expanded={menuOpen || menuClosing}
             aria-haspopup="dialog"
-            style={{ ...btnStyle(true, menuOpen || menuClosing), position: "relative" as const }}
           >
             {ICON_MENU}
-            {showCreditsBadge && <div style={S_MENU_BADGE} />}
+            {showCreditsBadge && <div className={styles.menuBadge} />}
           </button>
         </div>
       ) : (
         /* ── Tablet: unified capsule (non-split desktop) ── */
-        <div style={S_TOOLBAR_D}>
+        <div className={styles.toolbarDesktop}>
           <SectionErrorBoundary name="Toolbar">
-            <div style={S_GROUP_D}>
+            <div className={styles.toolbarGroup}>
               <CreditsDisplay />
               <AffinityBadge />
               <ConnectionStatus />
-              <div style={S_TOOLBAR_DIVIDER} />
+              <div className={styles.toolbarDivider} />
               <button
-                className="ling-action-btn"
+                className={btnClass(false)}
                 data-active={chatExpanded}
                 onClick={toggleChat}
                 aria-label={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}
                 aria-pressed={chatExpanded}
                 title={chatExpanded ? t("ui.collapseChat") : t("ui.expandChat")}
-                style={btnStyle(false, chatExpanded)}
               >
                 {ICON_CHAT}
               </button>
               <button
-                className="ling-action-btn"
-                data-active={memoryActive}
+                className={btnClass(false)}
+                data-active={memoryOpen}
                 onClick={openMemory}
                 aria-label={t("memory.title")}
                 title={t("memory.title")}
-                style={btnStyle(false, memoryActive)}
               >
                 {ICON_MEMORY}
               </button>
               <button
-                className="ling-action-btn"
-                data-active={aboutActive}
+                className={btnClass(false)}
+                data-active={aboutOpen}
                 onClick={openAbout}
                 aria-label={t("shortcuts.showAbout")}
                 title={t("shortcuts.showAbout")}
-                style={btnStyle(false, aboutActive)}
               >
                 {ICON_INFO}
               </button>
@@ -401,7 +259,7 @@ export const OverlayLayout = React.memo(function OverlayLayout({
           {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
           <div
             aria-hidden="true"
-            style={{ ...S_MENU_BACKDROP, opacity: menuClosing ? 0 : 1, animation: menuClosing ? undefined : "pageFadeIn 0.2s ease-out" }}
+            className={`${styles.menuBackdrop} ${menuClosing ? styles.menuBackdropClosing : ""}`}
             onClick={closeMenu}
           />
           {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
@@ -410,39 +268,36 @@ export const OverlayLayout = React.memo(function OverlayLayout({
             role="dialog"
             aria-modal="true"
             aria-label={t("ui.menu", "Menu")}
-            style={menuClosing ? S_MOBILE_MENU_CLOSING : S_MOBILE_MENU}
+            className={`${styles.mobileMenu} ${menuClosing ? styles.mobileMenuClosing : ""}`}
             onKeyDown={handleMenuKeyDown}
           >
-            <div style={S_MENU_HEADER}>
+            <div className={styles.menuHeader}>
               <button
-                className="ling-action-btn"
+                className={btnClass(true)}
                 onClick={closeMenu}
                 aria-label={t("ui.close", "Close")}
-                style={btnStyle(true, false)}
                 autoFocus
               >
                 {ICON_CLOSE}
               </button>
             </div>
             <SectionErrorBoundary name="MenuStatus">
-              <div style={S_MENU_STATUS}>
+              <div className={styles.menuStatus}>
                 <CreditsDisplay />
                 <AffinityBadge />
                 <ConnectionStatus />
               </div>
             </SectionErrorBoundary>
-            <div style={S_MENU_SEP} />
+            <div className={styles.menuSep} />
             <button
-              className="ling-menu-item"
-              style={S_MENU_ITEM}
+              className={`ling-menu-item ${styles.menuItem}`}
               onClick={() => { openMemory(); closeMenu(); }}
             >
               {ICON_MEMORY}
               <span>{t("memory.title")}</span>
             </button>
             <button
-              className="ling-menu-item"
-              style={S_MENU_ITEM}
+              className={`ling-menu-item ${styles.menuItem}`}
               onClick={() => { openAbout(); closeMenu(); }}
             >
               {ICON_INFO}
@@ -453,10 +308,10 @@ export const OverlayLayout = React.memo(function OverlayLayout({
       )}
 
       {/* ===== Layer 2: Floating chat area ===== */}
-      <div style={chatOuterStyle}>
-        <div style={chatInnerStyle(isMobile, chatExpanded)}>
+      <div className={styles.chatOuter} style={chatOuterVars}>
+        <div className={styles.chatInner} data-state={chatState(isMobile, chatExpanded)}>
           <SectionErrorBoundary name="ChatArea" fallback={
-            <div style={S_FALLBACK_CHAT}>{t("error.chatRenderFailed")}</div>
+            <div className={styles.chatFallback}>{t("error.chatRenderFailed")}</div>
           }>
             <Suspense fallback={null}>
               <ChatArea onCollapse={isMobile ? collapseChat : undefined} />
@@ -469,7 +324,7 @@ export const OverlayLayout = React.memo(function OverlayLayout({
             role="button"
             tabIndex={0}
             aria-label={t("ui.expandChat")}
-            style={S_EXPAND_HANDLE}
+            className={styles.expandHandle}
             onClick={toggleChat}
             onKeyDown={handleExpandKeyDown}
           >
@@ -477,11 +332,11 @@ export const OverlayLayout = React.memo(function OverlayLayout({
           </div>
         )}
 
-        <div style={S_INPUT_SECTION}>
+        <div className={styles.inputSection}>
           {/* Constellation — floats above InputBar (lazy: defers framer-motion chunk) */}
           {!isMobile && (
             <SectionErrorBoundary name="Constellation">
-              <div style={S_CONSTELLATION_POS}>
+              <div className={styles.constellationWrap}>
                 <Suspense fallback={null}>
                   <Constellation />
                 </Suspense>
@@ -489,11 +344,11 @@ export const OverlayLayout = React.memo(function OverlayLayout({
             </SectionErrorBoundary>
           )}
           <SectionErrorBoundary name="InputBar" fallback={
-            <div style={S_INPUT_BAR_BG}>
-              <div style={S_FALLBACK_INPUT}>{i18next.t("error.inputBarFailed")}</div>
+            <div className={styles.inputBarBg}>
+              <div className={styles.inputFallback}>{i18next.t("error.inputBarFailed")}</div>
             </div>
           }>
-            <div style={S_INPUT_BAR_BG}>
+            <div className={styles.inputBarBg}>
               <InputBar />
             </div>
           </SectionErrorBoundary>
