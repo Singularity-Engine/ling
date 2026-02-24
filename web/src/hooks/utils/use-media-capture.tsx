@@ -1,10 +1,9 @@
-/* eslint-disable operator-assignment */
-/* eslint-disable object-shorthand */
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCamera } from '@/context/CameraContext';
 import { useScreenCaptureContext } from '@/context/ScreenCaptureContext';
 import { toaster } from "@/components/ui/toaster";
+import { createLogger } from '@/utils/logger';
 import {
   IMAGE_COMPRESSION_QUALITY_KEY,
   DEFAULT_IMAGE_COMPRESSION_QUALITY,
@@ -24,6 +23,8 @@ interface ImageData {
   data: string;
   mime_type: string;
 }
+
+const log = createLogger('MediaCapture');
 
 export function useMediaCapture() {
   const { t } = useTranslation();
@@ -72,7 +73,7 @@ export function useMediaCapture() {
 
       const maxWidth = getImageMaxWidth();
       if (maxWidth > 0 && width > maxWidth) {
-        height = (maxWidth / width) * height;
+        height *= maxWidth / width;
         width = maxWidth;
       }
 
@@ -80,7 +81,7 @@ export function useMediaCapture() {
       canvas.height = height;
       const ctx = canvas.getContext('2d');
       if (!ctx) {
-        console.error('Failed to get canvas context');
+        log.error('Failed to get canvas context');
         return null;
       }
 
@@ -88,9 +89,9 @@ export function useMediaCapture() {
       const quality = getCompressionQuality();
       return canvas.toDataURL('image/jpeg', quality);
     } catch (error) {
-      console.error(`Error capturing ${source} frame:`, error);
+      log.error(`Error capturing ${source} frame:`, error);
       toaster.create({
-        title: `${t('error.failedCapture', { source: source })}: ${error}`,
+        title: `${t('error.failedCapture', { source })}: ${error}`,
         type: 'error',
         duration: 2000,
       });

@@ -6,6 +6,7 @@ import { updateModelConfig } from '../../../WebSDK/src/lappdefine';
 import { LAppDelegate } from '../../../WebSDK/src/lappdelegate';
 import { initializeLive2D } from '@cubismsdksamples/main';
 import { useMode } from '@/context/ModeContext';
+import { createLogger } from '@/utils/logger';
 
 interface UseLive2DModelProps {
   modelInfo: ModelInfo | undefined;
@@ -16,6 +17,8 @@ interface Position {
   x: number;
   y: number;
 }
+
+const log = createLogger('Live2DModel');
 
 // Thresholds for tap vs drag detection
 const TAP_DURATION_THRESHOLD_MS = 200; // Max duration for a tap
@@ -44,7 +47,7 @@ function parseModelUrl(url: string): { baseUrl: string; modelDir: string; modelF
 
     return { baseUrl, modelDir, modelFileName };
   } catch (error) {
-    console.error('Error parsing model URL:', error);
+    log.error('Error parsing model URL:', error);
     return { baseUrl: '', modelDir: '', modelFileName: '' };
   }
 }
@@ -135,7 +138,7 @@ export const useLive2DModel = ({
           }, 500);
         }
       } catch (error) {
-        console.error('Error processing model URL:', error);
+        log.error('Error processing model URL:', error);
       }
     }
   }, [modelInfo?.url, modelInfo?.kScale]);
