@@ -46,21 +46,22 @@ class SoulPostProcessor:
         client_uid: str = "",
     ):
         """内部处理逻辑"""
-        # 1. 敏感内容检查 (NEVER_STORE 阻止, CAUTION 脱敏继续)
+        # 1. 敏感内容检查 (NEVER_STORE 阻止, CAUTION 先提取后脱敏)
         from ..ethics.sensitive_filter import check_sensitivity
         sensitivity = check_sensitivity(user_input)
         if sensitivity == "block":
             logger.info("[Soul] Skipping extraction: sensitive content blocked")
             return
-        if sensitivity == "caution":
-            user_input = "[用户分享了健康相关信息]"  # 脱敏后继续提取情感
+
+        # P1: caution 级先用原文提取, 再脱敏存储
+        is_caution = sensitivity == "caution"
 
         # 2. 跳过逻辑: 短 + 无情感信号才跳过
         if len(user_input.strip()) < 5 and not _has_emotion_signal(user_input):
             return
 
         try:
-            # 3. LLM 提取
+            # 3. LLM 提取 (用原文, 保留情感信号)
             from ..extractors.merged_extractor import extract_all
             from ..config import get_soul_config
 
@@ -70,6 +71,10 @@ class SoulPostProcessor:
             )
             if not extracted:
                 return
+
+            # P1: 写入前脱敏 — caution 级清空 summary 中的敏感内容
+            if is_caution and extracted.importance:
+                extracted.importance.summary = "[用户分享了健康相关信息]"
 
             # 3.5 Phase 3c: 依赖检测 (在写入前, 利用提取结果)
             try:
@@ -258,6 +263,27 @@ class SoulPostProcessor:
                 if existing.get("cooling_warned"):
                     total_weight *= 1.5
 
+                # P1: 关系弹性 — 降级后 7 天内回来, 额外 2x 加速 (与 1.5x 取 max)
+                cooled_at = existing.get("cooled_at")
+                if cooled_at:
+                    if isinstance(cooled_at, str):
+                        cooled_at = datetime.fromisoformat(cooled_at)
+                    days_since_cool = (now - cooled_at).days
+                    if days_since_cool <= 7:
+                        total_weight = max(total_weight, sum(
+                            s.get("weight", 1.0) for s in extracted.relationship_signals
+                        ) * 2.0)
+
+                # P2: 关系里程碑检测 — 阶段升级时写入 milestone
+                old_stage = existing.get("stage", "stranger")
+                old_date = existing.get("last_interaction_date")
+                new_score = existing.get("accumulated_score", 0) + total_weight
+                new_days = existing.get("total_days_active", 0) + (1 if old_date != today_str else 0)
+
+                from ..recall.soul_recall import _calculate_stage
+                new_stage = _calculate_stage(new_score, new_days, user_id)
+                stage_order = {"stranger": 0, "acquaintance": 1, "familiar": 2, "close": 3, "soulmate": 4}
+
                 # 更新
                 update_ops = {
                     "$inc": {
@@ -268,6 +294,8 @@ class SoulPostProcessor:
                         "last_interaction": now,
                         "last_interaction_date": today_str,
                         "cooling_warned": False,
+                        "cooled_from_stage": None,
+                        "cooled_at": None,
                         "updated_at": now,
                     },
                     "$push": {
@@ -281,8 +309,14 @@ class SoulPostProcessor:
                     },
                 }
 
+                # P2: 阶段升级里程碑
+                if (new_stage != old_stage
+                        and stage_order.get(new_stage, 0) > stage_order.get(old_stage, 0)):
+                    update_ops["$set"]["stage"] = new_stage
+                    update_ops["$set"]["stage_entered_at"] = now
+                    update_ops["$set"]["recent_milestone"] = f"升级到{new_stage}"
+
                 # Round 3: total_days_active 更新 — 检测日期变化
-                old_date = existing.get("last_interaction_date")
                 if old_date != today_str:
                     update_ops["$inc"]["total_days_active"] = 1
 

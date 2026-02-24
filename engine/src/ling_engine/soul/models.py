@@ -103,6 +103,8 @@ class UserRelationship(BaseModel):
     last_interaction: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     last_interaction_date: Optional[str] = None  # YYYY-MM-DD, for total_days_active tracking
     cooling_warned: bool = False
+    cooled_from_stage: Optional[str] = None      # P1: 降级前的阶段 (关系弹性)
+    cooled_at: Optional[datetime] = None          # P1: 降级时间 (7 天内回来 → 2x 加速)
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -152,3 +154,5 @@ class SoulContext(BaseModel):
     collective_wisdom: List[str] = Field(default_factory=list)            # 第 10 路: 集体智慧
     current_life_chapter: Optional[str] = None                            # 当前人生章节摘要
     emotional_baseline: str = "neutral"                                   # 情感基线
+    # P2: 关系里程碑
+    recent_milestone: Optional[str] = None                                # 阶段升级提示

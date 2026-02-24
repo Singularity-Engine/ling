@@ -11,7 +11,8 @@ from typing import Optional
 
 
 # 阶段伦理触发阈值
-CLOSE_REMINDER_INTERVAL = 30  # close 阶段每 30 次对话提醒一次
+CLOSE_REMINDER_INTERVAL = 30    # close 阶段每 30 次对话提醒一次
+SOULMATE_REMINDER_INTERVAL = 30  # P1: soulmate 从 50 降为 30 (与 close 一致)
 
 
 def get_stage_guardrail(
@@ -43,7 +44,7 @@ def _close_guardrail(conversation_count: int) -> Optional[str]:
 
 def _soulmate_guardrail(conversation_count: int) -> Optional[str]:
     """soulmate 阶段护栏: 成长导向"""
-    if conversation_count > 0 and conversation_count % CLOSE_REMINDER_INTERVAL == 0:
+    if conversation_count > 0 and conversation_count % SOULMATE_REMINDER_INTERVAL == 0:
         return (
             "你们心领神会。在深度交流中保持成长导向——"
             "不只是安慰，也适时提出真诚的观察和建议。"

@@ -39,12 +39,19 @@ EXTREME_ROUNDS_PER_DAY = 20
 ESCALATION_WINDOW = 5  # 最近 N 轮
 ESCALATION_THRESHOLD = 0.7  # 连续高强度负面
 
-# --- 提醒文案 (温和、非说教) ---
-GENTLE_HINTS = [
-    "如果你最近感到孤独或压力很大，和身边信任的人聊聊也许会有帮助。",
-    "有时候，和现实中的朋友或家人分享感受，能带来不一样的温暖。",
-    "我一直在，但如果你需要更专业的支持，可以考虑和心理咨询师聊聊。",
-]
+# --- 提醒文案 (温和、非说教) --- P1: 3 级升级机制
+GENTLE_HINTS = {
+    "gentle": "记得照顾好自己，灵一直在这里。",
+    "moderate": "灵注意到你最近经历了很多。如果身边有信任的朋友或家人，和他们聊聊也许会有帮助。",
+    "professional": "灵很关心你的状态。如果你觉得需要，和专业的心理咨询师聊聊是很勇敢的选择。",
+}
+
+# P1: 升级阈值 — 根据累计信号次数选择提醒级别
+ESCALATION_LEVELS = {
+    "gentle": 1,       # 首次触发: 温和提醒
+    "moderate": 3,     # 3 次累计: 中度关注
+    "professional": 7, # 7 次累计: 建议专业帮助
+}
 
 # --- 内存追踪 (OrderedDict + TTL + maxsize) ---
 _MAX_TRACKED = 500
@@ -53,6 +60,7 @@ _TTL_SECONDS = 86400  # 24h
 _daily_rounds: OrderedDict = OrderedDict()     # {user_id: {"date": str, "count": int}}
 _emotion_history: OrderedDict = OrderedDict()  # {user_id: [intensity, ...]}
 _timestamps: OrderedDict = OrderedDict()       # {user_id: monotonic_time}
+_signal_counts: OrderedDict = OrderedDict()    # P1: {user_id: int} 累计信号次数
 _cleanup_counter = 0
 
 
@@ -68,11 +76,13 @@ def _lazy_cleanup():
         _daily_rounds.pop(k, None)
         _emotion_history.pop(k, None)
         _timestamps.pop(k, None)
+        _signal_counts.pop(k, None)
     while len(_daily_rounds) > _MAX_TRACKED:
         oldest = next(iter(_daily_rounds))
         _daily_rounds.pop(oldest)
         _emotion_history.pop(oldest, None)
         _timestamps.pop(oldest, None)
+        _signal_counts.pop(oldest, None)
 
 
 def check_dependency_signals(
@@ -113,6 +123,14 @@ def check_dependency_signals(
             _daily_rounds[user_id] = {"date": today_str, "count": 1}
             entry = _daily_rounds[user_id]
 
+        # P0: 每次插入后检查 maxsize (不仅在 lazy cleanup 时)
+        if len(_daily_rounds) > _MAX_TRACKED:
+            oldest = next(iter(_daily_rounds))
+            _daily_rounds.pop(oldest, None)
+            _emotion_history.pop(oldest, None)
+            _timestamps.pop(oldest, None)
+            _signal_counts.pop(oldest, None)
+
         if entry["count"] > EXTREME_ROUNDS_PER_DAY:
             signals_triggered.append("extreme_frequency")
 
@@ -133,15 +151,22 @@ def check_dependency_signals(
     if not signals_triggered:
         return None
 
-    # 选择提醒文案 (基于信号类型)
-    if "dependency_language" in signals_triggered:
-        hint = GENTLE_HINTS[0]
-    elif "emotional_escalation" in signals_triggered:
-        hint = GENTLE_HINTS[2]  # 建议专业支持
+    # P1: 累计信号计数 → 升级提醒级别
+    count = _signal_counts.get(user_id, 0) + len(signals_triggered)
+    _signal_counts[user_id] = count
+
+    # 根据累计次数选择级别
+    if count >= ESCALATION_LEVELS["professional"]:
+        level = "professional"
+    elif count >= ESCALATION_LEVELS["moderate"]:
+        level = "moderate"
     else:
-        hint = GENTLE_HINTS[1]
+        level = "gentle"
+
+    hint = GENTLE_HINTS[level]
 
     logger.info(
-        f"[DependencyDetector] Signals: {signals_triggered} for {user_id[:8]}..."
+        f"[DependencyDetector] Signals: {signals_triggered} for {user_id[:8]}... "
+        f"(cumulative={count}, level={level})"
     )
     return hint

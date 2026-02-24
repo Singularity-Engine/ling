@@ -103,6 +103,9 @@ async def batch_cooling_check(dry_run: bool = False) -> Dict:
             new_stage, _ = cooling_result
             update_fields["stage"] = new_stage
             update_fields["stage_entered_at"] = now
+            # P1: 关系弹性 — 标记降级来源
+            update_fields["cooled_from_stage"] = stage
+            update_fields["cooled_at"] = now
             demoted += 1
 
         # 分数衰减 (无论是否降级, 长期不互动都衰减)

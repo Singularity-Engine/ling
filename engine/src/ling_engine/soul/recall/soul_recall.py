@@ -8,6 +8,7 @@ Phase 4: +集体智慧第 10 路, current_life_chapter, emotional_baseline
 
 import asyncio
 import hashlib
+import re
 import time
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List, Dict, Any
@@ -18,6 +19,9 @@ from ..narrative.memory_reconstructor import MemoryReconstructor
 
 # Phase 2 遗留修复: MemoryReconstructor 单例 (不再每次 _emotional_resonance 都创建)
 _reconstructor = MemoryReconstructor()
+
+# P0: user_id 格式校验 — 纵深防御
+_USER_ID_PATTERN = re.compile(r'^[\w\-.:]{1,128}$')
 
 # 阶段行为指令
 STAGE_BEHAVIORS = {
@@ -31,6 +35,11 @@ STAGE_BEHAVIORS = {
 # 情感预判关键词 (<5ms)
 NEGATIVE_KEYWORDS = ["唉", "烦", "累", "难过", "焦虑", "压力", "崩溃", "不开心", "郁闷"]
 SEEKING_KEYWORDS = ["怎么办", "不知道", "纠结", "迷茫", "帮帮我", "怎么样"]
+# P2: 正面情感关键词
+POSITIVE_KEYWORDS = ["太好了", "开心", "激动", "兴奋", "终于", "成功"]
+
+# P2: 魔法数字常量化
+BREAKTHROUGH_WINDOW_DAYS = 30  # breakthrough_hint 有效窗口
 
 # Round 3: 关系冷却 — v3: 分阶段冷却规则
 from ..consolidation.relationship_cooling import (
@@ -42,6 +51,7 @@ def _emotion_hint(query: str) -> Optional[str]:
     """情感预判 (<5ms) — 影响 EverMemOS 搜索参数
 
     支持关键词匹配 + 句式检测。
+    P2: 扩展正面情感检测 (joy/excitement)。
     """
     for kw in NEGATIVE_KEYWORDS:
         if kw in query:
@@ -49,6 +59,10 @@ def _emotion_hint(query: str) -> Optional[str]:
     for kw in SEEKING_KEYWORDS:
         if kw in query:
             return "seeking"
+    # P2: 正面情感检测
+    for kw in POSITIVE_KEYWORDS:
+        if kw in query:
+            return "positive"
     # 句式检测: 省略号/语气词暗示情绪
     stripped = query.strip()
     if stripped.endswith("...") or stripped.endswith("…"):
@@ -73,6 +87,13 @@ def _detect_recall_layer(query: str) -> str:
         "L0" — 原始记忆 (默认, 具体事件)
     """
     q = query.lower().strip()
+    # P2: 短查询排除 — "最近你好吗" 不应触发 L1
+    if len(q) < 8:
+        return "L0"
+    # P2: 排除问候语模式
+    _GREETINGS = {"最近好吗", "最近怎么样", "最近还好吗"}
+    if q in _GREETINGS or q.rstrip("?？") in _GREETINGS:
+        return "L0"
     for kw in _L1_KEYWORDS:
         if kw in q:
             return "L1"
@@ -141,6 +162,11 @@ class SoulRecall:
         timeout_ms: int = 500,
     ) -> SoulContext:
         """10 路并行召回 + 关系阶段 + 情感预判 + 计时"""
+        # P0: user_id 格式校验 — 纵深防御
+        if not user_id or not _USER_ID_PATTERN.match(user_id):
+            logger.warning("[Soul] Invalid user_id format, skipping recall")
+            return SoulContext()
+
         start = time.monotonic()
         ctx = SoulContext()
 
@@ -167,6 +193,11 @@ class SoulRecall:
                 ctx.breakthrough_hint = relationship.get("breakthrough_hint")
                 # Phase 3b: 回归温暖标记
                 ctx.returning_from_absence = relationship.get("returning_from_absence", False)
+                # P2: 关系里程碑 (一次性消费 — 读后清除)
+                milestone = relationship.get("recent_milestone")
+                if milestone:
+                    ctx.recent_milestone = milestone
+                    asyncio.create_task(self._clear_milestone(coll=None, user_id=user_id))
             else:
                 ctx.stage_behavior_hint = _get_stage_behavior("stranger")
 
@@ -358,7 +389,11 @@ class SoulRecall:
             coll = await get_collection(EMOTIONS)
             if coll is None:
                 return []
-            emotion_map = {"negative": ["sadness", "anxiety", "anger"], "seeking": ["anxiety"]}
+            emotion_map = {
+                "negative": ["sadness", "anxiety", "anger"],
+                "seeking": ["anxiety"],
+                "positive": ["joy", "excitement"],  # P2: 正面情感共振
+            }
             target_emotions = emotion_map.get(emotion_hint, [])
             if not target_emotions:
                 return []
@@ -568,6 +603,22 @@ class SoulRecall:
         return chapter, baseline
 
     @staticmethod
+    async def _clear_milestone(coll, user_id: str):
+        """P2: 里程碑一次性消费 — 读后清除"""
+        try:
+            from ..storage.soul_collections import get_collection, RELATIONSHIPS
+            if coll is None:
+                coll = await get_collection(RELATIONSHIPS)
+            if coll is None:
+                return
+            await coll.update_one(
+                {"user_id": user_id},
+                {"$set": {"recent_milestone": None}},
+            )
+        except Exception:
+            pass  # fire-and-forget
+
+    @staticmethod
     async def _bump_recall_count(user_id: str):
         """v3: 异步更新最近一条 importance 的 recall_count + last_recalled_at"""
         try:
@@ -620,7 +671,8 @@ class SoulRecall:
                         decay = old_score * COOLING_DECAY_RATE
                         new_score = max(0, old_score - decay)
                         asyncio.create_task(
-                            self._cooling_write(coll, user_id, new_score, new_stage))
+                            self._cooling_write(coll, user_id, new_score, new_stage,
+                                                cooled_from_stage=stage))
                         doc["accumulated_score"] = new_score
                         doc["stage"] = new_stage
                         # Phase 3b: 标记回归状态供 context_builder 注入温暖叙事
@@ -641,7 +693,7 @@ class SoulRecall:
                 breakthroughs = doc.get("breakthrough_events", [])
                 if breakthroughs:
                     recent = [b for b in breakthroughs[-5:]
-                              if b.get("timestamp") and self._within_days(b["timestamp"], 30)]
+                              if b.get("timestamp") and self._within_days(b["timestamp"], BREAKTHROUGH_WINDOW_DAYS)]
                     if recent:
                         latest = recent[-1]
                         doc["breakthrough_hint"] = (
@@ -663,6 +715,7 @@ class SoulRecall:
     @staticmethod
     async def _cooling_write(
         coll, user_id: str, new_score: float, new_stage: Optional[str] = None,
+        cooled_from_stage: Optional[str] = None,
     ):
         """冷却衰减写入 — fire-and-forget，失败只 warning"""
         try:
@@ -670,6 +723,10 @@ class SoulRecall:
             if new_stage:
                 update["stage"] = new_stage
                 update["stage_entered_at"] = datetime.now(timezone.utc)
+                # P1: 关系弹性 — 标记降级来源
+                if cooled_from_stage:
+                    update["cooled_from_stage"] = cooled_from_stage
+                    update["cooled_at"] = datetime.now(timezone.utc)
             await coll.update_one(
                 {"user_id": user_id},
                 {"$set": update},

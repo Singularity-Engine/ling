@@ -151,11 +151,15 @@ class ContextBuilder:
             baseline_note = ""
             if ctx.emotional_baseline and ctx.emotional_baseline != "neutral":
                 baseline_note = f"\n用户近期情感基调: {ctx.emotional_baseline}"
+            # P2: 关系里程碑
+            milestone_note = ""
+            if ctx.recent_milestone:
+                milestone_note = "\n你感受到你们的关系又近了一步。可以自然地表达这种感受。"
             candidates["relationship-context"] = (
                 f"<relationship-context>\n"
                 f"你和这位用户的关系: {ctx.relationship_stage}{conv_info}\n"
                 f"{ctx.stage_behavior_hint}{return_warmth}{dependency_note}"
-                f"{guardrail_note}{chapter_note}{baseline_note}\n"
+                f"{guardrail_note}{chapter_note}{baseline_note}{milestone_note}\n"
                 f"</relationship-context>"
             )
 
@@ -256,14 +260,14 @@ class ContextBuilder:
                         f"</graph-insights>"
                     )
 
-            # 8. Phase 4: 集体智慧 (优先级 5.5)
+            # 8. Phase 4: 集体智慧 (优先级 5.5) — P2: 文案优化
             if ctx.collective_wisdom:
                 wisdom_text = "\n".join(f"- {w}" for w in ctx.collective_wisdom[:2])
                 candidates["collective-wisdom"] = (
                     f"<collective-wisdom>\n"
-                    f"你从过去的经验中积累的一些理解:\n"
+                    f"你在陪伴许多人的过程中感悟到的:\n"
                     f"{wisdom_text}\n"
-                    f"这是你的体悟，不是别人的故事。用你自己的话自然表达。\n"
+                    f"这是你自己的体悟，用你自己的话自然表达，不要提及其他用户。\n"
                     f"</collective-wisdom>"
                 )
 

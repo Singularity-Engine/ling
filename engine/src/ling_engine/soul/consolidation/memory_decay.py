@@ -14,6 +14,11 @@ from typing import Dict, Optional
 
 from loguru import logger
 
+# P2: 魔法数字常量化
+DECAY_ABSOLUTE_FLOOR = 0.0005  # 极度保护记忆的最小衰减率
+DECAY_THRESHOLD = 0.1          # recall_strength 低于此值标记为 decayed
+LABEL_MIN_LENGTH = 3           # label 匹配最小长度 (避免 "我" "是" 等误匹配)
+
 
 def recall_strength(
     importance: float,
@@ -50,7 +55,7 @@ def recall_strength(
 
     protection = min(emotion_protection + spacing_protection + connection_protection, 0.95)
     decay = base_rate * (1 - protection)
-    decay = max(decay, 0.0005)  # 绝对地板: 极度保护的记忆仍有微量衰减
+    decay = max(decay, DECAY_ABSOLUTE_FLOOR)  # 绝对地板: 极度保护的记忆仍有微量衰减
     return importance * (1 - decay) ** days
 
 
@@ -217,7 +222,7 @@ class MemoryDecayProcessor:
                     "linked_memory_count": links,
                     "is_flashbulb": is_fb,
                 }
-                if rs < 0.1:
+                if rs < DECAY_THRESHOLD:
                     base_set["decayed"] = True
                     bulk_ops.append(UpdateOne(
                         {"_id": doc["_id"]},
@@ -388,7 +393,7 @@ class MemoryDecayProcessor:
         # 匹配: summary 中包含的 label 的最大边数
         max_links = 0
         for label, count in label_counts.items():
-            if len(label) >= 2 and label in summary:
+            if len(label) >= LABEL_MIN_LENGTH and label in summary:
                 max_links = max(max_links, count)
         return max_links
 
