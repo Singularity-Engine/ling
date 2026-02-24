@@ -4,28 +4,28 @@ import type { MessageEvent } from '@/services/websocket-service';
 import {
   WebSocketStateContext, WebSocketActionsContext,
   type HistoryInfo, type LegacyMessage, defaultBaseUrl,
-} from '@/context/websocket-context';
-import { type ModelInfo, useLive2DConfigActions } from '@/context/live2d-config-context';
-import { useSubtitleActions } from '@/context/subtitle-context';
+} from '@/context/WebsocketContext';
+import { type ModelInfo, useLive2DConfigActions } from '@/context/Live2dConfigContext';
+import { useSubtitleActions } from '@/context/SubtitleContext';
 import { audioTaskQueue } from '@/utils/task-queue';
 import { useAudioTask } from '@/components/canvas/live2d';
-import { useBgUrlActions } from '@/context/bgurl-context';
-import { useConfigState, useConfigActions } from '@/context/character-config-context';
-import { useChatMessagesActions, useHistoryListActions, useStreamingSetters } from '@/context/chat-history-context';
+import { useBgUrlActions } from '@/context/BgurlContext';
+import { useConfigState, useConfigActions } from '@/context/CharacterConfigContext';
+import { useChatMessagesActions, useHistoryListActions, useStreamingSetters } from '@/context/ChatHistoryContext';
 import { toaster } from '@/components/ui/toaster';
-import { useVADState, useVADActions } from '@/context/vad-context';
-import { type AiState, useAiStateActions } from "@/context/ai-state-context";
+import { useVADState, useVADActions } from '@/context/VadContext';
+import { type AiState, useAiStateActions } from "@/context/AiStateContext";
 import { useLocalStorage } from '@/hooks/utils/use-local-storage';
-import { useGroup } from '@/context/group-context';
+import { useGroup } from '@/context/GroupContext';
 import { useInterrupt } from '@/hooks/utils/use-interrupt';
-import { useBrowser } from '@/context/browser-context';
-import { useAffinityActions } from '@/context/affinity-context';
-import { useToolActions, categorize } from '@/context/tool-state-context';
+import { useBrowser } from '@/context/BrowserContext';
+import { useAffinityActions } from '@/context/AffinityContext';
+import { useToolActions, categorize } from '@/context/ToolStateContext';
 import { gatewayConnector, type GatewayState } from '@/services/gateway-connector';
 import { gatewayAdapter, type GatewayMessageEvent } from '@/services/gateway-message-adapter';
 import { ttsService } from '@/services/tts-service';
 import { asrService } from '@/services/asr-service';
-import { useTTSActions } from '@/context/tts-state-context';
+import { useTTSActions } from '@/context/TtsStateContext';
 import { BRAND_NAME_SHORT, BRAND_NAME_DISPLAY, BRAND_AVATAR_NAME } from '@/constants/brand';
 import {
   SK_OLD_VISITOR_SESSION, skOldSession, skSessionKey,
@@ -33,8 +33,8 @@ import {
   SS_VISITED,
 } from '@/constants/storage-keys';
 import { MOBILE_BREAKPOINT } from '@/constants/breakpoints';
-import { useAuthState, useAuthActions } from '@/context/auth-context';
-import { useUIActions, type BillingModalState } from '@/context/ui-context';
+import { useAuthState, useAuthActions } from '@/context/AuthContext';
+import { useUIActions, type BillingModalState } from '@/context/UiContext';
 import { apiClient } from '@/services/api-client';
 import i18next from 'i18next';
 import { createLogger } from '@/utils/logger';

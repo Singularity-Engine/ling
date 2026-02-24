@@ -1,8 +1,8 @@
 import { Subject } from 'rxjs';
 import i18next from 'i18next';
-import { ModelInfo } from '@/context/live2d-config-context';
-import { HistoryInfo } from '@/context/websocket-context';
-import { ConfigFile } from '@/context/character-config-context';
+import { ModelInfo } from '@/context/Live2dConfigContext';
+import { HistoryInfo } from '@/context/WebsocketContext';
+import { ConfigFile } from '@/context/CharacterConfigContext';
 import { toaster } from '@/components/ui/toaster';
 
 export interface DisplayText {

@@ -1,0 +1,274 @@
+{
+  "Version": 3,
+  "FileReferences": {
+    "Moc": "xiyu-dog.moc3",
+    "Textures": [
+      "texture_00.png",
+      "texture_01.png",
+      "texture_02.png",
+      "texture_03.png",
+      "texture_04.png",
+      "texture_05.png"
+    ],
+    "Physics": "xiyu-dog.physics3.json",
+    "DisplayInfo": "xiyu-dog.cdi3.json",
+    "Expressions": [
+      {
+        "Name": "exp_00",
+        "File": "expressions/01-kiss.exp3.json"
+      },
+      {
+        "Name": "exp_01",
+        "File": "expressions/angry.exp3.json"
+      },
+      {
+        "Name": "exp_02",
+        "File": "expressions/03-heart.exp3.json"
+      },
+      {
+        "Name": "exp_03",
+        "File": "expressions/13-cry.exp3.json"
+      },
+      {
+        "Name": "exp_04",
+        "File": "expressions/02-wink.exp3.json"
+      },
+      {
+        "Name": "exp_05",
+        "File": "expressions/05-dark.exp3.json"
+      },
+      {
+        "Name": "exp_06",
+        "File": "expressions/07-highlight-off.exp3.json"
+      },
+      {
+        "Name": "exp_07",
+        "File": "expressions/04-blush.exp3.json"
+      },
+      {
+        "Name": "exp_08",
+        "File": "expressions/11-star-eyes.exp3.json"
+      },
+      {
+        "Name": "exp_09",
+        "File": "expressions/12-circles.exp3.json"
+      },
+      {
+        "Name": "exp_10",
+        "File": "expressions/10-cry-highlight.exp3.json"
+      },
+      {
+        "Name": "exp_11",
+        "File": "expressions/08-shadow.exp3.json"
+      },
+      {
+        "Name": "exp_12",
+        "File": "expressions/14-asmr.exp3.json"
+      },
+      {
+        "Name": "exp_13",
+        "File": "expressions/15-knife.exp3.json"
+      },
+      {
+        "Name": "exp_14",
+        "File": "expressions/25-watermark-off.exp3.json"
+      },
+      {
+        "Name": "exp_15",
+        "File": "expressions/sese.exp3.json"
+      }
+    ],
+    "Motions": {
+      "Idle": [
+        {
+          "File": "expressions/idle-continuous.motion3.json",
+          "FadeInTime": 0.0,
+          "FadeOutTime": 0.0
+        },
+        {
+          "File": "expressions/idle-continuous-2.motion3.json",
+          "FadeInTime": 0.0,
+          "FadeOutTime": 0.0
+        }
+      ],
+      "TapBody": [
+        {
+          "File": "expressions/01-kiss.exp3.json",
+          "FadeInTime": 0.5,
+          "FadeOutTime": 0.5
+        },
+        {
+          "File": "expressions/02-wink.exp3.json",
+          "FadeInTime": 0.5,
+          "FadeOutTime": 0.5
+        },
+        {
+          "File": "expressions/03-heart.exp3.json",
+          "FadeInTime": 0.5,
+          "FadeOutTime": 0.5
+        },
+        {
+          "File": "expressions/body-sway.motion3.json",
+          "FadeInTime": 0.2,
+          "FadeOutTime": 0.2
+        }
+      ],
+      "TapHead": [
+        {
+          "File": "expressions/11-star-eyes.exp3.json",
+          "FadeInTime": 0.5,
+          "FadeOutTime": 0.5
+        },
+        {
+          "File": "expressions/12-circles.exp3.json",
+          "FadeInTime": 0.5,
+          "FadeOutTime": 0.5
+        },
+        {
+          "File": "expressions/04-blush.exp3.json",
+          "FadeInTime": 0.5,
+          "FadeOutTime": 0.5
+        },
+        {
+          "File": "expressions/nod.motion3.json",
+          "FadeInTime": 0.2,
+          "FadeOutTime": 0.2
+        }
+      ],
+      "Happy": [
+        {
+          "File": "expressions/03-heart.exp3.json",
+          "FadeInTime": 0.5,
+          "FadeOutTime": 0.5
+        },
+        {
+          "File": "expressions/11-star-eyes.exp3.json",
+          "FadeInTime": 0.5,
+          "FadeOutTime": 0.5
+        },
+        {
+          "File": "expressions/nod.motion3.json",
+          "FadeInTime": 0.2,
+          "FadeOutTime": 0.2
+        }
+      ],
+      "Sad": [
+        {
+          "File": "expressions/13-cry.exp3.json",
+          "FadeInTime": 0.5,
+          "FadeOutTime": 0.5
+        },
+        {
+          "File": "expressions/10-cry-highlight.exp3.json",
+          "FadeInTime": 0.5,
+          "FadeOutTime": 0.5
+        },
+        {
+          "File": "expressions/shake-head.motion3.json",
+          "FadeInTime": 0.2,
+          "FadeOutTime": 0.2
+        }
+      ],
+      "Angry": [
+        {
+          "File": "expressions/angry.exp3.json",
+          "FadeInTime": 0.5,
+          "FadeOutTime": 0.5
+        },
+        {
+          "File": "expressions/05-dark.exp3.json",
+          "FadeInTime": 0.5,
+          "FadeOutTime": 0.5
+        },
+        {
+          "File": "expressions/shake-head.motion3.json",
+          "FadeInTime": 0.2,
+          "FadeOutTime": 0.2
+        }
+      ],
+      "caring": [
+        {
+          "File": "expressions/14-asmr.exp3.json",
+          "FadeInTime": 0.5,
+          "FadeOutTime": 0.5
+        },
+        {
+          "File": "expressions/18-hair-down.exp3.json",
+          "FadeInTime": 0.5,
+          "FadeOutTime": 0.5
+        },
+        {
+          "File": "expressions/nod.motion3.json",
+          "FadeInTime": 0.2,
+          "FadeOutTime": 0.2
+        }
+      ],
+      "sese": [
+        {
+          "File": "expressions/sese.exp3.json",
+          "FadeInTime": 0.5,
+          "FadeOutTime": 0.5
+        },
+        {
+          "File": "expressions/body-sway.motion3.json",
+          "FadeInTime": 0.2,
+          "FadeOutTime": 0.2
+        }
+      ],
+      "Nod": [
+        {
+          "File": "expressions/nod.motion3.json",
+          "FadeInTime": 0.2,
+          "FadeOutTime": 0.2
+        }
+      ],
+      "Shake": [
+        {
+          "File": "expressions/shake-head.motion3.json",
+          "FadeInTime": 0.2,
+          "FadeOutTime": 0.2
+        }
+      ],
+      "Sway": [
+        {
+          "File": "expressions/body-sway.motion3.json",
+          "FadeInTime": 0.2,
+          "FadeOutTime": 0.2
+        }
+      ]
+    }
+  },
+  "Groups": [
+    {
+      "Target": "Parameter",
+      "Name": "EyeBlink",
+      "Ids": [
+        "ParamEyeLOpen",
+        "ParamEyeROpen"
+      ]
+    },
+    {
+      "Target": "Parameter",
+      "Name": "LipSync",
+      "Ids": []
+    }
+  ],
+  "HitAreas": [
+    {
+      "Name": "HitAreaHead",
+      "Id": "HitAreaHead",
+      "X": -50.0,
+      "Y": 1.0,
+      "Width": 2.0,
+      "Height": 1.5
+    },
+    {
+      "Name": "HitAreaBody",
+      "Id": "HitAreaBody",
+      "X": 50.0,
+      "Y": -2.5,
+      "Width": 6.0,
+      "Height": 4.0
+    }
+  ]
+}

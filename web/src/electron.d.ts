@@ -1,7 +1,7 @@
 import type { IpcRenderer } from 'electron';
 import type { LAppAdapter } from '../WebSDK/src/lappadapter';
 import type { LAppLive2DManager } from '../WebSDK/src/lapplive2dmanager';
-import type { ToolCategory } from './context/tool-state-context';
+import type { ToolCategory } from './context/ToolStateContext';
 
 declare global {
   interface Window {

@@ -1,10 +1,10 @@
 import { useEffect, useCallback } from "react";
 import { useInterrupt } from "@/components/canvas/live2d";
 import { useMicToggle } from "./use-mic-toggle";
-import { useLive2DConfig } from "@/context/live2d-config-context";
+import { useLive2DConfig } from "@/context/Live2dConfigContext";
 import { useSwitchCharacter } from "@/hooks/utils/use-switch-character";
 import { useForceIgnoreMouse } from "@/hooks/utils/use-force-ignore-mouse";
-import { useMode } from "@/context/mode-context";
+import { useMode } from "@/context/ModeContext";
 
 export function useIpcHandlers() {
   const { handleMicToggle } = useMicToggle();

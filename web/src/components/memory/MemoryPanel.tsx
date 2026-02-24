@@ -8,7 +8,7 @@
 import { memo, useState, useEffect, useCallback, useRef, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiClient } from '@/services/api-client';
-import { useAuthState } from '@/context/auth-context';
+import { useAuthState } from '@/context/AuthContext';
 // Hover styles moved to static index.css — no runtime injection needed.
 
 interface MemoryEntry {

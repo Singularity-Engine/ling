@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { canvasStyles } from './canvas-styles';
 import { useSubtitleDisplay } from '@/hooks/canvas/use-subtitle-display';
-import { useSubtitleRead } from '@/context/subtitle-context';
+import { useSubtitleRead } from '@/context/SubtitleContext';
 
 // Type definitions
 interface SubtitleTextProps {

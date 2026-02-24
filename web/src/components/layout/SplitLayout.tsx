@@ -14,9 +14,9 @@ import { CrystalField } from "../crystal/CrystalField";
 import { TapParticles } from "../effects/TapParticles";
 import { LoadingSkeleton } from "../loading/LoadingSkeleton";
 import { SuggestionChips } from "../chat/SuggestionChips";
-import { useChatMessagesState, useChatMessagesActions } from "@/context/chat-history-context";
-import { useWebSocketState, useWebSocketActions } from "@/context/websocket-context";
-import { useAiStateRead } from "@/context/ai-state-context";
+import { useChatMessagesState, useChatMessagesActions } from "@/context/ChatHistoryContext";
+import { useWebSocketState, useWebSocketActions } from "@/context/WebsocketContext";
+import { useAiStateRead } from "@/context/AiStateContext";
 import styles from "./SplitLayout.module.css";
 
 const ChatArea = lazy(() => import("../chat/ChatArea").then(m => ({ default: m.ChatArea })));

@@ -1,8 +1,8 @@
 import { memo, useState, useId, useMemo, useEffect, useRef, useCallback, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
-import { useAffinityMeta } from "@/context/affinity-context";
+import { useAffinityMeta } from "@/context/AffinityContext";
 import { AFFINITY_LEVELS, DEFAULT_LEVEL } from "@/config/affinity-palette";
-import { LEVELS } from "@/hooks/use-affinity-engine";
+import { LEVELS } from "@/hooks/useAffinityEngine";
 import { trackEvent } from "@/utils/track-event";
 // Keyframes moved to static index.css — no runtime injection needed.
 

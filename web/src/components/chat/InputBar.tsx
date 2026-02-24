@@ -1,10 +1,10 @@
 import { memo, useState, useRef, useCallback, useEffect, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
-import { useWebSocketState, useWebSocketActions } from "@/context/websocket-context";
-import { useChatMessagesActions } from "@/context/chat-history-context";
-import { useAiStateRead } from "@/context/ai-state-context";
+import { useWebSocketState, useWebSocketActions } from "@/context/WebsocketContext";
+import { useChatMessagesActions } from "@/context/ChatHistoryContext";
+import { useAiStateRead } from "@/context/AiStateContext";
 import { useInterrupt } from "@/components/canvas/live2d";
-import { useVADState, useVADActions } from "@/context/vad-context";
+import { useVADState, useVADActions } from "@/context/VadContext";
 import { trackEvent } from "@/utils/track-event";
 
 // ─── Static style constants (avoid per-render allocation during typing) ───

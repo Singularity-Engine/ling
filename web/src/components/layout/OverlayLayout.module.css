@@ -1,4 +1,13 @@
-/* OverlayLayout — Mobile/tablet overlay mode */
+/**
+ * OverlayLayout — Mobile/tablet overlay mode
+ *
+ * Dependencies on global keyframes (defined in index.css):
+ *   - pageFadeIn    — used by .menuBackdrop entrance animation
+ *   - slideInRight  — used by .mobileMenu entrance animation
+ *   - slideOutRight — used by .mobileMenuClosing exit animation
+ *
+ * These are NOT scoped by CSS Modules (Vite default), so they resolve correctly.
+ */
 
 /* ── Root ── */
 .root {
@@ -61,41 +70,41 @@
 .toolbarDesktop {
   position: absolute;
   top: 52px;
-  right: 12px;
+  right: var(--ling-space-3);
   z-index: 20;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: var(--ling-space-3);
 }
 
 .toolbarGroup {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 6px;
-  border-radius: 20px;
-  background: rgba(0, 0, 0, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  gap: 6px;
+  padding: var(--ling-space-2);
+  border-radius: var(--ling-radius-xl);
+  background: var(--ling-overlay-dim);
+  border: 1px solid var(--ling-border);
+  gap: var(--ling-space-2);
 }
 
 .toolbarDivider {
-  width: 24px;
+  width: var(--ling-space-6);
   height: 1px;
-  background: rgba(255, 255, 255, 0.08);
-  margin: 4px 0;
+  background: var(--ling-overlay-8);
+  margin: var(--ling-space-1) 0;
 }
 
 /* ── Mobile trigger buttons ── */
 .mobileTrigger {
   position: absolute;
   top: max(44px, calc(env(safe-area-inset-top, 0px) + 36px));
-  right: max(8px, env(safe-area-inset-right, 0px));
+  right: max(var(--ling-space-2), env(safe-area-inset-right, 0px));
   z-index: 20;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--ling-space-2);
 }
 
 /* ── Action buttons (shared base) ── */
@@ -105,13 +114,15 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.3s ease, border-color 0.3s ease,
-              transform 0.12s ease, opacity 0.12s ease;
+  transition: background var(--ling-duration-normal) var(--ling-ease-default),
+              border-color var(--ling-duration-normal) var(--ling-ease-default),
+              transform var(--ling-duration-fast) var(--ling-ease-default),
+              opacity var(--ling-duration-fast) var(--ling-ease-default);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   padding: 0;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--ling-overlay-8);
+  border: 1px solid var(--ling-overlay-12);
 }
 
 .actionBtn[data-active="true"] {
@@ -139,12 +150,12 @@
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--ling-overlay-backdrop);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  transition: opacity 250ms ease;
+  transition: opacity var(--ling-duration-normal) var(--ling-ease-default);
   touch-action: none;
-  animation: pageFadeIn 0.2s ease-out;
+  animation: pageFadeIn 0.2s var(--ling-ease-enter);
 }
 
 .menuBackdropClosing {
@@ -159,26 +170,26 @@
   bottom: 0;
   width: min(260px, 75vw);
   z-index: 51;
-  background: rgba(10, 0, 21, 0.94);
+  background: var(--ling-surface-deep);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  border-left: 1px solid var(--ling-border);
   display: flex;
   flex-direction: column;
-  animation: slideInRight 0.25s ease-out;
+  animation: slideInRight 0.25s var(--ling-ease-enter);
   overscroll-behavior: contain;
 }
 
 .mobileMenuClosing {
-  animation: slideOutRight 250ms ease-in forwards;
+  animation: slideOutRight var(--ling-duration-normal) var(--ling-ease-exit) forwards;
 }
 
 .menuBadge {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 8px;
-  height: 8px;
+  top: var(--ling-space-1);
+  right: var(--ling-space-1);
+  width: var(--ling-space-2);
+  height: var(--ling-space-2);
   border-radius: 50%;
   background: var(--ling-error);
   border: 2px solid rgba(10, 0, 21, 0.8);
@@ -188,38 +199,38 @@
 .menuHeader {
   display: flex;
   justify-content: flex-end;
-  padding: max(48px, calc(env(safe-area-inset-top, 0px) + 40px)) 12px 8px;
+  padding: max(48px, calc(env(safe-area-inset-top, 0px) + 40px)) var(--ling-space-3) var(--ling-space-2);
 }
 
 .menuStatus {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: var(--ling-space-2);
+  padding: var(--ling-space-2) var(--ling-space-3);
   flex-wrap: wrap;
 }
 
 .menuItem {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  border-radius: 12px;
+  gap: var(--ling-space-3);
+  padding: var(--ling-space-3) var(--ling-space-4);
+  border-radius: var(--ling-radius-md);
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 15px;
+  color: var(--ling-text-soft);
+  font-size: var(--ling-font-lg);
   cursor: pointer;
   width: 100%;
   text-align: left;
   font-family: inherit;
-  transition: background 0.15s ease;
+  transition: background var(--ling-duration-fast) var(--ling-ease-default);
 }
 
 .menuSep {
   height: 1px;
-  background: rgba(255, 255, 255, 0.06);
-  margin: 4px 12px;
+  background: var(--ling-border);
+  margin: var(--ling-space-1) var(--ling-space-3);
 }
 
 /* ── Chat area ── */
@@ -233,18 +244,24 @@
   flex-direction: column;
   pointer-events: none;
   transform: translateY(calc(-1 * var(--kb-offset, 0px)));
-  transition: var(--kb-transition, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1));
+  transition: var(--kb-transition, transform var(--ling-duration-slow) var(--ling-ease-default));
 }
 
 .chatInner {
   overflow: hidden;
   position: relative;
   pointer-events: auto;
-  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: max-height, opacity;
+  transition: max-height var(--ling-duration-slow) var(--ling-ease-default),
+              opacity var(--ling-duration-slow) var(--ling-ease-default);
   mask-image: linear-gradient(to bottom, transparent 0%, black 25%);
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 25%);
+}
+
+/* will-change only when transitioning — removed permanent will-change to reduce GPU memory */
+.chatInner[data-state="closed"],
+.chatInner[data-state="desktop-open"],
+.chatInner[data-state="mobile-open"] {
+  will-change: auto;
 }
 
 .chatInner[data-state="closed"] {
@@ -266,7 +283,7 @@
   pointer-events: auto;
   display: flex;
   justify-content: center;
-  padding: 6px 0;
+  padding: var(--ling-space-2) 0;
   cursor: pointer;
 }
 
@@ -279,8 +296,8 @@
 
 .constellationWrap {
   position: absolute;
-  bottom: calc(100% + 12px);
-  left: 16px;
+  bottom: calc(100% + var(--ling-space-3));
+  left: var(--ling-space-4);
   z-index: 26;
   pointer-events: auto;
 }
@@ -296,27 +313,69 @@
 .chatFallback {
   padding: var(--ling-space-4);
   text-align: center;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--ling-text-tertiary);
   font-size: var(--ling-font-sm);
 }
 
 .inputFallback {
-  padding: 12px var(--ling-space-4);
-  color: rgba(255, 255, 255, 0.3);
+  padding: var(--ling-space-3) var(--ling-space-4);
+  color: var(--ling-text-muted);
   font-size: var(--ling-font-sm);
   text-align: center;
 }
 
 /* ── First-minute experience (overlay mode) ── */
 
-/* Greeting phase: gentle ground gradient pulse */
+/* Greeting phase: gentle ground gradient pulse + vignette overlay */
 .root[data-first-minute="greeting"] .groundGradient {
   animation: overlayGroundPulse 3s ease-in-out infinite;
 }
 
+/* Greeting phase: vignette effect for cinematic focus on character */
+.root[data-first-minute="greeting"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 21;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 70% 60% at 50% 45%,
+    transparent 30%,
+    rgba(10, 0, 21, 0.35) 100%
+  );
+  animation: vignetteIn var(--ling-duration-slow) var(--ling-ease-enter) both;
+}
+
+/* Greeting phase: toolbar hidden, fades in during inviting */
+.root[data-first-minute="loading"] .toolbarDesktop,
+.root[data-first-minute="loading"] .mobileTrigger,
+.root[data-first-minute="greeting"] .toolbarDesktop,
+.root[data-first-minute="greeting"] .mobileTrigger {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.root[data-first-minute="inviting"] .toolbarDesktop,
+.root[data-first-minute="inviting"] .mobileTrigger {
+  animation: toolbarFadeIn var(--ling-duration-slow) var(--ling-ease-enter) both;
+}
+
 /* Inviting phase: chat outer entrance */
 .root[data-first-minute="inviting"] .chatOuter {
-  animation: overlaySlideUp 0.5s var(--ling-ease-enter) both;
+  animation: overlaySlideUp var(--ling-duration-slow) var(--ling-ease-enter) both;
+}
+
+/* Inviting phase: vignette dissolves */
+.root[data-first-minute="inviting"]::after,
+.root[data-first-minute="nudge"]::after,
+.root[data-first-minute="waiting"]::after,
+.root[data-first-minute="interacted"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 21;
+  pointer-events: none;
+  background: transparent;
 }
 
 @keyframes overlayGroundPulse {
@@ -325,6 +384,16 @@
 }
 
 @keyframes overlaySlideUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(var(--ling-space-5)); }
   to { opacity: 1; transform: translateY(calc(-1 * var(--kb-offset, 0px))); }
+}
+
+@keyframes vignetteIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes toolbarFadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }

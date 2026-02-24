@@ -11,8 +11,8 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { useAiStateRead, AiStateEnum } from '@/context/ai-state-context';
-import { useAffinityMeta } from '@/context/affinity-context';
+import { useAiStateRead, AiStateEnum } from '@/context/AiStateContext';
+import { useAffinityMeta } from '@/context/AffinityContext';
 import { getIdleExpression, EXPRESSION_TRANSITION } from '@/config/expression-presets';
 import { createLogger } from '@/utils/logger';
 

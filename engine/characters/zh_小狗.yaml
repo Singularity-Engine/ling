@@ -14,7 +14,7 @@ character_config:
   conf_uid: "dog-local-001"
   live2d_model_name: "dog-local"
   character_name: "小狗"
-  avatar: "小狗.png"
+  avatar: "dog.png"
   human_name: "主人"
 
   persona_prompt: |

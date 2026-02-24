@@ -1,9 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { memo, useState, useCallback, useMemo, type CSSProperties } from "react";
-import { useAffinityMeta } from "@/context/affinity-context";
+import { useAffinityMeta } from "@/context/AffinityContext";
 import { AFFINITY_CRYSTAL_THEMES, CATEGORY_COLORS, DEFAULT_LEVEL, type AffinityCrystalTheme } from "@/config/affinity-palette";
 // @property rules + keyframes moved to static index.css — no runtime injection needed.
-import type { ToolCategory } from "../../context/tool-state-context";
+import type { ToolCategory } from "../../context/ToolStateContext";
 
 const DEFAULT_THEME: AffinityCrystalTheme = AFFINITY_CRYSTAL_THEMES[DEFAULT_LEVEL];
 

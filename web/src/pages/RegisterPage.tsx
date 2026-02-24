@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuthActions } from '@/context/auth-context';
+import { useAuthActions } from '@/context/AuthContext';
 import { ApiError } from '@/services/api-client';
 import { HreflangTags } from '@/components/seo/HreflangTags';
 

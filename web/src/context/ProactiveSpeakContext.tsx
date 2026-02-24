@@ -3,7 +3,7 @@ import {
 } from 'react';
 import { useLocalStorage } from '@/hooks/utils/use-local-storage';
 import { useTriggerSpeak } from '@/hooks/utils/use-trigger-speak';
-import { useAiStateRead, AiStateEnum } from '@/context/ai-state-context';
+import { useAiStateRead, AiStateEnum } from '@/context/AiStateContext';
 
 interface ProactiveSpeakSettings {
   allowButtonTrigger: boolean;

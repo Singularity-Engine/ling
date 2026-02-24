@@ -1,7 +1,7 @@
 import { memo, useState, useEffect, useCallback, useRef, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
-import { useAuthState, useAuthActions } from "@/context/auth-context";
-import { useUIActions } from "@/context/ui-context";
+import { useAuthState, useAuthActions } from "@/context/AuthContext";
+import { useUIActions } from "@/context/UiContext";
 import { apiClient } from "@/services/api-client";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import packageJson from "../../../package.json";

@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import i18n from 'i18next';
-import { useBgUrlState, useBgUrlActions } from '@/context/bgurl-context';
-import { useCameraActions } from '@/context/camera-context';
-import { useConfigState, useConfigActions } from '@/context/character-config-context';
-import { useSubtitle } from '@/context/subtitle-context';
-import { useWebSocketState, useWebSocketActions, defaultBaseUrl, defaultWsUrl } from '@/context/websocket-context';
+import { useBgUrlState, useBgUrlActions } from '@/context/BgurlContext';
+import { useCameraActions } from '@/context/CameraContext';
+import { useConfigState, useConfigActions } from '@/context/CharacterConfigContext';
+import { useSubtitle } from '@/context/SubtitleContext';
+import { useWebSocketState, useWebSocketActions, defaultBaseUrl, defaultWsUrl } from '@/context/WebsocketContext';
 import { useSwitchCharacter } from '@/hooks/utils/use-switch-character';
 import { createLogger } from '@/utils/logger';
 import { SK_IMAGE_COMPRESSION_QUALITY, SK_IMAGE_MAX_WIDTH } from '@/constants/storage-keys';

@@ -7,7 +7,7 @@
 
 import { memo, useState, useCallback, useEffect, useRef, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useUIState, useUIActions } from '@/context/ui-context';
+import { useUIState, useUIActions } from '@/context/UiContext';
 
 const EXIT_MS = 200;
 

@@ -3,9 +3,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAiStateRead, useAiStateActions } from '@/context/ai-state-context';
-import { useSubtitleActions } from '@/context/subtitle-context';
-import { useChatMessagesActions, useStreamingSetters } from '@/context/chat-history-context';
+import { useAiStateRead, useAiStateActions } from '@/context/AiStateContext';
+import { useSubtitleActions } from '@/context/SubtitleContext';
+import { useChatMessagesActions, useStreamingSetters } from '@/context/ChatHistoryContext';
 import { audioTaskQueue } from '@/utils/task-queue';
 import { audioManager } from '@/utils/audio-manager';
 import { createLogger } from '@/utils/logger';

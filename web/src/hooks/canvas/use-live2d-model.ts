@@ -5,11 +5,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // @ts-nocheck
 import { useEffect, useRef, useCallback, useState, RefObject } from "react";
-import { ModelInfo } from "@/context/live2d-config-context";
+import { ModelInfo } from "@/context/Live2dConfigContext";
 import { updateModelConfig } from '../../../WebSDK/src/lappdefine';
 import { LAppDelegate } from '../../../WebSDK/src/lappdelegate';
 import { initializeLive2D } from '@cubismsdksamples/main';
-import { useMode } from '@/context/mode-context';
+import { useMode } from '@/context/ModeContext';
 
 interface UseLive2DModelProps {
   modelInfo: ModelInfo | undefined;

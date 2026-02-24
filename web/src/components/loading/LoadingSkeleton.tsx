@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import { useState, useEffect, memo } from 'react';
-import { useAiStateRead, AiStateEnum } from '@/context/ai-state-context';
+import { useAiStateRead, AiStateEnum } from '@/context/AiStateContext';
 
 // ── Timing ──
 const FADE_OUT_MS = 600; // unmount delay after fade-out animation ends

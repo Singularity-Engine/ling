@@ -2,8 +2,8 @@
 /* eslint-disable object-shorthand */
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useCamera } from '@/context/camera-context';
-import { useScreenCaptureContext } from '@/context/screen-capture-context';
+import { useCamera } from '@/context/CameraContext';
+import { useScreenCaptureContext } from '@/context/ScreenCaptureContext';
 import { toaster } from "@/components/ui/toaster";
 import {
   IMAGE_COMPRESSION_QUALITY_KEY,

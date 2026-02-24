@@ -6,8 +6,8 @@
  */
 
 import { memo, useCallback, type CSSProperties } from 'react';
-import { useAuthState } from '@/context/auth-context';
-import { useUIActions } from '@/context/ui-context';
+import { useAuthState } from '@/context/AuthContext';
+import { useUIActions } from '@/context/UiContext';
 
 // ── Constants ──
 const LOW_BALANCE_THRESHOLD = 10;

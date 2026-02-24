@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next";
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { ThinkingBubble } from "./ThinkingBubble";
-import { useStreamingValue } from "@/context/chat-history-context";
-import { useAiStateRead } from "@/context/ai-state-context";
-import { useWebSocketState, useWebSocketActions } from "@/context/websocket-context";
-import { useThrottledValue } from "@/hooks/use-throttled-value";
+import { useStreamingValue } from "@/context/ChatHistoryContext";
+import { useAiStateRead } from "@/context/AiStateContext";
+import { useWebSocketState, useWebSocketActions } from "@/context/WebsocketContext";
+import { useThrottledValue } from "@/hooks/useThrottledValue";
 import type { Message } from "@/services/websocket-service";
 
 // ─── Style constants ───

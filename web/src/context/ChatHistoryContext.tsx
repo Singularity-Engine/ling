@@ -2,7 +2,7 @@ import {
   createContext, useContext, useState, useMemo, useCallback, useRef, type ReactNode,
 } from 'react';
 import type { Message } from '@/services/websocket-service';
-import type { HistoryInfo } from './websocket-context';
+import type { HistoryInfo } from './WebsocketContext';
 import { createLogger } from '@/utils/logger';
 
 const log = createLogger('ChatHistory');

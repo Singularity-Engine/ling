@@ -7,8 +7,8 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
 import { apiClient } from '@/services/api-client';
-import { useUIState, useUIActions } from '@/context/ui-context';
-import { useAuthState } from '@/context/auth-context';
+import { useUIState, useUIActions } from '@/context/UiContext';
+import { useAuthState } from '@/context/AuthContext';
 import { toaster } from '@/components/ui/toaster';
 import { createLogger } from '@/utils/logger';
 

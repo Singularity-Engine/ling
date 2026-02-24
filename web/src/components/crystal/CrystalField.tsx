@@ -1,6 +1,6 @@
 import { memo, useMemo, useState, useEffect, useRef, useCallback, type CSSProperties } from "react";
-import { useToolState } from "../../context/tool-state-context";
-import { useIsMobile } from "../../hooks/use-is-mobile";
+import { useToolState } from "../../context/ToolStateContext";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import { InfoCrystal } from "./InfoCrystal";
 
 const DESKTOP_POSITIONS: Record<number, CSSProperties> = {

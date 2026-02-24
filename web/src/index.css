@@ -195,6 +195,10 @@
 
   /* ── Design Token: Border ── */
   --ling-border: rgba(255, 255, 255, 0.08);
+
+  /* ── Design Token: Focus Ring ── */
+  --ling-focus-ring: var(--ling-purple-50);
+  --ling-focus-ring-component: var(--ling-purple-lighter);
 }
 
 /* === 亮色主题变量 === */
@@ -321,6 +325,10 @@
   --ling-warm-accent: #d97706;
   --ling-warm-soft: rgba(217, 119, 6, 0.1);
   --ling-border: rgba(0, 0, 0, 0.1);
+
+  /* Focus ring: deeper purple for contrast on light backgrounds */
+  --ling-focus-ring: var(--ling-purple-70);
+  --ling-focus-ring-component: var(--ling-purple-deep);
 }
 
 /* === 全局基础 === */
@@ -417,7 +425,7 @@ body {
   background: var(--ling-purple-50) !important;
   border-color: var(--ling-purple-70) !important;
 }
-.ling-action-btn:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
+/* focus-visible unified — see "聚焦环" section */
 
 @keyframes landingBtnSpin {
   to { transform: rotate(360deg); }
@@ -699,8 +707,7 @@ body {
 .ling-mic-btn:active {
   transform: scale(0.88);
 }
-.ling-send-btn:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
-.ling-mic-btn:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
+/* focus-visible unified — see "聚焦环" section */
 /* Light theme: darken-on-hover instead of brighten (buttons are already light) */
 [data-theme="light"] .ling-send-btn:not(:disabled):hover {
   filter: brightness(0.92);
@@ -758,7 +765,16 @@ input::placeholder, textarea::placeholder {
   outline: none;
 }
 *:focus-visible {
-  outline: 2px solid var(--ling-purple-50);
+  outline: 2px solid var(--ling-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Component-level focus ring — interactive controls get brighter ring for clarity */
+.ling-action-btn:focus-visible,
+.ling-send-btn:focus-visible,
+.ling-mic-btn:focus-visible,
+.ling-menu-item:focus-visible {
+  outline: 2px solid var(--ling-focus-ring-component);
   outline-offset: 2px;
 }
 

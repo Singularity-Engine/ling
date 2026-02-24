@@ -1,8 +1,8 @@
-import { useAiState } from '@/context/ai-state-context';
-import { useWebSocket } from '@/context/websocket-context';
-import { useStreamingRef, useStreamingSetters } from '@/context/chat-history-context';
+import { useAiState } from '@/context/AiStateContext';
+import { useWebSocket } from '@/context/WebsocketContext';
+import { useStreamingRef, useStreamingSetters } from '@/context/ChatHistoryContext';
 import { audioTaskQueue } from '@/utils/task-queue';
-import { useSubtitle } from '@/context/subtitle-context';
+import { useSubtitle } from '@/context/SubtitleContext';
 import { useAudioTask } from './use-audio-task';
 
 export const useInterrupt = () => {

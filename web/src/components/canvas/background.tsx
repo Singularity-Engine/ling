@@ -1,7 +1,7 @@
 import { memo, useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { canvasStyles } from './canvas-styles';
-import { useCameraState, useCameraActions } from '@/context/camera-context';
-import { useBgUrlState } from '@/context/bgurl-context';
+import { useCameraState, useCameraActions } from '@/context/CameraContext';
+import { useBgUrlState } from '@/context/BgurlContext';
 
 const Background = memo(({ children }: { children?: React.ReactNode }) => {
   const videoRef = useRef<HTMLVideoElement>(null);

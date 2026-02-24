@@ -1,7 +1,7 @@
 import { memo, useMemo, useRef, useState, useEffect, type CSSProperties } from 'react';
-import { useToolState } from '../../context/tool-state-context';
-import { useAiStateRead } from '../../context/ai-state-context';
-import { useAffinityMeta, useAffinityEffects } from '../../context/affinity-context';
+import { useToolState } from '../../context/ToolStateContext';
+import { useAiStateRead } from '../../context/AiStateContext';
+import { useAffinityMeta, useAffinityEffects } from '../../context/AffinityContext';
 import { AFFINITY_AMBIENT_TINTS, DEFAULT_LEVEL, type AffinityAmbientTint } from '../../config/affinity-palette';
 // Keyframes moved to static index.css — no runtime injection needed.
 

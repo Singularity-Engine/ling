@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useBgUrl } from '@/context/bgurl-context';
+import { useBgUrl } from '@/context/BgurlContext';
 
 export const useBackground = () => {
   const context = useBgUrl();

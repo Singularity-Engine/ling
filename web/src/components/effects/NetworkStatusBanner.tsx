@@ -1,6 +1,6 @@
 import { memo, useState, useEffect, useRef, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
-import { useNetworkStatus } from "../../hooks/use-network-status";
+import { useNetworkStatus } from "../../hooks/useNetworkStatus";
 // Keyframes moved to static index.css — no runtime injection needed.
 
 // ── Named constants ──

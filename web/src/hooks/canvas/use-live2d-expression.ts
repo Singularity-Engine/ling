@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { ModelInfo } from '@/context/live2d-config-context';
+import { ModelInfo } from '@/context/Live2dConfigContext';
 
 /**
  * Custom hook for handling Live2D model expressions

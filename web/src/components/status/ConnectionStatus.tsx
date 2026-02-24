@@ -1,6 +1,6 @@
 import { memo, useState, useEffect, useRef, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
-import { useWebSocketState, useWebSocketActions } from "@/context/websocket-context";
+import { useWebSocketState, useWebSocketActions } from "@/context/WebsocketContext";
 import { gatewayConnector, RECONNECT_MAX_RETRIES } from "@/services/gateway-connector";
 import { OVERLAY_COLORS } from "@/constants/colors";
 

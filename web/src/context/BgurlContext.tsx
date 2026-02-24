@@ -2,7 +2,7 @@ import {
   createContext, useMemo, useContext, useState, useCallback, useRef,
 } from 'react';
 import { useLocalStorage } from '@/hooks/utils/use-local-storage';
-import { useWebSocketState } from './websocket-context';
+import { useWebSocketState } from './WebsocketContext';
 
 /**
  * Background file interface

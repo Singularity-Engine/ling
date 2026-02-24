@@ -1,5 +1,5 @@
 import { useMemo, useCallback } from 'react';
-import { useWebSocket } from '@/context/websocket-context';
+import { useWebSocket } from '@/context/WebsocketContext';
 
 interface WSStatusInfo {
   color: string

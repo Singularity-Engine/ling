@@ -7,24 +7,24 @@
  */
 
 import type { ReactNode } from "react";
-import { UIProvider } from "@/context/ui-context";
-import { ThemeProvider } from "@/context/theme-context";
-import { ModeProvider } from "@/context/mode-context";
-import { CameraProvider } from "@/context/camera-context";
-import { ScreenCaptureProvider } from "@/context/screen-capture-context";
-import { CharacterConfigProvider } from "@/context/character-config-context";
-import { ChatHistoryProvider } from "@/context/chat-history-context";
-import { AiStateProvider } from "@/context/ai-state-context";
-import { ProactiveSpeakProvider } from "@/context/proactive-speak-context";
-import { Live2DConfigProvider } from "@/context/live2d-config-context";
-import { SubtitleProvider } from "@/context/subtitle-context";
-import { VADProvider } from "@/context/vad-context";
-import { BgUrlProvider } from "@/context/bgurl-context";
-import { GroupProvider } from "@/context/group-context";
-import { BrowserProvider } from "@/context/browser-context";
-import { ToolStateProvider } from "@/context/tool-state-context";
-import { TTSStateProvider } from "@/context/tts-state-context";
-import { AffinityProvider } from "@/context/affinity-context";
+import { UIProvider } from "@/context/UiContext";
+import { ThemeProvider } from "@/context/ThemeContext";
+import { ModeProvider } from "@/context/ModeContext";
+import { CameraProvider } from "@/context/CameraContext";
+import { ScreenCaptureProvider } from "@/context/ScreenCaptureContext";
+import { CharacterConfigProvider } from "@/context/CharacterConfigContext";
+import { ChatHistoryProvider } from "@/context/ChatHistoryContext";
+import { AiStateProvider } from "@/context/AiStateContext";
+import { ProactiveSpeakProvider } from "@/context/ProactiveSpeakContext";
+import { Live2DConfigProvider } from "@/context/Live2dConfigContext";
+import { SubtitleProvider } from "@/context/SubtitleContext";
+import { VADProvider } from "@/context/VadContext";
+import { BgUrlProvider } from "@/context/BgurlContext";
+import { GroupProvider } from "@/context/GroupContext";
+import { BrowserProvider } from "@/context/BrowserContext";
+import { ToolStateProvider } from "@/context/ToolStateContext";
+import { TTSStateProvider } from "@/context/TtsStateContext";
+import { AffinityProvider } from "@/context/AffinityContext";
 import WebSocketHandler from "@/services/websocket-handler";
 
 /**

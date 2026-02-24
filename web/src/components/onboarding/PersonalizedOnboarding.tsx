@@ -13,7 +13,7 @@ import {
   LuGamepad2, LuGlobe, LuCheck,
 } from "react-icons/lu";
 import { getSkillsByTags, getMetaByKey, getSkillLabel, type SkillMeta } from "../../config/skill-registry";
-import { useConstellation } from "../../hooks/use-constellation";
+import { useConstellation } from "../../hooks/useConstellation";
 import { SK_ONBOARDING_DONE, SK_USER_PREFERENCES } from "@/constants/storage-keys";
 
 const STORAGE_KEY = SK_ONBOARDING_DONE;

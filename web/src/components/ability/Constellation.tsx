@@ -1,8 +1,8 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { useConstellation } from "../../hooks/use-constellation";
-import { useToolState } from "../../context/tool-state-context";
+import { useConstellation } from "../../hooks/useConstellation";
+import { useToolState } from "../../context/ToolStateContext";
 import { getSkillMeta, getMetaByKey, getSkillLabel, type SkillMeta } from "../../config/skill-registry";
 // Keyframes moved to static index.css — no runtime injection needed.
 

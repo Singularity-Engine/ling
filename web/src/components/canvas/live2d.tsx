@@ -3,17 +3,17 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { memo, useRef, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useLive2DConfig } from "@/context/live2d-config-context";
+import { useLive2DConfig } from "@/context/Live2dConfigContext";
 import { useIpcHandlers } from "@/hooks/utils/use-ipc-handlers";
 import { useInterrupt } from "@/hooks/utils/use-interrupt";
 import { useAudioTask } from "@/hooks/utils/use-audio-task";
 import { useLive2DModel } from "@/hooks/canvas/use-live2d-model";
 import { useLive2DResize } from "@/hooks/canvas/use-live2d-resize";
-import { useAiState, AiStateEnum } from "@/context/ai-state-context";
+import { useAiState, AiStateEnum } from "@/context/AiStateContext";
 import { useLive2DExpression } from "@/hooks/canvas/use-live2d-expression";
 import { useForceIgnoreMouse } from "@/hooks/utils/use-force-ignore-mouse";
-import { useMode } from "@/context/mode-context";
-import { useWebSocket } from "@/context/websocket-context";
+import { useMode } from "@/context/ModeContext";
+import { useWebSocket } from "@/context/WebsocketContext";
 
 interface Live2DProps {
   showSidebar?: boolean;

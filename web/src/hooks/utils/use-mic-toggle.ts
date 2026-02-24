@@ -1,5 +1,5 @@
-import { useVAD } from '@/context/vad-context';
-import { useAiState } from '@/context/ai-state-context';
+import { useVAD } from '@/context/VadContext';
+import { useAiState } from '@/context/AiStateContext';
 
 export function useMicToggle() {
   const { startMic, stopMic, micOn } = useVAD();

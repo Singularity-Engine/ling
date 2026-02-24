@@ -5,13 +5,13 @@ import { ChatBubble } from "./ChatBubble";
 import { TimeSeparator, shouldShowSeparator } from "./TimeSeparator";
 import { SuggestionChips } from "./SuggestionChips";
 import { StreamingFooter } from "./StreamingFooter";
-import { useChatMessagesState, useChatMessagesActions, useStreamingRef } from "@/context/chat-history-context";
+import { useChatMessagesState, useChatMessagesActions, useStreamingRef } from "@/context/ChatHistoryContext";
 import type { Message } from "@/services/websocket-service";
 
-import { useAiStateRead } from "@/context/ai-state-context";
-import { useWebSocketState, useWebSocketActions } from "@/context/websocket-context";
-import { useChatScroll } from "@/hooks/use-chat-scroll";
-import { useSwipeCollapse } from "@/hooks/use-swipe-collapse";
+import { useAiStateRead } from "@/context/AiStateContext";
+import { useWebSocketState, useWebSocketActions } from "@/context/WebsocketContext";
+import { useChatScroll } from "@/hooks/useChatScroll";
+import { useSwipeCollapse } from "@/hooks/useSwipeCollapse";
 
 // Touch-only device detection (no hover capability = phone/tablet)
 const isTouchDevice =

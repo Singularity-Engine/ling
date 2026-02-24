@@ -2,10 +2,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable no-underscore-dangle */
 import { useEffect, useCallback, RefObject, useRef } from 'react';
-import { ModelInfo } from '@/context/live2d-config-context';
+import { ModelInfo } from '@/context/Live2dConfigContext';
 import { LAppDelegate } from '../../../WebSDK/src/lappdelegate';
 import { LAppLive2DManager } from '../../../WebSDK/src/lapplive2dmanager';
-import { useMode } from '@/context/mode-context';
+import { useMode } from '@/context/ModeContext';
 
 // Constants for model scaling behavior
 const MIN_ZOOM = 0.3;         // Minimum zoom factor (30% of base)
