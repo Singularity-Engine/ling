@@ -60,38 +60,26 @@ export function useIpcHandlers() {
     if (!window.electron?.ipcRenderer) return;
     if (!isPet) return;
 
-    window.electron.ipcRenderer.removeAllListeners("mic-toggle");
-    window.electron.ipcRenderer.removeAllListeners("interrupt");
-    window.electron.ipcRenderer.removeAllListeners("toggle-scroll-to-resize");
-    window.electron.ipcRenderer.removeAllListeners("switch-character");
-    window.electron.ipcRenderer.removeAllListeners("toggle-force-ignore-mouse");
-    window.electron.ipcRenderer.removeAllListeners("force-ignore-mouse-changed");
+    // Use specific removeListener instead of removeAllListeners to avoid
+    // nuking handlers added by other modules (Sentry, debug tools, etc.)
+    const ipc = window.electron.ipcRenderer;
 
-    window.electron.ipcRenderer.on("mic-toggle", micToggleHandler);
-    window.electron.ipcRenderer.on("interrupt", interruptHandler);
-    window.electron.ipcRenderer.on(
-      "toggle-scroll-to-resize",
-      scrollToResizeHandler,
-    );
-    window.electron.ipcRenderer.on("switch-character", switchCharacterHandler);
-    window.electron.ipcRenderer.on(
-      "toggle-force-ignore-mouse",
-      toggleForceIgnoreMouseHandler,
-    );
-    window.electron.ipcRenderer.on(
-      "force-ignore-mouse-changed",
-      forceIgnoreMouseChangedHandler,
-    );
+    ipc.on("mic-toggle", micToggleHandler);
+    ipc.on("interrupt", interruptHandler);
+    ipc.on("toggle-scroll-to-resize", scrollToResizeHandler);
+    ipc.on("switch-character", switchCharacterHandler);
+    ipc.on("toggle-force-ignore-mouse", toggleForceIgnoreMouseHandler);
+    ipc.on("force-ignore-mouse-changed", forceIgnoreMouseChangedHandler);
 
     return () => {
-      window.electron?.ipcRenderer.removeAllListeners("mic-toggle");
-      window.electron?.ipcRenderer.removeAllListeners("interrupt");
-      window.electron?.ipcRenderer.removeAllListeners(
-        "toggle-scroll-to-resize",
-      );
-      window.electron?.ipcRenderer.removeAllListeners("switch-character");
-      window.electron?.ipcRenderer.removeAllListeners("toggle-force-ignore-mouse");
-      window.electron?.ipcRenderer.removeAllListeners("force-ignore-mouse-changed");
+      const r = window.electron?.ipcRenderer;
+      if (!r) return;
+      r.removeListener("mic-toggle", micToggleHandler);
+      r.removeListener("interrupt", interruptHandler);
+      r.removeListener("toggle-scroll-to-resize", scrollToResizeHandler);
+      r.removeListener("switch-character", switchCharacterHandler);
+      r.removeListener("toggle-force-ignore-mouse", toggleForceIgnoreMouseHandler);
+      r.removeListener("force-ignore-mouse-changed", forceIgnoreMouseChangedHandler);
     };
   }, [
     micToggleHandler,

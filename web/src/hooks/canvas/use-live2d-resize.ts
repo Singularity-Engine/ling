@@ -286,6 +286,12 @@ export const useLive2DResize = ({
         animationFrameIdRef.current = null;
       });
     }
+    return () => {
+      if (animationFrameIdRef.current !== null) {
+        cancelAnimationFrame(animationFrameIdRef.current);
+        animationFrameIdRef.current = null;
+      }
+    };
   }, [showSidebar, handleResize]);
 
   // Set up event listeners and cleanup for wheel scaling

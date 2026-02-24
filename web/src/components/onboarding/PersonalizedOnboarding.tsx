@@ -451,6 +451,7 @@ function StepWelcome({ t, onNext }: { t: (k: string) => string; onNext: () => vo
           strokeLinecap="round"
           strokeLinejoin="round"
           style={S_STAR_SVG}
+          aria-hidden="true"
         >
           <path d="M12 2L12 22M2 12L22 12M4.93 4.93L19.07 19.07M19.07 4.93L4.93 19.07" />
         </svg>

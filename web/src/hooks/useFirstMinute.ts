@@ -80,7 +80,10 @@ export function useFirstMinute(): FirstMinuteState {
       // Mark interaction in localStorage for ExperimentBar
       window.dispatchEvent(new CustomEvent("ling-user-interacted"));
     };
-    window.addEventListener("ling-user-interacted", onInteract);
+    // { once: true } ensures the listener auto-removes after first fire,
+    // preventing re-entrant dispatch since onInteract itself dispatches
+    // the same event. Explicit cleanup still needed for the unmount case.
+    window.addEventListener("ling-user-interacted", onInteract, { once: true });
 
     return () => {
       timers.forEach(clearTimeout);

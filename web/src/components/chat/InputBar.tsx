@@ -125,6 +125,9 @@ const ICON_STOP = (
   </svg>
 );
 
+/** Module-level empty array — avoids allocating a new [] on every send. */
+const EMPTY_IMAGES: never[] = [];
+
 const AI_STATE_KEYS: Record<string, string> = {
   idle: "",
   loading: "chat.loading",
@@ -244,7 +247,7 @@ export const InputBar = memo(() => {
     sendMessage({
       type: "text-input",
       text: text,
-      images: [],
+      images: EMPTY_IMAGES,
     });
     trackEvent("message_sent", { source: "input_bar" });
 

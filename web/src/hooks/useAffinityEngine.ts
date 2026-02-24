@@ -121,6 +121,9 @@ export function useAffinityEngine({ updateAffinity, showMilestone, showPointGain
     const initial = stateRef.current;
     updateAffinityRef.current(initial.affinity, getLevel(initial.affinity));
 
+    // Track milestone timeout so we can cancel it on unmount
+    let milestoneTimer: ReturnType<typeof setTimeout> | undefined;
+
     // ── Core: apply delta and propagate ──────────────────────────
 
     function applyDelta(delta: number) {
@@ -149,7 +152,7 @@ export function useAffinityEngine({ updateAffinity, showMilestone, showPointGain
         if (msg && !reachedLevels.includes(newLevel)) {
           reachedLevels = [...reachedLevels, newLevel];
           // Delay milestone slightly so the bar animates first
-          setTimeout(() => showMilestoneRef.current(msg), 400);
+          milestoneTimer = setTimeout(() => showMilestoneRef.current(msg), 400);
         }
       }
 
@@ -198,6 +201,9 @@ export function useAffinityEngine({ updateAffinity, showMilestone, showPointGain
       }
     });
 
-    return () => sub.unsubscribe();
+    return () => {
+      sub.unsubscribe();
+      clearTimeout(milestoneTimer);
+    };
   }, []); // stable — subscribe once
 }
