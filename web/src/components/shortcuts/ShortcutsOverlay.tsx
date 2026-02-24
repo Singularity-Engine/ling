@@ -2,6 +2,7 @@ import { type CSSProperties } from "react";
 import { memo, useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { OVERLAY_COLORS } from "@/constants/colors";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface ShortcutsOverlayProps {
   open: boolean;
@@ -98,6 +99,9 @@ export const ShortcutsOverlay = memo(({ open, onClose }: ShortcutsOverlayProps) 
   const [closing, setClosing] = useState(false);
   const closingTimer = useRef<ReturnType<typeof setTimeout>>();
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Focus-trap: keep Tab/Shift+Tab within the dialog
+  useFocusTrap(cardRef, open && !closing);
 
   // Clean up timer on unmount
   useEffect(() => () => { clearTimeout(closingTimer.current); }, []);

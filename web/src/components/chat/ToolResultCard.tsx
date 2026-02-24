@@ -74,6 +74,7 @@ function getShimmerInnerStyle(accent: string): CSSProperties {
       position: "absolute", top: 0, left: 0, width: "50%", height: "100%",
       background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
       animation: "toolShimmer 1.5s ease-in-out infinite",
+      willChange: "transform",
     };
     _shimmerCache.set(accent, s);
   }

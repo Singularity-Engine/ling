@@ -8,6 +8,7 @@
 import { memo, useState, useCallback, useEffect, useRef, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUIState, useUIActions } from '@/context/UiContext';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 const EXIT_MS = 200;
 
@@ -101,6 +102,10 @@ const InsufficientCreditsModal: React.FC = memo(function InsufficientCreditsModa
   // Track what to do after the exit animation finishes
   const afterCloseRef = useRef<(() => void) | null>(null);
   const primaryRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Focus-trap: keep Tab/Shift+Tab within the dialog
+  useFocusTrap(cardRef, billingModal.open && !closing);
 
   // Clean up timer on unmount
   useEffect(() => () => { clearTimeout(closingTimer.current); }, []);
@@ -175,6 +180,7 @@ const InsufficientCreditsModal: React.FC = memo(function InsufficientCreditsModa
   return (
     <div style={closing ? S_BACKDROP_CLOSING : S_BACKDROP_OPEN} onClick={handleBackdropClick}>
       <div
+        ref={cardRef}
         style={closing ? S_CARD_CLOSING : S_CARD_OPEN}
         role="alertdialog"
         aria-modal="true"

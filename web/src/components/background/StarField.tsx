@@ -115,7 +115,8 @@ export const StarField = memo(() => {
     };
     window.addEventListener("resize", throttledResize);
     // Fullscreen transitions may not fire resize
-    const onFsChange = () => { setTimeout(throttledResize, 100); };
+    let fsTimerId = 0;
+    const onFsChange = () => { fsTimerId = window.setTimeout(throttledResize, 100); };
     document.addEventListener("fullscreenchange", onFsChange);
     document.addEventListener("webkitfullscreenchange", onFsChange);
 
@@ -281,6 +282,7 @@ export const StarField = memo(() => {
     return () => {
       cancelAnimationFrame(animRef.current);
       cancelAnimationFrame(resizeRaf);
+      clearTimeout(fsTimerId);
       window.removeEventListener("resize", throttledResize);
       document.removeEventListener("fullscreenchange", onFsChange);
       document.removeEventListener("webkitfullscreenchange", onFsChange);

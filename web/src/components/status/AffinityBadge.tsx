@@ -98,7 +98,7 @@ const S_MILESTONE_TEXT: CSSProperties = { fontSize: "13px", color: "var(--ling-t
 const S_HEART_PATH: CSSProperties = { transition: "stroke 0.5s ease" };
 const S_STATS_ROW: CSSProperties = { display: "flex", gap: "12px", marginBottom: "12px", fontSize: "11px", color: "var(--ling-text-dim)" };
 
-const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPercent: number; size?: number }) => {
+const HeartIcon = memo(function HeartIcon({ color, fillPercent, size = 32 }: { color: string; fillPercent: number; size?: number }) {
   const gradientId = useId();
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -117,7 +117,7 @@ const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPerce
       />
     </svg>
   );
-};
+});
 
 function getDaysTogether(): number {
   let stored = localStorage.getItem(SK_FIRST_VISIT);
