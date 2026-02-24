@@ -523,6 +523,8 @@
     "cardAlt": "共有カード",
     "save": "保存",
     "share": "共有",
-    "continueShare": "共有を続ける"
+    "continueShare": "共有を続ける",
+    "genFailed": "共有カードの生成に失敗しました",
+    "retry": "再試行"
   }
 }

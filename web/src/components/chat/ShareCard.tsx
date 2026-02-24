@@ -233,6 +233,7 @@ export const ShareCard = memo(function ShareCard({ content, isOpen, onClose, mod
   const { t } = useTranslation();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [genError, setGenError] = useState(false);
   const [showPrivacyWarning, setShowPrivacyWarning] = useState(false);
   const blobUrlRef = useRef<string | null>(null);
   const privacyResolveRef = useRef<((proceed: boolean) => void) | null>(null);
@@ -276,6 +277,7 @@ export const ShareCard = memo(function ShareCard({ content, isOpen, onClose, mod
     }
 
     setGenerating(true);
+    setGenError(false);
     onModeChange("preview");
 
     try {
@@ -292,6 +294,7 @@ export const ShareCard = memo(function ShareCard({ content, isOpen, onClose, mod
       trackEvent("share_card_generated");
     } catch (err) {
       log.error("Failed to generate share card:", err);
+      setGenError(true);
     } finally {
       setGenerating(false);
     }
@@ -358,6 +361,13 @@ export const ShareCard = memo(function ShareCard({ content, isOpen, onClose, mod
         <div className={styles.generating} role="status" aria-busy="true" aria-label={t("share.generating", "Generating...")}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: "sendSpin 1s linear infinite" }} aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
           {t("share.generating", "Generating...")}
+        </div>
+      ) : genError ? (
+        <div className={styles.genError} role="alert">
+          <span>{t("share.genFailed", "Failed to generate share card")}</span>
+          <button className={styles.cardSaveBtn} onClick={handleShare}>
+            {t("share.retry", "Retry")}
+          </button>
         </div>
       ) : imageUrl ? (
         <>

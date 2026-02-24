@@ -524,6 +524,8 @@
     "cardAlt": "Teilen-Karte",
     "save": "Speichern",
     "share": "Teilen",
-    "continueShare": "Weiter teilen"
+    "continueShare": "Weiter teilen",
+    "genFailed": "Freigabekarte konnte nicht erstellt werden",
+    "retry": "Erneut versuchen"
   }
 }

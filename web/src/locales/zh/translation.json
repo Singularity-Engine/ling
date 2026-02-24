@@ -523,6 +523,8 @@
     "cardAlt": "分享卡片",
     "save": "保存",
     "share": "分享",
-    "continueShare": "继续分享"
+    "continueShare": "继续分享",
+    "genFailed": "分享卡片生成失败",
+    "retry": "重试"
   }
 }

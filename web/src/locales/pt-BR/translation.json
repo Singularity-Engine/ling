@@ -547,6 +547,8 @@
     "cardAlt": "Cart\u00e3o de compartilhamento",
     "save": "Salvar",
     "share": "Compartilhar",
-    "continueShare": "Continuar compartilhando"
+    "continueShare": "Continuar compartilhando",
+    "genFailed": "Falha ao gerar o cartão de compartilhamento",
+    "retry": "Tentar novamente"
   }
 }

@@ -547,6 +547,8 @@
     "cardAlt": "Tarjeta para compartir",
     "save": "Guardar",
     "share": "Compartir",
-    "continueShare": "Continuar compartiendo"
+    "continueShare": "Continuar compartiendo",
+    "genFailed": "Error al generar la tarjeta para compartir",
+    "retry": "Reintentar"
   }
 }

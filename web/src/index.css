@@ -697,6 +697,11 @@ body {
   box-shadow: 0 0 0 1px var(--ling-purple-25), 0 0 16px var(--ling-purple-15);
   background: var(--ling-input-hover-bg);
 }
+/* Explicit focus-visible ring for Windows High Contrast mode (box-shadow is ignored there) */
+.ling-textarea:focus-visible {
+  outline: 2px solid var(--ling-focus-ring-component, var(--ling-purple-light));
+  outline-offset: 1px;
+}
 .ling-textarea:focus::placeholder {
   color: var(--ling-text-muted);
 }

@@ -429,7 +429,6 @@ export const ChatArea = memo(({ onCollapse }: ChatAreaProps) => {
       className="chat-area-scroll"
       role="log"
       aria-label={t("ui.chatMessages")}
-      aria-live="polite"
       style={containerStyle}
       {...swipeHandlers}
     >
