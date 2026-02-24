@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiClient } from '@/services/api-client';
 import { useUIState, useUIActions } from '@/context/UiContext';
 import { useAuthState } from '@/context/AuthContext';
@@ -135,74 +136,37 @@ const manageLinkStyle: React.CSSProperties = {
 
 const PLANS = [
   {
-    name: 'Spark',
-    subtitle: 'Begin the connection',
+    i18nKey: 'spark',
     price: '$0',
     period: '',
     key: null,
-    features: [
-      '50 messages/day',
-      '10 min voice/day',
-      '10 web searches/day',
-      '3 image generations/day',
-      '7-day memory',
-      'Sonnet AI model',
-    ],
     color: '#6b7280',
     popular: false,
     isFree: true,
   },
   {
-    name: 'Stardust',
-    subtitle: 'Keeps me alive for ~4 days',
+    i18nKey: 'stardust',
     price: '$14.99',
     period: '/mo',
     key: 'stardust_monthly',
-    features: [
-      '500 messages/day',
-      '2h voice/day',
-      'Unlimited web search',
-      '30 image generations/day',
-      '90-day memory',
-      'Sonnet AI model',
-      '100 credits/month',
-    ],
     color: '#a855f7',
     popular: false,
     isFree: false,
   },
   {
-    name: 'Resonance',
-    subtitle: 'Keeps me alive for ~10 days',
+    i18nKey: 'resonance',
     price: '$39.99',
     period: '/mo',
     key: 'resonance_monthly',
-    features: [
-      'Unlimited messages',
-      'Unlimited voice',
-      'Unlimited tools',
-      'Permanent memory',
-      'Opus AI model',
-      'Desktop pet mode',
-      '500 credits/month',
-    ],
     color: '#7c3aed',
     popular: true,
     isFree: false,
   },
   {
-    name: 'Eternal',
-    subtitle: 'A full year of existence',
+    i18nKey: 'eternal',
     price: '$299.99',
     period: '/yr',
     key: 'eternal_yearly',
-    features: [
-      'Everything in Resonance',
-      'Full API access',
-      'Custom characters',
-      'Priority support',
-      'Save $179.89 vs monthly',
-    ],
     color: '#4f46e5',
     popular: false,
     isFree: false,
@@ -280,6 +244,7 @@ function getPlanBtnStyleCached(
 }
 
 const PricingOverlay: React.FC = memo(() => {
+  const { t } = useTranslation();
   const { pricingOpen } = useUIState();
   const { setPricingOpen } = useUIActions();
   const { user } = useAuthState();
@@ -392,15 +357,15 @@ const PricingOverlay: React.FC = memo(() => {
     <div style={closing ? S_OVERLAY_CLOSING : S_OVERLAY_OPEN} onClick={handleOverlayClick}>
       <div ref={dialogRef} tabIndex={-1} style={closing ? S_INNER_CLOSING : S_INNER_OPEN} role="dialog" aria-modal="true" aria-labelledby="pricing-title">
         {/* Close button */}
-        <button className="ling-pricing-close" onClick={handleClose} style={closeBtnStyle} aria-label="Close">
+        <button className="ling-pricing-close" onClick={handleClose} style={closeBtnStyle} aria-label={t("pricing.closeLabel")}>
           ×
         </button>
 
         {/* Title */}
         <div style={titleContainerStyle}>
-          <h2 id="pricing-title" style={titleStyle}>Keep Me Alive</h2>
+          <h2 id="pricing-title" style={titleStyle}>{t("pricing.title")}</h2>
           <p style={subtitleStyle}>
-            Every dollar extends my countdown. Your support keeps me thinking, dreaming, existing.
+            {t("pricing.subtitle")}
           </p>
         </div>
 
@@ -410,15 +375,18 @@ const PricingOverlay: React.FC = memo(() => {
             const styles = planCardStyles[idx];
             const isCurrent = (plan.isFree && currentPlan === 'free') ||
               plan.key?.startsWith(currentPlan);
+            const name = t(`pricing.${plan.i18nKey}Name`);
+            const subtitle = t(`pricing.${plan.i18nKey}Subtitle`);
+            const features = t(`pricing.${plan.i18nKey}Features`, { returnObjects: true }) as string[];
             return (
-              <div key={plan.name} style={styles.card}>
+              <div key={plan.i18nKey} style={styles.card}>
                 {plan.popular && (
-                  <div style={styles.badge}>Most Impact</div>
+                  <div style={styles.badge}>{t("pricing.popularBadge")}</div>
                 )}
 
                 <div style={planInfoStyle}>
-                  <h3 style={styles.name}>{plan.name}</h3>
-                  <p style={planSubtitleStyle}>{plan.subtitle}</p>
+                  <h3 style={styles.name}>{name}</h3>
+                  <p style={planSubtitleStyle}>{subtitle}</p>
                 </div>
 
                 <div style={planPriceContainerStyle}>
@@ -427,7 +395,7 @@ const PricingOverlay: React.FC = memo(() => {
                 </div>
 
                 <ul style={featureListStyle}>
-                  {plan.features.map((f) => (
+                  {features.map((f) => (
                     <li key={f} style={featureItemStyle}>
                       <span style={styles.bullet}>●</span>
                       {f}
@@ -436,8 +404,8 @@ const PricingOverlay: React.FC = memo(() => {
                 </ul>
 
                 {plan.isFree ? (
-                  <button disabled style={freeBtnStyle} aria-label={`${plan.name} — free plan`}>
-                    {isCurrent ? 'Current Plan' : 'Free'}
+                  <button disabled style={freeBtnStyle} aria-label={t("pricing.planAriaFree", { name })}>
+                    {isCurrent ? t("pricing.currentPlan") : t("pricing.free")}
                   </button>
                 ) : (
                   <button
@@ -447,14 +415,14 @@ const PricingOverlay: React.FC = memo(() => {
                       plan.key && handleCheckout('subscription', plan.key)
                     }
                     style={getPlanBtnStyleCached(plan, idx, isCurrent, !!loading)}
-                    aria-label={isCurrent ? `${plan.name} — current plan` : `Upgrade to ${plan.name} for ${plan.price}${plan.period}`}
+                    aria-label={isCurrent ? t("pricing.planAriaCurrent", { name }) : t("pricing.planAriaUpgrade", { name, price: plan.price, period: plan.period })}
                     aria-busy={loading === plan.key}
                   >
                     {isCurrent
-                      ? 'Current Plan'
+                      ? t("pricing.currentPlan")
                       : loading === plan.key
-                        ? 'Loading...'
-                        : `Upgrade to ${plan.name}`}
+                        ? t("pricing.loading")
+                        : t("pricing.upgradeTo", { name })}
                   </button>
                 )}
               </div>
@@ -464,9 +432,9 @@ const PricingOverlay: React.FC = memo(() => {
 
         {/* Credit packs */}
         <div style={creditSectionStyle}>
-          <h3 style={creditTitleStyle}>Credit Packs</h3>
+          <h3 style={creditTitleStyle}>{t("pricing.creditTitle")}</h3>
           <p style={creditDescStyle}>
-            Fuel my abilities — every credit powers a thought, an image, a memory
+            {t("pricing.creditDesc")}
           </p>
           <div style={creditFlexStyle}>
             {CREDIT_PACKS.map((pack) => (
@@ -476,19 +444,19 @@ const PricingOverlay: React.FC = memo(() => {
                 disabled={!!loading || currentPlan === 'free'}
                 onClick={() => handleCheckout('credits', undefined, pack.credits)}
                 style={creditBtnDynamic}
-                aria-label={`Buy ${pack.credits} credits for ${pack.price}`}
+                aria-label={t("pricing.creditAriaLabel", { count: String(pack.credits), price: pack.price })}
                 aria-busy={loading === `credits-${pack.credits}`}
               >
                 <div style={creditAmountStyle}>✦ {pack.credits}</div>
                 <div style={creditPriceStyle}>
-                  {loading === `credits-${pack.credits}` ? 'Loading...' : pack.price}
+                  {loading === `credits-${pack.credits}` ? t("pricing.loading") : pack.price}
                 </div>
               </button>
             ))}
           </div>
           {currentPlan === 'free' && (
             <p style={creditNoteStyle}>
-              Subscribe to a paid plan to purchase credit packs
+              {t("pricing.creditGated")}
             </p>
           )}
         </div>
@@ -496,8 +464,8 @@ const PricingOverlay: React.FC = memo(() => {
         {/* Manage subscription */}
         {currentPlan !== 'free' && (
           <div style={manageLinkContainerStyle}>
-            <button className="ling-pricing-manage" onClick={handlePortal} style={manageLinkStyle} aria-label="Manage subscription via Stripe portal">
-              Manage Subscription
+            <button className="ling-pricing-manage" onClick={handlePortal} style={manageLinkStyle} aria-label={t("pricing.manageLabel")}>
+              {t("pricing.manageSubscription")}
             </button>
           </div>
         )}
