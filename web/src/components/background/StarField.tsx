@@ -114,6 +114,10 @@ export const StarField = memo(() => {
       resizeRaf = requestAnimationFrame(() => { resizeRaf = 0; resize(); });
     };
     window.addEventListener("resize", throttledResize);
+    // Fullscreen transitions may not fire resize
+    const onFsChange = () => { setTimeout(throttledResize, 100); };
+    document.addEventListener("fullscreenchange", onFsChange);
+    document.addEventListener("webkitfullscreenchange", onFsChange);
 
     // Initialize stars across 3 depth layers.
     // Stars are already grouped by layer (generated in layer order) so fillStyle
@@ -278,6 +282,8 @@ export const StarField = memo(() => {
       cancelAnimationFrame(animRef.current);
       cancelAnimationFrame(resizeRaf);
       window.removeEventListener("resize", throttledResize);
+      document.removeEventListener("fullscreenchange", onFsChange);
+      document.removeEventListener("webkitfullscreenchange", onFsChange);
     };
   }, []);
 

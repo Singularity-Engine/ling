@@ -83,7 +83,7 @@ const S_CANVAS: React.CSSProperties = {
   top: 0,
   left: 0,
   width: "100vw",
-  height: "100vh",
+  height: "100dvh",
   pointerEvents: "none",
   zIndex: 1,
 };
@@ -144,9 +144,14 @@ export const ParticleCanvas = memo(function ParticleCanvas({
       resizeRaf = requestAnimationFrame(() => { resizeRaf = 0; resize(); });
     };
     window.addEventListener("resize", throttledResize);
+    const onFsChange = () => { setTimeout(throttledResize, 100); };
+    document.addEventListener("fullscreenchange", onFsChange);
+    document.addEventListener("webkitfullscreenchange", onFsChange);
     return () => {
       cancelAnimationFrame(resizeRaf);
       window.removeEventListener("resize", throttledResize);
+      document.removeEventListener("fullscreenchange", onFsChange);
+      document.removeEventListener("webkitfullscreenchange", onFsChange);
     };
   }, [getParticleCount]);
 

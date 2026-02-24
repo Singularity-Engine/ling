@@ -4,10 +4,9 @@ import { useCamera } from '@/context/CameraContext';
 import { useScreenCaptureContext } from '@/context/ScreenCaptureContext';
 import { toaster } from "@/components/ui/toaster";
 import { createLogger } from '@/utils/logger';
+import { SK_IMAGE_COMPRESSION_QUALITY, SK_IMAGE_MAX_WIDTH } from '@/constants/storage-keys';
 import {
-  IMAGE_COMPRESSION_QUALITY_KEY,
   DEFAULT_IMAGE_COMPRESSION_QUALITY,
-  IMAGE_MAX_WIDTH_KEY,
   DEFAULT_IMAGE_MAX_WIDTH,
 } from '@/hooks/sidebar/setting/use-general-settings';
 
@@ -32,7 +31,7 @@ export function useMediaCapture() {
   const { stream: screenStream } = useScreenCaptureContext();
 
   const getCompressionQuality = useCallback(() => {
-    const storedQuality = localStorage.getItem(IMAGE_COMPRESSION_QUALITY_KEY);
+    const storedQuality = localStorage.getItem(SK_IMAGE_COMPRESSION_QUALITY);
     if (storedQuality) {
       const quality = parseFloat(storedQuality);
       if (!Number.isNaN(quality) && quality >= 0.1 && quality <= 1.0) {
@@ -43,7 +42,7 @@ export function useMediaCapture() {
   }, []);
 
   const getImageMaxWidth = useCallback(() => {
-    const storedMaxWidth = localStorage.getItem(IMAGE_MAX_WIDTH_KEY);
+    const storedMaxWidth = localStorage.getItem(SK_IMAGE_MAX_WIDTH);
     if (storedMaxWidth) {
       const maxWidth = parseInt(storedMaxWidth, 10);
       if (!Number.isNaN(maxWidth) && maxWidth >= 0) {

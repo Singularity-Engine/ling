@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAffinityMeta } from "@/context/AffinityContext";
 import { AFFINITY_LEVELS, DEFAULT_LEVEL } from "@/config/affinity-palette";
 import { LEVELS } from "@/hooks/useAffinityEngine";
+import { SK_FIRST_VISIT } from "@/constants/storage-keys";
 import { trackEvent } from "@/utils/track-event";
 // Keyframes moved to static index.css — no runtime injection needed.
 
@@ -95,6 +96,7 @@ const S_MILESTONE_BASE: CSSProperties = {
 };
 const S_MILESTONE_TEXT: CSSProperties = { fontSize: "13px", color: "var(--ling-text-primary)", fontWeight: 500 };
 const S_HEART_PATH: CSSProperties = { transition: "stroke 0.5s ease" };
+const S_STATS_ROW: CSSProperties = { display: "flex", gap: "12px", marginBottom: "12px", fontSize: "11px", color: "var(--ling-text-dim)" };
 
 const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPercent: number; size?: number }) => {
   const gradientId = useId();
@@ -117,13 +119,11 @@ const HeartIcon = ({ color, fillPercent, size = 32 }: { color: string; fillPerce
   );
 };
 
-const LS_FIRST_VISIT_KEY = "ling-first-visit";
-
 function getDaysTogether(): number {
-  let stored = localStorage.getItem(LS_FIRST_VISIT_KEY);
+  let stored = localStorage.getItem(SK_FIRST_VISIT);
   if (!stored) {
     stored = new Date().toISOString();
-    localStorage.setItem(LS_FIRST_VISIT_KEY, stored);
+    localStorage.setItem(SK_FIRST_VISIT, stored);
     trackEvent("first_visit");
   }
   const firstVisit = new Date(stored).getTime();
@@ -303,7 +303,7 @@ export const AffinityBadge = memo(() => {
             </div>
 
             {/* Relationship stats */}
-            <div style={{ display: "flex", gap: "12px", marginBottom: "12px", fontSize: "11px", color: "var(--ling-text-dim)" }}>
+            <div style={S_STATS_ROW}>
               <span>{t("affinity.daysTogether", { count: daysTogether })}</span>
             </div>
 

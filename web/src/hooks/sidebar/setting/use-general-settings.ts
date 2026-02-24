@@ -11,9 +11,7 @@ import { SK_IMAGE_COMPRESSION_QUALITY, SK_IMAGE_MAX_WIDTH } from '@/constants/st
 
 const log = createLogger('Settings');
 
-export const IMAGE_COMPRESSION_QUALITY_KEY = SK_IMAGE_COMPRESSION_QUALITY;
 export const DEFAULT_IMAGE_COMPRESSION_QUALITY = 0.8;
-export const IMAGE_MAX_WIDTH_KEY = SK_IMAGE_MAX_WIDTH;
 export const DEFAULT_IMAGE_MAX_WIDTH = 0;
 
 interface GeneralSettings {
@@ -36,7 +34,7 @@ interface UseGeneralSettingsProps {
 }
 
 const loadInitialCompressionQuality = (): number => {
-  const storedQuality = localStorage.getItem(IMAGE_COMPRESSION_QUALITY_KEY);
+  const storedQuality = localStorage.getItem(SK_IMAGE_COMPRESSION_QUALITY);
   if (storedQuality) {
     const quality = parseFloat(storedQuality);
     if (!Number.isNaN(quality) && quality >= 0.1 && quality <= 1.0) {
@@ -47,7 +45,7 @@ const loadInitialCompressionQuality = (): number => {
 };
 
 const loadInitialImageMaxWidth = (): number => {
-  const storedMaxWidth = localStorage.getItem(IMAGE_MAX_WIDTH_KEY);
+  const storedMaxWidth = localStorage.getItem(SK_IMAGE_MAX_WIDTH);
   if (storedMaxWidth) {
     const maxWidth = parseInt(storedMaxWidth, 10);
     if (!Number.isNaN(maxWidth) && maxWidth >= 0) {
@@ -153,10 +151,10 @@ export const useGeneralSettings = ({
           break;
         }
         case 'imageCompressionQuality':
-          localStorage.setItem(IMAGE_COMPRESSION_QUALITY_KEY, String(value));
+          localStorage.setItem(SK_IMAGE_COMPRESSION_QUALITY, String(value));
           break;
         case 'imageMaxWidth':
-          localStorage.setItem(IMAGE_MAX_WIDTH_KEY, String(value));
+          localStorage.setItem(SK_IMAGE_MAX_WIDTH, String(value));
           break;
         default:
           break;

@@ -11,6 +11,7 @@
  */
 
 import { useState, useEffect, useReducer, useRef, useMemo, memo, type CSSProperties } from "react";
+import { SK_HAS_INTERACTED } from "@/constants/storage-keys";
 // Keyframes & hover styles moved to static index.css — no runtime injection needed.
 
 // ── Types ──
@@ -185,7 +186,6 @@ CountdownTimer.displayName = "CountdownTimer";
 
 // ── Component ──
 
-const LS_INTERACTED_KEY = "ling-has-interacted";
 const S_BAR_MINI: CSSProperties = {
   ...S_BAR,
   gap: 8,
@@ -199,14 +199,14 @@ export const ExperimentBar = memo(function ExperimentBar() {
 
   // Progressive disclosure: show minimal bar until user has interacted
   const [hasInteracted, setHasInteracted] = useState(() =>
-    typeof localStorage !== "undefined" && localStorage.getItem(LS_INTERACTED_KEY) === "1"
+    typeof localStorage !== "undefined" && localStorage.getItem(SK_HAS_INTERACTED) === "1"
   );
 
   // Listen for first message sent to mark as interacted
   useEffect(() => {
     if (hasInteracted) return;
     const handler = () => {
-      localStorage.setItem(LS_INTERACTED_KEY, "1");
+      localStorage.setItem(SK_HAS_INTERACTED, "1");
       setHasInteracted(true);
     };
     // Listen for custom event dispatched when user sends first message

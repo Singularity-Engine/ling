@@ -18,12 +18,11 @@ import { useChatMessagesState, useChatMessagesActions } from "@/context/ChatHist
 import { useWebSocketState, useWebSocketActions } from "@/context/WebsocketContext";
 import { useAiStateRead } from "@/context/AiStateContext";
 import { focusTextarea } from "@/utils/dom";
+import { SK_SPLIT_WIDTH } from "@/constants/storage-keys";
 import styles from "./SplitLayout.module.css";
 
 const ChatArea = lazy(() => import("../chat/ChatArea").then(m => ({ default: m.ChatArea })));
 const Constellation = lazy(() => import("../ability/Constellation").then(m => ({ default: m.Constellation })));
-
-const LS_KEY = "ling-split-width";
 const EMPTY_IMAGES: never[] = [];
 const clampSplitWidth = (w: number) => Math.max(360, Math.min(500, w));
 
@@ -50,7 +49,7 @@ export const SplitLayout = memo(function SplitLayout({ firstMinutePhase }: Split
 
   // Split width state with localStorage persistence
   const [splitWidth, setSplitWidth] = useState(() => {
-    const saved = localStorage.getItem(LS_KEY);
+    const saved = localStorage.getItem(SK_SPLIT_WIDTH);
     if (saved) {
       const parsed = parseInt(saved, 10);
       if (parsed >= 360 && parsed <= 500) return parsed;
@@ -67,7 +66,7 @@ export const SplitLayout = memo(function SplitLayout({ firstMinutePhase }: Split
 
   // Save to localStorage when drag ends
   const saveSplitWidth = useCallback((width: number) => {
-    localStorage.setItem(LS_KEY, String(width));
+    localStorage.setItem(SK_SPLIT_WIDTH, String(width));
   }, []);
 
   // Divider drag handlers — use direct DOM CSS variable manipulation during drag

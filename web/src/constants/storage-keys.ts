@@ -26,10 +26,13 @@ export const SK_VISIT_COUNT = 'ling_visit_count';
 export const SK_THEME = 'ling-theme';
 export const SK_IMAGE_COMPRESSION_QUALITY = 'appImageCompressionQuality';
 export const SK_IMAGE_MAX_WIDTH = 'appImageMaxWidth';
+export const SK_SPLIT_WIDTH = 'ling-split-width';
 
 /** Feature-specific */
 export const SK_CONSTELLATION = 'ling-constellation-v1';
 export const SK_AFFINITY_STATE = 'ling-affinity-state';
+export const SK_FIRST_VISIT = 'ling-first-visit';
+export const SK_HAS_INTERACTED = 'ling-has-interacted';
 
 /** i18n (managed by i18next, referenced here for completeness) */
 export const SK_LANGUAGE = 'i18nextLng';
