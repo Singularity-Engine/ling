@@ -462,7 +462,7 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
 
         {/* Copyright */}
         <div style={S_COPYRIGHT}>
-          © 2026 Singularity Engine
+          © {new Date().getFullYear()} Singularity Engine
         </div>
       </div>
     </div>

@@ -649,6 +649,10 @@ body {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.4; transform: scale(0.85); }
 }
+@keyframes dashSkeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 
 /* InputBar — textarea, buttons, and animation styles (core always-rendered component) */
 @keyframes inputPulse {

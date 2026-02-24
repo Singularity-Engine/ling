@@ -93,6 +93,10 @@ export const SplitLayout = memo(function SplitLayout({ firstMinutePhase }: Split
   const isConnectedRef = useRef(isConnected);
   isConnectedRef.current = isConnected;
 
+  // Focus-timer ref — cleared on unmount to avoid DOM ops after teardown (matches ChatArea pattern).
+  const focusTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => { clearTimeout(focusTimerRef.current); }, []);
+
   const [splitBounds, setSplitBounds] = useState<SplitBounds>(() =>
     getAdaptiveSplitBounds(typeof window !== "undefined" ? window.innerWidth : FALLBACK_VIEWPORT_WIDTH)
   );
@@ -239,7 +243,7 @@ export const SplitLayout = memo(function SplitLayout({ firstMinutePhase }: Split
       if (!isConnectedRef.current) return;
       appendHumanMessage(text);
       sendMessage({ type: "text-input", text, images: EMPTY_IMAGES });
-      setTimeout(focusTextarea, 0);
+      focusTimerRef.current = setTimeout(focusTextarea, 0);
     },
     [appendHumanMessage, sendMessage]
   );

@@ -74,28 +74,42 @@ export function DashboardPage() {
 
         {/* Cards grid */}
         <div style={S.grid}>
-          <div style={S_CARD_PURPLE}>
-            <span style={S.cardLabel}>{t('dashboard.totalUsers')}</span>
-            <span style={S_VAL_PURPLE}>{data?.experiment.total_users ?? '—'}</span>
-          </div>
+          {!data && !error ? (
+            /* Loading skeleton — shown during initial fetch */
+            <>
+              {[0, 1, 2, 3].map(i => (
+                <div key={i} style={S_CARD_SKELETON}>
+                  <span style={S.cardLabel}>&nbsp;</span>
+                  <span style={S_VAL_SKELETON} />
+                </div>
+              ))}
+            </>
+          ) : (
+            <>
+              <div style={S_CARD_PURPLE}>
+                <span style={S.cardLabel}>{t('dashboard.totalUsers')}</span>
+                <span style={S_VAL_PURPLE}>{data?.experiment.total_users ?? '—'}</span>
+              </div>
 
-          <div style={S_CARD_GREEN}>
-            <span style={S.cardLabel}>{t('dashboard.activeToday')}</span>
-            <span style={S_VAL_GREEN}>{data?.experiment.active_today ?? '—'}</span>
-          </div>
+              <div style={S_CARD_GREEN}>
+                <span style={S.cardLabel}>{t('dashboard.activeToday')}</span>
+                <span style={S_VAL_GREEN}>{data?.experiment.active_today ?? '—'}</span>
+              </div>
 
-          <div style={S_CARD_LAVENDER}>
-            <span style={S.cardLabel}>{t('dashboard.newToday')}</span>
-            <span style={S_VAL_LAVENDER}>{data?.experiment.new_today ?? '—'}</span>
-          </div>
+              <div style={S_CARD_LAVENDER}>
+                <span style={S.cardLabel}>{t('dashboard.newToday')}</span>
+                <span style={S_VAL_LAVENDER}>{data?.experiment.new_today ?? '—'}</span>
+              </div>
 
-          <div style={statusOk ? S_CARD_GREEN : S_CARD_RED}>
-            <span style={S.cardLabel}>{t('dashboard.systemStatus')}</span>
-            <span style={statusOk ? S_VAL_GREEN : S_VAL_RED}>
-              {data ? (statusOk ? t('dashboard.statusRunning') : t('dashboard.statusDown')) : '—'}
-            </span>
-            {statusOk && <span style={S.statusDot} />}
-          </div>
+              <div style={statusOk ? S_CARD_GREEN : S_CARD_RED}>
+                <span style={S.cardLabel}>{t('dashboard.systemStatus')}</span>
+                <span style={statusOk ? S_VAL_GREEN : S_VAL_RED}>
+                  {data ? (statusOk ? t('dashboard.statusRunning') : t('dashboard.statusDown')) : '—'}
+                </span>
+                {statusOk && <span style={S.statusDot} />}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Footer info */}
@@ -229,3 +243,17 @@ const S_VAL_PURPLE: React.CSSProperties = { ...S.cardValue, color: 'var(--ling-p
 const S_VAL_GREEN: React.CSSProperties = { ...S.cardValue, color: 'var(--ling-success)' };
 const S_VAL_LAVENDER: React.CSSProperties = { ...S.cardValue, color: 'var(--ling-purple-light)' };
 const S_VAL_RED: React.CSSProperties = { ...S.cardValue, color: 'var(--ling-error)' };
+
+// Loading skeleton card + value — shimmer animation via CSS @keyframes pulse (already in index.css)
+const S_CARD_SKELETON: React.CSSProperties = {
+  ...S.card,
+  borderColor: 'rgba(255,255,255,0.06)',
+};
+const S_VAL_SKELETON: React.CSSProperties = {
+  width: 64,
+  height: 36,
+  borderRadius: 8,
+  background: 'linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%)',
+  backgroundSize: '200% 100%',
+  animation: 'dashSkeleton 1.5s ease-in-out infinite',
+};

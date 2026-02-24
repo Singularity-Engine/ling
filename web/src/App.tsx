@@ -580,6 +580,11 @@ function AnimatedRoutes(): JSX.Element {
     ? location.pathname
     : '/';
 
+  // Scroll to top on route change — prevents inheriting scroll position from previous page
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   return (
     <div key={pageKey} style={S_PAGE_WRAP}>
       <Suspense fallback={null}>
