@@ -45,6 +45,10 @@ interface ToolActionsType {
 const ToolStateContext = createContext<ToolStateReadonly | null>(null);
 const ToolActionsContext = createContext<ToolActionsType | null>(null);
 
+// ─── Timing constants ─────────────────────────────────────────────
+const PRESENTING_PHASE_MS = 3000;
+const RESULT_REMOVAL_MS = 30000;
+
 let toolIdCounter = 0;
 
 const KEY_TO_CATEGORY: Record<string, ToolCategory> = {
@@ -155,7 +159,7 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
   // Auto-transition presenting → idle after 3s
   useEffect(() => {
     if (state.currentPhase === 'presenting') {
-      presentingTimer.current = setTimeout(() => dispatch({ type: 'setPhase', phase: 'idle' }), 3000);
+      presentingTimer.current = setTimeout(() => dispatch({ type: 'setPhase', phase: 'idle' }), PRESENTING_PHASE_MS);
     }
     return () => {
       if (presentingTimer.current) {
@@ -169,7 +173,7 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
     const timer = setTimeout(() => {
       dispatch({ type: 'removeRecent', id: toolId });
       removalTimers.current.delete(toolId);
-    }, 30000);
+    }, RESULT_REMOVAL_MS);
     removalTimers.current.set(toolId, timer);
   }, []);
 
@@ -230,7 +234,7 @@ export function ToolStateProvider({ children }: { children: ReactNode }) {
     window.__triggerToolDemo = (category: ToolCategory = 'search') => {
       const demoId = `tool-${++toolIdCounter}`;
       startTool({ id: demoId, name: `demo_${category}`, category, arguments: JSON.stringify({ query: 'Demo 展示' }) });
-      trackTimeout(() => completeTool(demoId, JSON.stringify({ summary: `${category} 工具演示完成`, demo: true })), 3000);
+      trackTimeout(() => completeTool(demoId, JSON.stringify({ summary: `${category} 工具演示完成`, demo: true })), PRESENTING_PHASE_MS);
     };
     return () => {
       delete window.__triggerToolDemo;

@@ -45,6 +45,11 @@ interface AffinityActionsType {
   getCurrentExpression: () => string | null;
 }
 
+// ─── Timing constants ─────────────────────────────────────────────
+const MILESTONE_DISPLAY_MS = 5000;
+const POINT_GAIN_DISPLAY_MS = 1500;
+const EXPRESSION_DECAY_MS = 8000;
+
 const AffinityMetaContext = createContext<AffinityMetaState | null>(null);
 const AffinityEffectsContext = createContext<AffinityEffectsState | null>(null);
 const AffinityActionsContext = createContext<AffinityActionsType | null>(null);
@@ -86,7 +91,7 @@ export function AffinityProvider({ children }: { children: ReactNode }) {
     setMilestoneVal(message);
     milestoneTimer.current = setTimeout(() => {
       setMilestoneVal(null);
-    }, 5000);
+    }, MILESTONE_DISPLAY_MS);
   }, []);
 
   const showPointGain = useCallback((delta: number, streak: boolean) => {
@@ -95,7 +100,7 @@ export function AffinityProvider({ children }: { children: ReactNode }) {
     const timer = setTimeout(() => {
       pointGainTimers.current.delete(timer);
       setPointGains(prev => prev.filter(p => p.id !== id));
-    }, 1500);
+    }, POINT_GAIN_DISPLAY_MS);
     pointGainTimers.current.add(timer);
   }, []);
 
@@ -109,7 +114,7 @@ export function AffinityProvider({ children }: { children: ReactNode }) {
       currentExpressionRef.current = null;
       setCurrentExpr(null);
       setExprIntensity(0);
-    }, 8000);
+    }, EXPRESSION_DECAY_MS);
   }, []);
 
   const getCurrentExpression = useCallback(() => currentExpressionRef.current, []);

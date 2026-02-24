@@ -15,6 +15,7 @@ interface ToastItem {
 let toastListeners: ((toasts: ToastItem[]) => void)[] = [];
 let toastList: ToastItem[] = [];
 let nextId = 0;
+const activeTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
 function notify() {
   toastListeners.forEach(fn => fn([...toastList]));
@@ -33,12 +34,28 @@ export const toaster = {
     toastList = [...toastList, item];
     notify();
     if (item.duration && item.duration > 0) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
+        activeTimers.delete(id);
         toastList = toastList.filter(t => t.id !== id);
         notify();
       }, item.duration);
+      activeTimers.set(id, timer);
     }
     return id;
+  },
+  /** Dismiss a specific toast and clear its pending timer. */
+  dismiss(id: string) {
+    const timer = activeTimers.get(id);
+    if (timer) { clearTimeout(timer); activeTimers.delete(id); }
+    toastList = toastList.filter(t => t.id !== id);
+    notify();
+  },
+  /** Dismiss all toasts and clear all pending timers. */
+  dismissAll() {
+    activeTimers.forEach(timer => clearTimeout(timer));
+    activeTimers.clear();
+    toastList = [];
+    notify();
   },
 };
 

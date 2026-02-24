@@ -59,6 +59,9 @@ interface VADActionsType {
 /**
  * Default values and constants
  */
+// ─── Timing constants ─────────────────────────────────────────────
+const VAD_SETTINGS_RESTART_DEBOUNCE_MS = 300;
+
 const DEFAULT_VAD_SETTINGS: VADSettings = {
   positiveSpeechThreshold: 50,
   negativeSpeechThreshold: 35,
@@ -304,9 +307,9 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
       settingsRestartTimer.current = setTimeout(() => {
         stopMic();
         startMic();
-      }, 300);
+      }, VAD_SETTINGS_RESTART_DEBOUNCE_MS);
     }
-  }, []);
+  }, [stopMic, startMic]);
 
   const setAutoStopMic = useCallback((value: boolean) => {
     autoStopMicRef.current = value;
