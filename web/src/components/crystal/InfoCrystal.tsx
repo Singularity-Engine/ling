@@ -50,7 +50,7 @@ const S_EXP_HEADER: CSSProperties = { display: "flex", alignItems: "center", gap
 const S_EXP_ICON: CSSProperties = { fontSize: "20px" };
 const S_EXP_NAME: CSSProperties = { fontSize: "18px", fontWeight: 600, flex: 1 };
 const S_EXP_STATUS: CSSProperties = { fontSize: "14px" };
-const S_EXP_CLOSE: CSSProperties = { fontSize: "18px", color: "rgba(255,255,255,0.35)", cursor: "pointer", marginLeft: "4px", lineHeight: 1 };
+const S_EXP_CLOSE_BTN: CSSProperties = { fontSize: "18px", color: "rgba(255,255,255,0.35)", cursor: "pointer", marginLeft: "4px", lineHeight: 1, background: "none", border: "none", padding: 0, font: "inherit" };
 const S_EXP_CONTENT: CSSProperties = {
   fontSize: "14px", lineHeight: 1.7, color: "rgba(255, 255, 255, 0.88)",
   whiteSpace: "pre-wrap", wordBreak: "break-word", display: "block",
@@ -137,7 +137,6 @@ interface InfoCrystalProps {
   };
   position: "left" | "right" | "center";
   index: number;
-  onDismiss?: () => void;
 }
 
 export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) => {
@@ -220,7 +219,11 @@ export const InfoCrystal = memo(({ tool, position, index }: InfoCrystalProps) =>
             <span style={S_EXP_ICON} aria-hidden="true">{icon}</span>
             <span style={S_EXP_NAME}>{tool.name}</span>
             <span style={S_EXP_STATUS} aria-label={tool.status}>{statusIcon}</span>
-            <span style={S_EXP_CLOSE} role="button" tabIndex={0} aria-label="Close">✕</span>
+            <button
+              style={S_EXP_CLOSE_BTN}
+              onClick={(e) => { e.stopPropagation(); setExpanded(false); }}
+              aria-label={t("common.close")}
+            >✕</button>
           </div>
           {/* Full content */}
           <span style={S_EXP_CONTENT}>

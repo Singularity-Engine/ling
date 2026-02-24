@@ -226,7 +226,10 @@ export const BackgroundReactor = memo(() => {
     [gainPulseColor],
   );
   const levelBloomStyle = useMemo(
-    () => ({ ...LEVEL_BLOOM_BASE, background: `radial-gradient(ellipse 50% 45% at 50% 45%, ${levelTransition?.color}55 0%, ${levelTransition?.color}22 40%, transparent 65%)` }),
+    () => {
+      const c = levelTransition?.color ?? 'transparent';
+      return { ...LEVEL_BLOOM_BASE, background: `radial-gradient(ellipse 50% 45% at 50% 45%, ${c}55 0%, ${c}22 40%, transparent 65%)` };
+    },
     [levelTransition?.color],
   );
 

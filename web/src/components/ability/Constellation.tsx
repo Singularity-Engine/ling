@@ -268,7 +268,7 @@ export const Constellation = memo(() => {
                   const p2 = positions[i + 1];
                   return (
                     <motion.line
-                      key={i}
+                      key={`${sorted[i].key}-${sorted[i + 1].key}`}
                       x1={p1.x + OUTER_RADIUS + 20}
                       y1={p1.y + OUTER_RADIUS + 20}
                       x2={p2.x + OUTER_RADIUS + 20}

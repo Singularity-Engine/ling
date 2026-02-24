@@ -41,6 +41,7 @@ const S_CONTAINER_CONNECTING: CSSProperties = {
   border: "1px solid var(--ling-surface-border)",
   cursor: "default",
   opacity: 1,
+  animation: "connFadeIn 0.3s ease-out",
 };
 
 const S_CONTAINER_CLOSED: CSSProperties = {
