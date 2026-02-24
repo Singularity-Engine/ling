@@ -5,6 +5,9 @@ import { ModelInfo } from '@/context/Live2dConfigContext';
 import { LAppDelegate } from '../../../WebSDK/src/lappdelegate';
 import { LAppLive2DManager } from '../../../WebSDK/src/lapplive2dmanager';
 import { useMode } from '@/context/ModeContext';
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('Live2DResize');
 
 /** Cubism SDK internal: model matrix fields not in public typings */
 interface CubismModelMatrix {
@@ -221,9 +224,6 @@ export const useLive2DResize = ({
         : containerBounds || { width: 0, height: 0 };
 
 
-
-
-
       const lastDimensions = lastContainerDimensionsRef.current;
       const sidebarChanged = prevSidebarStateRef.current !== showSidebar;
       const dimensionsChanged = Math.abs(lastDimensions.width - width) > 1 || Math.abs(lastDimensions.height - height) > 1;
@@ -238,10 +238,10 @@ export const useLive2DResize = ({
       prevSidebarStateRef.current = showSidebar;
 
       if (!containerBounds && !isPet) {
-        if (import.meta.env.DEV) console.warn('[Resize] Container bounds not available in window mode.');
+        log.debug('Container bounds not available in window mode.');
       }
       if (width === 0 || height === 0) {
-        if (import.meta.env.DEV) console.warn('[Resize] Width or Height is zero, skipping canvas/delegate update.');
+        log.debug('Width or Height is zero, skipping canvas/delegate update.');
         isResizingRef.current = false;
         return;
       }
@@ -259,7 +259,7 @@ export const useLive2DResize = ({
       if (delegate) {
         delegate.onResize();
       } else {
-        if (import.meta.env.DEV) console.warn('[Resize] LAppDelegate instance not found.');
+        log.debug('LAppDelegate instance not found.');
       }
 
       isResizingRef.current = false;
@@ -371,5 +371,3 @@ export const useLive2DResize = ({
 
   return { canvasRef, handleResize };
 };
-
-

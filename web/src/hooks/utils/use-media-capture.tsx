@@ -55,13 +55,13 @@ export function useMediaCapture() {
 
   const captureFrame = useCallback(async (stream: MediaStream | null, source: 'camera' | 'screen') => {
     if (!stream) {
-      if (import.meta.env.DEV) console.warn(`No ${source} stream available`);
+      log.debug(`No ${source} stream available`);
       return null;
     }
 
     const videoTrack = stream.getVideoTracks()[0];
     if (!videoTrack) {
-      if (import.meta.env.DEV) console.warn(`No video track in ${source} stream`);
+      log.debug(`No video track in ${source} stream`);
       return null;
     }
 

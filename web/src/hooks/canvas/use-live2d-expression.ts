@@ -72,7 +72,7 @@ export const useLive2DExpression = () => {
         }
       }
     } catch (error) {
-      if (import.meta.env.DEV) console.warn('Failed to reset expression:', error);
+      log.warn('Failed to reset expression:', error);
     }
   }, [setExpression]);
 

@@ -14,6 +14,7 @@ import { useLive2DExpression } from "@/hooks/canvas/use-live2d-expression";
 import { useForceIgnoreMouse } from "@/hooks/utils/use-force-ignore-mouse";
 import { useMode } from "@/context/ModeContext";
 import { useWebSocket } from "@/context/WebsocketContext";
+import { createLogger } from "@/utils/logger";
 
 interface Live2DProps {
   showSidebar?: boolean;
@@ -65,6 +66,8 @@ const S_RETRY_BTN: CSSProperties = {
   border: "1px solid rgba(139, 92, 246, 0.6)", borderRadius: 8,
   color: "#c4b5fd", fontSize: 14, cursor: "pointer",
 };
+
+const log = createLogger('Live2D');
 
 export const Live2D = memo(
   ({ showSidebar }: Live2DProps): JSX.Element => {
@@ -126,7 +129,7 @@ export const Live2D = memo(
     const handleContextMenu = useCallback((e: React.MouseEvent) => {
       if (!isPet) return;
       e.preventDefault();
-      if (import.meta.env.DEV) console.log('[ContextMenu] (Pet Mode) Right-click detected, requesting menu...');
+      log.debug('(Pet Mode) Right-click detected, requesting menu...');
       window.api?.showContextMenu?.();
     }, [isPet]);
 

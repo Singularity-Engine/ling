@@ -5,6 +5,9 @@ import { useLive2DConfig } from "@/context/Live2dConfigContext";
 import { useSwitchCharacter } from "@/hooks/utils/use-switch-character";
 import { useForceIgnoreMouse } from "@/hooks/utils/use-force-ignore-mouse";
 import { useMode } from "@/context/ModeContext";
+import { createLogger } from "@/utils/logger";
+
+const log = createLogger('IpcHandlers');
 
 export function useIpcHandlers() {
   const { handleMicToggle } = useMicToggle();
@@ -42,7 +45,7 @@ export function useIpcHandlers() {
   // Handler for force ignore mouse state changes from main process
   const forceIgnoreMouseChangedHandler = useCallback(
     (_event: unknown, isForced: boolean) => {
-      if (import.meta.env.DEV) console.log("Force ignore mouse changed:", isForced);
+      log.debug("Force ignore mouse changed:", isForced);
       setForceIgnoreMouse(isForced);
     },
     [setForceIgnoreMouse],
