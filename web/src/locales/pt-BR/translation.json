@@ -436,6 +436,14 @@
     "s6Body": "Reservamo-nos o direito de modificar o servi\u00e7o e estes termos a qualquer momento. Altera\u00e7\u00f5es significativas ser\u00e3o comunicadas pelo e-mail cadastrado.",
     "backHome": "Voltar para o In\u00edcio"
   },
+  "experiment": {
+    "statusBar": "Barra de status do experimento de startup IA",
+    "dayLabel": "Dia {{day}} do experimento",
+    "countdown": "{{d}} dias {{h}} horas {{m}} minutos {{s}} segundos restantes",
+    "revenueProgress": "Progresso da receita mensal",
+    "revenueLabel": "Receita mensal ${{current}} / ${{target}}",
+    "missionLink": "Ver a missão do experimento de startup IA da Ling"
+  },
   "about": {
     "name": "Ling",
     "tagline": "Sua companheira IA, sempre aqui para voc\u00ea.",

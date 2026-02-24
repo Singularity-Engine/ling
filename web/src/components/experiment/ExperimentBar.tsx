@@ -11,6 +11,7 @@
  */
 
 import { useState, useEffect, useReducer, useRef, useMemo, memo, type CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 import { SK_HAS_INTERACTED } from "@/constants/storage-keys";
 // Keyframes & hover styles moved to static index.css — no runtime injection needed.
 
@@ -162,6 +163,7 @@ function formatCountdown(deathDate: string): string {
 }
 
 const CountdownTimer = memo(function CountdownTimer({ deathDate, danger }: { deathDate: string; danger: boolean }) {
+  const { t } = useTranslation();
   const [, tick] = useReducer((x: number) => x + 1, 0);
   const timerRef = useRef<ReturnType<typeof setInterval>>();
 
@@ -176,7 +178,7 @@ const CountdownTimer = memo(function CountdownTimer({ deathDate, danger }: { dea
     <span
       style={danger ? S_COUNTDOWN_DANGER : S_COUNTDOWN}
       role="timer"
-      aria-label={`剩余 ${d}天 ${h}时 ${m}分 ${s}秒`}
+      aria-label={t("experiment.countdown", { d, h, m, s })}
     >
       {text}
     </span>
@@ -195,6 +197,7 @@ const S_BAR_MINI: CSSProperties = {
 };
 
 export const ExperimentBar = memo(function ExperimentBar() {
+  const { t } = useTranslation();
   const [status, setStatus] = useState<ExperimentStatus>(FALLBACK);
 
   // Progressive disclosure: show minimal bar until user has interacted
@@ -245,8 +248,8 @@ export const ExperimentBar = memo(function ExperimentBar() {
   // Minimal bar for new users — just Day badge
   if (!hasInteracted) {
     return (
-      <div style={S_BAR_MINI} role="banner" aria-label="AI创业实验状态栏">
-        <span style={S_DAY} aria-label={`实验第 ${status.day_number} 天`}>Day {status.day_number}</span>
+      <div style={S_BAR_MINI} role="banner" aria-label={t("experiment.statusBar")}>
+        <span style={S_DAY} aria-label={t("experiment.dayLabel", { day: status.day_number })}>Day {status.day_number}</span>
         <span style={S_SEP} aria-hidden="true" />
         <span style={S_REVENUE_MINI}>{status.days_remaining}d left</span>
       </div>
@@ -254,9 +257,9 @@ export const ExperimentBar = memo(function ExperimentBar() {
   }
 
   return (
-    <div style={S_BAR} role="banner" aria-label="AI创业实验状态栏">
+    <div style={S_BAR} role="banner" aria-label={t("experiment.statusBar")}>
       {/* Day badge */}
-      <span style={S_DAY} aria-label={`实验第 ${status.day_number} 天`}>Day {status.day_number}</span>
+      <span style={S_DAY} aria-label={t("experiment.dayLabel", { day: status.day_number })}>Day {status.day_number}</span>
 
       <span style={S_SEP} aria-hidden="true" />
 
@@ -266,14 +269,14 @@ export const ExperimentBar = memo(function ExperimentBar() {
       <span style={S_SEP} aria-hidden="true" />
 
       {/* Revenue progress */}
-      <div style={S_PROGRESS_WRAP} aria-label="月收入进度">
+      <div style={S_PROGRESS_WRAP} aria-label={t("experiment.revenueProgress")}>
         <div
           style={S_PROGRESS_BAR}
           role="progressbar"
           aria-valuenow={status.revenue?.monthly_usd || 0}
           aria-valuemin={0}
           aria-valuemax={status.revenue?.target_monthly_usd || 36}
-          aria-label={`月收入 $${status.revenue?.monthly_usd || 0} / $${status.revenue?.target_monthly_usd || 36}`}
+          aria-label={t("experiment.revenueLabel", { current: status.revenue?.monthly_usd || 0, target: status.revenue?.target_monthly_usd || 36 })}
         >
           <div style={progressFillStyle} />
         </div>
@@ -296,7 +299,7 @@ export const ExperimentBar = memo(function ExperimentBar() {
         rel="noopener noreferrer"
         className="experiment-bar-link"
         style={S_LINK}
-        aria-label="查看灵的 AI 创业实验使命"
+        aria-label={t("experiment.missionLink")}
       >
         Mission
       </a>

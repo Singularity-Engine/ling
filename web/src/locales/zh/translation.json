@@ -412,6 +412,14 @@
     "s6Body": "我们保留随时修改服务内容和条款的权利。重大变更会通过注册邮箱通知。",
     "backHome": "返回首页"
   },
+  "experiment": {
+    "statusBar": "AI创业实验状态栏",
+    "dayLabel": "实验第 {{day}} 天",
+    "countdown": "剩余 {{d}}天 {{h}}时 {{m}}分 {{s}}秒",
+    "revenueProgress": "月收入进度",
+    "revenueLabel": "月收入 ${{current}} / ${{target}}",
+    "missionLink": "查看灵的 AI 创业实验使命"
+  },
   "about": {
     "name": "灵 · Ling",
     "tagline": "你的 AI 伙伴，一直在这里。",

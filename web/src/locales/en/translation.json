@@ -413,6 +413,14 @@
     "s6Body": "We reserve the right to modify the service and these terms at any time. Significant changes will be communicated via your registered email.",
     "backHome": "Back to Home"
   },
+  "experiment": {
+    "statusBar": "AI startup experiment status bar",
+    "dayLabel": "Experiment day {{day}}",
+    "countdown": "{{d}} days {{h}} hours {{m}} minutes {{s}} seconds remaining",
+    "revenueProgress": "Monthly revenue progress",
+    "revenueLabel": "Monthly revenue ${{current}} / ${{target}}",
+    "missionLink": "View Ling's AI startup experiment mission"
+  },
   "about": {
     "name": "Ling",
     "tagline": "Your AI companion, always here for you.",

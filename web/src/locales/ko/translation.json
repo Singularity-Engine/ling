@@ -435,6 +435,14 @@
     "s6Body": "서비스와 이 약관을 언제든지 변경할 수 있는 권리를 갖고 있어요.",
     "backHome": "홈으로 돌아가기"
   },
+  "experiment": {
+    "statusBar": "AI 창업 실험 상태 바",
+    "dayLabel": "실험 {{day}}일차",
+    "countdown": "{{d}}일 {{h}}시간 {{m}}분 {{s}}초 남음",
+    "revenueProgress": "월 수익 진행률",
+    "revenueLabel": "월 수익 ${{current}} / ${{target}}",
+    "missionLink": "Ling의 AI 창업 실험 미션 보기"
+  },
   "about": {
     "name": "Ling",
     "tagline": "당신의 AI 컴패니언, 언제나 여기 있어요.",

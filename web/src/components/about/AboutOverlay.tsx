@@ -37,7 +37,7 @@ const LINKS = [
   },
 ] as const;
 
-const TECH_STACK = "React + Vite + Chakra UI + Live2D";
+const TECH_STACK = "React + Vite + Live2D + WebSocket";
 
 const PLAN_LABELS: Record<string, string> = {
   free: "Spark (Free)",
@@ -462,7 +462,7 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
 
         {/* Copyright */}
         <div style={S_COPYRIGHT}>
-          © {new Date().getFullYear()} Singularity Engine
+          © 2026 Singularity Engine
         </div>
       </div>
     </div>

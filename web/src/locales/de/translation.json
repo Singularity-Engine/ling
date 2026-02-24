@@ -413,6 +413,14 @@
     "s6Body": "Wir behalten uns das Recht vor, den Dienst und diese Bedingungen jederzeit zu ändern. Wesentliche Änderungen werden Ihnen über Ihre registrierte E-Mail-Adresse mitgeteilt.",
     "backHome": "Zurück zur Startseite"
   },
+  "experiment": {
+    "statusBar": "KI-Startup-Experiment Statusleiste",
+    "dayLabel": "Experiment Tag {{day}}",
+    "countdown": "{{d}} Tage {{h}} Stunden {{m}} Minuten {{s}} Sekunden verbleibend",
+    "revenueProgress": "Monatlicher Umsatzfortschritt",
+    "revenueLabel": "Monatlicher Umsatz ${{current}} / ${{target}}",
+    "missionLink": "Lings KI-Startup-Experiment-Mission ansehen"
+  },
   "about": {
     "name": "Ling",
     "tagline": "Deine KI-Begleiterin, immer für dich da.",

@@ -412,6 +412,14 @@
     "s6Body": "当社はサービス内容および本規約をいつでも変更する権利を有します。重要な変更については、ご登録のメールアドレス宛にお知らせいたします。",
     "backHome": "ホームに戻る"
   },
+  "experiment": {
+    "statusBar": "AI起業実験ステータスバー",
+    "dayLabel": "実験 {{day}} 日目",
+    "countdown": "残り {{d}}日 {{h}}時間 {{m}}分 {{s}}秒",
+    "revenueProgress": "月間収益進捗",
+    "revenueLabel": "月間収益 ${{current}} / ${{target}}",
+    "missionLink": "LingのAI起業実験ミッションを見る"
+  },
   "about": {
     "name": "Ling",
     "tagline": "あなたのAIコンパニオン、いつもそばに。",

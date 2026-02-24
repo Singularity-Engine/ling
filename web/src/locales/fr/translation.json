@@ -436,6 +436,14 @@
     "s6Body": "Nous nous reservons le droit de modifier le service et ces conditions a tout moment. Les changements importants seront communiques par e-mail.",
     "backHome": "Retour a l'accueil"
   },
+  "experiment": {
+    "statusBar": "Barre d'état de l'expérience startup IA",
+    "dayLabel": "Jour {{day}} de l'expérience",
+    "countdown": "{{d}} jours {{h}} heures {{m}} minutes {{s}} secondes restantes",
+    "revenueProgress": "Progression des revenus mensuels",
+    "revenueLabel": "Revenus mensuels ${{current}} / ${{target}}",
+    "missionLink": "Voir la mission de l'expérience startup IA de Ling"
+  },
   "about": {
     "name": "Ling",
     "tagline": "Ton compagnon IA, toujours la pour toi.",

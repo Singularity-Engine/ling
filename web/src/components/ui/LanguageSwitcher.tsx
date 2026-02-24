@@ -31,7 +31,9 @@ const S_TRIGGER_OPEN: CSSProperties = {
   color: "var(--ling-text-primary)",
 };
 
-const S_DROPDOWN: CSSProperties = {
+const DROPDOWN_EXIT_MS = 120;
+
+const S_DROPDOWN_BASE: CSSProperties = {
   position: "absolute",
   bottom: "calc(100% + 6px)",
   left: "50%",
@@ -46,8 +48,10 @@ const S_DROPDOWN: CSSProperties = {
   boxShadow: "0 8px 32px rgba(0, 0, 0, 0.5), 0 0 20px var(--ling-purple-08)",
   zIndex: 10,
   minWidth: "220px",
-  animation: "overlayFadeIn 0.15s ease-out",
 };
+
+const S_DROPDOWN_OPEN: CSSProperties = { ...S_DROPDOWN_BASE, animation: "overlayFadeIn 0.15s ease-out" };
+const S_DROPDOWN_CLOSING: CSSProperties = { ...S_DROPDOWN_BASE, animation: `overlayFadeOut ${DROPDOWN_EXIT_MS}ms ease-in forwards` };
 
 const S_OPTION_BASE: CSSProperties = {
   padding: "8px 12px",
@@ -82,55 +86,72 @@ const ICON_GLOBE = (
 export const LanguageSwitcher = memo(() => {
   const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [closing, setClosing] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const closingTimer = useRef<ReturnType<typeof setTimeout>>();
 
   const currentLang = (SUPPORTED_LANGUAGES as readonly string[]).includes(i18n.language)
     ? (i18n.language as SupportedLanguage)
     : "en";
+
+  // Animated close: play exit animation before unmounting
+  const doClose = useCallback(() => {
+    if (closing) return;
+    setClosing(true);
+    closingTimer.current = setTimeout(() => {
+      setClosing(false);
+      setOpen(false);
+    }, DROPDOWN_EXIT_MS);
+  }, [closing]);
+
+  // Clean up timer on unmount
+  useEffect(() => () => { clearTimeout(closingTimer.current); }, []);
 
   const handleSelect = useCallback(async (lng: SupportedLanguage) => {
     const from = currentLang;
     await ensureLanguageLoaded(lng);
     i18n.changeLanguage(lng);
     trackEvent('language_switch', { from, to: lng });
-    setOpen(false);
-  }, [i18n, currentLang]);
+    doClose();
+  }, [i18n, currentLang, doClose]);
 
-  const toggleOpen = useCallback(() => setOpen(prev => !prev), []);
+  const toggleOpen = useCallback(() => {
+    if (open) { doClose(); } else { setOpen(true); }
+  }, [open, doClose]);
 
   // Close on Escape key
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
-      setOpen(false);
-    }
-  }, []);
+    if (e.key === "Escape") doClose();
+  }, [doClose]);
 
   // Close on outside click
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setOpen(false);
+        doClose();
       }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
+  }, [open, doClose]);
+
+  const isVisible = open || closing;
 
   return (
     <div ref={wrapperRef} style={S_WRAPPER}>
       <button
         onClick={toggleOpen}
-        style={open ? S_TRIGGER_OPEN : S_TRIGGER}
-        aria-expanded={open}
+        style={isVisible ? S_TRIGGER_OPEN : S_TRIGGER}
+        aria-expanded={isVisible}
         aria-haspopup="listbox"
       >
         {ICON_GLOBE}
         {LANGUAGE_NAMES[currentLang]}
       </button>
 
-      {open && (
-        <div style={S_DROPDOWN} role="listbox" aria-label={i18n.t("settings.general.language")} onKeyDown={handleKeyDown}>
+      {isVisible && (
+        <div style={closing ? S_DROPDOWN_CLOSING : S_DROPDOWN_OPEN} role="listbox" aria-label={i18n.t("settings.general.language")} onKeyDown={handleKeyDown}>
           {SUPPORTED_LANGUAGES.map((lng) => (
             <button
               key={lng}

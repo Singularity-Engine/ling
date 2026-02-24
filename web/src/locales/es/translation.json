@@ -436,6 +436,14 @@
     "s6Body": "Nos reservamos el derecho de modificar el servicio y estas condiciones en cualquier momento.",
     "backHome": "Volver al inicio"
   },
+  "experiment": {
+    "statusBar": "Barra de estado del experimento de startup IA",
+    "dayLabel": "Día {{day}} del experimento",
+    "countdown": "{{d}} días {{h}} horas {{m}} minutos {{s}} segundos restantes",
+    "revenueProgress": "Progreso de ingresos mensuales",
+    "revenueLabel": "Ingresos mensuales ${{current}} / ${{target}}",
+    "missionLink": "Ver la misión del experimento de startup IA de Ling"
+  },
   "about": {
     "name": "Ling",
     "tagline": "Tu companera IA, siempre aqui para ti.",
