@@ -15,7 +15,7 @@ export const S_OUTER_USER_GAP: CSSProperties = { ...S_OUTER_USER, marginTop: "va
 export const S_OUTER_AI_GAP: CSSProperties = { ...S_OUTER_AI, marginTop: "var(--ling-space-4)" };
 
 const S_AVATAR: CSSProperties = {
-  width: "28px", height: "28px", borderRadius: "50%",
+  width: "var(--ling-space-7)", height: "var(--ling-space-7)", borderRadius: "50%",
   display: "flex", alignItems: "center", justifyContent: "center",
   fontSize: "var(--ling-font-13)", fontWeight: 600, flexShrink: 0,
   letterSpacing: "0.3px", userSelect: "none", marginTop: "1px",
@@ -86,7 +86,7 @@ export const S_COLLAPSE_MASK_USER: CSSProperties = {
 };
 export const S_TOGGLE_BTN: CSSProperties = {
   display: "flex", alignItems: "center", justifyContent: "center", gap: "var(--ling-space-1)",
-  width: "100%", minHeight: "44px", padding: "10px 0 var(--ling-space-1)", border: "none", background: "transparent",
+  width: "100%", minHeight: "var(--ling-touch-target)", padding: "10px 0 var(--ling-space-1)", border: "none", background: "transparent",
   color: "var(--ling-purple-85)", fontSize: "var(--ling-font-sm)", fontWeight: 500,
   cursor: "pointer", letterSpacing: "0.3px", transition: `color var(--ling-duration-fast), background var(--ling-duration-fast)`,
   borderRadius: "0 0 var(--ling-radius-lg) var(--ling-radius-lg)",

@@ -36,15 +36,26 @@ function _onResize() {
   });
 }
 
+// Fullscreen transitions may not fire `resize` in all browsers.
+// Listen for fullscreenchange to force a recheck of breakpoints.
+function _onFullscreenChange() {
+  // Small delay — browsers update innerWidth asynchronously after fullscreen toggle
+  setTimeout(_onResize, 100);
+}
+
 function subscribe(onStoreChange: () => void): () => void {
   _listeners.add(onStoreChange);
   if (_listeners.size === 1) {
     window.addEventListener("resize", _onResize);
+    document.addEventListener("fullscreenchange", _onFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", _onFullscreenChange);
   }
   return () => {
     _listeners.delete(onStoreChange);
     if (_listeners.size === 0) {
       window.removeEventListener("resize", _onResize);
+      document.removeEventListener("fullscreenchange", _onFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", _onFullscreenChange);
       if (_rafId) { cancelAnimationFrame(_rafId); _rafId = 0; }
     }
   };

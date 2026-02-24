@@ -353,9 +353,15 @@ export const useLive2DResize = ({
     };
 
     window.addEventListener('resize', handleWindowResize);
+    // Fullscreen transitions may not fire resize — listen explicitly
+    const onFsChange = () => { setTimeout(handleWindowResize, 120); };
+    document.addEventListener('fullscreenchange', onFsChange);
+    document.addEventListener('webkitfullscreenchange', onFsChange);
 
     return () => {
       window.removeEventListener('resize', handleWindowResize);
+      document.removeEventListener('fullscreenchange', onFsChange);
+      document.removeEventListener('webkitfullscreenchange', onFsChange);
       if (animationFrameIdRef.current !== null) {
         cancelAnimationFrame(animationFrameIdRef.current);
         animationFrameIdRef.current = null;

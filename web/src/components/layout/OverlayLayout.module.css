@@ -303,7 +303,7 @@
 }
 
 .inputBarBg {
-  background: rgba(10, 0, 21, 0.55);
+  background: var(--ling-input-section-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--ling-purple-15);

@@ -148,7 +148,12 @@
   --ling-space-6: 24px;
   --ling-space-7: 28px;
   --ling-space-8: 32px;
+  --ling-space-9: 36px;
   --ling-space-10: 40px;
+
+  /* ── Design Token: Interactive targets ── */
+  --ling-touch-target: 44px;
+  --ling-btn-height: 48px;
 
   /* ── Design Token: Font Size Scale ── */
   --ling-font-xs: 11px;
@@ -160,6 +165,7 @@
   --ling-font-xl: 20px;
   --ling-font-2xl: 24px;
   --ling-font-3xl: 28px;
+  --ling-font-price: 32px;
   --ling-font-display: 36px;
   --ling-font-hero: 48px;
 
@@ -234,6 +240,8 @@
   /* 文字 */
   --ling-text-primary: rgba(0, 0, 0, 0.9);
   --ling-text-secondary: rgba(0, 0, 0, 0.65);
+  --ling-text-soft: rgba(0, 0, 0, 0.6);
+  --ling-text-dim: rgba(0, 0, 0, 0.55);
   --ling-text-tertiary: rgba(0, 0, 0, 0.4);
   --ling-text-muted: rgba(0, 0, 0, 0.35);
 

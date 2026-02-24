@@ -37,6 +37,8 @@ interface Live2DManager {
 interface LAppAdapterLike {
   setExpression(name: string): void;
   getExpressionName(index: number): string | null;
+  getExpressionCount(): number;
+  getModel(): { _modelSetting?: unknown } | null;
 }
 
 interface Window {

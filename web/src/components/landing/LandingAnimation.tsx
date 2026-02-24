@@ -167,6 +167,9 @@ const skipStyle: React.CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   padding: "8px 16px",
+  background: "none",
+  border: "none",
+  font: "inherit",
 };
 
 export const LandingAnimation = memo(function LandingAnimation({ onComplete }: LandingAnimationProps) {
@@ -182,6 +185,7 @@ export const LandingAnimation = memo(function LandingAnimation({ onComplete }: L
   const [bgDim, setBgDim] = useState(0);
   const [exiting, setExiting] = useState(false);
   const startTimeRef = useRef(0);
+  const flashTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const skippedRef = useRef(false);
   const showButtonRef = useRef(showButton);
   showButtonRef.current = showButton;
@@ -238,11 +242,10 @@ export const LandingAnimation = memo(function LandingAnimation({ onComplete }: L
     convergeRafId = requestAnimationFrame(updateProgress);
 
     // Phase 2: explode (2.5-3.0s)
-    let flashTimer: ReturnType<typeof setTimeout>;
     const explodeTimer = setTimeout(() => {
       setParticlePhase("explode");
       setFlashOpacity(0.8);
-      flashTimer = setTimeout(() => setFlashOpacity(0), 400);
+      flashTimerRef.current = setTimeout(() => setFlashOpacity(0), 400);
     }, 2500);
 
     // Phase 3: text (3.0s+)
@@ -256,7 +259,7 @@ export const LandingAnimation = memo(function LandingAnimation({ onComplete }: L
       clearTimeout(convergeTimer);
       cancelAnimationFrame(convergeRafId);
       clearTimeout(explodeTimer);
-      clearTimeout(flashTimer);
+      clearTimeout(flashTimerRef.current);
       clearTimeout(textTimer);
     };
   }, []);
@@ -390,9 +393,9 @@ export const LandingAnimation = memo(function LandingAnimation({ onComplete }: L
       </div>
 
       {/* Skip hint — 移动端友好触摸区域 */}
-      <div onClick={handleSkip} className="landing-skip" style={skipStyle}>
+      <button type="button" onClick={handleSkip} className="landing-skip" style={skipStyle}>
         {t("landing.skip")}
-      </div>
+      </button>
 
     </div>
   );

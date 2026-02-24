@@ -138,23 +138,23 @@ const S_CARD_BASE: CSSProperties = {
   font: "inherit", color: "inherit",
 };
 const S_CHECK_BADGE: CSSProperties = {
-  position: "absolute", top: 6, right: 6, width: 18, height: 18,
+  position: "absolute", top: "var(--ling-radius-sm)", right: "var(--ling-radius-sm)", width: 18, height: 18,
   borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
 };
-const S_CHECK_ML: CSSProperties = { marginLeft: 4 };
+const S_CHECK_ML: CSSProperties = { marginLeft: "var(--ling-space-1)" };
 
 // ── Step: Goals ──
 const S_SUB_GOALS: CSSProperties = {
   color: "var(--ling-text-dim)", fontSize: "var(--ling-font-md)", margin: "0 0 var(--ling-space-6)",
 };
 const S_GRID_GOALS: CSSProperties = {
-  display: "flex", flexWrap: "wrap", gap: "10px",
+  display: "flex", flexWrap: "wrap", gap: "var(--ling-space-3)",
   justifyContent: "center", maxWidth: "min(440px, 100%)", margin: "0 auto",
 };
 const S_MEMORY_INNER: CSSProperties = { textAlign: "left", flex: 1 };
-const S_MEMORY_NOTE: CSSProperties = { fontSize: "var(--ling-font-xs)", color: "var(--ling-text-dim)", marginTop: 2 };
+const S_MEMORY_NOTE: CSSProperties = { fontSize: "var(--ling-font-xs)", color: "var(--ling-text-dim)", marginTop: "2px" };
 const S_GOAL_CARD_BASE: CSSProperties = {
-  position: "relative", padding: "var(--ling-space-3) 18px", borderRadius: "14px",
+  position: "relative", padding: "var(--ling-space-3) var(--ling-space-5)", borderRadius: "var(--ling-radius-md)",
   display: "flex", alignItems: "center", gap: "var(--ling-space-2)",
   transition: `border-color var(--ling-duration-fast), background-color var(--ling-duration-fast), opacity var(--ling-duration-fast)`,
   font: "inherit", color: "inherit",
@@ -228,9 +228,9 @@ function getMemoryCardStyle(color: string): CSSProperties {
   let s = _memoryCardCache.get(color);
   if (!s) {
     s = {
-      padding: "12px 16px", borderRadius: "14px",
+      padding: "var(--ling-space-3) var(--ling-space-4)", borderRadius: "var(--ling-radius-md)",
       border: `1.5px solid ${color}80`, background: `${color}20`,
-      display: "flex", alignItems: "center", gap: "8px", width: "100%",
+      display: "flex", alignItems: "center", gap: "var(--ling-space-2)", width: "100%",
     };
     _memoryCardCache.set(color, s);
   }
@@ -241,7 +241,7 @@ const _memoryLabelCache = new Map<string, CSSProperties>();
 function getMemoryLabelStyle(color: string): CSSProperties {
   let s = _memoryLabelCache.get(color);
   if (!s) {
-    s = { fontSize: "14px", color, fontWeight: 600 };
+    s = { fontSize: "var(--ling-font-md)", color, fontWeight: 600 };
     _memoryLabelCache.set(color, s);
   }
   return s;
@@ -249,14 +249,14 @@ function getMemoryLabelStyle(color: string): CSSProperties {
 
 // ── Step: Ready ──
 const S_DESC_READY: CSSProperties = {
-  color: "rgba(255,255,255,0.5)", fontSize: "15px", margin: "0 0 28px",
+  color: "var(--ling-text-dim)", fontSize: "var(--ling-font-15)", margin: "0 0 var(--ling-space-7)",
 };
 const S_CONSTELLATION: CSSProperties = {
-  position: "relative", width: "200px", height: "200px", margin: "0 auto 24px",
+  position: "relative", width: "200px", height: "200px", margin: "0 auto var(--ling-space-6)",
 };
 const S_CONSTELLATION_SVG: CSSProperties = { position: "absolute", inset: 0, pointerEvents: "none" };
 const S_HINT_ITALIC: CSSProperties = {
-  fontSize: "13px", color: "rgba(255,255,255,0.3)", fontStyle: "italic",
+  fontSize: "var(--ling-font-13)", color: "var(--ling-text-muted)", fontStyle: "italic",
 };
 
 export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingProps) {

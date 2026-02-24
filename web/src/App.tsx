@@ -183,7 +183,7 @@ function MainContent(): JSX.Element {
   const micOnRef = useRef(micOn);
   micOnRef.current = micOn;
 
-  // Update --vh CSS variable on resize (used for mobile viewport height).
+  // Update --vh CSS variable on resize & fullscreen change (used for mobile viewport height).
   // isMobile detection is handled by the shared useIsMobile() hook.
   useEffect(() => {
     const updateVh = () => {
@@ -195,10 +195,16 @@ function MainContent(): JSX.Element {
       if (rafId) return;
       rafId = requestAnimationFrame(() => { rafId = 0; updateVh(); });
     };
+    // Fullscreen transitions may not fire resize — listen explicitly
+    const onFullscreenChange = () => { setTimeout(throttled, 100); };
     window.addEventListener("resize", throttled);
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", onFullscreenChange);
     return () => {
       cancelAnimationFrame(rafId);
       window.removeEventListener("resize", throttled);
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", onFullscreenChange);
     };
   }, []);
 

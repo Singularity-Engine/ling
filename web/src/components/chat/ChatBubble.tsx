@@ -173,7 +173,6 @@ interface ChatBubbleProps {
   skipEntryAnimation?: boolean;
   senderChanged?: boolean;
   memoryContext?: string;
-  isPremiumFeature?: boolean;
 }
 
 function formatTime(ts: string): string {

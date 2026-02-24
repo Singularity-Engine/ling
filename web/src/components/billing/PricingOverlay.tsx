@@ -28,19 +28,19 @@ const S_OVERLAY_BASE: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: '20px',
+  padding: 'var(--ling-space-5)',
   overflow: 'auto',
 };
-const S_OVERLAY_OPEN: React.CSSProperties = { ...S_OVERLAY_BASE, animation: 'overlayFadeIn 0.2s ease-out' };
-const S_OVERLAY_CLOSING: React.CSSProperties = { ...S_OVERLAY_BASE, animation: `overlayFadeOut ${EXIT_MS}ms ease-in forwards` };
+const S_OVERLAY_OPEN: React.CSSProperties = { ...S_OVERLAY_BASE, animation: `overlayFadeIn var(--ling-duration-fast) var(--ling-ease-exit)` };
+const S_OVERLAY_CLOSING: React.CSSProperties = { ...S_OVERLAY_BASE, animation: `overlayFadeOut ${EXIT_MS}ms var(--ling-ease-exit) forwards` };
 
 const S_INNER_BASE: React.CSSProperties = {
   maxWidth: '1100px',
   width: '100%',
   position: 'relative',
 };
-const S_INNER_OPEN: React.CSSProperties = { ...S_INNER_BASE, animation: 'overlaySlideIn 0.25s ease-out' };
-const S_INNER_CLOSING: React.CSSProperties = { ...S_INNER_BASE, animation: `overlaySlideOut ${EXIT_MS}ms ease-in forwards` };
+const S_INNER_OPEN: React.CSSProperties = { ...S_INNER_BASE, animation: `overlaySlideIn var(--ling-duration-normal) var(--ling-ease-exit)` };
+const S_INNER_CLOSING: React.CSSProperties = { ...S_INNER_BASE, animation: `overlaySlideOut ${EXIT_MS}ms var(--ling-ease-exit) forwards` };
 
 const closeBtnStyle: React.CSSProperties = {
   position: 'absolute',
@@ -49,7 +49,7 @@ const closeBtnStyle: React.CSSProperties = {
   background: 'none',
   border: 'none',
   color: 'var(--ling-text-dim)',
-  fontSize: '28px',
+  fontSize: 'var(--ling-font-3xl)',
   cursor: 'pointer',
   padding: 'var(--ling-space-1)',
   lineHeight: 1,
@@ -69,7 +69,7 @@ const planGridStyle: React.CSSProperties = {
 
 const popularBadgeBase: React.CSSProperties = {
   position: 'absolute',
-  top: '-12px',
+  top: 'calc(-1 * var(--ling-space-3))',
   left: '50%',
   transform: 'translateX(-50%)',
   color: 'var(--ling-text-primary)',
@@ -84,7 +84,7 @@ const popularBadgeBase: React.CSSProperties = {
 const planInfoStyle: React.CSSProperties = { marginBottom: 'var(--ling-space-4)' };
 const planSubtitleStyle: React.CSSProperties = { color: 'var(--ling-text-tertiary)', fontSize: 'var(--ling-font-sm)', margin: 'var(--ling-space-1) 0 0' };
 const planPriceContainerStyle: React.CSSProperties = { marginBottom: 'var(--ling-space-5)' };
-const planPriceStyle: React.CSSProperties = { color: 'var(--ling-text-primary)', fontSize: '32px', fontWeight: 700 };
+const planPriceStyle: React.CSSProperties = { color: 'var(--ling-text-primary)', fontSize: 'var(--ling-font-price)', fontWeight: 700 };
 const planPeriodStyle: React.CSSProperties = { color: 'var(--ling-text-tertiary)', fontSize: 'var(--ling-font-md)' };
 
 const featureListStyle: React.CSSProperties = { listStyle: 'none', padding: 0, margin: '0 0 var(--ling-space-5)', flex: 1 };
@@ -98,8 +98,8 @@ const featureItemStyle: React.CSSProperties = {
 };
 
 const freeBtnStyle: React.CSSProperties = {
-  padding: '10px',
-  borderRadius: '10px',
+  padding: 'var(--ling-space-3)',
+  borderRadius: 'var(--ling-radius-md)',
   border: '1px solid var(--ling-surface-hover)',
   background: 'transparent',
   color: 'var(--ling-text-muted)',
@@ -222,35 +222,35 @@ const planCardStyles = PLANS.map((plan) => ({
     border: plan.popular
       ? `2px solid ${plan.color}`
       : '1px solid var(--ling-surface-hover)',
-    borderRadius: '16px',
-    padding: '24px',
+    borderRadius: 'var(--ling-radius-lg)',
+    padding: 'var(--ling-space-6)',
     display: 'flex',
     flexDirection: 'column' as const,
     position: 'relative' as const,
   } as React.CSSProperties,
   badge: { ...popularBadgeBase, background: plan.color } as React.CSSProperties,
-  name: { color: plan.color, fontSize: '18px', fontWeight: 700, margin: 0 } as React.CSSProperties,
-  bullet: { color: plan.color, fontSize: '10px', marginTop: '4px' } as React.CSSProperties,
+  name: { color: plan.color, fontSize: 'var(--ling-font-lg)', fontWeight: 700, margin: 0 } as React.CSSProperties,
+  bullet: { color: plan.color, fontSize: '10px', marginTop: 'var(--ling-space-1)' } as React.CSSProperties,
 }));
 
 const planBtnBase: React.CSSProperties = {
-  padding: '10px',
-  borderRadius: '10px',
+  padding: 'var(--ling-space-3)',
+  borderRadius: 'var(--ling-radius-md)',
   border: 'none',
-  fontSize: '14px',
+  fontSize: 'var(--ling-font-md)',
   fontWeight: 600,
-  transition: 'background 0.2s, opacity 0.2s',
+  transition: `background var(--ling-duration-fast), opacity var(--ling-duration-fast)`,
 };
 
 const creditBtnBase: React.CSSProperties = {
   flex: '1 1 140px',
-  padding: '16px',
-  borderRadius: '12px',
+  padding: 'var(--ling-space-4)',
+  borderRadius: 'var(--ling-radius-md)',
   border: '1px solid var(--ling-purple-20)',
   background: 'var(--ling-purple-08)',
   color: 'var(--ling-text-primary)',
   textAlign: 'center',
-  transition: 'background 0.2s, border-color 0.2s',
+  transition: `background var(--ling-duration-fast), border-color var(--ling-duration-fast)`,
 };
 
 // Lazy-cached plan button styles — avoids per-render allocation in .map()
