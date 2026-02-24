@@ -32,7 +32,7 @@ export function TermsPage() {
         <section style={styles.section}>
           <h2 style={styles.h2}>{t('terms.s2Title')}</h2>
           <ul style={styles.ul}>
-            {Array.isArray(items) && items.map((item, i) => <li key={i}>{item}</li>)}
+            {Array.isArray(items) && items.map((item) => <li key={item}>{item}</li>)}
           </ul>
         </section>
 

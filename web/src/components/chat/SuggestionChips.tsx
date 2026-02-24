@@ -1,4 +1,4 @@
-import { memo, type CSSProperties } from "react";
+import { memo, useCallback, type CSSProperties } from "react";
 import i18next from "i18next";
 
 // ─── Style constants (avoid per-render allocation) ───
@@ -56,6 +56,15 @@ export const SuggestionChips = memo(function SuggestionChips({
   centered?: boolean;
   baseDelay?: number;
 }) {
+  // Single delegated handler — avoids creating N inline closures per render.
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      const text = e.currentTarget.dataset.chip;
+      if (text) onChipClick(text);
+    },
+    [onChipClick],
+  );
+
   if (!Array.isArray(chips) || chips.length === 0) return null;
   return (
     <div role="group" aria-label={i18next.t("ui.suggestedReplies")} style={centered ? S_CHIPS_CENTERED : S_CHIPS_LEFT}>
@@ -63,7 +72,8 @@ export const SuggestionChips = memo(function SuggestionChips({
         <button
           key={chip}
           className="welcome-chip"
-          onClick={() => onChipClick(chip)}
+          data-chip={chip}
+          onClick={handleClick}
           style={getChipStyle(baseDelay, i)}
         >
           {chip}

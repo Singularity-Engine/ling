@@ -280,7 +280,9 @@ export const ToolResultCard = memo(({ toolName, content, status }: ToolResultCar
   );
 
   const isLongText = textContent.length > COLLAPSE_CHAR_THRESHOLD;
-  const hasContent = !!(textContent || hasCode);
+  // Memoize so toggleCollapsed callback stays referentially stable
+  // even when `content` changes but "has content" truth value doesn't.
+  const hasContent = useMemo(() => !!(textContent || hasCode), [textContent, hasCode]);
   const isRunning = status === "running";
   const isError = status !== "running" && status !== "completed";
 
