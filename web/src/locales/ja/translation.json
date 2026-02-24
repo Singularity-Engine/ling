@@ -22,7 +22,8 @@
     "statusRunning": "稼働中",
     "statusDown": "停止中",
     "lastUpdated": "最終更新",
-    "autoRefresh": "30秒ごとに自動更新"
+    "autoRefresh": "30秒ごとに自動更新",
+    "loadError": "データの読み込みに失敗しました"
   },
   "common": {
     "save": "保存",
@@ -237,13 +238,15 @@
     "toolError": "エラー",
     "toolResult": "ツール結果",
     "memoryMarker": "記憶に基づく",
-    "remembers": "覚えています"
+    "remembers": "覚えています",
+    "aiThinking": "AI が考え中"
   },
   "connection": {
     "connected": "接続済み",
     "reconnecting": "再接続中...",
     "disconnected": "切断されました",
-    "clickRetry": "クリックして再試行"
+    "clickRetry": "クリックして再試行",
+    "idleRetry": "再接続を待っています..."
   },
   "affinity": {
     "label": "好感度",
@@ -370,7 +373,8 @@
     "guestLimitMessage": "無料登録でリンとの会話を続けましょう。記憶機能やより深い会話など、さまざまな機能がアンロックされます。",
     "registerFree": "無料で登録",
     "checkoutSuccess": "お支払いが完了しました！ようこそ。",
-    "checkoutCanceled": "お支払いがキャンセルされました。いつでも再度お試しいただけます。"
+    "checkoutCanceled": "お支払いがキャンセルされました。いつでも再度お試しいただけます。",
+    "creditsAriaLabel": "{{count}} クレジット。料金プランを見る。"
   },
   "memory": {
     "title": "記憶",

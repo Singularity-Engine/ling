@@ -22,7 +22,8 @@
     "statusRunning": "En cours",
     "statusDown": "Hors service",
     "lastUpdated": "Dernière mise à jour",
-    "autoRefresh": "Actualisation automatique toutes les 30s"
+    "autoRefresh": "Actualisation automatique toutes les 30s",
+    "loadError": "Échec du chargement des données"
   },
   "common": {
     "save": "Enregistrer",
@@ -237,13 +238,15 @@
     "toolError": "Erreur",
     "toolResult": "Résultat d'outil",
     "memoryMarker": "Basé sur la mémoire",
-    "remembers": "Se souvient"
+    "remembers": "Se souvient",
+    "aiThinking": "L'IA réfléchit"
   },
   "connection": {
     "connected": "Connecte",
     "reconnecting": "Reconnexion...",
     "disconnected": "Deconnecte",
-    "clickRetry": "Clique pour reessayer"
+    "clickRetry": "Clique pour reessayer",
+    "idleRetry": "En attente de reconnexion..."
   },
   "affinity": {
     "label": "Affinite",
@@ -394,7 +397,8 @@
     "guestLimitMessage": "Inscris-toi gratuitement pour continuer a discuter avec Ling — deverrouille les souvenirs, des conversations plus profondes, et plus encore.",
     "registerFree": "Inscription gratuite",
     "checkoutSuccess": "Paiement reussi ! Bienvenue a bord.",
-    "checkoutCanceled": "Paiement annule. Tu peux reessayer quand tu veux."
+    "checkoutCanceled": "Paiement annule. Tu peux reessayer quand tu veux.",
+    "creditsAriaLabel": "{{count}} crédits. Cliquez pour voir les tarifs."
   },
   "memory": {
     "title": "Souvenirs",

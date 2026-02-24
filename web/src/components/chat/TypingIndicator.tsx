@@ -1,4 +1,5 @@
 import { memo, type CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 
 // ─── Constants ───
 
@@ -50,10 +51,11 @@ interface TypingIndicatorProps {
 }
 
 export const TypingIndicator = memo(({ fadeOut }: TypingIndicatorProps) => {
+  const { t } = useTranslation();
   return (
     <div
       role="status"
-      aria-label="AI is thinking"
+      aria-label={t("chat.aiThinking")}
       style={fadeOut ? S_WRAP_OUT : S_WRAP_IN}
     >
       {DOT_INDICES.map((i) => (

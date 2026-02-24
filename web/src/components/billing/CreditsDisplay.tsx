@@ -6,6 +6,7 @@
  */
 
 import { memo, useCallback, type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuthState } from '@/context/AuthContext';
 import { useUIActions } from '@/context/UiContext';
 
@@ -34,6 +35,7 @@ const S_TEXT_NORMAL: CSSProperties = { fontSize: '12px', fontWeight: 600, color:
 const S_TEXT_LOW: CSSProperties = { fontSize: '12px', fontWeight: 600, color: 'var(--ling-error)' };
 
 const CreditsDisplay: React.FC = memo(() => {
+  const { t } = useTranslation();
   const { user } = useAuthState();
   const { setPricingOpen } = useUIActions();
   const openPricing = useCallback(() => setPricingOpen(true), [setPricingOpen]);
@@ -54,7 +56,7 @@ const CreditsDisplay: React.FC = memo(() => {
       onClick={openPricing}
       className="ling-credits-display"
       style={S_BUTTON}
-      aria-label={`Credits: ${Math.floor(balance)}. Click to view pricing.`}
+      aria-label={t("billing.creditsAriaLabel", { count: Math.floor(balance) })}
       title={`Credits: ${balance}`}
     >
       <span aria-hidden="true" style={isLow ? S_ICON_LOW : S_ICON_NORMAL}>✦</span>

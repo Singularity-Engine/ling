@@ -22,7 +22,8 @@
     "statusRunning": "Em execução",
     "statusDown": "Fora do ar",
     "lastUpdated": "Última atualização",
-    "autoRefresh": "Atualiza automaticamente a cada 30s"
+    "autoRefresh": "Atualiza automaticamente a cada 30s",
+    "loadError": "Falha ao carregar os dados"
   },
   "common": {
     "save": "Salvar",
@@ -237,13 +238,15 @@
     "toolError": "Erro",
     "toolResult": "Resultado da ferramenta",
     "memoryMarker": "Baseado em memória",
-    "remembers": "Lembrou"
+    "remembers": "Lembrou",
+    "aiThinking": "IA pensando"
   },
   "connection": {
     "connected": "Conectado",
     "reconnecting": "Reconectando...",
     "disconnected": "Desconectado",
-    "clickRetry": "Clique para tentar novamente"
+    "clickRetry": "Clique para tentar novamente",
+    "idleRetry": "Aguardando para tentar novamente..."
   },
   "affinity": {
     "label": "Afinidade",
@@ -394,7 +397,8 @@
     "guestLimitMessage": "Cadastre-se gr\u00e1tis para continuar conversando com a Ling \u2014 desbloqueie mem\u00f3rias, conversas mais profundas e mais.",
     "registerFree": "Cadastre-se Gr\u00e1tis",
     "checkoutSuccess": "Pagamento realizado com sucesso! Bem-vindo(a) a bordo.",
-    "checkoutCanceled": "Pagamento cancelado. Voc\u00ea pode tentar novamente a qualquer momento."
+    "checkoutCanceled": "Pagamento cancelado. Voc\u00ea pode tentar novamente a qualquer momento.",
+    "creditsAriaLabel": "{{count}} créditos. Clique para ver os planos."
   },
   "memory": {
     "title": "Mem\u00f3rias",

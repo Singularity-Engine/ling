@@ -22,7 +22,8 @@
     "statusRunning": "Running",
     "statusDown": "Down",
     "lastUpdated": "Last updated",
-    "autoRefresh": "Auto-refreshes every 30s"
+    "autoRefresh": "Auto-refreshes every 30s",
+    "loadError": "Failed to load data"
   },
   "common": {
     "save": "Save",
@@ -237,13 +238,15 @@
     "toolError": "Error",
     "toolResult": "Tool result",
     "memoryMarker": "Based on memory",
-    "remembers": "Remembered"
+    "remembers": "Remembered",
+    "aiThinking": "AI is thinking"
   },
   "connection": {
     "connected": "Connected",
     "reconnecting": "Reconnecting...",
     "disconnected": "Disconnected",
-    "clickRetry": "Click to retry"
+    "clickRetry": "Click to retry",
+    "idleRetry": "Waiting to retry..."
   },
   "affinity": {
     "label": "Affinity",
@@ -371,7 +374,8 @@
     "guestLimitMessage": "Sign up for free to continue chatting with Ling — unlock memories, deeper conversations, and more.",
     "registerFree": "Sign Up Free",
     "checkoutSuccess": "Payment successful! Welcome aboard.",
-    "checkoutCanceled": "Checkout canceled. You can try again anytime."
+    "checkoutCanceled": "Checkout canceled. You can try again anytime.",
+    "creditsAriaLabel": "{{count}} credits. Click to view pricing."
   },
   "memory": {
     "title": "Memories",

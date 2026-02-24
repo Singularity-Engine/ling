@@ -22,7 +22,8 @@
     "statusRunning": "실행 중",
     "statusDown": "중단됨",
     "lastUpdated": "마지막 업데이트",
-    "autoRefresh": "30초마다 자동 새로고침"
+    "autoRefresh": "30초마다 자동 새로고침",
+    "loadError": "데이터를 불러오지 못했습니다"
   },
   "common": {
     "save": "저장",
@@ -237,13 +238,15 @@
     "toolError": "오류",
     "toolResult": "도구 결과",
     "memoryMarker": "기억 기반",
-    "remembers": "기억했어요"
+    "remembers": "기억했어요",
+    "aiThinking": "AI 생각 중"
   },
   "connection": {
     "connected": "연결됨",
     "reconnecting": "재연결 중...",
     "disconnected": "연결 끊김",
-    "clickRetry": "클릭하면 다시 시도해요"
+    "clickRetry": "클릭하면 다시 시도해요",
+    "idleRetry": "재연결 대기 중..."
   },
   "affinity": {
     "label": "호감도",
@@ -393,7 +396,8 @@
     "guestLimitMessage": "무료로 가입하면 Ling과 계속 대화할 수 있어요 — 기억, 더 깊은 대화 등 다양한 기능을 사용해 보세요.",
     "registerFree": "무료 가입",
     "checkoutSuccess": "결제가 완료되었어요! 환영해요.",
-    "checkoutCanceled": "결제가 취소되었어요. 언제든 다시 시도할 수 있어요."
+    "checkoutCanceled": "결제가 취소되었어요. 언제든 다시 시도할 수 있어요.",
+    "creditsAriaLabel": "{{count}} 크레딧. 요금제를 보려면 클릭하세요."
   },
   "memory": {
     "title": "기억",

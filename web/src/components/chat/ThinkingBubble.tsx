@@ -18,7 +18,7 @@ const S_AVATAR_AI: CSSProperties = {
   background: "var(--ling-avatar-ai-bg)", color: "var(--ling-avatar-ai-color)",
   border: "1.5px solid var(--ling-avatar-ai-color)",
 };
-const S_INNER: CSSProperties = { maxWidth: "min(82%, 620px)", minWidth: 0 };
+const S_INNER: CSSProperties = { maxWidth: "min(88%, var(--ling-chat-ai-max-width, 860px))", minWidth: 0 };
 const S_NAME: CSSProperties = {
   display: "block", fontSize: "11px", color: "var(--ling-chat-label)",
   marginBottom: "4px", marginLeft: "4px", fontWeight: 500, letterSpacing: "0.5px",
@@ -39,11 +39,14 @@ const S_CURSOR: CSSProperties = {
   animation: "streamingCursor 1s ease-in-out infinite",
 };
 
+/** Markdown throttle interval — caps ReactMarkdown re-parses at ~8fps during streaming */
+const MD_THROTTLE_MS = 125;
+
 /**
- * Coarser throttle: caps ReactMarkdown re-parses at ~8fps (125ms interval)
- * during streaming.  Between ticks the component still re-renders (props
- * change at ~30fps) but the useMemo keyed on mdContent returns cached VDOM
- * — essentially free reconciliation.
+ * Coarser throttle: caps ReactMarkdown re-parses at ~8fps during streaming.
+ * Between ticks the component still re-renders (props change at ~30fps) but
+ * the useMemo keyed on mdContent returns cached VDOM — essentially free
+ * reconciliation.
  * Outside streaming the value passes through immediately via early return,
  * avoiding extra state updates and a second useEffect.
  */
@@ -55,7 +58,7 @@ function useMdThrottle(content: string, active: boolean): string {
   useEffect(() => {
     if (!active) return;
     setSnap(latestRef.current);                 // flush on activation
-    const id = setInterval(() => setSnap(latestRef.current), 125);
+    const id = setInterval(() => setSnap(latestRef.current), MD_THROTTLE_MS);
     return () => clearInterval(id);
   }, [active]);
 

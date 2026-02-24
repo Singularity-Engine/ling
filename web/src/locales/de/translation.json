@@ -22,7 +22,8 @@
     "statusRunning": "Läuft",
     "statusDown": "Ausgefallen",
     "lastUpdated": "Zuletzt aktualisiert",
-    "autoRefresh": "Automatische Aktualisierung alle 30s"
+    "autoRefresh": "Automatische Aktualisierung alle 30s",
+    "loadError": "Daten konnten nicht geladen werden"
   },
   "common": {
     "save": "Speichern",
@@ -237,13 +238,15 @@
     "toolError": "Fehler",
     "toolResult": "Werkzeugergebnis",
     "memoryMarker": "Basierend auf Erinnerung",
-    "remembers": "Erinnert sich"
+    "remembers": "Erinnert sich",
+    "aiThinking": "KI denkt nach"
   },
   "connection": {
     "connected": "Verbunden",
     "reconnecting": "Wiederverbindung...",
     "disconnected": "Getrennt",
-    "clickRetry": "Klicke zum Wiederholen"
+    "clickRetry": "Klicke zum Wiederholen",
+    "idleRetry": "Warte auf erneuten Versuch..."
   },
   "affinity": {
     "label": "Zuneigung",
@@ -371,7 +374,8 @@
     "guestLimitMessage": "Registriere dich kostenlos, um weiter mit Ling zu chatten — schalte Erinnerungen, tiefere Gespräche und mehr frei.",
     "registerFree": "Kostenlos registrieren",
     "checkoutSuccess": "Zahlung erfolgreich! Willkommen an Bord.",
-    "checkoutCanceled": "Bezahlvorgang abgebrochen. Du kannst es jederzeit erneut versuchen."
+    "checkoutCanceled": "Bezahlvorgang abgebrochen. Du kannst es jederzeit erneut versuchen.",
+    "creditsAriaLabel": "{{count}} Credits. Klicken Sie, um die Preise anzuzeigen."
   },
   "memory": {
     "title": "Erinnerungen",

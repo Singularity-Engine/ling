@@ -100,7 +100,7 @@ export function DashboardPage() {
 
         {/* Footer info */}
         <div style={S.footer}>
-          {error && <p style={S.errorText}>Failed to load data</p>}
+          {error && <p style={S.errorText}>{t('dashboard.loadError')}</p>}
           {data && (
             <p style={S.updated}>
               {t('dashboard.lastUpdated')}: {new Date(data.updated_at).toLocaleTimeString()}
@@ -117,7 +117,7 @@ export function DashboardPage() {
 // ── Static styles ──────────────────────────────────────────────
 const S: Record<string, React.CSSProperties> = {
   page: {
-    width: '100vw',
+    width: '100%',
     minHeight: '100dvh',
     background: 'var(--ling-bg-deep)',
     display: 'flex',

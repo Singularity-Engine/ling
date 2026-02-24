@@ -22,7 +22,8 @@
     "statusRunning": "运行中",
     "statusDown": "已停机",
     "lastUpdated": "最后更新",
-    "autoRefresh": "每 30 秒自动刷新"
+    "autoRefresh": "每 30 秒自动刷新",
+    "loadError": "数据加载失败"
   },
   "common": {
     "save": "保存",
@@ -237,13 +238,15 @@
     "toolError": "错误",
     "toolResult": "工具结果",
     "memoryMarker": "基于记忆",
-    "remembers": "灵记住了"
+    "remembers": "灵记住了",
+    "aiThinking": "AI 思考中"
   },
   "connection": {
     "connected": "已连接",
     "reconnecting": "重连中...",
     "disconnected": "连接断开",
-    "clickRetry": "点击重试"
+    "clickRetry": "点击重试",
+    "idleRetry": "等待重连..."
   },
   "affinity": {
     "label": "好感度",
@@ -370,7 +373,8 @@
     "guestLimitMessage": "免费注册即可继续和灵聊天——解锁记忆、更深度的对话，以及更多功能。",
     "registerFree": "免费注册",
     "checkoutSuccess": "支付成功！欢迎加入。",
-    "checkoutCanceled": "支付已取消。你可以随时再试。"
+    "checkoutCanceled": "支付已取消。你可以随时再试。",
+    "creditsAriaLabel": "{{count}} 积分。点击查看定价方案。"
   },
   "memory": {
     "title": "记忆",

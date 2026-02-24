@@ -22,7 +22,8 @@
     "statusRunning": "En ejecución",
     "statusDown": "Caído",
     "lastUpdated": "Última actualización",
-    "autoRefresh": "Se actualiza automáticamente cada 30s"
+    "autoRefresh": "Se actualiza automáticamente cada 30s",
+    "loadError": "Error al cargar los datos"
   },
   "common": {
     "save": "Guardar",
@@ -237,13 +238,15 @@
     "toolError": "Error",
     "toolResult": "Resultado de herramienta",
     "memoryMarker": "Basado en recuerdos",
-    "remembers": "Recordado"
+    "remembers": "Recordado",
+    "aiThinking": "IA pensando"
   },
   "connection": {
     "connected": "Conectado",
     "reconnecting": "Reconectando...",
     "disconnected": "Desconectado",
-    "clickRetry": "Clic para reintentar"
+    "clickRetry": "Clic para reintentar",
+    "idleRetry": "Esperando para reintentar..."
   },
   "affinity": {
     "label": "Afinidad",
@@ -394,7 +397,8 @@
     "guestLimitMessage": "Registrate gratis para seguir hablando con Ling: desbloquea recuerdos, conversaciones mas profundas y mas.",
     "registerFree": "Registrate gratis",
     "checkoutSuccess": "!Pago exitoso! Bienvenido/a.",
-    "checkoutCanceled": "Compra cancelada. Puedes intentar de nuevo cuando quieras."
+    "checkoutCanceled": "Compra cancelada. Puedes intentar de nuevo cuando quieras.",
+    "creditsAriaLabel": "{{count}} créditos. Haz clic para ver los planes."
   },
   "memory": {
     "title": "Recuerdos",
