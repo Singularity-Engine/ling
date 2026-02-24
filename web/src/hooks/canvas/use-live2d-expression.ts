@@ -1,5 +1,8 @@
 import { useCallback } from 'react';
 import { ModelInfo } from '@/context/Live2dConfigContext';
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('Live2DExpr');
 
 /**
  * Custom hook for handling Live2D model expressions
@@ -13,7 +16,7 @@ export const useLive2DExpression = () => {
    */
   const setExpression = useCallback((
     expressionValue: string | number,
-    lappAdapter: any,
+    lappAdapter: LAppAdapterLike,
   ) => {
     try {
       if (typeof expressionValue === 'string') {
@@ -27,7 +30,7 @@ export const useLive2DExpression = () => {
         }
       }
     } catch (error) {
-      console.error('Failed to set expression:', error);
+      log.error('Failed to set expression:', error);
     }
   }, []);
 
@@ -37,7 +40,7 @@ export const useLive2DExpression = () => {
    * @param modelInfo - Current model information
    */
   const resetExpression = useCallback((
-    lappAdapter: any,
+    lappAdapter: LAppAdapterLike,
     modelInfo?: ModelInfo,
   ) => {
     if (!lappAdapter) return;

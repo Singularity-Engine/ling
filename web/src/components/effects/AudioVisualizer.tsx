@@ -276,7 +276,7 @@ export const AudioVisualizer = memo(() => {
 
   return (
     <div style={containerStyle}>
-      <canvas ref={canvasRef} style={CANVAS_STYLE} />
+      <canvas ref={canvasRef} style={CANVAS_STYLE} aria-hidden="true" />
     </div>
   );
 });

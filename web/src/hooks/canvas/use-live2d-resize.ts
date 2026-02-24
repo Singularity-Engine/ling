@@ -1,11 +1,19 @@
 /* eslint-disable no-use-before-define */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable no-underscore-dangle */
 import { useEffect, useCallback, RefObject, useRef } from 'react';
 import { ModelInfo } from '@/context/Live2dConfigContext';
 import { LAppDelegate } from '../../../WebSDK/src/lappdelegate';
 import { LAppLive2DManager } from '../../../WebSDK/src/lapplive2dmanager';
 import { useMode } from '@/context/ModeContext';
+
+/** Cubism SDK internal: model matrix fields not in public typings */
+interface CubismModelMatrix {
+  getArray(): Float32Array;
+  scale(sx: number, sy: number): void;
+}
+interface ModelWithMatrix {
+  _modelMatrix?: CubismModelMatrix;
+}
 
 // Constants for model scaling behavior
 const MIN_ZOOM = 0.3;         // Minimum zoom factor (30% of base)
@@ -32,8 +40,8 @@ const applyAbsoluteScale = (absoluteScale: number) => {
     const model = manager.getModel(0);
     if (!model) return;
 
-    // @ts-ignore - accessing internal _modelMatrix
-    const matrix = model._modelMatrix;
+    const matrix = (model as unknown as ModelWithMatrix)._modelMatrix;
+    if (!matrix) return;
     const arr = matrix.getArray();
     const oldScale = arr[0];
     if (oldScale === 0 || absoluteScale === oldScale) return;
@@ -145,8 +153,7 @@ export const useLive2DResize = ({
     try {
       const manager = LAppLive2DManager.getInstance();
       const model = manager?.getModel(0);
-      // @ts-ignore
-      const arr = model?._modelMatrix?.getArray();
+      const arr = (model as unknown as ModelWithMatrix)?._modelMatrix?.getArray();
       if (arr && arr[0] !== 0) {
         baseScaleRef.current = arr[0];
         return true;
@@ -359,15 +366,4 @@ export const useLive2DResize = ({
   return { canvasRef, handleResize };
 };
 
-/**
- * Helper function to set model scale with device pixel ratio consideration
- * @deprecated This logic might be better handled within the view matrix scaling
- */
-export const setModelScale = (
-  model: any,
-  kScale: string | number | undefined,
-) => {
-  if (!model || kScale === undefined) return;
-  if (import.meta.env.DEV) console.warn("setModelScale is potentially deprecated; scaling is primarily handled by view matrix now.");
-};
 

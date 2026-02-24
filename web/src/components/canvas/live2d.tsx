@@ -53,7 +53,7 @@ export const Live2D = memo(
     // Reset expression to default when AI state becomes idle
     useEffect(() => {
       if (aiState === AiStateEnum.IDLE) {
-        const lappAdapter = (window as any).getLAppAdapter?.();
+        const lappAdapter = window.getLAppAdapter?.();
         if (lappAdapter) {
           resetExpression(lappAdapter, modelInfo);
         }
@@ -61,6 +61,7 @@ export const Live2D = memo(
     }, [aiState, modelInfo, resetExpression]);
 
     // 连接失败超时后显示重试按钮
+    const RETRY_TIMEOUT_MS = 8000;
     useEffect(() => {
       if (wsState === 'OPEN') {
         setShowRetry(false);
@@ -68,7 +69,7 @@ export const Live2D = memo(
       }
       const timer = setTimeout(() => {
         if (wsState !== 'OPEN') setShowRetry(true);
-      }, 8000);
+      }, RETRY_TIMEOUT_MS);
       return () => clearTimeout(timer);
     }, [wsState]);
 
@@ -114,6 +115,8 @@ export const Live2D = memo(
         />
         {showOverlay && (
           <div
+            role="status"
+            aria-live="polite"
             style={{
               position: "absolute",
               inset: 0,

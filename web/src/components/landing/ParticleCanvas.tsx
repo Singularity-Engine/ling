@@ -276,6 +276,7 @@ export const ParticleCanvas = memo(function ParticleCanvas({
     <canvas
       ref={canvasRef}
       style={S_CANVAS}
+      aria-hidden="true"
     />
   );
 });
