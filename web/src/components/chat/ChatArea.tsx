@@ -27,11 +27,12 @@ const EMPTY_IMAGES: never[] = [];
 // ─── Static style constants (avoid per-render allocation during ~30fps streaming) ───
 
 const S_CONTAINER: CSSProperties = {
-  height: "100%",
+  maxHeight: "inherit",
   overflowY: "auto",
   overflowX: "hidden",
   padding: "16px 0",
   position: "relative",
+  overscrollBehavior: "contain",
 };
 
 const S_LOAD_MORE_WRAP: CSSProperties = {

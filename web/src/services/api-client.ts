@@ -13,7 +13,7 @@ function getApiBase(): string {
   if (import.meta.env.DEV) {
     return '';
   }
-  return 'https://lain.sngxai.com';
+  return 'https://ling.sngxai.com';
 }
 
 const TOKEN_KEY = SK_TOKEN;

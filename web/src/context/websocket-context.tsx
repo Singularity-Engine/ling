@@ -14,10 +14,10 @@ function getDefaultUrls() {
     };
   }
 
-  // 外网访问 - 通过 lain.sngxai.com 连接数字人后端
+  // 外网访问 - 通过 ling.sngxai.com 连接数字人后端
   return {
-    wsUrl: 'wss://lain.sngxai.com/client-ws',
-    baseUrl: 'https://lain.sngxai.com',
+    wsUrl: 'wss://ling.sngxai.com/client-ws',
+    baseUrl: 'https://ling.sngxai.com',
   };
 }
 

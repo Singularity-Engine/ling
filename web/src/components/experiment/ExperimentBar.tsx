@@ -33,11 +33,7 @@ interface ExperimentStatus {
 
 // ── Constants ──
 
-const STATUS_API = (() => {
-  const host = window.location.hostname;
-  if (host === "localhost" || host === "127.0.0.1") return "/api/status.json";
-  return "https://ling.sngxai.com/api/status.json";
-})();
+const STATUS_API = "/data/status.json";
 
 const FALLBACK: ExperimentStatus = {
   alive: true,

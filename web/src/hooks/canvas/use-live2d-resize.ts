@@ -8,11 +8,11 @@ import { LAppLive2DManager } from '../../../WebSDK/src/lapplive2dmanager';
 import { useMode } from '@/context/mode-context';
 
 // Constants for model scaling behavior
-const MIN_SCALE = 0.1;
-const MAX_SCALE = 5.0;
-const EASING_FACTOR = 0.3; // Controls animation smoothness
-const WHEEL_SCALE_STEP = 0.03; // Scale change per wheel tick
-const DEFAULT_SCALE = 1.0; // Default scale if not specified
+const MIN_ZOOM = 0.3;         // Minimum zoom factor (30% of base)
+const MAX_ZOOM = 3.0;         // Maximum zoom factor (300% of base)
+const EASING_FACTOR = 0.3;    // Controls animation smoothness
+const WHEEL_ZOOM_STEP = 0.05; // Zoom change per wheel tick
+const ZOOM_EPSILON = 0.001;   // Stop animating below this diff
 
 interface UseLive2DResizeProps {
   containerRef: RefObject<HTMLDivElement>;
@@ -21,10 +21,10 @@ interface UseLive2DResizeProps {
 }
 
 /**
- * Applies scale to both model and view matrices
- * @param scale - The scale value to apply
+ * Apply absolute scale to the model matrix.
+ * Preserves translation consistency by scaling tx/ty proportionally.
  */
-export const applyScale = (scale: number) => {
+const applyAbsoluteScale = (absoluteScale: number) => {
   try {
     const manager = LAppLive2DManager.getInstance();
     if (!manager) return;
@@ -32,12 +32,25 @@ export const applyScale = (scale: number) => {
     const model = manager.getModel(0);
     if (!model) return;
 
-    // @ts-ignore
-    model._modelMatrix.scale(scale, scale);
-  } catch (error) {
+    // @ts-ignore - accessing internal _modelMatrix
+    const matrix = model._modelMatrix;
+    const arr = matrix.getArray();
+    const oldScale = arr[0];
+    if (oldScale === 0 || absoluteScale === oldScale) return;
+
+    // Scale translation proportionally to keep the model centered
+    const ratio = absoluteScale / oldScale;
+    matrix.scale(absoluteScale, absoluteScale);
+    const updated = matrix.getArray();
+    updated[12] = arr[12] * ratio;
+    updated[13] = arr[13] * ratio;
+  } catch {
     // Model not ready for scaling yet — silent fallthrough
   }
 };
+
+/** @deprecated Use applyAbsoluteScale internally. Kept for external callers. */
+export const applyScale = applyAbsoluteScale;
 
 /**
  * Hook to handle Live2D model resizing and scaling
@@ -54,10 +67,12 @@ export const useLive2DResize = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isResizingRef = useRef<boolean>(false);
 
-  // Initialize scale references
-  const initialScale = modelInfo?.kScale || DEFAULT_SCALE;
-  const lastScaleRef = useRef<number>(initialScale);
-  const targetScaleRef = useRef<number>(initialScale);
+  // Zoom state: zoomFactor is relative to the SDK's bbox-fitted base scale.
+  // baseScaleRef captures _modelMatrix._tr[0] when the user first zooms,
+  // so we apply (baseScale * zoomFactor) instead of overwriting the fitScale.
+  const baseScaleRef = useRef<number | null>(null);
+  const currentZoomRef = useRef<number>(1.0);
+  const targetZoomRef = useRef<number>(1.0);
   const animationFrameRef = useRef<number>();
   const isAnimatingRef = useRef<boolean>(false);
   const hasAppliedInitialScale = useRef<boolean>(false);
@@ -69,12 +84,12 @@ export const useLive2DResize = ({
   const prevSidebarStateRef = useRef<boolean | undefined>(showSidebar);
 
   /**
-   * Reset scale state when model changes
+   * Reset zoom state when model changes
    */
   useEffect(() => {
-    const newInitialScale = modelInfo?.kScale || DEFAULT_SCALE;
-    lastScaleRef.current = newInitialScale;
-    targetScaleRef.current = newInitialScale;
+    baseScaleRef.current = null; // Will be re-captured on next zoom
+    currentZoomRef.current = 1.0;
+    targetZoomRef.current = 1.0;
     hasAppliedInitialScale.current = false;
 
     if (animationFrameRef.current) {
@@ -90,49 +105,76 @@ export const useLive2DResize = ({
   }, [modelInfo?.url, modelInfo?.kScale]);
 
   /**
-   * Smooth animation loop for scaling
-   * Uses linear interpolation for smooth transitions
+   * Smooth animation loop for zoom.
+   * Interpolates zoomFactor toward target, applies (baseScale * zoom).
+   * Stops when the difference is negligible (avoids running forever).
    */
   const animateEase = useCallback(() => {
-    const clampedTargetScale = Math.max(
-      MIN_SCALE,
-      Math.min(MAX_SCALE, targetScaleRef.current),
-    );
+    const base = baseScaleRef.current;
+    if (base === null) {
+      isAnimatingRef.current = false;
+      return;
+    }
 
-    const currentScale = lastScaleRef.current;
-    const diff = clampedTargetScale - currentScale;
+    const target = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, targetZoomRef.current));
+    const current = currentZoomRef.current;
+    const diff = target - current;
 
-    const newScale = currentScale + diff * EASING_FACTOR;
-    applyScale(newScale);
-    lastScaleRef.current = newScale;
+    // Stop when close enough — don't waste frames
+    if (Math.abs(diff) < ZOOM_EPSILON) {
+      applyAbsoluteScale(base * target);
+      currentZoomRef.current = target;
+      isAnimatingRef.current = false;
+      return;
+    }
+
+    const newZoom = current + diff * EASING_FACTOR;
+    applyAbsoluteScale(base * newZoom);
+    currentZoomRef.current = newZoom;
 
     animationFrameRef.current = requestAnimationFrame(animateEase);
   }, []);
 
   /**
-   * Handles mouse wheel events for scaling
-   * Initiates smooth scaling animation
+   * Captures the SDK's base scale from the model matrix.
+   * Called once on the first zoom interaction so subsequent zooms
+   * multiply against the bbox-fitted scale rather than overwriting it.
+   */
+  const captureBaseScale = useCallback((): boolean => {
+    if (baseScaleRef.current !== null) return true;
+    try {
+      const manager = LAppLive2DManager.getInstance();
+      const model = manager?.getModel(0);
+      // @ts-ignore
+      const arr = model?._modelMatrix?.getArray();
+      if (arr && arr[0] !== 0) {
+        baseScaleRef.current = arr[0];
+        return true;
+      }
+    } catch { /* model not ready */ }
+    return false;
+  }, []);
+
+  /**
+   * Handles mouse wheel events for zooming.
+   * Adjusts zoom factor relative to SDK base scale.
    */
   const handleWheel = useCallback((e: WheelEvent) => {
     e.preventDefault();
     if (!modelInfo?.scrollToResize) return;
+    if (!captureBaseScale()) return; // model not ready
 
     const direction = e.deltaY > 0 ? -1 : 1;
-    const increment = WHEEL_SCALE_STEP * direction;
-
-    const currentActualScale = lastScaleRef.current;
-    const newTargetScale = Math.max(
-      MIN_SCALE,
-      Math.min(MAX_SCALE, currentActualScale + increment),
+    targetZoomRef.current = Math.max(
+      MIN_ZOOM,
+      Math.min(MAX_ZOOM, targetZoomRef.current + WHEEL_ZOOM_STEP * direction),
     );
-
-    targetScaleRef.current = newTargetScale;
 
     if (!isAnimatingRef.current) {
       isAnimatingRef.current = true;
       animationFrameRef.current = requestAnimationFrame(animateEase);
     }
-  }, [modelInfo?.scrollToResize, animateEase]);
+  }, [modelInfo?.scrollToResize, animateEase, captureBaseScale]);
 
   /**
    * Pre-process container resize

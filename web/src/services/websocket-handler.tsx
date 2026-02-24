@@ -40,6 +40,79 @@ import i18next from 'i18next';
 import { createLogger } from '@/utils/logger';
 import { useLatest } from '@/utils/use-latest';
 
+// ─── History message normalization ───────────────────────────────
+// Gateway chat.history may return OpenAI-format content arrays.
+// Coerce every message's content to a plain string before passing
+// into the React state so components can safely call string methods.
+
+// Internal messages that should never be shown to users (checked AFTER metadata stripping)
+const INTERNAL_MESSAGE_PATTERNS = [
+  /^\[greeting:experiment\]/,        // Auto-greeting context payload
+  /^HEARTBEAT_OK$/,                  // Heartbeat responses
+  /^\{[\s]*"status"[\s]*:/,          // Tool result JSON (e.g. {"status":"error",...})
+  /^#\s+\d{4}-\d{2}-\d{2}/,         // Memory file headings (e.g. # 2026-02-24 - Day 4)
+];
+function isInternalMessage(content: string): boolean {
+  return INTERNAL_MESSAGE_PATTERNS.some(p => p.test(content));
+}
+
+/** Extract only the user-visible text from a message's content field.
+ *  Filters out thinking blocks, tool calls, and tool results — only keeps text parts. */
+function extractVisibleText(content: unknown): string {
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) {
+    return (content as Array<Record<string, unknown>>)
+      .filter(p => p && typeof p === 'object' && p.type === 'text')
+      .map(p => String(p.text ?? ''))
+      .join('');
+  }
+  if (content == null) return '';
+  return String(content);
+}
+
+/**
+ * Strip gateway-injected metadata prefix from user messages.
+ * The gateway wraps every incoming user message with:
+ *   Conversation info (untrusted metadata):\n```json\n{...}\n```\n\n[timestamp] actual_text
+ * This function extracts just the "actual_text" portion.
+ */
+function stripGatewayMeta(text: string): string {
+  if (!text.startsWith('Conversation info (untrusted')) return text;
+  // Match everything up to and including the closing code fence + optional [timestamp]
+  const match = text.match(/^Conversation info \(untrusted[\s\S]*?\n```\s*\n+(?:\[[^\]]*\]\s?)?/);
+  return match ? text.slice(match[0].length).trim() : text;
+}
+
+// Roles that are internal Gateway machinery (not user-facing messages)
+const INTERNAL_ROLES = new Set(['toolResult', 'tool', 'system']);
+
+function normalizeHistoryMessages(
+  raw: Array<{ role: string; content: unknown; timestamp?: string; [k: string]: unknown }>,
+): import('@/services/websocket-service').Message[] {
+  return raw.filter((m) => {
+    // Skip internal roles entirely
+    if (INTERNAL_ROLES.has(m.role)) return false;
+    let c = extractVisibleText(m.content).trim();
+    // Skip empty messages (e.g. assistant with only thinking/toolCall, no text)
+    if (!c) return false;
+    // Strip gateway metadata prefix — user messages are wrapped with
+    // "Conversation info (untrusted metadata):\n```json\n{...}\n```\n\n[timestamp] actual_text"
+    c = stripGatewayMeta(c);
+    if (!c) return false;
+    return !isInternalMessage(c);
+  }).map((m, i) => ({
+    id: String(m.id ?? `hist-${i}-${Date.now()}`),
+    role: m.role === 'human' || m.role === 'user' ? 'human' as const : 'ai' as const,
+    content: stripGatewayMeta(extractVisibleText(m.content)),
+    timestamp: (m.timestamp as string) || new Date().toISOString(),
+    type: (m.type as 'text' | 'tool_call_status') || 'text',
+    name: m.name as string | undefined,
+    tool_id: m.tool_id as string | undefined,
+    tool_name: m.tool_name as string | undefined,
+    status: m.status as 'running' | 'completed' | 'error' | undefined,
+  }));
+}
+
 // ─── Gateway configuration ──────────────────────────────────────
 
 const GATEWAY_TOKEN = import.meta.env.VITE_GATEWAY_TOKEN || '';
@@ -279,7 +352,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           .then((res) => {
             const payload = res.payload;
             if (payload?.messages?.length && payload.messages.length > 0) {
-              setMessagesRef.current(payload.messages);
+              setMessagesRef.current(normalizeHistoryMessages(payload.messages as Array<{ role: string; content: unknown; timestamp?: string }>));
             } else {
               setMessagesRef.current([]);
             }
@@ -612,7 +685,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
               if (aborted) return;
               const payload = res.payload;
               if (payload?.messages?.length && payload.messages.length > 0) {
-                setMessagesRef.current(payload.messages);
+                setMessagesRef.current(normalizeHistoryMessages(payload.messages as Array<{ role: string; content: unknown; timestamp?: string }>));
                 greetingSentRef.current = true;
                 log.debug('Restored', payload.messages.length, 'messages from previous session');
                 return;
@@ -778,7 +851,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         .then((res) => {
           const payload = res.payload;
           if (payload?.messages?.length && payload.messages.length > 0) {
-            setMessagesRef.current(payload.messages);
+            setMessagesRef.current(normalizeHistoryMessages(payload.messages as Array<{ role: string; content: unknown; timestamp?: string }>));
             log.debug('Post-reconnect: restored', payload.messages.length, 'messages');
           }
         })
@@ -865,7 +938,9 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
                   audioBase64: result.audioBase64,
                   volumes: result.volumes,
                   sliceLength: result.sliceLength,
-                  displayText: { text: sentence, name: BRAND_NAME_SHORT, avatar: '' },
+                  // Don't pass displayText — ai-message-complete already added the text
+                  // to messages. Passing displayText here would cause appendAIMessage to
+                  // merge each sentence into the existing message, duplicating content.
                   expressions: expr ? [expr] : null,
                   forwarded: false,
                 });
@@ -1060,7 +1135,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
             // resolved, discard the result to avoid overwriting the new session.
             if (sessionKeyRef.current !== targetUid) return;
             if (res.payload?.messages) {
-              setMessagesRef.current(res.payload.messages);
+              setMessagesRef.current(normalizeHistoryMessages(res.payload.messages as Array<{ role: string; content: unknown; timestamp?: string }>));
             } else {
               // Gateway may return empty or different format
               setMessagesRef.current([]);

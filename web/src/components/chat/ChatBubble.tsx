@@ -34,6 +34,23 @@ function extractLang(children: ReactNode): string | null {
   return match ? match[1] : null;
 }
 
+/** Ensure content is always a string — Gateway history may return OpenAI-format arrays
+ *  (e.g. [{type:"text", text:"Hello"}] instead of plain "Hello"). */
+function normalizeContent(raw: unknown): string {
+  if (typeof raw === 'string') return raw;
+  if (Array.isArray(raw)) {
+    return raw
+      .map((part: unknown) => {
+        if (typeof part === 'string') return part;
+        if (part && typeof part === 'object' && 'text' in part) return String((part as { text: unknown }).text);
+        return '';
+      })
+      .join('');
+  }
+  if (raw == null) return '';
+  return String(raw);
+}
+
 // URL regex for linkifying plain-text user messages.
 // Matches http(s) URLs and www. prefixed URLs.
 // Capturing group in split → odd-indexed parts are matched URLs.
@@ -322,7 +339,9 @@ const RelativeTime = memo(({ timestamp, style }: { timestamp: string; style: CSS
 });
 RelativeTime.displayName = "RelativeTime";
 
-export const ChatBubble = memo(({ role, content, timestamp, isStreaming, isToolCall, toolName, toolStatus, isGreeting, skipEntryAnimation, senderChanged }: ChatBubbleProps) => {
+export const ChatBubble = memo(({ role, content: rawContent, timestamp, isStreaming, isToolCall, toolName, toolStatus, isGreeting, skipEntryAnimation, senderChanged }: ChatBubbleProps) => {
+  // Normalize content — Gateway history may return array (OpenAI format) instead of string
+  const content = normalizeContent(rawContent);
   const isUser = role === "user";
   const [copied, setCopied] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);

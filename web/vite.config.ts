@@ -51,6 +51,9 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: {
+        // Force new SW to activate immediately — don't wait for old tabs to close
+        skipWaiting: true,
+        clientsClaim: true,
         // Precache built assets (JS/CSS/HTML)
         globPatterns: ['**/*.{js,css,html,svg,ico,woff2}'],
         // Don't precache large binary files — they'll be cached at runtime
