@@ -269,6 +269,7 @@ export const useLive2DResize = ({
         log.debug('LAppDelegate instance not found.');
       }
 
+      hasAppliedInitialScale.current = true;
       isResizingRef.current = false;
     } catch (error) {
       isResizingRef.current = false;
@@ -370,8 +371,14 @@ export const useLive2DResize = ({
     };
 
     window.addEventListener('resize', handleWindowResize);
-    // Fullscreen transitions may not fire resize — listen explicitly
-    const onFsChange = () => { setTimeout(handleWindowResize, 120); };
+    // Fullscreen transitions may not fire resize — listen explicitly.
+    // Track the timeout so cleanup can cancel it if the component unmounts
+    // during the 120ms delay (prevents calling handleResize after teardown).
+    let fsTimerId: ReturnType<typeof setTimeout> | undefined;
+    const onFsChange = () => {
+      clearTimeout(fsTimerId);
+      fsTimerId = setTimeout(handleWindowResize, 120);
+    };
     document.addEventListener('fullscreenchange', onFsChange);
     document.addEventListener('webkitfullscreenchange', onFsChange);
 
@@ -379,6 +386,7 @@ export const useLive2DResize = ({
       window.removeEventListener('resize', handleWindowResize);
       document.removeEventListener('fullscreenchange', onFsChange);
       document.removeEventListener('webkitfullscreenchange', onFsChange);
+      clearTimeout(fsTimerId);
       if (animationFrameIdRef.current !== null) {
         cancelAnimationFrame(animationFrameIdRef.current);
         animationFrameIdRef.current = null;

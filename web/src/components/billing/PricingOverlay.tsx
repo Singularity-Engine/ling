@@ -266,29 +266,31 @@ const PricingOverlay: React.FC = memo(() => {
 
   const currentPlan = user?.plan || 'free';
 
+  // Ref mirror — lets handleClose read the latest `closing` without depending
+  // on it, keeping the callback stable across closing-state transitions and
+  // avoiding cascading re-creation of handleOverlayClick.
+  const closingRef = useRef(closing);
+  closingRef.current = closing;
+
   const handleClose = useCallback(() => {
-    if (closing) return;
+    if (closingRef.current) return;
     setClosing(true);
     closingTimer.current = setTimeout(() => {
       setClosing(false);
       setPricingOpen(false);
     }, EXIT_MS);
-  }, [setPricingOpen, closing]);
+  }, [setPricingOpen]);
 
-  // Keep a ref so the ESC listener always calls the latest handleClose
-  const handleCloseRef = useRef(handleClose);
-  handleCloseRef.current = handleClose;
-
-  // ESC to close
+  // ESC to close — handleClose is stable (closingRef pattern), safe to use directly
   useEffect(() => {
     if (!pricingOpen) return;
     setClosing(false);
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') handleCloseRef.current();
+      if (e.key === 'Escape') handleClose();
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [pricingOpen]);
+  }, [pricingOpen, handleClose]);
 
   const handleOverlayClick = useCallback(
     (e: React.MouseEvent) => { if (e.target === e.currentTarget) handleClose(); },

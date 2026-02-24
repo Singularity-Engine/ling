@@ -106,14 +106,20 @@ export const ShortcutsOverlay = memo(({ open, onClose }: ShortcutsOverlayProps) 
   // Clean up timer on unmount
   useEffect(() => () => { clearTimeout(closingTimer.current); }, []);
 
+  // Ref mirror — lets handleClose read the latest `closing` without depending
+  // on it, keeping the callback stable across closing-state transitions and
+  // avoiding cascading re-creation of handleBackdropClick / handleKeyDown.
+  const closingRef = useRef(closing);
+  closingRef.current = closing;
+
   const handleClose = useCallback(() => {
-    if (closing) return;
+    if (closingRef.current) return;
     setClosing(true);
     closingTimer.current = setTimeout(() => {
       setClosing(false);
       onClose();
     }, EXIT_DURATION);
-  }, [onClose, closing]);
+  }, [onClose]);
 
   const handleBackdropClick = useCallback((e: React.MouseEvent) => {
     if (e.target === e.currentTarget) handleClose();
