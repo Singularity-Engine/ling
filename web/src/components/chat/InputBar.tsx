@@ -20,6 +20,9 @@ const S_STATE_TEXT: CSSProperties = {
   fontSize: "11px", color: "var(--ling-purple-70)",
   animation: "inputPulse 1.5s ease-in-out infinite",
 };
+const S_STATE_TEXT_WARN: CSSProperties = {
+  fontSize: "11px", color: "var(--ling-error)", opacity: 0.85,
+};
 
 const S_INPUT_ROW: CSSProperties = {
   display: "flex", alignItems: "flex-end", gap: "8px",
@@ -216,12 +219,12 @@ export const InputBar = memo(() => {
 
   const trimmed = inputText.trim();
   const hasText = trimmed.length > 0;
+  const charCount = trimmed.length;
+  const isOverLimit = charCount > MAX_LENGTH;
   const isAiBusy = aiState === "thinking-speaking" || aiState === "loading";
   const isAiSpeaking = aiState === "thinking-speaking";
   const stateKey = AI_STATE_KEYS[aiState] || "";
-  const stateText = isSending && !stateKey ? t("chat.sending") : stateKey ? t(stateKey) : "";
-  const charCount = trimmed.length;
-  const isOverLimit = charCount > MAX_LENGTH;
+  const stateText = isOverLimit ? t("chat.overLimit") : isSending && !stateKey ? t("chat.sending") : stateKey ? t(stateKey) : "";
   const canSend = hasText && !isOverLimit && !isSending && isConnected;
 
   const handleSend = useCallback(() => {
@@ -309,7 +312,7 @@ export const InputBar = memo(() => {
   return (
     <div style={S_BAR_WRAP}>
       <div style={S_STATE_ROW} role="status" aria-live="polite">
-        {stateText && <span style={S_STATE_TEXT}>{stateText}</span>}
+        {stateText && <span style={isOverLimit ? S_STATE_TEXT_WARN : S_STATE_TEXT}>{stateText}</span>}
       </div>
 
       <div style={S_INPUT_ROW}>

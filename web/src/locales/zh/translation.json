@@ -227,6 +227,7 @@
     "regenerating": "正在重新生成...",
     "loadOlder": "加载更早的 {{count}} 条消息",
     "sending": "发送中...",
+    "overLimit": "消息过长",
     "noResponse": "灵似乎暂时没有回应，试试重新发送？",
     "retry": "重试",
     "showMore": "展开全文",

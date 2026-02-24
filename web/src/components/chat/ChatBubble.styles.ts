@@ -67,7 +67,7 @@ const S_COPY_BASE: CSSProperties = {
   position: "absolute", top: "2px", width: "32px", height: "32px",
   display: "flex", alignItems: "center", justifyContent: "center",
   background: "transparent", border: "none", borderRadius: "6px",
-  cursor: "pointer", padding: 0, transition: "color 0.2s ease, background 0.2s ease, transform 0.2s ease", color: "var(--ling-text-tertiary)",
+  cursor: "pointer", padding: 0, transition: "opacity 0.15s ease, color 0.2s ease, background 0.2s ease, transform 0.2s ease", color: "var(--ling-text-tertiary)",
 };
 export const S_COPY_AI: CSSProperties = { ...S_COPY_BASE, right: "-36px" };
 export const S_COPY_USER: CSSProperties = { ...S_COPY_BASE, left: "-36px" };

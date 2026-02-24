@@ -1,6 +1,7 @@
-"""知识图谱维护 — 节点去重 + 矛盾检测
+"""知识图谱维护 — 节点去重 + 矛盾检测 + 传递推理
 
 Phase 3b-alpha: 离线批处理, 由 NightlyConsolidator 编排调用。
+v3 补完: 传递推理 — 发现 A→B, B→C 时记录潜在 A→C 关系。
 """
 
 import time
@@ -25,6 +26,7 @@ class GraphMaintenance:
 
         total_merged = 0
         total_contradictions = 0
+        total_transitive = 0
 
         for uid in user_ids:
             try:
@@ -39,12 +41,19 @@ class GraphMaintenance:
             except Exception as e:
                 logger.warning(f"[GraphMaint] Contradiction detection failed for user {uid[:8]}...: {e}")
 
+            try:
+                transitive = await self._discover_transitive_relations(uid, dry_run)
+                total_transitive += transitive
+            except Exception as e:
+                logger.warning(f"[GraphMaint] Transitive discovery failed for user {uid[:8]}...: {e}")
+
         elapsed_ms = int((time.monotonic() - start) * 1000)
         return {
             "status": "ok",
             "users": len(user_ids),
             "merged": total_merged,
             "contradictions": total_contradictions,
+            "transitive_discovered": total_transitive,
             "elapsed_ms": elapsed_ms,
             "dry_run": dry_run,
         }
@@ -207,3 +216,73 @@ class GraphMaintenance:
                     )
 
         return contradiction_count
+
+    async def _discover_transitive_relations(self, user_id: str, dry_run: bool) -> int:
+        """v3: 传递推理 — 发现 A→B, B→C 且无直接 A→C 时创建隐含边
+
+        保守策略:
+        - 只处理 cause/goal/leads_to 这类有传递性的关系
+        - 新边标记 source="transitive_inference", strength=0.3
+        - 每用户最多创建 5 条隐含边 (避免图爆炸)
+        """
+        from ..storage.soul_collections import get_collection, SEMANTIC_EDGES
+
+        edges_coll = await get_collection(SEMANTIC_EDGES)
+        if edges_coll is None:
+            return 0
+
+        # 可传递的关系类型
+        transitive_relations = {"cause", "goal", "leads_to"}
+
+        # 加载用户所有边
+        edge_map: Dict[str, list] = {}  # {source_label: [(target_label, relation)]}
+        existing_pairs = set()  # {(source_label, target_label)}
+        cursor = edges_coll.find(
+            {"user_id": user_id},
+            projection={"source_label": 1, "target_label": 1, "relation": 1, "_id": 0},
+            batch_size=200,
+        )
+        async for doc in cursor:
+            src = doc.get("source_label", "")
+            tgt = doc.get("target_label", "")
+            rel = doc.get("relation", "")
+            if src and tgt:
+                edge_map.setdefault(src, []).append((tgt, rel))
+                existing_pairs.add((src, tgt))
+
+        # 发现传递关系: A→B (可传递), B→C (任意) 且 A→C 不存在
+        discovered = 0
+        max_new = 5
+
+        for a, neighbors in edge_map.items():
+            if discovered >= max_new:
+                break
+            for b, rel_ab in neighbors:
+                if rel_ab not in transitive_relations:
+                    continue
+                for c, _rel_bc in edge_map.get(b, []):
+                    if c == a:
+                        continue  # 避免环
+                    if (a, c) in existing_pairs:
+                        continue  # 已存在直接边
+                    if discovered >= max_new:
+                        break
+
+                    if not dry_run:
+                        from ..semantic.knowledge_graph import get_knowledge_graph
+                        kg = get_knowledge_graph()
+                        await kg.upsert_edge(
+                            user_id, a, c,
+                            relation=rel_ab,
+                            strength=0.3,
+                        )
+                    existing_pairs.add((a, c))  # 防止重复发现
+                    discovered += 1
+
+        if discovered > 0:
+            logger.info(
+                f"[GraphMaint] Discovered {discovered} transitive relations "
+                f"for user {user_id[:8]}..."
+            )
+
+        return discovered

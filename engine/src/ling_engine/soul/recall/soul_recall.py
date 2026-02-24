@@ -497,12 +497,15 @@ class SoulRecall:
                     title = doc.get("title", "")
                     arc = doc.get("emotional_arc", "")
                     moments = doc.get("defining_moments", [])
+                    lessons = doc.get("lessons_learned", [])
                     if title:
                         entry = f"[人生阶段] {title}"
                         if arc:
                             entry += f" — 情绪弧线: {arc}"
                         if moments:
                             entry += f" (关键时刻: {'、'.join(moments[:2])})"
+                        if lessons:
+                            entry += f" (灵的感悟: {'、'.join(lessons[:2])})"
                         results.append(entry)
                 return results
 

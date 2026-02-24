@@ -227,6 +227,7 @@
     "regenerating": "다시 생성하는 중...",
     "loadOlder": "이전 메시지 {{count}}개 불러오기",
     "sending": "보내는 중...",
+    "overLimit": "메시지가 너무 깁니다",
     "noResponse": "Ling이 응답하지 않는 것 같아요 — 다시 보내 볼까요?",
     "retry": "다시 시도",
     "showMore": "더 보기",

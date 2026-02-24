@@ -227,6 +227,7 @@
     "regenerating": "Wird neu generiert...",
     "loadOlder": "{{count}} ältere Nachrichten laden",
     "sending": "Wird gesendet...",
+    "overLimit": "Nachricht zu lang",
     "noResponse": "Ling scheint nicht zu antworten — versuch es nochmal?",
     "retry": "Erneut versuchen",
     "showMore": "Mehr anzeigen",

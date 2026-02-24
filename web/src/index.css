@@ -1072,7 +1072,7 @@ canvas {
 @keyframes emptyStateFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 @keyframes emptyStateFadeOut { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(-12px) scale(0.96); } }
 @keyframes scrollBtnIn { from { opacity: 0; transform: translateY(12px) scale(0.8); } to { opacity: 1; transform: translateY(0) scale(1); } }
-@keyframes scrollBtnPulse { 0%, 100% { opacity: 0.85; } 50% { opacity: 1; } }
+@keyframes scrollBtnPulse { 0%, 100% { box-shadow: 0 2px 20px var(--ling-purple-50); } 50% { box-shadow: 0 4px 28px var(--ling-purple-70); } }
 .ling-scroll-btn:hover { background: var(--ling-purple) !important; box-shadow: 0 4px 18px var(--ling-purple-40) !important; transform: scale(1.08); }
 .ling-scroll-btn:active { transform: scale(0.92); }
 .ling-scroll-btn:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }

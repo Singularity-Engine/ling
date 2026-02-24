@@ -1,7 +1,7 @@
-"""夜间记忆整理编排器 — Phase 3b + Phase 4
+"""夜间记忆整理编排器 — Phase 3b + Phase 4 + v3 补完
 
 按依赖顺序执行:
-  每日: relationship_cooling, memory_decay, graph_maintenance, data_lifecycle, diary
+  每日: relationship_cooling, memory_decay, graph_maintenance, data_lifecycle, diary, profile_update
   周日: weekly_digest
   每月1日: monthly_theme, life_chapter, collective_patterns, self_narrative
 
@@ -53,6 +53,11 @@ class NightlyConsolidator:
         # 5. 灵的每日观察日记 (Phase 4)
         tasks_result["diary"] = await self._run_task(
             "diary", self._diary,
+        )
+
+        # 6. 用户画像刷新 (v3: 每日)
+        tasks_result["profile_update"] = await self._run_task(
+            "profile_update", self._profile_update,
         )
 
         # === 周度任务 (周日触发) ===
@@ -172,6 +177,11 @@ class NightlyConsolidator:
         if result:
             return {"status": "ok", "month": result.month}
         return {"status": "skipped", "reason": "no_data_or_exists"}
+
+    async def _profile_update(self) -> Dict:
+        """v3: 用户画像刷新 (每日)"""
+        from ..cache.user_profile_cache import refresh_all_profiles
+        return await refresh_all_profiles()
 
     async def _write_log(self, results: Dict):
         """写入整理日志 — 只存聚合统计, 不存 user_id (无 PII)"""

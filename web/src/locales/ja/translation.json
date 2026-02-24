@@ -227,6 +227,7 @@
     "regenerating": "再生成中...",
     "loadOlder": "過去の {{count}} 件のメッセージを読み込む",
     "sending": "送信中...",
+    "overLimit": "メッセージが長すぎます",
     "noResponse": "リンから応答がないようです。もう一度送信してみますか？",
     "retry": "再試行",
     "showMore": "もっと見る",

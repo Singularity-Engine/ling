@@ -227,6 +227,7 @@
     "regenerating": "Regeneration...",
     "loadOlder": "Charger {{count}} messages plus anciens",
     "sending": "Envoi...",
+    "overLimit": "Message trop long",
     "noResponse": "Ling ne semble pas repondre — reessaie d'envoyer ?",
     "retry": "Reessayer",
     "showMore": "Voir plus",

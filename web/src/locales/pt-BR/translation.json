@@ -227,6 +227,7 @@
     "regenerating": "Regenerando...",
     "loadOlder": "Carregar {{count}} mensagens anteriores",
     "sending": "Enviando...",
+    "overLimit": "Mensagem longa demais",
     "noResponse": "Parece que a Ling n\u00e3o est\u00e1 respondendo \u2014 tente enviar novamente?",
     "retry": "Tentar novamente",
     "showMore": "Mostrar mais",
