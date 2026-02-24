@@ -319,24 +319,31 @@ export const useLive2DModel = ({
     // --- End Pet Hover Logic ---
   }, [isPet, isDragging, electronApi, canvasRef]);
 
+  // Shared drag-finalization logic — called from both handlePointerUp and
+  // handlePointerLeave so we don't need to fabricate a dummy PointerEvent.
+  const finalizeDrag = useCallback(() => {
+    setIsDragging(false);
+    const adapter = window.getLAppAdapter?.();
+    if (adapter) {
+      const currentModel = adapter.getModel();
+      if (currentModel && currentModel._modelMatrix) {
+        const matrix = currentModel._modelMatrix.getArray();
+        const finalPos = { x: matrix[12], y: matrix[13] };
+        modelPositionRef.current = finalPos;
+        modelStartPos.current = finalPos;
+        setPosition(finalPos);
+      }
+    }
+    isPotentialTapRef.current = false;
+  }, []);
+
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     const adapter = window.getLAppAdapter?.();
     const model = adapter?.getModel();
     const view = LAppDelegate.getInstance().getView();
 
     if (isDragging) {
-      // Finalize drag
-      setIsDragging(false);
-      if (adapter) {
-        const currentModel = adapter.getModel(); // Re-get model in case adapter changed
-        if (currentModel && currentModel._modelMatrix) {
-          const matrix = currentModel._modelMatrix.getArray();
-          const finalPos = { x: matrix[12], y: matrix[13] };
-          modelPositionRef.current = finalPos;
-          modelStartPos.current = finalPos; // Update base position for next potential drag
-          setPosition(finalPos);
-        }
-      }
+      finalizeDrag();
     } else if (isPotentialTapRef.current && adapter && model && view && canvasRef.current) {
       // --- Tap Motion Logic ---
       const timeElapsed = Date.now() - mouseDownTimeRef.current;
@@ -368,23 +375,22 @@ export const useLive2DModel = ({
 
     // Reset potential tap flag regardless of outcome
     isPotentialTapRef.current = false;
-  }, [isDragging, canvasRef, modelInfo]);
+  }, [isDragging, finalizeDrag, canvasRef, modelInfo]);
 
   const handlePointerLeave = useCallback(() => {
     if (isDragging) {
-      // If dragging and pointer leaves, treat it like a pointer up to end drag
-      handlePointerUp({} as React.PointerEvent); // Pass a dummy event or adjust handlePointerUp signature
+      finalizeDrag();
     }
     // Reset potential tap if pointer leaves before pointer up
     if (isPotentialTapRef.current) {
       isPotentialTapRef.current = false;
     }
-    // --- Pet Hover Logic (Unchanged) ---
+    // --- Pet Hover Logic ---
     if (isPet && electronApi && isHoveringModelRef.current) {
       isHoveringModelRef.current = false;
       electronApi.ipcRenderer.send('update-component-hover', 'live2d-model', false);
     }
-  }, [isPet, isDragging, electronApi, handlePointerUp]);
+  }, [isPet, isDragging, electronApi, finalizeDrag]);
 
   useEffect(() => {
     if (!isPet && electronApi && isHoveringModelRef.current) {

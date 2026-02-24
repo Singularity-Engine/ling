@@ -65,7 +65,10 @@ function isHelloOkPayload(value: unknown): value is HelloOkPayload {
 function isAgentEventPayload(value: unknown): value is AgentEventPayload {
   if (!value || typeof value !== 'object') return false;
   const v = value as Record<string, unknown>;
-  return v.data === undefined || typeof v.data === 'object';
+  // Require at least one expected field to be present (runId, stream, or data)
+  // to avoid treating arbitrary objects as agent event payloads.
+  const hasExpectedField = 'runId' in v || 'stream' in v || 'data' in v;
+  return hasExpectedField && (v.data === undefined || typeof v.data === 'object');
 }
 
 export interface ChatHistoryPayload {
@@ -423,12 +426,12 @@ class GatewayConnector {
 
         // ── Agent events ──
         if (frame.type === 'event' && (frame.event === 'agent.event' || frame.event === 'agent')) {
-          const payload = isAgentEventPayload(frame.payload) ? frame.payload : {} as AgentEventPayload;
+          const payload = isAgentEventPayload(frame.payload) ? frame.payload : undefined;
           const agentEvent: GatewayAgentEvent = {
-            runId: payload.runId || '',
-            stream: (payload.stream as GatewayAgentEvent['stream']) || 'lifecycle',
-            seq: payload.seq || 0,
-            data: payload.data || {},
+            runId: payload?.runId || '',
+            stream: (payload?.stream as GatewayAgentEvent['stream']) || 'lifecycle',
+            seq: payload?.seq || 0,
+            data: payload?.data || {},
           };
           this.debugCounters.agentEvents++;
           // JSON.stringify at ~30fps during streaming creates significant GC
