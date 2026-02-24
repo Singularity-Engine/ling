@@ -436,3 +436,4 @@ init_git_repo.ps1
 /MCP_Implementation_Documentation.md
 # /.env.docker  # 注释掉，因为部署脚本需要这个文件
 /nul
+desktop/
