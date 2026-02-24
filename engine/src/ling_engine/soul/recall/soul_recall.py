@@ -1,6 +1,7 @@
 """
-灵魂级记忆召回 — 7 路并行 + 关系阶段 + 情感预判 + 计时
+灵魂级记忆召回 — 8 路并行 + 关系阶段 + 情感预判 + 计时
 Phase 2: +情感共振第 7 路, StoryThreadTracker, breakthrough_hint 闭环
+Phase 3: +知识图谱第 8 路
 """
 
 import asyncio
@@ -11,6 +12,10 @@ from typing import Optional, List, Dict, Any
 from loguru import logger
 
 from ..models import SoulContext, RelationshipStage, STAGE_THRESHOLDS
+from ..narrative.memory_reconstructor import MemoryReconstructor
+
+# Phase 2 遗留修复: MemoryReconstructor 单例 (不再每次 _emotional_resonance 都创建)
+_reconstructor = MemoryReconstructor()
 
 # 阶段行为指令
 STAGE_BEHAVIORS = {
@@ -108,7 +113,7 @@ class SoulRecall:
         top_k: int = 3,
         timeout_ms: int = 500,
     ) -> SoulContext:
-        """7 路并行召回 + 关系阶段 + 情感预判 + 计时"""
+        """8 路并行召回 + 关系阶段 + 情感预判 + 计时"""
         start = time.monotonic()
         ctx = SoulContext()
 
@@ -117,7 +122,7 @@ class SoulRecall:
                 self._parallel_recall(query, user_id, is_owner, top_k),
                 timeout=timeout_ms / 1000.0,
             )
-            qdrant, evermemos, foresights, profile, stories, relationship, resonance = results
+            qdrant, evermemos, foresights, profile, stories, relationship, resonance, graph = results
 
             # 处理 gather 的 return_exceptions=True 结果
             ctx.qdrant_memories = qdrant if isinstance(qdrant, list) else []
@@ -141,6 +146,9 @@ class SoulRecall:
             else:
                 ctx.emotional_resonance = []
 
+            # Phase 3: 知识图谱推理
+            ctx.graph_insights = graph if isinstance(graph, list) else []
+
         except asyncio.TimeoutError:
             logger.warning(f"[Soul] Recall timeout ({timeout_ms}ms)")
             ctx.stage_behavior_hint = _get_stage_behavior("stranger")
@@ -151,14 +159,14 @@ class SoulRecall:
             f"[Soul] Recall completed in {elapsed_ms:.0f}ms "
             f"(qdrant={len(ctx.qdrant_memories)}, evermemos={len(ctx.evermemos_memories)}, "
             f"foresight={len(ctx.triggered_foresights)}, resonance={len(ctx.emotional_resonance)}, "
-            f"stage={ctx.relationship_stage})"
+            f"graph={len(ctx.graph_insights)}, stage={ctx.relationship_stage})"
         )
         return ctx
 
     async def _parallel_recall(
         self, query: str, user_id: str, is_owner: bool, top_k: int
     ):
-        """7 路并行召回"""
+        """8 路并行召回"""
         # 情感预判 (<5ms)
         emotion = _emotion_hint(query)
 
@@ -170,6 +178,7 @@ class SoulRecall:
             self._active_stories(user_id),
             self._fetch_relationship(user_id),
             self._emotional_resonance(query, user_id, emotion),  # Phase 2: 第 7 路
+            self._graph_trace(query, user_id),                    # Phase 3: 第 8 路
             return_exceptions=True,
         )
 
@@ -303,8 +312,7 @@ class SoulRecall:
                         except Exception:
                             pass
                     if days_ago > 90:
-                        from ..narrative.memory_reconstructor import MemoryReconstructor
-                        desc = MemoryReconstructor().reconstruct(
+                        desc = _reconstructor.reconstruct(
                             desc, days_ago=days_ago,
                             emotion_label=doc.get("user_emotion", ""),
                             trigger_keywords=doc.get("trigger_keywords", []),
@@ -319,6 +327,53 @@ class SoulRecall:
         except Exception as e:
             logger.debug(f"[Soul] Emotional resonance failed: {e}")
             return []
+
+    async def _graph_trace(self, query: str, user_id: str) -> List[str]:
+        """Phase 3: 知识图谱上下文追踪
+
+        整体 300ms 硬上限, 多 label 并行 trace, 从 config 读取参数。
+        """
+        try:
+            from ..config import get_soul_config
+            cfg = get_soul_config()
+            return await asyncio.wait_for(
+                self._graph_trace_inner(
+                    query, user_id,
+                    cfg.graph_max_depth,
+                    cfg.graph_trace_timeout_ms / 1000.0,
+                ),
+                timeout=0.3,  # 整体 300ms 硬上限
+            )
+        except (asyncio.TimeoutError, Exception):
+            return []
+
+    async def _graph_trace_inner(
+        self, query: str, user_id: str,
+        max_depth: int, trace_timeout: float,
+    ) -> List[str]:
+        """知识图谱追踪内部实现 — 多 label 并行"""
+        from ..semantic.knowledge_graph import get_knowledge_graph
+        kg = get_knowledge_graph()
+
+        labels = await kg.find_matching_labels(user_id, query, limit=2)
+        if not labels:
+            return []
+
+        # 多 label 并行 trace
+        trace_tasks = [
+            asyncio.wait_for(
+                kg.trace_context(user_id, label, max_depth=max_depth, limit=3),
+                timeout=trace_timeout,
+            )
+            for label in labels
+        ]
+        all_traces = await asyncio.gather(*trace_tasks, return_exceptions=True)
+
+        results = []
+        for t in all_traces:
+            if isinstance(t, list):
+                results.extend(t)
+        return results[:3]
 
     @staticmethod
     def _within_days(timestamp_str: str, days: int) -> bool:

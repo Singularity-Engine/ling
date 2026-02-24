@@ -5,8 +5,10 @@
 - 不使用独立 LLM 调用，故事信息来自 merged_extractor 的 story_update 字段
 - 标题匹配用 SequenceMatcher (ratio > 0.6)
 - 单例工厂模式
+- Phase 3: dormant 故事线重激活
 """
 
+import asyncio
 from datetime import datetime, timezone, timedelta
 from difflib import SequenceMatcher
 from typing import Optional, List
@@ -76,6 +78,18 @@ class StoryThreadTracker:
                 tension = doc.get("tension", "")
                 expected = doc.get("expected_next", "")
                 hint = title
+
+                # Phase 3: 重激活的故事线加试探性措辞
+                if doc.get("reactivated"):
+                    hint = f"[久未提及] {title}"
+                    # 清除 reactivated 标记 (只在首次召回时试探)
+                    asyncio.create_task(
+                        coll.update_one(
+                            {"_id": doc["_id"]},
+                            {"$unset": {"reactivated": ""}},
+                        )
+                    )
+
                 if tension:
                     hint += f" — {tension}"
                 if expected:
@@ -147,6 +161,33 @@ class StoryThreadTracker:
             if ratio > best_ratio:
                 best_ratio = ratio
                 best_match = doc
+
+        # Phase 3: 无 active 匹配时，搜索 dormant 故事线尝试重激活
+        if not best_match or best_ratio <= 0.6:
+            try:
+                dormant_cursor = coll.find(
+                    {"user_id": user_id, "status": "dormant"},
+                    sort=[("last_updated", -1)],
+                    limit=10,
+                )
+                async for doc in dormant_cursor:
+                    ratio = SequenceMatcher(
+                        None, title[:50], doc.get("title", "")[:50],
+                    ).ratio()
+                    if ratio > 0.6:
+                        await coll.update_one(
+                            {"_id": doc["_id"]},
+                            {"$set": {
+                                "status": "active",
+                                "reactivated": True,
+                                "last_updated": datetime.now(timezone.utc),
+                            }},
+                        )
+                        best_match = doc
+                        best_ratio = ratio
+                        break
+            except Exception:
+                pass  # 非关键路径
 
         if best_match and best_ratio > 0.6:
             update_ops = {

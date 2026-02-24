@@ -79,10 +79,11 @@ class SoulPostProcessor:
                     self._update_relationship(extracted, user_id),
                     self._detect_breakthrough(extracted, user_id),
                     self._write_story(extracted, user_id),
+                    self._write_graph(extracted, user_id),
                     return_exceptions=True,
                 )
                 # Round 2: 遍历检查异常
-                task_names = ["emotion", "importance", "relationship", "breakthrough", "story"]
+                task_names = ["emotion", "importance", "relationship", "breakthrough", "story", "graph"]
                 for i, r in enumerate(results):
                     if isinstance(r, Exception):
                         logger.warning(f"[Soul] PostProcessor {task_names[i]} write failed: {r}")
@@ -125,14 +126,48 @@ class SoulPostProcessor:
             logger.debug(f"[Soul] Importance write failed: {e}")
 
     async def _write_story(self, extracted, user_id: str):
-        """Phase 2: 写入故事线更新"""
+        """Phase 2: 写入故事线更新 — Phase 3: StoryUpdate.model_dump() 适配"""
         if not extracted.story_update:
             return
         try:
             from ..narrative.story_thread_tracker import get_story_tracker
-            await get_story_tracker().update_from_extraction(extracted.story_update, user_id)
+            # Phase 3: StoryUpdate 是 Pydantic model, 需要转为 dict
+            story_dict = extracted.story_update.model_dump()
+            await get_story_tracker().update_from_extraction(story_dict, user_id)
         except Exception as e:
             logger.debug(f"[Soul] Story write failed: {e}")
+
+    async def _write_graph(self, extracted, user_id: str):
+        """Phase 3: 写入知识图谱节点和边"""
+        if not extracted.semantic_graph:
+            return
+        try:
+            from ..semantic.knowledge_graph import get_knowledge_graph
+            kg = get_knowledge_graph()
+            graph = extracted.semantic_graph
+            nodes = graph.get("nodes", [])[:3]
+            edges = graph.get("edges", [])[:2]
+
+            # 先并行写节点 (边依赖节点存在)
+            node_tasks = [
+                kg.upsert_node(user_id, n.get("label", ""), n.get("category", "other"))
+                for n in nodes if n.get("label")
+            ]
+            if node_tasks:
+                await asyncio.gather(*node_tasks, return_exceptions=True)
+
+            # 再并行写边
+            edge_tasks = [
+                kg.upsert_edge(
+                    user_id, e.get("source", ""), e.get("target", ""),
+                    e.get("relation", "context"),
+                )
+                for e in edges if e.get("source") and e.get("target")
+            ]
+            if edge_tasks:
+                await asyncio.gather(*edge_tasks, return_exceptions=True)
+        except Exception as e:
+            logger.debug(f"[Soul] Graph write failed: {e}")
 
     async def _detect_breakthrough(self, extracted, user_id: str):
         """检测突破性事件 — 高情感强度 + 高重要度 = 关系里程碑"""

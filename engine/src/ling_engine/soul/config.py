@@ -27,6 +27,10 @@ class SoulConfig:
         # 缓存配置
         self.profile_cache_ttl = int(os.environ.get("SOUL_PROFILE_CACHE_TTL", "3600"))
 
+        # Phase 3: 知识图谱
+        self.graph_max_depth = int(os.environ.get("SOUL_GRAPH_MAX_DEPTH", "2"))
+        self.graph_trace_timeout_ms = int(os.environ.get("SOUL_GRAPH_TRACE_TIMEOUT_MS", "200"))
+
         if self.enabled:
             logger.info(f"[Soul] 灵魂系统已启用 (MongoDB: {self.mongo_url}/{self.mongo_database})")
         else:

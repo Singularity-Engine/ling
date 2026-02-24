@@ -10,7 +10,7 @@ from typing import Optional
 from loguru import logger
 from pydantic import ValidationError
 
-from ..models import ExtractionResult, EmotionAnnotation, ImportanceScore
+from ..models import ExtractionResult, EmotionAnnotation, ImportanceScore, StoryUpdate
 
 # OpenAI client 单例 — 双重检查锁，线程安全
 _openai_lock = threading.Lock()
@@ -61,6 +61,10 @@ EXTRACTION_PROMPT = """你是灵的记忆分析系统。分析以下对话，提
     "details": "发生了什么变化",
     "arc_position": "setup|rising|climax|falling|resolution",
     "expected_next": "预计下一步(如果能推断)"
+  }},
+  "semantic_graph": {{
+    "nodes": [{{"label": "概念名", "category": "skill|interest|company|person|goal|emotion|place"}}],
+    "edges": [{{"source": "源概念", "target": "目标概念", "relation": "cause|goal|method|context|part_of|conflict|leads_to"}}]
   }}
 }}
 
@@ -83,7 +87,10 @@ personal_story_sharing(3.5), seeking_advice(3.0), casual_chat(1.0),
 humor_exchange(2.0), gratitude_expression(2.5), daily_check_in(1.5)
 
 如果对话没有涉及任何进行中的故事线话题，story_update 可以为 null。
-故事线示例: 求职面试过程、学习新技能、搬家计划、人际关系变化等。"""
+故事线示例: 求职面试过程、学习新技能、搬家计划、人际关系变化等。
+
+semantic_graph: 从对话中提取重要概念(人/技能/公司/目标/地点)及它们之间的关系。
+最多3个节点+2条边。琐碎词不提取。无可图谱化概念时为null。"""
 
 
 def _sync_extract(user_input: str, ai_response: str, model: str) -> Optional[dict]:
@@ -100,7 +107,7 @@ def _sync_extract(user_input: str, ai_response: str, model: str) -> Optional[dic
                 )},
             ],
             temperature=0,
-            max_tokens=800,
+            max_tokens=1000,
             response_format={"type": "json_object"},
         )
         return json.loads(response.choices[0].message.content)
@@ -209,20 +216,33 @@ async def extract_all(
         emotion_data = raw_json.get("emotion")
         importance_data = raw_json.get("importance")
         signals = raw_json.get("relationship_signals", [])
-        story_update = raw_json.get("story_update")
+        story_data = raw_json.get("story_update")
+        graph_data = raw_json.get("semantic_graph")
 
         emotion = EmotionAnnotation(user_id="", **emotion_data) if emotion_data else None
         importance = ImportanceScore(user_id="", **importance_data) if importance_data else None
 
-        # story_update: null/None 表示无故事线更新
-        if story_update and not story_update.get("title"):
-            story_update = None
+        # story_update: null/None 表示无故事线更新, Phase 3: 类型化为 StoryUpdate
+        story_update = None
+        if story_data and story_data.get("title"):
+            story_update = StoryUpdate(**story_data)
+
+        # Phase 3: semantic_graph — label 截断到 50 字符 + 控制字符过滤
+        import re
+        if graph_data and isinstance(graph_data, dict):
+            nodes = graph_data.get("nodes", [])
+            for node in nodes:
+                if "label" in node:
+                    node["label"] = re.sub(r'[\x00-\x1f\x7f]', '', str(node["label"]).strip())[:50]
+        else:
+            graph_data = None
 
         return ExtractionResult(
             emotion=emotion,
             importance=importance,
             relationship_signals=signals,
             story_update=story_update,
+            semantic_graph=graph_data,
         )
     except (ValidationError, TypeError, KeyError) as e:
         logger.warning(f"[Soul] Extraction validation failed: {e}")

@@ -88,12 +88,22 @@ class UserRelationship(BaseModel):
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+class StoryUpdate(BaseModel):
+    """类型化故事线更新 — Phase 3: 替代 Dict[str, Any]"""
+    title: str
+    update_type: str = "continue"  # new/continue/resolve
+    details: str = ""
+    arc_position: str = "setup"
+    expected_next: Optional[str] = None
+
+
 class ExtractionResult(BaseModel):
     """LLM 合并提取结果"""
     emotion: Optional[EmotionAnnotation] = None
     importance: Optional[ImportanceScore] = None
-    story_update: Optional[Dict[str, Any]] = None
+    story_update: Optional[StoryUpdate] = None
     relationship_signals: List[Dict[str, Any]] = Field(default_factory=list)
+    semantic_graph: Optional[Dict[str, Any]] = None  # Phase 3: 知识图谱提取
 
 
 class SoulContext(BaseModel):
@@ -110,3 +120,5 @@ class SoulContext(BaseModel):
     emotional_resonance: List[str] = Field(default_factory=list)      # 第 7 路: 情感共振记忆
     in_conversation_shift: Optional[str] = None                        # 对话内情绪突变提示
     breakthrough_hint: Optional[str] = None                            # 突破性事件提示
+    # Phase 3: 深层灵魂
+    graph_insights: List[str] = Field(default_factory=list)              # 第 8 路: 知识图谱推理
