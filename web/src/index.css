@@ -326,16 +326,16 @@ body {
 .ling-memory-scroll::-webkit-scrollbar { width: 4px; }
 .ling-memory-scroll::-webkit-scrollbar-track { background: transparent; }
 .ling-memory-scroll::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.25);
+  background: var(--ling-purple-25);
   border-radius: 4px;
 }
 .ling-memory-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.4);
+  background: var(--ling-purple-40);
 }
 /* Memory card focus-within for keyboard users */
 .ling-memory-card:focus-within {
-  background: rgba(255,255,255,0.07);
-  border-left-color: rgba(139,92,246,0.55);
+  background: var(--ling-surface-hover);
+  border-left-color: var(--ling-purple-50);
 }
 
 /* Right toolbar action buttons hover */
@@ -344,8 +344,8 @@ body {
   border-color: rgba(255, 255, 255, 0.2) !important;
 }
 .ling-action-btn[data-active="true"]:hover {
-  background: rgba(139, 92, 246, 0.5) !important;
-  border-color: rgba(139, 92, 246, 0.7) !important;
+  background: var(--ling-purple-50) !important;
+  border-color: var(--ling-purple-70) !important;
 }
 .ling-action-btn:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
 
@@ -501,7 +501,7 @@ body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.5), 0 2px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 0 20px var(--ling-purple-50), 0 2px 12px rgba(0, 0, 0, 0.25);
   opacity: 0;
   animation: indicatorBreatheOpacity 3s ease-in-out infinite;
   pointer-events: none;
@@ -520,10 +520,10 @@ body {
 
 /* Mobile menu item hover/active */
 .ling-menu-item:hover {
-  background: rgba(255, 255, 255, 0.06) !important;
+  background: var(--ling-surface) !important;
 }
 .ling-menu-item:active {
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: var(--ling-surface-hover) !important;
 }
 
 /* ConnectionStatus — keyframe animations (core always-rendered component) */
@@ -661,7 +661,7 @@ body {
 .ling-tap-particle {
   animation: tapParticleFloat 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
   will-change: transform, opacity;
-  filter: drop-shadow(0 0 4px rgba(139, 92, 246, 0.5));
+  filter: drop-shadow(0 0 4px var(--ling-purple-50));
   user-select: none;
 }
 
@@ -1117,7 +1117,7 @@ canvas {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  box-shadow: 0 0 16px rgba(139,92,246,0.5), 0 0 4px rgba(139,92,246,0.3);
+  box-shadow: 0 0 16px var(--ling-purple-50), 0 0 4px var(--ling-purple-30);
   opacity: 0;
   animation: constellationPulseOpacity 3s ease-in-out infinite;
   pointer-events: none;
@@ -1141,7 +1141,7 @@ canvas {
   animation: constellationFlashScale 0.6s ease-out;
 }
 .constellation-core.constellation-flash::after {
-  box-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(139,92,246,0.6);
+  box-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px var(--ling-purple-60);
   animation: constellationFlashGlow 0.6s ease-out forwards;
   will-change: opacity;
 }
@@ -1252,10 +1252,10 @@ canvas {
 }
 
 /* ── MemoryPanel: hover interactions + staggered card entrance ── */
-.ling-mem-close:hover { background: rgba(255,255,255,0.06) !important; color: rgba(255,255,255,0.6) !important; }
-.ling-mem-close:active { background: rgba(255,255,255,0.08) !important; color: rgba(255,255,255,0.7) !important; transform: scale(0.9); }
+.ling-mem-close:hover { background: var(--ling-surface) !important; color: var(--ling-btn-ghost-color) !important; }
+.ling-mem-close:active { background: var(--ling-surface-border) !important; color: var(--ling-text-soft) !important; transform: scale(0.9); }
 .ling-mem-close:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
-.ling-memory-card:hover { background: rgba(255,255,255,0.07) !important; border-left-color: rgba(139,92,246,0.55) !important; }
+.ling-memory-card:hover { background: var(--ling-surface-hover) !important; border-left-color: var(--ling-purple-50) !important; }
 @keyframes memCardIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes memLoadPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.8; } }
 
@@ -1269,9 +1269,9 @@ canvas {
 .ling-retry-btn:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
 
 /* ── Billing: modal & pricing button hover ── */
-.ling-billing-primary:hover { background: rgba(139, 92, 246, 0.8) !important; }
+.ling-billing-primary:hover { background: var(--ling-purple-85) !important; }
 .ling-billing-primary:active { transform: scale(0.96); }
-.ling-billing-secondary:hover { background: rgba(255,255,255,0.1) !important; border-color: rgba(255,255,255,0.22) !important; color: rgba(255,255,255,0.85) !important; }
+.ling-billing-secondary:hover { background: var(--ling-surface-hover) !important; border-color: var(--ling-surface-border) !important; color: var(--ling-text-primary) !important; }
 .ling-billing-secondary:active { transform: scale(0.96); }
 .ling-plan-btn:hover { filter: brightness(1.15); }
 .ling-plan-btn:active { transform: scale(0.97); }
