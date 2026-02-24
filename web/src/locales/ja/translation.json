@@ -418,6 +418,9 @@
     "countdown": "残り {{d}}日 {{h}}時間 {{m}}分 {{s}}秒",
     "revenueProgress": "月間収益進捗",
     "revenueLabel": "月間収益 ${{current}} / ${{target}}",
+    "dayBadge": "{{day}}日目",
+    "daysLeft": "残り{{days}}日",
+    "missionText": "ミッション",
     "missionLink": "LingのAI起業実験ミッションを見る"
   },
   "about": {

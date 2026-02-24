@@ -450,6 +450,9 @@
     "countdown": "剩余 {{d}}天 {{h}}时 {{m}}分 {{s}}秒",
     "revenueProgress": "月收入进度",
     "revenueLabel": "月收入 ${{current}} / ${{target}}",
+    "dayBadge": "第 {{day}} 天",
+    "daysLeft": "剩余 {{days}} 天",
+    "missionText": "使命",
     "missionLink": "查看灵的 AI 创业实验使命"
   },
   "about": {

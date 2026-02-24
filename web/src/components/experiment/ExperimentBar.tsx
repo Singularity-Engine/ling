@@ -249,9 +249,9 @@ export const ExperimentBar = memo(function ExperimentBar() {
   if (!hasInteracted) {
     return (
       <div style={S_BAR_MINI} role="banner" aria-label={t("experiment.statusBar")}>
-        <span style={S_DAY} aria-label={t("experiment.dayLabel", { day: status.day_number })}>Day {status.day_number}</span>
+        <span style={S_DAY} aria-label={t("experiment.dayLabel", { day: status.day_number })}>{t("experiment.dayBadge", { day: status.day_number })}</span>
         <span style={S_SEP} aria-hidden="true" />
-        <span style={S_REVENUE_MINI}>{status.days_remaining}d left</span>
+        <span style={S_REVENUE_MINI}>{t("experiment.daysLeft", { days: status.days_remaining })}</span>
       </div>
     );
   }
@@ -259,7 +259,7 @@ export const ExperimentBar = memo(function ExperimentBar() {
   return (
     <div style={S_BAR} role="banner" aria-label={t("experiment.statusBar")}>
       {/* Day badge */}
-      <span style={S_DAY} aria-label={t("experiment.dayLabel", { day: status.day_number })}>Day {status.day_number}</span>
+      <span style={S_DAY} aria-label={t("experiment.dayLabel", { day: status.day_number })}>{t("experiment.dayBadge", { day: status.day_number })}</span>
 
       <span style={S_SEP} aria-hidden="true" />
 
@@ -301,7 +301,7 @@ export const ExperimentBar = memo(function ExperimentBar() {
         style={S_LINK}
         aria-label={t("experiment.missionLink")}
       >
-        Mission
+        {t("experiment.missionText", "Mission")}
       </a>
     </div>
   );

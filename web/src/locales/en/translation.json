@@ -451,6 +451,9 @@
     "countdown": "{{d}} days {{h}} hours {{m}} minutes {{s}} seconds remaining",
     "revenueProgress": "Monthly revenue progress",
     "revenueLabel": "Monthly revenue ${{current}} / ${{target}}",
+    "dayBadge": "Day {{day}}",
+    "daysLeft": "{{days}}d left",
+    "missionText": "Mission",
     "missionLink": "View Ling's AI startup experiment mission"
   },
   "about": {

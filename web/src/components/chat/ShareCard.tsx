@@ -78,9 +78,9 @@ async function renderShareCard(
     img.crossOrigin = "anonymous";
     img.src = avatarUrl;
     await new Promise<void>((resolve, reject) => {
-      img.onload = () => resolve();
-      img.onerror = () => reject();
-      setTimeout(reject, 3000);
+      const timer = setTimeout(reject, 3000);
+      img.onload = () => { clearTimeout(timer); resolve(); };
+      img.onerror = () => { clearTimeout(timer); reject(); };
     });
     ctx.save();
     ctx.beginPath();

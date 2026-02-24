@@ -144,11 +144,14 @@ export const ParticleCanvas = memo(function ParticleCanvas({
       resizeRaf = requestAnimationFrame(() => { resizeRaf = 0; resize(); });
     };
     window.addEventListener("resize", throttledResize);
-    const onFsChange = () => { setTimeout(throttledResize, 100); };
+    // Fullscreen transitions may not fire resize — match StarField cleanup pattern
+    let fsTimerId = 0;
+    const onFsChange = () => { fsTimerId = window.setTimeout(throttledResize, 100); };
     document.addEventListener("fullscreenchange", onFsChange);
     document.addEventListener("webkitfullscreenchange", onFsChange);
     return () => {
       cancelAnimationFrame(resizeRaf);
+      clearTimeout(fsTimerId);
       window.removeEventListener("resize", throttledResize);
       document.removeEventListener("fullscreenchange", onFsChange);
       document.removeEventListener("webkitfullscreenchange", onFsChange);

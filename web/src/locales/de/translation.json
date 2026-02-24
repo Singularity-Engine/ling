@@ -419,6 +419,9 @@
     "countdown": "{{d}} Tage {{h}} Stunden {{m}} Minuten {{s}} Sekunden verbleibend",
     "revenueProgress": "Monatlicher Umsatzfortschritt",
     "revenueLabel": "Monatlicher Umsatz ${{current}} / ${{target}}",
+    "dayBadge": "Tag {{day}}",
+    "daysLeft": "{{days}}T übrig",
+    "missionText": "Mission",
     "missionLink": "Lings KI-Startup-Experiment-Mission ansehen"
   },
   "about": {
