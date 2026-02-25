@@ -303,7 +303,7 @@ class SoulRecall:
 
         # Phase 3: SLO 观测与自动调参输入
         try:
-            from ..fabric.service import get_memory_fabric
+            from soul_fabric import get_memory_fabric
 
             create_logged_task(
                 get_memory_fabric().record_recall_observation(
@@ -327,7 +327,7 @@ class SoulRecall:
     ) -> Dict[str, Any]:
         """12 路并行召回 — 返回 Dict (SOTA: 替代 tuple)"""
         from ..config import get_soul_config
-        from ..fabric.service import get_memory_fabric
+        from soul_fabric import get_memory_fabric
         from ..ports.initializer import ensure_ports_initialized
 
         emotion = _emotion_hint(query)
@@ -495,7 +495,7 @@ class SoulRecall:
     async def _fabric_event_memories(self, query: str, user_id: str, top_k: int) -> List[str]:
         """从 MemoryFabric 事件源补充回忆，确保 /v1/memory/events 可被主召回消费。"""
         try:
-            from ..fabric.service import get_memory_fabric
+            from soul_fabric import get_memory_fabric
             return await asyncio.wait_for(
                 get_memory_fabric().fetch_event_memories_for_recall(
                     user_id=user_id,
@@ -797,7 +797,7 @@ class SoulRecall:
     async def _core_blocks_fetch(self, user_id: str) -> List[str]:
         """Phase 1: Letta Core Blocks 获取。"""
         try:
-            from ..fabric.service import get_memory_fabric
+            from soul_fabric import get_memory_fabric
 
             return await get_memory_fabric().fetch_core_blocks(user_id=user_id)
         except Exception as e:
@@ -807,7 +807,7 @@ class SoulRecall:
     async def _procedural_fetch(self, user_id: str) -> List[str]:
         """Phase 1: LangMem 程序性记忆获取。"""
         try:
-            from ..fabric.service import get_memory_fabric
+            from soul_fabric import get_memory_fabric
 
             return await get_memory_fabric().fetch_procedural_rules(user_id=user_id)
         except Exception as e:
@@ -817,7 +817,7 @@ class SoulRecall:
     async def _safety_shadow_fetch(self, user_id: str) -> List[str]:
         """Phase 2: 安全影子记忆提醒。"""
         try:
-            from ..fabric.service import get_memory_fabric
+            from soul_fabric import get_memory_fabric
 
             return await get_memory_fabric().fetch_safety_alerts(user_id=user_id)
         except Exception as e:

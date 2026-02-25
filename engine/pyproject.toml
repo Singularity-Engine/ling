@@ -42,6 +42,7 @@ dependencies = [
     "stripe>=7.0.0",
     "psycopg2-binary>=2.9.9",
     "motor>=3.3.0",
+    "soul-fabric @ git+https://github.com/Singularity-Engine/soul-memory-fabric.git",
 ]
 
 [tool.pixi.project]

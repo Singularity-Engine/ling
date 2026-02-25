@@ -174,8 +174,7 @@ class SoulPostProcessor:
             if not (cfg.enabled and cfg.fabric_enabled):
                 return
 
-            from ..fabric.api_models import MemoryEventRequest
-            from ..fabric.service import get_memory_fabric
+            from soul_fabric import MemoryEventRequest, get_memory_fabric
 
             flashbulb = self._is_flashbulb(extracted, cfg.decay_flashbulb_intensity)
             memory_type = "flashbulb_episode" if flashbulb else "episode"

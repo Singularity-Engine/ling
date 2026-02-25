@@ -10,8 +10,7 @@ from unittest.mock import AsyncMock, patch
 from ling_engine.soul.adapters.graphiti_adapter import GraphitiAdapter
 from ling_engine.soul.cache.user_profile_cache import reset_user_profile_cache_for_testing
 from ling_engine.soul.config import reset_soul_config_for_testing
-from ling_engine.soul.fabric.service import get_memory_fabric, reset_memory_fabric_for_testing
-from ling_engine.soul.fabric.api_models import MemoryBenchmarkRequest
+from soul_fabric import get_memory_fabric, reset_memory_fabric_for_testing, MemoryBenchmarkRequest
 
 
 class _EnvMixin:

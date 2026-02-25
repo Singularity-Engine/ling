@@ -8,6 +8,49 @@ from loguru import logger
 from threading import Lock
 
 
+def _configure_memory_fabric():
+    """将 ling-platform 的 recall/consolidation/deletion 实现注入到 soul_fabric。"""
+    from soul_fabric import MemoryFabric, set_memory_fabric
+
+    async def _recall_fn(query, user_id, top_k, timeout_ms):
+        from ..recall.soul_recall import get_soul_recall
+        return await get_soul_recall().recall(
+            query=query, user_id=user_id, top_k=top_k, timeout_ms=timeout_ms,
+        )
+
+    async def _consolidation_fn(user_id, dry_run):
+        if user_id:
+            from ..consolidation.graph_maintenance import GraphMaintenance
+            from ..consolidation.memory_decay import MemoryDecayProcessor
+            decay_result = await MemoryDecayProcessor()._process_user(user_id, dry_run=dry_run)
+            gm = GraphMaintenance()
+            merged = await gm._merge_duplicate_nodes(user_id, dry_run=dry_run)
+            contradictions = await gm._detect_contradictions(user_id)
+            transitive = await gm._discover_transitive_relations(user_id, dry_run=dry_run)
+            return {
+                "scope": "user", "user_id": user_id, "dry_run": dry_run,
+                "memory_decay": decay_result,
+                "graph_merge": {"merged": merged, "contradictions": contradictions, "transitive_discovered": transitive},
+            }
+        else:
+            from ..consolidation.nightly_consolidator import NightlyConsolidator
+            result = await NightlyConsolidator(dry_run=dry_run).run()
+            result["scope"] = "global"
+            return result
+
+    async def _deletion_fn(user_id):
+        from ..services.memory_deletion import get_deletion_service
+        return await get_deletion_service().delete_user(user_id)
+
+    fabric = MemoryFabric(
+        recall_fn=_recall_fn,
+        consolidation_fn=_consolidation_fn,
+        deletion_fn=_deletion_fn,
+    )
+    set_memory_fabric(fabric)
+    logger.info("[Ports] Memory Fabric configured with ling-platform backends")
+
+
 def initialize_ports():
     """根据配置注册所有可用的 MemoryPort
 
@@ -21,6 +64,13 @@ def initialize_ports():
 
     if not cfg.enabled:
         return
+
+    # 0. Memory Fabric — 注入 ling-platform 实现
+    if cfg.fabric_enabled:
+        try:
+            _configure_memory_fabric()
+        except Exception as e:
+            logger.warning(f"[Ports] Memory Fabric configuration failed: {e}")
 
     # 1. Graphiti — 时序知识图谱 (SOTA P0)
     if cfg.graphiti_enabled:

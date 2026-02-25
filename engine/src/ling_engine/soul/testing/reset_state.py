@@ -6,7 +6,7 @@ from ..adapters.graphiti_adapter import reset_graphiti_adapter_for_testing
 from ..adapters.mem0_adapter import reset_mem0_adapter_for_testing
 from ..cache.user_profile_cache import reset_user_profile_cache_for_testing
 from ..config import reset_soul_config_for_testing
-from ..fabric.service import reset_memory_fabric_for_testing
+from soul_fabric import reset_memory_fabric_for_testing
 from ..narrative.story_thread_tracker import reset_story_tracker_for_testing
 from ..pipeline.in_conversation_tracker import reset_in_conversation_tracker_for_testing
 from ..pipeline.soul_post_processor import reset_soul_post_processor_for_testing

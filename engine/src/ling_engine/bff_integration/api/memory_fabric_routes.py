@@ -7,15 +7,15 @@ import os
 from fastapi import APIRouter, Depends, HTTPException, Request
 from loguru import logger
 
-from ...soul.fabric.api_models import (
+from soul_fabric import (
     MemoryBenchmarkRequest,
     MemoryConsolidateRequest,
     MemoryDeleteUserRequest,
     MemoryEventRequest,
     MemoryRecallRequest,
     MemoryReflectRequest,
+    get_memory_fabric,
 )
-from ...soul.fabric.service import get_memory_fabric
 from ..auth.ling_deps import get_current_user
 from ..auth.rate_limit import limiter
 
