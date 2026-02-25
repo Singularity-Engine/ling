@@ -51,6 +51,15 @@ def get_in_conversation_tracker() -> "InConversationTracker":
     return _in_conv_tracker
 
 
+def reset_in_conversation_tracker_for_testing():
+    """测试辅助: 清空对话内状态并重置单例。"""
+    global _in_conv_tracker, _cleanup_counter
+    _conversation_emotions.clear()
+    _conversation_timestamps.clear()
+    _cleanup_counter = 0
+    _in_conv_tracker = None
+
+
 class InConversationTracker:
     """对话内情绪突变检测 — 规则式 <5ms"""
 

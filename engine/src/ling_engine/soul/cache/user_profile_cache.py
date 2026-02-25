@@ -3,15 +3,17 @@
 P0: OrderedDict LRU 淘汰策略, 防止无限增长
 """
 
-import asyncio
 import time
 from collections import OrderedDict
 from typing import Optional, List, Dict, Any
 from loguru import logger
 
+from ..utils.async_tasks import create_logged_task
+
 _cache: OrderedDict = OrderedDict()  # LRU: 最近使用的在末尾
 _TTL = 3600  # 1 hour
 _MAX_CACHE_SIZE = 1000  # 最多缓存 1000 个用户画像
+_last_refresh: Dict[str, float] = {}
 
 
 def _cache_set(user_id: str, data: str):
@@ -19,8 +21,10 @@ def _cache_set(user_id: str, data: str):
     if user_id in _cache:
         _cache.move_to_end(user_id)
     _cache[user_id] = {"data": data, "ts": time.monotonic()}
+    _last_refresh[user_id] = time.monotonic()
     while len(_cache) > _MAX_CACHE_SIZE:
-        _cache.popitem(last=False)  # 淘汰最旧
+        evicted_uid, _ = _cache.popitem(last=False)  # 淘汰最旧
+        _last_refresh.pop(evicted_uid, None)
 
 
 def _cache_get(user_id: str) -> Optional[str]:
@@ -58,8 +62,14 @@ async def get_user_profile(user_id: str, timeout: float = 2.0) -> Optional[str]:
 async def warmup(recent_user_ids: List[str]):
     """服务启动时预加载最近活跃用户的画像"""
     for uid in recent_user_ids[:20]:
-        asyncio.create_task(get_user_profile(uid))
+        create_logged_task(get_user_profile(uid), "profile_cache_warmup")
     logger.info(f"[Soul] Profile cache warming up for {len(recent_user_ids[:20])} users")
+
+
+def reset_user_profile_cache_for_testing():
+    """测试辅助: 清空画像缓存。"""
+    _cache.clear()
+    _last_refresh.clear()
 
 
 def invalidate(user_id: str):

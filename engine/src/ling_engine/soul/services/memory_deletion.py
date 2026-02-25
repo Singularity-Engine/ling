@@ -20,6 +20,8 @@ from typing import Dict, Any
 
 from loguru import logger
 
+from ..utils.validation import is_valid_user_id
+
 
 class MemoryDeletionService:
     """统一记忆删除服务"""
@@ -41,12 +43,28 @@ class MemoryDeletionService:
                 "success": bool,  # 所有后端都成功
             }
         """
+        if not is_valid_user_id(user_id):
+            logger.warning("[GDPR] Invalid user_id format, abort deletion request")
+            return {
+                "user_id": str(user_id),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "results": {
+                    "validation": {
+                        "deleted": 0,
+                        "error": "invalid user_id",
+                    }
+                },
+                "success": False,
+            }
+
         report = {
             "user_id": user_id,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "results": {},
             "success": True,
         }
+        from ..config import get_soul_config
+        cfg = get_soul_config()
 
         # 1. MongoDB — Soul System 原生集合
         report["results"]["mongodb"] = await self._delete_mongodb(user_id)
@@ -58,10 +76,18 @@ class MemoryDeletionService:
         report["results"]["evermemos"] = await self._delete_evermemos(user_id)
 
         # 4. Graphiti + MongoDB KG — 通过 PortRegistry
-        report["results"]["graphiti"] = await self._delete_via_port("graphiti", user_id)
+        report["results"]["graphiti"] = await self._delete_via_port(
+            "graphiti",
+            user_id,
+            required=cfg.graphiti_enabled,
+        )
 
         # 5. Mem0 — 通过 PortRegistry
-        report["results"]["mem0"] = await self._delete_via_port("mem0", user_id)
+        report["results"]["mem0"] = await self._delete_via_port(
+            "mem0",
+            user_id,
+            required=cfg.mem0_enabled,
+        )
 
         # 汇总
         for backend, result in report["results"].items():
@@ -85,16 +111,18 @@ class MemoryDeletionService:
                 EMOTIONS, STORIES, IMPORTANCE, RELATIONSHIPS,
                 SEMANTIC_NODES, SEMANTIC_EDGES,
                 WEEKLY_DIGESTS, MONTHLY_THEMES, LIFE_CHAPTERS,
+                MEMORY_ATOMS, MEMORY_TRACES, CORE_BLOCKS, PROCEDURAL_RULES, SAFETY_SHADOW,
             )
             collections = [
                 EMOTIONS, STORIES, IMPORTANCE, RELATIONSHIPS,
                 SEMANTIC_NODES, SEMANTIC_EDGES,
                 WEEKLY_DIGESTS, MONTHLY_THEMES, LIFE_CHAPTERS,
+                MEMORY_ATOMS, MEMORY_TRACES, CORE_BLOCKS, PROCEDURAL_RULES, SAFETY_SHADOW,
             ]
             total = 0
             for coll_name in collections:
                 coll = await get_collection(coll_name)
-                if coll:
+                if coll is not None:
                     result = await coll.delete_many({"user_id": user_id})
                     total += result.deleted_count
             return {"deleted": total, "error": None}
@@ -126,14 +154,26 @@ class MemoryDeletionService:
             logger.warning(f"[GDPR] EverMemOS delete failed: {e}")
             return {"deleted": 0, "error": str(e)}
 
-    async def _delete_via_port(self, port_name: str, user_id: str) -> Dict[str, Any]:
+    async def _delete_via_port(
+        self,
+        port_name: str,
+        user_id: str,
+        required: bool = False,
+    ) -> Dict[str, Any]:
         """通过 PortRegistry 删除"""
         try:
+            from ..ports.initializer import ensure_ports_initialized
             from ..ports.registry import get_port_registry
+            ensure_ports_initialized()
             registry = get_port_registry()
             port = registry.get_port(port_name)
             if port is None:
-                return {"deleted": 0, "error": None}  # Port 未注册不算错误
+                if required:
+                    return {
+                        "deleted": 0,
+                        "error": f"required port '{port_name}' not initialized",
+                    }
+                return {"deleted": 0, "error": None}
             count = await port.delete_user_data(user_id)
             if count < 0:
                 return {"deleted": 0, "error": "deletion failed"}
@@ -152,3 +192,9 @@ def get_deletion_service() -> MemoryDeletionService:
     if _deletion_service is None:
         _deletion_service = MemoryDeletionService()
     return _deletion_service
+
+
+def reset_deletion_service_for_testing():
+    """测试辅助: 重置删除服务单例。"""
+    global _deletion_service
+    _deletion_service = None

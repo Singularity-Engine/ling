@@ -136,7 +136,7 @@ async def _gather_daily_stats(day_start: datetime, day_end: datetime) -> Dict:
 
     try:
         emo_coll = await get_collection(EMOTIONS)
-        if emo_coll:
+        if emo_coll is not None:
             user_ids = await emo_coll.distinct(
                 "user_id",
                 {"created_at": {"$gte": day_start, "$lt": day_end}},
@@ -158,7 +158,7 @@ async def _gather_daily_stats(day_start: datetime, day_end: datetime) -> Dict:
 
     try:
         imp_coll = await get_collection(IMPORTANCE)
-        if imp_coll:
+        if imp_coll is not None:
             cursor = imp_coll.find(
                 {"created_at": {"$gte": day_start, "$lt": day_end}, "score": {"$gte": 0.5}},
                 projection={"summary": 1, "_id": 0},

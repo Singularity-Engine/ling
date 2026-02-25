@@ -8,12 +8,14 @@
 - Phase 3: dormant 故事线重激活
 """
 
-import asyncio
 from datetime import datetime, timezone, timedelta
 from difflib import SequenceMatcher
 from typing import Optional, List
 
 from loguru import logger
+
+from ..utils.async_tasks import create_logged_task
+from ..utils.validation import is_valid_user_id
 
 # 📖: 故事线生命周期常量
 DORMANT_AFTER_DAYS = 30      # 超过 30 天未更新自动休眠
@@ -31,11 +33,20 @@ def get_story_tracker() -> "StoryThreadTracker":
     return _story_tracker
 
 
+def reset_story_tracker_for_testing():
+    """测试辅助: 重置故事线追踪器单例。"""
+    global _story_tracker
+    _story_tracker = None
+
+
 class StoryThreadTracker:
     """故事线追踪器 — 管理用户生活中的故事线"""
 
     async def update_from_extraction(self, story_update: dict, user_id: str):
         """从 LLM 提取结果更新故事线"""
+        if not is_valid_user_id(user_id):
+            logger.warning("[Soul] Invalid user_id format, skipping story update")
+            return
         if not story_update or not story_update.get("title"):
             return
         update_type = story_update.get("update_type", "continue")
@@ -51,6 +62,9 @@ class StoryThreadTracker:
 
         📖 大师建议: 自动将超过 DORMANT_AFTER_DAYS 天未更新的故事线降级为 dormant
         """
+        if not is_valid_user_id(user_id):
+            logger.warning("[Soul] Invalid user_id format, skipping active stories fetch")
+            return []
         try:
             from ..storage.soul_collections import get_collection, STORIES
             coll = await get_collection(STORIES)
@@ -83,11 +97,12 @@ class StoryThreadTracker:
                 if doc.get("reactivated"):
                     hint = f"[久未提及] {title}"
                     # 清除 reactivated 标记 (只在首次召回时试探)
-                    asyncio.create_task(
+                    create_logged_task(
                         coll.update_one(
                             {"_id": doc["_id"]},
                             {"$unset": {"reactivated": ""}},
-                        )
+                        ),
+                        "clear_story_reactivated_flag",
                     )
 
                 if tension:

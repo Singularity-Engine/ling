@@ -16,22 +16,15 @@ Fallback: Graphiti 不可用时降级到 MongoDB knowledge_graph.py
 """
 
 import asyncio
-import os
-import re
+import time
 from datetime import datetime, timezone
 from typing import List, Optional, Dict, Any
 
 from loguru import logger
 
+from ..config import get_soul_config
 from ..ports.memory_port import MemoryPort, MemoryResult, MemorySource, MemoryWriteRequest
-
-# user_id 校验 (复用 soul_recall 的模式)
-_USER_ID_PATTERN = re.compile(r'^[\w\-.:]{1,128}$')
-
-# Graphiti 配置
-GRAPHITI_URL = os.environ.get("GRAPHITI_URL", "bolt://localhost:7687")
-GRAPHITI_TIMEOUT = float(os.environ.get("GRAPHITI_TIMEOUT", "0.2"))  # 200ms
-
+from ..utils.validation import is_valid_user_id
 
 class GraphitiAdapter(MemoryPort):
     """Graphiti 时序知识图谱适配器
@@ -45,6 +38,9 @@ class GraphitiAdapter(MemoryPort):
         self._client = None
         self._initialized = False
         self._use_fallback = False
+        self._permanently_unavailable = False
+        self._last_init_attempt = 0.0
+        self._init_lock = asyncio.Lock()
 
     @property
     def section_name(self) -> str:
@@ -60,33 +56,64 @@ class GraphitiAdapter(MemoryPort):
 
     @property
     def timeout_seconds(self) -> float:
-        return GRAPHITI_TIMEOUT
+        cfg = get_soul_config()
+        return max(0.05, cfg.graphiti_timeout_ms / 1000.0)
 
     async def _ensure_client(self):
-        """懒初始化 Graphiti 客户端"""
-        if self._initialized:
+        """懒初始化 Graphiti 客户端（失败后按间隔重试）。"""
+        if self._permanently_unavailable:
             return
-        self._initialized = True
-        try:
-            from graphiti_core import Graphiti
-            from graphiti_core.llm_client import OpenAIClient
+        if self._client is not None and not self._use_fallback:
+            return
 
-            llm_client = OpenAIClient(
-                model=os.environ.get("GRAPHITI_LLM_MODEL", "gpt-4o-mini"),
-            )
-            self._client = Graphiti(
-                GRAPHITI_URL,
-                os.environ.get("NEO4J_USER", "neo4j"),
-                os.environ.get("NEO4J_PASSWORD", ""),
-                llm_client=llm_client,
-            )
-            logger.info("[Graphiti] Client initialized")
-        except ImportError:
-            logger.info("[Graphiti] graphiti_core not installed, using MongoDB fallback")
-            self._use_fallback = True
-        except Exception as e:
-            logger.warning(f"[Graphiti] Init failed, using fallback: {e}")
-            self._use_fallback = True
+        cfg = get_soul_config()
+        retry_interval = max(1.0, cfg.adapter_retry_interval_sec)
+        now = time.monotonic()
+        if self._initialized and (now - self._last_init_attempt) < retry_interval:
+            return
+
+        async with self._init_lock:
+            now = time.monotonic()
+            if self._permanently_unavailable:
+                return
+            if self._client is not None and not self._use_fallback:
+                return
+            if self._initialized and (now - self._last_init_attempt) < retry_interval:
+                return
+
+            self._initialized = True
+            self._last_init_attempt = now
+            try:
+                from graphiti_core import Graphiti
+                from graphiti_core.llm_client import OpenAIClient
+                from graphiti_core.llm_client.config import LLMConfig
+
+                llm_client = OpenAIClient(
+                    config=LLMConfig(model=cfg.graphiti_llm_model)
+                )
+                self._client = Graphiti(
+                    cfg.graphiti_url,
+                    cfg.neo4j_user,
+                    cfg.neo4j_password,
+                    llm_client=llm_client,
+                )
+                self._use_fallback = False
+                logger.info("[Graphiti] Client initialized")
+            except ImportError:
+                logger.info("[Graphiti] graphiti_core not installed, using MongoDB fallback")
+                self._client = None
+                self._use_fallback = True
+                self._permanently_unavailable = True
+            except Exception as e:
+                self._mark_temporarily_unavailable()
+                logger.warning(
+                    f"[Graphiti] Init failed, using fallback (retry in {retry_interval:.0f}s): {e}"
+                )
+
+    def _mark_temporarily_unavailable(self):
+        """标记客户端暂不可用，后续由 _ensure_client 周期性重试。"""
+        self._client = None
+        self._use_fallback = True
 
     async def search(
         self,
@@ -96,7 +123,7 @@ class GraphitiAdapter(MemoryPort):
         **kwargs,
     ) -> List[MemoryResult]:
         """搜索知识图谱 — Graphiti 优先, MongoDB fallback"""
-        if not user_id or not _USER_ID_PATTERN.match(user_id):
+        if not is_valid_user_id(user_id):
             return []
 
         await self._ensure_client()
@@ -108,6 +135,7 @@ class GraphitiAdapter(MemoryPort):
             return await self._graphiti_search(query, user_id, top_k)
         except Exception as e:
             logger.debug(f"[Graphiti] Search failed, fallback: {e}")
+            self._mark_temporarily_unavailable()
             return await self._fallback_search(query, user_id, top_k)
 
     async def _graphiti_search(
@@ -195,6 +223,7 @@ class GraphitiAdapter(MemoryPort):
             return True
         except Exception as e:
             logger.debug(f"[Graphiti] Write failed, fallback: {e}")
+            self._mark_temporarily_unavailable()
             return await self._fallback_write(request)
 
     async def write_graph_extraction(
@@ -239,6 +268,7 @@ class GraphitiAdapter(MemoryPort):
             return True
         except Exception as e:
             logger.debug(f"[Graphiti] Graph extraction write failed, fallback: {e}")
+            self._mark_temporarily_unavailable()
             return await self._fallback_write_graph(user_id, nodes, edges)
 
     async def _fallback_write(self, request: MemoryWriteRequest) -> bool:
@@ -288,55 +318,160 @@ class GraphitiAdapter(MemoryPort):
 
     async def delete_user_data(self, user_id: str) -> int:
         """GDPR: 删除用户的所有图谱数据"""
+        if not is_valid_user_id(user_id):
+            logger.warning("[Graphiti] Invalid user_id format, skip delete_user_data")
+            return 0
+
         count = 0
+        graphiti_delete_failed = False
         # 1. Graphiti 删除
         await self._ensure_client()
         if self._client and not self._use_fallback:
             try:
-                # Graphiti group_id 级别删除
-                # Note: 实际 API 可能需要调整
-                edges = await self._client.search(
-                    query="*", num_results=1000, group_ids=[user_id],
-                )
-                for edge in edges:
-                    edge_uuid = getattr(edge, "uuid", None)
-                    if edge_uuid:
-                        await self._client.delete_edge(edge_uuid)
-                        count += 1
+                deleted = await self._delete_group_edges(user_id=user_id, batch_size=200)
+                count += deleted
+                verified = await self._verify_group_empty(user_id=user_id, attempts=5)
+                if not verified:
+                    graphiti_delete_failed = True
+                    logger.error(
+                        "[Graphiti] GDPR delete verification failed: edges still exist "
+                        f"(user={user_id})"
+                    )
             except Exception as e:
                 logger.warning(f"[Graphiti] GDPR delete failed: {e}")
+                self._mark_temporarily_unavailable()
+                graphiti_delete_failed = True
+        else:
+            # 合规删除必须“可证明完成”。若 Graphiti 未就绪，仅删本地 fallback 会导致不完整删除。
+            graphiti_delete_failed = True
+            logger.error(
+                "[Graphiti] GDPR delete skipped: graph backend unavailable "
+                f"(user={user_id}, fallback={self._use_fallback}, initialized={self._initialized})"
+            )
 
         # 2. MongoDB fallback 数据也要删
         try:
-            from ..semantic.knowledge_graph import get_knowledge_graph
             from ..storage.soul_collections import get_collection, SEMANTIC_NODES, SEMANTIC_EDGES
             nodes_coll = await get_collection(SEMANTIC_NODES)
             edges_coll = await get_collection(SEMANTIC_EDGES)
-            if nodes_coll:
+            if nodes_coll is not None:
                 r = await nodes_coll.delete_many({"user_id": user_id})
                 count += r.deleted_count
-            if edges_coll:
+            if edges_coll is not None:
                 r = await edges_coll.delete_many({"user_id": user_id})
                 count += r.deleted_count
         except Exception as e:
             logger.warning(f"[Graphiti] MongoDB fallback delete failed: {e}")
 
+        if graphiti_delete_failed:
+            return -1
         return count
+
+    async def _delete_group_edges(
+        self,
+        user_id: str,
+        batch_size: int,
+        max_seconds: float = 90.0,
+    ) -> int:
+        """按 group_id 批量删除 Graphiti 边，循环直到为空或进入明确失败态。"""
+        deleted_total = 0
+        stalled_rounds = 0
+        deadline = time.monotonic() + max(10.0, max_seconds)
+
+        while True:
+            if time.monotonic() >= deadline:
+                logger.warning(
+                    "[Graphiti] GDPR delete timed out before group drained "
+                    f"(user={user_id}, deleted={deleted_total})"
+                )
+                break
+            edges = await self._client.search(
+                query="*",
+                num_results=batch_size,
+                group_ids=[user_id],
+            )
+            if not edges:
+                break
+
+            deleted_in_round = 0
+            for edge in edges:
+                edge_uuid = getattr(edge, "uuid", None)
+                if not edge_uuid:
+                    continue
+                try:
+                    await self._client.delete_edge(edge_uuid)
+                    deleted_total += 1
+                    deleted_in_round += 1
+                except Exception as e:
+                    logger.debug(f"[Graphiti] delete_edge failed ({edge_uuid}): {e}")
+
+            if deleted_in_round == 0:
+                stalled_rounds += 1
+                if stalled_rounds >= 3:
+                    logger.warning(
+                        "[Graphiti] GDPR delete stalled for 3 rounds, breaking "
+                        f"(user={user_id}, batch={len(edges)})"
+                    )
+                    break
+            else:
+                stalled_rounds = 0
+
+        return deleted_total
+
+    async def _verify_group_empty(self, user_id: str, attempts: int = 3) -> bool:
+        """删除后验证 group 是否为空，确保 GDPR 删除可证明。"""
+        for i in range(max(1, attempts)):
+            try:
+                edges = await self._client.search(
+                    query="*",
+                    num_results=1,
+                    group_ids=[user_id],
+                )
+            except Exception as e:
+                logger.warning(f"[Graphiti] GDPR verify failed: {e}")
+                return False
+
+            if not edges:
+                return True
+
+            if i < attempts - 1:
+                await asyncio.sleep(0.15 * (i + 1))
+
+        return False
 
     async def health_check(self) -> bool:
         """检查 Graphiti/Neo4j 连接"""
         await self._ensure_client()
-        if self._use_fallback:
-            return True  # fallback 模式下始终 "健康"
+        if self._use_fallback or self._client is None:
+            return False
         try:
-            # 简单查询测试连接
+            # 只验证图数据库连通性，避免将外部 LLM 密钥问题误判为图后端不可用。
             await asyncio.wait_for(
-                self._client.search(query="health_check", num_results=1),
+                self._client.driver.execute_query("RETURN 1 AS ok"),
                 timeout=2.0,
             )
             return True
         except Exception:
+            self._mark_temporarily_unavailable()
             return False
+
+    def runtime_status(self) -> Dict[str, Any]:
+        """返回适配器运行态健康快照（不触发网络请求）。"""
+        if self._permanently_unavailable:
+            available = False
+        elif not self._initialized:
+            # 冷启动未知态按不可用处理（fail-closed），避免 strict 模式误判通过。
+            available = False
+        else:
+            available = bool(self._client is not None and not self._use_fallback)
+        return {
+            "available": available,
+            "initialized": bool(self._initialized),
+            "fallback": bool(self._use_fallback),
+            "permanently_unavailable": bool(self._permanently_unavailable),
+            "unknown": bool((not self._initialized) and (not self._permanently_unavailable)),
+            "last_init_attempt": self._last_init_attempt,
+        }
 
     def format_section(self, results: List[MemoryResult]) -> Optional[str]:
         """格式化图谱洞察 — 沿用 context_builder 风格"""
@@ -378,3 +513,9 @@ def get_graphiti_adapter() -> GraphitiAdapter:
     if _graphiti_adapter is None:
         _graphiti_adapter = GraphitiAdapter()
     return _graphiti_adapter
+
+
+def reset_graphiti_adapter_for_testing():
+    """测试辅助: 重置 GraphitiAdapter 单例。"""
+    global _graphiti_adapter
+    _graphiti_adapter = None

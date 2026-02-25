@@ -6,6 +6,7 @@ EverMemOS 客户端 — 灵的长期记忆接口
 
 import os
 import asyncio
+import atexit
 import aiohttp
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -376,3 +377,22 @@ async def close():
     if _session and not _session.closed:
         await _session.close()
         _session = None
+
+
+def _close_session_sync():
+    """进程退出时兜底关闭 session，避免 Unclosed client session 警告。"""
+    global _session
+    session = _session
+    if session is None or session.closed:
+        return
+    try:
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(session.close())
+        loop.close()
+    except Exception:
+        pass
+    finally:
+        _session = None
+
+
+atexit.register(_close_session_sync)

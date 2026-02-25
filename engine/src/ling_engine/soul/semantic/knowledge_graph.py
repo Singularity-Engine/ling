@@ -31,6 +31,12 @@ def get_knowledge_graph() -> "KnowledgeGraph":
     return _kg_instance
 
 
+def reset_knowledge_graph_for_testing():
+    """测试辅助: 重置 KnowledgeGraph 单例。"""
+    global _kg_instance
+    _kg_instance = None
+
+
 def _calc_confidence(mention_count: int, last_confirmed: datetime) -> float:
     """动态计算节点置信度 — 基于提及次数 + 时间衰减
 

@@ -199,7 +199,7 @@ class MemoryDecayProcessor:
             # Phase 3b-beta: 获取 span_days 和 links
             summary = doc.get("summary", "")
             span = span_days_map.get(summary[:50], 0.0)
-            links = self._get_links_for_doc(doc)
+            links = self._get_links_for_doc(doc, links_map)
 
             # 计算 recall_strength
             rs = recall_strength(
@@ -329,7 +329,7 @@ class MemoryDecayProcessor:
         说明它是用户知识网络的核心节点, 应受到更多保护。
 
         Returns:
-            dict: {summary_prefix_50: link_count}
+            dict: {label_lower: link_count}
         """
         from ..storage.soul_collections import get_collection, SEMANTIC_EDGES, SEMANTIC_NODES
 
@@ -338,7 +338,6 @@ class MemoryDecayProcessor:
         if nodes_coll is None or edges_coll is None:
             return {}
 
-        links_map: Dict[str, int] = {}
         try:
             # 获取用户所有节点的 label → 边数映射
             node_labels = set()
@@ -370,19 +369,15 @@ class MemoryDecayProcessor:
                 if tgt:
                     label_link_count[tgt] = label_link_count.get(tgt, 0) + 1
 
-            # 不直接返回 label→count,而是需要把 importance 的 summary 映射过去
-            # 这里存储 label_link_count,在 _process_user 外部做匹配
-            # 改为: 存到实例变量供 _get_links_for_summary 使用
-            self._label_link_count = label_link_count
+            return label_link_count
 
         except Exception as e:
             logger.debug(f"[Decay] links preload failed: {e}")
 
-        return links_map
+        return {}
 
-    def _get_links_for_doc(self, doc: dict) -> int:
+    def _get_links_for_doc(self, doc: dict, label_counts: Dict[str, int]) -> int:
         """根据 importance 文档的 summary 匹配知识图谱连接数"""
-        label_counts = getattr(self, "_label_link_count", {})
         if not label_counts:
             return 0
 

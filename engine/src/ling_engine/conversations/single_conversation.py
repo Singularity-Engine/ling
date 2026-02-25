@@ -22,6 +22,7 @@ from .tts_manager import TTSTaskManager
 from .global_tts_manager import global_tts_manager, TTSPriority
 from ..chat_history_manager import store_message
 from ..service_context import ServiceContext
+from ..soul.utils.async_tasks import create_logged_task
 import traceback
 
 
@@ -53,7 +54,8 @@ async def process_agent_response(
             from ..soul.recall.context_builder import ContextBuilder
             from ..soul.config import get_soul_config
 
-            if get_soul_config().enabled:
+            cfg = get_soul_config()
+            if cfg.enabled:
                 _is_owner = False
                 try:
                     from ..tools.evermemos_client import resolve_user_context
@@ -73,13 +75,20 @@ async def process_agent_response(
 
                 soul_context = await get_soul_recall().recall(
                     query=user_input, user_id=user_id,
-                    is_owner=_is_owner, top_k=3, timeout_ms=500)
+                    is_owner=_is_owner,
+                    top_k=cfg.recall_top_k,
+                    timeout_ms=cfg.recall_timeout_ms_extended,
+                )
 
                 # Phase 2: 设置对话内情绪突变
                 if _in_conv_shift:
                     soul_context.in_conversation_shift = _in_conv_shift
 
-                injection = ContextBuilder().build(soul_context, user_id=user_id)
+                injection = ContextBuilder().build(
+                    soul_context,
+                    user_id=user_id,
+                    query=user_input,
+                )
                 if injection:
                     enhanced_input = f"{user_input}\n\n{injection}"
                     if hasattr(batch_input, 'texts') and batch_input.texts:
@@ -481,18 +490,22 @@ async def process_agent_response(
 
                 # 记忆保存完全异步，不阻塞用户响应（火忘模式）
                 logger.debug("🧠 启动异步记忆保存任务（不等待完成）...")
-                asyncio.create_task(save_memory_async(summr, user_id))
+                create_logged_task(
+                    save_memory_async(summr, user_id),
+                    "save_memory_async",
+                )
                 # 同时记录到 EverMemOS（灵的长期记忆）— 含用户隔离 + 角色上下文
                 try:
                     from ..tools.evermemos_client import record_conversation
                     _conf_uid = getattr(context.character_config, 'conf_uid', '') if hasattr(context, 'character_config') else ''
-                    asyncio.create_task(
+                    create_logged_task(
                         record_conversation(
                             clean_user_input, clean_ai_response,
                             user_id=user_id,
                             client_uid=client_uid,
                             conf_uid=_conf_uid,
-                        )
+                        ),
+                        "record_conversation",
                     )
                 except Exception:
                     pass
@@ -502,10 +515,15 @@ async def process_agent_response(
                 from ..soul.pipeline.soul_post_processor import get_soul_post_processor
                 from ..soul.config import get_soul_config
                 if get_soul_config().enabled:
-                    asyncio.create_task(get_soul_post_processor().process(
-                        user_input=clean_user_input,
-                        ai_response=clean_ai_response,
-                        user_id=user_id, client_uid=client_uid))
+                    create_logged_task(
+                        get_soul_post_processor().process(
+                            user_input=clean_user_input,
+                            ai_response=clean_ai_response,
+                            user_id=user_id, client_uid=client_uid,
+                            conversation_id=conversation_id or "",
+                        ),
+                        "soul_post_process",
+                    )
             except (ImportError, Exception):
                 pass
 
@@ -642,13 +660,14 @@ async def _process_mcp_results_with_util_agent(
                     current_user_query = user_input
 
                     # 启动多用户感知的异步任务，不保留引用
-                    asyncio.create_task(
+                    create_logged_task(
                         util_agent_helper.handle_mcp_result_truly_async(
                             user_query=current_user_query,
                             tool_name=tool_name,
                             raw_result=out_obj,
-                            callback=multi_user_aware_callback
-                        )
+                            callback=multi_user_aware_callback,
+                        ),
+                        f"util_agent_{tool_name}",
                     )
 
                     logger.info(f"🚀 [独立异步] 已启动 {tool_name} 的独立 Util Agent 处理")

@@ -21,6 +21,14 @@ CONSOLIDATION_LOG = "soul_consolidation_log"
 # Phase 4: 集体灵魂
 COLLECTIVE_PATTERNS = "soul_collective_patterns"
 SELF_NARRATIVE = "soul_self_narrative"
+# Memory Fabric 控制平面
+MEMORY_ATOMS = "soul_memory_atoms"
+MEMORY_TRACES = "soul_memory_traces"
+CORE_BLOCKS = "soul_core_blocks"
+PROCEDURAL_RULES = "soul_procedural_rules"
+SAFETY_SHADOW = "soul_safety_shadow"
+BENCHMARK_RUNS = "soul_benchmark_runs"
+SLO_METRICS = "soul_slo_metrics"
 
 _indexes_created = False
 _indexes_lock = asyncio.Lock()
@@ -45,6 +53,7 @@ async def ensure_indexes():
         if _indexes_created:  # double-check inside lock
             return
 
+        from ..config import get_soul_config
         from .mongo_client import get_soul_db
         db = await get_soul_db()
         if db is None:
@@ -153,17 +162,135 @@ async def ensure_indexes():
             await db[SELF_NARRATIVE].create_index(
                 "month", unique=True, background=True)
 
-            # Phase 3: 数据保留 TTL 索引
-            # soul_emotions: 180 天自动过期
-            await db[EMOTIONS].create_index(
-                "created_at",
-                expireAfterSeconds=180 * 86400,
+            # Memory Fabric: MemoryAtom 事件溯源
+            await db[MEMORY_ATOMS].create_index(
+                "memory_id",
+                unique=True,
                 background=True,
             )
-            # soul_importance: 180 天自动过期
-            await db[IMPORTANCE].create_index(
+            await db[MEMORY_ATOMS].create_index(
+                [("tenant_id", 1), ("user_id", 1), ("idempotency_key", 1)],
+                unique=True,
+                sparse=True,
+                background=True,
+            )
+            await db[MEMORY_ATOMS].create_index(
+                [("tenant_id", 1), ("user_id", 1), ("event_time", -1)],
+                background=True,
+            )
+            await db[MEMORY_ATOMS].create_index(
+                [("state", 1), ("ingest_time", -1)],
+                background=True,
+            )
+
+            # Memory Fabric: 审计追踪链
+            await db[MEMORY_TRACES].create_index(
+                [("memory_id", 1), ("created_at", -1)],
+                background=True,
+            )
+            await db[MEMORY_TRACES].create_index(
+                [("user_id", 1), ("created_at", -1)],
+                background=True,
+            )
+
+            # Phase 1: Letta Core Blocks (persona/human/policy)
+            await db[CORE_BLOCKS].create_index(
+                [("tenant_id", 1), ("user_id", 1), ("block_type", 1)],
+                unique=True,
+                background=True,
+            )
+
+            # Phase 1: LangMem 程序性记忆规则
+            await db[PROCEDURAL_RULES].create_index(
+                [("tenant_id", 1), ("user_id", 1), ("active", 1), ("priority", -1)],
+                background=True,
+            )
+
+            # Phase 2: 安全影子记忆 (投毒隔离区)
+            await db[SAFETY_SHADOW].create_index(
+                [("tenant_id", 1), ("user_id", 1), ("state", 1), ("created_at", -1)],
+                background=True,
+            )
+            await db[SAFETY_SHADOW].create_index(
+                [("related_memory_id", 1), ("created_at", -1)],
+                background=True,
+            )
+
+            # Phase 3: 评测与 SLO
+            await db[BENCHMARK_RUNS].create_index(
+                [("suite", 1), ("created_at", -1)],
+                background=True,
+            )
+            await db[SLO_METRICS].create_index(
+                [("metric_name", 1), ("created_at", -1)],
+                background=True,
+            )
+            await db[SLO_METRICS].create_index(
+                [("metric_name", 1), ("stage", 1), ("created_at", -1)],
+                background=True,
+            )
+
+            # Phase 3: 数据保留 TTL 索引
+            # emotions/importance 改用 expires_at 字段做 TTL：
+            # - 普通记录写入 expires_at=created_at+180d
+            # - flashbulb/no_expire 不写 expires_at，因此不会被 TTL 删除
+            ttl_seconds = 0  # expires_at 是绝对过期时间，TTL 必须为 0
+            cfg = get_soul_config()
+            fabric_retention_seconds = max(1, int(cfg.memory_event_retention_days)) * 86400
+
+            for coll_name in (EMOTIONS, IMPORTANCE):
+                coll = db[coll_name]
+                idx_info = await coll.index_information()
+                # 清理旧 TTL 索引
+                for old_idx in ("created_at_1", "ttl_created_at_expirable", "ttl_created_at"):
+                    if old_idx in idx_info:
+                        await coll.drop_index(old_idx)
+
+                current_ttl = idx_info.get("ttl_expires_at")
+                if current_ttl and current_ttl.get("expireAfterSeconds") != ttl_seconds:
+                    await coll.drop_index("ttl_expires_at")
+
+                if "ttl_expires_at" not in idx_info:
+                    await coll.create_index(
+                        "expires_at",
+                        name="ttl_expires_at",
+                        expireAfterSeconds=ttl_seconds,
+                        background=True,
+                    )
+
+            # Memory Fabric retention: atom 使用 ingest_time TTL
+            # 隔离态(quarantined)需长期保留做安全取证：TTL 仅作用于非隔离态。
+            atoms_coll = db[MEMORY_ATOMS]
+            atoms_idx_info = await atoms_coll.index_information()
+            ttl_filter = {
+                "state": {
+                    "$in": ["raw", "consolidated", "active", "retired"],
+                }
+            }
+            atoms_current_ttl = atoms_idx_info.get("ttl_ingest_time_retained")
+            if atoms_current_ttl and (
+                atoms_current_ttl.get("expireAfterSeconds") != fabric_retention_seconds
+                or atoms_current_ttl.get("partialFilterExpression") != ttl_filter
+            ):
+                await atoms_coll.drop_index("ttl_ingest_time_retained")
+            await atoms_coll.create_index(
+                "ingest_time",
+                name="ttl_ingest_time_retained",
+                expireAfterSeconds=fabric_retention_seconds,
+                partialFilterExpression=ttl_filter,
+                background=True,
+            )
+
+            # Memory traces retention: 跟随 MemoryAtom 保留窗口
+            traces_coll = db[MEMORY_TRACES]
+            traces_idx_info = await traces_coll.index_information()
+            traces_current_ttl = traces_idx_info.get("ttl_created_at_retained")
+            if traces_current_ttl and traces_current_ttl.get("expireAfterSeconds") != fabric_retention_seconds:
+                await traces_coll.drop_index("ttl_created_at_retained")
+            await traces_coll.create_index(
                 "created_at",
-                expireAfterSeconds=180 * 86400,
+                name="ttl_created_at_retained",
+                expireAfterSeconds=fabric_retention_seconds,
                 background=True,
             )
 
@@ -171,3 +298,9 @@ async def ensure_indexes():
             logger.info("[Soul] MongoDB indexes ensured")
         except Exception as e:
             logger.warning(f"[Soul] Index creation failed (non-fatal): {e}")
+
+
+def reset_soul_collections_state_for_testing():
+    """测试辅助: 重置索引初始化标记。"""
+    global _indexes_created
+    _indexes_created = False

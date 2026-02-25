@@ -130,6 +130,7 @@ class SoulContext(BaseModel):
     """灵魂召回上下文 — SoulRecall 输出, ContextBuilder 输入"""
     qdrant_memories: List[str] = Field(default_factory=list)
     evermemos_memories: List[str] = Field(default_factory=list)
+    event_sourced_memories: List[str] = Field(default_factory=list)       # MemoryAtom 事件源补充
     triggered_foresights: List[str] = Field(default_factory=list)
     user_profile_summary: str = ""
     story_continuations: List[str] = Field(default_factory=list)
@@ -159,4 +160,7 @@ class SoulContext(BaseModel):
     # SOTA: Graphiti 时序图谱 + Mem0 实体记忆
     graphiti_insights: List[str] = Field(default_factory=list)            # Graphiti 时序关系
     entity_memories: List[str] = Field(default_factory=list)              # Mem0 实体级记忆
+    core_memory_blocks: List[str] = Field(default_factory=list)           # Letta Core Blocks
+    procedural_memories: List[str] = Field(default_factory=list)          # LangMem 程序性规则
+    safety_alerts: List[str] = Field(default_factory=list)                # A-MemGuard 安全提醒
     memory_sources: Dict[str, int] = Field(default_factory=dict)          # 各路召回数量统计

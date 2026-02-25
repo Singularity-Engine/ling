@@ -10,9 +10,14 @@ collective_patterns, self_narrative
 from typing import List, Dict, Any, Optional
 from loguru import logger
 
+from ..utils.validation import is_valid_user_id
+
 
 async def get_user_memory_summary(user_id: str) -> Optional[Dict[str, Any]]:
     """查询全部 11 个集合返回分类统计"""
+    if not is_valid_user_id(user_id):
+        logger.warning("[Transparency] Invalid user_id format in summary request")
+        return None
     try:
         from ..storage.soul_collections import (
             get_collection, EMOTIONS, STORIES, IMPORTANCE,
@@ -63,6 +68,9 @@ async def list_user_memories(
 
     knowledge 类别只展示节点标签和类别，不展示边的关系推理。
     """
+    if not is_valid_user_id(user_id):
+        logger.warning("[Transparency] Invalid user_id format in list request")
+        return []
     try:
         from ..storage.soul_collections import (
             get_collection, EMOTIONS, STORIES, IMPORTANCE,
@@ -142,6 +150,9 @@ async def delete_user_memory(user_id: str, memory_id: str) -> bool:
     - 否则 → 尝试 ObjectId(memory_id) 遍历其他集合 delete_one
     防越权: 查询条件包含 user_id。
     """
+    if not is_valid_user_id(user_id):
+        logger.warning("[Transparency] Invalid user_id format in delete single request")
+        return False
     try:
         # 知识图谱节点 ID 格式: "user_id:md5[:8]"
         if memory_id.startswith(f"{user_id}:"):
@@ -188,6 +199,9 @@ async def delete_all_user_memories(user_id: str) -> int:
     COLLECTIVE_PATTERNS 和 SELF_NARRATIVE 不含 user_id (匿名/灵自有), 不删除。
     TODO: EverMemOS 原始记忆需单独 API 删除 (待 EverMemOS 提供批量删除接口)。
     """
+    if not is_valid_user_id(user_id):
+        logger.warning("[Transparency] Invalid user_id format in delete-all request")
+        return 0
     total = 0
     try:
         from ..storage.soul_collections import (
@@ -230,6 +244,9 @@ async def export_user_data(user_id: str) -> Dict[str, Any]:
     COLLECTIVE_PATTERNS/SELF_NARRATIVE 不含 user_id, 不导出 (匿名/灵自有)。
     返回 JSON-serializable 的完整数据包。
     """
+    if not is_valid_user_id(user_id):
+        logger.warning("[Transparency] Invalid user_id format in export request")
+        return {}
     try:
         from ..storage.soul_collections import (
             get_collection, EMOTIONS, STORIES, IMPORTANCE,

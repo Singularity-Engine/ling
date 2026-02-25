@@ -1,6 +1,11 @@
 import os
 from datetime import datetime, timezone
 import uuid
+import time
+import re
+import math
+import hashlib
+import requests as _requests
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams
 from .important import process_content
@@ -11,22 +16,32 @@ from loguru import logger
 
 load_dotenv()
 
-# OpenAI client
+# OpenAI client (fallback only)
 try:
     client = get_openai_client()
     logger.debug("记忆系统OpenAI客户端初始化成功")
 except Exception as e:
-    logger.error(f"记忆系统OpenAI客户端初始化失败: {e}")
+    logger.warning(f"记忆系统OpenAI客户端初始化失败(非必需，Ollama为主力): {e}")
     client = None
 
-# OpenAI配置
+# Ollama Embedding 配置 (主力)
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
+OLLAMA_EMBEDDING_MODEL = os.environ.get("OLLAMA_EMBEDDING_MODEL", "qwen3-embedding:0.6b")
+OLLAMA_EMBEDDING_DIMS = int(os.environ.get("OLLAMA_EMBEDDING_DIMS", "1024"))
+OLLAMA_EMBEDDING_TIMEOUT = int(os.environ.get("OLLAMA_EMBEDDING_TIMEOUT", "30"))
+
+# OpenAI配置 (fallback)
 OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
 OPENAI_EMBEDDING_MODEL = os.environ.get("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
-OPENAI_EMBEDDING_MODEL_DIMS = int(os.environ.get("OPENAI_EMBEDDING_MODEL_DIMS", 1536))
 
 # Qdrant配置
 QDRANT_URL = os.environ.get("QDRANT_URL", "http://qdrant:6333")
 COLLECTION_NAME = os.environ.get("COLLECTION_NAME", "openmemory")
+
+_ollama_available = None  # None = untested, True/False = tested
+
+# 向量维度取 Ollama 配置（主力）
+OPENAI_EMBEDDING_MODEL_DIMS = OLLAMA_EMBEDDING_DIMS
 
 # Qdrant client
 try:
@@ -66,20 +81,47 @@ class Memory:
 
 from ..utils.token_counter import token_stats, TokenCalculator, TokenUsage
 
-def create_embedding(content):
-    """生成文本的嵌入向量"""
+
+def _ollama_embedding(content: str) -> list | None:
+    """通过 Ollama 本地模型生成 embedding（主力方案，免费、快速、无 API key）。"""
+    global _ollama_available
+    try:
+        resp = _requests.post(
+            f"{OLLAMA_BASE_URL}/api/embed",
+            json={"model": OLLAMA_EMBEDDING_MODEL, "input": content},
+            timeout=OLLAMA_EMBEDDING_TIMEOUT,
+        )
+        resp.raise_for_status()
+        embeddings = resp.json().get("embeddings", [])
+        if embeddings and len(embeddings[0]) > 0:
+            if _ollama_available is not True:
+                logger.info(f"Ollama embedding 可用: model={OLLAMA_EMBEDDING_MODEL}, dims={len(embeddings[0])}")
+                _ollama_available = True
+            return embeddings[0]
+        logger.warning("Ollama 返回空 embedding")
+        return None
+    except Exception as e:
+        if _ollama_available is not False:
+            logger.warning(f"Ollama embedding 不可用: {e}")
+            _ollama_available = False
+        return None
+
+
+def _openai_embedding(content: str) -> list | None:
+    """通过 OpenAI API 生成 embedding（备用方案）。"""
+    if client is None:
+        return None
     try:
         calculator = TokenCalculator(OPENAI_EMBEDDING_MODEL)
         input_tokens = calculator.count_tokens(content)
 
         response = client.embeddings.create(
             model=OPENAI_EMBEDDING_MODEL,
-            input=content
+            input=content,
         )
 
         usage = TokenUsage(input_tokens, 0, input_tokens)
         cost_info = calculator.estimate_cost(usage)
-
         token_stats.add_usage(
             model=OPENAI_EMBEDDING_MODEL,
             usage=usage,
@@ -87,17 +129,33 @@ def create_embedding(content):
             metadata={
                 "service_type": "embedding",
                 "model": OPENAI_EMBEDDING_MODEL,
-                "content_length": len(content)
-            }
+                "content_length": len(content),
+            },
         )
-
-        logger.debug(f"[Token跟踪] 嵌入模型: {OPENAI_EMBEDDING_MODEL}, Token: {input_tokens}, "
-                     f"成本: ${cost_info.total_cost:.6f}")
-
+        logger.debug(
+            f"[Token跟踪] 嵌入模型: {OPENAI_EMBEDDING_MODEL}, Token: {input_tokens}, "
+            f"成本: ${cost_info.total_cost:.6f}"
+        )
         return response.data[0].embedding
     except Exception as e:
-        logger.error(f"生成嵌入向量时出错: {type(e).__name__} - {str(e)}")
+        logger.warning(f"OpenAI embedding 失败: {type(e).__name__} - {str(e)[:200]}")
         return None
+
+
+def create_embedding(content):
+    """生成文本的嵌入向量。优先级: Ollama 本地 > OpenAI API。"""
+    # 1. Ollama 本地（主力，免费）
+    result = _ollama_embedding(content)
+    if result is not None:
+        return result
+
+    # 2. OpenAI API（备用）
+    result = _openai_embedding(content)
+    if result is not None:
+        return result
+
+    logger.error("所有 embedding 方案均失败")
+    return None
 
 
 def save_memory(content, user_id=None):

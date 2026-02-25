@@ -5,6 +5,7 @@ Port 初始化器 — 根据配置自动注册所有记忆源
 """
 
 from loguru import logger
+from threading import Lock
 
 
 def initialize_ports():
@@ -43,6 +44,7 @@ def initialize_ports():
 
 
 _initialized = False
+_init_lock = Lock()
 
 
 def ensure_ports_initialized():
@@ -50,5 +52,18 @@ def ensure_ports_initialized():
     global _initialized
     if _initialized:
         return
-    _initialized = True
-    initialize_ports()
+    with _init_lock:
+        if _initialized:
+            return
+        initialize_ports()
+        _initialized = True
+
+
+def reset_ports_initializer_for_testing():
+    """测试辅助: 重置初始化状态和 PortRegistry。"""
+    global _initialized
+    with _init_lock:
+        _initialized = False
+    from .registry import reset_port_registry_for_testing
+
+    reset_port_registry_for_testing()

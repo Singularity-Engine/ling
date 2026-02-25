@@ -172,7 +172,7 @@ async def _gather_anonymous_stats(month: str) -> Dict:
     # 情绪分布
     try:
         emo_coll = await get_collection(EMOTIONS)
-        if emo_coll:
+        if emo_coll is not None:
             pipeline = [
                 {"$match": {"created_at": {"$gte": start, "$lt": end}}},
                 {"$group": {"_id": "$user_emotion", "count": {"$sum": 1}}},
@@ -198,7 +198,7 @@ async def _gather_anonymous_stats(month: str) -> Dict:
     # 高频关键词 (从 importance 的 summary 中提取)
     try:
         imp_coll = await get_collection(IMPORTANCE)
-        if imp_coll:
+        if imp_coll is not None:
             cursor = imp_coll.find(
                 {"created_at": {"$gte": start, "$lt": end}, "score": {"$gte": 0.5}},
                 projection={"summary": 1, "_id": 0},
@@ -217,7 +217,7 @@ async def _gather_anonymous_stats(month: str) -> Dict:
     # 关系阶段分布
     try:
         rel_coll = await get_collection(RELATIONSHIPS)
-        if rel_coll:
+        if rel_coll is not None:
             pipeline = [
                 {"$group": {"_id": "$stage", "count": {"$sum": 1}}},
             ]

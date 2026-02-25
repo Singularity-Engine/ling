@@ -1,11 +1,13 @@
 """数据生命周期管理 — Phase 4: 热/温/冷三层存储
 
 热数据 (HOT):  近 30 天 episode + 活跃故事线 + 知识图谱 → 全索引
-温数据 (WARM): 30-180 天 → 正常访问, TTL 索引自动清理
+温数据 (WARM): 30-180 天 → 正常访问
 冷数据 (COLD): >180 天 episode → 仅通过 L1/L2/L3 抽象层级访问
 
-当前 MongoDB TTL 索引已自动处理 emotions 和 importance 的 180 天过期。
-本模块补充: 标记温数据、统计各层数据量、清理孤立数据。
+当前 MongoDB TTL 索引基于 expires_at:
+- 普通记录: expires_at=created_at+180d
+- no_expire/flashbulb: 不写 expires_at
+本模块补充: 回填 expires_at、统计各层数据量、清理孤立数据。
 
 调用方: NightlyConsolidator (每日)
 """
@@ -40,9 +42,19 @@ async def lifecycle_maintenance(dry_run: bool = False) -> Dict:
     stats: Dict = {
         "hot": {},
         "warm": {},
+        "expiry_backfilled": 0,
+        "no_expire_sanitized": 0,
         "orphan_edges_cleaned": 0,
         "dormant_stories_archived": 0,
     }
+
+    # 0. 回填 expires_at 并清理 no_expire 记录上的 expires_at（避免 flashbulb 被 TTL 误删）
+    try:
+        backfill = await _backfill_expiry_fields(dry_run=dry_run, now=now)
+        stats["expiry_backfilled"] = backfill.get("backfilled", 0)
+        stats["no_expire_sanitized"] = backfill.get("no_expire_sanitized", 0)
+    except Exception as e:
+        logger.debug(f"[Lifecycle] Expiry backfill failed: {e}")
 
     # 1. 统计各层数据量
     for name, coll_name in [("emotions", EMOTIONS), ("importance", IMPORTANCE)]:
@@ -65,7 +77,7 @@ async def lifecycle_maintenance(dry_run: bool = False) -> Dict:
     try:
         edges_coll = await get_collection(SEMANTIC_EDGES)
         nodes_coll = await get_collection(SEMANTIC_NODES)
-        if edges_coll and nodes_coll:
+        if edges_coll is not None and nodes_coll is not None:
             orphan_count = await _clean_orphan_edges(edges_coll, nodes_coll, dry_run)
             stats["orphan_edges_cleaned"] = orphan_count
     except Exception as e:
@@ -74,7 +86,7 @@ async def lifecycle_maintenance(dry_run: bool = False) -> Dict:
     # 3. 归档长期 dormant 的故事线 (>90 天 dormant → resolved)
     try:
         stories_coll = await get_collection(STORIES)
-        if stories_coll and not dry_run:
+        if stories_coll is not None and not dry_run:
             archive_cutoff = now - timedelta(days=90)
             result = await stories_coll.update_many(
                 {
@@ -90,6 +102,73 @@ async def lifecycle_maintenance(dry_run: bool = False) -> Dict:
     stats["status"] = "ok"
     stats["dry_run"] = dry_run
     return stats
+
+
+async def _backfill_expiry_fields(dry_run: bool, now: datetime) -> Dict[str, int]:
+    """给普通记录补 expires_at，并移除 no_expire 文档上的 expires_at。"""
+    from pymongo import UpdateOne
+
+    from ..storage.soul_collections import get_collection, EMOTIONS, IMPORTANCE
+
+    ttl_delta = timedelta(days=WARM_DAYS)
+    total_backfilled = 0
+    total_sanitized = 0
+
+    for coll_name in (EMOTIONS, IMPORTANCE):
+        coll = await get_collection(coll_name)
+        if coll is None:
+            continue
+
+        # no_expire 文档不应带 expires_at，避免被 TTL 删除。
+        try:
+            if dry_run:
+                total_sanitized += await coll.count_documents(
+                    {"no_expire": True, "expires_at": {"$exists": True}}
+                )
+            else:
+                sanitized = await coll.update_many(
+                    {"no_expire": True, "expires_at": {"$exists": True}},
+                    {"$unset": {"expires_at": ""}},
+                )
+                total_sanitized += int(sanitized.modified_count)
+        except Exception as e:
+            logger.debug(f"[Lifecycle] sanitize no_expire failed for {coll_name}: {e}")
+
+        # 普通记录补齐 expires_at。
+        query = {
+            "$and": [
+                {"expires_at": {"$exists": False}},
+                {"$or": [{"no_expire": {"$exists": False}}, {"no_expire": False}]},
+            ]
+        }
+        if dry_run:
+            total_backfilled += await coll.count_documents(query)
+            continue
+
+        ops = []
+        cursor = coll.find(query, projection={"_id": 1, "created_at": 1}, batch_size=500)
+        async for doc in cursor:
+            created_at = doc.get("created_at")
+            if not isinstance(created_at, datetime):
+                created_at = now
+            ops.append(
+                UpdateOne(
+                    {"_id": doc["_id"]},
+                    {"$set": {"expires_at": created_at + ttl_delta}},
+                )
+            )
+            if len(ops) >= 500:
+                result = await coll.bulk_write(ops, ordered=False)
+                total_backfilled += int(result.modified_count)
+                ops = []
+        if ops:
+            result = await coll.bulk_write(ops, ordered=False)
+            total_backfilled += int(result.modified_count)
+
+    return {
+        "backfilled": int(total_backfilled),
+        "no_expire_sanitized": int(total_sanitized),
+    }
 
 
 async def _clean_orphan_edges(edges_coll, nodes_coll, dry_run: bool) -> int:

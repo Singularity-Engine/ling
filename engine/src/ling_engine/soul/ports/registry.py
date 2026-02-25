@@ -165,3 +165,9 @@ def get_port_registry() -> PortRegistry:
     if _registry is None:
         _registry = PortRegistry()
     return _registry
+
+
+def reset_port_registry_for_testing():
+    """测试辅助: 重置 PortRegistry 单例。"""
+    global _registry
+    _registry = None

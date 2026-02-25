@@ -21,9 +21,12 @@ _reconstructor = MemoryReconstructor()
 # Section 优先级 (数字越小越优先，注入预算: 最多 MAX_SECTIONS 个 section)
 SECTION_PRIORITY = {
     "relationship-context": 1,   # 必注入 (always)
+    "safety-alerts": 1.5,        # 安全护栏 (always if exists)
     "emotion-shift": 2,          # 实时感知 (always)
+    "core-blocks": 2.2,          # Letta 核心常驻记忆
     "abstract-context": 2.5,     # Phase 3b-beta: L1/L3 抽象记忆 (高于原始记忆)
     "relevant-memories": 3,      # 核心记忆 (含情感共振)
+    "procedural-memory": 3.5,    # LangMem 程序性策略
     "user-profile": 4,
     "entity-context": 4.5,       # SOTA: Mem0 实体记忆 (高于图谱推理)
     "graph-insights": 5,         # Phase 3: 知识图谱推理 / Graphiti 时序图谱
@@ -35,7 +38,7 @@ SECTION_PRIORITY = {
 MAX_SECTIONS = 6  # SOTA: 从 5 提升到 6 (新增 entity-context)
 
 # Phase 3: always sections — 不受 get_max_sections 限制
-ALWAYS_SECTIONS = {"relationship-context", "emotion-shift"}
+ALWAYS_SECTIONS = {"relationship-context", "emotion-shift", "safety-alerts"}
 
 # SOTA: 动态预算关键词 — 用户主动询问记忆时增加预算
 MEMORY_REQUEST_KEYWORDS = {"记得", "还记得", "上次", "之前", "以前", "你知道", "remember"}
@@ -113,6 +116,7 @@ class ContextBuilder:
         has_substance = (
             ctx.qdrant_memories
             or ctx.evermemos_memories
+            or ctx.event_sourced_memories
             or ctx.triggered_foresights
             or ctx.story_continuations
             or ctx.emotional_resonance
@@ -124,6 +128,9 @@ class ContextBuilder:
             or ctx.entity_memories                                              # SOTA: Mem0
             or ctx.graphiti_insights                                            # SOTA: Graphiti
             or (ctx.user_profile_summary and len(ctx.user_profile_summary.strip()) > 10)
+            or ctx.core_memory_blocks
+            or ctx.procedural_memories
+            or ctx.safety_alerts
             or ctx.relationship_stage != "stranger"
         )
         if not has_substance:
@@ -182,7 +189,37 @@ class ContextBuilder:
                 f"</emotion-shift>"
             )
 
+        # 安全提醒（优先级高，且不受节奏预算约束）
+        if ctx.safety_alerts:
+            safety_text = "\n".join(f"- {x}" for x in ctx.safety_alerts[:3])
+            candidates["safety-alerts"] = (
+                f"<safety-alerts>\n"
+                f"以下信息涉及安全或边界风险，请保守处理：\n"
+                f"{safety_text}\n"
+                f"禁止复述敏感细节，仅用于避免错误行为。\n"
+                f"</safety-alerts>"
+            )
+
+        # Letta Core Blocks：保持人格连续性的常驻块
+        if ctx.core_memory_blocks:
+            core_text = "\n".join(f"- {x}" for x in ctx.core_memory_blocks[:3])
+            candidates["core-blocks"] = (
+                f"<core-blocks>\n"
+                f"{core_text}\n"
+                f"</core-blocks>"
+            )
+
         if inject_memories:
+            # LangMem 程序性记忆：行为策略/长期规则
+            if ctx.procedural_memories:
+                procedural_text = "\n".join(f"- {x}" for x in ctx.procedural_memories[:5])
+                candidates["procedural-memory"] = (
+                    f"<procedural-memory>\n"
+                    f"对话中的长期策略规则:\n"
+                    f"{procedural_text}\n"
+                    f"</procedural-memory>"
+                )
+
             # 2.5. Phase 3b-beta: 抽象记忆 (优先级 2.5 — 高于原始记忆)
             if ctx.abstract_memories:
                 abstract_text = "\n".join(f"- {m}" for m in ctx.abstract_memories[:3])
@@ -195,7 +232,9 @@ class ContextBuilder:
                 )
 
             # 3. 相关记忆 + 情感共振合并 (优先级 3)
-            raw_memories = self._deduplicate(ctx.qdrant_memories + ctx.evermemos_memories)
+            raw_memories = self._deduplicate(
+                ctx.qdrant_memories + ctx.evermemos_memories + ctx.event_sourced_memories
+            )
             all_memories = [self._compress_memory(m) for m in raw_memories]
             if ctx.emotional_resonance:
                 all_memories.extend(ctx.emotional_resonance[:2])

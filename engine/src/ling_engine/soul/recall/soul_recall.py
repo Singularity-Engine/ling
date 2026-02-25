@@ -9,7 +9,6 @@ SOTA: +Graphiti 时序图谱第 8 路(替换), +Mem0 实体记忆第 11 路
 
 import asyncio
 import hashlib
-import re
 import time
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List, Dict, Any
@@ -17,12 +16,11 @@ from loguru import logger
 
 from ..models import SoulContext, RelationshipStage, STAGE_THRESHOLDS
 from ..narrative.memory_reconstructor import MemoryReconstructor
+from ..utils.async_tasks import create_logged_task
+from ..utils.validation import is_valid_user_id
 
 # Phase 2 遗留修复: MemoryReconstructor 单例 (不再每次 _emotional_resonance 都创建)
 _reconstructor = MemoryReconstructor()
-
-# P0: user_id 格式校验 — 纵深防御
-_USER_ID_PATTERN = re.compile(r'^[\w\-.:]{1,128}$')
 
 # 阶段行为指令
 STAGE_BEHAVIORS = {
@@ -151,6 +149,12 @@ def get_soul_recall() -> "SoulRecall":
     return _soul_recall_instance
 
 
+def reset_soul_recall_for_testing():
+    """测试辅助: 重置 SoulRecall 单例。"""
+    global _soul_recall_instance
+    _soul_recall_instance = None
+
+
 class SoulRecall:
     """灵魂级记忆召回"""
 
@@ -172,7 +176,7 @@ class SoulRecall:
         - memory_sources 统计 (🤖: 来源标注)
         """
         # P0: user_id 格式校验 — 纵深防御
-        if not user_id or not _USER_ID_PATTERN.match(user_id):
+        if not is_valid_user_id(user_id):
             logger.warning("[Soul] Invalid user_id format, skipping recall")
             return SoulContext()
 
@@ -188,6 +192,10 @@ class SoulRecall:
             # SOTA: Dict 解包 — 增加新路不需要改这里的顺序
             ctx.qdrant_memories = self._safe_list(results.get("qdrant"))
             ctx.evermemos_memories = self._safe_list(results.get("evermemos"))
+            ctx.event_sourced_memories = self._safe_list(results.get("fabric_events"))
+            if ctx.event_sourced_memories:
+                merged_memories = list(dict.fromkeys(ctx.evermemos_memories + ctx.event_sourced_memories))
+                ctx.evermemos_memories = merged_memories[: max(top_k * 3, len(ctx.evermemos_memories))]
             ctx.triggered_foresights = self._safe_list(results.get("foresight"))
             ctx.user_profile_summary = results.get("profile", "") if isinstance(results.get("profile"), str) else ""
             ctx.story_continuations = self._safe_list(results.get("stories"))
@@ -203,7 +211,10 @@ class SoulRecall:
                 milestone = relationship.get("recent_milestone")
                 if milestone:
                     ctx.recent_milestone = milestone
-                    asyncio.create_task(self._clear_milestone(coll=None, user_id=user_id))
+                    create_logged_task(
+                        self._clear_milestone(coll=None, user_id=user_id),
+                        "clear_milestone",
+                    )
             else:
                 ctx.stage_behavior_hint = _get_stage_behavior("stranger")
 
@@ -238,6 +249,9 @@ class SoulRecall:
 
             # SOTA: Mem0 实体记忆 (第 11 路)
             ctx.entity_memories = self._safe_list(results.get("mem0"))
+            ctx.core_memory_blocks = self._safe_list(results.get("core_blocks"))
+            ctx.procedural_memories = self._safe_list(results.get("procedural"))
+            ctx.safety_alerts = self._safe_list(results.get("safety_shadow"))
 
             # 阶段行为护栏
             try:
@@ -268,18 +282,39 @@ class SoulRecall:
 
         # 异步更新 recall_count
         if ctx.qdrant_memories or ctx.evermemos_memories:
-            asyncio.create_task(self._bump_recall_count(user_id))
+            create_logged_task(
+                self._bump_recall_count(user_id),
+                "bump_recall_count",
+            )
 
         # 计时
         elapsed_ms = (time.monotonic() - start) * 1000
         logger.info(
             f"[Soul] Recall completed in {elapsed_ms:.0f}ms "
             f"(qdrant={len(ctx.qdrant_memories)}, evermemos={len(ctx.evermemos_memories)}, "
+            f"fabric_events={len(ctx.event_sourced_memories)}, "
             f"foresight={len(ctx.triggered_foresights)}, resonance={len(ctx.emotional_resonance)}, "
             f"graph={len(ctx.graph_insights)}, graphiti={len(ctx.graphiti_insights)}, "
-            f"mem0={len(ctx.entity_memories)}, abstract={len(ctx.abstract_memories)}, "
+            f"mem0={len(ctx.entity_memories)}, core={len(ctx.core_memory_blocks)}, "
+            f"procedural={len(ctx.procedural_memories)}, safety={len(ctx.safety_alerts)}, "
+            f"abstract={len(ctx.abstract_memories)}, "
             f"collective={len(ctx.collective_wisdom)}, stage={ctx.relationship_stage})"
         )
+
+        # Phase 3: SLO 观测与自动调参输入
+        try:
+            from ..fabric.service import get_memory_fabric
+
+            create_logged_task(
+                get_memory_fabric().record_recall_observation(
+                    latency_ms=elapsed_ms,
+                    relationship_stage=ctx.relationship_stage,
+                    source_counts=ctx.memory_sources,
+                ),
+                "fabric_record_recall_observation",
+            )
+        except Exception:
+            pass
         return ctx
 
     @staticmethod
@@ -291,29 +326,126 @@ class SoulRecall:
         self, query: str, user_id: str, is_owner: bool, top_k: int
     ) -> Dict[str, Any]:
         """12 路并行召回 — 返回 Dict (SOTA: 替代 tuple)"""
+        from ..config import get_soul_config
+        from ..fabric.service import get_memory_fabric
+        from ..ports.initializer import ensure_ports_initialized
+
         emotion = _emotion_hint(query)
         recall_layer = _detect_recall_layer(query)
-
-        # 定义所有搜索任务 — 新增路只需在这里加一行
+        cfg = get_soul_config()
+        use_port_registry = cfg.enable_port_registry
+        # 先并发启动核心 4 路，再根据 relationship stage 决定是否扩展重路径。
         tasks = {
-            "qdrant": self._qdrant_search(query, user_id, top_k),
-            "evermemos": self._evermemos_search(query, user_id, is_owner, top_k, emotion),
-            "foresight": self._foresight_search(query, top_k=2),
-            "profile": self._profile_fetch(user_id),
-            "stories": self._active_stories(user_id),
-            "relationship": self._fetch_relationship(user_id),
-            "resonance": self._emotional_resonance(query, user_id, emotion),
-            "graph": self._graph_trace(query, user_id),        # MongoDB 旧图谱 (fallback)
-            "abstract": self._abstract_recall(user_id, recall_layer),
-            "collective": self._collective_wisdom(query, emotion),
-            "graphiti": self._graphiti_search(query, user_id, top_k),    # SOTA: 第 8 路替换
-            "mem0": self._mem0_entity_search(query, user_id, top_k),     # SOTA: 第 11 路
+            "qdrant": asyncio.create_task(self._qdrant_search(query, user_id, top_k)),
+            "foresight": asyncio.create_task(self._foresight_search(query, top_k=2)),
+            "profile": asyncio.create_task(self._profile_fetch(user_id)),
+            "relationship": asyncio.create_task(self._fetch_relationship(user_id)),
         }
+        if cfg.fabric_enabled:
+            tasks["fabric_events"] = asyncio.create_task(
+                self._fabric_event_memories(query, user_id, top_k),
+            )
+
+        try:
+            relationship = await tasks["relationship"]
+        except Exception:
+            relationship = None
+        relationship_stage = (
+            relationship.get("stage", "stranger")
+            if isinstance(relationship, dict) and relationship
+            else "stranger"
+        )
+        route_plan = get_memory_fabric().plan_recall(
+            relationship_stage=relationship_stage,
+            latency_budget_ms=cfg.recall_timeout_ms_extended,
+            query=query,
+        )
+        routes = route_plan.routes
+
+        if routes.get("core_blocks"):
+            tasks["core_blocks"] = self._core_blocks_fetch(user_id)
+        if routes.get("procedural"):
+            tasks["procedural"] = self._procedural_fetch(user_id)
+        if routes.get("safety_shadow"):
+            tasks["safety_shadow"] = self._safety_shadow_fetch(user_id)
+
+        if any(
+            routes.get(k)
+            for k in (
+                "evermemos",
+                "stories",
+                "resonance",
+                "abstract",
+                "collective",
+                "graphiti",
+                "mem0",
+                "graph",
+            )
+        ):
+            if use_port_registry and (cfg.graphiti_enabled or cfg.mem0_enabled):
+                ensure_ports_initialized()
+
+            if routes.get("evermemos"):
+                tasks["evermemos"] = self._evermemos_search(query, user_id, is_owner, top_k, emotion)
+            if routes.get("stories"):
+                tasks["stories"] = self._active_stories(user_id)
+            if routes.get("resonance"):
+                tasks["resonance"] = self._emotional_resonance(query, user_id, emotion)
+            if routes.get("abstract"):
+                tasks["abstract"] = self._abstract_recall(user_id, recall_layer)
+            if routes.get("collective"):
+                tasks["collective"] = self._collective_wisdom(query, emotion)
+            if routes.get("graphiti"):
+                tasks["graphiti"] = (
+                    self._port_registry_search("graphiti", query, user_id, top_k)
+                    if use_port_registry
+                    else self._graphiti_search(query, user_id, top_k)
+                )
+            if routes.get("mem0"):
+                tasks["mem0"] = (
+                    self._port_registry_search("mem0", query, user_id, top_k)
+                    if use_port_registry
+                    else self._mem0_entity_search(query, user_id, top_k)
+                )
+            if routes.get("graph"):
+                tasks["graph"] = self._graph_trace(query, user_id)
+        else:
+            logger.debug("[Soul] Stranger recall fast-path: running 4 core routes only")
+        logger.debug(
+            "[MemoryFabric] recall complexity={} budget_tier={} routes={} providers={}",
+            route_plan.query_complexity,
+            route_plan.budget_tier,
+            sorted([k for k, enabled in routes.items() if enabled]),
+            route_plan.selected_providers,
+        )
 
         keys = list(tasks.keys())
         coros = list(tasks.values())
         results = await asyncio.gather(*coros, return_exceptions=True)
         return dict(zip(keys, results))
+
+    async def _port_registry_search(
+        self,
+        port_name: str,
+        query: str,
+        user_id: str,
+        top_k: int,
+    ) -> List[str]:
+        """通过 PortRegistry 调用指定 Port 搜索（启用时替代直连 adapter）。"""
+        try:
+            from ..ports.registry import get_port_registry
+
+            port = get_port_registry().get_port(port_name)
+            if port is None:
+                return []
+            results = await asyncio.wait_for(
+                port.search(query, user_id, top_k=top_k),
+                timeout=port.timeout_seconds,
+            )
+            return [r.content for r in results if r.content]
+        except Exception as e:
+            logger.debug(f"[Soul] PortRegistry search failed ({port_name}): {e}")
+            return []
 
     async def _qdrant_search(self, query: str, user_id: str, top_k: int) -> List[str]:
         """Qdrant 短期记忆搜索"""
@@ -322,7 +454,7 @@ class SoulRecall:
             loop = asyncio.get_event_loop()
             results = await asyncio.wait_for(
                 loop.run_in_executor(None, search_similar_memories, query, user_id, top_k),
-                timeout=0.4,
+                timeout=0.2,
             )
             if results:
                 return [item[1] for item in results if len(item) >= 2 and item[1]]
@@ -360,11 +492,28 @@ class SoulRecall:
             logger.debug(f"[Soul] EverMemOS search failed: {e}")
         return []
 
+    async def _fabric_event_memories(self, query: str, user_id: str, top_k: int) -> List[str]:
+        """从 MemoryFabric 事件源补充回忆，确保 /v1/memory/events 可被主召回消费。"""
+        try:
+            from ..fabric.service import get_memory_fabric
+            return await asyncio.wait_for(
+                get_memory_fabric().fetch_event_memories_for_recall(
+                    user_id=user_id,
+                    query=query,
+                    tenant_id="default",
+                    limit=max(1, top_k),
+                ),
+                timeout=0.18,
+            )
+        except Exception as e:
+            logger.debug(f"[Soul] MemoryFabric event recall failed: {e}")
+            return []
+
     async def _foresight_search(self, query: str, top_k: int = 2) -> List[str]:
         """EverMemOS 前瞻记忆搜索"""
         try:
             from ...tools.evermemos_client import search_foresight
-            results = await search_foresight(query, top_k=top_k, timeout=0.5)
+            results = await search_foresight(query, top_k=top_k, timeout=0.2)
             if results:
                 return [
                     item.get("content", "") if isinstance(item, dict) else str(item)
@@ -645,6 +794,36 @@ class SoulRecall:
             logger.debug(f"[Soul] Mem0 search failed: {e}")
             return []
 
+    async def _core_blocks_fetch(self, user_id: str) -> List[str]:
+        """Phase 1: Letta Core Blocks 获取。"""
+        try:
+            from ..fabric.service import get_memory_fabric
+
+            return await get_memory_fabric().fetch_core_blocks(user_id=user_id)
+        except Exception as e:
+            logger.debug(f"[Soul] Core blocks fetch failed: {e}")
+            return []
+
+    async def _procedural_fetch(self, user_id: str) -> List[str]:
+        """Phase 1: LangMem 程序性记忆获取。"""
+        try:
+            from ..fabric.service import get_memory_fabric
+
+            return await get_memory_fabric().fetch_procedural_rules(user_id=user_id)
+        except Exception as e:
+            logger.debug(f"[Soul] Procedural memory fetch failed: {e}")
+            return []
+
+    async def _safety_shadow_fetch(self, user_id: str) -> List[str]:
+        """Phase 2: 安全影子记忆提醒。"""
+        try:
+            from ..fabric.service import get_memory_fabric
+
+            return await get_memory_fabric().fetch_safety_alerts(user_id=user_id)
+        except Exception as e:
+            logger.debug(f"[Soul] Safety shadow fetch failed: {e}")
+            return []
+
     async def _life_context(self, user_id: str) -> tuple:
         """Phase 4: 获取当前人生章节 + 情感基线
 
@@ -657,7 +836,7 @@ class SoulRecall:
             from ..storage.soul_collections import get_collection, LIFE_CHAPTERS, EMOTIONS
             # 当前人生章节
             lc_coll = await get_collection(LIFE_CHAPTERS)
-            if lc_coll:
+            if lc_coll is not None:
                 doc = await lc_coll.find_one(
                     {"user_id": user_id, "ended_at": None},
                     sort=[("started_at", -1)],
@@ -669,7 +848,7 @@ class SoulRecall:
 
             # 情感基线: 近 30 天最常见情绪
             em_coll = await get_collection(EMOTIONS)
-            if em_coll:
+            if em_coll is not None:
                 from datetime import timedelta
                 cutoff = datetime.now(timezone.utc) - timedelta(days=30)
                 pipeline = [
@@ -740,6 +919,7 @@ class SoulRecall:
             if doc:
                 # v3: 分阶段关系冷却
                 last_interaction = doc.get("last_interaction")
+                stage_locked_by_cooling = False
                 if last_interaction:
                     if isinstance(last_interaction, str):
                         last_interaction = datetime.fromisoformat(last_interaction)
@@ -752,11 +932,19 @@ class SoulRecall:
                         old_score = doc.get("accumulated_score", 0)
                         decay = old_score * COOLING_DECAY_RATE
                         new_score = max(0, old_score - decay)
-                        asyncio.create_task(
-                            self._cooling_write(coll, user_id, new_score, new_stage,
-                                                cooled_from_stage=stage))
+                        create_logged_task(
+                            self._cooling_write(
+                                coll,
+                                user_id,
+                                new_score,
+                                new_stage,
+                                cooled_from_stage=stage,
+                            ),
+                            "relationship_cooling_downgrade",
+                        )
                         doc["accumulated_score"] = new_score
                         doc["stage"] = new_stage
+                        stage_locked_by_cooling = True
                         # Phase 3b: 标记回归状态供 context_builder 注入温暖叙事
                         doc["returning_from_absence"] = True
                     elif days_since > COOLING_DAYS:
@@ -764,8 +952,10 @@ class SoulRecall:
                         old_score = doc.get("accumulated_score", 0)
                         decay = old_score * COOLING_DECAY_RATE
                         new_score = max(0, old_score - decay)
-                        asyncio.create_task(
-                            self._cooling_write(coll, user_id, new_score))
+                        create_logged_task(
+                            self._cooling_write(coll, user_id, new_score),
+                            "relationship_cooling_decay",
+                        )
                         doc["accumulated_score"] = new_score
                         doc["returning_from_absence"] = True
 
@@ -786,7 +976,8 @@ class SoulRecall:
                 # 计算阶段
                 score = doc.get("accumulated_score", 0)
                 total_days = doc.get("total_days_active", 0)
-                doc["stage"] = _calculate_stage(score, total_days, user_id=user_id)
+                if not stage_locked_by_cooling:
+                    doc["stage"] = _calculate_stage(score, total_days, user_id=user_id)
                 return doc
 
             return None

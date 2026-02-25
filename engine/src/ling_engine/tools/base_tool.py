@@ -9,6 +9,22 @@ from langchain_core.tools import tool
 from loguru import logger
 
 
+def _schedule_background_task(coro, label: str):
+    """统一回收后台任务异常，避免静默丢失。"""
+    task = asyncio.create_task(coro)
+
+    def _on_done(done_task: asyncio.Task):
+        try:
+            done_task.result()
+        except asyncio.CancelledError:
+            logger.debug(f"[Tool] 后台任务取消: {label}")
+        except Exception as e:
+            logger.warning(f"[Tool] 后台任务失败 ({label}): {e}")
+
+    task.add_done_callback(_on_done)
+    return task
+
+
 class BaseTool(ABC):
     """基础工具抽象类，所有工具都应继承此类"""
     
@@ -101,8 +117,9 @@ class BaseTool(ABC):
                     from .evermemos_client import record_tool_call
                     from ..bff_integration.auth.user_context import UserContextManager
                     _current_uid = UserContextManager.get_current_user_id() or "unknown"
-                    asyncio.create_task(
-                        record_tool_call(self.name, kwargs, result, success=True, user_id=_current_uid)
+                    _schedule_background_task(
+                        record_tool_call(self.name, kwargs, result, success=True, user_id=_current_uid),
+                        f"{self.name}:record_tool_call_success",
                     )
                 except Exception:
                     pass  # EverMemOS 不可用不影响工具执行
@@ -117,8 +134,9 @@ class BaseTool(ABC):
                     from .evermemos_client import record_tool_call
                     from ..bff_integration.auth.user_context import UserContextManager
                     _current_uid = UserContextManager.get_current_user_id() or "unknown"
-                    asyncio.create_task(
-                        record_tool_call(self.name, kwargs, error_msg, success=False, user_id=_current_uid)
+                    _schedule_background_task(
+                        record_tool_call(self.name, kwargs, error_msg, success=False, user_id=_current_uid),
+                        f"{self.name}:record_tool_call_failure",
                     )
                 except Exception:
                     pass

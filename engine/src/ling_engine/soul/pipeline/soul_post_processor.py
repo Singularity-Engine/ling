@@ -5,9 +5,12 @@ SOTA: +Graphiti 图谱写入, +Mem0 对话记忆写入
 """
 
 import asyncio
-from datetime import datetime, timezone
+import hashlib
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from loguru import logger
+
+from ..utils.validation import is_valid_user_id
 
 # 情感关键词 (来自 v3 设计的 InConversationTracker)
 EMOTION_KEYWORDS = {
@@ -28,16 +31,37 @@ def _has_emotion_signal(text: str) -> bool:
 class SoulPostProcessor:
     """灵魂后处理器 — 异步写入情感、重要度、关系信号到 MongoDB"""
 
+    @staticmethod
+    def _is_flashbulb(extracted, intensity_threshold: float) -> bool:
+        """统一 flashbulb 判定，确保 emotion/importance 使用同一规则。"""
+        return bool(
+            extracted.emotion
+            and extracted.importance
+            and extracted.emotion.is_emotional_peak
+            and extracted.emotion.emotion_intensity >= intensity_threshold
+            and extracted.importance.score >= 0.7
+        )
+
     async def process(
         self,
         user_input: str,
         ai_response: str,
         user_id: str,
         client_uid: str = "",
+        conversation_id: str = "",
     ):
         """处理一轮对话的后处理"""
+        if not is_valid_user_id(user_id):
+            logger.warning("[Soul] Invalid user_id format, skipping post-process")
+            return
         async with _semaphore:
-            await self._process_inner(user_input, ai_response, user_id, client_uid)
+            await self._process_inner(
+                user_input=user_input,
+                ai_response=ai_response,
+                user_id=user_id,
+                client_uid=client_uid,
+                conversation_id=conversation_id,
+            )
 
     async def _process_inner(
         self,
@@ -45,6 +69,7 @@ class SoulPostProcessor:
         ai_response: str,
         user_id: str,
         client_uid: str = "",
+        conversation_id: str = "",
     ):
         """内部处理逻辑"""
         # 1. 敏感内容检查 (NEVER_STORE 阻止, CAUTION 先提取后脱敏)
@@ -99,6 +124,15 @@ class SoulPostProcessor:
             # 4. 并行写入 (try/finally 防泄漏) — SOTA: +Graphiti +Mem0
             try:
                 results = await asyncio.gather(
+                    self._ingest_memory_atom(
+                        extracted=extracted,
+                        user_input=user_input,
+                        ai_response=ai_response,
+                        user_id=user_id,
+                        client_uid=client_uid,
+                        conversation_id=conversation_id,
+                        is_caution=is_caution,
+                    ),
                     self._write_emotion(extracted, user_id),
                     self._write_importance(extracted, user_id),
                     self._update_relationship(extracted, user_id),
@@ -110,7 +144,7 @@ class SoulPostProcessor:
                     return_exceptions=True,
                 )
                 task_names = [
-                    "emotion", "importance", "relationship", "breakthrough",
+                    "memory_atom", "emotion", "importance", "relationship", "breakthrough",
                     "story", "graph", "graphiti", "mem0",
                 ]
                 for i, r in enumerate(results):
@@ -122,18 +156,140 @@ class SoulPostProcessor:
         except Exception as e:
             logger.warning(f"[Soul] PostProcessor failed (non-fatal): {e}")
 
+    async def _ingest_memory_atom(
+        self,
+        extracted,
+        user_input: str,
+        ai_response: str,
+        user_id: str,
+        client_uid: str = "",
+        conversation_id: str = "",
+        is_caution: bool = False,
+    ):
+        """将对话轮次写入 Memory Fabric 的统一 MemoryAtom 主链路。"""
+        try:
+            from ..config import get_soul_config
+
+            cfg = get_soul_config()
+            if not (cfg.enabled and cfg.fabric_enabled):
+                return
+
+            from ..fabric.api_models import MemoryEventRequest
+            from ..fabric.service import get_memory_fabric
+
+            flashbulb = self._is_flashbulb(extracted, cfg.decay_flashbulb_intensity)
+            memory_type = "flashbulb_episode" if flashbulb else "episode"
+            event_time = datetime.now(timezone.utc)
+            idempotency_key = self._build_event_idempotency_key(
+                user_id=user_id,
+                client_uid=client_uid,
+                conversation_id=conversation_id,
+                user_input=user_input,
+                ai_response=ai_response,
+                event_time=event_time,
+            )
+            entities = []
+            relations = []
+            if extracted.semantic_graph:
+                entities = [
+                    str(n.get("label", "")).strip()
+                    for n in extracted.semantic_graph.get("nodes", [])[:12]
+                    if str(n.get("label", "")).strip()
+                ]
+                relations = [
+                    {
+                        "source": str(e.get("source", "")),
+                        "target": str(e.get("target", "")),
+                        "relation": str(e.get("relation", "context")),
+                    }
+                    for e in extracted.semantic_graph.get("edges", [])[:12]
+                    if e.get("source") and e.get("target")
+                ]
+
+            affect = {}
+            if extracted.emotion:
+                affect = {
+                    "user_emotion": extracted.emotion.user_emotion,
+                    "emotion_intensity": extracted.emotion.emotion_intensity,
+                    "is_emotional_peak": extracted.emotion.is_emotional_peak,
+                    "trajectory": extracted.emotion.emotional_trajectory,
+                }
+
+            salience = extracted.importance.score if extracted.importance else 0.0
+            trust_score = 0.45 if is_caution else 0.75
+            confidence = 0.75 if extracted.importance else 0.6
+            content = f"用户: {user_input.strip()}\nAI: {ai_response.strip()}"
+
+            req = MemoryEventRequest(
+                idempotency_key=idempotency_key,
+                tenant_id="default",
+                user_id=user_id,
+                session_id=client_uid or None,
+                agent_id="ling",
+                event_time=event_time,
+                source="conversation_post_processor",
+                modality="text",
+                memory_type=memory_type,
+                content_raw=content[:8000],
+                content_norm=content[:8000],
+                entities=entities,
+                relations=relations,
+                affect=affect,
+                salience=max(0.0, min(1.0, float(salience))),
+                confidence=max(0.0, min(1.0, float(confidence))),
+                trust_score=max(0.0, min(1.0, float(trust_score))),
+                provenance={
+                    "pipeline": "soul_post_processor",
+                    "conversation_id": conversation_id,
+                    "client_uid": client_uid,
+                },
+                retention_policy="flashbulb" if flashbulb else "default",
+                pii_tags=["sensitive"] if is_caution else [],
+                legal_basis="service_operation",
+            )
+            await get_memory_fabric().ingest_event(req=req, actor_id=user_id)
+        except Exception as e:
+            logger.warning(f"[Soul] MemoryAtom ingest failed (non-fatal): {e}")
+
+    @staticmethod
+    def _build_event_idempotency_key(
+        user_id: str,
+        client_uid: str,
+        conversation_id: str,
+        user_input: str,
+        ai_response: str,
+        event_time: datetime,
+    ) -> str:
+        """构造对话轮次幂等键，尽量吸收重试请求。"""
+        raw = (
+            f"{user_id}|{client_uid}|{conversation_id}|"
+            f"{event_time.replace(microsecond=0).isoformat()}|"
+            f"{user_input.strip()}|{ai_response.strip()}"
+        )
+        digest = hashlib.sha256(raw.encode("utf-8")).hexdigest()
+        return f"turn_{digest}"
+
     async def _write_emotion(self, extracted, user_id: str):
         """写入情感标注到 MongoDB"""
         if not extracted.emotion:
             return
         try:
             from ..storage.soul_collections import get_collection, EMOTIONS
+            from ..config import get_soul_config
             coll = await get_collection(EMOTIONS)
             if coll is None:
                 return
 
             doc = extracted.emotion.model_dump()
             doc["user_id"] = user_id
+            created_at = doc.get("created_at")
+            if not isinstance(created_at, datetime):
+                created_at = datetime.now(timezone.utc)
+                doc["created_at"] = created_at
+            if self._is_flashbulb(extracted, get_soul_config().decay_flashbulb_intensity):
+                doc["no_expire"] = True
+            else:
+                doc["expires_at"] = created_at + timedelta(days=180)
             await coll.insert_one(doc)
         except Exception as e:
             logger.debug(f"[Soul] Emotion write failed: {e}")
@@ -151,14 +307,19 @@ class SoulPostProcessor:
 
             # v3: flashbulb 三重条件: peak + intensity >= threshold + importance >= 0.7
             cfg = get_soul_config()
-            if (extracted.emotion
-                    and extracted.emotion.is_emotional_peak
-                    and extracted.emotion.emotion_intensity >= cfg.decay_flashbulb_intensity
-                    and extracted.importance.score >= 0.7):
+            if self._is_flashbulb(extracted, cfg.decay_flashbulb_intensity):
                 extracted.importance.is_flashbulb = True
 
             doc = extracted.importance.model_dump()
             doc["user_id"] = user_id
+            created_at = doc.get("created_at")
+            if not isinstance(created_at, datetime):
+                created_at = datetime.now(timezone.utc)
+                doc["created_at"] = created_at
+            if doc.get("is_flashbulb"):
+                doc["no_expire"] = True
+            else:
+                doc["expires_at"] = created_at + timedelta(days=180)
             await coll.insert_one(doc)
         except Exception as e:
             logger.debug(f"[Soul] Importance write failed: {e}")
@@ -288,6 +449,7 @@ class SoulPostProcessor:
             return
         try:
             from ..storage.soul_collections import get_collection, RELATIONSHIPS
+            from pymongo import ReturnDocument
             coll = await get_collection(RELATIONSHIPS)
             if coll is None:
                 return
@@ -296,95 +458,123 @@ class SoulPostProcessor:
             today_str = now.strftime("%Y-%m-%d")
 
             # 计算本轮信号总权重
-            total_weight = sum(
+            base_weight = sum(
                 s.get("weight", 1.0) for s in extracted.relationship_signals
             )
+            total_weight = base_weight
+            existing = await coll.find_one(
+                {"user_id": user_id},
+                {
+                    "cooling_warned": 1,
+                    "cooled_at": 1,
+                    "last_interaction_date": 1,
+                },
+            )
 
-            # 使用 upsert 更新
-            existing = await coll.find_one({"user_id": user_id})
+            # Phase 3b: 回归温暖 — 冷却后首次互动给予 1.5x 权重加成
+            if existing and existing.get("cooling_warned"):
+                total_weight *= 1.5
 
-            if existing:
-                # Phase 3b: 回归温暖 — 冷却后首次互动给予 1.5x 权重加成
-                if existing.get("cooling_warned"):
-                    total_weight *= 1.5
+            # P1: 关系弹性 — 降级后 7 天内回来, 额外 2x 加速 (与 1.5x 取 max)
+            cooled_at = existing.get("cooled_at") if existing else None
+            if cooled_at:
+                if isinstance(cooled_at, str):
+                    cooled_at = datetime.fromisoformat(cooled_at)
+                days_since_cool = (now - cooled_at).days
+                if days_since_cool <= 7:
+                    total_weight = max(total_weight, base_weight * 2.0)
 
-                # P1: 关系弹性 — 降级后 7 天内回来, 额外 2x 加速 (与 1.5x 取 max)
-                cooled_at = existing.get("cooled_at")
-                if cooled_at:
-                    if isinstance(cooled_at, str):
-                        cooled_at = datetime.fromisoformat(cooled_at)
-                    days_since_cool = (now - cooled_at).days
-                    if days_since_cool <= 7:
-                        total_weight = max(total_weight, sum(
-                            s.get("weight", 1.0) for s in extracted.relationship_signals
-                        ) * 2.0)
-
-                # P2: 关系里程碑检测 — 阶段升级时写入 milestone
-                old_stage = existing.get("stage", "stranger")
-                old_date = existing.get("last_interaction_date")
-                new_score = existing.get("accumulated_score", 0) + total_weight
-                new_days = existing.get("total_days_active", 0) + (1 if old_date != today_str else 0)
-
-                from ..recall.soul_recall import _calculate_stage
-                new_stage = _calculate_stage(new_score, new_days, user_id)
-                stage_order = {"stranger": 0, "acquaintance": 1, "familiar": 2, "close": 3, "soulmate": 4}
-
-                # 更新
-                update_ops = {
-                    "$inc": {
-                        "accumulated_score": total_weight,
-                        "total_conversations": 1,
-                    },
-                    "$set": {
-                        "last_interaction": now,
-                        "last_interaction_date": today_str,
-                        "cooling_warned": False,
-                        "cooled_from_stage": None,
-                        "cooled_at": None,
-                        "updated_at": now,
-                    },
-                    "$push": {
-                        "signal_history": {
-                            "$each": [
-                                {**s, "timestamp": now.isoformat()}
-                                for s in extracted.relationship_signals[:5]
-                            ],
-                            "$slice": -50,  # 只保留最近 50 条
-                        }
-                    },
-                }
-
-                # P2: 阶段升级里程碑
-                if (new_stage != old_stage
-                        and stage_order.get(new_stage, 0) > stage_order.get(old_stage, 0)):
-                    update_ops["$set"]["stage"] = new_stage
-                    update_ops["$set"]["stage_entered_at"] = now
-                    update_ops["$set"]["recent_milestone"] = f"升级到{new_stage}"
-
-                # Round 3: total_days_active 更新 — 检测日期变化
-                if old_date != today_str:
-                    update_ops["$inc"]["total_days_active"] = 1
-
-                await coll.update_one({"user_id": user_id}, update_ops)
-            else:
-                # 新建
-                doc = {
+            # 原子更新基础字段，并返回更新后的文档用于阶段计算。
+            update_ops = {
+                "$inc": {
+                    "accumulated_score": total_weight,
+                    "total_conversations": 1,
+                },
+                "$set": {
+                    "last_interaction": now,
+                    "cooling_warned": False,
+                    "cooled_from_stage": None,
+                    "cooled_at": None,
+                    "updated_at": now,
+                },
+                "$setOnInsert": {
                     "user_id": user_id,
                     "stage": "stranger",
                     "stage_entered_at": now,
-                    "total_conversations": 1,
                     "total_days_active": 1,
-                    "accumulated_score": total_weight,
-                    "signal_history": [
-                        {**s, "timestamp": now.isoformat()}
-                        for s in extracted.relationship_signals[:5]
-                    ],
-                    "last_interaction": now,
                     "last_interaction_date": today_str,
-                    "cooling_warned": False,
-                    "updated_at": now,
-                }
-                await coll.insert_one(doc)
+                },
+                "$push": {
+                    "signal_history": {
+                        "$each": [
+                            {**s, "timestamp": now.isoformat()}
+                            for s in extracted.relationship_signals[:5]
+                        ],
+                        "$slice": -50,  # 只保留最近 50 条
+                    }
+                },
+            }
+
+            updated = await coll.find_one_and_update(
+                {"user_id": user_id},
+                update_ops,
+                upsert=True,
+                return_document=ReturnDocument.AFTER,
+            )
+            if not updated:
+                return
+
+            # 并发安全: 同一自然日仅允许一次 +1。
+            if existing and existing.get("last_interaction_date") != today_str:
+                await coll.update_one(
+                    {
+                        "_id": updated["_id"],
+                        "last_interaction_date": {"$ne": today_str},
+                    },
+                    {
+                        "$inc": {"total_days_active": 1},
+                        "$set": {"last_interaction_date": today_str},
+                    },
+                )
+
+            refreshed = await coll.find_one(
+                {"_id": updated["_id"]},
+                {"accumulated_score": 1, "total_days_active": 1, "stage": 1},
+            )
+            if refreshed:
+                updated = refreshed
+
+            from ..recall.soul_recall import _calculate_stage
+
+            stage_order = {
+                "stranger": 0,
+                "acquaintance": 1,
+                "familiar": 2,
+                "close": 3,
+                "soulmate": 4,
+            }
+            old_stage = updated.get("stage", "stranger")
+            new_stage = _calculate_stage(
+                updated.get("accumulated_score", 0),
+                updated.get("total_days_active", 0),
+                user_id,
+            )
+
+            # CAS: 仅当 stage 仍是旧值时升级，避免并发重复里程碑。
+            if (
+                new_stage != old_stage
+                and stage_order.get(new_stage, 0) > stage_order.get(old_stage, 0)
+            ):
+                await coll.update_one(
+                    {"_id": updated["_id"], "stage": old_stage},
+                    {
+                        "$set": {
+                            "stage": new_stage,
+                            "stage_entered_at": now,
+                            "recent_milestone": f"升级到{new_stage}",
+                        }
+                    },
+                )
 
         except Exception as e:
             logger.debug(f"[Soul] Relationship update failed: {e}")
@@ -400,3 +590,9 @@ def get_soul_post_processor() -> SoulPostProcessor:
     if _post_processor is None:
         _post_processor = SoulPostProcessor()
     return _post_processor
+
+
+def reset_soul_post_processor_for_testing():
+    """测试辅助: 重置后处理器单例。"""
+    global _post_processor
+    _post_processor = None

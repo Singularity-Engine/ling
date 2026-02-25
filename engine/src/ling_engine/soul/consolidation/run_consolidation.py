@@ -37,21 +37,22 @@ def _load_env():
 
 LOCK_FILE = Path.home() / ".openclaw" / "soul-consolidator.lock"
 
-# Telegram 通知
-TELEGRAM_BOT_TOKEN = os.getenv(
-    "TELEGRAM_BOT_TOKEN",
-    "8258673837:AAFNjusVknlFZawj5YRa-FX2uHPLIvQ1an4",
-)
-TELEGRAM_CHAT_ID = "8448994241"
-
-
 def _notify_telegram(text: str):
     """发送 Telegram 通知 — 整理完成/失败时调用"""
+    token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+    chat_id = os.getenv("TELEGRAM_CHAT_ID", "").strip()
+
+    if not token or not chat_id:
+        logger.warning(
+            "[Consolidator] Telegram not configured, skip notification "
+            "(set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID)"
+        )
+        return
     try:
         import urllib.request
         import json
-        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-        data = json.dumps({"chat_id": TELEGRAM_CHAT_ID, "text": text}).encode()
+        url = f"https://api.telegram.org/bot{token}/sendMessage"
+        data = json.dumps({"chat_id": chat_id, "text": text}).encode()
         req = urllib.request.Request(
             url, data=data,
             headers={"Content-Type": "application/json"},
