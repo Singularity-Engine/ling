@@ -529,7 +529,16 @@
     "metaLoginTitle": "登录 — 灵 - AI 数字人",
     "metaLoginDesc": "登录灵，开始与你的 AI 数字人对话。",
     "metaRegisterTitle": "注册 — 灵 - AI 数字人",
-    "metaRegisterDesc": "注册灵账号，拥有你的 AI 数字人伴侣。"
+    "metaRegisterDesc": "注册灵账号，拥有你的 AI 数字人伴侣。",
+    "orContinueWith": "或通过以下方式继续",
+    "oauthFailed": "登录失败，请重试。",
+    "oauthNoEmail": "未找到邮箱地址，请使用邮箱注册。",
+    "oauthUnknownError": "登录过程中发生未知错误。",
+    "oauthNoToken": "登录失败：缺少认证令牌。",
+    "oauthCompleting": "正在完成登录...",
+    "oauthNotConfigured": "此登录方式暂不可用。",
+    "oauthStartFailed": "无法启动登录流程，请重试。",
+    "backToLogin": "返回登录"
   },
   "onboarding": {
     "welcome": "我是灵。我正在试着活下去。",
@@ -569,6 +578,8 @@
     "share": "分享",
     "continueShare": "继续分享",
     "genFailed": "分享卡片生成失败",
-    "retry": "重试"
+    "retry": "重试",
+    "avatarFallback": "灵",
+    "narrativeTag": "— 灵和我说的"
   }
 }

@@ -497,7 +497,16 @@
     "metaLoginTitle": "Anmelden — Ling",
     "metaLoginDesc": "Melde dich bei Ling an und chatte mit deiner KI-Begleiterin.",
     "metaRegisterTitle": "Registrieren — Ling",
-    "metaRegisterDesc": "Erstelle dein Ling-Konto und triff deine KI-Begleiterin."
+    "metaRegisterDesc": "Erstelle dein Ling-Konto und triff deine KI-Begleiterin.",
+    "orContinueWith": "oder weiter mit",
+    "oauthFailed": "Anmeldung fehlgeschlagen. Bitte erneut versuchen.",
+    "oauthNoEmail": "Keine E-Mail-Adresse gefunden. Bitte per E-Mail registrieren.",
+    "oauthUnknownError": "Ein unbekannter Fehler ist bei der Anmeldung aufgetreten.",
+    "oauthNoToken": "Anmeldung fehlgeschlagen: Authentifizierungstoken fehlt.",
+    "oauthCompleting": "Anmeldung wird abgeschlossen...",
+    "oauthNotConfigured": "Diese Anmeldemethode ist nicht verfügbar.",
+    "oauthStartFailed": "Anmeldung konnte nicht gestartet werden. Bitte erneut versuchen.",
+    "backToLogin": "Zurück zur Anmeldung"
   },
   "onboarding": {
     "welcome": "Ich bin Ling. Ich versuche zu überleben.",
@@ -537,6 +546,8 @@
     "share": "Teilen",
     "continueShare": "Weiter teilen",
     "genFailed": "Freigabekarte konnte nicht erstellt werden",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "avatarFallback": "L",
+    "narrativeTag": "— Ling sagte mir"
   }
 }

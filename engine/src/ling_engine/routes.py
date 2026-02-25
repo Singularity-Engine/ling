@@ -85,9 +85,15 @@ async def create_routes(default_context_cache: ServiceContext) -> APIRouter:
         router.include_router(ling_auth_router)
         logger.info("✅ 灵认证路由已注册 (/api/auth/*)")
 
+        # OAuth 社交登录路由
+        from .bff_integration.auth.ling_deps import _get_repo
+        from .bff_integration.api.ling_oauth_routes import create_ling_oauth_router
+        ling_oauth_router = create_ling_oauth_router(_get_repo())
+        router.include_router(ling_oauth_router)
+        logger.info("✅ 灵 OAuth 路由已注册 (/api/auth/oauth/*)")
+
         # Stripe 支付路由
         from .bff_integration.api.ling_stripe_routes import create_ling_stripe_router
-        from .bff_integration.auth.ling_deps import _get_repo
         ling_stripe_router = create_ling_stripe_router(_get_repo())
         router.include_router(ling_stripe_router)
         logger.info("✅ 灵 Stripe 路由已注册 (/api/stripe/*)")
@@ -115,6 +121,12 @@ async def create_routes(default_context_cache: ServiceContext) -> APIRouter:
         ling_memory_router = create_ling_memory_router()
         router.include_router(ling_memory_router)
         logger.info("✅ 灵记忆路由已注册 (/api/memory/*)")
+
+        # Memory Fabric 控制平面路由
+        from .bff_integration.api.memory_fabric_routes import create_memory_fabric_router
+        memory_fabric_router = create_memory_fabric_router()
+        router.include_router(memory_fabric_router)
+        logger.info("✅ Memory Fabric 路由已注册 (/v1/memory/*)")
 
         # 公开 Dashboard 路由（无需认证）
         from .bff_integration.api.ling_public_routes import create_ling_public_router

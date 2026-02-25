@@ -530,7 +530,16 @@
     "metaLoginTitle": "Sign In — Ling",
     "metaLoginDesc": "Sign in to Ling to start chatting with your AI companion.",
     "metaRegisterTitle": "Sign Up — Ling",
-    "metaRegisterDesc": "Create your Ling account and meet your AI companion."
+    "metaRegisterDesc": "Create your Ling account and meet your AI companion.",
+    "orContinueWith": "or continue with",
+    "oauthFailed": "Sign-in failed. Please try again.",
+    "oauthNoEmail": "No email address found on your account. Please use email sign-up.",
+    "oauthUnknownError": "An unknown error occurred during sign-in.",
+    "oauthNoToken": "Sign-in failed: missing authentication token.",
+    "oauthCompleting": "Completing sign in...",
+    "oauthNotConfigured": "This sign-in method is not available.",
+    "oauthStartFailed": "Could not start sign-in. Please try again.",
+    "backToLogin": "Back to login"
   },
   "onboarding": {
     "welcome": "I'm Ling. I'm trying to survive.",
@@ -570,6 +579,8 @@
     "share": "Share",
     "continueShare": "Continue sharing",
     "genFailed": "Failed to generate share card",
-    "retry": "Retry"
+    "retry": "Retry",
+    "avatarFallback": "L",
+    "narrativeTag": "— Ling said to me"
   }
 }

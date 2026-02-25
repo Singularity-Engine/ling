@@ -25,7 +25,7 @@ if (typeof window !== 'undefined') {
   initSentry();
   initAnalytics();
 
-  window.getLAppAdapter = () => LAppAdapter.getInstance();
+  window.getLAppAdapter = () => LAppAdapter.getInstance() as unknown as LAppAdapterLike;
 
   // Render React immediately — don't block on Live2D Core.
   // Landing animation runs ~7s, plenty of time for the script to load in background.

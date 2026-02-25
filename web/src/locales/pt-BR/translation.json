@@ -520,7 +520,16 @@
     "metaLoginTitle": "Entrar \u2014 Ling",
     "metaLoginDesc": "Entre na Ling para come\u00e7ar a conversar com sua companheira IA.",
     "metaRegisterTitle": "Cadastrar \u2014 Ling",
-    "metaRegisterDesc": "Crie sua conta na Ling e conhe\u00e7a sua companheira IA."
+    "metaRegisterDesc": "Crie sua conta na Ling e conhe\u00e7a sua companheira IA.",
+    "orContinueWith": "ou continue com",
+    "oauthFailed": "Falha no login. Tente novamente.",
+    "oauthNoEmail": "Nenhum e-mail encontrado. Cadastre-se com e-mail.",
+    "oauthUnknownError": "Ocorreu um erro desconhecido durante o login.",
+    "oauthNoToken": "Falha no login: token de autentica\u00e7\u00e3o ausente.",
+    "oauthCompleting": "Concluindo login...",
+    "oauthNotConfigured": "Este m\u00e9todo de login n\u00e3o est\u00e1 dispon\u00edvel.",
+    "oauthStartFailed": "N\u00e3o foi poss\u00edvel iniciar o login. Tente novamente.",
+    "backToLogin": "Voltar ao login"
   },
   "onboarding": {
     "welcome": "Eu sou a Ling. Estou tentando sobreviver.",
@@ -560,6 +569,8 @@
     "share": "Compartilhar",
     "continueShare": "Continuar compartilhando",
     "genFailed": "Falha ao gerar o cartão de compartilhamento",
-    "retry": "Tentar novamente"
+    "retry": "Tentar novamente",
+    "avatarFallback": "L",
+    "narrativeTag": "— Ling me disse"
   }
 }

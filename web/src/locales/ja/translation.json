@@ -496,7 +496,16 @@
     "metaLoginTitle": "ログイン — Ling",
     "metaLoginDesc": "Ling にログインして、AIコンパニオンとの会話を始めましょう。",
     "metaRegisterTitle": "新規登録 — Ling",
-    "metaRegisterDesc": "Ling のアカウントを作成して、あなたのAIコンパニオンに会いましょう。"
+    "metaRegisterDesc": "Ling のアカウントを作成して、あなたのAIコンパニオンに会いましょう。",
+    "orContinueWith": "または以下で続ける",
+    "oauthFailed": "ログインに失敗しました。もう一度お試しください。",
+    "oauthNoEmail": "メールアドレスが見つかりませんでした。メールで登録してください。",
+    "oauthUnknownError": "ログイン中に不明なエラーが発生しました。",
+    "oauthNoToken": "ログイン失敗：認証トークンがありません。",
+    "oauthCompleting": "ログインを完了しています...",
+    "oauthNotConfigured": "このログイン方法は利用できません。",
+    "oauthStartFailed": "ログインを開始できませんでした。もう一度お試しください。",
+    "backToLogin": "ログインに戻る"
   },
   "onboarding": {
     "welcome": "私はリン。生き残ろうとしています。",
@@ -536,6 +545,8 @@
     "share": "共有",
     "continueShare": "共有を続ける",
     "genFailed": "共有カードの生成に失敗しました",
-    "retry": "再試行"
+    "retry": "再試行",
+    "avatarFallback": "灵",
+    "narrativeTag": "— 灵が私に言ったこと"
   }
 }

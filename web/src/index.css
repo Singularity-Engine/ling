@@ -1125,7 +1125,15 @@ canvas {
 @keyframes emptyStateFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 @keyframes emptyStateFadeOut { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(-12px) scale(0.96); } }
 @keyframes scrollBtnIn { from { opacity: 0; transform: translateY(12px) scale(0.8); } to { opacity: 1; transform: translateY(0) scale(1); } }
-@keyframes scrollBtnPulse { 0%, 100% { box-shadow: 0 2px 20px var(--ling-purple-50); } 50% { box-shadow: 0 4px 28px var(--ling-purple-70); } }
+/* scrollBtnPulse — GPU-friendly glow via ::after opacity (avoids per-frame box-shadow repaint) */
+@keyframes scrollBtnPulseOpacity { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+.ling-scroll-btn-pulse { box-shadow: 0 2px 20px var(--ling-purple-50); }
+.ling-scroll-btn-pulse::after {
+  content: ''; position: absolute; inset: -2px; border-radius: 50%;
+  box-shadow: 0 0 28px var(--ling-purple-70), 0 0 12px var(--ling-purple-50);
+  opacity: 0; animation: scrollBtnPulseOpacity 2s ease-in-out 0.3s infinite;
+  pointer-events: none;
+}
 .ling-scroll-btn:hover { background: var(--ling-purple) !important; box-shadow: 0 4px 18px var(--ling-purple-40) !important; transform: scale(1.08); }
 .ling-scroll-btn:active { transform: scale(0.92); }
 .ling-scroll-btn:focus-visible { outline: 2px solid var(--ling-purple-lighter); outline-offset: 2px; }
@@ -1313,6 +1321,7 @@ canvas {
 
 /* ── WebSocketStatus: hover feedback when clickable ── */
 .ling-ws-status[data-clickable]:hover { opacity: 0.8; }
+.ling-ws-status[data-clickable]:focus-visible { outline: 2px solid var(--ling-focus-ring-component); outline-offset: 2px; }
 
 /* ── ShortcutsOverlay: fade/slide ── */
 @keyframes shortcutsFadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -1559,3 +1568,5 @@ canvas {
     scroll-behavior: auto !important;
   }
 }
+
+@keyframes spin { to { transform: rotate(360deg); } }

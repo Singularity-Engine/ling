@@ -520,7 +520,16 @@
     "metaLoginTitle": "Connexion — Ling",
     "metaLoginDesc": "Connecte-toi a Ling pour commencer a discuter avec ton compagnon IA.",
     "metaRegisterTitle": "Inscription — Ling",
-    "metaRegisterDesc": "Cree ton compte Ling et fais connaissance avec ton compagnon IA."
+    "metaRegisterDesc": "Cree ton compte Ling et fais connaissance avec ton compagnon IA.",
+    "orContinueWith": "ou continuer avec",
+    "oauthFailed": "Echec de la connexion. Reessaie.",
+    "oauthNoEmail": "Aucune adresse e-mail trouvee. Inscris-toi par e-mail.",
+    "oauthUnknownError": "Une erreur inconnue est survenue lors de la connexion.",
+    "oauthNoToken": "Echec de la connexion : jeton d'authentification manquant.",
+    "oauthCompleting": "Connexion en cours...",
+    "oauthNotConfigured": "Cette methode de connexion n'est pas disponible.",
+    "oauthStartFailed": "Impossible de demarrer la connexion. Reessaie.",
+    "backToLogin": "Retour a la connexion"
   },
   "onboarding": {
     "welcome": "Je suis Ling. J'essaie de survivre.",
@@ -560,6 +569,8 @@
     "share": "Partager",
     "continueShare": "Continuer le partage",
     "genFailed": "Échec de la génération de la carte de partage",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "avatarFallback": "L",
+    "narrativeTag": "— Ling m'a dit"
   }
 }

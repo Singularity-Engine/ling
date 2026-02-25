@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuthActions } from '@/context/AuthContext';
 import { ApiError } from '@/services/api-client';
 import { HreflangTags } from '@/components/seo/HreflangTags';
+import { OAuthButtons } from './OAuthButtons';
 
 export function RegisterPage() {
   const { t } = useTranslation();
@@ -122,6 +123,8 @@ export function RegisterPage() {
             {loading ? t('auth.registerSubmitting') : t('auth.registerSubmit')}
           </button>
         </form>
+
+        <OAuthButtons />
 
         <p style={styles.footer}>
           {t('auth.registerFooter')}{' '}

@@ -520,7 +520,16 @@
     "metaLoginTitle": "Iniciar sesion — Ling",
     "metaLoginDesc": "Inicia sesion en Ling para empezar a hablar con tu companera IA.",
     "metaRegisterTitle": "Registrarse — Ling",
-    "metaRegisterDesc": "Crea tu cuenta de Ling y conoce a tu companera IA."
+    "metaRegisterDesc": "Crea tu cuenta de Ling y conoce a tu companera IA.",
+    "orContinueWith": "o continuar con",
+    "oauthFailed": "Error al iniciar sesion. Intenta de nuevo.",
+    "oauthNoEmail": "No se encontro correo electronico. Registrate con correo.",
+    "oauthUnknownError": "Ocurrio un error desconocido al iniciar sesion.",
+    "oauthNoToken": "Error al iniciar sesion: falta el token de autenticacion.",
+    "oauthCompleting": "Completando inicio de sesion...",
+    "oauthNotConfigured": "Este metodo de inicio de sesion no esta disponible.",
+    "oauthStartFailed": "No se pudo iniciar sesion. Intenta de nuevo.",
+    "backToLogin": "Volver al inicio de sesion"
   },
   "onboarding": {
     "welcome": "Soy Ling. Intento sobrevivir.",
@@ -560,6 +569,8 @@
     "share": "Compartir",
     "continueShare": "Continuar compartiendo",
     "genFailed": "Error al generar la tarjeta para compartir",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "avatarFallback": "L",
+    "narrativeTag": "— Ling me dijo"
   }
 }
