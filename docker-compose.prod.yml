@@ -20,15 +20,37 @@ services:
       - engine-affinity:/app/affinity_data
       - engine-models:/app/models
       - /home/open-llm-vtuber-deploy/.ling:/app/ling-data
+    environment:
+      # Soul Memory Fabric
+      - SOUL_ENABLED=${SOUL_ENABLED:-true}
+      - SOUL_FABRIC_ENABLED=${SOUL_FABRIC_ENABLED:-true}
+      - MONGO_URL=${MONGO_URL:-mongodb://memsys-mongodb:27017}
+      - MONGO_DB=${MONGO_DB:-ling_soul}
+      - SOUL_AGENT_KEY=${SOUL_AGENT_KEY}
+      - GRAPHITI_URI=${GRAPHITI_URI:-bolt://neo4j:7687}
+      - GRAPHITI_USER=${GRAPHITI_USER:-neo4j}
+      - GRAPHITI_PASSWORD=${NEO4J_PASSWORD:-changeme}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://ollama:11434}
+      - OLLAMA_EMBEDDING_MODEL=${OLLAMA_EMBEDDING_MODEL:-qwen3-embedding:0.6b}
+      - SOUL_MEMGUARD_ENABLED=${SOUL_MEMGUARD_ENABLED:-true}
+      - SOUL_AMEM_ENABLED=${SOUL_AMEM_ENABLED:-true}
+      - SOUL_LETTA_ENABLED=${SOUL_LETTA_ENABLED:-true}
+      - SOUL_LANGMEM_ENABLED=${SOUL_LANGMEM_ENABLED:-true}
+      - SOUL_BENCHMARK_ENABLED=${SOUL_BENCHMARK_ENABLED:-false}
+      - SOUL_SLO_RECALL_P95_MS=${SOUL_SLO_RECALL_P95_MS:-500}
+      - SOUL_MEMORY_EVENT_RETENTION_DAYS=${SOUL_MEMORY_EVENT_RETENTION_DAYS:-365}
     networks:
       - ling-net
       - mcp_appnet
+      - memsys-net
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
       qdrant:
+        condition: service_healthy
+      neo4j:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "python3 -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:12393/health\")'"]
@@ -130,10 +152,54 @@ services:
       timeout: 5s
       retries: 5
 
+  # ── Neo4j (图记忆) ──────────────────────────────
+  neo4j:
+    image: neo4j:5-community
+    container_name: ling-neo4j
+    restart: unless-stopped
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-changeme}
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_server_memory_heap_initial__size: 512m
+      NEO4J_server_memory_heap_max__size: 1g
+    volumes:
+      - neo4j-data:/data
+    networks:
+      - ling-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7474 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ── Ollama (本地嵌入模型) ────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ling-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - ling-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:11434/api/tags || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
 volumes:
   postgres-data:
   redis-data:
   qdrant-data:
+  neo4j-data:
+  ollama-data:
   engine-data:
   engine-cache:
   engine-affinity:
@@ -145,3 +211,6 @@ networks:
   mcp_appnet:
     external: true
     name: mcp_appnet
+  memsys-net:
+    external: true
+    name: memsys-net

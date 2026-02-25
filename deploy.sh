@@ -86,7 +86,7 @@ ${SSH_CMD} "
 "
 
 # ── 健康检查 ──────────────────────────────────────
-echo -e "${YELLOW}5/5 健康检查...${NC}"
+echo -e "${YELLOW}5/7 健康检查...${NC}"
 sleep 5
 
 ${SSH_CMD} "
@@ -98,6 +98,36 @@ ${SSH_CMD} "
     docker compose -f ${REMOTE_PATH}/docker-compose.yml exec -T redis redis-cli ping 2>&1 || echo 'FAIL'
     echo '--- Qdrant ---'
     curl -sf http://localhost:6333/healthz && echo ' OK' || echo ' FAIL'
+    echo '--- Neo4j ---'
+    curl -sf http://localhost:7474 && echo ' OK' || echo ' FAIL'
+    echo '--- Ollama ---'
+    curl -sf http://localhost:11434/api/tags && echo ' OK' || echo ' FAIL'
+"
+
+# ── Ollama 模型预拉取 ─────────────────────────────
+echo -e "${YELLOW}6/7 Ollama 模型预拉取...${NC}"
+${SSH_CMD} "
+    echo '拉取 qwen3-embedding:0.6b (首次约 600MB)...'
+    docker exec ling-ollama ollama pull qwen3-embedding:0.6b 2>&1 | tail -5
+    echo '模型拉取完成'
+" || echo -e "${YELLOW}Ollama 模型拉取跳过（容器可能未就绪）${NC}"
+
+# ── Soul Fabric 初始化 ────────────────────────────
+echo -e "${YELLOW}7/7 Soul Fabric 初始化...${NC}"
+${SSH_CMD} "
+    # MongoDB 索引创建
+    if [ -f ${REMOTE_PATH}/engine/scripts/create_soul_indexes.js ]; then
+        echo '创建 MongoDB 索引...'
+        docker exec memsys-mongodb mongosh ling_soul < ${REMOTE_PATH}/engine/scripts/create_soul_indexes.js 2>&1 | tail -5
+    fi
+
+    # 安装备份 cron
+    echo '0 3 * * * root bash ${REMOTE_PATH}/engine/scripts/soul_backup.sh >> /var/log/soul_backup.log 2>&1' | sudo tee /etc/cron.d/soul-backup > /dev/null 2>&1 || true
+
+    # Soul Fabric 健康检查
+    echo '--- Soul Fabric Coverage ---'
+    sleep 5
+    curl -sf http://localhost:12393/v1/memory/coverage -H 'X-Agent-Key: \$(grep SOUL_AGENT_KEY ${REMOTE_PATH}/.env | cut -d= -f2)' 2>&1 | head -3 || echo 'Soul Fabric 尚未就绪（可能需要更多启动时间）'
 "
 
 echo -e "${GREEN}=== 部署完成 ===${NC}"

@@ -21,19 +21,52 @@ from ..auth.rate_limit import limiter
 
 _AGENT_KEY = os.environ.get("SOUL_AGENT_KEY", "")
 
+# ── Agent 权限分级 ────────────────────────────────────
+# ling-finder: 可读写指定用户记忆 (recall + ingest)
+# soul-consolidator: 可全局整理 (consolidate global)
+# 其他 agent: 仅写入指定用户
+_AGENT_ROLES = {
+    "ling-finder": "agent:read-write",
+    "soul-consolidator": "agent:consolidator",
+}
+
+
+def _agent_id_to_role(agent_id: str) -> str:
+    """Map agent_id to permission role."""
+    return _AGENT_ROLES.get(agent_id, "agent:write-only")
+
 
 def _is_admin(user: dict) -> bool:
     return user.get("role") in {"owner", "admin"}
 
 
+def _is_consolidator(user: dict) -> bool:
+    """Check if user is an agent with consolidation privileges."""
+    return user.get("agent_role") == "agent:consolidator" or _is_admin(user)
+
+
+def _can_read(user: dict) -> bool:
+    """Check if user/agent can read memories."""
+    if not user.get("agent"):
+        return True  # normal users can always read their own
+    return user.get("agent_role") in {"agent:read-write", "agent:consolidator"} or _is_admin(user)
+
+
 def _try_agent_auth(request: Request) -> dict | None:
-    """Check X-Agent-Key header. Returns synthetic admin user or None."""
+    """Check X-Agent-Key header. Returns synthetic user with agent role or None."""
     if not _AGENT_KEY:
         return None
     key = request.headers.get("x-agent-key", "")
     if key and key == _AGENT_KEY:
         agent_id = request.headers.get("x-agent-id", "agent")
-        return {"id": f"agent:{agent_id}", "role": "admin", "agent": True}
+        agent_role = _agent_id_to_role(agent_id)
+        return {
+            "id": f"agent:{agent_id}",
+            "role": "admin" if agent_role == "agent:consolidator" else "agent",
+            "agent": True,
+            "agent_id": agent_id,
+            "agent_role": agent_role,
+        }
     return None
 
 
@@ -92,9 +125,9 @@ def create_memory_fabric_router() -> APIRouter:
         payload: MemoryConsolidateRequest,
         user: dict = Depends(_get_user_or_agent),
     ):
-        # 全局整理仅管理员可触发
-        if payload.user_id is None and not _is_admin(user):
-            raise HTTPException(status_code=403, detail="仅管理员可触发全局整理")
+        # 全局整理仅管理员或 consolidator agent 可触发
+        if payload.user_id is None and not _is_consolidator(user):
+            raise HTTPException(status_code=403, detail="仅管理员或 soul-consolidator 可触发全局整理")
 
         target_user_id = None
         if payload.user_id is not None:
@@ -116,6 +149,8 @@ def create_memory_fabric_router() -> APIRouter:
         payload: MemoryRecallRequest,
         user: dict = Depends(_get_user_or_agent),
     ):
+        if not _can_read(user):
+            raise HTTPException(status_code=403, detail="该 Agent 无记忆读取权限")
         try:
             target_user_id = _resolve_user_scope(user, payload.user_id)
             return await get_memory_fabric().recall(

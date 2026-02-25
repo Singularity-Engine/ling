@@ -28,6 +28,9 @@ RUN pip install --no-cache-dir \
     sherpa-onnx silero-vad soundfile chardet langdetect tqdm \
     ruamel-yaml tomli
 
+# 安装 git (soul-fabric 通过 git 依赖安装)
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
 # 复制应用代码
 COPY . /app/
 
