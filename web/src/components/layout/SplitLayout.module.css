@@ -3,6 +3,7 @@
 .root {
   display: grid;
   grid-template-columns: var(--split-left, var(--ling-split-left-default)) var(--ling-split-divider) 1fr;
+  grid-template-rows: 1fr;
   height: 100dvh;
   width: 100%;
   background: var(--ling-bg-deep);
@@ -15,9 +16,10 @@
 .leftPanel {
   position: relative;
   overflow: hidden;
-  contain: strict;
+  contain: layout paint;
   min-width: var(--split-left-min, var(--ling-split-left-min));
   max-width: var(--split-left-max, var(--ling-split-left-max));
+  min-height: 0;
 }
 
 /* ── Divider: draggable separator ── */

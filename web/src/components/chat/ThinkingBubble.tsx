@@ -114,7 +114,7 @@ export const ThinkingBubble = memo(({ content, isThinking, isStreaming }: Thinki
           {isStreaming && mdContent && (
             <div className="md-content" style={showDotsExit ? S_MD_FADE : S_MD}>
               {renderedMarkdown}
-              <span style={S_CURSOR} />
+              <span style={S_CURSOR} aria-hidden="true" />
             </div>
           )}
         </div>

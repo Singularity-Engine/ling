@@ -91,11 +91,8 @@ const S_SCROLL_BTN: CSSProperties = {
   position: "relative",
 };
 
-const S_SCROLL_BTN_PULSE: CSSProperties = {
-  ...S_SCROLL_BTN,
-  boxShadow: "0 2px 20px var(--ling-purple-50)",
-  animation: "scrollBtnIn 0.25s var(--ling-ease-enter), scrollBtnPulse 2s ease-in-out 0.3s infinite",
-};
+// scrollBtnPulse glow moved to CSS ::after pseudo-element (GPU-composited opacity
+// instead of per-frame box-shadow repaint).  Class `.ling-scroll-btn-pulse` drives it.
 
 const S_NEW_DOT: CSSProperties = {
   position: "absolute",
@@ -505,10 +502,10 @@ export const ChatArea = memo(({ onCollapse }: ChatAreaProps) => {
       {!isNearBottom && (
         <div style={S_SCROLL_WRAP}>
           <button
-            className="ling-scroll-btn"
+            className={`ling-scroll-btn${hasNewMessage ? " ling-scroll-btn-pulse" : ""}`}
             onClick={scrollToBottom}
             aria-label={t("ui.scrollToLatest")}
-            style={hasNewMessage ? S_SCROLL_BTN_PULSE : S_SCROLL_BTN}
+            style={S_SCROLL_BTN}
           >
             ↓
             {hasNewMessage && <span style={S_NEW_DOT} />}

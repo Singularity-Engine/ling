@@ -325,7 +325,7 @@ export const MemoryPanel = memo(function MemoryPanel({ open, onClose }: MemoryPa
               ? <>{t('memory.freeExpiry', { interpolation: { escapeValue: false } }).split('<bold>').map((part, i) => {
                   if (i === 0) return part;
                   const [bold, rest] = part.split('</bold>');
-                  return <span key={i}><strong style={S_FOOTER_BOLD}>{bold}</strong>{rest}</span>;
+                  return <span key={`expiry-${bold}`}><strong style={S_FOOTER_BOLD}>{bold}</strong>{rest}</span>;
                 })}</>
               : user?.plan === 'stardust'
                 ? t('memory.stardustExpiry')

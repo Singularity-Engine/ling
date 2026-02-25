@@ -94,7 +94,14 @@ class ApiClient {
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      throw new ApiError(res.status, body.detail || res.statusText);
+      const detail = body.detail;
+      const message =
+        typeof detail === 'string'
+          ? detail
+          : Array.isArray(detail)
+            ? detail.map((d: { msg?: string }) => d.msg || '').join('; ')
+            : res.statusText;
+      throw new ApiError(res.status, message);
     }
 
     return res.json();

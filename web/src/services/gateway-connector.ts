@@ -428,10 +428,10 @@ class GatewayConnector {
         if (frame.type === 'event' && (frame.event === 'agent.event' || frame.event === 'agent')) {
           const payload = isAgentEventPayload(frame.payload) ? frame.payload : undefined;
           const agentEvent: GatewayAgentEvent = {
-            runId: payload?.runId || '',
+            runId: (payload?.runId as string) || '',
             stream: (payload?.stream as GatewayAgentEvent['stream']) || 'lifecycle',
-            seq: payload?.seq || 0,
-            data: payload?.data || {},
+            seq: (payload?.seq as number) || 0,
+            data: (payload?.data || {}) as Record<string, unknown>,
           };
           this.debugCounters.agentEvents++;
           // JSON.stringify at ~30fps during streaming creates significant GC

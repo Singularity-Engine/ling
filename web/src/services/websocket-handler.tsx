@@ -182,7 +182,7 @@ const modelBaseUrl = typeof window !== 'undefined'
 
 const LING_MODEL_INFO: ModelInfo = {
   name: BRAND_NAME_DISPLAY,
-  url: `${modelBaseUrl}/0A-原档整理(1).model3.json`,
+  url: `${modelBaseUrl}/0a-original-v1.model3.json`,
   kScale: 1.0,
   initialXshift: 0,
   initialYshift: isMobile ? 0 : -100,
@@ -471,6 +471,9 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
   // ─── Message handler (receives adapted Gateway messages) ──────
 
+  // Timer for delayed billing modal after affinity milestone (shared between handler & cleanup)
+  let milestoneTimer: ReturnType<typeof setTimeout> | undefined;
+
   const handleWebSocketMessage = useCallback((message: MessageEvent) => {
     log.debug('Processing message:', message.type, message);
     switch (message.type) {
@@ -735,9 +738,6 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
   const handleWebSocketMessageRef = useLatest(handleWebSocketMessage);
 
   useEffect(() => {
-    // Track fire-and-forget timers so cleanup can cancel them
-    let milestoneTimer: ReturnType<typeof setTimeout> | undefined;
-
     // Subscribe to Gateway state changes — track transitions for user notifications
     let prevGwState: GatewayState | null = null;
     const stateSub = gatewayConnector.state$.subscribe((state) => {
@@ -1201,7 +1201,9 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           if (res.payload?.sessions) {
             const historyList: HistoryInfo[] = res.payload.sessions.map((s) => ({
               uid: s.key || s.id,
-              latest_message: s.lastMessage || null,
+              latest_message: s.lastMessage
+                ? { role: 'ai' as const, timestamp: s.updatedAt || s.createdAt || new Date().toISOString(), content: s.lastMessage }
+                : null,
               timestamp: s.updatedAt || s.createdAt || new Date().toISOString(),
             }));
             setHistoryListRef.current(historyList);
@@ -1257,7 +1259,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
 
       default:
         // Unknown message type — log for debugging
-        log.debug('Unhandled sendMessage type:', message.type);
+        log.debug('Unhandled sendMessage type:', (message as { type: string }).type);
         return;
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps -- all state via refs; stable after mount

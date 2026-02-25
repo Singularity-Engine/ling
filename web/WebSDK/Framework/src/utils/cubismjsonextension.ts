@@ -1,3 +1,4 @@
+// @ts-nocheck — Third-party Live2D SDK (do not modify)
 /**
  * Copyright(c) Live2D Inc. All rights reserved.
  *

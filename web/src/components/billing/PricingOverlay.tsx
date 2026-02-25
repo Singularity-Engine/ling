@@ -446,7 +446,7 @@ const PricingOverlay: React.FC = memo(() => {
                 disabled={!!loading || currentPlan === 'free'}
                 onClick={() => handleCheckout('credits', undefined, pack.credits)}
                 style={creditBtnDynamic}
-                aria-label={t("pricing.creditAriaLabel", { count: String(pack.credits), price: pack.price })}
+                aria-label={t("pricing.creditAriaLabel", { count: pack.credits, price: pack.price })}
                 aria-busy={loading === `credits-${pack.credits}`}
               >
                 <div style={creditAmountStyle}>✦ {pack.credits}</div>
