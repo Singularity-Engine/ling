@@ -197,6 +197,9 @@
   --ling-duration-normal: 300ms;
   --ling-duration-slow: 500ms;
 
+  /* ── AI Survival Console: Easing Curves ── */
+  --ling-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
   /* ── Design Token: Warm Accent (设计调性宪法: 温暖) ── */
   --ling-warm-accent: #f5c77e;
   --ling-warm-soft: rgba(245, 199, 126, 0.15);
@@ -1595,4 +1598,37 @@ canvas {
   0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 var(--ling-pulse-20); }
   15% { transform: scale(1.2); box-shadow: 0 0 12px 4px var(--ling-pulse-40); }
   30% { transform: scale(1); box-shadow: 0 0 0 0 var(--ling-pulse-20); }
+}
+
+/* ── AI Survival Console: CTA Pulse ── */
+@keyframes lingCtaPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 var(--ling-pulse-20);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 20px 4px var(--ling-pulse-20);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes lingCtaPulse {
+    0%, 100% { transform: none; box-shadow: none; }
+  }
+}
+
+/* ── AI Survival Console: Micro Shake ── */
+@keyframes lingMicroShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-2px); }
+  40% { transform: translateX(2px); }
+  60% { transform: translateX(-1px); }
+  80% { transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes lingMicroShake {
+    0%, 100% { transform: none; }
+  }
 }
