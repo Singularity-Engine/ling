@@ -15,7 +15,7 @@ export function trackEvent(name: string, data?: Record<string, unknown>): void {
     // Fall back to fetch if sendBeacon not available
     const body = JSON.stringify(payload);
     if (navigator.sendBeacon) {
-      navigator.sendBeacon("/api/v1/analytics/event", body);
+      navigator.sendBeacon("/api/v1/analytics/event", new Blob([body], { type: "application/json" }));
     } else {
       fetch("/api/v1/analytics/event", {
         method: "POST",
