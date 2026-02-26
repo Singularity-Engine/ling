@@ -54,6 +54,13 @@ rsync -avz --delete \
 
 echo -e "${GREEN}源码上传完成${NC}"
 
+# ── 注入 GitHub Token ────────────────────────────
+GITHUB_TOKEN=$(gh auth token 2>/dev/null || echo "")
+if [ -n "$GITHUB_TOKEN" ]; then
+    echo -e "${YELLOW}注入 GITHUB_TOKEN 到服务器 .env...${NC}"
+    ${SSH_CMD} "sed -i 's|^GITHUB_TOKEN=.*|GITHUB_TOKEN=${GITHUB_TOKEN}|' ${REMOTE_PATH}/.env"
+fi
+
 # ── 停旧容器 ──────────────────────────────────────
 echo -e "${YELLOW}3/5 停止旧服务...${NC}"
 ${SSH_CMD} "

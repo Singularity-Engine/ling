@@ -31,11 +31,20 @@ RUN pip install --no-cache-dir \
 # 安装 git (soul-fabric 通过 git 依赖安装)
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
+# GitHub token for private repo access (soul-memory-fabric)
+ARG GITHUB_TOKEN
+RUN if [ -n "$GITHUB_TOKEN" ]; then \
+        git config --global url."https://${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"; \
+    fi
+
 # 复制应用代码
 COPY . /app/
 
 # 安装包
 RUN pip install --no-cache-dir -e .
+
+# 清理 git credentials
+RUN git config --global --unset-all url.https://@github.com/.insteadof 2>/dev/null || true
 
 # 创建必要目录
 RUN mkdir -p /app/logs /app/chat_history /app/cache /app/affinity_data /app/models
