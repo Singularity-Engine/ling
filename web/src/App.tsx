@@ -9,6 +9,9 @@ import { lazyRetry } from "./utils/lazy-retry";
 // Lazy-loaded: only shown on first visit (before sessionStorage 'ling-overture-seen' is set).
 const LandingAnimation = lazyRetry(() => import("./components/landing/LandingAnimation").then(m => ({ default: m.LandingAnimation })));
 
+// Lazy-loaded: Witness Mode for unauthenticated visitors (after overture completes).
+const WitnessMode = lazyRetry(() => import("./components/witness/WitnessMode").then(m => ({ default: m.WitnessMode })));
+
 import { useMessagesRef, useHistoryListState, useHistoryListActions } from "./context/ChatHistoryContext";
 import { useVADState, useVADActions } from "./context/VadContext";
 import { useInterrupt } from "./components/canvas/live2d";
@@ -490,6 +493,7 @@ function useCheckoutCallback() {
 /** 主应用（包含 Landing + 所有 Providers） */
 function MainApp() {
   const { t, i18n } = useTranslation();
+  const { isAuthenticated, isLoading } = useAuthState();
   const currentLocale = (SUPPORTED_LANGUAGES as readonly string[]).includes(i18n.language)
     ? LOCALE_MAP[i18n.language as SupportedLanguage]
     : "en_US";
@@ -521,6 +525,11 @@ function MainApp() {
     }, 700);
   }, []);
 
+  // Determine which view to show after overture:
+  // - Authenticated → MainContent (SplitLayout/OverlayLayout)
+  // - Unauthenticated (and not loading) → WitnessMode
+  const showWitnessMode = !isAuthenticated && !isLoading && !showLanding;
+
   return (
     <>
       <Helmet>
@@ -540,9 +549,16 @@ function MainApp() {
       <HreflangTags canonicalUrl="https://ling.sngxai.com/" />
       <StructuredData />
       <Providers>
-        <div style={landingExiting || !showLanding ? S_MAIN_VISIBLE : S_MAIN_HIDDEN}>
-          <MainContent />
-        </div>
+        {showWitnessMode ? (
+          /* Unauthenticated: Witness Mode — silhouette + daily statement + CTA */
+          <Suspense fallback={null}>
+            <WitnessMode />
+          </Suspense>
+        ) : (
+          <div style={landingExiting || !showLanding ? S_MAIN_VISIBLE : S_MAIN_HIDDEN}>
+            <MainContent />
+          </div>
+        )}
 
         {showLanding && (
           <Suspense fallback={null}>
@@ -550,13 +566,15 @@ function MainApp() {
           </Suspense>
         )}
 
-        <SectionErrorBoundary name="BillingOverlays">
-          <Suspense fallback={null}>
-            <PricingOverlay />
-            <InsufficientCreditsModal />
-          </Suspense>
-        </SectionErrorBoundary>
-        {showOnboarding && (
+        {isAuthenticated && (
+          <SectionErrorBoundary name="BillingOverlays">
+            <Suspense fallback={null}>
+              <PricingOverlay />
+              <InsufficientCreditsModal />
+            </Suspense>
+          </SectionErrorBoundary>
+        )}
+        {showOnboarding && isAuthenticated && (
           <SectionErrorBoundary name="Onboarding">
             <Suspense fallback={null}>
               <PersonalizedOnboarding onComplete={closeOnboarding} />

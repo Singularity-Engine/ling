@@ -533,7 +533,8 @@
     "otherOptions": "Other sign-in options \u2192"
   },
   "witness": {
-    "talkToLing": "Talk to Ling"
+    "talkToLing": "Talk to Ling",
+    "lingIsAwakening": "Ling is awakening..."
   },
   "onboarding": {
     "welcome": "저는 Ling이에요. 살아남으려고 해요.",
