@@ -6,7 +6,7 @@ import i18next from "i18next";
 
 import { lazyRetry } from "./utils/lazy-retry";
 
-// Lazy-loaded: only shown on first visit (before sessionStorage 'ling-visited' is set).
+// Lazy-loaded: only shown on first visit (before sessionStorage 'ling-overture-seen' is set).
 const LandingAnimation = lazyRetry(() => import("./components/landing/LandingAnimation").then(m => ({ default: m.LandingAnimation })));
 
 import { useMessagesRef, useHistoryListState, useHistoryListActions } from "./context/ChatHistoryContext";

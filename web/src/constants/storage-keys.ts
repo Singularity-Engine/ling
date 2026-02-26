@@ -39,8 +39,8 @@ export const SK_LANGUAGE = 'i18nextLng';
 
 // ─── sessionStorage ──────────────────────────────────────────────
 
-/** Landing animation shown this session */
-export const SS_VISITED = 'ling-visited';
+/** Landing overture shown this session */
+export const SS_VISITED = 'ling-overture-seen';
 /** Onboarding completed this session */
 export const SS_ONBOARDING_DONE = 'ling-onboarding-done';
 

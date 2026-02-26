@@ -1,7 +1,7 @@
 import { useRef, useEffect, useCallback, memo } from "react";
 import { MOBILE_BREAKPOINT } from "@/constants/breakpoints";
 
-export type ParticlePhase = "float" | "converge" | "explode" | "fade";
+export type ParticlePhase = "float" | "converge" | "orbit" | "explode" | "fade";
 
 // Canvas 2D context 无法读取 CSS 变量，此处保留字面量（与 --ling-purple 色系一致）
 const COLORS = ["#8b5cf6", "#60a5fa", "#a78bfa", "#c084fc"];
@@ -215,6 +215,17 @@ export const ParticleCanvas = memo(function ParticleCanvas({
             p.size = Math.min(4, p.size + 0.01 * ease);
             break;
           }
+          case "orbit": {
+            // Particles slowly orbit around center point
+            p.convergeAngle += 0.008 + p.floatSpeed * 0.5;
+            const orbitRadius = 30 + p.floatRadius * 0.4;
+            const targetX = cx + Math.cos(p.convergeAngle) * orbitRadius;
+            const targetY = cy + Math.sin(p.convergeAngle) * orbitRadius;
+            p.x += (targetX - p.x) * 0.05;
+            p.y += (targetY - p.y) * 0.05;
+            p.alpha = Math.min(0.8, p.alpha + 0.002);
+            break;
+          }
           case "explode": {
             p.x += p.vx;
             p.y += p.vy;
@@ -258,10 +269,10 @@ export const ParticleCanvas = memo(function ParticleCanvas({
         return;
       }
 
-      // Draw central glow during converge phase (single gradient per frame — acceptable)
-      if (phase === "converge" && phaseProgressRef.current > 0.3) {
-        const progress = phaseProgressRef.current;
-        const glowAlpha = (progress - 0.3) * 1.4;
+      // Draw central glow during converge/orbit phase (single gradient per frame — acceptable)
+      if ((phase === "converge" && phaseProgressRef.current > 0.3) || phase === "orbit") {
+        const progress = phase === "orbit" ? 1 : phaseProgressRef.current;
+        const glowAlpha = phase === "orbit" ? 0.6 : (progress - 0.3) * 1.4;
         const glowRadius = 30 + progress * 60;
         const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowRadius);
         gradient.addColorStop(0, `rgba(139, 92, 246, ${glowAlpha * 0.8})`);

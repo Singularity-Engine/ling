@@ -1,401 +1,343 @@
-import { useTranslation } from "react-i18next";
-import { memo, useState, useEffect, useCallback, useRef, useMemo } from "react";
+/**
+ * LandingAnimation — 6-phase cinematic overture engine.
+ *
+ * Phases:
+ *   0 VOID+PULSE    — particles float, center pulse glow
+ *   1 SILHOUETTE    — LingSilhouette visible, particles converge→orbit
+ *   2 AWAKEN        — crossfade silhouette out (opacity to 0)
+ *   3 VITALS+GAZE   — VitalsBar slides in from top
+ *   4 SPEAK+CTA     — typewriter daily statement + CTA button appears
+ *   5 IDLE          — CTA pulses, waiting for user action
+ *
+ * Skip: anytime via Skip button → jump to onComplete
+ * Returning user (sessionStorage): skip entirely
+ * Reduced motion: skip entirely
+ */
+
+import { memo, useState, useEffect, useCallback, useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { ParticleCanvas, type ParticlePhase } from "./ParticleCanvas";
+import { LingSilhouette } from "./LingSilhouette";
+import { VitalsBar } from "../vitals/VitalsBar";
+import { useVitalsData } from "@/hooks/useVitalsData";
+import { getDailyStatement } from "@/data/daily-statements";
 import { prefersReducedMotion } from "@/utils/reduced-motion";
 
 interface LandingAnimationProps {
   onComplete: () => void;
 }
 
+const SS_KEY = "ling-overture-seen";
+const TYPE_SPEED_MS = 50;
 
-const TYPE_SPEED = 70; // ms per character — 更流畅的打字节奏
-const LINE_DELAY = 500; // pause between lines
+/* ── Map overture phase to particle phase ─── */
+function toParticlePhase(phase: number): ParticlePhase {
+  switch (phase) {
+    case 0: return "float";
+    case 1: return "converge";
+    case 2: return "orbit";
+    default: return "fade";
+  }
+}
 
-/* ── Module-level style constants ─────────────────────────── */
+/* ── Hoisted style constants (CSSProperties) ─────────────────── */
 
-const rootStyleBase: React.CSSProperties = {
+const S_ROOT: React.CSSProperties = {
   position: "fixed",
   inset: 0,
   zIndex: 9999,
-  background: "linear-gradient(180deg, var(--ling-bg-deep) 0%, var(--ling-bg-mid) 50%, var(--ling-bg-warm) 100%)",
-  overflow: "hidden",
-  transition: "opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)",
-};
-
-const bgDimStyleBase: React.CSSProperties = {
-  position: "fixed",
-  inset: 0,
   background: "var(--ling-bg-deep)",
-  transition: "opacity 1s ease",
+  overflow: "hidden",
+};
+
+const S_PULSE_GLOW: React.CSSProperties = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  width: 200,
+  height: 200,
+  transform: "translate(-50%, -50%)",
+  borderRadius: "50%",
+  background: "radial-gradient(circle, var(--ling-purple-40) 0%, var(--ling-purple-12) 50%, transparent 70%)",
+  animation: "pulse 2s ease-in-out infinite",
+  pointerEvents: "none",
   zIndex: 2,
-  pointerEvents: "none",
 };
 
-const flashStyleBase: React.CSSProperties = {
-  position: "fixed",
-  inset: 0,
-  background: "radial-gradient(circle at 50% 50%, var(--ling-purple-lighter) 0%, var(--ling-purple-60) 50%, transparent 80%)",
-  transition: "opacity 0.5s ease-out",
-  zIndex: 3,
-  pointerEvents: "none",
+const S_VITALS_WRAP: React.CSSProperties = {
+  position: "absolute",
+  top: 0,
+  left: 0,
+  width: "100%",
+  zIndex: 50,
 };
 
-const textWrapperBase: React.CSSProperties = {
-  position: "fixed",
-  inset: 0,
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  zIndex: 4,
-  padding: "0 24px",
-  transition: "opacity 0.6s ease-out",
+const S_STATEMENT: React.CSSProperties = {
+  position: "absolute",
+  bottom: "25%",
+  left: "50%",
+  transform: "translateX(-50%)",
+  width: "min(90vw, 560px)",
+  textAlign: "center",
+  fontStyle: "italic",
+  fontSize: "clamp(1rem, 2.5vw, 1.25rem)",
+  color: "var(--ling-text-secondary)",
+  textShadow: "0 0 20px var(--ling-purple-25)",
+  lineHeight: 1.6,
+  zIndex: 10,
 };
 
-const textBlockStyle: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  gap: "16px",
-  maxWidth: "min(90vw, 600px)",
-};
-
-// Per-line-index static properties (title / subtitle / tagline)
-const lineStyleBase: React.CSSProperties[] = [
-  { fontSize: "clamp(3rem, 7vw, 4.5rem)", fontWeight: 700, letterSpacing: "0.12em", textAlign: "center", wordBreak: "break-word", minHeight: "4.5rem", marginTop: "0", transition: "opacity 0.5s ease-out, transform 0.5s ease-out" },
-  { fontSize: "1.4rem", fontWeight: 500, letterSpacing: "0.04em", textAlign: "center", wordBreak: "break-word", minHeight: "1.75rem", marginTop: "8px", transition: "opacity 0.5s ease-out, transform 0.5s ease-out" },
-  { fontSize: "1.25rem", fontWeight: 400, letterSpacing: "0.04em", textAlign: "center", wordBreak: "break-word", minHeight: "1.75rem", marginTop: "28px", transition: "opacity 0.5s ease-out, transform 0.5s ease-out" },
-];
-
-// Precomputed line×state styles (9 total) to avoid allocations in the 70ms typewriter hot loop.
-// States: hidden (i > currentLine), typing (i === currentLine), complete (i < currentLine).
-const LINE_STATE_STYLES: Record<"hidden" | "typing" | "complete", React.CSSProperties>[] = [
-  // Line 0 — title (color handled by .landing-title-gradient CSS class)
-  {
-    hidden:   { ...lineStyleBase[0], opacity: 0, transform: "translateY(12px)", textShadow: "none" },
-    typing:   { ...lineStyleBase[0], opacity: 1, transform: "translateY(0)", textShadow: "0 0 20px var(--ling-purple-25)" },
-    complete: { ...lineStyleBase[0], opacity: 1, transform: "translateY(0)" },
-  },
-  // Line 1 — subtitle
-  {
-    hidden:   { ...lineStyleBase[1], color: "var(--ling-text-secondary)", opacity: 0, transform: "translateY(12px)", textShadow: "none" },
-    typing:   { ...lineStyleBase[1], color: "var(--ling-text-secondary)", opacity: 1, transform: "translateY(0)", textShadow: "none" },
-    complete: { ...lineStyleBase[1], color: "var(--ling-text-secondary)", opacity: 1, transform: "translateY(0)", textShadow: "0 0 20px var(--ling-purple-20)" },
-  },
-  // Line 2 — tagline (last line)
-  {
-    hidden:   { ...lineStyleBase[2], color: "var(--ling-purple-lighter)", opacity: 0, transform: "translateY(12px)", textShadow: "none" },
-    typing:   { ...lineStyleBase[2], color: "var(--ling-purple-lighter)", opacity: 1, transform: "translateY(0)", textShadow: "none" },
-    complete: { ...lineStyleBase[2], color: "var(--ling-purple-lighter)", opacity: 1, transform: "translateY(0)", textShadow: "0 0 20px var(--ling-purple-20)" },
-  },
-];
-
-const cursorStyleTitle: React.CSSProperties = {
-  display: "inline-block",
-  width: "2px",
-  height: "2rem",
-  background: "var(--ling-purple)",
-  marginLeft: "2px",
-  verticalAlign: "middle",
-  animation: "blink 1s infinite",
-};
-
-const cursorStyleNormal: React.CSSProperties = {
-  display: "inline-block",
-  width: "2px",
-  height: "1.125rem",
-  background: "var(--ling-purple)",
-  marginLeft: "2px",
-  verticalAlign: "middle",
-  animation: "blink 1s infinite",
-};
-
-const buttonContainerBase: React.CSSProperties = {
-  marginTop: "48px",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  gap: "16px",
-  transition: "opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)",
-};
-
-const startBtnBase: React.CSSProperties = {
-  padding: "16px 48px",
-  fontSize: "1.125rem",
+const S_CTA: React.CSSProperties = {
+  position: "absolute",
+  bottom: "12%",
+  left: "50%",
+  transform: "translateX(-50%)",
+  padding: "14px 40px",
+  fontSize: "1.05rem",
   fontWeight: 600,
   color: "#fff",
   background: "linear-gradient(135deg, var(--ling-purple) 0%, var(--ling-purple-deep) 100%)",
   border: "1px solid var(--ling-purple-30)",
-  borderRadius: "999px",
-  boxShadow: "0 0 30px var(--ling-purple-40), 0 0 60px var(--ling-purple-20), inset 0 1px 0 rgba(255,255,255,0.15)",
-  transition: "transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease",
-  position: "relative",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: "8px",
-};
-
-const spinnerStyle: React.CSSProperties = {
-  display: "inline-block",
-  width: "16px",
-  height: "16px",
-  border: "2px solid rgba(255,255,255,0.3)",
-  borderTopColor: "#fff",
-  borderRadius: "50%",
-  animation: "landingBtnSpin 0.6s linear infinite",
-};
-
-const arrowStyle: React.CSSProperties = { fontSize: "1.1em", opacity: 0.8, transition: "transform 0.25s ease" };
-
-const hintStyle: React.CSSProperties = { fontSize: "0.75rem", color: "var(--ling-text-tertiary)", letterSpacing: "0.04em" };
-
-const skipStyle: React.CSSProperties = {
-  position: "fixed",
-  bottom: "max(16px, env(safe-area-inset-bottom, 0px))",
-  right: "16px",
-  color: "var(--ling-text-tertiary)",
-  fontSize: "0.75rem",
-  zIndex: 5,
-  animation: "fadeInUp 1s ease-out 1s both",
+  borderRadius: 999,
   cursor: "pointer",
-  minWidth: "48px",
-  minHeight: "48px",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: "8px 16px",
-  background: "none",
-  border: "none",
+  boxShadow: "0 0 24px var(--ling-purple-40), 0 0 48px var(--ling-purple-20), inset 0 1px 0 rgba(255,255,255,0.15)",
+  animation: "lingCtaPulse 2.5s ease-in-out infinite",
+  zIndex: 10,
+  letterSpacing: "0.04em",
   font: "inherit",
 };
 
-export const LandingAnimation = memo(function LandingAnimation({ onComplete }: LandingAnimationProps) {
-  const { t } = useTranslation();
-  const LINES = useMemo(() => [t("landing.line1"), t("landing.line2"), t("landing.line3")], [t]);
-  const [particlePhase, setParticlePhase] = useState<ParticlePhase>("float");
-  const phaseProgressRef = useRef(0);
-  const [flashOpacity, setFlashOpacity] = useState(0);
-  const [showText, setShowText] = useState(false);
-  const [currentLine, setCurrentLine] = useState(0);
-  const [displayedChars, setDisplayedChars] = useState(0);
-  const [showButton, setShowButton] = useState(false);
-  const [bgDim, setBgDim] = useState(0);
-  const [exiting, setExiting] = useState(false);
-  const startTimeRef = useRef(0);
-  const flashTimerRef = useRef<ReturnType<typeof setTimeout>>();
-  const skippedRef = useRef(false);
-  const showButtonRef = useRef(showButton);
-  showButtonRef.current = showButton;
+const S_SKIP: React.CSSProperties = {
+  position: "absolute",
+  bottom: "4%",
+  right: "4%",
+  padding: "8px 16px",
+  fontSize: "0.75rem",
+  color: "var(--ling-text-tertiary)",
+  background: "none",
+  border: "none",
+  cursor: "pointer",
+  opacity: 0.5,
+  zIndex: 20,
+  font: "inherit",
+  minWidth: 48,
+  minHeight: 48,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
 
-  // Skip handler
-  const handleSkip = useCallback(() => {
-    if (skippedRef.current) return;
-    skippedRef.current = true;
-    setExiting(true);
-    onComplete(); // Fire immediately — cross-dissolve with main content
+const SR_ONLY: React.CSSProperties = {
+  position: "absolute",
+  width: 1,
+  height: 1,
+  padding: 0,
+  margin: -1,
+  overflow: "hidden",
+  clip: "rect(0, 0, 0, 0)",
+  whiteSpace: "nowrap",
+  border: 0,
+};
+
+/* ── Phase timeline (ms) ─────────────────── */
+const PHASE_TIMES = [0, 1500, 3000, 4000, 5000, 6000] as const;
+
+export const LandingAnimation = memo(function LandingAnimation({
+  onComplete,
+}: LandingAnimationProps) {
+  const [phase, setPhase] = useState(0);
+  const [typewriterText, setTypewriterText] = useState("");
+  const phaseTimerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const phaseProgressRef = useRef(0);
+  const completedRef = useRef(false);
+
+  // Get today's daily statement (day of year)
+  const now = new Date();
+  const dayOfYear = Math.floor(
+    (now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000
+  );
+  const statement = getDailyStatement(dayOfYear);
+
+  // Vitals data for VitalsBar
+  const vitals = useVitalsData();
+
+  // handleComplete — sets sessionStorage and calls onComplete prop
+  const handleComplete = useCallback(() => {
+    if (completedRef.current) return;
+    completedRef.current = true;
+    sessionStorage.setItem(SS_KEY, "true");
+    // Clean up timers
+    phaseTimerRef.current.forEach(clearTimeout);
+    phaseTimerRef.current = [];
+    onComplete();
   }, [onComplete]);
 
-  // Keyboard skip — use ref for showButton to avoid listener gap on re-register
+  // Returning user or reduced motion: skip entirely
+  useEffect(() => {
+    if (sessionStorage.getItem(SS_KEY) || prefersReducedMotion()) {
+      handleComplete();
+    }
+  }, [handleComplete]);
+
+  // Phase timeline engine (setTimeout chain)
+  useEffect(() => {
+    // If already completed (returning user / reduced motion), don't start
+    if (completedRef.current) return;
+
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    // Phase 1 at 1.5s
+    timers.push(setTimeout(() => setPhase(1), PHASE_TIMES[1]));
+    // Phase 2 at 3.0s
+    timers.push(setTimeout(() => setPhase(2), PHASE_TIMES[2]));
+    // Phase 3 at 4.0s
+    timers.push(setTimeout(() => setPhase(3), PHASE_TIMES[3]));
+    // Phase 4 at 5.0s
+    timers.push(setTimeout(() => setPhase(4), PHASE_TIMES[4]));
+    // Phase 5 at 6.0s
+    timers.push(setTimeout(() => setPhase(5), PHASE_TIMES[5]));
+
+    phaseTimerRef.current = timers;
+
+    return () => {
+      timers.forEach(clearTimeout);
+    };
+  }, []);
+
+  // Update phaseProgressRef for converge phase (used by ParticleCanvas)
+  useEffect(() => {
+    if (phase !== 1) return;
+
+    const startTime = performance.now();
+    const duration = PHASE_TIMES[2] - PHASE_TIMES[1]; // 1500ms
+    let rafId = 0;
+
+    const tick = () => {
+      const elapsed = performance.now() - startTime;
+      phaseProgressRef.current = Math.min(1, elapsed / duration);
+      if (elapsed < duration) {
+        rafId = requestAnimationFrame(tick);
+      }
+    };
+    rafId = requestAnimationFrame(tick);
+
+    return () => cancelAnimationFrame(rafId);
+  }, [phase]);
+
+  // Typewriter effect: type statement character by character when phase >= 4
+  useEffect(() => {
+    if (phase < 4 || completedRef.current) return;
+
+    let charIndex = 0;
+    setTypewriterText("");
+
+    const tick = () => {
+      charIndex++;
+      setTypewriterText(statement.slice(0, charIndex));
+    };
+
+    const intervalId = setInterval(tick, TYPE_SPEED_MS);
+
+    // Stop when complete
+    const totalTime = statement.length * TYPE_SPEED_MS + 50;
+    const stopTimer = setTimeout(() => {
+      clearInterval(intervalId);
+      setTypewriterText(statement);
+    }, totalTime);
+
+    return () => {
+      clearInterval(intervalId);
+      clearTimeout(stopTimer);
+    };
+  }, [phase, statement]);
+
+  // Keyboard skip (Escape or Enter/Space)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" || (showButtonRef.current && (e.key === "Enter" || e.key === " "))) {
-        handleSkip();
+      if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
+        handleComplete();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [handleSkip]);
+  }, [handleComplete]);
 
-  // Main timeline — 压缩到 3.0s 开始出文字（更快触达内容）
-  // reduced-motion: 跳过粒子动画，直接显示文字
-  useEffect(() => {
-    if (prefersReducedMotion()) {
-      setParticlePhase("fade");
-      setBgDim(0.6);
-      setShowText(true);
-      setCurrentLine(LINES.length); // 跳过打字机，直接全部显示
-      return;
-    }
+  // If already completed, render nothing
+  if (completedRef.current && phase === 0) {
+    return null;
+  }
 
-    startTimeRef.current = performance.now();
-
-    // Phase 1: converge (1.2-2.5s)
-    const convergeTimer = setTimeout(() => {
-      setParticlePhase("converge");
-    }, 1200);
-
-    let convergeRafId = 0;
-    const updateProgress = () => {
-      const elapsed = performance.now() - startTimeRef.current;
-      if (elapsed > 1200 && elapsed < 2500) {
-        phaseProgressRef.current = (elapsed - 1200) / 1300;
-        convergeRafId = requestAnimationFrame(updateProgress);
-      } else if (elapsed >= 2500) {
-        phaseProgressRef.current = 1;
-      } else {
-        convergeRafId = requestAnimationFrame(updateProgress);
-      }
-    };
-    convergeRafId = requestAnimationFrame(updateProgress);
-
-    // Phase 2: explode (2.5-3.0s)
-    const explodeTimer = setTimeout(() => {
-      setParticlePhase("explode");
-      setFlashOpacity(0.8);
-      flashTimerRef.current = setTimeout(() => setFlashOpacity(0), 400);
-    }, 2500);
-
-    // Phase 3: text (3.0s+)
-    const textTimer = setTimeout(() => {
-      setParticlePhase("fade");
-      setBgDim(0.6);
-      setShowText(true);
-    }, 3000);
-
-    return () => {
-      clearTimeout(convergeTimer);
-      cancelAnimationFrame(convergeRafId);
-      clearTimeout(explodeTimer);
-      clearTimeout(flashTimerRef.current);
-      clearTimeout(textTimer);
-    };
-  }, []);
-
-  // Typewriter effect
-  useEffect(() => {
-    if (!showText) return;
-    if (currentLine >= LINES.length) {
-      const t = setTimeout(() => setShowButton(true), 400);
-      return () => clearTimeout(t);
-    }
-
-    const line = LINES[currentLine];
-    if (displayedChars < line.length) {
-      const t = setTimeout(
-        () => setDisplayedChars((c) => c + 1),
-        TYPE_SPEED
-      );
-      return () => clearTimeout(t);
-    } else {
-      const t = setTimeout(() => {
-        setCurrentLine((l) => l + 1);
-        setDisplayedChars(0);
-      }, LINE_DELAY);
-      return () => clearTimeout(t);
-    }
-  }, [showText, currentLine, displayedChars, LINES]);
-
-  // Dynamic styles — memoized to avoid per-render allocations
-  const rootStyle = useMemo<React.CSSProperties>(
-    () => ({ ...rootStyleBase, opacity: exiting ? 0 : 1, transform: exiting ? "scale(1.04)" : "scale(1)" }),
-    [exiting],
-  );
-
-  const bgDimStyle = useMemo<React.CSSProperties>(
-    () => ({ ...bgDimStyleBase, opacity: bgDim }),
-    [bgDim],
-  );
-
-  const flashStyle = useMemo<React.CSSProperties>(
-    () => ({ ...flashStyleBase, opacity: flashOpacity }),
-    [flashOpacity],
-  );
-
-  const textWrapperStyle = useMemo<React.CSSProperties>(
-    () => ({ ...textWrapperBase, opacity: showText ? 1 : 0, pointerEvents: showText ? "auto" : "none" }),
-    [showText],
-  );
-
-  const btnContainerStyle = useMemo<React.CSSProperties>(
-    () => ({
-      ...buttonContainerBase,
-      opacity: showButton ? 1 : 0,
-      transform: showButton ? "translateY(0) scale(1)" : "translateY(16px) scale(0.96)",
-      pointerEvents: showButton ? "auto" : "none",
-    }),
-    [showButton],
-  );
-
-  const startBtnStyle = useMemo<React.CSSProperties>(
-    () => ({ ...startBtnBase, cursor: exiting ? "default" : "pointer", opacity: exiting ? 0.85 : 1 }),
-    [exiting],
-  );
+  const particlePhase = toParticlePhase(phase);
 
   return (
-    <div data-landing style={rootStyle}>
-      {/* Particle canvas */}
+    <div style={S_ROOT} data-phase={phase}>
+      {/* Particles background */}
       <ParticleCanvas phase={particlePhase} phaseProgressRef={phaseProgressRef} />
 
-      {/* Background dim overlay */}
-      <div style={bgDimStyle} />
+      {/* Center pulse glow (phase 0) */}
+      {phase === 0 && <div style={S_PULSE_GLOW} />}
 
-      {/* Flash overlay */}
-      <div style={flashStyle} />
+      {/* Silhouette (phases 1-2) */}
+      <LingSilhouette visible={phase >= 1 && phase <= 2} breathing={phase === 1} />
 
-      {/* Text content — always rendered to avoid FOUC; opacity controls visibility */}
-      <div style={textWrapperStyle}>
-        <div className="landing-text-block" style={textBlockStyle}>
-          {LINES.map((line, i) => {
-            const isComplete = i < currentLine;
-            const state = isComplete ? "complete" : i === currentLine ? "typing" : "hidden";
-            const chars = isComplete ? line.length : i === currentLine ? displayedChars : 0;
-            const text = line.slice(0, chars);
-            const isActive = i === currentLine && chars < line.length;
-
-            return (
-              <div
-                key={i}
-                className={`landing-text-line${i === 0 ? " landing-title-gradient" : ""}${i === 0 && isComplete ? " landing-title-glow" : ""}`}
-                style={LINE_STATE_STYLES[i][state]}
-              >
-                {text}
-                {isActive && (
-                  <span style={i === 0 ? cursorStyleTitle : cursorStyleNormal} />
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Start button — container always rendered to prevent layout shift */}
-        <div style={btnContainerStyle}>
-          <button
-            onClick={handleSkip}
-            className="landing-start-btn"
-            disabled={exiting || !showButton}
-            aria-busy={exiting}
-            tabIndex={showButton ? 0 : -1}
-            style={startBtnStyle}
+      {/* VitalsBar (phase 3+) */}
+      <AnimatePresence>
+        {phase >= 3 && (
+          <motion.div
+            key="vitals"
+            initial={{ y: -48, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, ease: [0, 0, 0.2, 1] }}
+            style={S_VITALS_WRAP}
           >
-            {exiting && <span style={spinnerStyle} aria-hidden="true" />}
-            {t("landing.startChat")}
-            {!exiting && (
-              <span className="landing-btn-arrow" style={arrowStyle}>
-                {"\u2192"}
-              </span>
-            )}
-          </button>
-          <span style={hintStyle}>
-            <span className="landing-hint-mobile">{t("landing.tapHint", "Tap to start")}</span>
-            <span className="landing-hint-desktop">{t("landing.enterHint")}</span>
-          </span>
-          {/* Feature pills */}
-          <div className="landing-feature-pills">
-            {(["featureMemory", "featureVoice", "featureAvatar"] as const).map((key) => (
-              <span key={key} className="landing-feature-pill">
-                {t(`landing.${key}`)}
-              </span>
-            ))}
-          </div>
-        </div>
+            <VitalsBar vitals={vitals} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Statement text (phase 4+) with typewriter effect */}
+      <AnimatePresence>
+        {phase >= 4 && (
+          <motion.div
+            key="statement"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            style={S_STATEMENT}
+          >
+            <p>{typewriterText}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* CTA button (phase 4+) */}
+      <AnimatePresence>
+        {phase >= 4 && (
+          <motion.button
+            key="cta"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            style={S_CTA}
+            onClick={handleComplete}
+          >
+            Talk to Ling
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Skip button (always visible in phases 0-4) */}
+      {phase < 5 && (
+        <button style={S_SKIP} onClick={handleComplete}>
+          Skip {"\u2192"}
+        </button>
+      )}
+
+      {/* Accessibility announcement */}
+      <div role="status" aria-live="polite" style={SR_ONLY}>
+        {phase === 0 && "Ling is awakening..."}
+        {phase === 4 && statement}
       </div>
-
-      {/* Skip hint — 移动端友好触摸区域 */}
-      <button type="button" onClick={handleSkip} className="landing-skip" style={skipStyle}>
-        {t("landing.skip")}
-      </button>
-
     </div>
   );
 });
