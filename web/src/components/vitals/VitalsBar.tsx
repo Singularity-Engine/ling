@@ -5,7 +5,7 @@
  * Replaces ExperimentBar as the primary status display.
  */
 
-import { memo } from "react";
+import React, { memo } from "react";
 import { useTranslation } from "react-i18next";
 import styles from "./VitalsBar.module.css";
 
@@ -24,12 +24,14 @@ interface VitalsBarProps {
   vitals: VitalsData;
   onCenterClick?: () => void;
   onSettingsClick?: () => void;
+  centerBtnRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
 export const VitalsBar = memo(function VitalsBar({
   vitals,
   onCenterClick,
   onSettingsClick,
+  centerBtnRef,
 }: VitalsBarProps) {
   const { t } = useTranslation();
 
@@ -64,6 +66,7 @@ export const VitalsBar = memo(function VitalsBar({
       {/* Center: Countdown + heartbeat + revenue */}
       {/* 大师♿改进: 用 <button> 替代 <div role="button"> */}
       <button
+        ref={centerBtnRef}
         className={styles.center}
         onClick={onCenterClick}
         aria-label={t("experiment.countdown", {

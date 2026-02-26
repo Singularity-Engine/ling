@@ -1,0 +1,100 @@
+/* DashboardOverlay — Glass morphism survival metrics panel */
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 200;
+  background: rgba(6, 0, 15, 0.9);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ling-space-8);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--ling-space-6);
+  width: 100%;
+  max-width: 420px;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ling-space-2);
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ling-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.value {
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
+  font-size: var(--ling-font-xl, 20px);
+  font-weight: 600;
+  color: var(--ling-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Revenue progress bar */
+.progressBar {
+  width: 100%;
+  height: 6px;
+  background: var(--ling-surface-border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: var(--ling-space-1);
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ling-purple-light), var(--ling-alive));
+  border-radius: 3px;
+  transition: width 1s ease;
+}
+
+.progressPercent {
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
+  font-size: 12px;
+  color: var(--ling-text-dim);
+  font-variant-numeric: tabular-nums;
+  margin-top: var(--ling-space-1);
+}
+
+/* Separator between metrics */
+.metric + .metric {
+  padding-top: var(--ling-space-4);
+  border-top: 1px solid var(--ling-purple-08);
+}
+
+/* Reduced motion: disable animation */
+@media (prefers-reduced-motion: reduce) {
+  .progressFill {
+    transition: none;
+  }
+}
+
+/* Mobile: full-screen, more padding */
+@media (max-width: 768px) {
+  .overlay {
+    padding: var(--ling-space-6);
+  }
+
+  .grid {
+    max-width: 100%;
+  }
+
+  .value {
+    font-size: var(--ling-font-lg, 18px);
+  }
+}

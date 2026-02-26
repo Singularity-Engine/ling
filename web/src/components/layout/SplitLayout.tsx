@@ -8,6 +8,8 @@ import { AffinityBadge } from "../status/AffinityBadge";
 import CreditsDisplay from "../billing/CreditsDisplay";
 import { VitalsBar } from "../vitals/VitalsBar";
 import { useVitalsData } from "@/hooks/useVitalsData";
+import { DashboardOverlay } from "../dashboard/DashboardOverlay";
+import { useDashboardData } from "@/hooks/useDashboardData";
 import { StarField } from "../background/StarField";
 import { BackgroundReactor } from "../effects/BackgroundReactor";
 import { AudioVisualizer } from "../effects/AudioVisualizer";
@@ -250,12 +252,33 @@ export const SplitLayout = memo(function SplitLayout({ firstMinutePhase }: Split
   );
 
   const vitals = useVitalsData();
+  const dashData = useDashboardData();
+  const [dashboardOpen, setDashboardOpen] = useState(false);
+  const centerBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Keyboard shortcut: Cmd+D / Ctrl+D to toggle dashboard overlay
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "d") {
+        e.preventDefault();
+        setDashboardOpen(v => !v);
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
+
+  // Return focus to VitalsBar center button when dashboard closes
+  const handleDashboardClose = useCallback(() => {
+    setDashboardOpen(false);
+    requestAnimationFrame(() => centerBtnRef.current?.focus());
+  }, []);
 
   return (
     <div ref={rootRef} className={styles.root} style={rootStyle} data-first-minute={firstMinutePhase}>
       {/* ── Vitals Bar — spans full width at top ── */}
       <div className={styles.vitalsRow}>
-        <VitalsBar vitals={vitals} />
+        <VitalsBar vitals={vitals} onCenterClick={() => setDashboardOpen(v => !v)} centerBtnRef={centerBtnRef} />
       </div>
 
       {/* ── Left Panel: Live2D ── */}
@@ -311,6 +334,9 @@ export const SplitLayout = memo(function SplitLayout({ firstMinutePhase }: Split
       <div className={styles.rightPanel}>
         {/* Glow bleed from character panel */}
         <div className={styles.glowBleed} />
+
+        {/* Dashboard Overlay — covers chat column only */}
+        <DashboardOverlay open={dashboardOpen} onClose={handleDashboardClose} data={dashData} />
 
         {/* VitalsBar is now in the top grid row — ExperimentBar removed */}
 

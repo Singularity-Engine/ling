@@ -8,7 +8,7 @@
  * received as props from MainContent in App.tsx.
  */
 
-import React, { Suspense, useMemo, type CSSProperties } from "react";
+import React, { Suspense, useMemo, useState, useCallback, useEffect, useRef, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
 import { SectionErrorBoundary } from "../error/SectionErrorBoundary";
@@ -19,6 +19,8 @@ import { AffinityBadge } from "../status/AffinityBadge";
 import CreditsDisplay from "../billing/CreditsDisplay";
 import { VitalsBar } from "../vitals/VitalsBar";
 import { useVitalsData } from "@/hooks/useVitalsData";
+import { DashboardOverlay } from "../dashboard/DashboardOverlay";
+import { useDashboardData } from "@/hooks/useDashboardData";
 import { StarField } from "../background/StarField";
 import { BackgroundReactor } from "../effects/BackgroundReactor";
 import { AudioVisualizer } from "../effects/AudioVisualizer";
@@ -95,6 +97,27 @@ export const OverlayLayout = React.memo(function OverlayLayout({
 }: OverlayLayoutProps) {
   const { t } = useTranslation();
   const vitals = useVitalsData();
+  const dashData = useDashboardData();
+  const [dashboardOpen, setDashboardOpen] = useState(false);
+  const centerBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Keyboard shortcut: Cmd+D / Ctrl+D to toggle dashboard overlay
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "d") {
+        e.preventDefault();
+        setDashboardOpen(v => !v);
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
+
+  // Return focus to VitalsBar center button when dashboard closes
+  const handleDashboardClose = useCallback(() => {
+    setDashboardOpen(false);
+    requestAnimationFrame(() => centerBtnRef.current?.focus());
+  }, []);
 
   // CSS variables for keyboard offset — drives chatOuter transform via CSS
   const chatOuterVars = useMemo<CSSProperties>(() => ({
@@ -106,8 +129,11 @@ export const OverlayLayout = React.memo(function OverlayLayout({
     <div className={styles.root} data-first-minute={firstMinutePhase}>
       {/* ===== VitalsBar — fixed top strip ===== */}
       <div className={styles.vitalsMini}>
-        <VitalsBar vitals={vitals} />
+        <VitalsBar vitals={vitals} onCenterClick={() => setDashboardOpen(v => !v)} centerBtnRef={centerBtnRef} />
       </div>
+
+      {/* ===== Dashboard Overlay — full-screen on mobile/tablet ===== */}
+      <DashboardOverlay open={dashboardOpen} onClose={handleDashboardClose} data={dashData} />
 
       {/* ===== Layer -1: StarField ===== */}
       <div className={styles.layerStarfield}>
