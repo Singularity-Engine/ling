@@ -12,7 +12,7 @@ def _configure_memory_fabric():
     """将 ling-platform 的 recall/consolidation/deletion 实现注入到 soul_fabric。"""
     from soul_fabric import MemoryFabric, set_memory_fabric
 
-    async def _recall_fn(query, user_id, top_k, timeout_ms):
+    async def _recall_fn(query, user_id, top_k, timeout_ms, **kwargs):
         from ..recall.soul_recall import get_soul_recall
         return await get_soul_recall().recall(
             query=query, user_id=user_id, top_k=top_k, timeout_ms=timeout_ms,
