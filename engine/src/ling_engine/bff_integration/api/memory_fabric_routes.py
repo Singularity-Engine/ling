@@ -100,7 +100,17 @@ async def _get_user_or_agent(
     return await get_current_user(credentials)
 
 
+def _ensure_fabric_initialized():
+    """确保 Soul Ports 已初始化，Memory Fabric 带注入函数。"""
+    try:
+        from ...soul.ports.initializer import ensure_ports_initialized
+        ensure_ports_initialized()
+    except Exception as e:
+        logger.warning(f"[MemoryFabric] Ports initialization failed: {e}")
+
+
 def create_memory_fabric_router() -> APIRouter:
+    _ensure_fabric_initialized()
     router = APIRouter(prefix="/api/v1/memory", tags=["memory-fabric"])
 
     @router.post("/events")
