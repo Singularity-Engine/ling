@@ -101,7 +101,7 @@ async def _get_user_or_agent(
 
 
 def create_memory_fabric_router() -> APIRouter:
-    router = APIRouter(prefix="/v1/memory", tags=["memory-fabric"])
+    router = APIRouter(prefix="/api/v1/memory", tags=["memory-fabric"])
 
     @router.post("/events")
     @limiter.limit("60/minute")

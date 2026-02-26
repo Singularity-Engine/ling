@@ -126,7 +126,7 @@ async def create_routes(default_context_cache: ServiceContext) -> APIRouter:
         from .bff_integration.api.memory_fabric_routes import create_memory_fabric_router
         memory_fabric_router = create_memory_fabric_router()
         router.include_router(memory_fabric_router)
-        logger.info("✅ Memory Fabric 路由已注册 (/v1/memory/*)")
+        logger.info("✅ Memory Fabric 路由已注册 (/api/v1/memory/*)")
 
         # 公开 Dashboard 路由（无需认证）
         from .bff_integration.api.ling_public_routes import create_ling_public_router
