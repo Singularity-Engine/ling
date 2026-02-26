@@ -126,6 +126,61 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
 // Mobile: menu exit animation duration (used by closeMenu timer)
 const MENU_EXIT_MS = 250;
 
+// Witness ↔ Console crossfade duration (ms per direction)
+// Total transition: ~800ms (400ms out + 400ms in) with mode="wait"-like sequencing.
+// Reduced-motion users get instant swap (0ms).
+const CROSSFADE_MS = 400;
+
+// Detect prefers-reduced-motion at module level (static, avoids per-render media query)
+const prefersReducedMotion =
+  typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+const crossfadeDuration = prefersReducedMotion ? 0 : CROSSFADE_MS;
+
+/**
+ * CSS-based crossfade hook — simulates AnimatePresence mode="wait" without
+ * importing framer-motion on the critical path.
+ *
+ * When the target key changes:
+ *   1. Fade out current view (opacity 1 → 0, crossfadeDuration ms)
+ *   2. Swap content (render new key)
+ *   3. Fade in new view (opacity 0 → 1, crossfadeDuration ms)
+ *
+ * Returns { renderKey, opacity } — renderKey lags behind `activeKey` during
+ * the fade-out phase so the old component stays mounted until fully invisible.
+ */
+function useCrossfade(activeKey: string) {
+  const [renderKey, setRenderKey] = useState(activeKey);
+  const [opacity, setOpacity] = useState(1);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    if (activeKey === renderKey) return;
+
+    // Phase 1: fade out current view
+    setOpacity(0);
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      // Phase 2: swap to new content (still invisible)
+      setRenderKey(activeKey);
+      // Phase 3: fade in — needs a frame for the DOM swap before opacity transition
+      requestAnimationFrame(() => setOpacity(1));
+    }, crossfadeDuration);
+
+    return () => clearTimeout(timerRef.current);
+  }, [activeKey, renderKey]);
+
+  // Cleanup timer on unmount
+  useEffect(() => () => { clearTimeout(timerRef.current); }, []);
+
+  const style: CSSProperties = useMemo(() => ({
+    opacity,
+    transition: `opacity ${crossfadeDuration}ms var(--ling-ease-default)`,
+    willChange: opacity < 1 ? 'opacity' : 'auto',
+  }), [opacity]);
+
+  return { renderKey, style };
+}
+
 // Landing → main content transition
 const S_MAIN_VISIBLE: CSSProperties = {
   opacity: 1, transform: "scale(1)",
@@ -521,6 +576,14 @@ function MainApp() {
   // - Unauthenticated (and not loading) → WitnessMode
   const showWitnessMode = !isAuthenticated && !isLoading && !showLanding;
 
+  // Crossfade between Witness Mode and Console Mode.
+  // On auth state change (login/logout without full reload), the old view fades
+  // out over 400ms, then the new view fades in over 400ms (mode="wait" style).
+  // OAuth redirects cause a full page reload so the crossfade won't play there,
+  // but it covers: logout, future non-redirect auth flows, and SSR hydration.
+  const modeKey = showWitnessMode ? 'witness' : 'console';
+  const { renderKey: activeMode, style: crossfadeStyle } = useCrossfade(modeKey);
+
   return (
     <>
       <Helmet>
@@ -540,16 +603,18 @@ function MainApp() {
       <HreflangTags canonicalUrl="https://ling.sngxai.com/" />
       <StructuredData />
       <Providers>
-        {showWitnessMode ? (
-          /* Unauthenticated: Witness Mode — silhouette + daily statement + CTA */
-          <Suspense fallback={null}>
-            <WitnessMode />
-          </Suspense>
-        ) : (
-          <div style={landingExiting || !showLanding ? S_MAIN_VISIBLE : S_MAIN_HIDDEN}>
-            <MainContent />
-          </div>
-        )}
+        <div style={crossfadeStyle}>
+          {activeMode === 'witness' ? (
+            /* Unauthenticated: Witness Mode — silhouette + daily statement + CTA */
+            <Suspense fallback={null}>
+              <WitnessMode />
+            </Suspense>
+          ) : (
+            <div style={landingExiting || !showLanding ? S_MAIN_VISIBLE : S_MAIN_HIDDEN}>
+              <MainContent />
+            </div>
+          )}
+        </div>
 
         {showLanding && (
           <Suspense fallback={null}>
