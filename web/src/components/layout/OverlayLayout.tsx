@@ -30,6 +30,7 @@ import { TapParticles } from "../effects/TapParticles";
 import { LoadingSkeleton } from "../loading/LoadingSkeleton";
 import { ICON_CHAT, ICON_MEMORY, ICON_INFO, ICON_CHEVRON_UP, ICON_MENU, ICON_CLOSE } from "./overlay-icons";
 import { lazyRetry } from "@/utils/lazy-retry";
+import { useSwipeGesture } from "@/hooks/useSwipeGesture";
 import styles from "./OverlayLayout.module.css";
 
 const ChatArea = lazyRetry(() => import("../chat/ChatArea").then(m => ({ default: m.ChatArea })));
@@ -103,6 +104,49 @@ export const OverlayLayout = React.memo(function OverlayLayout({
   const [dashboardOpen, setDashboardOpen] = useState(false);
   const centerBtnRef = useRef<HTMLButtonElement>(null);
 
+  // ── Swipe gestures (mobile only) ──────────────────────────────────────────
+  const swipeUpRef = useRef<HTMLDivElement>(null);
+  const swipeDownRef = useRef<HTMLDivElement>(null);
+
+  // Swipe UP on the Live2D area → expand chat (only when collapsed)
+  const expandChat = useCallback(() => {
+    if (!chatExpanded) toggleChat();
+  }, [chatExpanded, toggleChat]);
+
+  useSwipeGesture(swipeUpRef, {
+    direction: "up",
+    threshold: 40,
+    onSwipe: expandChat,
+    enabled: isMobile && !chatExpanded,
+  });
+
+  // Swipe DOWN on the chat area → collapse chat (only when expanded)
+  useSwipeGesture(swipeDownRef, {
+    direction: "down",
+    threshold: 40,
+    onSwipe: collapseChat,
+    enabled: isMobile && chatExpanded,
+  });
+
+  // ── Swipe hint for first-time mobile users ────────────────────────────────
+  const [showSwipeHint, setShowSwipeHint] = useState(false);
+
+  useEffect(() => {
+    if (!isMobile) return;
+    const STORAGE_KEY = "ling-swipe-hint-count";
+    const MAX_SHOWS = 3;
+    try {
+      const count = parseInt(localStorage.getItem(STORAGE_KEY) ?? "0", 10);
+      if (count >= MAX_SHOWS) return;
+      localStorage.setItem(STORAGE_KEY, String(count + 1));
+      setShowSwipeHint(true);
+      const timer = setTimeout(() => setShowSwipeHint(false), 3000);
+      return () => clearTimeout(timer);
+    } catch {
+      // localStorage unavailable — silently skip hint
+    }
+  }, [isMobile]);
+
   // Keyboard shortcut: Cmd+D / Ctrl+D to toggle dashboard overlay
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -144,7 +188,7 @@ export const OverlayLayout = React.memo(function OverlayLayout({
 
       {/* ===== Layer 0: Live2D ===== */}
       <SectionErrorBoundary name="Live2D">
-        <div className={styles.layerLive2d}>
+        <div ref={swipeUpRef} className={styles.layerLive2d}>
           <Live2D />
         </div>
       </SectionErrorBoundary>
@@ -296,9 +340,16 @@ export const OverlayLayout = React.memo(function OverlayLayout({
         </>
       )}
 
+      {/* ===== Swipe hint (mobile, first 3 visits) ===== */}
+      {isMobile && showSwipeHint && !chatExpanded && (
+        <div className={styles.swipeHint} aria-hidden="true">
+          {"\u2191 "}{t("ui.swipeUpToChat", "Swipe up to chat")}
+        </div>
+      )}
+
       {/* ===== Layer 2: Floating chat area ===== */}
       <div className={styles.chatOuter} style={chatOuterVars}>
-        <div className={styles.chatInner} data-state={chatState(isMobile, chatExpanded)}>
+        <div ref={swipeDownRef} className={styles.chatInner} data-state={chatState(isMobile, chatExpanded)}>
           <SectionErrorBoundary name="ChatArea" fallback={
             <div className={styles.chatFallback}>{t("error.chatRenderFailed")}</div>
           }>

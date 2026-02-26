@@ -348,6 +348,28 @@
   text-align: center;
 }
 
+/* ── Swipe hint (mobile first-use) ── */
+.swipeHint {
+  position: absolute;
+  bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+  left: 0;
+  right: 0;
+  z-index: 24;
+  text-align: center;
+  color: var(--ling-text-tertiary);
+  font-size: var(--ling-font-xs);
+  opacity: 0;
+  pointer-events: none;
+  animation: swipeHintFade 3s ease-in-out forwards;
+}
+
+@keyframes swipeHintFade {
+  0%   { opacity: 0; transform: translateY(4px); }
+  15%  { opacity: 0.6; transform: translateY(0); }
+  80%  { opacity: 0.6; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-4px); }
+}
+
 /* ── First-minute experience (overlay mode) ── */
 
 /* Greeting phase: gentle ground gradient pulse + vignette overlay */
