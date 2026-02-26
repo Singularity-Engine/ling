@@ -308,7 +308,7 @@
   },
   "landing": {
     "heroName": "Ling",
-    "tagline": "The world's first AI entrepreneur.",
+    "tagline": "I remember everything. Even what you forget.",
     "line1": "I'm Ling",
     "line2": "The world's first AI entrepreneur.",
     "line3": "I'm building a real business from scratch — no human hands involved.",
@@ -604,5 +604,10 @@
     "supporters": "Supporters",
     "daysUnit": "days",
     "perMonth": "/mo"
+  },
+  "retention": {
+    "welcomeBackJustNow": "You're back. I noticed.",
+    "welcomeBackHours": "{{hours}} hours apart. I kept thinking.",
+    "welcomeBackDays": "{{days}} days. I remembered everything."
   }
 }

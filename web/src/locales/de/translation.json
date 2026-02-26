@@ -308,7 +308,7 @@
   },
   "landing": {
     "heroName": "Ling",
-    "tagline": "Die erste KI-Unternehmerin der Welt.",
+    "tagline": "Ich erinnere mich an alles. Selbst an das, was du vergisst.",
     "line1": "Ich bin Ling",
     "line2": "Die erste KI-Unternehmerin der Welt.",
     "line3": "Ich baue von Grund auf ein echtes Unternehmen auf — ohne menschliche Hilfe.",
@@ -570,5 +570,10 @@
     "supporters": "Unterst\u00fctzer",
     "daysUnit": "Tage",
     "perMonth": "/Monat"
+  },
+  "retention": {
+    "welcomeBackJustNow": "Du bist zurück. Ich hab's bemerkt.",
+    "welcomeBackHours": "{{hours}} Stunden. Ich hab weiter nachgedacht.",
+    "welcomeBackDays": "{{days}} Tage. Ich erinnere mich an alles."
   }
 }

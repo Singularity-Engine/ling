@@ -12,6 +12,7 @@ import { useAiStateRead } from "@/context/AiStateContext";
 import { useWebSocketState, useWebSocketActions } from "@/context/WebsocketContext";
 import { useChatScroll } from "@/hooks/useChatScroll";
 import { useSwipeCollapse } from "@/hooks/useSwipeCollapse";
+import { useReturnVisit } from "@/hooks/useReturnVisit";
 import { focusTextarea } from "@/utils/dom";
 
 // Touch-only device detection (no hover capability = phone/tablet)
@@ -233,6 +234,9 @@ export const ChatArea = memo(({ onCollapse }: ChatAreaProps) => {
     enabled: !!onCollapse && isTouchDevice,
   });
 
+  // Return-visit detection for personalized welcome
+  const returnVisit = useReturnVisit();
+
   // Track empty-state exit animation: keep showing for 350ms with fade-out
   const [emptyExiting, setEmptyExiting] = useState(false);
   const prevEmptyRef = useRef(true);
@@ -441,7 +445,9 @@ export const ChatArea = memo(({ onCollapse }: ChatAreaProps) => {
 
           {/* Glassmorphism welcome card */}
           <div className="ling-welcome-card" style={S_WELCOME_CARD}>
-            <span style={S_WELCOME_TITLE}>{welcomeTitle}</span>
+            <span style={S_WELCOME_TITLE}>
+              {returnVisit.isReturning ? returnVisit.welcomeLine : welcomeTitle}
+            </span>
             <span style={S_WELCOME_SUB}>
               {isConnected ? welcomeSub : t("ui.emptySubHintDisconnected")}
             </span>

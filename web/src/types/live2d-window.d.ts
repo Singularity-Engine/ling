@@ -1,7 +1,7 @@
 /**
  * Window augmentation for Live2D APIs injected at runtime.
  *
- * - getLAppAdapter: set in main.tsx → LAppAdapter.getInstance()
+ * - getLAppAdapter: set in entries/ling.tsx → LAppAdapter.getInstance()
  * - getLive2DManager: set by WebSDK/src/lapplive2dmanager.ts
  * - LAppLive2DManager: the manager class itself, exposed by WebSDK
  */
@@ -75,7 +75,7 @@ interface LAppAdapterLike {
 }
 
 interface Window {
-  /** Returns the singleton LAppAdapter (set in main.tsx) */
+  /** Returns the singleton LAppAdapter (set in entries/ling.tsx) */
   getLAppAdapter?(): LAppAdapterLike;
   /** Returns the Live2D model manager (set by WebSDK) */
   getLive2DManager?(): Live2DManager | null;

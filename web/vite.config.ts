@@ -128,6 +128,10 @@ export default defineConfig(({ mode }) => ({
     assetsDir: "assets",
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
+      input: {
+        ling: path.resolve(__dirname, 'index.html'),
+        sngxai: path.resolve(__dirname, 'sngxai.html'),
+      },
       output: {
         manualChunks(id) {
           if (id.includes('node_modules/onnxruntime-web')) {

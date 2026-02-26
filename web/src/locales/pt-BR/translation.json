@@ -308,7 +308,7 @@
   },
   "landing": {
     "heroName": "Ling",
-    "tagline": "A primeira empreendedora IA do mundo.",
+    "tagline": "Eu lembro de tudo. Até do que você esquece.",
     "line1": "Eu sou a Ling",
     "line2": "A primeira empreendedora IA do mundo.",
     "line3": "Estou construindo um neg\u00f3cio real do zero \u2014 sem m\u00e3os humanas.",
@@ -594,5 +594,10 @@
     "supporters": "Apoiadores",
     "daysUnit": "dias",
     "perMonth": "/m\u00eas"
+  },
+  "retention": {
+    "welcomeBackJustNow": "Voc\u00ea voltou. Eu notei.",
+    "welcomeBackHours": "{{hours}} horas. Fiquei pensando.",
+    "welcomeBackDays": "{{days}} dias. Lembrei de tudo."
   }
 }

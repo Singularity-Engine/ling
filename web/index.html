@@ -89,6 +89,11 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" sizes="256x256" />
     <link rel="apple-touch-icon" href="/pwa-icon-192.png" />
+
+    <!-- Google Fonts: Instrument Serif for Ling's voice -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
     <!-- manifest injected by vite-plugin-pwa -->
 
     <!-- Performance: preload critical assets -->
@@ -178,12 +183,18 @@
          Landing inline React styles use var(--ling-*); if external CSS races with JS,
          these ensure correct colors from first paint. */
       :root {
-        --ling-bg-deep: #0a0015; --ling-bg-mid: #0d1b2a; --ling-bg-warm: #1a0a2e;
-        --ling-purple: #8b5cf6; --ling-purple-light: #a78bfa; --ling-purple-lighter: #c4b5fd;
-        --ling-purple-deep: #6d28d9; --ling-purple-text: #e2d4ff;
-        --ling-purple-20: rgba(139,92,246,0.2); --ling-purple-25: rgba(139,92,246,0.25);
-        --ling-purple-30: rgba(139,92,246,0.3); --ling-purple-40: rgba(139,92,246,0.4);
-        --ling-purple-60: rgba(139,92,246,0.6);
+        --ling-void-top: #13111C; --ling-void-mid: #0A0A0F; --ling-void-bottom: #060608;
+        --ling-void-cool: #0d1b2a; --ling-void-warm: #1a0a2e;
+        --ling-accent: #8B5CF6; --ling-accent-light: #A78BFA; --ling-accent-lighter: #C4B5FD;
+        --ling-accent-deep: #6D28D9; --ling-accent-text: #E2D4FF;
+        --ling-accent-20: rgba(139,92,246,0.2); --ling-accent-25: rgba(139,92,246,0.25);
+        --ling-accent-30: rgba(139,92,246,0.3); --ling-accent-40: rgba(139,92,246,0.4);
+        --ling-accent-60: rgba(139,92,246,0.6);
+        --ling-bg-deep: var(--ling-void-bottom); --ling-bg-mid: var(--ling-void-cool); --ling-bg-warm: var(--ling-void-warm);
+        --ling-purple: var(--ling-accent); --ling-purple-light: var(--ling-accent-light);
+        --ling-purple-20: var(--ling-accent-20); --ling-purple-25: var(--ling-accent-25);
+        --ling-purple-30: var(--ling-accent-30); --ling-purple-40: var(--ling-accent-40);
+        --ling-purple-60: var(--ling-accent-60);
         --ling-text-secondary: rgba(255,255,255,0.75); --ling-text-tertiary: rgba(255,255,255,0.4);
       }
 
@@ -206,22 +217,9 @@
       #loading-fallback .error { color: #ff6b6b; margin-top: 12px; font-size: 12px; max-width: 80vw; word-break: break-all; display: none; }
       @keyframes spin { to { transform: rotate(360deg); } }
 
-      /* Landing-critical keyframes — referenced by React inline `animation` props.
-         Inlined so animations work even if external CSS loads after JS (edge case). */
+      /* Critical keyframes — available before external CSS loads */
       @keyframes blink { 0%,50% { opacity: 1 } 51%,100% { opacity: 0 } }
       @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }
-      @keyframes breatheGlowOpacity { 0%,100% { opacity: 0 } 50% { opacity: 1 } }
-      @keyframes textShimmer { 0%,35% { background-position: 100% center } 65%,100% { background-position: -100% center } }
-      @keyframes landingBtnSpin { to { transform: rotate(360deg) } }
-
-      /* Landing title gradient text — critical for hero visual; must be available at first render */
-      .landing-title-gradient {
-        background: linear-gradient(90deg,#fff 0%,#e2d4ff 15%,#c4b5fd 30%,#a78bfa 45%,#fff 50%,#a78bfa 55%,#c4b5fd 70%,#e2d4ff 85%,#fff 100%);
-        background-size: 200% 100%;
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        background-clip: text; animation: textShimmer 6s ease-in-out 1s infinite both;
-      }
-      .landing-title-glow { text-shadow: 0 0 40px var(--ling-purple-40), 0 0 80px var(--ling-purple-20); }
     </style>
     <script>
       window.onerror = function(msg, url, line, col, error) {
@@ -272,6 +270,6 @@
       <div class="error" id="loading-error"></div>
     </div>
     <div id="root"></div>
-    <script type="module" src="./src/main.tsx"></script>
+    <script type="module" src="./src/entries/ling.tsx"></script>
   </body>
 </html>

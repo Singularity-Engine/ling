@@ -6,8 +6,7 @@ import i18next from "i18next";
 
 import { lazyRetry } from "./utils/lazy-retry";
 
-// Lazy-loaded: only shown on first visit (before sessionStorage 'ling-overture-seen' is set).
-const LandingAnimation = lazyRetry(() => import("./components/landing/LandingAnimation").then(m => ({ default: m.LandingAnimation })));
+import { BrandReveal } from "./components/landing/BrandReveal";
 
 // Lazy-loaded: Witness Mode for unauthenticated visitors (after overture completes).
 const WitnessMode = lazyRetry(() => import("./components/witness/WitnessMode").then(m => ({ default: m.WitnessMode })));
@@ -30,8 +29,9 @@ import { OverlayLayout } from "./components/layout/OverlayLayout";
 import { Providers } from "./components/layout/Providers";
 import { AuthProvider, useAuthState, useAuthActions } from "./context/AuthContext";
 import { SectionErrorBoundary } from "./components/error/SectionErrorBoundary";
+import { BreathingBackground } from "./components/shared/BreathingBackground";
 import { createLogger } from "./utils/logger";
-import { MISC_COLORS } from "./constants/colors";
+
 import { SS_VISITED } from "./constants/storage-keys";
 import { captureError } from "./lib/sentry";
 import { focusTextarea } from "./utils/dom";
@@ -78,7 +78,7 @@ const S_EB_DETAIL_TOGGLE: CSSProperties = { marginTop: 'var(--ling-space-5)', ba
 const S_EB_DETAIL_PRE: CSSProperties = {
   marginTop: 'var(--ling-space-3)', textAlign: 'left', color: 'rgba(255,107,107,0.7)',
   fontSize: 'var(--ling-font-xs)', fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all',
-  maxHeight: 200, overflow: 'auto', background: MISC_COLORS.ERROR_BG, padding: 'var(--ling-space-3)', borderRadius: 'var(--ling-radius-8)',
+  maxHeight: 200, overflow: 'auto', background: 'rgba(0, 0, 0, 0.3)', padding: 'var(--ling-space-3)', borderRadius: 'var(--ling-radius-8)',
 };
 
 // Error Boundary
@@ -583,6 +583,7 @@ function MainApp() {
 
   return (
     <>
+      <BreathingBackground />
       <Helmet>
         <title>{t("seo.homeTitle")}</title>
         <meta name="description" content={t("seo.homeDesc")} />
@@ -614,9 +615,7 @@ function MainApp() {
         </div>
 
         {showLanding && (
-          <Suspense fallback={null}>
-            <LandingAnimation onComplete={handleLandingComplete} />
-          </Suspense>
+          <BrandReveal onComplete={handleLandingComplete} />
         )}
 
         {isAuthenticated && (

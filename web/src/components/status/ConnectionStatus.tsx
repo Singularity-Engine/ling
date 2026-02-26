@@ -2,7 +2,6 @@ import { memo, useState, useEffect, useRef, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { useWebSocketState, useWebSocketActions } from "@/context/WebsocketContext";
 import { gatewayConnector, RECONNECT_MAX_RETRIES } from "@/services/gateway-connector";
-import { OVERLAY_COLORS } from "@/constants/colors";
 
 // ── Timing constants ──
 const CONNECTED_FADE_START = 1700; // ms — begin fade-out after connection
@@ -14,7 +13,7 @@ const S_CONTAINER_BASE: CSSProperties = {
   alignItems: "center",
   gap: "6px",
   padding: "5px 10px",
-  background: OVERLAY_COLORS.MEDIUM,
+  background: 'rgba(0, 0, 0, 0.35)',
   backdropFilter: "blur(12px)",
   borderRadius: "16px",
   transition: "border-color 0.4s ease, opacity 0.4s ease",

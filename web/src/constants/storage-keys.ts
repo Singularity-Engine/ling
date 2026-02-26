@@ -33,6 +33,7 @@ export const SK_CONSTELLATION = 'ling-constellation-v1';
 export const SK_AFFINITY_STATE = 'ling-affinity-state';
 export const SK_FIRST_VISIT = 'ling-first-visit';
 export const SK_HAS_INTERACTED = 'ling-has-interacted';
+export const SK_LAST_VISIT = 'ling-last-visit';
 
 /** i18n (managed by i18next, referenced here for completeness) */
 export const SK_LANGUAGE = 'i18nextLng';

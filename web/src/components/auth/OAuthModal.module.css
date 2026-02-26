@@ -29,13 +29,18 @@
   margin: 0 0 24px;
 }
 
-.googleBtn {
-  width: 100%;
+.oauthRow {
+  display: flex;
+  gap: 12px;
+}
+
+.oauthBtn {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 12px 24px;
+  gap: 8px;
+  padding: 12px 16px;
   min-height: 44px;
   font-size: 15px;
   font-weight: 500;
@@ -45,34 +50,74 @@
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
+  font-family: inherit;
 }
 
-.googleBtn:hover {
+.oauthBtn:hover {
   background: var(--ling-surface-hover, rgba(255, 255, 255, 0.1));
   border-color: rgba(255, 255, 255, 0.15);
 }
 
-.googleBtn:focus-visible {
+.oauthBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.oauthBtn:focus-visible {
   outline: 2px solid var(--ling-focus-ring, var(--ling-purple-lighter, #c4b5fd));
   outline-offset: 2px;
 }
 
-.fallback {
-  margin-top: 16px;
+.error {
+  margin: 12px 0 0;
+  padding: 8px 12px;
   font-size: 13px;
-  color: var(--ling-text-dim);
+  color: var(--ling-warning, #fbbf24);
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 8px;
+  text-align: center;
 }
 
-.fallbackLink {
-  color: var(--ling-purple-light, #a78bfa);
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: var(--ling-text-muted, rgba(255, 255, 255, 0.3));
+  font-size: 13px;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--ling-overlay-12, rgba(255, 255, 255, 0.08));
+}
+
+.emailBtn {
+  display: block;
+  width: 100%;
+  padding: 12px 24px;
+  min-height: 44px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ling-text-primary);
+  background: linear-gradient(135deg, var(--ling-purple, #8b5cf6) 0%, var(--ling-purple-deep, #6d28d9) 100%);
+  border: 1px solid var(--ling-purple-30, rgba(139, 92, 246, 0.3));
+  border-radius: 8px;
   text-decoration: none;
+  text-align: center;
+  transition: opacity 0.15s;
+  box-sizing: border-box;
 }
 
-.fallbackLink:hover {
-  text-decoration: underline;
+.emailBtn:hover {
+  opacity: 0.9;
 }
 
-.fallbackLink:focus-visible {
+.emailBtn:focus-visible {
   outline: 2px solid var(--ling-focus-ring, var(--ling-purple-lighter, #c4b5fd));
   outline-offset: 2px;
 }

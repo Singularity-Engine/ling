@@ -1,0 +1,37 @@
+.root {
+  width: 100%;
+  display: block;
+}
+
+.path {
+  stroke: var(--ling-accent, #8B5CF6);
+  stroke-width: 1;
+  fill: none;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: fracturePulse 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.subtle .path {
+  opacity: 0.3;
+  filter: none;
+}
+
+.prominent .path {
+  opacity: 1;
+  filter: drop-shadow(0 0 4px rgba(139, 92, 246, 0.4))
+          drop-shadow(0 0 12px rgba(139, 92, 246, 0.2));
+}
+
+@keyframes fracturePulse {
+  0%   { stroke-dashoffset: 1000; }
+  50%  { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -1000; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}

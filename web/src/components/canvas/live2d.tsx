@@ -15,7 +15,6 @@ import { useForceIgnoreMouse } from "@/hooks/utils/use-force-ignore-mouse";
 import { useMode } from "@/context/ModeContext";
 import { useWebSocket } from "@/context/WebsocketContext";
 import { createLogger } from "@/utils/logger";
-import { LingSilhouette } from "../landing/LingSilhouette";
 
 interface Live2DProps {
   showSidebar?: boolean;
@@ -146,10 +145,15 @@ export const Live2D = memo(
           style={S_CANVAS[varKey]}
           aria-hidden="true"
         />
-        {/* Loading state: silhouette instead of spinner */}
+        {/* Loading state */}
         {showOverlay && (
           <div style={S_OVERLAY}>
-            <LingSilhouette visible breathing />
+            <div aria-hidden="true" style={{
+              width: 32, height: 32, borderRadius: '50%',
+              border: '3px solid rgba(139,92,246,0.2)',
+              borderTopColor: '#8B5CF6',
+              animation: 'spin 0.8s linear infinite',
+            }} />
             {showRetry && (
               <>
                 <p style={S_ERROR_TEXT}>{t("live2d.loadSlow", { defaultValue: "Ling is taking longer than usual." })}</p>

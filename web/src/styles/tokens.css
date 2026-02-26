@@ -1,0 +1,410 @@
+/*
+ * DESIGN TOKEN SYSTEM — SINGLE SOURCE OF TRUTH
+ * Source: docs/plans/2026-02-26-ling-ai-founder-redesign.md §5
+ *
+ * Architecture:
+ *   Section A: New canonical tokens (design doc names)
+ *   Section B: Legacy aliases (old names → derive from Section A via var())
+ *   Section C: Component tokens (bubbles, inputs, etc. — keep original names)
+ *   Section D: Light theme overrides
+ *
+ * Rule: New code uses Section A names. Old code works via Section B aliases.
+ *       When a component is rebuilt, it migrates from B→A names and the alias
+ *       is deleted. Section B shrinks to zero over time.
+ */
+
+:root {
+
+  /* ═══════════════════════════════════════════════════════════
+     SECTION A: CANONICAL TOKENS — Design Doc §5
+     These are the REAL values. Everything else derives from these.
+     ═══════════════════════════════════════════════════════════ */
+
+  /* ── A1: Void (background space — not flat color) ── */
+  --ling-void-top: #13111C;
+  --ling-void-mid: #0A0A0F;
+  --ling-void-bottom: #060608;
+  --ling-void-cool: #0d1b2a;   /* blue-tinted depth — body gradient mid */
+  --ling-void-warm: #1a0a2e;   /* purple-tinted depth — body gradient bottom */
+
+  /* ── A2: Accent (Ling's life color — purple) ── */
+  --ling-accent: #8B5CF6;
+  --ling-accent-light: #A78BFA;
+  --ling-accent-lighter: #C4B5FD;
+  --ling-accent-deep: #6D28D9;
+  --ling-accent-text: #E2D4FF;
+  --ling-accent-soft: rgba(139, 92, 246, 0.10);
+  --ling-accent-glow: 0 0 20px rgba(139, 92, 246, 0.12);
+  /* Accent opacity scale */
+  --ling-accent-05: rgba(139, 92, 246, 0.05);
+  --ling-accent-08: rgba(139, 92, 246, 0.08);
+  --ling-accent-10: rgba(139, 92, 246, 0.10);
+  --ling-accent-12: rgba(139, 92, 246, 0.12);
+  --ling-accent-15: rgba(139, 92, 246, 0.15);
+  --ling-accent-20: rgba(139, 92, 246, 0.20);
+  --ling-accent-25: rgba(139, 92, 246, 0.25);
+  --ling-accent-30: rgba(139, 92, 246, 0.30);
+  --ling-accent-40: rgba(139, 92, 246, 0.40);
+  --ling-accent-50: rgba(139, 92, 246, 0.50);
+  --ling-accent-60: rgba(139, 92, 246, 0.60);
+  --ling-accent-70: rgba(139, 92, 246, 0.70);
+  --ling-accent-85: rgba(139, 92, 246, 0.85);
+
+  /* ── A3: Text hierarchy ── */
+  --ling-text-1: #FAFAFA;
+  --ling-text-2: #A1A1AA;
+  --ling-text-3: #71717A;
+
+  /* ── A4: Glass surface (glassmorphism) ── */
+  --ling-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  --ling-glass-blur: blur(40px) saturate(1.2);
+  --ling-glass-border: rgba(255, 255, 255, 0.06);
+
+  /* ── A5: Semantic colors ── */
+  --ling-success: #22C55E;
+  --ling-warning: #F59E0B;
+  --ling-error: #EF4444;
+  --ling-error-bg: rgba(239, 68, 68, 0.2);
+  --ling-error-border: rgba(239, 68, 68, 0.3);
+
+  /* ── A6: Spacing (4px base grid) ── */
+  --ling-space-px: 1px;
+  --ling-space-0: 0;
+  --ling-space-0-5: 2px;
+  --ling-space-1: 4px;
+  --ling-space-1-5: 6px;
+  --ling-space-2: 8px;
+  --ling-space-3: 12px;
+  --ling-space-4: 16px;
+  --ling-space-5: 20px;
+  --ling-space-6: 24px;
+  --ling-space-7: 28px;
+  --ling-space-8: 32px;
+  --ling-space-9: 36px;
+  --ling-space-10: 40px;
+  --ling-space-12: 48px;
+  --ling-space-16: 64px;
+  --ling-space-20: 80px;
+  --ling-space-24: 96px;
+
+  /* ── A7: Z-index scale ── */
+  --ling-z-base: 0;
+  --ling-z-above: 10;
+  --ling-z-sticky: 100;
+  --ling-z-overlay: 200;
+  --ling-z-modal: 300;
+  --ling-z-toast: 400;
+  --ling-z-max: 9999;
+
+  /* ── A8: Typography ── */
+  --ling-font-ling: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --ling-font-world: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', system-ui, sans-serif;
+
+  --ling-font-xs: 11px;
+  --ling-font-sm: 12px;
+  --ling-font-13: 13px;
+  --ling-font-md: 14px;
+  --ling-font-15: 15px;
+  --ling-font-lg: 16px;
+  --ling-font-xl: 20px;
+  --ling-font-2xl: 24px;
+  --ling-font-3xl: 28px;
+  --ling-font-price: 32px;
+  --ling-font-display: 36px;
+  --ling-font-hero: clamp(48px, 10vw, 120px);
+  --ling-font-hero-mobile: clamp(32px, 8vw, 64px);
+
+  --ling-weight-normal: 400;
+  --ling-weight-medium: 500;
+  --ling-weight-semibold: 600;
+  --ling-weight-bold: 700;
+
+  /* ── A9: Border radius ── */
+  --ling-radius-sm: 6px;
+  --ling-radius-8: 8px;
+  --ling-radius-md: 12px;
+  --ling-radius-lg: 16px;
+  --ling-radius-xl: 20px;
+  --ling-radius-full: 9999px;
+
+  /* ── A10: Shadow ── */
+  --ling-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --ling-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+  --ling-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --ling-shadow-glow: 0 0 20px var(--ling-accent-20);
+
+  /* ── A11: Motion ── */
+  --ling-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ling-ease-enter: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ling-ease-exit: cubic-bezier(0.4, 0.0, 1.0, 1.0);
+  --ling-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ling-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ling-duration-instant: 100ms;
+  --ling-duration-fast: 150ms;
+  --ling-duration-normal: 300ms;
+  --ling-duration-slow: 500ms;
+  --ling-duration-breath: 60s;
+
+  /* ═══════════════════════════════════════════════════════════
+     SECTION B: LEGACY ALIASES — old names → new tokens via var()
+     These exist ONLY for backward compatibility with 41 files / 1028 refs.
+     When a component is rebuilt, migrate its refs to Section A names
+     and delete the alias. Target: Section B shrinks to zero.
+     ═══════════════════════════════════════════════════════════ */
+
+  /* Old background names → new void tokens */
+  --ling-bg-deep: var(--ling-void-bottom);
+  --ling-bg-mid: var(--ling-void-cool);
+  --ling-bg-warm: var(--ling-void-warm);
+
+  /* Old purple names → new accent tokens */
+  --ling-purple: var(--ling-accent);
+  --ling-purple-light: var(--ling-accent-light);
+  --ling-purple-lighter: var(--ling-accent-lighter);
+  --ling-purple-deep: var(--ling-accent-deep);
+  --ling-purple-text: var(--ling-accent-text);
+  --ling-purple-05: var(--ling-accent-05);
+  --ling-purple-08: var(--ling-accent-08);
+  --ling-purple-12: var(--ling-accent-12);
+  --ling-purple-15: var(--ling-accent-15);
+  --ling-purple-20: var(--ling-accent-20);
+  --ling-purple-25: var(--ling-accent-25);
+  --ling-purple-30: var(--ling-accent-30);
+  --ling-purple-40: var(--ling-accent-40);
+  --ling-purple-50: var(--ling-accent-50);
+  --ling-purple-60: var(--ling-accent-60);
+  --ling-purple-70: var(--ling-accent-70);
+  --ling-purple-85: var(--ling-accent-85);
+
+  /* Old text names → new text hierarchy */
+  --ling-text-primary: var(--ling-text-1);
+  --ling-text-secondary: rgba(255, 255, 255, 0.8);
+  --ling-text-soft: rgba(255, 255, 255, 0.7);
+  --ling-text-dim: rgba(255, 255, 255, 0.5);
+  --ling-text-tertiary: rgba(255, 255, 255, 0.45);
+  --ling-text-muted: rgba(255, 255, 255, 0.35);
+
+  /* Old surface tokens (keep values, these are fine) */
+  --ling-surface: rgba(255, 255, 255, 0.06);
+  --ling-surface-hover: rgba(255, 255, 255, 0.1);
+  --ling-surface-border: rgba(255, 255, 255, 0.08);
+  --ling-surface-elevated: rgba(0, 0, 0, 0.35);
+  --ling-surface-subtle: rgba(255, 255, 255, 0.04);
+  --ling-surface-deep: rgba(10, 0, 21, 0.92);
+
+  /* Old warm accent */
+  --ling-warm-accent: #f5c77e;
+  --ling-warm-soft: rgba(245, 199, 126, 0.15);
+
+  /* ═══════════════════════════════════════════════════════════
+     SECTION C: COMPONENT TOKENS — keep original names, update values
+     These are NOT legacy — they're semantic component-level tokens
+     that will survive the redesign with potentially updated values.
+     ═══════════════════════════════════════════════════════════ */
+
+  /* Overlay */
+  --ling-overlay-dim: rgba(0, 0, 0, 0.2);
+  --ling-overlay-backdrop: rgba(0, 0, 0, 0.4);
+  --ling-overlay-modal: rgba(0, 0, 0, 0.7);
+  --ling-overlay-heavy: rgba(0, 0, 0, 0.85);
+  --ling-overlay-4: rgba(255, 255, 255, 0.04);
+  --ling-overlay-8: rgba(255, 255, 255, 0.08);
+  --ling-overlay-12: rgba(255, 255, 255, 0.12);
+  --ling-overlay-20: rgba(255, 255, 255, 0.2);
+  --ling-stripe-bg: rgba(255, 255, 255, 0.02);
+
+  /* Modal */
+  --ling-modal-bg: rgba(20, 8, 40, 0.95);
+  --ling-modal-border: var(--ling-accent-30);
+  --ling-btn-ghost-border: rgba(255, 255, 255, 0.12);
+  --ling-btn-ghost-bg: rgba(255, 255, 255, 0.05);
+  --ling-btn-ghost-color: rgba(255, 255, 255, 0.6);
+
+  /* Status banner */
+  --ling-status-offline-bg: rgba(220, 38, 38, 0.75);
+  --ling-status-offline-border: rgba(248, 113, 113, 0.4);
+  --ling-status-offline-shadow: rgba(220, 38, 38, 0.3);
+  --ling-status-recovered-bg: rgba(22, 163, 74, 0.75);
+  --ling-status-recovered-border: rgba(74, 222, 128, 0.4);
+  --ling-status-recovered-shadow: rgba(22, 163, 74, 0.3);
+
+  /* Chat bubbles */
+  --ling-bubble-user-bg: linear-gradient(135deg, rgba(139, 92, 246, 0.62), rgba(109, 40, 217, 0.54));
+  --ling-bubble-ai-bg: rgba(20, 8, 40, 0.65);
+  --ling-bubble-user-border: var(--ling-accent-40);
+  --ling-bubble-ai-border: rgba(255, 255, 255, 0.1);
+  --ling-bubble-ai-accent: var(--ling-pulse);
+  --ling-bubble-user-shadow: var(--ling-accent-30);
+  --ling-bubble-user-text: rgba(255, 255, 255, 0.97);
+  --ling-bubble-ai-shadow: rgba(0, 0, 0, 0.22);
+  --ling-bubble-ai-text: rgba(255, 255, 255, 0.92);
+  --ling-chat-timestamp: rgba(255, 255, 255, 0.5);
+  --ling-chat-label: var(--ling-accent-70);
+  --ling-chat-label-user: rgba(255, 255, 255, 0.68);
+  --ling-avatar-user-bg: rgba(139, 92, 246, 0.44);
+  --ling-avatar-user-color: rgba(255, 255, 255, 0.9);
+  --ling-avatar-ai-bg: rgba(139, 92, 246, 0.18);
+  --ling-avatar-ai-color: rgba(167, 139, 250, 0.9);
+  --ling-collapse-mask-ai: linear-gradient(transparent, rgba(255, 255, 255, 0.08));
+  --ling-collapse-mask-user: linear-gradient(transparent, rgba(109, 40, 217, 0.5));
+
+  /* Code block */
+  --ling-code-text: var(--ling-accent-lighter);
+  --ling-code-bg: rgba(10, 0, 21, 0.6);
+
+  /* Input area */
+  --ling-input-section-bg: rgba(10, 0, 21, 0.55);
+  --ling-input-bar-bg: rgba(255, 255, 255, 0.03);
+  --ling-input-hover-border: rgba(255, 255, 255, 0.18);
+  --ling-input-hover-bg: rgba(255, 255, 255, 0.08);
+  --ling-input-hint: rgba(255, 255, 255, 0.2);
+  --ling-input-counter: rgba(255, 255, 255, 0.25);
+  --ling-input-counter-warn: rgba(251, 191, 36, 0.7);
+  --ling-btn-muted-bg: rgba(255, 255, 255, 0.06);
+  --ling-btn-muted-border: rgba(255, 255, 255, 0.08);
+  --ling-btn-muted-color: rgba(255, 255, 255, 0.5);
+
+  /* Body */
+  --ling-body-bg: linear-gradient(180deg, var(--ling-bg-deep) 0%, var(--ling-bg-mid) 50%, var(--ling-bg-warm) 100%);
+  --ling-body-color: #ffffff;
+  --ling-placeholder-color: rgba(255, 255, 255, 0.4);
+  --ling-selection-color: #fff;
+  --ling-md-em: rgba(200, 180, 255, 0.9);
+  --ling-md-pre-code: rgba(255, 255, 255, 0.85);
+  --ling-md-blockquote-color: rgba(255, 255, 255, 0.7);
+  --ling-md-heading-color: rgba(255, 255, 255, 0.95);
+
+  /* Tool cards */
+  --ling-tool-search: #60a5fa;
+  --ling-tool-search-bg: rgba(96, 165, 250, 0.08);
+  --ling-tool-search-border: rgba(96, 165, 250, 0.2);
+  --ling-tool-weather: #facc15;
+  --ling-tool-weather-bg: rgba(250, 204, 21, 0.08);
+  --ling-tool-weather-border: rgba(250, 204, 21, 0.2);
+  --ling-tool-memory: #a78bfa;
+  --ling-tool-memory-bg: rgba(167, 139, 250, 0.08);
+  --ling-tool-memory-border: rgba(167, 139, 250, 0.2);
+  --ling-tool-code: #10b981;
+  --ling-tool-code-bg: rgba(16, 185, 129, 0.08);
+  --ling-tool-code-border: rgba(16, 185, 129, 0.2);
+
+  /* Interactive targets */
+  --ling-touch-target: 44px;
+  --ling-btn-height: 48px;
+
+  /* Survival console */
+  --ling-pulse: #ff6b9d;
+  --ling-pulse-20: rgba(255, 107, 157, 0.2);
+  --ling-pulse-40: rgba(255, 107, 157, 0.4);
+  --ling-alive: #00ffcc;
+  --ling-alive-20: rgba(0, 255, 204, 0.2);
+  --ling-countdown: #ffd700;
+  --ling-countdown-20: rgba(255, 215, 0, 0.2);
+
+  /* Vitals */
+  --ling-vitals-height: 48px;
+  --ling-vitals-height-mobile: 40px;
+  --ling-font-vitals: 13px;
+
+  /* Split layout */
+  --ling-split-left-min: 360px;
+  --ling-split-left-max: 500px;
+  --ling-split-left-default: 420px;
+  --ling-split-divider: 4px;
+
+  /* Border & Focus */
+  --ling-border: rgba(255, 255, 255, 0.08);
+  --ling-focus-ring: var(--ling-accent-50);
+  --ling-focus-ring-component: var(--ling-accent-lighter);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SECTION D: LIGHT THEME OVERRIDES
+   ═══════════════════════════════════════════════════════════ */
+
+[data-theme="light"] {
+  --ling-void-top: #f5f0ff;
+  --ling-void-mid: #ede5ff;
+  --ling-void-bottom: #e8deff;
+  --ling-void-cool: #e0d4f5;
+  --ling-void-warm: #d5c8f0;
+
+  --ling-accent: #7c3aed;
+  --ling-accent-light: #8b5cf6;
+  --ling-accent-lighter: #a78bfa;
+  --ling-accent-deep: #6d28d9;
+  --ling-accent-text: #4c1d95;
+
+  --ling-text-1: rgba(0, 0, 0, 0.9);
+  --ling-text-2: rgba(0, 0, 0, 0.55);
+  --ling-text-3: rgba(0, 0, 0, 0.35);
+
+  --ling-text-primary: var(--ling-text-1);
+  --ling-text-secondary: rgba(0, 0, 0, 0.65);
+  --ling-text-soft: rgba(0, 0, 0, 0.6);
+  --ling-text-dim: rgba(0, 0, 0, 0.55);
+  --ling-text-tertiary: rgba(0, 0, 0, 0.4);
+  --ling-text-muted: rgba(0, 0, 0, 0.35);
+
+  --ling-surface: rgba(0, 0, 0, 0.04);
+  --ling-surface-hover: rgba(0, 0, 0, 0.07);
+  --ling-surface-border: rgba(0, 0, 0, 0.1);
+  --ling-surface-elevated: rgba(255, 255, 255, 0.8);
+
+  --ling-success: #16a34a;
+  --ling-warning: #d97706;
+  --ling-error: #dc2626;
+  --ling-error-bg: rgba(220, 38, 38, 0.1);
+  --ling-error-border: rgba(220, 38, 38, 0.2);
+
+  --ling-overlay-modal: rgba(0, 0, 0, 0.45);
+  --ling-modal-bg: rgba(255, 255, 255, 0.96);
+  --ling-modal-border: var(--ling-accent-25);
+  --ling-btn-ghost-border: rgba(0, 0, 0, 0.12);
+  --ling-btn-ghost-bg: rgba(0, 0, 0, 0.04);
+  --ling-btn-ghost-color: rgba(0, 0, 0, 0.55);
+
+  --ling-bubble-user-bg: linear-gradient(135deg, rgba(124, 58, 237, 0.18), rgba(109, 40, 217, 0.12));
+  --ling-bubble-ai-bg: rgba(255, 255, 255, 0.8);
+  --ling-bubble-user-border: rgba(124, 58, 237, 0.25);
+  --ling-bubble-ai-border: rgba(0, 0, 0, 0.08);
+  --ling-bubble-user-shadow: rgba(124, 58, 237, 0.15);
+  --ling-bubble-user-text: rgba(0, 0, 0, 0.85);
+  --ling-bubble-ai-shadow: rgba(0, 0, 0, 0.06);
+  --ling-bubble-ai-text: rgba(0, 0, 0, 0.85);
+  --ling-chat-timestamp: rgba(0, 0, 0, 0.4);
+  --ling-chat-label: var(--ling-accent);
+  --ling-chat-label-user: rgba(0, 0, 0, 0.5);
+  --ling-avatar-user-bg: rgba(124, 58, 237, 0.15);
+  --ling-avatar-user-color: #6d28d9;
+  --ling-avatar-ai-bg: rgba(124, 58, 237, 0.1);
+  --ling-avatar-ai-color: #7c3aed;
+
+  --ling-code-text: #6d28d9;
+  --ling-code-bg: rgba(124, 58, 237, 0.06);
+  --ling-body-bg: linear-gradient(180deg, var(--ling-void-top) 0%, var(--ling-void-mid) 50%, var(--ling-void-bottom) 100%);
+  --ling-body-color: #1a1a1a;
+  --ling-placeholder-color: rgba(0, 0, 0, 0.35);
+  --ling-selection-color: #1a1a1a;
+  --ling-input-section-bg: rgba(255, 255, 255, 0.7);
+  --ling-input-bar-bg: rgba(0, 0, 0, 0.03);
+  --ling-input-hover-border: rgba(0, 0, 0, 0.15);
+  --ling-input-hover-bg: rgba(0, 0, 0, 0.05);
+  --ling-input-hint: rgba(0, 0, 0, 0.2);
+  --ling-input-counter: rgba(0, 0, 0, 0.3);
+}
+
+/* ── Voice selectors (design doc §5: 两种声音) ── */
+
+[data-voice="ling"] {
+  font-family: var(--ling-font-ling);
+}
+
+[data-voice="world"] {
+  font-family: var(--ling-font-world);
+}
+
+[data-voice="ling"] .numeric,
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

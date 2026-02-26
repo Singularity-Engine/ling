@@ -23,7 +23,7 @@ declare global {
       onToggleInputSubtitle: (callback: () => void) => (() => void) | undefined;
     };
 
-    // ─── Live2D globals (set in main.tsx / WebSDK) ──────────────
+    // ─── Live2D globals (set in entries/ling.tsx / WebSDK) ──────────────
     getLAppAdapter?: () => LAppAdapter;
     getLive2DManager?: () => LAppLive2DManager;
     LAppDefine?: { CurrentKScale: number };

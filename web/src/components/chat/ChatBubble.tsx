@@ -413,7 +413,7 @@ export const ChatBubble = memo(({ role, content: rawContent, timestamp, isStream
   const aiInitial = !isUser ? i18next.t("chat.characterName").charAt(0) : "";
 
   return (
-    <div className="ling-msg-row" style={outerStyle}>
+    <div className="ling-msg-row" style={outerStyle} data-voice={isUser ? "world" : "ling"}>
       {!isUser && <div className="ling-avatar" style={S_AVATAR_AI}>{aiInitial}</div>}
       <div style={isUser ? S_INNER_USER : S_INNER_AI} className="chat-bubble-wrap chat-msg-inner">
         {isUser ? (

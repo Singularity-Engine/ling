@@ -49,7 +49,7 @@ export const S_USER_TEXT: CSSProperties = {
   fontSize: "var(--ling-font-md)", color: "var(--ling-bubble-user-text)", whiteSpace: "pre-wrap",
   wordBreak: "break-word", overflowWrap: "anywhere", lineHeight: 1.7, letterSpacing: "0.3px",
 };
-export const S_AI_MD: CSSProperties = { fontSize: "var(--ling-font-md)", color: "var(--ling-bubble-ai-text)", lineHeight: 1.7, letterSpacing: "0.3px" };
+export const S_AI_MD: CSSProperties = { fontSize: "var(--ling-font-md)", color: "var(--ling-bubble-ai-text)", lineHeight: 1.7, letterSpacing: "0.3px", fontFamily: 'var(--ling-font-ling)' };
 
 export const S_NAME: CSSProperties = {
   display: "block", fontSize: "var(--ling-font-xs)", color: "var(--ling-chat-label)",
