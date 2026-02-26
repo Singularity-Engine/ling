@@ -454,22 +454,19 @@ class TestSecurity:
         )
         assert resp.status_code in (401, 422)
 
-    def test_xss_in_username(self, http_client):
-        """XSS in username should be safely handled."""
+    def test_xss_in_username_rejected(self, http_client):
+        """XSS in username must be rejected by regex whitelist."""
         resp = http_client.post(
             "/api/auth/register",
             json={
-                "username": "<script>alert(1)</script>",
+                "username": "xss_test<>",
                 "email": f"xss_{uuid.uuid4().hex[:4]}@e2etest.dev",
                 "password": "SafePass1!",
             },
         )
-        # Should be 422 (validation), 200 (sanitized), or 429 (rate limited)
-        assert resp.status_code in (200, 422, 400, 429)
-        if resp.status_code == 200:
-            data = resp.json()
-            username = data.get("user", {}).get("username", "")
-            assert "<script>" not in username
+        assert resp.status_code in (422, 429), (
+            f"XSS username should be 422, got {resp.status_code}: {resp.text}"
+        )
 
     def test_oversized_payload(self, http_client, alice_auth):
         """Oversized memory payload should be handled."""
@@ -487,8 +484,8 @@ class TestSecurity:
         # Should either accept with truncation or reject with 413/422
         assert resp.status_code in (200, 413, 422, 400)
 
-    def test_empty_password_register(self, http_client):
-        """Empty password should be rejected."""
+    def test_empty_password_rejected(self, http_client):
+        """Empty password must be rejected (min 8 chars)."""
         resp = http_client.post(
             "/api/auth/register",
             json={
@@ -499,8 +496,8 @@ class TestSecurity:
         )
         assert resp.status_code in (422, 429)
 
-    def test_weak_password_register(self, http_client):
-        """Very weak password should be rejected if validation exists."""
+    def test_weak_password_rejected(self, http_client):
+        """Weak password (< 8 chars) must be rejected."""
         resp = http_client.post(
             "/api/auth/register",
             json={
@@ -509,8 +506,9 @@ class TestSecurity:
                 "password": "123",
             },
         )
-        # 422 if validation, 200 if no server-side check, 429 rate limit
-        assert resp.status_code in (200, 422, 400, 429)
+        assert resp.status_code in (422, 429), (
+            f"Weak password should be 422, got {resp.status_code}: {resp.text}"
+        )
 
     def test_cors_headers(self, http_client, base_url):
         """CORS preflight — nginx or FastAPI handles it."""

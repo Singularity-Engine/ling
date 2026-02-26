@@ -428,17 +428,26 @@ def _handle_refund(charge: dict, repo: LingUserRepository):
     except Exception:
         return
     if user_id:
-        # 简化处理：退款时扣减等额积分
-        refund_amount = charge.get("amount_refunded", 0)
+        refund_amount = charge.get("amount_refunded", 0)  # cents
         if refund_amount > 0:
-            credits_to_deduct = refund_amount // 5  # 粗略换算
+            # 按积分包价格反查，精确匹配退款金额
+            # CREDIT_PACKAGES: {credits: price_cents}
+            credits_to_deduct = 0
+            for credits, price_cents in CREDIT_PACKAGES.items():
+                if refund_amount == price_cents:
+                    credits_to_deduct = credits
+                    break
+            # 未匹配到精确包 → 按最贵包单价比例计算
+            if credits_to_deduct == 0:
+                # 50000 credits / 1999 cents ≈ 25.01 credits/cent
+                credits_to_deduct = int(refund_amount * 50000 / 1999)
             if credits_to_deduct > 0:
                 repo.deduct_credits(
                     user_id, Decimal(str(credits_to_deduct)),
-                    "退款扣减积分",
+                    f"退款扣减积分 (${refund_amount / 100:.2f})",
                     tx_type="admin_adjust",
                 )
-                logger.info(f"退款扣减: {user_id} -{credits_to_deduct}")
+                logger.info(f"退款扣减: {user_id} -{credits_to_deduct} (refund ${refund_amount / 100:.2f})")
 
 
 def _handle_dispute(charge: dict, repo: LingUserRepository):
