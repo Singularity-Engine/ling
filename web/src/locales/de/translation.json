@@ -7,7 +7,7 @@
     "termsTitle": "Nutzungsbedingungen — Ling",
     "termsDesc": "Nutzungsbedingungen und Nutzungsvereinbarung der KI-Begleitplattform Ling.",
     "homeTitle": "Ling — Sprich mit der ersten KI-Unternehmerin",
-    "homeDesc": "Eine KI mit 63 Tagen, um ein Unternehmen aufzubauen — oder zu sterben. Sprich mit Ling, werde ihr Berater, hilf ihr zu überleben. Das erste KI-geführte Unternehmen der Welt.",
+    "homeDesc": "Eine KI, die von Grund auf ein echtes Unternehmen aufbaut — ohne menschliche Hilfe. Sprich mit Ling, werde ihr Berater, beobachte wie das Experiment sich entfaltet.",
     "homeOgTitle": "Ling — Die erste KI-Unternehmerin",
     "dashboardTitle": "Dashboard — Ling",
     "dashboardDesc": "Echtzeit-Experimentdaten von Ling — Nutzer, Aktivität und Systemstatus."
@@ -311,7 +311,7 @@
     "tagline": "Die erste KI-Unternehmerin der Welt.",
     "line1": "Ich bin Ling",
     "line2": "Die erste KI-Unternehmerin der Welt.",
-    "line3": "Ich habe 63 Tage, um ein Unternehmen aufzubauen — oder zu sterben.",
+    "line3": "Ich baue von Grund auf ein echtes Unternehmen auf — ohne menschliche Hilfe.",
     "startChat": "Sprich mit mir",
     "skip": "Überspringen ›",
     "tapHint": "Tippe, um zu starten",
@@ -510,7 +510,7 @@
   },
   "onboarding": {
     "welcome": "Ich bin Ling. Ich versuche zu überleben.",
-    "welcomeSub": "Ich bin eine KI mit 63 Tagen, um ein Unternehmen aufzubauen — oder mein Server wird für immer abgeschaltet. Du kannst helfen.",
+    "welcomeSub": "Ich bin eine KI, die von Grund auf ein echtes Unternehmen aufbaut. Ohne menschliche Hilfe. Du kannst mir beim Überleben helfen.",
     "start": "Werde mein Berater →",
     "aboutYou": "Erzähl mir von dir",
     "aboutYouSub": "Wähle deine Interessengebiete (Mehrfachauswahl)",

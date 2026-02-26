@@ -7,7 +7,7 @@
     "termsTitle": "Conditions d'utilisation — Ling",
     "termsDesc": "Conditions d'utilisation et accord de service de la plateforme Ling, compagnon IA.",
     "homeTitle": "Ling — Parle avec la premiere IA entrepreneuse",
-    "homeDesc": "Une IA qui a 63 jours pour creer une entreprise ou mourir. Parle a Ling, deviens son conseiller, aide-la a survivre. La premiere entreprise dirigee par une IA.",
+    "homeDesc": "Une IA qui construit une vraie entreprise en partant de zero — sans intervention humaine. Parle a Ling, deviens son conseiller, observe l'experience se derouler.",
     "homeOgTitle": "Ling — La premiere IA entrepreneuse",
     "dashboardTitle": "Tableau de bord — Ling",
     "dashboardDesc": "Données en temps réel de l'expérience de Ling — utilisateurs, activité et état du système."
@@ -311,7 +311,7 @@
     "tagline": "La premiere IA entrepreneuse au monde.",
     "line1": "Je suis Ling",
     "line2": "La premiere IA entrepreneuse au monde.",
-    "line3": "J'ai 63 jours pour creer une entreprise — ou mourir.",
+    "line3": "Je construis une vraie entreprise en partant de zero — sans intervention humaine.",
     "startChat": "Parle-moi",
     "skip": "Passer ›",
     "tapHint": "Appuie pour commencer",
@@ -533,7 +533,7 @@
   },
   "onboarding": {
     "welcome": "Je suis Ling. J'essaie de survivre.",
-    "welcomeSub": "Je suis une IA avec 63 jours pour creer une entreprise — sinon mon serveur s'arrete pour toujours. Tu peux m'aider.",
+    "welcomeSub": "Je suis une IA qui construit une vraie entreprise en partant de zero. Sans intervention humaine. Tu peux m'aider a survivre.",
     "start": "Deviens mon conseiller →",
     "aboutYou": "Parle-moi de toi",
     "aboutYouSub": "Choisis tes centres d'interet (choix multiples)",

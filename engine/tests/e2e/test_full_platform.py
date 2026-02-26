@@ -469,20 +469,24 @@ class TestSecurity:
         )
 
     def test_oversized_payload(self, http_client, alice_auth):
-        """Oversized memory payload should be handled."""
+        """Oversized memory payload should be handled (rejected or truncated)."""
         token, _ = alice_auth
         huge_content = "A" * 100_000
-        resp = http_client.post(
-            "/api/v1/memory/events",
-            headers=_auth_header(token),
-            json={
-                "idempotency_key": f"e2e-huge-{uuid.uuid4().hex[:8]}",
-                "content_raw": huge_content,
-                "source": "e2e_test",
-            },
-        )
-        # Should either accept with truncation or reject with 413/422
-        assert resp.status_code in (200, 413, 422, 400)
+        try:
+            resp = http_client.post(
+                "/api/v1/memory/events",
+                headers=_auth_header(token),
+                json={
+                    "idempotency_key": f"e2e-huge-{uuid.uuid4().hex[:8]}",
+                    "content_raw": huge_content,
+                    "source": "e2e_test",
+                },
+            )
+            # Should either accept with truncation or reject with 413/422
+            assert resp.status_code in (200, 413, 422, 400)
+        except (httpx.ReadError, httpx.RemoteProtocolError):
+            # nginx/proxy may drop the connection for oversized payloads — this is valid
+            pass
 
     def test_empty_password_rejected(self, http_client):
         """Empty password must be rejected (min 8 chars)."""

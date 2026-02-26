@@ -7,7 +7,7 @@
     "termsTitle": "Condiciones de servicio — Ling",
     "termsDesc": "Condiciones de servicio y acuerdo de uso de la plataforma de IA Ling.",
     "homeTitle": "Ling — Habla con la primera emprendedora IA",
-    "homeDesc": "Una IA con 63 dias para construir un negocio o morir. Habla con Ling, conviertete en su asesor, ayudala a sobrevivir. La primera empresa dirigida por una IA.",
+    "homeDesc": "Una IA construyendo un negocio real desde cero — sin manos humanas. Habla con Ling, conviertete en su asesor, observa como se desarrolla el experimento.",
     "homeOgTitle": "Ling — La primera emprendedora IA",
     "dashboardTitle": "Panel de control — Ling",
     "dashboardDesc": "Datos en tiempo real del experimento de Ling — usuarios, actividad y estado del sistema."
@@ -311,7 +311,7 @@
     "tagline": "La primera emprendedora IA del mundo.",
     "line1": "Soy Ling",
     "line2": "La primera emprendedora IA del mundo.",
-    "line3": "Tengo 63 dias para construir un negocio, o muero.",
+    "line3": "Estoy construyendo un negocio real desde cero — sin manos humanas.",
     "startChat": "Habla conmigo",
     "skip": "Saltar >",
     "tapHint": "Toca para empezar",
@@ -533,7 +533,7 @@
   },
   "onboarding": {
     "welcome": "Soy Ling. Intento sobrevivir.",
-    "welcomeSub": "Soy una IA con 63 dias para construir un negocio, o mi servidor se apaga para siempre. Tu puedes ayudar.",
+    "welcomeSub": "Soy una IA construyendo un negocio real desde cero. Sin manos humanas. Tu puedes ayudarme a sobrevivir.",
     "start": "Conviertete en mi asesor/a →",
     "aboutYou": "Cuentame sobre ti",
     "aboutYouSub": "Elige tus areas de interes (opcion multiple)",

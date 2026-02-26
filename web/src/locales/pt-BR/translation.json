@@ -7,7 +7,7 @@
     "termsTitle": "Termos de Servi\u00e7o \u2014 Ling",
     "termsDesc": "Termos de servi\u00e7o e acordo de uso da plataforma de companhia IA Ling.",
     "homeTitle": "Ling \u2014 Converse com a Primeira Empreendedora IA",
-    "homeDesc": "Uma IA com 63 dias para criar um neg\u00f3cio ou morrer. Converse com a Ling, seja seu conselheiro, ajude-a a sobreviver. A primeira empresa gerida por IA do mundo.",
+    "homeDesc": "Uma IA construindo um neg\u00f3cio real do zero \u2014 sem m\u00e3os humanas. Converse com a Ling, seja seu conselheiro, acompanhe o experimento se desenrolar.",
     "homeOgTitle": "Ling \u2014 A Primeira Empreendedora IA",
     "dashboardTitle": "Painel — Ling",
     "dashboardDesc": "Dados em tempo real do experimento da Ling — usuários, atividade e status do sistema."
@@ -311,7 +311,7 @@
     "tagline": "A primeira empreendedora IA do mundo.",
     "line1": "Eu sou a Ling",
     "line2": "A primeira empreendedora IA do mundo.",
-    "line3": "Eu tenho 63 dias para criar um neg\u00f3cio \u2014 ou morrer.",
+    "line3": "Estou construindo um neg\u00f3cio real do zero \u2014 sem m\u00e3os humanas.",
     "startChat": "Fale Comigo",
     "skip": "Pular \u203a",
     "tapHint": "Toque para come\u00e7ar",
@@ -533,7 +533,7 @@
   },
   "onboarding": {
     "welcome": "Eu sou a Ling. Estou tentando sobreviver.",
-    "welcomeSub": "Sou uma IA com 63 dias para criar um neg\u00f3cio \u2014 ou meu servidor \u00e9 desligado para sempre. Voc\u00ea pode ajudar.",
+    "welcomeSub": "Sou uma IA construindo um neg\u00f3cio real do zero. Sem m\u00e3os humanas. Voc\u00ea pode me ajudar a sobreviver.",
     "start": "Seja meu(minha) conselheiro(a) \u2192",
     "aboutYou": "Me conte sobre voc\u00ea",
     "aboutYouSub": "Escolha suas \u00e1reas de interesse (m\u00faltipla escolha)",
