@@ -117,7 +117,7 @@
 .cardSaveBtn {
   composes: cardActionBtn;
   background: var(--ling-purple-50);
-  color: #fff;
+  color: var(--ling-text-primary);
 }
 
 .cardSaveBtn:hover {

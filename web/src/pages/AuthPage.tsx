@@ -276,7 +276,7 @@ const S: Record<string, CSSProperties> = {
     borderRadius: 'var(--ling-radius-8)',
     border: 'none',
     background: 'var(--ling-purple-60)',
-    color: '#fff',
+    color: 'var(--ling-text-primary)',
     fontSize: 'var(--ling-font-15)',
     fontWeight: 600,
     cursor: 'pointer',
