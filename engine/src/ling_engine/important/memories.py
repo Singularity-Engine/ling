@@ -257,7 +257,7 @@ def check_existing_memory(summary, user_id="default_user", embedding=None, text_
             query_filter={
                 "must": [
                     {"key": "is_deleted", "match": {"value": False}}
-                ] + ([{"key": "user_id", "match": {"value": user_id}}] if user_id else [])
+                ] + [{"key": "user_id", "match": {"value": user_id}}]
             }
         )
 
@@ -331,7 +331,7 @@ def search_similar_memories(query, user_id=None, limit=5):
                 query_filter={
                     "must": [
                         {"key": "is_deleted", "match": {"value": False}}
-                    ] + ([{"key": "user_id", "match": {"value": user_id}}] if user_id else [])
+                    ] + [{"key": "user_id", "match": {"value": user_id}}]
                 }
             )
         except Exception as e:
@@ -434,7 +434,7 @@ def list_all_memories_simple(user_id="default_user", limit=100):
             scroll_filter={
                 "must": [
                     {"key": "is_deleted", "match": {"value": False}}
-                ] + ([{"key": "user_id", "match": {"value": user_id}}] if user_id else [])
+                ] + [{"key": "user_id", "match": {"value": user_id}}]
             }
         )
 
