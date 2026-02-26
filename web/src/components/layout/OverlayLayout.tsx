@@ -173,6 +173,9 @@ export const OverlayLayout = React.memo(function OverlayLayout({
 
   return (
     <div className={styles.root} data-first-minute={firstMinutePhase}>
+      {/* Accessibility: day boundary announcement for screen readers */}
+      <div id="ling-day-announce" role="alert" aria-live="assertive" className="sr-only" />
+
       {/* ===== VitalsBar — fixed top strip ===== */}
       <div className={styles.vitalsMini}>
         <VitalsBar vitals={vitals} onCenterClick={() => setDashboardOpen(v => !v)} centerBtnRef={centerBtnRef} />

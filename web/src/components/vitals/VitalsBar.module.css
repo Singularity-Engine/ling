@@ -54,9 +54,11 @@
   box-shadow: 0 0 6px var(--ling-alive-20);
 }
 
+/* Offline: hollow circle (ring outline) for color-blind shape distinction */
 .statusDot[data-status="offline"] {
-  background: var(--ling-text-dim);
+  background: transparent;
   box-shadow: none;
+  border: 1.5px solid var(--ling-text-dim);
 }
 
 /* ── Center zone: countdown + heartbeat + revenue ── */

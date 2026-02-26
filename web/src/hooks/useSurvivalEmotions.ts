@@ -66,13 +66,19 @@ export function useSurvivalEmotions(): void {
       }, 2000);
     }
 
-    // Trigger 4: Day boundary (e.g., 60→59 days) → micro-shake
+    // Trigger 4: Day boundary (e.g., 60→59 days) → micro-shake + a11y announcement
     if (vitals.daysRemaining !== prev.daysRemaining && prev.daysRemaining > 0) {
       document.body.classList.add("ling-micro-shake");
       if (shakeTimerRef.current) clearTimeout(shakeTimerRef.current);
       shakeTimerRef.current = setTimeout(() => {
         document.body.classList.remove("ling-micro-shake");
       }, 200);
+
+      // Announce day change to screen readers
+      const announceEl = document.getElementById("ling-day-announce");
+      if (announceEl) {
+        announceEl.textContent = `${vitals.daysRemaining} days remaining`;
+      }
     }
 
     // Trigger 1: Countdown < 30 days → concerned expression (persistent)

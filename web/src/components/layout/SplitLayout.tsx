@@ -278,6 +278,9 @@ export const SplitLayout = memo(function SplitLayout({ firstMinutePhase }: Split
 
   return (
     <div ref={rootRef} className={styles.root} style={rootStyle} data-first-minute={firstMinutePhase}>
+      {/* Accessibility: day boundary announcement for screen readers */}
+      <div id="ling-day-announce" role="alert" aria-live="assertive" className="sr-only" />
+
       {/* ── Vitals Bar — spans full width at top ── */}
       <div className={styles.vitalsRow}>
         <VitalsBar vitals={vitals} onCenterClick={() => setDashboardOpen(v => !v)} centerBtnRef={centerBtnRef} />
