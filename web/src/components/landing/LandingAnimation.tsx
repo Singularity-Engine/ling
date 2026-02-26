@@ -22,6 +22,7 @@ import { VitalsBar } from "../vitals/VitalsBar";
 import { useVitalsData } from "@/hooks/useVitalsData";
 import { getDailyStatement } from "@/data/daily-statements";
 import { prefersReducedMotion } from "@/utils/reduced-motion";
+import { trackEvent } from "@/utils/analytics";
 
 interface LandingAnimationProps {
   onComplete: () => void;
@@ -251,16 +252,22 @@ export const LandingAnimation = memo(function LandingAnimation({
     };
   }, [phase, statement]);
 
+  // Fire overture_completed when phase naturally reaches 5 (idle)
+  useEffect(() => {
+    if (phase === 5) trackEvent("overture_completed");
+  }, [phase]);
+
   // Keyboard skip (Escape or Enter/Space)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
+        if (phase < 5) trackEvent("overture_skipped", { phase });
         handleComplete();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [handleComplete]);
+  }, [handleComplete, phase]);
 
   // If already completed, render nothing
   if (completedRef.current && phase === 0) {
@@ -328,7 +335,7 @@ export const LandingAnimation = memo(function LandingAnimation({
 
       {/* Skip button (always visible in phases 0-4) */}
       {phase < 5 && (
-        <button style={S_SKIP} onClick={handleComplete}>
+        <button style={S_SKIP} onClick={() => { trackEvent("overture_skipped", { phase }); handleComplete(); }}>
           Skip {"\u2192"}
         </button>
       )}

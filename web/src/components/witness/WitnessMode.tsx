@@ -5,6 +5,7 @@ import { useVitalsData } from "@/hooks/useVitalsData";
 import { getDailyStatement } from "@/data/daily-statements";
 import { OAuthModal } from "../auth/OAuthModal";
 import { LingSilhouette } from "../landing/LingSilhouette";
+import { trackEvent } from "@/utils/analytics";
 import styles from "./WitnessMode.module.css";
 
 interface WitnessModeProps {
@@ -43,7 +44,7 @@ export const WitnessMode = memo(function WitnessMode({
         <div className={styles.ctaWrap}>
           <button
             className={styles.cta}
-            onClick={() => setShowAuth(true)}
+            onClick={() => { trackEvent("witness_to_auth"); setShowAuth(true); }}
             aria-label={t("witness.talkToLing", { defaultValue: "Talk to Ling" })}
           >
             {t("witness.talkToLing", { defaultValue: "Talk to Ling" })}

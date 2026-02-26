@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { apiClient } from '@/services/api-client';
+import { trackEvent } from '@/utils/analytics';
 
 export function OAuthCallbackPage() {
   const { t } = useTranslation();
@@ -28,6 +29,7 @@ export function OAuthCallbackPage() {
     }
 
     apiClient.setTokens(token, refreshToken);
+    trackEvent("auth_completed");
     // Clear tokens from URL to prevent leakage via browser history / Referer header
     window.history.replaceState({}, '', '/oauth/callback');
     // Full-page reload to re-initialize AuthProvider with new tokens

@@ -31,6 +31,7 @@ import { LoadingSkeleton } from "../loading/LoadingSkeleton";
 import { ICON_CHAT, ICON_MEMORY, ICON_INFO, ICON_CHEVRON_UP, ICON_MENU, ICON_CLOSE } from "./overlay-icons";
 import { lazyRetry } from "@/utils/lazy-retry";
 import { useSwipeGesture } from "@/hooks/useSwipeGesture";
+import { trackEvent } from "@/utils/analytics";
 import styles from "./OverlayLayout.module.css";
 
 const ChatArea = lazyRetry(() => import("../chat/ChatArea").then(m => ({ default: m.ChatArea })));
@@ -146,6 +147,11 @@ export const OverlayLayout = React.memo(function OverlayLayout({
       // localStorage unavailable — silently skip hint
     }
   }, [isMobile]);
+
+  // Track dashboard_opened event
+  useEffect(() => {
+    if (dashboardOpen) trackEvent("dashboard_opened");
+  }, [dashboardOpen]);
 
   // Keyboard shortcut: Cmd+D / Ctrl+D to toggle dashboard overlay
   useEffect(() => {

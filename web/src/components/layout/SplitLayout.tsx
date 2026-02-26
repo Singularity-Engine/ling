@@ -23,6 +23,7 @@ import { useWebSocketState, useWebSocketActions } from "@/context/WebsocketConte
 import { useAiStateRead } from "@/context/AiStateContext";
 import { focusTextarea } from "@/utils/dom";
 import { lazyRetry } from "@/utils/lazy-retry";
+import { trackEvent } from "@/utils/analytics";
 import styles from "./SplitLayout.module.css";
 
 const ChatArea = lazyRetry(() => import("../chat/ChatArea").then(m => ({ default: m.ChatArea })));
@@ -257,6 +258,11 @@ export const SplitLayout = memo(function SplitLayout({ firstMinutePhase }: Split
   const dashData = useDashboardData();
   const [dashboardOpen, setDashboardOpen] = useState(false);
   const centerBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Track dashboard_opened event
+  useEffect(() => {
+    if (dashboardOpen) trackEvent("dashboard_opened");
+  }, [dashboardOpen]);
 
   // Keyboard shortcut: Cmd+D / Ctrl+D to toggle dashboard overlay
   useEffect(() => {

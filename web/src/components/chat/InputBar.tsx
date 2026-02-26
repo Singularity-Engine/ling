@@ -6,6 +6,7 @@ import { useAiStateRead } from "@/context/AiStateContext";
 import { useInterrupt } from "@/components/canvas/live2d";
 import { useVADState, useVADActions } from "@/context/VadContext";
 import { trackEvent } from "@/utils/track-event";
+import { trackEvent as analyticsEvent } from "@/utils/analytics";
 
 // ─── Static style constants (avoid per-render allocation during typing) ───
 
@@ -155,6 +156,7 @@ export const InputBar = memo(() => {
   // Prevents premature isSending reset when isAiBusy is true at send time.
   const sentWhileBusyRef = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const firstMsgFiredRef = useRef(!!sessionStorage.getItem("ling-first-msg"));
 
   /** Resize textarea to fit content (max 96px). Shared by input, fill, and send-fail handlers.
    *  Wrapped in rAF to coalesce rapid input events and avoid forced synchronous reflow per keystroke. */
@@ -260,6 +262,11 @@ export const InputBar = memo(() => {
       images: EMPTY_IMAGES,
     });
     trackEvent("message_sent", { source: "input_bar" });
+    if (!firstMsgFiredRef.current) {
+      firstMsgFiredRef.current = true;
+      sessionStorage.setItem("ling-first-msg", "1");
+      analyticsEvent("first_message_sent");
+    }
 
     setInputText("");
     if (textareaRef.current) {
