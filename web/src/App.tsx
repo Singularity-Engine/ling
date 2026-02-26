@@ -14,7 +14,7 @@ const WitnessMode = lazyRetry(() => import("./components/witness/WitnessMode").t
 
 import { useMessagesRef, useHistoryListState, useHistoryListActions } from "./context/ChatHistoryContext";
 import { useVADState, useVADActions } from "./context/VadContext";
-import { useInterrupt } from "./components/canvas/live2d";
+import { useInterrupt } from "./hooks/utils/use-interrupt";
 import { HreflangTags } from "./components/seo/HreflangTags";
 import { StructuredData } from "./components/seo/StructuredData";
 import { LOCALE_MAP, type SupportedLanguage, SUPPORTED_LANGUAGES } from "./i18n";

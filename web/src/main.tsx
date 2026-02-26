@@ -3,7 +3,6 @@ import { HelmetProvider } from 'react-helmet-async';
 import './index.css';
 import 'highlight.js/styles/atom-one-dark.min.css';
 import App from './App';
-import { LAppAdapter } from '../WebSDK/src/lappadapter';
 import './i18n';
 import { initSentry } from './lib/sentry';
 import { initAnalytics } from './lib/analytics';
@@ -25,7 +24,11 @@ if (typeof window !== 'undefined') {
   initSentry();
   initAnalytics();
 
-  window.getLAppAdapter = () => LAppAdapter.getInstance() as unknown as LAppAdapterLike;
+  // Defer Live2D WebSDK import — keeps vendor-live2d chunk off the critical path.
+  // Landing animation runs ~7s, plenty of time for the async import to resolve.
+  import('../WebSDK/src/lappadapter').then(({ LAppAdapter }) => {
+    window.getLAppAdapter = () => LAppAdapter.getInstance() as unknown as LAppAdapterLike;
+  }).catch((err) => log.error('Failed to load LAppAdapter:', err));
 
   // Render React immediately — don't block on Live2D Core.
   // Landing animation runs ~7s, plenty of time for the script to load in background.

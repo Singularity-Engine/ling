@@ -94,6 +94,8 @@
     <!-- Performance: preload critical assets -->
     <link rel="preload" href="./libs/live2dcubismcore.js" as="script" />
     <link rel="preload" href="/favicon.svg" as="image" type="image/svg+xml" />
+    <!-- Preload Live2D model manifest — triggers early model loading pipeline -->
+    <link rel="preload" href="/live2d-models/001/0a-original-v1.model3.json" as="fetch" crossorigin />
 
     <!-- Resource hints — API & TTS endpoints -->
     <link rel="dns-prefetch" href="https://api.fish.audio" />
