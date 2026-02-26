@@ -19,6 +19,7 @@ import { AffinityBadge } from "../status/AffinityBadge";
 import CreditsDisplay from "../billing/CreditsDisplay";
 import { VitalsBar } from "../vitals/VitalsBar";
 import { useVitalsData } from "@/hooks/useVitalsData";
+import { useSurvivalEmotions } from "@/hooks/useSurvivalEmotions";
 import { DashboardOverlay } from "../dashboard/DashboardOverlay";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { StarField } from "../background/StarField";
@@ -96,6 +97,7 @@ export const OverlayLayout = React.memo(function OverlayLayout({
   firstMinutePhase,
 }: OverlayLayoutProps) {
   const { t } = useTranslation();
+  useSurvivalEmotions();
   const vitals = useVitalsData();
   const dashData = useDashboardData();
   const [dashboardOpen, setDashboardOpen] = useState(false);

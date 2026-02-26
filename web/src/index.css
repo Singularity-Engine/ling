@@ -1632,3 +1632,7 @@ canvas {
     0%, 100% { transform: none; }
   }
 }
+
+.ling-micro-shake {
+  animation: lingMicroShake 0.2s ease-out;
+}

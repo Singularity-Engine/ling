@@ -8,6 +8,7 @@ import { AffinityBadge } from "../status/AffinityBadge";
 import CreditsDisplay from "../billing/CreditsDisplay";
 import { VitalsBar } from "../vitals/VitalsBar";
 import { useVitalsData } from "@/hooks/useVitalsData";
+import { useSurvivalEmotions } from "@/hooks/useSurvivalEmotions";
 import { DashboardOverlay } from "../dashboard/DashboardOverlay";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { StarField } from "../background/StarField";
@@ -87,6 +88,7 @@ interface SplitLayoutProps {
  */
 export const SplitLayout = memo(function SplitLayout({ firstMinutePhase }: SplitLayoutProps): JSX.Element {
   const { t } = useTranslation();
+  useSurvivalEmotions();
   const { messages } = useChatMessagesState();
   const { appendHumanMessage } = useChatMessagesActions();
   const { isThinkingSpeaking } = useAiStateRead();
