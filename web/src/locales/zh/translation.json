@@ -452,6 +452,7 @@
     "revenueLabel": "月收入 ${{current}} / ${{target}}",
     "dayBadge": "第 {{day}} 天",
     "daysLeft": "剩余 {{days}} 天",
+    "beTheFirst": "成为第一位",
     "missionText": "使命",
     "missionLink": "查看灵的 AI 创业实验使命"
   },
@@ -544,6 +545,7 @@
   },
   "witness": {
     "talkToLing": "Talk to Ling",
+    "signInToTalk": "登录与灵对话",
     "lingIsAwakening": "Ling is awakening..."
   },
   "onboarding": {

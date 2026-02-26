@@ -98,7 +98,7 @@ const S_CTA: React.CSSProperties = {
   fontSize: "1.05rem",
   fontWeight: 600,
   color: "#fff",
-  background: "linear-gradient(135deg, var(--ling-purple) 0%, var(--ling-purple-deep) 100%)",
+  background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)",
   border: "1px solid var(--ling-purple-30)",
   borderRadius: 999,
   cursor: "pointer",
@@ -180,28 +180,52 @@ export const LandingAnimation = memo(function LandingAnimation({
     }
   }, [handleComplete]);
 
-  // Phase timeline engine (setTimeout chain)
+  // Phase timeline engine (setTimeout chain with visibility detection)
   useEffect(() => {
     // If already completed (returning user / reduced motion), don't start
     if (completedRef.current) return;
 
     const timers: ReturnType<typeof setTimeout>[] = [];
+    let pausedAt = 0; // elapsed ms when tab became hidden
+    let startTime = performance.now();
+    let paused = false;
 
-    // Phase 1 at 1.5s
-    timers.push(setTimeout(() => setPhase(1), PHASE_TIMES[1]));
-    // Phase 2 at 3.0s
-    timers.push(setTimeout(() => setPhase(2), PHASE_TIMES[2]));
-    // Phase 3 at 4.0s
-    timers.push(setTimeout(() => setPhase(3), PHASE_TIMES[3]));
-    // Phase 4 at 5.0s
-    timers.push(setTimeout(() => setPhase(4), PHASE_TIMES[4]));
-    // Phase 5 at 6.0s
-    timers.push(setTimeout(() => setPhase(5), PHASE_TIMES[5]));
+    function scheduleRemaining(elapsedMs: number) {
+      // Clear old timers
+      timers.forEach(clearTimeout);
+      timers.length = 0;
 
-    phaseTimerRef.current = timers;
+      for (let i = 1; i < PHASE_TIMES.length; i++) {
+        const delay = PHASE_TIMES[i] - elapsedMs;
+        if (delay > 0) {
+          timers.push(setTimeout(() => setPhase(i), delay));
+        }
+      }
+      phaseTimerRef.current = timers;
+    }
+
+    // Initial schedule
+    scheduleRemaining(0);
+
+    // Pause/resume on visibility change (background tabs throttle setTimeout)
+    const onVisibility = () => {
+      if (completedRef.current) return;
+      if (document.hidden) {
+        paused = true;
+        pausedAt = performance.now() - startTime;
+        timers.forEach(clearTimeout);
+        timers.length = 0;
+      } else if (paused) {
+        paused = false;
+        startTime = performance.now() - pausedAt;
+        scheduleRemaining(pausedAt);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
       timers.forEach(clearTimeout);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
 

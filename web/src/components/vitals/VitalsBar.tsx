@@ -98,7 +98,9 @@ export const VitalsBar = memo(function VitalsBar({
       {/* Right: Supporters + settings */}
       <div className={styles.right}>
         <span className={styles.supporters}>
-          {vitals.supporterCount} {t("experiment.supporters", { count: vitals.supporterCount, defaultValue: "supporters" })}
+          {vitals.supporterCount > 0
+            ? `${vitals.supporterCount} ${t("experiment.supporters", { count: vitals.supporterCount, defaultValue: "supporters" })}`
+            : t("experiment.beTheFirst", { defaultValue: "Be the first" })}
         </span>
         <button
           className={styles.settingsBtn}

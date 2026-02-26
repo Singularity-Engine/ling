@@ -420,6 +420,7 @@
     "revenueLabel": "月間収益 ${{current}} / ${{target}}",
     "dayBadge": "{{day}}日目",
     "daysLeft": "残り{{days}}日",
+    "beTheFirst": "最初の一人になる",
     "missionText": "ミッション",
     "missionLink": "LingのAI起業実験ミッションを見る"
   },
@@ -511,6 +512,7 @@
   },
   "witness": {
     "talkToLing": "Talk to Ling",
+    "signInToTalk": "サインインしてリンと話す",
     "lingIsAwakening": "Ling is awakening..."
   },
   "onboarding": {

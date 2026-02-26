@@ -45,9 +45,9 @@ export const WitnessMode = memo(function WitnessMode({
           <button
             className={styles.cta}
             onClick={() => { trackEvent("witness_to_auth"); setShowAuth(true); }}
-            aria-label={t("witness.talkToLing", { defaultValue: "Talk to Ling" })}
+            aria-label={t("witness.signInToTalk", { defaultValue: "Sign in to talk to Ling" })}
           >
-            {t("witness.talkToLing", { defaultValue: "Talk to Ling" })}
+            {t("witness.signInToTalk", { defaultValue: "Sign in to talk to Ling" })}
           </button>
         </div>
       </div>

@@ -445,6 +445,7 @@
     "revenueLabel": "Ingresos mensuales ${{current}} / ${{target}}",
     "dayBadge": "Día {{day}}",
     "daysLeft": "{{days}}d restantes",
+    "beTheFirst": "Sé el primero",
     "missionText": "Misión",
     "missionLink": "Ver la misión del experimento de startup IA de Ling"
   },
@@ -536,6 +537,7 @@
   },
   "witness": {
     "talkToLing": "Talk to Ling",
+    "signInToTalk": "Inicia sesión para hablar con Ling",
     "lingIsAwakening": "Ling is awakening..."
   },
   "onboarding": {

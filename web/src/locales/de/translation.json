@@ -421,6 +421,7 @@
     "revenueLabel": "Monatlicher Umsatz ${{current}} / ${{target}}",
     "dayBadge": "Tag {{day}}",
     "daysLeft": "{{days}}T übrig",
+    "beTheFirst": "Sei der Erste",
     "missionText": "Mission",
     "missionLink": "Lings KI-Startup-Experiment-Mission ansehen"
   },
@@ -512,6 +513,7 @@
   },
   "witness": {
     "talkToLing": "Talk to Ling",
+    "signInToTalk": "Anmelden, um mit Ling zu sprechen",
     "lingIsAwakening": "Ling is awakening..."
   },
   "onboarding": {
