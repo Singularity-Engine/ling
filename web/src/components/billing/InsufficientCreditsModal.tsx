@@ -199,7 +199,7 @@ const InsufficientCreditsModal: React.FC = memo(function InsufficientCreditsModa
           {isGuestLimit ? (
             <a
               ref={primaryRef as React.Ref<HTMLAnchorElement>}
-              href="/register"
+              href="/auth"
               onClick={handleDismiss}
               className="ling-billing-primary"
               style={S_BTN_PRIMARY}

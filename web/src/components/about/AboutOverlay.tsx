@@ -436,10 +436,10 @@ export const AboutOverlay = memo(({ open, onClose }: AboutOverlayProps) => {
           <div style={S_GUEST_BOX}>
             <p style={S_GUEST_PROMPT}>{t("about.guestPrompt")}</p>
             <div style={S_GUEST_BTN_ROW}>
-              <a className="about-btn-primary" href="/login" style={S_LOGIN_LINK}>
+              <a className="about-btn-primary" href="/auth" style={S_LOGIN_LINK}>
                 {t("about.loginButton")}
               </a>
-              <a className="about-btn-outline" href="/register" style={S_REGISTER_LINK}>
+              <a className="about-btn-outline" href="/auth" style={S_REGISTER_LINK}>
                 {t("about.registerButton")}
               </a>
             </div>

@@ -294,7 +294,7 @@ export const MemoryPanel = memo(function MemoryPanel({ open, onClose }: MemoryPa
               <div style={S_EMPTY_ICON} role="img" aria-label={t('memory.guestTitle')}>{'\uD83D\uDD12'}</div>
               <h4 style={S_EMPTY_TITLE}>{t('memory.guestTitle')}</h4>
               <p style={S_EMPTY_DESC_MB}>{t('memory.guestDesc')}</p>
-              <a href="/register" style={S_REGISTER_LINK}>
+              <a href="/auth" style={S_REGISTER_LINK}>
                 {t('memory.registerToUnlock')}
               </a>
             </div>

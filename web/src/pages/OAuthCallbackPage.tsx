@@ -39,7 +39,7 @@ export function OAuthCallbackPage() {
       <div style={styles.page}>
         <div style={styles.card}>
           <p style={styles.error}>{error}</p>
-          <Link to="/login" style={styles.link}>{t('auth.backToLogin')}</Link>
+          <Link to="/auth" style={styles.link}>{t('auth.backToLogin')}</Link>
         </div>
       </div>
     );

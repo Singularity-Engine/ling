@@ -48,8 +48,7 @@ const InsufficientCreditsModal = lazyRetry(() => import("./components/billing/In
 // const PersonalizedOnboarding = lazyRetry(() => import("./components/onboarding/PersonalizedOnboarding").then(m => ({ default: m.PersonalizedOnboarding })));
 
 // ─── Lazy-loaded route pages ───
-const LoginPage = lazyRetry(() => import("./pages/LoginPage").then(m => ({ default: m.LoginPage })));
-const RegisterPage = lazyRetry(() => import("./pages/RegisterPage").then(m => ({ default: m.RegisterPage })));
+const AuthPage = lazyRetry(() => import("./pages/AuthPage").then(m => ({ default: m.AuthPage })));
 const TermsPage = lazyRetry(() => import("./pages/TermsPage").then(m => ({ default: m.TermsPage })));
 const DashboardPage = lazyRetry(() => import("./pages/DashboardPage").then(m => ({ default: m.DashboardPage })));
 const OAuthCallbackPage = lazyRetry(() => import("./pages/OAuthCallbackPage").then(m => ({ default: m.OAuthCallbackPage })));
@@ -583,7 +582,7 @@ const S_PAGE_WRAP: CSSProperties = { minHeight: "100dvh", animation: "pageFadeIn
 function AnimatedRoutes(): JSX.Element {
   const location = useLocation();
   // Normalize key so all catch-all paths share the same key (avoids spurious remount)
-  const pageKey = ['/login', '/register', '/terms', '/dashboard', '/oauth/callback'].includes(location.pathname)
+  const pageKey = ['/auth', '/login', '/register', '/terms', '/dashboard', '/oauth/callback'].includes(location.pathname)
     ? location.pathname
     : '/';
 
@@ -596,8 +595,9 @@ function AnimatedRoutes(): JSX.Element {
     <div key={pageKey} style={S_PAGE_WRAP}>
       <Suspense fallback={null}>
         <Routes location={location}>
-          <Route path="/login" element={<GuestOnly><LoginPage /></GuestOnly>} />
-          <Route path="/register" element={<GuestOnly><RegisterPage /></GuestOnly>} />
+          <Route path="/auth" element={<GuestOnly><AuthPage /></GuestOnly>} />
+          <Route path="/login" element={<Navigate to="/auth" replace />} />
+          <Route path="/register" element={<Navigate to="/auth" replace />} />
           <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />

@@ -54,7 +54,7 @@ export const OAuthModal = memo(function OAuthModal({ open, onClose }: OAuthModal
           {loading ? "..." : t("auth.continueWithGoogle", { defaultValue: "Continue with Google" })}
         </button>
         <p className={styles.fallback}>
-          <Link to="/login" className={styles.fallbackLink}>
+          <Link to="/auth" className={styles.fallbackLink}>
             {t("auth.otherOptions", { defaultValue: "Other sign-in options \u2192" })}
           </Link>
         </p>
