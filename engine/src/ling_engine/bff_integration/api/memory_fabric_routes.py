@@ -72,7 +72,9 @@ def _try_agent_auth(request: Request) -> dict | None:
 
 def _resolve_user_scope(user: dict, requested_user_id: str | None) -> str:
     if user.get("agent"):
-        return requested_user_id or "unknown-agent"
+        if not requested_user_id:
+            raise HTTPException(status_code=400, detail="Agent 请求必须指定 user_id")
+        return requested_user_id
     current = str(user["id"])
     target = requested_user_id or current
     if target != current and not _is_admin(user):

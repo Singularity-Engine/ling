@@ -17,7 +17,7 @@ from loguru import logger
 from ..models import SoulContext, RelationshipStage, STAGE_THRESHOLDS
 from ..narrative.memory_reconstructor import MemoryReconstructor
 from ..utils.async_tasks import create_logged_task
-from ..utils.validation import is_valid_user_id
+from ..utils.validation import is_valid_user_id, is_authenticated_user_id
 
 # Phase 2 遗留修复: MemoryReconstructor 单例 (不再每次 _emotional_resonance 都创建)
 _reconstructor = MemoryReconstructor()
@@ -178,6 +178,9 @@ class SoulRecall:
         # P0: user_id 格式校验 — 纵深防御
         if not is_valid_user_id(user_id):
             logger.warning("[Soul] Invalid user_id format, skipping recall")
+            return SoulContext()
+        if not is_authenticated_user_id(user_id):
+            logger.info(f"[Soul] 跳过匿名用户记忆召回: {user_id}")
             return SoulContext()
 
         start = time.monotonic()

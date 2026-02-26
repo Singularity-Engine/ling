@@ -284,10 +284,10 @@ async def handle_conversation_trigger(
         else:
             logger.warning("⚠️ 消息中也无用户ID")
     
-    # 最后的回退方案：使用客户端ID作为用户ID（确保每个客户端有唯一的用户标识）
+    # 最后的回退方案：使用客户端ID作为用户ID（匿名用户，Soul记忆系统会跳过）
     if not user_id:
         user_id = f"client_{client_uid}"
-        logger.warning(f"⚠️ 使用客户端ID作为用户ID: {user_id}")
+        logger.warning(f"⚠️ 匿名用户(未登录)，使用客户端ID: {user_id}，Soul记忆将不可用")
     
     session_emoji = np.random.choice(EMOJI_LIST)
     logger.debug(f"🎯 最终使用的用户ID: {user_id}")

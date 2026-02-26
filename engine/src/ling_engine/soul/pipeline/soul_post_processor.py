@@ -54,6 +54,10 @@ class SoulPostProcessor:
         if not is_valid_user_id(user_id):
             logger.warning("[Soul] Invalid user_id format, skipping post-process")
             return
+        from ..utils.validation import is_authenticated_user_id
+        if not is_authenticated_user_id(user_id):
+            logger.info(f"[Soul] 跳过匿名用户记忆写入: {user_id}")
+            return
         async with _semaphore:
             await self._process_inner(
                 user_input=user_input,

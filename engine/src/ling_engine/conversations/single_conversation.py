@@ -35,7 +35,7 @@ async def process_agent_response(
         tts_manager: TTSTaskManager,
         client_uid: str = None,
         conversation_id: Optional[str] = None,
-        user_id: str = "default_user",
+        user_id: str = "",
         user_input: Union[str, np.ndarray] = None,
         enable_memory: bool = True,
 ) -> tuple[str, str]:
