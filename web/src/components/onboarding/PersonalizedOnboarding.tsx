@@ -102,7 +102,7 @@ const S_BTN_BACK: CSSProperties = {
 };
 const S_BTN_NEXT: CSSProperties = {
   padding: "var(--ling-space-3) var(--ling-space-8)", borderRadius: "var(--ling-radius-md)",
-  border: "none", background: "var(--ling-purple)", color: "#fff",
+  border: "none", background: "var(--ling-purple)", color: "var(--ling-text-primary)",
   fontSize: "var(--ling-font-md)", fontWeight: 600,
   cursor: "pointer", transition: `background-color var(--ling-duration-fast), transform var(--ling-duration-fast)`,
 };
@@ -111,7 +111,7 @@ const S_BTN_NEXT: CSSProperties = {
 const S_STAR_WRAP: CSSProperties = { marginBottom: "var(--ling-space-6)" };
 const S_STAR_SVG: CSSProperties = { filter: "drop-shadow(0 0 20px var(--ling-purple-50))" };
 const S_TITLE_LG: CSSProperties = {
-  color: "#fff", fontSize: "var(--ling-font-3xl)", fontWeight: 700,
+  color: "var(--ling-text-primary)", fontSize: "var(--ling-font-3xl)", fontWeight: 700,
   margin: "0 0 var(--ling-space-3)", lineHeight: 1.3,
 };
 const S_DESC_WELCOME: CSSProperties = {
@@ -121,14 +121,14 @@ const S_DESC_WELCOME: CSSProperties = {
 };
 const S_BTN_START: CSSProperties = {
   padding: "var(--ling-space-4) 36px", borderRadius: "var(--ling-radius-md)",
-  border: "none", background: "var(--ling-purple)", color: "#fff",
+  border: "none", background: "var(--ling-purple)", color: "var(--ling-text-primary)",
   fontSize: "var(--ling-font-15)", fontWeight: 600,
   cursor: "pointer", transition: `background-color var(--ling-duration-fast), transform var(--ling-duration-fast)`,
 };
 
 // ── Step: Interests ──
 const S_TITLE_MD: CSSProperties = {
-  color: "#fff", fontSize: "var(--ling-font-2xl)", fontWeight: 700, margin: "0 0 var(--ling-space-2)",
+  color: "var(--ling-text-primary)", fontSize: "var(--ling-font-2xl)", fontWeight: 700, margin: "0 0 var(--ling-space-2)",
 };
 const S_SUB_INTERESTS: CSSProperties = {
   color: "var(--ling-text-dim)", fontSize: "var(--ling-font-md)", margin: "0 0 var(--ling-space-7)",

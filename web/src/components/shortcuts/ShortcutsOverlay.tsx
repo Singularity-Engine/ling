@@ -1,7 +1,6 @@
 import { type CSSProperties } from "react";
 import { memo, useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { OVERLAY_COLORS } from "@/constants/colors";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface ShortcutsOverlayProps {
@@ -33,7 +32,7 @@ const S_BACKDROP_BASE: CSSProperties = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  background: OVERLAY_COLORS.DARK,
+  background: "var(--ling-overlay-modal)",
   backdropFilter: "blur(8px)",
   WebkitBackdropFilter: "blur(8px)",
 };
@@ -76,7 +75,7 @@ const S_KEY_GROUP: CSSProperties = { display: "flex", gap: "4px" };
 
 const S_KBD: CSSProperties = {
   background: "var(--ling-surface-border)",
-  border: "1px solid rgba(255, 255, 255, 0.15)",
+  border: "1px solid var(--ling-overlay-20)",
   borderRadius: "6px",
   padding: "2px 8px",
   fontSize: "12px",

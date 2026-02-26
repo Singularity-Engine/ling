@@ -317,7 +317,9 @@
     "enterHint": "按 Enter 键开始 ↵",
     "featureMemory": "AI CEO",
     "featureVoice": "真实赌注",
-    "featureAvatar": "开源"
+    "featureAvatar": "开源",
+    "talkToLing": "和灵对话",
+    "awakening": "灵正在苏醒..."
   },
   "ui": {
     "expandFooter": "展开底栏",
@@ -543,7 +545,8 @@
     "continueWithGoogle": "Continue with Google",
     "otherOptions": "Other sign-in options \u2192",
     "orDivider": "\u6216",
-    "signIn": "\u767b\u5f55"
+    "signIn": "\u767b\u5f55",
+    "signInWith": "使用 {{provider}} 登录"
   },
   "witness": {
     "talkToLing": "Talk to Ling",

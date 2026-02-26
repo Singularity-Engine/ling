@@ -137,7 +137,7 @@ const S: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    fontFamily: 'inherit',
     padding: '24px 16px',
     boxSizing: 'border-box',
   },
@@ -161,12 +161,12 @@ const S: Record<string, React.CSSProperties> = {
   title: {
     fontSize: 18,
     fontWeight: 600,
-    color: 'rgba(255,255,255,0.85)',
+    color: 'var(--ling-text-secondary)',
     margin: '8px 0 4px',
   },
   subtitle: {
     fontSize: 13,
-    color: 'rgba(255,255,255,0.4)',
+    color: 'var(--ling-text-tertiary)',
     margin: 0,
   },
   grid: {
@@ -175,8 +175,8 @@ const S: Record<string, React.CSSProperties> = {
     gap: 16,
   },
   card: {
-    background: 'rgba(255,255,255,0.04)',
-    border: '1px solid rgba(255,255,255,0.08)',
+    background: 'var(--ling-overlay-4)',
+    border: '1px solid var(--ling-overlay-8)',
     borderRadius: 16,
     padding: '24px 16px',
     display: 'flex',
@@ -189,7 +189,7 @@ const S: Record<string, React.CSSProperties> = {
   cardLabel: {
     fontSize: 12,
     fontWeight: 500,
-    color: 'rgba(255,255,255,0.45)',
+    color: 'var(--ling-text-tertiary)',
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
@@ -214,12 +214,12 @@ const S: Record<string, React.CSSProperties> = {
   },
   updated: {
     fontSize: 12,
-    color: 'rgba(255,255,255,0.3)',
+    color: 'var(--ling-text-muted)',
     margin: '4px 0',
   },
   autoRefresh: {
     fontSize: 11,
-    color: 'rgba(255,255,255,0.2)',
+    color: 'var(--ling-text-muted)',
     margin: '4px 0 16px',
   },
   errorText: {
@@ -235,7 +235,7 @@ const S: Record<string, React.CSSProperties> = {
 };
 
 // Pre-computed card variants — avoids inline spread on every 30s poll render
-const S_CARD_PURPLE: React.CSSProperties = { ...S.card, borderColor: 'rgba(139,92,246,0.4)' };
+const S_CARD_PURPLE: React.CSSProperties = { ...S.card, borderColor: 'var(--ling-purple-40)' };
 const S_CARD_GREEN: React.CSSProperties = { ...S.card, borderColor: 'rgba(34,197,94,0.4)' };
 const S_CARD_LAVENDER: React.CSSProperties = { ...S.card, borderColor: 'rgba(167,139,250,0.4)' };
 const S_CARD_RED: React.CSSProperties = { ...S.card, borderColor: 'rgba(239,68,68,0.4)' };
@@ -247,13 +247,13 @@ const S_VAL_RED: React.CSSProperties = { ...S.cardValue, color: 'var(--ling-erro
 // Loading skeleton card + value — shimmer animation via CSS @keyframes pulse (already in index.css)
 const S_CARD_SKELETON: React.CSSProperties = {
   ...S.card,
-  borderColor: 'rgba(255,255,255,0.06)',
+  borderColor: 'var(--ling-overlay-4)',
 };
 const S_VAL_SKELETON: React.CSSProperties = {
   width: 64,
   height: 36,
   borderRadius: 8,
-  background: 'linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%)',
+  background: 'linear-gradient(90deg, var(--ling-overlay-4) 25%, var(--ling-overlay-8) 50%, var(--ling-overlay-4) 75%)',
   backgroundSize: '200% 100%',
   animation: 'dashSkeleton 1.5s ease-in-out infinite',
 };

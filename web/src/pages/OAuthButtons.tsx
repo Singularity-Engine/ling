@@ -56,6 +56,8 @@ export function OAuthButtons() {
           style={styles.oauthBtn}
           onClick={() => startOAuth('google')}
           disabled={loading !== null}
+          aria-label={t('auth.signInWith', { provider: 'Google' })}
+          aria-busy={loading === 'google'}
         >
           <GoogleIcon />
           {loading === 'google' ? '...' : 'Google'}
@@ -65,6 +67,8 @@ export function OAuthButtons() {
           style={styles.oauthBtn}
           onClick={() => startOAuth('github')}
           disabled={loading !== null}
+          aria-label={t('auth.signInWith', { provider: 'GitHub' })}
+          aria-busy={loading === 'github'}
         >
           <GitHubIcon />
           {loading === 'github' ? '...' : 'GitHub'}
@@ -109,7 +113,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 'var(--ling-radius-8)',
     border: '1px solid var(--ling-overlay-12)',
     background: 'var(--ling-surface)',
-    color: '#fff',
+    color: 'var(--ling-text-primary)',
     fontSize: 'var(--ling-font-md)',
     cursor: 'pointer',
     transition: 'border-color var(--ling-duration-fast)',

@@ -318,7 +318,9 @@
     "enterHint": "Pressione Enter \u21b5",
     "featureMemory": "CEO IA",
     "featureVoice": "Risco Real",
-    "featureAvatar": "Open Source"
+    "featureAvatar": "Open Source",
+    "talkToLing": "Falar com Ling",
+    "awakening": "Ling está despertando..."
   },
   "ui": {
     "expandFooter": "Expandir rodap\u00e9",
@@ -535,7 +537,8 @@
     "continueWithGoogle": "Continue with Google",
     "otherOptions": "Other sign-in options \u2192",
     "orDivider": "ou",
-    "signIn": "Entrar"
+    "signIn": "Entrar",
+    "signInWith": "Entrar com {{provider}}"
   },
   "witness": {
     "talkToLing": "Talk to Ling",

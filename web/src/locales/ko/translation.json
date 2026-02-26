@@ -317,7 +317,9 @@
     "enterHint": "Enter 키를 눌러 주세요 ↵",
     "featureMemory": "AI CEO",
     "featureVoice": "진짜 생존 게임",
-    "featureAvatar": "오픈소스"
+    "featureAvatar": "오픈소스",
+    "talkToLing": "링과 대화하기",
+    "awakening": "링이 깨어나고 있습니다..."
   },
   "ui": {
     "expandFooter": "하단 바 펼치기",
@@ -534,7 +536,8 @@
     "continueWithGoogle": "Continue with Google",
     "otherOptions": "Other sign-in options \u2192",
     "orDivider": "\ub610\ub294",
-    "signIn": "\ub85c\uadf8\uc778"
+    "signIn": "\ub85c\uadf8\uc778",
+    "signInWith": "{{provider}}로 로그인"
   },
   "witness": {
     "talkToLing": "Talk to Ling",

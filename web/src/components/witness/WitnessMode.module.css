@@ -51,9 +51,9 @@
   padding: 14px 40px;
   font-size: 18px;
   font-weight: 600;
-  color: #fff;
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-  border: 1px solid rgba(139, 92, 246, 0.6);
+  color: var(--ling-text-primary);
+  background: linear-gradient(135deg, var(--ling-purple) 0%, var(--ling-purple-deep) 100%);
+  border: 1px solid var(--ling-purple-60);
   border-radius: var(--ling-radius-full, 9999px);
   cursor: pointer;
   animation: lingCtaPulse 3s ease-in-out infinite;
@@ -61,8 +61,8 @@
 }
 
 .cta:hover {
-  background: rgba(139, 92, 246, 0.5);
-  border-color: rgba(139, 92, 246, 0.8);
+  background: var(--ling-purple-50);
+  border-color: var(--ling-purple-85);
 }
 
 .cta:active {

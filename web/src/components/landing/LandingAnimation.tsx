@@ -23,6 +23,7 @@ import { useVitalsData } from "@/hooks/useVitalsData";
 import { getDailyStatement } from "@/data/daily-statements";
 import { prefersReducedMotion } from "@/utils/reduced-motion";
 import { trackEvent } from "@/utils/analytics";
+import { useTranslation } from "react-i18next";
 
 interface LandingAnimationProps {
   onComplete: () => void;
@@ -97,8 +98,8 @@ const S_CTA: React.CSSProperties = {
   padding: "14px 40px",
   fontSize: "1.05rem",
   fontWeight: 600,
-  color: "#fff",
-  background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)",
+  color: "var(--ling-text-primary)",
+  background: "linear-gradient(135deg, var(--ling-purple) 0%, var(--ling-purple-deep) 100%)",
   border: "1px solid var(--ling-purple-30)",
   borderRadius: 999,
   cursor: "pointer",
@@ -147,6 +148,7 @@ const PHASE_TIMES = [0, 1500, 3000, 4000, 5000, 6000] as const;
 export const LandingAnimation = memo(function LandingAnimation({
   onComplete,
 }: LandingAnimationProps) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState(0);
   const [typewriterText, setTypewriterText] = useState("");
   const phaseTimerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -352,7 +354,7 @@ export const LandingAnimation = memo(function LandingAnimation({
             style={S_CTA}
             onClick={handleComplete}
           >
-            Talk to Ling
+            {t("landing.talkToLing", { defaultValue: "Talk to Ling" })}
           </motion.button>
         )}
       </AnimatePresence>
@@ -360,13 +362,13 @@ export const LandingAnimation = memo(function LandingAnimation({
       {/* Skip button (always visible in phases 0-4) */}
       {phase < 5 && (
         <button style={S_SKIP} onClick={() => { trackEvent("overture_skipped", { phase }); handleComplete(); }}>
-          Skip {"\u2192"}
+          {t("landing.skip", { defaultValue: "Skip" })} {"\u2192"}
         </button>
       )}
 
       {/* Accessibility announcement */}
       <div role="status" aria-live="polite" style={SR_ONLY}>
-        {phase === 0 && "Ling is awakening..."}
+        {phase === 0 && t("landing.awakening", { defaultValue: "Ling is awakening..." })}
         {phase === 4 && statement}
       </div>
     </div>

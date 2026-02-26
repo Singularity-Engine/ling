@@ -318,7 +318,9 @@
     "enterHint": "Appuie sur Entree ↵",
     "featureMemory": "IA PDG",
     "featureVoice": "Enjeux reels",
-    "featureAvatar": "Open Source"
+    "featureAvatar": "Open Source",
+    "talkToLing": "Parler à Ling",
+    "awakening": "Ling se réveille..."
   },
   "ui": {
     "expandFooter": "Developper le pied de page",
@@ -535,7 +537,8 @@
     "continueWithGoogle": "Continue with Google",
     "otherOptions": "Other sign-in options \u2192",
     "orDivider": "ou",
-    "signIn": "Se connecter"
+    "signIn": "Se connecter",
+    "signInWith": "Se connecter avec {{provider}}"
   },
   "witness": {
     "talkToLing": "Talk to Ling",

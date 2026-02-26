@@ -93,7 +93,7 @@ const S_PRODUCT_NAME: CSSProperties = {
 };
 
 const S_TAGLINE: CSSProperties = {
-  color: "rgba(196, 181, 253, 0.7)",
+  color: "var(--ling-text-soft)",
   fontSize: "13px",
   marginBottom: "20px",
   lineHeight: 1.5,
@@ -122,7 +122,7 @@ const S_VERSION_LABEL: CSSProperties = {
 
 const S_VERSION_BADGE: CSSProperties = {
   fontSize: "12px",
-  color: "rgba(139, 92, 246, 0.8)",
+  color: "var(--ling-purple-85)",
   background: "var(--ling-purple-12)",
   padding: "2px 10px",
   borderRadius: "10px",
@@ -196,7 +196,7 @@ const S_BTN_PRIMARY: CSSProperties = {
   borderRadius: "8px",
   border: "none",
   background: "var(--ling-purple-50)",
-  color: "#fff",
+  color: "var(--ling-text-primary)",
   fontSize: "12px",
   fontWeight: 600,
   cursor: "pointer",
@@ -258,7 +258,7 @@ const S_LOGIN_LINK: CSSProperties = {
   borderRadius: "8px",
   border: "none",
   background: "var(--ling-purple-50)",
-  color: "#fff",
+  color: "var(--ling-text-primary)",
   fontSize: "13px",
   fontWeight: 600,
   cursor: "pointer",
@@ -273,7 +273,7 @@ const S_REGISTER_LINK: CSSProperties = {
   borderRadius: "8px",
   border: "1px solid var(--ling-purple-40)",
   background: "transparent",
-  color: "rgba(196, 181, 253, 0.8)",
+  color: "var(--ling-purple-lighter)",
   fontSize: "13px",
   fontWeight: 600,
   cursor: "pointer",

@@ -318,7 +318,9 @@
     "enterHint": "Press Enter ↵",
     "featureMemory": "AI CEO",
     "featureVoice": "Real Stakes",
-    "featureAvatar": "Open Source"
+    "featureAvatar": "Open Source",
+    "talkToLing": "Talk to Ling",
+    "awakening": "Ling is awakening..."
   },
   "ui": {
     "expandFooter": "Expand footer",
@@ -545,7 +547,8 @@
     "continueWithGoogle": "Continue with Google",
     "otherOptions": "Other sign-in options \u2192",
     "orDivider": "or",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "signInWith": "Sign in with {{provider}}"
   },
   "witness": {
     "talkToLing": "Talk to Ling",

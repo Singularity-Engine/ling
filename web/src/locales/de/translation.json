@@ -318,7 +318,9 @@
     "enterHint": "Enter drücken ↵",
     "featureMemory": "KI-CEO",
     "featureVoice": "Echte Konsequenzen",
-    "featureAvatar": "Open Source"
+    "featureAvatar": "Open Source",
+    "talkToLing": "Mit Ling sprechen",
+    "awakening": "Ling erwacht..."
   },
   "ui": {
     "expandFooter": "Fußzeile ausklappen",
@@ -511,7 +513,8 @@
     "continueWithGoogle": "Continue with Google",
     "otherOptions": "Other sign-in options \u2192",
     "orDivider": "oder",
-    "signIn": "Anmelden"
+    "signIn": "Anmelden",
+    "signInWith": "Mit {{provider}} anmelden"
   },
   "witness": {
     "talkToLing": "Talk to Ling",

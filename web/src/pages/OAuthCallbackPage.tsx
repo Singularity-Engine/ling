@@ -50,7 +50,7 @@ export function OAuthCallbackPage() {
   return (
     <div style={styles.page}>
       <div style={styles.card}>
-        <div style={styles.spinner} />
+        <div style={styles.spinner} role="status" aria-label={t('auth.oauthCompleting')} />
         <p style={styles.text}>{t('auth.oauthCompleting')}</p>
       </div>
     </div>
@@ -65,7 +65,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    fontFamily: 'inherit',
   },
   card: {
     textAlign: 'center',

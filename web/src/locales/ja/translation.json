@@ -317,7 +317,9 @@
     "enterHint": "Enter キーで開始 ↵",
     "featureMemory": "AI CEO",
     "featureVoice": "Real Stakes",
-    "featureAvatar": "Open Source"
+    "featureAvatar": "Open Source",
+    "talkToLing": "リンと話す",
+    "awakening": "リンが目覚めています..."
   },
   "ui": {
     "expandFooter": "フッターを展開",
@@ -510,7 +512,8 @@
     "continueWithGoogle": "Continue with Google",
     "otherOptions": "Other sign-in options \u2192",
     "orDivider": "\u307e\u305f\u306f",
-    "signIn": "\u30ed\u30b0\u30a4\u30f3"
+    "signIn": "\u30ed\u30b0\u30a4\u30f3",
+    "signInWith": "{{provider}} でサインイン"
   },
   "witness": {
     "talkToLing": "Talk to Ling",

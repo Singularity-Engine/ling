@@ -318,7 +318,9 @@
     "enterHint": "Presiona Enter ↵",
     "featureMemory": "CEO IA",
     "featureVoice": "Riesgo real",
-    "featureAvatar": "Open Source"
+    "featureAvatar": "Open Source",
+    "talkToLing": "Habla con Ling",
+    "awakening": "Ling está despertando..."
   },
   "ui": {
     "expandFooter": "Expandir pie de pagina",
@@ -535,7 +537,8 @@
     "continueWithGoogle": "Continue with Google",
     "otherOptions": "Other sign-in options \u2192",
     "orDivider": "o",
-    "signIn": "Iniciar sesi\u00f3n"
+    "signIn": "Iniciar sesi\u00f3n",
+    "signInWith": "Iniciar sesión con {{provider}}"
   },
   "witness": {
     "talkToLing": "Talk to Ling",

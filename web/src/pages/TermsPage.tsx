@@ -72,7 +72,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     justifyContent: 'center',
     padding: '40px 20px',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    fontFamily: 'inherit',
   },
   container: {
     maxWidth: 640,
@@ -85,7 +85,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: 4,
   },
   updated: {
-    color: 'rgba(255,255,255,0.35)',
+    color: 'var(--ling-text-muted)',
     fontSize: 13,
     marginBottom: 32,
   },
@@ -93,17 +93,17 @@ const styles: Record<string, React.CSSProperties> = {
   h2: {
     fontSize: 18,
     fontWeight: 600,
-    color: 'rgba(255,255,255,0.8)',
+    color: 'var(--ling-text-secondary)',
     marginBottom: 8,
   },
   p: {
-    color: 'rgba(255,255,255,0.55)',
+    color: 'var(--ling-text-dim)',
     fontSize: 14,
     lineHeight: '1.7',
     margin: 0,
   },
   ul: {
-    color: 'rgba(255,255,255,0.55)',
+    color: 'var(--ling-text-dim)',
     fontSize: 14,
     lineHeight: '1.7',
     paddingLeft: 20,
