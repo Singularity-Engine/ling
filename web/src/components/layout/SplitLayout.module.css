@@ -3,13 +3,19 @@
 .root {
   display: grid;
   grid-template-columns: var(--split-left, var(--ling-split-left-default)) var(--ling-split-divider) 1fr;
-  grid-template-rows: 1fr;
+  grid-template-rows: var(--ling-vitals-height) 1fr;
   height: 100dvh;
   width: 100%;
   background: var(--ling-bg-deep);
   overflow: hidden;
   position: relative;
   min-width: 0;
+}
+
+/* ── Vitals Bar occupies full top row ── */
+.vitalsRow {
+  grid-column: 1 / -1;
+  grid-row: 1;
 }
 
 /* ── Left panel: Live2D character ── */
@@ -20,6 +26,7 @@
   min-width: var(--split-left-min, var(--ling-split-left-min));
   max-width: var(--split-left-max, var(--ling-split-left-max));
   min-height: 0;
+  grid-row: 2;
 }
 
 /* ── Divider: draggable separator ── */
@@ -31,6 +38,7 @@
   background: transparent;
   flex-shrink: 0;
   touch-action: none;
+  grid-row: 2;
   /* Visual depth line */
   display: flex;
   align-items: center;
@@ -102,6 +110,7 @@
   overflow: hidden;
   contain: layout paint;
   min-width: 0;
+  grid-row: 2;
 }
 
 /* ── Right panel toolbar ── */
@@ -209,13 +218,6 @@
   background: radial-gradient(ellipse at left center, var(--ling-purple-08), transparent 70%);
   pointer-events: none;
   z-index: 1;
-}
-
-/* ── ExperimentBar positioned on right panel only ── */
-.experimentBar {
-  position: relative;
-  z-index: 5;
-  flex-shrink: 0;
 }
 
 /* ── Animations ── */

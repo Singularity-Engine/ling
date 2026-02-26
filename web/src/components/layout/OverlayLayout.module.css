@@ -16,6 +16,17 @@
   width: 100%;
   background: var(--ling-bg-deep);
   overflow: hidden;
+  padding-top: var(--ling-vitals-height-mobile);
+}
+
+/* ── Vitals Mini strip (mobile/tablet) ── */
+.vitalsMini {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  height: var(--ling-vitals-height-mobile);
 }
 
 /* ── Absolute layers ── */

@@ -6,7 +6,8 @@ import { InputBar } from "../chat/InputBar";
 import { ConnectionStatus } from "../status/ConnectionStatus";
 import { AffinityBadge } from "../status/AffinityBadge";
 import CreditsDisplay from "../billing/CreditsDisplay";
-import { ExperimentBar } from "../experiment/ExperimentBar";
+import { VitalsBar } from "../vitals/VitalsBar";
+import { useVitalsData } from "@/hooks/useVitalsData";
 import { StarField } from "../background/StarField";
 import { BackgroundReactor } from "../effects/BackgroundReactor";
 import { AudioVisualizer } from "../effects/AudioVisualizer";
@@ -248,8 +249,15 @@ export const SplitLayout = memo(function SplitLayout({ firstMinutePhase }: Split
     [appendHumanMessage, sendMessage]
   );
 
+  const vitals = useVitalsData();
+
   return (
     <div ref={rootRef} className={styles.root} style={rootStyle} data-first-minute={firstMinutePhase}>
+      {/* ── Vitals Bar — spans full width at top ── */}
+      <div className={styles.vitalsRow}>
+        <VitalsBar vitals={vitals} />
+      </div>
+
       {/* ── Left Panel: Live2D ── */}
       <aside
         className={styles.leftPanel}
@@ -304,12 +312,7 @@ export const SplitLayout = memo(function SplitLayout({ firstMinutePhase }: Split
         {/* Glow bleed from character panel */}
         <div className={styles.glowBleed} />
 
-        {/* ExperimentBar — right panel only */}
-        <div className={styles.experimentBar}>
-          <SectionErrorBoundary name="ExperimentBar">
-            <ExperimentBar />
-          </SectionErrorBoundary>
-        </div>
+        {/* VitalsBar is now in the top grid row — ExperimentBar removed */}
 
         {/* Toolbar — tier 1 (always visible): connection; tier 2 (in capsule): credits, affinity */}
         <div className={styles.toolbar}>

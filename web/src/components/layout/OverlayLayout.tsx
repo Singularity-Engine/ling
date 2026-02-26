@@ -17,7 +17,8 @@ import { InputBar } from "../chat/InputBar";
 import { ConnectionStatus } from "../status/ConnectionStatus";
 import { AffinityBadge } from "../status/AffinityBadge";
 import CreditsDisplay from "../billing/CreditsDisplay";
-import { ExperimentBar } from "../experiment/ExperimentBar";
+import { VitalsBar } from "../vitals/VitalsBar";
+import { useVitalsData } from "@/hooks/useVitalsData";
 import { StarField } from "../background/StarField";
 import { BackgroundReactor } from "../effects/BackgroundReactor";
 import { AudioVisualizer } from "../effects/AudioVisualizer";
@@ -93,6 +94,7 @@ export const OverlayLayout = React.memo(function OverlayLayout({
   firstMinutePhase,
 }: OverlayLayoutProps) {
   const { t } = useTranslation();
+  const vitals = useVitalsData();
 
   // CSS variables for keyboard offset — drives chatOuter transform via CSS
   const chatOuterVars = useMemo<CSSProperties>(() => ({
@@ -102,10 +104,10 @@ export const OverlayLayout = React.memo(function OverlayLayout({
 
   return (
     <div className={styles.root} data-first-minute={firstMinutePhase}>
-      {/* ===== Layer -2: ExperimentBar ===== */}
-      <SectionErrorBoundary name="ExperimentBar">
-        <ExperimentBar />
-      </SectionErrorBoundary>
+      {/* ===== VitalsBar — fixed top strip ===== */}
+      <div className={styles.vitalsMini}>
+        <VitalsBar vitals={vitals} />
+      </div>
 
       {/* ===== Layer -1: StarField ===== */}
       <div className={styles.layerStarfield}>
