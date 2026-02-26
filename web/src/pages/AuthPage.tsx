@@ -87,7 +87,7 @@ export function AuthPage() {
         {/* Divider */}
         <div style={S.dividerWrap}>
           <div style={S.dividerLine} />
-          <span style={S.dividerText}>or</span>
+          <span style={S.dividerText}>{t('auth.orDivider', { defaultValue: 'or' })}</span>
           <div style={S.dividerLine} />
         </div>
 
@@ -98,6 +98,7 @@ export function AuthPage() {
               type="text"
               className="ling-auth-input"
               placeholder={t('auth.placeholderEmailOrUsername')}
+              aria-label={t('auth.placeholderEmailOrUsername')}
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               required
@@ -110,6 +111,7 @@ export function AuthPage() {
                 type="email"
                 className="ling-auth-input"
                 placeholder={t('auth.placeholderEmail')}
+                aria-label={t('auth.placeholderEmail')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -120,6 +122,7 @@ export function AuthPage() {
                 type="text"
                 className="ling-auth-input"
                 placeholder={t('auth.placeholderUsername')}
+                aria-label={t('auth.placeholderUsername')}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -133,6 +136,7 @@ export function AuthPage() {
             type="password"
             className="ling-auth-input"
             placeholder={t('auth.placeholderPassword')}
+            aria-label={t('auth.placeholderPassword')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -146,6 +150,7 @@ export function AuthPage() {
               type="password"
               className="ling-auth-input"
               placeholder={t('auth.placeholderConfirmPassword')}
+              aria-label={t('auth.placeholderConfirmPassword')}
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               required
@@ -207,7 +212,6 @@ const S: Record<string, CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     padding: 'var(--ling-space-4) 0',
   },
   card: {
@@ -216,8 +220,8 @@ const S: Record<string, CSSProperties> = {
     padding: '32px',
     textAlign: 'center',
     boxSizing: 'border-box',
-    background: 'rgba(6, 0, 15, 0.85)',
-    border: '1px solid rgba(139, 92, 246, 0.1)',
+    background: 'var(--ling-modal-bg, rgba(20, 8, 40, 0.95))',
+    border: '1px solid var(--ling-modal-border, rgba(139, 92, 246, 0.08))',
     borderRadius: 16,
     backdropFilter: 'blur(24px)',
     WebkitBackdropFilter: 'blur(24px)',
@@ -260,7 +264,7 @@ const S: Record<string, CSSProperties> = {
     borderRadius: 'var(--ling-radius-8)',
     border: '1px solid var(--ling-overlay-12)',
     background: 'var(--ling-surface)',
-    color: '#fff',
+    color: 'var(--ling-text-primary)',
     fontSize: 'var(--ling-font-lg)',
     outline: 'none',
     transition: 'border var(--ling-duration-fast)',

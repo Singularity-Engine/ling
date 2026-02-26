@@ -508,7 +508,9 @@
     "oauthStartFailed": "ログインを開始できませんでした。もう一度お試しください。",
     "backToLogin": "ログインに戻る",
     "continueWithGoogle": "Continue with Google",
-    "otherOptions": "Other sign-in options \u2192"
+    "otherOptions": "Other sign-in options \u2192",
+    "orDivider": "\u307e\u305f\u306f",
+    "signIn": "\u30ed\u30b0\u30a4\u30f3"
   },
   "witness": {
     "talkToLing": "Talk to Ling",
@@ -556,5 +558,13 @@
     "retry": "再試行",
     "avatarFallback": "灵",
     "narrativeTag": "— 灵が私に言ったこと"
+  },
+  "vitals": {
+    "revenue": "\u53ce\u76ca",
+    "burnRate": "\u30d0\u30fc\u30f3\u30ec\u30fc\u30c8",
+    "runway": "\u30e9\u30f3\u30a6\u30a7\u30a4",
+    "supporters": "\u30b5\u30dd\u30fc\u30bf\u30fc",
+    "daysUnit": "\u65e5",
+    "perMonth": "/\u6708"
   }
 }

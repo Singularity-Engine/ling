@@ -35,6 +35,7 @@ import { MISC_COLORS } from "./constants/colors";
 import { SS_VISITED } from "./constants/storage-keys";
 import { captureError } from "./lib/sentry";
 import { focusTextarea } from "./utils/dom";
+import { prefersReducedMotion } from "./utils/reduced-motion";
 import "./index.css";
 
 // ─── Lazy-loaded overlays & modals (chunk loads on first use) ───
@@ -91,7 +92,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
       return (
         <div style={S_EB_WRAP}>
           <div style={S_EB_INNER}>
-            <div style={S_EB_EMOJI}>:(</div>
+            <div style={S_EB_EMOJI} aria-hidden="true">:(</div>
             <h2 style={S_EB_TITLE}>{i18next.t('error.pageCrashTitle')}</h2>
             <p style={S_EB_DESC}>
               {i18next.t('error.pageCrashLine1')}<br />{i18next.t('error.pageCrashLine2')}
@@ -131,11 +132,6 @@ const MENU_EXIT_MS = 250;
 // Reduced-motion users get instant swap (0ms).
 const CROSSFADE_MS = 400;
 
-// Detect prefers-reduced-motion at module level (static, avoids per-render media query)
-const prefersReducedMotion =
-  typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-const crossfadeDuration = prefersReducedMotion ? 0 : CROSSFADE_MS;
-
 /**
  * CSS-based crossfade hook — simulates AnimatePresence mode="wait" without
  * importing framer-motion on the critical path.
@@ -149,6 +145,7 @@ const crossfadeDuration = prefersReducedMotion ? 0 : CROSSFADE_MS;
  * the fade-out phase so the old component stays mounted until fully invisible.
  */
 function useCrossfade(activeKey: string) {
+  const crossfadeDuration = prefersReducedMotion() ? 0 : CROSSFADE_MS;
   const [renderKey, setRenderKey] = useState(activeKey);
   const [opacity, setOpacity] = useState(1);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -176,7 +173,7 @@ function useCrossfade(activeKey: string) {
     opacity,
     transition: `opacity ${crossfadeDuration}ms var(--ling-ease-default)`,
     willChange: opacity < 1 ? 'opacity' : 'auto',
-  }), [opacity]);
+  }), [opacity, crossfadeDuration]);
 
   return { renderKey, style };
 }

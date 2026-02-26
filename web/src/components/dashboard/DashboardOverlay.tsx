@@ -7,8 +7,10 @@
  */
 
 import { useEffect, useRef, useCallback, memo } from "react";
+import { useTranslation } from "react-i18next";
 import { AnimatePresence, motion } from "framer-motion";
 import type { DashboardData } from "@/hooks/useDashboardData";
+import { prefersReducedMotion } from "@/utils/reduced-motion";
 import styles from "./DashboardOverlay.module.css";
 
 interface DashboardOverlayProps {
@@ -17,22 +19,18 @@ interface DashboardOverlayProps {
   data: DashboardData;
 }
 
-// Check reduced-motion preference at module level for Framer
-const prefersReducedMotion =
-  typeof window !== "undefined" &&
-  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-const overlayVariants = {
-  hidden: { opacity: 0, y: prefersReducedMotion ? 0 : -20 },
-  visible: { opacity: 1, y: 0 },
-};
-
 export const DashboardOverlay = memo(function DashboardOverlay({
   open,
   onClose,
   data,
 }: DashboardOverlayProps) {
+  const { t } = useTranslation();
   const overlayRef = useRef<HTMLDivElement>(null);
+
+  const overlayVariants = {
+    hidden: { opacity: 0, y: prefersReducedMotion() ? 0 : -20 },
+    visible: { opacity: 1, y: 0 },
+  };
 
   // Close on Escape
   const handleKeyDown = useCallback(
@@ -82,18 +80,25 @@ export const DashboardOverlay = memo(function DashboardOverlay({
           onClick={handleOverlayClick}
           role="dialog"
           aria-modal="true"
-          aria-label="Dashboard"
+          aria-label={t("experiment.dashboardLabel", { defaultValue: "Dashboard" })}
           tabIndex={-1}
         >
           <div className={styles.grid}>
             {/* Revenue */}
             <div className={styles.metric}>
-              <span className={styles.label}>Revenue</span>
+              <span className={styles.label}>{t("vitals.revenue", { defaultValue: "Revenue" })}</span>
               <span className={styles.value}>
                 ${data.revenueUsd.toLocaleString()} / $
                 {data.targetUsd.toLocaleString()}
               </span>
-              <div className={styles.progressBar}>
+              <div
+                className={styles.progressBar}
+                role="progressbar"
+                aria-valuenow={Math.round(data.progressPercent)}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={t("experiment.revenueProgress", { defaultValue: "Monthly revenue progress" })}
+              >
                 <div
                   className={styles.progressFill}
                   style={{ transform: `scaleX(${data.progressPercent / 100})` }}
@@ -106,23 +111,23 @@ export const DashboardOverlay = memo(function DashboardOverlay({
 
             {/* Burn Rate */}
             <div className={styles.metric}>
-              <span className={styles.label}>Burn Rate</span>
+              <span className={styles.label}>{t("vitals.burnRate", { defaultValue: "Burn Rate" })}</span>
               <span className={styles.value}>
-                ${data.burnRate.toLocaleString()}/mo
+                ${data.burnRate.toLocaleString()}{t("vitals.perMonth", { defaultValue: "/mo" })}
               </span>
             </div>
 
             {/* Runway */}
             <div className={styles.metric}>
-              <span className={styles.label}>Runway</span>
+              <span className={styles.label}>{t("vitals.runway", { defaultValue: "Runway" })}</span>
               <span className={styles.value}>
-                ~{data.runwayDays.toFixed(1)} days
+                ~{data.runwayDays.toFixed(1)} {t("vitals.daysUnit", { defaultValue: "days" })}
               </span>
             </div>
 
             {/* Supporters */}
             <div className={styles.metric}>
-              <span className={styles.label}>Supporters</span>
+              <span className={styles.label}>{t("vitals.supporters", { defaultValue: "Supporters" })}</span>
               <span className={styles.value}>{data.supporterCount}</span>
             </div>
           </div>

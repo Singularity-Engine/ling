@@ -532,7 +532,9 @@
     "oauthStartFailed": "로그인을 시작할 수 없어요. 다시 시도해 주세요.",
     "backToLogin": "로그인으로 돌아가기",
     "continueWithGoogle": "Continue with Google",
-    "otherOptions": "Other sign-in options \u2192"
+    "otherOptions": "Other sign-in options \u2192",
+    "orDivider": "\ub610\ub294",
+    "signIn": "\ub85c\uadf8\uc778"
   },
   "witness": {
     "talkToLing": "Talk to Ling",
@@ -580,5 +582,13 @@
     "retry": "다시 시도",
     "avatarFallback": "링",
     "narrativeTag": "— 링이 나에게 한 말"
+  },
+  "vitals": {
+    "revenue": "\uc218\uc775",
+    "burnRate": "\uc18c\uc9c4\uc728",
+    "runway": "\ub7f0\uc6e8\uc774",
+    "supporters": "\ud6c4\uc6d0\uc790",
+    "daysUnit": "\uc77c",
+    "perMonth": "/\uc6d4"
   }
 }

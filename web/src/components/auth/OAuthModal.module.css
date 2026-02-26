@@ -2,22 +2,24 @@
   position: fixed;
   inset: 0;
   z-index: 300;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--ling-overlay-modal, rgba(0, 0, 0, 0.7));
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: overlayFadeIn 0.2s ease-out;
 }
 
 .card {
-  background: rgba(6, 0, 15, 0.95);
-  border: 1px solid var(--ling-purple-08, rgba(139, 92, 246, 0.08));
+  background: var(--ling-modal-bg, rgba(20, 8, 40, 0.95));
+  border: 1px solid var(--ling-modal-border, var(--ling-purple-08, rgba(139, 92, 246, 0.08)));
   border-radius: 16px;
   padding: 32px;
   max-width: 360px;
   width: 90vw;
   text-align: center;
+  animation: overlaySlideIn 0.25s ease-out;
 }
 
 .title {

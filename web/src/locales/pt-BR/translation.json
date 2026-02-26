@@ -533,7 +533,9 @@
     "oauthStartFailed": "N\u00e3o foi poss\u00edvel iniciar o login. Tente novamente.",
     "backToLogin": "Voltar ao login",
     "continueWithGoogle": "Continue with Google",
-    "otherOptions": "Other sign-in options \u2192"
+    "otherOptions": "Other sign-in options \u2192",
+    "orDivider": "ou",
+    "signIn": "Entrar"
   },
   "witness": {
     "talkToLing": "Talk to Ling",
@@ -581,5 +583,13 @@
     "retry": "Tentar novamente",
     "avatarFallback": "L",
     "narrativeTag": "— Ling me disse"
+  },
+  "vitals": {
+    "revenue": "Receita",
+    "burnRate": "Taxa de consumo",
+    "runway": "Autonomia",
+    "supporters": "Apoiadores",
+    "daysUnit": "dias",
+    "perMonth": "/m\u00eas"
   }
 }

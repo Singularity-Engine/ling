@@ -509,7 +509,9 @@
     "oauthStartFailed": "Anmeldung konnte nicht gestartet werden. Bitte erneut versuchen.",
     "backToLogin": "Zurück zur Anmeldung",
     "continueWithGoogle": "Continue with Google",
-    "otherOptions": "Other sign-in options \u2192"
+    "otherOptions": "Other sign-in options \u2192",
+    "orDivider": "oder",
+    "signIn": "Anmelden"
   },
   "witness": {
     "talkToLing": "Talk to Ling",
@@ -557,5 +559,13 @@
     "retry": "Erneut versuchen",
     "avatarFallback": "L",
     "narrativeTag": "— Ling sagte mir"
+  },
+  "vitals": {
+    "revenue": "Einnahmen",
+    "burnRate": "Burn-Rate",
+    "runway": "Laufzeit",
+    "supporters": "Unterst\u00fctzer",
+    "daysUnit": "Tage",
+    "perMonth": "/Monat"
   }
 }

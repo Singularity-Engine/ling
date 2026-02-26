@@ -455,7 +455,8 @@
     "daysLeft": "{{days}}d left",
     "beTheFirst": "Be the first",
     "missionText": "Mission",
-    "missionLink": "View Ling's AI startup experiment mission"
+    "missionLink": "View Ling's AI startup experiment mission",
+    "dashboardLabel": "Dashboard"
   },
   "about": {
     "name": "Ling",
@@ -542,7 +543,9 @@
     "oauthStartFailed": "Could not start sign-in. Please try again.",
     "backToLogin": "Back to login",
     "continueWithGoogle": "Continue with Google",
-    "otherOptions": "Other sign-in options \u2192"
+    "otherOptions": "Other sign-in options \u2192",
+    "orDivider": "or",
+    "signIn": "Sign in"
   },
   "witness": {
     "talkToLing": "Talk to Ling",
@@ -590,5 +593,13 @@
     "retry": "Retry",
     "avatarFallback": "L",
     "narrativeTag": "— Ling said to me"
+  },
+  "vitals": {
+    "revenue": "Revenue",
+    "burnRate": "Burn Rate",
+    "runway": "Runway",
+    "supporters": "Supporters",
+    "daysUnit": "days",
+    "perMonth": "/mo"
   }
 }

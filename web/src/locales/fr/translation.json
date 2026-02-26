@@ -533,7 +533,9 @@
     "oauthStartFailed": "Impossible de demarrer la connexion. Reessaie.",
     "backToLogin": "Retour a la connexion",
     "continueWithGoogle": "Continue with Google",
-    "otherOptions": "Other sign-in options \u2192"
+    "otherOptions": "Other sign-in options \u2192",
+    "orDivider": "ou",
+    "signIn": "Se connecter"
   },
   "witness": {
     "talkToLing": "Talk to Ling",
@@ -581,5 +583,13 @@
     "retry": "Réessayer",
     "avatarFallback": "L",
     "narrativeTag": "— Ling m'a dit"
+  },
+  "vitals": {
+    "revenue": "Revenus",
+    "burnRate": "Taux de d\u00e9pense",
+    "runway": "Autonomie",
+    "supporters": "Supporters",
+    "daysUnit": "jours",
+    "perMonth": "/mois"
   }
 }

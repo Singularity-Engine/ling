@@ -533,7 +533,9 @@
     "oauthStartFailed": "No se pudo iniciar sesion. Intenta de nuevo.",
     "backToLogin": "Volver al inicio de sesion",
     "continueWithGoogle": "Continue with Google",
-    "otherOptions": "Other sign-in options \u2192"
+    "otherOptions": "Other sign-in options \u2192",
+    "orDivider": "o",
+    "signIn": "Iniciar sesi\u00f3n"
   },
   "witness": {
     "talkToLing": "Talk to Ling",
@@ -581,5 +583,13 @@
     "retry": "Reintentar",
     "avatarFallback": "L",
     "narrativeTag": "— Ling me dijo"
+  },
+  "vitals": {
+    "revenue": "Ingresos",
+    "burnRate": "Gasto mensual",
+    "runway": "Autonom\u00eda",
+    "supporters": "Patrocinadores",
+    "daysUnit": "d\u00edas",
+    "perMonth": "/mes"
   }
 }

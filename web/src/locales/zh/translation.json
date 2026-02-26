@@ -541,7 +541,9 @@
     "oauthStartFailed": "无法启动登录流程，请重试。",
     "backToLogin": "返回登录",
     "continueWithGoogle": "Continue with Google",
-    "otherOptions": "Other sign-in options \u2192"
+    "otherOptions": "Other sign-in options \u2192",
+    "orDivider": "\u6216",
+    "signIn": "\u767b\u5f55"
   },
   "witness": {
     "talkToLing": "Talk to Ling",
@@ -589,5 +591,13 @@
     "retry": "重试",
     "avatarFallback": "灵",
     "narrativeTag": "— 灵和我说的"
+  },
+  "vitals": {
+    "revenue": "\u6536\u5165",
+    "burnRate": "\u6d88\u8017\u7387",
+    "runway": "\u7eed\u822a",
+    "supporters": "\u652f\u6301\u8005",
+    "daysUnit": "\u5929",
+    "perMonth": "/\u6708"
   }
 }
