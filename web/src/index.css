@@ -1,7 +1,7 @@
 /* === 暗色主题变量 === */
 :root {
   /* 基底色 */
-  --ling-bg-deep: #0a0015;
+  --ling-bg-deep: #06000f;
   --ling-bg-mid: #0d1b2a;
   --ling-bg-warm: #1a0a2e;
 
@@ -72,10 +72,10 @@
 
   /* 气泡 */
   --ling-bubble-user-bg: linear-gradient(135deg, rgba(139, 92, 246, 0.62), rgba(109, 40, 217, 0.54));
-  --ling-bubble-ai-bg: rgba(255, 255, 255, 0.15);
+  --ling-bubble-ai-bg: rgba(20, 8, 40, 0.65);
   --ling-bubble-user-border: rgba(139, 92, 246, 0.4);
-  --ling-bubble-ai-border: rgba(255, 255, 255, 0.22);
-  --ling-bubble-ai-accent: rgba(139, 92, 246, 0.78);
+  --ling-bubble-ai-border: rgba(255, 255, 255, 0.1);
+  --ling-bubble-ai-accent: var(--ling-pulse);
   --ling-bubble-user-shadow: rgba(139, 92, 246, 0.30);
   --ling-bubble-user-text: rgba(255, 255, 255, 0.97);
   --ling-bubble-ai-shadow: rgba(0, 0, 0, 0.22);
@@ -202,6 +202,20 @@
   --ling-warm-soft: rgba(245, 199, 126, 0.15);
   /* 候选2: --ling-warm-accent-alt1: #e8a87c (peach) */
   /* 候选3: --ling-warm-accent-alt2: #f0c9a0 (soft amber) */
+
+  /* ── AI Survival Console: Survival Colors ── */
+  --ling-pulse: #ff6b9d;
+  --ling-pulse-20: rgba(255, 107, 157, 0.2);
+  --ling-pulse-40: rgba(255, 107, 157, 0.4);
+  --ling-alive: #00ffcc;
+  --ling-alive-20: rgba(0, 255, 204, 0.2);
+  --ling-countdown: #ffd700;
+  --ling-countdown-20: rgba(255, 215, 0, 0.2);
+
+  /* ── AI Survival Console: Vitals Bar ── */
+  --ling-vitals-height: 48px;
+  --ling-vitals-height-mobile: 40px;
+  --ling-font-vitals: 13px;
 
   /* ── Design Token: Split Layout ── */
   --ling-split-left-min: 360px;
@@ -1570,3 +1584,15 @@ canvas {
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── AI Survival Console: Heartbeat Animation ── */
+@keyframes lingHeartbeat {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 var(--ling-pulse-20); }
+  15% { transform: scale(1.15); box-shadow: 0 0 8px 2px var(--ling-pulse-40); }
+  30% { transform: scale(1); box-shadow: 0 0 0 0 var(--ling-pulse-20); }
+}
+@keyframes lingHeartbeatSpeaking {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 var(--ling-pulse-20); }
+  15% { transform: scale(1.2); box-shadow: 0 0 12px 4px var(--ling-pulse-40); }
+  30% { transform: scale(1); box-shadow: 0 0 0 0 var(--ling-pulse-20); }
+}

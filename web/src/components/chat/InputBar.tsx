@@ -11,7 +11,10 @@ import { trackEvent } from "@/utils/track-event";
 
 const S_BAR_WRAP: CSSProperties = {
   padding: "10px 16px",
-  background: "var(--ling-input-bar-bg)",
+  background: "rgba(6, 0, 15, 0.7)",
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
+  borderTop: "1px solid var(--ling-purple-08)",
   paddingBottom: "calc(10px + env(safe-area-inset-bottom, 0px))",
 };
 

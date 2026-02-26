@@ -28,13 +28,13 @@ export const S_BUBBLE_USER: CSSProperties = {
   background: "var(--ling-bubble-user-bg)",
   border: "1px solid var(--ling-bubble-user-border)",
   overflow: "hidden", transition: `background var(--ling-duration-fast), border-color var(--ling-duration-fast), box-shadow var(--ling-duration-fast)`,
-  boxShadow: "0 2px 12px var(--ling-bubble-user-shadow)",
+  boxShadow: "0 2px 16px var(--ling-bubble-user-shadow)",
 };
 export const S_BUBBLE_AI: CSSProperties = {
   padding: "var(--ling-space-3) 18px", borderRadius: "18px 18px 18px 4px",
   background: "var(--ling-bubble-ai-bg)",
   border: "1px solid var(--ling-bubble-ai-border)",
-  borderLeft: "3px solid var(--ling-bubble-ai-accent)",
+  borderLeft: "2px solid var(--ling-bubble-ai-accent)",
   overflow: "hidden", transition: `background var(--ling-duration-fast), border-color var(--ling-duration-fast), box-shadow var(--ling-duration-fast)`,
   boxShadow: "0 1px 8px var(--ling-bubble-ai-shadow)",
 };
