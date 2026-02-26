@@ -1,0 +1,211 @@
+/* VitalsBar — Always-visible survival status strip */
+
+.bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--ling-vitals-height);
+  padding: 0 var(--ling-space-4);
+  background: rgba(6, 0, 15, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--ling-purple-08);
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  user-select: none;
+}
+
+/* Bottom glow edge (大师✨改进: 加 transition) */
+.bar::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--ling-pulse-20), var(--ling-purple-20), var(--ling-pulse-20), transparent);
+  transition: opacity 0.3s var(--ling-ease-default);
+}
+
+/* ── Left zone: name + status ── */
+.left {
+  display: flex;
+  align-items: center;
+  gap: var(--ling-space-2);
+  flex-shrink: 0;
+}
+
+.name {
+  font-size: var(--ling-font-vitals);
+  font-weight: 600;
+  color: var(--ling-text-primary);
+  letter-spacing: 0.02em;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ling-alive);
+  box-shadow: 0 0 6px var(--ling-alive-20);
+}
+
+.statusDot[data-status="offline"] {
+  background: var(--ling-text-dim);
+  box-shadow: none;
+}
+
+/* ── Center zone: countdown + heartbeat + revenue ── */
+/* 大师♿改进: 用 <button> 替代 <div role="button"> */
+.center {
+  display: flex;
+  align-items: center;
+  gap: var(--ling-space-4);
+  cursor: pointer;
+  padding: var(--ling-space-1) var(--ling-space-3);
+  border-radius: var(--ling-radius-full);
+  transition: background var(--ling-duration-fast);
+  background: transparent;
+  border: none;
+  font: inherit;
+  color: inherit;
+}
+
+.center:hover {
+  background: var(--ling-surface-hover);
+}
+
+.center:focus-visible {
+  outline: 2px solid var(--ling-focus-ring);
+  outline-offset: 2px;
+}
+
+.countdown {
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
+  font-size: var(--ling-font-vitals);
+  font-weight: 600;
+  color: var(--ling-countdown);
+  letter-spacing: 0.04em;
+}
+
+.heartbeat {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ling-pulse);
+  animation: lingHeartbeat 0.8s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.heartbeat[data-speaking="true"] {
+  animation: lingHeartbeatSpeaking 0.4s ease-in-out infinite;
+}
+
+/* 大师🍎改进: revenue/supporters 默认低 opacity，hover 时显现 */
+.progressWrap {
+  display: flex;
+  align-items: center;
+  gap: var(--ling-space-2);
+  opacity: 0.5;
+  transition: opacity var(--ling-duration-normal);
+}
+
+.center:hover .progressWrap {
+  opacity: 1;
+}
+
+.progressTrack {
+  width: 80px;
+  height: 3px;
+  background: var(--ling-surface-border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ling-purple-light), var(--ling-alive));
+  border-radius: 2px;
+  transform-origin: left;
+  transition: transform 1s ease;
+}
+
+/* 大师♿改进: reduced-motion 守卫 progress transition */
+@media (prefers-reduced-motion: reduce) {
+  .progressFill {
+    transition: none;
+  }
+}
+
+.revenueText {
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
+  font-size: 11px;
+  color: var(--ling-text-dim);
+}
+
+/* ── Right zone: supporters + settings ── */
+.right {
+  display: flex;
+  align-items: center;
+  gap: var(--ling-space-3);
+  flex-shrink: 0;
+}
+
+/* 大师🍎改进: supporters 默认低 opacity */
+.supporters {
+  font-size: 11px;
+  color: var(--ling-text-soft);
+  opacity: 0.5;
+  transition: opacity var(--ling-duration-normal);
+}
+
+.bar:hover .supporters {
+  opacity: 1;
+}
+
+.settingsBtn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--ling-radius-sm);
+  color: var(--ling-text-dim);
+  cursor: pointer;
+  padding: 0;
+  transition: color var(--ling-duration-fast), background var(--ling-duration-fast);
+}
+
+.settingsBtn:hover {
+  color: var(--ling-text-secondary);
+  background: var(--ling-surface-hover);
+}
+
+.settingsBtn:focus-visible {
+  outline: 2px solid var(--ling-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .bar {
+    height: var(--ling-vitals-height-mobile);
+    padding: 0 var(--ling-space-3);
+  }
+
+  .progressWrap,
+  .supporters,
+  .settingsBtn {
+    display: none;
+  }
+
+  .center {
+    gap: var(--ling-space-2);
+  }
+}
