@@ -61,7 +61,7 @@ services:
       retries: 5
       start_period: 120s
 
-  # ── Ling Web (Vite frontend) ───────────────────
+  # ── Ling Web (static SPA via nginx) ─────────────
   ling-web:
     build:
       context: ./web
@@ -73,6 +73,11 @@ services:
     networks:
       - ling-net
       - mcp_appnet
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   # ── TTS Proxy (standalone Fish Audio proxy) ────
   ling-tts-proxy:

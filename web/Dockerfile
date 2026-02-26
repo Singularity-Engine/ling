@@ -1,4 +1,5 @@
-# Ling Web - multi-stage build
+# Ling Web - multi-stage production build
+# Stage 1: build Vite SPA
 FROM node:20-alpine AS build
 
 WORKDIR /app
@@ -7,9 +8,41 @@ RUN npm ci --ignore-scripts
 COPY . .
 RUN npm run build
 
+# Stage 2: serve static files via nginx
 FROM nginx:alpine
+
 COPY --from=build /app/dist /usr/share/nginx/html
-# SPA fallback
-RUN printf 'server {\n  listen 3001;\n  root /usr/share/nginx/html;\n  location / {\n    try_files $uri $uri/ /index.html;\n  }\n}\n' > /etc/nginx/conf.d/default.conf
+
+# SPA fallback + static asset caching
+RUN cat > /etc/nginx/conf.d/default.conf <<'EOF'
+server {
+  listen 3001;
+  root /usr/share/nginx/html;
+
+  # hashed assets — cache aggressively (1 year)
+  location /assets/ {
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+  }
+
+  # service worker — never cache
+  location = /sw.js {
+    expires off;
+    add_header Cache-Control "no-store";
+  }
+
+  # SPA fallback — short cache for index.html
+  location / {
+    try_files $uri $uri/ /index.html;
+    add_header Cache-Control "no-cache";
+  }
+
+  # gzip
+  gzip on;
+  gzip_types text/css application/javascript application/json image/svg+xml;
+  gzip_min_length 256;
+}
+EOF
+
 EXPOSE 3001
 CMD ["nginx", "-g", "daemon off;"]
