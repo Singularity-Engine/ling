@@ -44,6 +44,19 @@
   contain: strict;
 }
 
+/* Bottom gradient: character feet fade into background */
+.layerLive2d::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(to top, var(--ling-bg-deep), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
 .layerEffects {
   position: absolute;
   inset: 0;

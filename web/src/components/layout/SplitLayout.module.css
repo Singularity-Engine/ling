@@ -29,6 +29,19 @@
   grid-row: 2;
 }
 
+/* Bottom gradient: character feet fade into background */
+.leftPanel::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(to top, var(--ling-bg-deep), transparent);
+  pointer-events: none;
+  z-index: 5;
+}
+
 /* ── Divider: draggable separator ── */
 .divider {
   position: relative;
