@@ -56,7 +56,8 @@ const S_PULSE_GLOW: React.CSSProperties = {
   left: "50%",
   width: 200,
   height: 200,
-  transform: "translate(-50%, -50%)",
+  marginTop: -100,
+  marginLeft: -100,
   borderRadius: "50%",
   background: "radial-gradient(circle, var(--ling-purple-40) 0%, var(--ling-purple-12) 50%, transparent 70%)",
   animation: "pulse 2s ease-in-out infinite",
@@ -161,11 +162,10 @@ export const LandingAnimation = memo(function LandingAnimation({
   // Vitals data for VitalsBar
   const vitals = useVitalsData();
 
-  // handleComplete — sets sessionStorage and calls onComplete prop
+  // handleComplete — cleans up and delegates to parent (parent owns sessionStorage)
   const handleComplete = useCallback(() => {
     if (completedRef.current) return;
     completedRef.current = true;
-    sessionStorage.setItem(SS_KEY, "true");
     // Clean up timers
     phaseTimerRef.current.forEach(clearTimeout);
     phaseTimerRef.current = [];

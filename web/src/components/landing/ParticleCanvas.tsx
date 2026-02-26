@@ -206,8 +206,9 @@ export const ParticleCanvas = memo(function ParticleCanvas({
           case "converge": {
             const t = phaseProgress;
             const ease = t * t * (3 - 2 * t); // smoothstep
-            const targetX = cx + (Math.random() - 0.5) * (1 - ease) * 20;
-            const targetY = cy + (Math.random() - 0.5) * (1 - ease) * 20;
+            const offset = (1 - ease) * 20;
+            const targetX = cx + Math.cos(p.convergeAngle) * offset;
+            const targetY = cy + Math.sin(p.convergeAngle) * offset;
             p.x += (targetX - p.x) * 0.03;
             p.y += (targetY - p.y) * 0.03;
             // Increase brightness as they converge
