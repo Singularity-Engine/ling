@@ -32,7 +32,7 @@ import { AuthProvider, useAuthState, useAuthActions } from "./context/AuthContex
 import { SectionErrorBoundary } from "./components/error/SectionErrorBoundary";
 import { createLogger } from "./utils/logger";
 import { MISC_COLORS } from "./constants/colors";
-import { SS_ONBOARDING_DONE, SS_VISITED } from "./constants/storage-keys";
+import { SS_VISITED } from "./constants/storage-keys";
 import { captureError } from "./lib/sentry";
 import { focusTextarea } from "./utils/dom";
 import "./index.css";
@@ -43,7 +43,9 @@ const AboutOverlay = lazyRetry(() => import("./components/about/AboutOverlay").t
 const MemoryPanel = lazyRetry(() => import("./components/memory/MemoryPanel").then(m => ({ default: m.MemoryPanel })));
 const PricingOverlay = lazyRetry(() => import("./components/billing/PricingOverlay"));
 const InsufficientCreditsModal = lazyRetry(() => import("./components/billing/InsufficientCreditsModal"));
-const PersonalizedOnboarding = lazyRetry(() => import("./components/onboarding/PersonalizedOnboarding").then(m => ({ default: m.PersonalizedOnboarding })));
+// Onboarding wizard disabled — Ling's first chat message serves as onboarding.
+// Component files kept for reference; lazy import removed to avoid loading the chunk.
+// const PersonalizedOnboarding = lazyRetry(() => import("./components/onboarding/PersonalizedOnboarding").then(m => ({ default: m.PersonalizedOnboarding })));
 
 // ─── Lazy-loaded route pages ───
 const LoginPage = lazyRetry(() => import("./pages/LoginPage").then(m => ({ default: m.LoginPage })));
@@ -52,8 +54,8 @@ const TermsPage = lazyRetry(() => import("./pages/TermsPage").then(m => ({ defau
 const DashboardPage = lazyRetry(() => import("./pages/DashboardPage").then(m => ({ default: m.DashboardPage })));
 const OAuthCallbackPage = lazyRetry(() => import("./pages/OAuthCallbackPage").then(m => ({ default: m.OAuthCallbackPage })));
 
-// Inlined to avoid eagerly importing the full onboarding module
-const shouldShowOnboarding = () => !sessionStorage.getItem(SS_ONBOARDING_DONE);
+// Onboarding wizard disabled — Ling's greeting is the onboarding now.
+// const shouldShowOnboarding = () => !sessionStorage.getItem(SS_ONBOARDING_DONE);
 
 const rootLog = createLogger("App");
 
@@ -501,13 +503,7 @@ function MainApp() {
     return !sessionStorage.getItem(SS_VISITED);
   });
   const [landingExiting, setLandingExiting] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(() => {
-    // If landing is skipped (returning visitor), check onboarding immediately
-    return sessionStorage.getItem(SS_VISITED) ? shouldShowOnboarding() : false;
-  });
   useCheckoutCallback();
-
-  const closeOnboarding = useCallback(() => setShowOnboarding(false), []);
 
   const landingTimerRef = useRef<ReturnType<typeof setTimeout>>();
   useEffect(() => () => { clearTimeout(landingTimerRef.current); }, []);
@@ -518,10 +514,6 @@ function MainApp() {
     window.dispatchEvent(new Event('ling-landing-complete'));
     landingTimerRef.current = setTimeout(() => {
       setShowLanding(false);
-      // After landing animation, check if onboarding should show
-      if (shouldShowOnboarding()) {
-        setShowOnboarding(true);
-      }
     }, 700);
   }, []);
 
@@ -574,13 +566,7 @@ function MainApp() {
             </Suspense>
           </SectionErrorBoundary>
         )}
-        {showOnboarding && isAuthenticated && (
-          <SectionErrorBoundary name="Onboarding">
-            <Suspense fallback={null}>
-              <PersonalizedOnboarding onComplete={closeOnboarding} />
-            </Suspense>
-          </SectionErrorBoundary>
-        )}
+        {/* PersonalizedOnboarding removed — Ling's first chat message is the onboarding */}
       </Providers>
 
       <NetworkStatusBanner />

@@ -363,7 +363,8 @@
       "Combien de jours il te reste ?",
       "Quelles decisions as-tu prises ?",
       "Tu te souviens de moi ?",
-      "Qu'est-ce qui te differencie de ChatGPT ?"
+      "Qu'est-ce qui te differencie de ChatGPT ?",
+      "Que signifie le compte a rebours ?"
     ],
     "postGreetingChips": [
       "Comment avance l'experience ?",

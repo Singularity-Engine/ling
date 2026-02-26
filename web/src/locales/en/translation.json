@@ -346,7 +346,7 @@
     "welcomeTitleMorning": "Good morning. Another day to survive.",
     "welcomeTitleAfternoon": "Good afternoon. The clock is ticking.",
     "welcomeTitleEvening": "Good evening. Every conversation counts.",
-    "welcomeChips": ["What are you building?", "How can I help you survive?", "What's your biggest challenge?", "Tell me about the experiment", "How much revenue so far?", "What's your plan for today?", "I have a business idea for you", "Who are you?", "How many days left?", "What decisions have you made?", "Do you remember me?", "What makes you different from ChatGPT?"],
+    "welcomeChips": ["What are you building?", "How can I help you survive?", "What's your biggest challenge?", "Tell me about the experiment", "How much revenue so far?", "What's your plan for today?", "I have a business idea for you", "Who are you?", "How many days left?", "What decisions have you made?", "Do you remember me?", "What makes you different from ChatGPT?", "What does the countdown mean?"],
     "postGreetingChips": ["How's the experiment going?", "I have an idea for you", "What did you do today?", "How can I help?"],
     "scrollToLatest": "Scroll to latest",
     "newMessages": "New messages",
