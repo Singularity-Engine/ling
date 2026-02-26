@@ -15,6 +15,7 @@ import { useForceIgnoreMouse } from "@/hooks/utils/use-force-ignore-mouse";
 import { useMode } from "@/context/ModeContext";
 import { useWebSocket } from "@/context/WebsocketContext";
 import { createLogger } from "@/utils/logger";
+import { LingSilhouette } from "../landing/LingSilhouette";
 
 interface Live2DProps {
   showSidebar?: boolean;
@@ -44,17 +45,7 @@ const S_CANVAS: Record<string, CSSProperties> = {
 const S_OVERLAY: CSSProperties = {
   position: "absolute", inset: 0,
   display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-  background: "rgba(10, 0, 21, 0.85)", backdropFilter: "blur(8px)", zIndex: 10,
-};
-
-const S_SPINNER: CSSProperties = {
-  width: 48, height: 48, borderRadius: "50%",
-  border: "3px solid transparent", borderTopColor: "#8b5cf6",
-  animation: "live2d-spin 1s linear infinite",
-};
-
-const S_LOADING_TEXT: CSSProperties = {
-  marginTop: 16, color: "rgba(255,255,255,0.6)", fontSize: 14,
+  background: "rgba(6, 0, 15, 0.7)", backdropFilter: "blur(8px)", zIndex: 10,
 };
 
 const S_ERROR_TEXT: CSSProperties = {
@@ -155,19 +146,14 @@ export const Live2D = memo(
           style={S_CANVAS[varKey]}
           aria-hidden="true"
         />
+        {/* Loading state: silhouette instead of spinner */}
         {showOverlay && (
-          <div role="status" aria-live="polite" style={S_OVERLAY}>
-            {!showRetry ? (
+          <div style={S_OVERLAY}>
+            <LingSilhouette visible breathing />
+            {showRetry && (
               <>
-                <div style={S_SPINNER} />
-                <span style={S_LOADING_TEXT}>{t('loading.awakeningLing')}</span>
-              </>
-            ) : (
-              <>
-                <span style={S_ERROR_TEXT}>{t('loading.connectionInterrupted')}</span>
-                <button type="button" onClick={handleRetry} style={S_RETRY_BTN}>
-                  {t('loading.reconnect')}
-                </button>
+                <p style={S_ERROR_TEXT}>{t("live2d.loadSlow", { defaultValue: "Ling is taking longer than usual." })}</p>
+                <button style={S_RETRY_BTN} onClick={handleRetry}>{t("live2d.retry", { defaultValue: "Retry" })}</button>
               </>
             )}
           </div>
