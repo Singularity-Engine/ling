@@ -529,7 +529,12 @@
     "oauthCompleting": "Completando inicio de sesion...",
     "oauthNotConfigured": "Este metodo de inicio de sesion no esta disponible.",
     "oauthStartFailed": "No se pudo iniciar sesion. Intenta de nuevo.",
-    "backToLogin": "Volver al inicio de sesion"
+    "backToLogin": "Volver al inicio de sesion",
+    "continueWithGoogle": "Continue with Google",
+    "otherOptions": "Other sign-in options \u2192"
+  },
+  "witness": {
+    "talkToLing": "Talk to Ling"
   },
   "onboarding": {
     "welcome": "Soy Ling. Intento sobrevivir.",

@@ -539,7 +539,12 @@
     "oauthCompleting": "Completing sign in...",
     "oauthNotConfigured": "This sign-in method is not available.",
     "oauthStartFailed": "Could not start sign-in. Please try again.",
-    "backToLogin": "Back to login"
+    "backToLogin": "Back to login",
+    "continueWithGoogle": "Continue with Google",
+    "otherOptions": "Other sign-in options \u2192"
+  },
+  "witness": {
+    "talkToLing": "Talk to Ling"
   },
   "onboarding": {
     "welcome": "I'm Ling. I'm trying to survive.",

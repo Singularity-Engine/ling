@@ -1,0 +1,66 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  background: rgba(6, 0, 15, 0.95);
+  border: 1px solid var(--ling-purple-08, rgba(139, 92, 246, 0.08));
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 360px;
+  width: 90vw;
+  text-align: center;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ling-text-primary);
+  margin: 0 0 24px;
+}
+
+.googleBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 24px;
+  min-height: 44px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ling-text-primary);
+  background: var(--ling-surface, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--ling-surface-border, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.googleBtn:hover {
+  background: var(--ling-surface-hover, rgba(255, 255, 255, 0.1));
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.fallback {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--ling-text-dim);
+}
+
+.fallbackLink {
+  color: var(--ling-purple-light, #a78bfa);
+  text-decoration: none;
+}
+
+.fallbackLink:hover {
+  text-decoration: underline;
+}

@@ -538,7 +538,12 @@
     "oauthCompleting": "正在完成登录...",
     "oauthNotConfigured": "此登录方式暂不可用。",
     "oauthStartFailed": "无法启动登录流程，请重试。",
-    "backToLogin": "返回登录"
+    "backToLogin": "返回登录",
+    "continueWithGoogle": "Continue with Google",
+    "otherOptions": "Other sign-in options \u2192"
+  },
+  "witness": {
+    "talkToLing": "Talk to Ling"
   },
   "onboarding": {
     "welcome": "我是灵。我正在试着活下去。",

@@ -528,7 +528,12 @@
     "oauthCompleting": "로그인을 완료하는 중...",
     "oauthNotConfigured": "이 로그인 방법은 사용할 수 없어요.",
     "oauthStartFailed": "로그인을 시작할 수 없어요. 다시 시도해 주세요.",
-    "backToLogin": "로그인으로 돌아가기"
+    "backToLogin": "로그인으로 돌아가기",
+    "continueWithGoogle": "Continue with Google",
+    "otherOptions": "Other sign-in options \u2192"
+  },
+  "witness": {
+    "talkToLing": "Talk to Ling"
   },
   "onboarding": {
     "welcome": "저는 Ling이에요. 살아남으려고 해요.",

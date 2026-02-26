@@ -529,7 +529,12 @@
     "oauthCompleting": "Concluindo login...",
     "oauthNotConfigured": "Este m\u00e9todo de login n\u00e3o est\u00e1 dispon\u00edvel.",
     "oauthStartFailed": "N\u00e3o foi poss\u00edvel iniciar o login. Tente novamente.",
-    "backToLogin": "Voltar ao login"
+    "backToLogin": "Voltar ao login",
+    "continueWithGoogle": "Continue with Google",
+    "otherOptions": "Other sign-in options \u2192"
+  },
+  "witness": {
+    "talkToLing": "Talk to Ling"
   },
   "onboarding": {
     "welcome": "Eu sou a Ling. Estou tentando sobreviver.",

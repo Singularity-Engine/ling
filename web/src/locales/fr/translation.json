@@ -529,7 +529,12 @@
     "oauthCompleting": "Connexion en cours...",
     "oauthNotConfigured": "Cette methode de connexion n'est pas disponible.",
     "oauthStartFailed": "Impossible de demarrer la connexion. Reessaie.",
-    "backToLogin": "Retour a la connexion"
+    "backToLogin": "Retour a la connexion",
+    "continueWithGoogle": "Continue with Google",
+    "otherOptions": "Other sign-in options \u2192"
+  },
+  "witness": {
+    "talkToLing": "Talk to Ling"
   },
   "onboarding": {
     "welcome": "Je suis Ling. J'essaie de survivre.",

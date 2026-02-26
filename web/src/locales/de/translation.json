@@ -506,7 +506,12 @@
     "oauthCompleting": "Anmeldung wird abgeschlossen...",
     "oauthNotConfigured": "Diese Anmeldemethode ist nicht verfügbar.",
     "oauthStartFailed": "Anmeldung konnte nicht gestartet werden. Bitte erneut versuchen.",
-    "backToLogin": "Zurück zur Anmeldung"
+    "backToLogin": "Zurück zur Anmeldung",
+    "continueWithGoogle": "Continue with Google",
+    "otherOptions": "Other sign-in options \u2192"
+  },
+  "witness": {
+    "talkToLing": "Talk to Ling"
   },
   "onboarding": {
     "welcome": "Ich bin Ling. Ich versuche zu überleben.",

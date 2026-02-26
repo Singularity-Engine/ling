@@ -505,7 +505,12 @@
     "oauthCompleting": "ログインを完了しています...",
     "oauthNotConfigured": "このログイン方法は利用できません。",
     "oauthStartFailed": "ログインを開始できませんでした。もう一度お試しください。",
-    "backToLogin": "ログインに戻る"
+    "backToLogin": "ログインに戻る",
+    "continueWithGoogle": "Continue with Google",
+    "otherOptions": "Other sign-in options \u2192"
+  },
+  "witness": {
+    "talkToLing": "Talk to Ling"
   },
   "onboarding": {
     "welcome": "私はリン。生き残ろうとしています。",
