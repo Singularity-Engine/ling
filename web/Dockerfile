@@ -21,14 +21,12 @@ server {
 
   # hashed assets — cache aggressively (1 year)
   location /assets/ {
-    expires 1y;
-    add_header Cache-Control "public, immutable";
+    add_header Cache-Control "public, immutable, max-age=31536000";
   }
 
   # service worker — never cache
   location = /sw.js {
-    expires off;
-    add_header Cache-Control "no-store";
+    add_header Cache-Control "max-age=0, no-cache, must-revalidate";
   }
 
   # SPA fallback — short cache for index.html
