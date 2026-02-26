@@ -1,0 +1,33 @@
+/* LingSilhouette — Static placeholder for Live2D loading */
+
+.silhouette {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(200px, 40vw, 400px);
+  height: auto;
+  opacity: 0;
+  transition: opacity 700ms var(--ling-ease-enter, ease-out);
+  pointer-events: none;
+  filter: drop-shadow(0 0 30px var(--ling-purple-20, rgba(139, 92, 246, 0.2)));
+}
+
+.silhouette[data-visible="true"] {
+  opacity: 0.6;
+}
+
+.breathing {
+  animation: silhouetteBreath 4s ease-in-out infinite;
+}
+
+@keyframes silhouetteBreath {
+  0%, 100% { transform: translate(-50%, -50%) scaleY(1); }
+  50% { transform: translate(-50%, -50%) scaleY(1.01); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .breathing {
+    animation: none;
+  }
+}
