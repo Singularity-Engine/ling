@@ -16,6 +16,7 @@ import {
 import { getSkillsByTags, getMetaByKey, getSkillLabel, type SkillMeta } from "../../config/skill-registry";
 import { useConstellation } from "../../hooks/useConstellation";
 import { SK_ONBOARDING_DONE, SK_USER_PREFERENCES } from "@/constants/storage-keys";
+import { prefersReducedMotion } from "@/utils/reduced-motion";
 
 const STORAGE_KEY = SK_ONBOARDING_DONE;
 const PREFS_KEY = SK_USER_PREFERENCES;
@@ -36,15 +37,16 @@ const INTERESTS = [
 
 const MAX_GOALS = 3;
 
-// Slide animation variants
+// Slide animation variants (skip x-slide when reduced-motion is active)
+const _rmOnboard = prefersReducedMotion();
 const slideVariants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? 200 : -200,
+    x: _rmOnboard ? 0 : direction > 0 ? 200 : -200,
     opacity: 0,
   }),
   center: { x: 0, opacity: 1 },
   exit: (direction: number) => ({
-    x: direction > 0 ? -200 : 200,
+    x: _rmOnboard ? 0 : direction > 0 ? -200 : 200,
     opacity: 0,
   }),
 };
@@ -393,7 +395,7 @@ export function PersonalizedOnboarding({ onComplete }: PersonalizedOnboardingPro
           initial="enter"
           animate="center"
           exit="exit"
-          transition={{ duration: 0.3, ease: "easeOut" }}
+          transition={{ duration: _rmOnboard ? 0 : 0.3, ease: "easeOut" }}
           style={S_STEP_CONTENT}
         >
           {step === 0 && (
@@ -656,7 +658,7 @@ function StepReady({
             key={item.key}
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2 + i * 0.1, type: "spring", stiffness: 300 }}
+            transition={_rmOnboard ? { duration: 0 } : { delay: 0.2 + i * 0.1, type: "spring", stiffness: 300 }}
             style={item.nodeStyle}
           >
             <item.meta.icon size={16} color={item.meta.color} />
@@ -677,7 +679,7 @@ function StepReady({
                 strokeWidth="1"
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
-                transition={{ delay: 0.5 + i * 0.1, duration: 0.4 }}
+                transition={_rmOnboard ? { duration: 0 } : { delay: 0.5 + i * 0.1, duration: 0.4 }}
               />
             );
           })}

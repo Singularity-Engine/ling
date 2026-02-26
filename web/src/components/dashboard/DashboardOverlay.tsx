@@ -96,7 +96,7 @@ export const DashboardOverlay = memo(function DashboardOverlay({
               <div className={styles.progressBar}>
                 <div
                   className={styles.progressFill}
-                  style={{ width: `${data.progressPercent}%` }}
+                  style={{ transform: `scaleX(${data.progressPercent / 100})` }}
                 />
               </div>
               <span className={styles.progressPercent}>

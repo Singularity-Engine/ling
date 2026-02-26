@@ -58,9 +58,11 @@
 
 .progressFill {
   height: 100%;
+  width: 100%;
   background: linear-gradient(90deg, var(--ling-purple-light), var(--ling-alive));
   border-radius: 3px;
-  transition: width 1s ease;
+  transform-origin: left;
+  transition: transform 1s ease;
 }
 
 .progressPercent {

@@ -287,7 +287,7 @@ export const LandingAnimation = memo(function LandingAnimation({
             key="vitals"
             initial={{ y: -48, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, ease: [0, 0, 0.2, 1] }}
+            transition={{ duration: 0.3, ease: [0, 0, 0.2, 1] }}
             style={S_VITALS_WRAP}
           >
             <VitalsBar vitals={vitals} />

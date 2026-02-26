@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useConstellation } from "../../hooks/useConstellation";
 import { useToolState } from "../../context/ToolStateContext";
 import { getSkillMeta, getMetaByKey, getSkillLabel, type SkillMeta } from "../../config/skill-registry";
+import { prefersReducedMotion } from "../../utils/reduced-motion";
 // Keyframes moved to static index.css — no runtime injection needed.
 
 // ── Arc layout helpers ──────────────────────────────────────────
@@ -43,11 +44,11 @@ const S_SVG: CSSProperties = {
   pointerEvents: "none",
   overflow: "visible",
 };
+const _rm = prefersReducedMotion();
 const CLOSED_VARIANT = { x: 0, y: 0, opacity: 0, scale: 0.3 };
-const STAGGER_VARIANTS = {
-  open: { transition: { staggerChildren: 0.05 } },
-  closed: { transition: { staggerChildren: 0.03, staggerDirection: -1 } },
-};
+const STAGGER_VARIANTS = _rm
+  ? { open: { transition: { duration: 0 } }, closed: { transition: { duration: 0 } } }
+  : { open: { transition: { staggerChildren: 0.05 } }, closed: { transition: { staggerChildren: 0.03, staggerDirection: -1 } } };
 const LINE_VARIANTS = {
   closed: { pathLength: 0, opacity: 0 },
   open: { pathLength: 1, opacity: 1 },
@@ -56,10 +57,12 @@ const WHILETAP_095 = { scale: 0.95 };
 const WHILETAP_090 = { scale: 0.9 };
 const CORE_OPEN = { rotate: 45 };
 const CORE_CLOSED = { rotate: 0 };
-const CORE_TRANSITION = { type: "spring" as const, stiffness: 300, damping: 20 };
+const CORE_TRANSITION = _rm
+  ? { duration: 0 }
+  : { type: "spring" as const, stiffness: 300, damping: 20 };
 const FADE_IN = { opacity: 0 };
 const FADE_VISIBLE = { opacity: 1 };
-const FADE_TRANSITION = { duration: 0.2 };
+const FADE_TRANSITION = { duration: _rm ? 0 : 0.2 };
 
 // ── Star button (memo'd — rendered in a list) ───────────────────
 const StarButton = memo(function StarButton({
@@ -113,7 +116,7 @@ const StarButton = memo(function StarButton({
     [position.x, position.y],
   );
   const transition = useMemo(
-    () => ({ type: "spring" as const, stiffness: 320, damping: 22, delay }),
+    () => _rm ? { duration: 0 } : { type: "spring" as const, stiffness: 320, damping: 22, delay },
     [delay],
   );
 
