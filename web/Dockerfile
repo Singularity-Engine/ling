@@ -13,8 +13,9 @@ FROM nginx:alpine
 
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Add WASM MIME type to nginx defaults
-RUN echo 'application/wasm wasm;' >> /etc/nginx/mime.types
+# Add WASM MIME type if not already present
+RUN grep -q 'wasm' /etc/nginx/mime.types || \
+    sed -i '/^}/i \    application/wasm                                         wasm;' /etc/nginx/mime.types
 
 # SPA fallback + static asset caching + COOP/COEP for SharedArrayBuffer (VAD/ONNX)
 RUN cat > /etc/nginx/conf.d/default.conf <<'EOF'
