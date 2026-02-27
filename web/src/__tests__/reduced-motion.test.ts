@@ -9,6 +9,15 @@ describe('prefers-reduced-motion coverage', () => {
     'src/components/shared/AnimatedNumber.module.css',
     'src/components/landing/BrandReveal.module.css',
     'src/pages/sngxai/Screen1.module.css',
+    'src/pages/sngxai/SngxaiApp.module.css',
+    'src/pages/sngxai/ActionCard.module.css',
+    'src/pages/sngxai/Screen2.module.css',
+    'src/pages/sngxai/Screen3.module.css',
+    'src/pages/sngxai/Sparkline.module.css',
+    'src/pages/sngxai/CircleTier.module.css',
+    'src/pages/sngxai/Screen4.module.css',
+    'src/pages/sngxai/Screen5.module.css',
+    'src/pages/sngxai/FilmGrain.module.css',
   ];
 
   cssFiles.forEach((file) => {

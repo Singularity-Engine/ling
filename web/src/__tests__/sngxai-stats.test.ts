@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { getMockStats, type SngxaiStats } from '../data/mock-sngxai-stats';
+import { getLiveStats, type SngxaiStats } from '../data/sngxai-stats';
 
-describe('Mock sngxai stats', () => {
+describe('sngxai-stats (live data)', () => {
   it('returns stats with required fields', () => {
-    const stats: SngxaiStats = getMockStats();
+    const stats: SngxaiStats = getLiveStats();
     expect(stats.dayCount).toBeGreaterThan(0);
     expect(stats.revenue).toBeGreaterThanOrEqual(0);
     expect(stats.revenueGoal).toBeGreaterThan(0);
@@ -12,8 +12,14 @@ describe('Mock sngxai stats', () => {
   });
 
   it('survivalPercent is revenue / revenueGoal * 100', () => {
-    const stats = getMockStats();
+    const stats = getLiveStats();
     const expected = Math.round((stats.revenue / stats.revenueGoal) * 100);
     expect(stats.survivalPercent).toBe(expected);
+  });
+
+  it('has lastUpdated field', () => {
+    const stats = getLiveStats();
+    expect(stats.lastUpdated).toBeTruthy();
+    expect(typeof stats.lastUpdated).toBe('string');
   });
 });

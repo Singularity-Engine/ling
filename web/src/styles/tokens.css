@@ -23,7 +23,7 @@
   /* ── A1: Void (background space — not flat color) ── */
   --ling-void-top: #13111C;
   --ling-void-mid: #0A0A0F;
-  --ling-void-bottom: #060608;
+  --ling-void-bottom: #07071a;
   --ling-void-cool: #0d1b2a;   /* blue-tinted depth — body gradient mid */
   --ling-void-warm: #1a0a2e;   /* purple-tinted depth — body gradient bottom */
 
@@ -111,6 +111,7 @@
   --ling-font-3xl: 28px;
   --ling-font-price: 32px;
   --ling-font-display: 36px;
+  --ling-font-display-lg: clamp(48px, 8vw, 120px);
   --ling-font-hero: clamp(48px, 10vw, 120px);
   --ling-font-hero-mobile: clamp(32px, 8vw, 64px);
 
@@ -398,13 +399,25 @@
 
 [data-voice="ling"] {
   font-family: var(--ling-font-ling);
+  color: var(--ling-text-1);
 }
 
 [data-voice="world"] {
   font-family: var(--ling-font-world);
+  color: var(--ling-text-2);
+  font-size: var(--ling-font-sm);
 }
 
 [data-voice="ling"] .numeric,
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* ── Backdrop-filter fallback ──
+   Browsers without backdrop-filter get a solid semi-transparent bg instead */
+@supports not (backdrop-filter: blur(1px)) {
+  :root {
+    --ling-glass: rgba(10, 8, 18, 0.85);
+    --ling-glass-blur: none;
+  }
 }

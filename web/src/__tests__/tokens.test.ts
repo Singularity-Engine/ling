@@ -19,7 +19,7 @@ describe('Design tokens (彻底版)', () => {
     expect(tokens).toContain('--ling-text-3:');
     expect(tokens).toContain('--ling-void-top: #13111C');
     expect(tokens).toContain('--ling-void-mid: #0A0A0F');
-    expect(tokens).toContain('--ling-void-bottom: #060608');
+    expect(tokens).toContain('--ling-void-bottom: #07071a');
   });
 
   it('tokens.css generates legacy aliases derived FROM new tokens', () => {
@@ -63,5 +63,15 @@ describe('Design tokens (彻底版)', () => {
   it('index.css no longer contains the old :root variable block', () => {
     expect(indexCss).not.toContain('/* 基底色 */');
     expect(indexCss).not.toContain('/* 主题紫 */');
+  });
+
+  it('has glassmorphism tokens', () => {
+    expect(tokens).toContain('--ling-glass:');
+    expect(tokens).toContain('--ling-glass-blur:');
+    expect(tokens).toContain('--ling-glass-border:');
+  });
+
+  it('has display-lg font token (hero size)', () => {
+    expect(tokens).toContain('--ling-font-display-lg:');
   });
 });

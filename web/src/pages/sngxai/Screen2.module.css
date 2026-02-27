@@ -1,0 +1,251 @@
+/* ═══════════════════════════════════════════════════════════
+   Screen 2 — "What Ling has been doing"
+   Design: Asymmetric layout — Ling on left, content on right
+   Emotion: Witness — the user observes Ling's journey
+   ═══════════════════════════════════════════════════════════ */
+
+.root {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  padding: var(--ling-space-16) var(--ling-space-10) var(--ling-space-16) var(--ling-space-8);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* ── Hero background image ── */
+.heroBg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.heroBg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: left 20%;
+  opacity: 0.68;
+  /* Left-to-right fade: Ling clearly visible on left 25%, fades before content */
+  mask-image: linear-gradient(
+    to right,
+    black 0%,
+    black 25%,
+    rgba(0, 0, 0, 0.25) 38%,
+    transparent 48%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    black 0%,
+    black 25%,
+    rgba(0, 0, 0, 0.25) 38%,
+    transparent 48%
+  );
+}
+
+/* Ensure all content sits above the hero bg */
+.root > *:not(.heroBg) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Headline ── */
+.headline {
+  font-family: var(--ling-font-ling);
+  font-size: var(--ling-font-display-lg);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--ling-text-1);
+  margin: 0 0 var(--ling-space-12);
+  text-align: right;
+  max-width: 55%;
+}
+
+/* ── Journal layout ── */
+.journal {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--ling-space-6);
+  max-width: 55%;
+  width: 100%;
+}
+
+/* Timeline spine — vertical glowing line */
+.journal::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--ling-accent-20) 15%,
+    var(--ling-accent-30) 50%,
+    var(--ling-accent-20) 85%,
+    transparent 100%
+  );
+  transform: translateX(-50%);
+}
+
+/* Timeline spine glow */
+.journal::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 10%;
+  bottom: 10%;
+  width: 60px;
+  background: radial-gradient(
+    ellipse at center,
+    var(--ling-accent-08) 0%,
+    transparent 70%
+  );
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* Alternating card placement */
+.journalEntry {
+  position: relative;
+}
+
+.journalEntry:nth-child(odd) {
+  grid-column: 1;
+  padding-right: var(--ling-space-6);
+}
+
+.journalEntry:nth-child(even) {
+  grid-column: 2;
+  padding-left: var(--ling-space-6);
+}
+
+/* Timeline dots on the spine */
+.journalEntry::after {
+  content: '';
+  position: absolute;
+  top: var(--ling-space-8);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ling-accent);
+  box-shadow: 0 0 12px var(--ling-accent-30);
+}
+
+.journalEntry:nth-child(odd)::after {
+  right: calc(-4px - var(--ling-space-6));
+}
+
+.journalEntry:nth-child(even)::after {
+  left: calc(-4px - var(--ling-space-6));
+}
+
+/* ── Navigation arrows (desktop) ── */
+.navRow {
+  display: flex;
+  gap: var(--ling-space-3);
+  margin-top: var(--ling-space-8);
+}
+
+.navBtn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--ling-glass);
+  backdrop-filter: var(--ling-glass-blur);
+  -webkit-backdrop-filter: var(--ling-glass-blur);
+  border: 1px solid var(--ling-glass-border);
+  color: var(--ling-text-2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition:
+    background var(--ling-duration-fast),
+    color var(--ling-duration-fast);
+  padding: 0;
+}
+
+.navBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ling-text-1);
+}
+
+.navBtn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* ═══ MOBILE: Revert to centered, stack vertically ═══ */
+@media (max-width: 768px) {
+  .root {
+    align-items: center;
+    padding: var(--ling-space-10) var(--ling-space-4);
+  }
+
+  .headline {
+    font-size: var(--ling-font-hero-mobile);
+    margin-bottom: var(--ling-space-8);
+    text-align: center;
+    max-width: 100%;
+  }
+
+  .journal {
+    grid-template-columns: 1fr;
+    gap: var(--ling-space-5);
+    max-width: 100%;
+  }
+
+  .journal::before,
+  .journal::after {
+    display: none;
+  }
+
+  .journalEntry:nth-child(odd),
+  .journalEntry:nth-child(even) {
+    grid-column: 1;
+    padding: 0;
+  }
+
+  .journalEntry::after {
+    display: none;
+  }
+
+  .heroBg img {
+    object-position: center 20%;
+    opacity: 0.18;
+    mask-image: linear-gradient(
+      to bottom,
+      black 0%,
+      rgba(0, 0, 0, 0.4) 30%,
+      transparent 50%
+    );
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      black 0%,
+      rgba(0, 0, 0, 0.4) 30%,
+      transparent 50%
+    );
+  }
+
+  .navRow {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journal::before,
+  .journal::after {
+    animation: none;
+  }
+}

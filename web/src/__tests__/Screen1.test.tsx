@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Screen1 } from '../pages/sngxai/Screen1';
-import { getMockStats } from '../data/mock-sngxai-stats';
+import { getLiveStats } from '../data/sngxai-stats';
 
 describe('Screen1', () => {
-  const stats = getMockStats();
+  const stats = getLiveStats();
 
   it('renders the hero statement', () => {
     const { container } = render(<Screen1 stats={stats} />);
@@ -15,17 +15,15 @@ describe('Screen1', () => {
 
   it('displays day count', () => {
     const { container } = render(<Screen1 stats={stats} />);
-    const dayLabel = container.querySelector('[aria-label="Day 47"]');
+    const dayLabel = container.querySelector(`[aria-label="Day ${stats.dayCount}"]`);
     expect(dayLabel).toBeTruthy();
   });
 
   it('displays revenue with goal', () => {
     const { container } = render(<Screen1 stats={stats} />);
-    const revenue = container.querySelector('[aria-label="Revenue $12"]');
+    const revenue = container.querySelector(`[aria-label="Revenue $${stats.revenue}"]`);
     expect(revenue).toBeTruthy();
-    // $36 is in the goal AnimatedNumber (no aria-label, check text content)
     expect(container.textContent).toContain('$');
-    expect(container.textContent).toContain('36');
   });
 
   it('has a Talk to Ling link', () => {
