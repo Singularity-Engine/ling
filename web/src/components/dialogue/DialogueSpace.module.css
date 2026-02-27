@@ -1,0 +1,41 @@
+.space {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--ling-space-6, 24px) var(--ling-space-8, 32px);
+  scrollbar-width: none;
+}
+.space::-webkit-scrollbar { display: none; }
+
+/* Top mask — gradient fade for BreathingBackground */
+.space::before {
+  content: '';
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 80px;
+  background: var(--ling-void-bottom, #060608);
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent);
+  mask-image: linear-gradient(to bottom, black, transparent);
+  pointer-events: none;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+/* Greeting centered */
+.greeting {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .space {
+    padding: var(--ling-space-4, 16px) var(--ling-space-3, 12px);
+  }
+}

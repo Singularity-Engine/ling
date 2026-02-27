@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef, Suspense, Component, type ErrorInfo, type ReactNode, type CSSProperties } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense, Component, type ErrorInfo, type ReactNode, type CSSProperties } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
@@ -6,47 +6,19 @@ import i18next from "i18next";
 
 import { lazyRetry } from "./utils/lazy-retry";
 
-import { CinematicOverture } from "./components/landing/CinematicOverture";
-
-// Lazy-loaded: Witness Mode for unauthenticated visitors (after overture completes).
-const WitnessMode = lazyRetry(() => import("./components/witness/WitnessMode").then(m => ({ default: m.WitnessMode })));
-
-import { useMessagesRef, useHistoryListState, useHistoryListActions } from "./context/ChatHistoryContext";
-import { useVADState, useVADActions } from "./context/VadContext";
-import { useInterrupt } from "./hooks/utils/use-interrupt";
 import { HreflangTags } from "./components/seo/HreflangTags";
 import { StructuredData } from "./components/seo/StructuredData";
 import { LOCALE_MAP, type SupportedLanguage, SUPPORTED_LANGUAGES } from "./i18n";
 import { Toaster, toaster } from "./components/ui/toaster";
-import { useWebSocketActions } from "./context/WebsocketContext";
-import { useKeyboardShortcuts, type ShortcutDef } from "./hooks/useKeyboardShortcuts";
 import { NetworkStatusBanner } from "./components/effects/NetworkStatusBanner";
-import { useAffinityIdleExpression } from "./hooks/useAffinityIdleExpression";
-import { useFirstMinute } from "./hooks/useFirstMinute";
-import { useIsMobile, useIsDesktop } from "./hooks/useIsMobile";
-import { SplitLayout } from "./components/layout/SplitLayout";
-import { OverlayLayout } from "./components/layout/OverlayLayout";
 import { Providers } from "./components/layout/Providers";
 import { AuthProvider, useAuthState, useAuthActions } from "./context/AuthContext";
-import { SectionErrorBoundary } from "./components/error/SectionErrorBoundary";
-import { BreathingBackground } from "./components/shared/BreathingBackground";
+import { SpatialLayout } from "./components/dialogue/SpatialLayout";
+import { OAuthModal } from "./components/auth/OAuthModal";
 import { createLogger } from "./utils/logger";
 
-import { SS_VISITED } from "./constants/storage-keys";
 import { captureError } from "./lib/sentry";
-import { focusTextarea } from "./utils/dom";
-import { prefersReducedMotion } from "./utils/reduced-motion";
 import "./index.css";
-
-// ─── Lazy-loaded overlays & modals (chunk loads on first use) ───
-const ShortcutsOverlay = lazyRetry(() => import("./components/shortcuts/ShortcutsOverlay").then(m => ({ default: m.ShortcutsOverlay })));
-const AboutOverlay = lazyRetry(() => import("./components/about/AboutOverlay").then(m => ({ default: m.AboutOverlay })));
-const MemoryPanel = lazyRetry(() => import("./components/memory/MemoryPanel").then(m => ({ default: m.MemoryPanel })));
-const PricingOverlay = lazyRetry(() => import("./components/billing/PricingOverlay"));
-const InsufficientCreditsModal = lazyRetry(() => import("./components/billing/InsufficientCreditsModal"));
-// Onboarding wizard disabled — Ling's first chat message serves as onboarding.
-// Component files kept for reference; lazy import removed to avoid loading the chunk.
-// const PersonalizedOnboarding = lazyRetry(() => import("./components/onboarding/PersonalizedOnboarding").then(m => ({ default: m.PersonalizedOnboarding })));
 
 // ─── Lazy-loaded route pages ───
 const AuthPage = lazyRetry(() => import("./pages/AuthPage").then(m => ({ default: m.AuthPage })));
@@ -124,379 +96,19 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
   }
 }
 
-// Mobile: menu exit animation duration (used by closeMenu timer)
-const MENU_EXIT_MS = 250;
-
-// Witness ↔ Console crossfade duration (ms per direction)
-// Total transition: ~800ms (400ms out + 400ms in) with mode="wait"-like sequencing.
-// Reduced-motion users get instant swap (0ms).
-const CROSSFADE_MS = 400;
-
-/**
- * CSS-based crossfade hook — simulates AnimatePresence mode="wait" without
- * importing framer-motion on the critical path.
- *
- * When the target key changes:
- *   1. Fade out current view (opacity 1 → 0, crossfadeDuration ms)
- *   2. Swap content (render new key)
- *   3. Fade in new view (opacity 0 → 1, crossfadeDuration ms)
- *
- * Returns { renderKey, opacity } — renderKey lags behind `activeKey` during
- * the fade-out phase so the old component stays mounted until fully invisible.
- */
-function useCrossfade(activeKey: string) {
-  const crossfadeDuration = prefersReducedMotion() ? 0 : CROSSFADE_MS;
-  const [renderKey, setRenderKey] = useState(activeKey);
-  const [opacity, setOpacity] = useState(1);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
-
-  useEffect(() => {
-    if (activeKey === renderKey) return;
-
-    // Phase 1: fade out current view
-    setOpacity(0);
-    clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      // Phase 2: swap to new content (still invisible)
-      setRenderKey(activeKey);
-      // Phase 3: fade in — needs a frame for the DOM swap before opacity transition
-      requestAnimationFrame(() => setOpacity(1));
-    }, crossfadeDuration);
-
-    return () => clearTimeout(timerRef.current);
-  }, [activeKey, renderKey]);
-
-  // Cleanup timer on unmount
-  useEffect(() => () => { clearTimeout(timerRef.current); }, []);
-
-  const style: CSSProperties = useMemo(() => ({
-    opacity,
-    transition: `opacity ${crossfadeDuration}ms var(--ling-ease-default)`,
-    willChange: opacity < 1 ? 'opacity' : 'auto',
-  }), [opacity, crossfadeDuration]);
-
-  return { renderKey, style };
-}
-
-// Landing → main content transition
-const S_MAIN_VISIBLE: CSSProperties = {
-  opacity: 1, transform: "scale(1)",
-  transition: "opacity 0.7s var(--ling-ease-default), transform 0.7s var(--ling-ease-default)",
+// Auth overlay inline styles
+const S_AUTH_OVERLAY: CSSProperties = {
+  position: 'fixed', bottom: 120, left: '50%', transform: 'translateX(-50%)',
+  zIndex: 'var(--ling-z-modal, 1000)' as unknown as number,
 };
-const S_MAIN_HIDDEN: CSSProperties = {
-  opacity: 0, transform: "scale(0.97)",
-  transition: "opacity 0.7s var(--ling-ease-default), transform 0.7s var(--ling-ease-default)",
+const S_AUTH_CTA: CSSProperties = {
+  background: 'var(--ling-glass)', backdropFilter: 'var(--ling-glass-blur)',
+  WebkitBackdropFilter: 'var(--ling-glass-blur)',
+  border: '1px solid var(--ling-glass-border)', borderRadius: 'var(--ling-radius-full, 9999px)',
+  padding: 'var(--ling-space-3) var(--ling-space-6)',
+  color: 'var(--ling-text-1)', fontFamily: 'var(--ling-font-world)',
+  fontSize: 15, cursor: 'pointer', transition: 'background 200ms, border-color 200ms',
 };
-
-
-function MainContent(): JSX.Element {
-  const isMobile = useIsMobile();
-  const isDesktop = useIsDesktop();
-
-  // First-minute experience orchestration
-  const { phase: firstMinutePhase } = useFirstMinute();
-  // For new visitors on overlay (mobile/tablet): start collapsed, auto-expand at "inviting" phase
-  const [chatExpanded, setChatExpanded] = useState(() => {
-    const visitCount = parseInt(sessionStorage.getItem("ling-visit-count") || "0", 10);
-    return visitCount > 0; // returning visitors start expanded, new visitors start collapsed
-  });
-  const autoExpandedRef = useRef(false);
-  useEffect(() => {
-    if (firstMinutePhase === "inviting" && !autoExpandedRef.current && !isDesktop) {
-      autoExpandedRef.current = true;
-      setChatExpanded(true);
-    }
-  }, [firstMinutePhase, isDesktop]);
-  const [shortcutsOpen, setShortcutsOpen] = useState(false);
-  const [aboutOpen, setAboutOpen] = useState(false);
-  const [memoryOpen, setMemoryOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [menuClosing, setMenuClosing] = useState(false);
-  const [kbOffset, setKbOffset] = useState(0);
-  const menuTimerRef = useRef<ReturnType<typeof setTimeout>>();
-  const hamburgerRef = useRef<HTMLButtonElement>(null);
-  const menuPanelRef = useRef<HTMLDivElement>(null);
-
-  // Auth state for low-balance badge on mobile hamburger
-  const { user } = useAuthState();
-  const showCreditsBadge = isMobile && !!user && !!user.plan && user.plan !== 'free'
-    && user.role !== 'owner' && user.role !== 'admin'
-    && (user.credits_balance ?? 0) <= 10;
-
-  // Contexts for keyboard shortcuts
-  const { micOn } = useVADState();
-  const { startMic, stopMic } = useVADActions();
-  const { sendMessage } = useWebSocketActions();
-  const { interrupt } = useInterrupt();
-  // Non-reactive ref getter — reads current messages at call-time without
-  // subscribing MainContent to every message update (avoids ~N re-renders
-  // per conversation turn where N = number of messages added).
-  const { getMessages } = useMessagesRef();
-  const { currentHistoryUid } = useHistoryListState();
-  const { updateHistoryList } = useHistoryListActions();
-
-  // Ref mirrors so createNewChat and shortcuts stay stable across state changes.
-  // Without this, every mic toggle or history switch recreates callbacks →
-  // rebuilds the shortcuts useMemo array, wasting work on every state change.
-  const historyUidRef = useRef(currentHistoryUid);
-  historyUidRef.current = currentHistoryUid;
-  const micOnRef = useRef(micOn);
-  micOnRef.current = micOn;
-
-  // Update --vh CSS variable on resize & fullscreen change (used for mobile viewport height).
-  // isMobile detection is handled by the shared useIsMobile() hook.
-  useEffect(() => {
-    const updateVh = () => {
-      document.documentElement.style.setProperty("--vh", `${window.innerHeight * 0.01}px`);
-    };
-    updateVh();
-    let rafId = 0;
-    let fsTimerId: ReturnType<typeof setTimeout>;
-    const throttled = () => {
-      if (rafId) return;
-      rafId = requestAnimationFrame(() => { rafId = 0; updateVh(); });
-    };
-    // Fullscreen transitions may not fire resize — listen explicitly
-    const onFullscreenChange = () => { fsTimerId = setTimeout(throttled, 100); };
-    window.addEventListener("resize", throttled);
-    document.addEventListener("fullscreenchange", onFullscreenChange);
-    document.addEventListener("webkitfullscreenchange", onFullscreenChange);
-    return () => {
-      clearTimeout(fsTimerId);
-      cancelAnimationFrame(rafId);
-      window.removeEventListener("resize", throttled);
-      document.removeEventListener("fullscreenchange", onFullscreenChange);
-      document.removeEventListener("webkitfullscreenchange", onFullscreenChange);
-    };
-  }, []);
-
-  useEffect(() => () => { clearTimeout(menuTimerRef.current); }, []);
-
-  useEffect(() => {
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.height = "100%";
-    document.body.style.height = "100%";
-    document.documentElement.style.position = "fixed";
-    document.body.style.position = "fixed";
-    document.documentElement.style.width = "100%";
-    document.body.style.width = "100%";
-  }, []);
-
-  // Mobile virtual keyboard: use visualViewport API to detect keyboard height
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-
-    const onResize = () => {
-      const offset = window.innerHeight - vv.height - vv.offsetTop;
-      setKbOffset(Math.max(0, offset));
-    };
-
-    let rafId = 0;
-    const throttledResize = () => {
-      if (rafId) return;
-      rafId = requestAnimationFrame(() => { rafId = 0; onResize(); });
-    };
-
-    vv.addEventListener("resize", throttledResize);
-    vv.addEventListener("scroll", throttledResize, { passive: true });
-    return () => {
-      cancelAnimationFrame(rafId);
-      vv.removeEventListener("resize", throttledResize);
-      vv.removeEventListener("scroll", throttledResize);
-    };
-  }, []);
-
-  const toggleChat = useCallback(() => {
-    setChatExpanded(prev => !prev);
-  }, []);
-  const collapseChat = useCallback(() => setChatExpanded(false), []);
-
-  // Stable open/close handlers — prevents defeating memo on ShortcutsOverlay, AboutOverlay, MemoryPanel
-  const openMemory = useCallback(() => setMemoryOpen(true), []);
-  const openAbout = useCallback(() => setAboutOpen(true), []);
-  const closeShortcuts = useCallback(() => setShortcutsOpen(false), []);
-  const closeAbout = useCallback(() => setAboutOpen(false), []);
-  const closeMemory = useCallback(() => setMemoryOpen(false), []);
-  const openMenu = useCallback(() => setMenuOpen(true), []);
-  const closeMenu = useCallback(() => {
-    if (menuClosing) return;
-    setMenuClosing(true);
-    menuTimerRef.current = setTimeout(() => {
-      setMenuClosing(false);
-      setMenuOpen(false);
-      hamburgerRef.current?.focus();
-    }, MENU_EXIT_MS);
-  }, [menuClosing]);
-
-  // Focus trap: keep Tab cycling inside mobile menu
-  const handleMenuKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key !== "Tab" || !menuPanelRef.current) return;
-    const focusable = menuPanelRef.current.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    if (focusable.length === 0) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (e.shiftKey) {
-      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
-    } else {
-      if (document.activeElement === last) { e.preventDefault(); first.focus(); }
-    }
-  }, []);
-  const handleExpandKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleChat(); }
-  }, [toggleChat]);
-
-  const createNewChat = useCallback(() => {
-    const msgs = getMessages();
-    if (historyUidRef.current && msgs.length > 0) {
-      updateHistoryList(historyUidRef.current, msgs[msgs.length - 1]);
-    }
-    interrupt();
-    sendMessage({ type: "create-new-history" });
-  }, [getMessages, updateHistoryList, interrupt, sendMessage]);
-
-  // Refs for ephemeral UI state — lets the Escape shortcut read latest values
-  // without adding them as useMemo deps (avoids rebuilding the entire shortcuts
-  // array on every overlay toggle or chat expand/collapse).
-  const shortcutsOpenRef = useRef(shortcutsOpen);
-  shortcutsOpenRef.current = shortcutsOpen;
-  const aboutOpenRef = useRef(aboutOpen);
-  aboutOpenRef.current = aboutOpen;
-  const memoryOpenRef = useRef(memoryOpen);
-  memoryOpenRef.current = memoryOpen;
-  const chatExpandedRef = useRef(chatExpanded);
-  chatExpandedRef.current = chatExpanded;
-  const menuOpenRef = useRef(menuOpen);
-  menuOpenRef.current = menuOpen;
-
-  // Keyboard shortcuts definition
-  const shortcuts: ShortcutDef[] = useMemo(() => [
-    {
-      key: "mod+m",
-      labelKey: "shortcuts.toggleMic",
-      // Read via ref so mic state changes don't rebuild the entire shortcuts array.
-      action: () => { micOnRef.current ? stopMic() : startMic(); },
-    },
-    {
-      key: "/",
-      labelKey: "shortcuts.focusInput",
-      action: () => { focusTextarea(); },
-    },
-    {
-      key: "mod+j",
-      labelKey: "shortcuts.toggleChat",
-      action: () => setChatExpanded(prev => !prev),
-      allowInInput: true,
-    },
-    {
-      key: "mod+k",
-      labelKey: "shortcuts.newChat",
-      action: createNewChat,
-      allowInInput: true,
-    },
-    {
-      key: "shift+i",
-      labelKey: "shortcuts.showAbout",
-      action: () => setAboutOpen(prev => !prev),
-      // No allowInInput — conflicts with typing uppercase "I"
-    },
-    {
-      key: "shift+?",
-      labelKey: "shortcuts.showHelp",
-      action: () => setShortcutsOpen(prev => !prev),
-      // No allowInInput — conflicts with typing "?"
-    },
-    {
-      key: "escape",
-      labelKey: "shortcuts.closeOverlay",
-      action: () => {
-        // Let context menus handle their own Escape
-        if (document.querySelector('[role="menu"]')) return false;
-        // Cascade: close overlays first, then collapse chat panel
-        if (menuOpenRef.current) {
-          clearTimeout(menuTimerRef.current);
-          setMenuClosing(false);
-          setMenuOpen(false);
-          hamburgerRef.current?.focus();
-        } else if (shortcutsOpenRef.current || aboutOpenRef.current || memoryOpenRef.current) {
-          setShortcutsOpen(false);
-          setAboutOpen(false);
-          setMemoryOpen(false);
-        } else if (chatExpandedRef.current) {
-          setChatExpanded(false);
-          // Blur textarea so focus doesn't remain on hidden input
-          (document.activeElement as HTMLElement)?.blur?.();
-        } else {
-          return false; // nothing to close, let event propagate
-        }
-      },
-      allowInInput: true,
-    },
-    // Fully stable: micOn read via micOnRef, startMic/stopMic are stable
-    // VADActions callbacks, createNewChat uses refs internally.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  ], [startMic, stopMic, createNewChat]);
-
-  useKeyboardShortcuts(shortcuts);
-  useAffinityIdleExpression();
-
-  return (
-    <>
-      {/* ===== Desktop split layout (≥ 1024px) ===== */}
-      {isDesktop ? (
-        <SplitLayout firstMinutePhase={firstMinutePhase} />
-      ) : (
-        <OverlayLayout
-          isMobile={isMobile}
-          chatExpanded={chatExpanded}
-          kbOffset={kbOffset}
-          menuOpen={menuOpen}
-          menuClosing={menuClosing}
-          showCreditsBadge={showCreditsBadge}
-          memoryOpen={memoryOpen}
-          aboutOpen={aboutOpen}
-          toggleChat={toggleChat}
-          collapseChat={collapseChat}
-          openMenu={openMenu}
-          closeMenu={closeMenu}
-          openMemory={openMemory}
-          openAbout={openAbout}
-          handleMenuKeyDown={handleMenuKeyDown}
-          handleExpandKeyDown={handleExpandKeyDown}
-          hamburgerRef={hamburgerRef}
-          menuPanelRef={menuPanelRef}
-          firstMinutePhase={firstMinutePhase}
-        />
-      )}
-
-      {/* ===== Layer 99: 快捷键帮助浮层 (shared across both layouts) ===== */}
-      {shortcutsOpen && (
-        <SectionErrorBoundary name="ShortcutsOverlay">
-          <Suspense fallback={null}>
-            <ShortcutsOverlay open={shortcutsOpen} onClose={closeShortcuts} />
-          </Suspense>
-        </SectionErrorBoundary>
-      )}
-      {aboutOpen && (
-        <SectionErrorBoundary name="AboutOverlay">
-          <Suspense fallback={null}>
-            <AboutOverlay open={aboutOpen} onClose={closeAbout} />
-          </Suspense>
-        </SectionErrorBoundary>
-      )}
-      {memoryOpen && (
-        <SectionErrorBoundary name="MemoryPanel">
-          <Suspense fallback={null}>
-            <MemoryPanel open={memoryOpen} onClose={closeMemory} />
-          </Suspense>
-        </SectionErrorBoundary>
-      )}
-    </>
-  );
-}
 
 /**
  * 隐藏 index.html 中的 #loading-fallback。
@@ -543,47 +155,18 @@ function useCheckoutCallback() {
   }, [refreshUser, t]);
 }
 
-/** 主应用（包含 Landing + 所有 Providers） */
+/** 主应用 — Conversation as Space */
 function MainApp() {
   const { t, i18n } = useTranslation();
   const { isAuthenticated, isLoading } = useAuthState();
+  const [showAuth, setShowAuth] = useState(false);
   const currentLocale = (SUPPORTED_LANGUAGES as readonly string[]).includes(i18n.language)
     ? LOCALE_MAP[i18n.language as SupportedLanguage]
     : "en_US";
-  const [showLanding, setShowLanding] = useState(() => {
-    return !sessionStorage.getItem(SS_VISITED);
-  });
-  const [landingExiting, setLandingExiting] = useState(false);
   useCheckoutCallback();
-
-  const landingTimerRef = useRef<ReturnType<typeof setTimeout>>();
-  useEffect(() => () => { clearTimeout(landingTimerRef.current); }, []);
-
-  const handleLandingComplete = useCallback(() => {
-    setLandingExiting(true);
-    sessionStorage.setItem(SS_VISITED, 'true');
-    window.dispatchEvent(new Event('ling-landing-complete'));
-    landingTimerRef.current = setTimeout(() => {
-      setShowLanding(false);
-    }, 700);
-  }, []);
-
-  // Determine which view to show after overture:
-  // - Authenticated → MainContent (SplitLayout/OverlayLayout)
-  // - Unauthenticated (and not loading) → WitnessMode
-  const showWitnessMode = !isAuthenticated && !isLoading && !showLanding;
-
-  // Crossfade between Witness Mode and Console Mode.
-  // On auth state change (login/logout without full reload), the old view fades
-  // out over 400ms, then the new view fades in over 400ms (mode="wait" style).
-  // OAuth redirects cause a full page reload so the crossfade won't play there,
-  // but it covers: logout, future non-redirect auth flows, and SSR hydration.
-  const modeKey = showWitnessMode ? 'witness' : 'console';
-  const { renderKey: activeMode, style: crossfadeStyle } = useCrossfade(modeKey);
 
   return (
     <>
-      <BreathingBackground />
       <Helmet>
         <title>{t("seo.homeTitle")}</title>
         <meta name="description" content={t("seo.homeDesc")} />
@@ -601,32 +184,19 @@ function MainApp() {
       <HreflangTags canonicalUrl="https://ling.sngxai.com/" />
       <StructuredData />
       <Providers>
-        <div style={crossfadeStyle}>
-          {activeMode === 'witness' ? (
-            /* Unauthenticated: Witness Mode — silhouette + daily statement + CTA */
-            <Suspense fallback={null}>
-              <WitnessMode />
-            </Suspense>
-          ) : (
-            <div style={landingExiting || !showLanding ? S_MAIN_VISIBLE : S_MAIN_HIDDEN}>
-              <MainContent />
-            </div>
-          )}
-        </div>
-
-        {showLanding && (
-          <CinematicOverture onComplete={handleLandingComplete} />
+        <SpatialLayout />
+        {!isAuthenticated && !isLoading && (
+          <div style={S_AUTH_OVERLAY}>
+            <button
+              style={S_AUTH_CTA}
+              onClick={() => setShowAuth(true)}
+              data-voice="world"
+            >
+              Sign in to talk to Ling →
+            </button>
+          </div>
         )}
-
-        {isAuthenticated && (
-          <SectionErrorBoundary name="BillingOverlays">
-            <Suspense fallback={null}>
-              <PricingOverlay />
-              <InsufficientCreditsModal />
-            </Suspense>
-          </SectionErrorBoundary>
-        )}
-        {/* PersonalizedOnboarding removed — Ling's first chat message is the onboarding */}
+        <OAuthModal open={showAuth} onClose={() => setShowAuth(false)} />
       </Providers>
 
       <NetworkStatusBanner />

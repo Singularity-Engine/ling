@@ -316,6 +316,32 @@
   --ling-border: rgba(255, 255, 255, 0.08);
   --ling-focus-ring: var(--ling-accent-50);
   --ling-focus-ring-component: var(--ling-accent-lighter);
+
+  /* ── C.spatial: Conversation as Space ── */
+
+  /* 记忆淡化层级 — opacity + scale 双重递减 */
+  --ling-spatial-fade-1: 1;
+  --ling-spatial-fade-2: 0.7;
+  --ling-spatial-fade-3: 0.45;
+  --ling-spatial-fade-4: 0.2;
+  --ling-spatial-scale-1: 1;
+  --ling-spatial-scale-2: 0.98;
+  --ling-spatial-scale-3: 0.95;
+  --ling-spatial-scale-4: 0.92;
+
+  /* 空间间距递减 */
+  --ling-spatial-gap-near: 80px;
+  --ling-spatial-gap-mid: 40px;
+  --ling-spatial-gap-far: 20px;
+
+  /* 灵的声音字号 — 大字、诗意、空间感 */
+  --ling-spatial-font-ling: clamp(28px, 3.5vw, 40px);
+  --ling-spatial-font-user: 15px;
+  --ling-spatial-font-old: clamp(18px, 2vw, 24px);
+
+  /* 记忆闪光色 */
+  --ling-sparkle: rgba(139, 92, 246, 0.6);
+  --ling-sparkle-glow: 0 0 12px rgba(139, 92, 246, 0.3);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -394,15 +420,8 @@
   --ling-input-counter: rgba(0, 0, 0, 0.3);
 }
 
-/* ── Voice selectors (design doc §5: 两种声音) ── */
-
-[data-voice="ling"] {
-  font-family: var(--ling-font-ling);
-}
-
-[data-voice="world"] {
-  font-family: var(--ling-font-world);
-}
+/* ── Voice selectors (design doc §5: 两种声音) ──
+   Complete rules in spatial.css; only tabular-nums utility here. */
 
 [data-voice="ling"] .numeric,
 .tabular-nums {

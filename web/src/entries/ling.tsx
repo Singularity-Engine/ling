@@ -2,6 +2,7 @@
 import { createRoot } from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
 import '../styles/tokens.css';
+import '../styles/spatial.css';
 import '../index.css';
 import 'highlight.js/styles/atom-one-dark.min.css';
 import App from '../App';
