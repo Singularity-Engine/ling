@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { apiClient } from '@/services/api-client';
 import { trackEvent } from '@/utils/analytics';
+import { useAuthActions } from '@/context/AuthContext';
 
 export function OAuthCallbackPage() {
   const { t } = useTranslation();
   const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const { refreshUser } = useAuthActions();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -32,9 +35,9 @@ export function OAuthCallbackPage() {
     trackEvent("auth_completed");
     // Clear tokens from URL to prevent leakage via browser history / Referer header
     window.history.replaceState({}, '', '/oauth/callback');
-    // Full-page reload to re-initialize AuthProvider with new tokens
-    window.location.href = '/';
-  }, [t]);
+    // Fetch user profile then navigate via React Router (no full-page reload)
+    refreshUser().finally(() => navigate('/', { replace: true }));
+  }, [t, navigate, refreshUser]);
 
   if (error) {
     return (
