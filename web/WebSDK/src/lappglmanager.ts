@@ -47,7 +47,7 @@ export class LAppGlManager {
       return;
     }
 
-     gl = canvas.getContext("webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl") as WebGLRenderingContext | null;
+     gl = canvas.getContext("webgl2", { alpha: true, premultipliedAlpha: true }) || canvas.getContext("webgl", { alpha: true, premultipliedAlpha: true }) || canvas.getContext("experimental-webgl", { alpha: true, premultipliedAlpha: true }) as WebGLRenderingContext | null;
 
      if (!gl) {
        // gl初期化失敗
