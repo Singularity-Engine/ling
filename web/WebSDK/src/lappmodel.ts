@@ -609,6 +609,14 @@ export class LAppModel extends CubismUserModel {
     // translateRelative operates in the scaled coordinate space.
     this._modelMatrix.translateRelative(-centerX, -centerY);
 
+    // Web desktop layout: shift model to the left side of the viewport.
+    // In view space, x ranges from -1 (left) to +1 (right).
+    // Shift left by 0.5 so the model appears on the left ~25% of the canvas.
+    if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+      const arr = this._modelMatrix.getArray();
+      arr[12] -= 0.5;
+    }
+
     console.log(
       `[BBox] applied: fitScale=${fitScale.toFixed(4)} viewAspect=${viewAspect.toFixed(4)}`
     );
