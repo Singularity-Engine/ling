@@ -54,6 +54,9 @@ export default defineConfig(({ mode }) => ({
         // Force new SW to activate immediately — don't wait for old tabs to close
         skipWaiting: true,
         clientsClaim: true,
+        // Don't intercept navigation to /api/ paths — they must reach nginx proxy
+        // (critical for OAuth callbacks like /api/auth/oauth/google/callback)
+        navigateFallbackDenylist: [/^\/api\//],
         // Precache built assets (JS/CSS/HTML)
         globPatterns: ['**/*.{js,css,html,svg,ico,woff2}'],
         // Don't precache large binary files — they'll be cached at runtime

@@ -286,10 +286,24 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
       setMicOn(true);
     } catch (error) {
       log.error('Failed to start VAD:', error);
+      const errMsg = error instanceof Error ? error.message : String(error);
+      // Detect common failure causes and give actionable feedback
+      const isMicDenied = errMsg.includes('Permission denied')
+        || errMsg.includes('NotAllowedError')
+        || errMsg.includes('not allowed');
+      const isNoDevice = errMsg.includes('NotFoundError')
+        || errMsg.includes('Requested device not found');
+      let description = errMsg;
+      if (isMicDenied) {
+        description = 'Microphone permission denied. Please allow microphone access in browser settings.';
+      } else if (isNoDevice) {
+        description = 'No microphone found. Please connect a microphone and try again.';
+      }
       toaster.create({
         title: t('error.failedStartVAD'),
+        description,
         type: 'error',
-        duration: 4000,
+        duration: 8000,
       });
     }
   }, [t]);
