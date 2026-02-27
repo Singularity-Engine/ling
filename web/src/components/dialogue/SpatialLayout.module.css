@@ -14,21 +14,25 @@
 
 .stage {
   flex: 1;
-  display: flex;
   min-height: 0;
   position: relative;
 }
 
-/* Desktop: Live2D left + dialogue right */
+/* Live2D: full-screen canvas behind everything */
 .character {
-  flex: 0 0 40%;
-  max-width: 600px;
-  position: relative;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   overflow: hidden;
 }
 
+/* Dialogue: floats on right, transparent over Live2D */
 .dialogue {
-  flex: 1;
+  position: relative;
+  z-index: 1;
+  width: 55%;
+  height: 100%;
+  margin-left: auto;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -54,7 +58,8 @@
 }
 
 @media (max-width: 768px) {
-  .stage {
-    flex-direction: column;
+  .dialogue {
+    width: 100%;
+    margin-left: 0;
   }
 }
