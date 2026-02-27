@@ -6,7 +6,7 @@ import i18next from "i18next";
 
 import { lazyRetry } from "./utils/lazy-retry";
 
-import { BrandReveal } from "./components/landing/BrandReveal";
+import { CinematicOverture } from "./components/landing/CinematicOverture";
 
 // Lazy-loaded: Witness Mode for unauthenticated visitors (after overture completes).
 const WitnessMode = lazyRetry(() => import("./components/witness/WitnessMode").then(m => ({ default: m.WitnessMode })));
@@ -615,7 +615,7 @@ function MainApp() {
         </div>
 
         {showLanding && (
-          <BrandReveal onComplete={handleLandingComplete} />
+          <CinematicOverture onComplete={handleLandingComplete} />
         )}
 
         {isAuthenticated && (

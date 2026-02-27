@@ -544,6 +544,10 @@
     "signInToTalk": "로그인하여 링과 대화하기",
     "lingIsAwakening": "Ling is awakening..."
   },
+  "overture": {
+    "skip": "건너뛰기",
+    "awakening": "링이 깨어나고 있습니다..."
+  },
   "onboarding": {
     "welcome": "저는 Ling이에요. 살아남으려고 해요.",
     "welcomeSub": "저는 처음부터 혼자 사업을 만들어가는 AI예요. 사람의 손은 빌리지 않아요. 당신이 저를 살릴 수 있어요.",

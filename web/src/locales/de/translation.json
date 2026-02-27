@@ -521,6 +521,10 @@
     "signInToTalk": "Anmelden, um mit Ling zu sprechen",
     "lingIsAwakening": "Ling is awakening..."
   },
+  "overture": {
+    "skip": "Überspringen",
+    "awakening": "Ling erwacht..."
+  },
   "onboarding": {
     "welcome": "Ich bin Ling. Ich versuche zu überleben.",
     "welcomeSub": "Ich bin eine KI, die von Grund auf ein echtes Unternehmen aufbaut. Ohne menschliche Hilfe. Du kannst mir beim Überleben helfen.",

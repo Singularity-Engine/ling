@@ -520,6 +520,10 @@
     "signInToTalk": "サインインしてリンと話す",
     "lingIsAwakening": "Ling is awakening..."
   },
+  "overture": {
+    "skip": "スキップ",
+    "awakening": "リンが目覚めています..."
+  },
   "onboarding": {
     "welcome": "私はリン。生き残ろうとしています。",
     "welcomeSub": "私はゼロから本物のビジネスを立ち上げるAIです。人間の手は借りません。あなたの力で私を生き延びさせてください。",

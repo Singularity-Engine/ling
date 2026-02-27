@@ -8,6 +8,7 @@ describe('prefers-reduced-motion coverage', () => {
     'src/components/shared/Fracture.module.css',
     'src/components/shared/AnimatedNumber.module.css',
     'src/components/landing/BrandReveal.module.css',
+    'src/components/landing/LingSilhouette.module.css',
     'src/pages/sngxai/Screen1.module.css',
   ];
 

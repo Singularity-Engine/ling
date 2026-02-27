@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { memo, useRef, useEffect, useState, useCallback, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
+import { LingSilhouette } from "../landing/LingSilhouette";
 import { useLive2DConfig } from "@/context/Live2dConfigContext";
 import { useIpcHandlers } from "@/hooks/utils/use-ipc-handlers";
 import { useInterrupt } from "@/hooks/utils/use-interrupt";
@@ -148,12 +149,7 @@ export const Live2D = memo(
         {/* Loading state */}
         {showOverlay && (
           <div style={S_OVERLAY}>
-            <div aria-hidden="true" style={{
-              width: 32, height: 32, borderRadius: '50%',
-              border: '3px solid rgba(139,92,246,0.2)',
-              borderTopColor: '#8B5CF6',
-              animation: 'spin 0.8s linear infinite',
-            }} />
+            <LingSilhouette visible breathing />
             {showRetry && (
               <>
                 <p style={S_ERROR_TEXT}>{t("live2d.loadSlow", { defaultValue: "Ling is taking longer than usual." })}</p>
