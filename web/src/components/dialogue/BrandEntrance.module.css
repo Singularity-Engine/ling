@@ -1,0 +1,52 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--ling-z-overlay, 2000);
+  background: var(--ling-bg, #06000F);
+  transition: opacity 600ms ease-out;
+}
+.backdrop[data-phase="exiting"] { opacity: 0; }
+
+.brand {
+  font-family: var(--ling-font-ling);
+  font-size: clamp(48px, 10vw, 120px);
+  color: var(--ling-text-1);
+  letter-spacing: 1em;
+  opacity: 0;
+  transition: letter-spacing 800ms cubic-bezier(0.33, 1, 0.68, 1),
+              opacity 600ms ease-out;
+}
+.backdrop[data-phase="visible"] .brand,
+.backdrop[data-phase="exiting"] .brand {
+  letter-spacing: 0.05em;
+  opacity: 1;
+}
+
+/* P0-E: Skip button */
+.skip {
+  position: absolute;
+  bottom: var(--ling-space-6, 24px);
+  right: var(--ling-space-6, 24px);
+  background: none;
+  border: none;
+  color: var(--ling-text-3, rgba(255,255,255,0.35));
+  font-family: var(--ling-font-world, system-ui);
+  font-size: 13px;
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 200ms;
+  padding: 4px 8px;
+}
+.skip:hover { opacity: 0.8; }
+
+@media (prefers-reduced-motion: reduce) {
+  .brand {
+    letter-spacing: 0.05em;
+    opacity: 1;
+    transition: none;
+  }
+  .backdrop { transition: none; }
+}

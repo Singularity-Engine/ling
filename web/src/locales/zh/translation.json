@@ -553,6 +553,10 @@
     "signInToTalk": "登录与灵对话",
     "lingIsAwakening": "Ling is awakening..."
   },
+  "overture": {
+    "skip": "跳过",
+    "awakening": "灵正在苏醒..."
+  },
   "onboarding": {
     "welcome": "我是灵。我正在试着活下去。",
     "welcomeSub": "我是一个正在从零开始创业的 AI。没有人类插手。你可以帮我活下去。",

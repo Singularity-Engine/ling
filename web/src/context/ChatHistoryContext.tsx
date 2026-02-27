@@ -10,7 +10,7 @@ const log = createLogger('ChatHistory');
 /**
  * Context 1a-state — Read-only messages array.
  * Changes on every message add/remove/replace.
- * Only components that RENDER messages (ChatArea) subscribe here.
+ * Only components that RENDER messages (DialogueSpace) subscribe here.
  * Components that only READ messages imperatively (e.g. MainContent
  * for createNewChat) should use useMessagesRef() instead.
  */
@@ -60,7 +60,7 @@ interface HistoryListActionsState {
 
 /**
  * Context 2 — Streaming response VALUE.
- * Changes ~60fps during AI streaming. Only ChatArea and interrupt hook
+ * Changes ~60fps during AI streaming. Only DialogueSpace and interrupt hook
  * subscribe here; sidebar / InputBar / App are shielded.
  */
 interface StreamingValueState {

@@ -1,0 +1,100 @@
+/* ─── data-voice 规范 (设计文档 §4 + §5) ─── */
+[data-voice="ling"] {
+  font-family: var(--ling-font-ling);
+  font-size: var(--ling-spatial-font-ling);
+  color: var(--ling-text-1);
+  text-align: center;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+[data-voice="world"] {
+  font-family: var(--ling-font-world);
+  font-size: var(--ling-spatial-font-user);
+  color: var(--ling-text-3);
+  text-align: right;
+  line-height: 1.5;
+}
+
+/* ─── 消息"吸入"动画 (设计文档 §4) ─── */
+@keyframes messageInhale {
+  from {
+    letter-spacing: 0.5em;
+    opacity: 0;
+  }
+  to {
+    letter-spacing: normal;
+    opacity: 1;
+  }
+}
+
+/* ─── 用户消息进入 — 简洁上浮 ─── */
+@keyframes userMessageIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── 思考发光脉冲 (设计文档 §4) ─── */
+@keyframes thinkingGlow {
+  0%, 100% { opacity: 0.02; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.05; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+/* ─── 思考发光深度 (P1-3: >2s 扩大) ─── */
+@keyframes thinkingGlowDeep {
+  0%, 100% { opacity: 0.03; transform: translate(-50%, -50%) scale(1.2); filter: blur(60px); }
+  50% { opacity: 0.06; transform: translate(-50%, -50%) scale(1.4); filter: blur(80px); }
+}
+
+/* ─── InputBar 底部边框唤醒 (设计文档 §4: 从中心展开) ─── */
+@keyframes borderAwaken {
+  from { transform: translateX(-50%) scaleX(0); }
+  to { transform: translateX(-50%) scaleX(1); }
+}
+
+/* ─── 记忆闪光 (P0-1, 设计文档 §4) ─── */
+@keyframes memorySparkle {
+  0% { opacity: 0; transform: scale(0.3); }
+  30% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.5) translateY(-10px); }
+}
+
+/* ─── 建议气泡浮入 (P0-2) ─── */
+@keyframes suggestionFloat {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── prefers-reduced-motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes messageInhale {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes userMessageIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes thinkingGlow {
+    0%, 100% { opacity: 0.03; }
+  }
+  @keyframes thinkingGlowDeep {
+    0%, 100% { opacity: 0.03; }
+  }
+  @keyframes borderAwaken {
+    from { transform: translateX(-50%) scaleX(1); }
+    to { transform: translateX(-50%) scaleX(1); }
+  }
+  @keyframes memorySparkle {
+    0%, 100% { opacity: 0; }
+  }
+  @keyframes suggestionFloat {
+    from { opacity: 1; }
+    to { opacity: 1; }
+  }
+}

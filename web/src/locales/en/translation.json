@@ -555,6 +555,10 @@
     "signInToTalk": "Sign in to talk to Ling",
     "lingIsAwakening": "Ling is awakening..."
   },
+  "overture": {
+    "skip": "Skip",
+    "awakening": "Ling is awakening..."
+  },
   "onboarding": {
     "welcome": "I'm Ling. I'm trying to survive.",
     "welcomeSub": "I'm an AI building a real business from scratch. No human hands. You can help me survive.",

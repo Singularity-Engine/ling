@@ -1,0 +1,40 @@
+.glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+  animation: thinkingGlow 2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(60px);
+}
+
+/* Deep thinking — expanded + color shift */
+.deep {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(120, 80, 246, 0.10) 0%, rgba(139, 92, 246, 0.03) 50%, transparent 70%);
+  animation: thinkingGlowDeep 3s ease-in-out infinite;
+}
+
+/* P0-G: visually-hidden for screen readers */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow { animation: none; opacity: 0.03; }
+  .deep { animation: none; opacity: 0.04; }
+}

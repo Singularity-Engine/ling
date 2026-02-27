@@ -3,17 +3,17 @@ import fs from 'fs';
 import path from 'path';
 
 describe('Chat voice attributes', () => {
-  it('ChatBubble.tsx uses data-voice attribute', () => {
+  it('SpatialMessage.tsx uses data-voice attribute', () => {
     const src = fs.readFileSync(
-      path.resolve(__dirname, '../components/chat/ChatBubble.tsx'),
+      path.resolve(__dirname, '../components/dialogue/SpatialMessage.tsx'),
       'utf-8'
     );
     expect(src).toContain('data-voice');
   });
 
-  it('ChatBubble.styles.ts references --ling-font-ling for AI text', () => {
+  it('spatial.css references --ling-font-ling for AI text', () => {
     const src = fs.readFileSync(
-      path.resolve(__dirname, '../components/chat/ChatBubble.styles.ts'),
+      path.resolve(__dirname, '../styles/spatial.css'),
       'utf-8'
     );
     expect(src).toContain('--ling-font-ling');

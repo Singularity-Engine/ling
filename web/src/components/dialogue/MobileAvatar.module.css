@@ -1,0 +1,9 @@
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--ling-glass);
+  border: 1px solid var(--ling-glass-border);
+  flex-shrink: 0;
+}

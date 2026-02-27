@@ -1,0 +1,134 @@
+.message {
+  max-width: 720px;
+  padding: 0 var(--ling-space-4, 16px);
+  transition: opacity 600ms var(--ling-ease-default),
+              transform 600ms var(--ling-ease-default);
+  position: relative;
+}
+
+/* ── Ling's voice ── */
+.message[data-voice="ling"] {
+  margin-left: auto;
+  margin-right: auto;
+}
+.message[data-voice="ling"][data-animate="true"] {
+  animation: messageInhale 400ms cubic-bezier(0.33, 1, 0.68, 1) both;
+}
+/* Long messages: simpler fade instead of letter-spacing */
+.longMsg[data-voice="ling"][data-animate="true"] {
+  animation: userMessageIn 300ms var(--ling-ease-out-expo) both;
+}
+/* Latest message subtle glow */
+.message[data-voice="ling"][data-fade="1"] {
+  text-shadow: 0 0 40px rgba(250, 250, 250, 0.03);
+}
+
+/* ── User's voice ── */
+.message[data-voice="world"] {
+  margin-left: auto;
+  margin-right: 0;
+  max-width: 480px;
+  border-right: 1px solid rgba(139, 92, 246, 0.2);
+  padding-right: var(--ling-space-4, 16px);
+}
+.message[data-voice="world"][data-animate="true"] {
+  animation: userMessageIn 300ms var(--ling-ease-out-expo) both;
+}
+
+/* ── Memory fade + spatial scale ── */
+.message[data-fade="1"] { opacity: var(--ling-spatial-fade-1, 1); transform: scale(var(--ling-spatial-scale-1, 1)); }
+.message[data-fade="2"] { opacity: var(--ling-spatial-fade-2, 0.7); transform: scale(var(--ling-spatial-scale-2, 0.98)); }
+.message[data-fade="3"] { opacity: var(--ling-spatial-fade-3, 0.45); transform: scale(var(--ling-spatial-scale-3, 0.96)); }
+.message[data-fade="4"] { opacity: var(--ling-spatial-fade-4, 0.2); transform: scale(var(--ling-spatial-scale-4, 0.94)); }
+
+/* ── Gap tiers ── */
+.message[data-gap="near"] { margin-bottom: var(--ling-spatial-gap-near); }
+.message[data-gap="mid"]  { margin-bottom: var(--ling-spatial-gap-mid); }
+.message[data-gap="far"]  { margin-bottom: var(--ling-spatial-gap-far); }
+
+/* ── Old messages shrink ── */
+.message[data-old="true"] { font-size: var(--ling-spatial-font-old); }
+
+/* ── Timestamp ── */
+.timestamp {
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: var(--ling-text-3);
+  opacity: 0.3;
+  transition: opacity 300ms;
+  margin-top: var(--ling-space-1, 4px);
+  display: block;
+}
+.message:hover .timestamp { opacity: 0.5; }
+
+/* ── Streaming cursor ── */
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--ling-accent);
+  vertical-align: text-bottom;
+  animation: streamingCursor 1s ease-in-out infinite;
+}
+@keyframes streamingCursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ── Memory sparkle ── */
+.sparkleContainer {
+  position: absolute;
+  inset: -4px;
+  pointer-events: none;
+  overflow: visible;
+}
+.sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--ling-sparkle);
+  box-shadow: var(--ling-sparkle-glow);
+  animation: memorySparkle 600ms ease-out forwards;
+}
+.sparkle:nth-child(1) { top: 20%; right: -2px; animation-delay: 0ms; }
+.sparkle:nth-child(2) { top: 50%; left: -2px; animation-delay: 100ms; }
+.sparkle:nth-child(3) { bottom: 20%; right: 10%; animation-delay: 200ms; }
+.sparkle:nth-child(4) { top: 10%; left: 30%; animation-delay: 300ms; }
+
+/* ── Suggestion link ── */
+.suggestion {
+  display: inline-block;
+  margin-top: var(--ling-space-3, 12px);
+  font-family: var(--ling-font-world);
+  font-size: 13px;
+  color: var(--ling-accent);
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 12px 0;
+  min-height: var(--ling-touch-target, 44px);
+  letter-spacing: 0.02em;
+  animation: suggestionFloat 300ms ease-out both;
+  transition: opacity 200ms;
+}
+.suggestion:hover { opacity: 0.7; text-decoration: underline; }
+
+@media (prefers-reduced-motion: reduce) {
+  .message[data-animate="true"] { animation: none; opacity: 1; }
+  .message[data-voice="world"][data-animate="true"] { animation: none; opacity: 1; }
+  .longMsg[data-voice="ling"][data-animate="true"] { animation: none; opacity: 1; }
+  .cursor { animation: none; }
+  .sparkle { animation: none; opacity: 0; }
+  .suggestion { animation: none; }
+}
+
+@media (max-width: 768px) {
+  .message[data-voice="ling"] {
+    font-size: clamp(22px, 5vw, 28px);
+    line-height: 1.6;
+  }
+  .message[data-voice="world"] {
+    max-width: 100%;
+  }
+}
