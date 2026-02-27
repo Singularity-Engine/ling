@@ -105,7 +105,7 @@ export default defineConfig(({ mode }) => ({
   },
   root: __dirname,
   publicDir: path.join(__dirname, "public"),
-  base: "./",
+  base: "/",
   server: {
     port: 3001,
     host: '0.0.0.0',
