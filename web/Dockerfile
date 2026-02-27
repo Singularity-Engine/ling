@@ -13,31 +13,44 @@ FROM nginx:alpine
 
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# SPA fallback + static asset caching
+# Add WASM MIME type to nginx defaults
+RUN echo 'application/wasm wasm;' >> /etc/nginx/mime.types
+
+# SPA fallback + static asset caching + COOP/COEP for SharedArrayBuffer (VAD/ONNX)
 RUN cat > /etc/nginx/conf.d/default.conf <<'EOF'
 server {
   listen 3001;
   root /usr/share/nginx/html;
 
+  # SharedArrayBuffer requires COOP + COEP headers (needed by ONNX Runtime WASM for VAD)
+  add_header Cross-Origin-Opener-Policy "same-origin" always;
+  add_header Cross-Origin-Embedder-Policy "credentialless" always;
+
   # hashed assets — cache aggressively (1 year)
   location /assets/ {
     add_header Cache-Control "public, immutable, max-age=31536000";
+    add_header Cross-Origin-Opener-Policy "same-origin" always;
+    add_header Cross-Origin-Embedder-Policy "credentialless" always;
   }
 
   # service worker — never cache
   location = /sw.js {
     add_header Cache-Control "max-age=0, no-cache, must-revalidate";
+    add_header Cross-Origin-Opener-Policy "same-origin" always;
+    add_header Cross-Origin-Embedder-Policy "credentialless" always;
   }
 
   # SPA fallback — short cache for index.html
   location / {
     try_files $uri $uri/ /index.html;
     add_header Cache-Control "no-cache";
+    add_header Cross-Origin-Opener-Policy "same-origin" always;
+    add_header Cross-Origin-Embedder-Policy "credentialless" always;
   }
 
   # gzip
   gzip on;
-  gzip_types text/css application/javascript application/json image/svg+xml;
+  gzip_types text/css application/javascript application/json image/svg+xml application/wasm;
   gzip_min_length 256;
 }
 EOF
