@@ -1,0 +1,53 @@
+name: CI/CD
+
+on:
+  push:
+#    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: docker/setup-buildx-action@v3
+
+    - name: Build image
+      run: docker build -t ling-engine:latest .
+
+    - name: Test
+      run: |
+        docker run --rm ling-engine:latest ruff check .
+        docker run --rm ling-engine:latest pytest tests/ -v
+
+    - name: Save and deploy
+      run: |
+        docker save ling-engine:latest | gzip > ling-engine.tar.gz
+
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.1.0
+      with:
+        host: 34.46.252.119
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          docker stop ling-engine 2>/dev/null || true
+          docker rm ling-engine 2>/dev/null || true
+
+    - name: Copy image
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: 34.46.252.119
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: "ling-engine.tar.gz"
+        target: "~/"
+
+    - name: Start container
+      uses: appleboy/ssh-action@v1.1.0
+      with:
+        host: 34.46.252.119
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          docker load < ~/ling-engine.tar.gz
+          docker run -d --name ling-engine --restart unless-stopped -p 12393:12393 ling-engine:latest

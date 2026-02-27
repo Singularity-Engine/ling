@@ -1,0 +1,445 @@
+/**
+ * OverlayLayout — Mobile/tablet overlay mode
+ *
+ * Dependencies on global keyframes (defined in index.css):
+ *   - pageFadeIn    — used by .menuBackdrop entrance animation
+ *   - slideInRight  — used by .mobileMenu entrance animation
+ *   - slideOutRight — used by .mobileMenuClosing exit animation
+ *
+ * These are NOT scoped by CSS Modules (Vite default), so they resolve correctly.
+ */
+
+/* ── Root ── */
+.root {
+  position: relative;
+  height: 100dvh;
+  width: 100%;
+  background: var(--ling-bg-deep);
+  overflow: hidden;
+  padding-top: var(--ling-vitals-height-mobile);
+}
+
+/* ── Vitals Mini strip (mobile/tablet) ── */
+.vitalsMini {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  height: var(--ling-vitals-height-mobile);
+}
+
+/* ── Absolute layers ── */
+.layerStarfield {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  contain: strict;
+}
+
+.layerLive2d {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  contain: strict;
+}
+
+/* Bottom gradient: character feet fade into background */
+.layerLive2d::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(to top, var(--ling-bg-deep), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.layerEffects {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+}
+
+/* ── Ground gradient ── */
+.groundGradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 58dvh;
+  z-index: 22;
+  pointer-events: none;
+  contain: strict;
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    rgba(10, 0, 21, 0.02) 12%,
+    rgba(10, 0, 21, 0.07) 24%,
+    rgba(10, 0, 21, 0.16) 36%,
+    rgba(10, 0, 21, 0.28) 48%,
+    rgba(10, 0, 21, 0.42) 60%,
+    rgba(10, 0, 21, 0.56) 72%,
+    rgba(10, 0, 21, 0.68) 84%,
+    rgba(10, 0, 21, 0.78) 94%,
+    rgba(10, 0, 21, 0.82) 100%
+  );
+}
+
+/* ── Desktop/tablet toolbar ── */
+.toolbarDesktop {
+  position: absolute;
+  top: 52px;
+  right: var(--ling-space-3);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ling-space-3);
+}
+
+.toolbarGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--ling-space-2);
+  border-radius: var(--ling-radius-xl);
+  background: var(--ling-overlay-dim);
+  border: 1px solid var(--ling-border);
+  gap: var(--ling-space-2);
+}
+
+.toolbarDivider {
+  width: var(--ling-space-6);
+  height: 1px;
+  background: var(--ling-overlay-8);
+  margin: var(--ling-space-1) 0;
+}
+
+/* ── Mobile trigger buttons ── */
+.mobileTrigger {
+  position: absolute;
+  top: max(44px, calc(env(safe-area-inset-top, 0px) + 36px));
+  right: max(var(--ling-space-2), env(safe-area-inset-right, 0px));
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--ling-space-2);
+}
+
+/* ── Action buttons (shared base) ── */
+.actionBtn {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--ling-duration-normal) var(--ling-ease-default),
+              border-color var(--ling-duration-normal) var(--ling-ease-default),
+              transform var(--ling-duration-fast) var(--ling-ease-default),
+              opacity var(--ling-duration-fast) var(--ling-ease-default);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 0;
+  background: var(--ling-overlay-8);
+  border: 1px solid var(--ling-overlay-12);
+}
+
+.actionBtn[data-active="true"] {
+  background: var(--ling-purple-40);
+  border-color: var(--ling-purple-60);
+}
+
+.actionBtnDesktop {
+  width: 42px;
+  height: 42px;
+}
+
+.actionBtnMobile {
+  width: 44px;
+  height: 44px;
+}
+
+/* Hamburger button: relative position for badge overlay */
+.hamburgerBtn {
+  position: relative;
+}
+
+/* ── Mobile menu ── */
+.menuBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: var(--ling-overlay-backdrop);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: opacity var(--ling-duration-normal) var(--ling-ease-default);
+  touch-action: none;
+  animation: pageFadeIn 0.2s var(--ling-ease-enter);
+}
+
+.menuBackdropClosing {
+  opacity: 0;
+  animation: none;
+}
+
+.mobileMenu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(260px, 75vw);
+  z-index: 51;
+  background: var(--ling-surface-deep);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-left: 1px solid var(--ling-border);
+  display: flex;
+  flex-direction: column;
+  animation: slideInRight 0.25s var(--ling-ease-enter);
+  overscroll-behavior: contain;
+}
+
+.mobileMenuClosing {
+  animation: slideOutRight var(--ling-duration-normal) var(--ling-ease-exit) forwards;
+}
+
+.menuBadge {
+  position: absolute;
+  top: var(--ling-space-1);
+  right: var(--ling-space-1);
+  width: var(--ling-space-2);
+  height: var(--ling-space-2);
+  border-radius: 50%;
+  background: var(--ling-error);
+  border: 2px solid rgba(10, 0, 21, 0.8);
+  pointer-events: none;
+}
+
+.menuHeader {
+  display: flex;
+  justify-content: flex-end;
+  padding: max(48px, calc(env(safe-area-inset-top, 0px) + 40px)) var(--ling-space-3) var(--ling-space-2);
+}
+
+.menuStatus {
+  display: flex;
+  align-items: center;
+  gap: var(--ling-space-2);
+  padding: var(--ling-space-2) var(--ling-space-3);
+  flex-wrap: wrap;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: var(--ling-space-3);
+  padding: var(--ling-space-3) var(--ling-space-4);
+  border-radius: var(--ling-radius-md);
+  background: transparent;
+  border: none;
+  color: var(--ling-text-soft);
+  font-size: var(--ling-font-lg);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  transition: background var(--ling-duration-fast) var(--ling-ease-default);
+}
+
+.menuSep {
+  height: 1px;
+  background: var(--ling-border);
+  margin: var(--ling-space-1) var(--ling-space-3);
+}
+
+/* ── Chat area ── */
+.chatOuter {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  transform: translateY(calc(-1 * var(--kb-offset, 0px)));
+  transition: var(--kb-transition, transform var(--ling-duration-slow) var(--ling-ease-default));
+}
+
+.chatInner {
+  overflow: hidden;
+  position: relative;
+  pointer-events: auto;
+  transition: max-height var(--ling-duration-slow) var(--ling-ease-default),
+              opacity var(--ling-duration-slow) var(--ling-ease-default);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 25%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 25%);
+}
+
+/* will-change only when transitioning — removed permanent will-change to reduce GPU memory */
+.chatInner[data-state="closed"],
+.chatInner[data-state="desktop-open"],
+.chatInner[data-state="mobile-open"] {
+  will-change: auto;
+}
+
+.chatInner[data-state="closed"] {
+  max-height: 0;
+  opacity: 0;
+}
+
+.chatInner[data-state="desktop-open"] {
+  max-height: 40dvh;
+  opacity: 1;
+}
+
+.chatInner[data-state="mobile-open"] {
+  max-height: 50dvh;
+  opacity: 1;
+}
+
+.expandHandle {
+  pointer-events: auto;
+  display: flex;
+  justify-content: center;
+  padding: var(--ling-space-2) 0;
+  cursor: pointer;
+}
+
+/* ── Input section ── */
+.inputSection {
+  flex-shrink: 0;
+  pointer-events: auto;
+  position: relative;
+}
+
+.constellationWrap {
+  position: absolute;
+  bottom: calc(100% + var(--ling-space-3));
+  left: var(--ling-space-4);
+  z-index: 26;
+  pointer-events: auto;
+}
+
+.inputBarBg {
+  background: var(--ling-input-section-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--ling-purple-15);
+}
+
+/* ── Fallback states ── */
+.chatFallback {
+  padding: var(--ling-space-4);
+  text-align: center;
+  color: var(--ling-text-tertiary);
+  font-size: var(--ling-font-sm);
+}
+
+.inputFallback {
+  padding: var(--ling-space-3) var(--ling-space-4);
+  color: var(--ling-text-muted);
+  font-size: var(--ling-font-sm);
+  text-align: center;
+}
+
+/* ── Swipe hint (mobile first-use) ── */
+.swipeHint {
+  position: absolute;
+  bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+  left: 0;
+  right: 0;
+  z-index: 24;
+  text-align: center;
+  color: var(--ling-text-tertiary);
+  font-size: var(--ling-font-xs);
+  opacity: 0;
+  pointer-events: none;
+  animation: swipeHintFade 3s ease-in-out forwards;
+}
+
+@keyframes swipeHintFade {
+  0%   { opacity: 0; transform: translateY(4px); }
+  15%  { opacity: 0.6; transform: translateY(0); }
+  80%  { opacity: 0.6; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-4px); }
+}
+
+/* ── First-minute experience (overlay mode) ── */
+
+/* Greeting phase: gentle ground gradient pulse + vignette overlay */
+.root[data-first-minute="greeting"] .groundGradient {
+  animation: overlayGroundPulse 3s ease-in-out infinite;
+}
+
+/* Greeting phase: vignette effect for cinematic focus on character */
+.root[data-first-minute="greeting"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 21;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 70% 60% at 50% 45%,
+    transparent 30%,
+    rgba(10, 0, 21, 0.35) 100%
+  );
+  animation: vignetteIn var(--ling-duration-slow) var(--ling-ease-enter) both;
+}
+
+/* Greeting phase: toolbar hidden, fades in during inviting */
+.root[data-first-minute="loading"] .toolbarDesktop,
+.root[data-first-minute="loading"] .mobileTrigger,
+.root[data-first-minute="greeting"] .toolbarDesktop,
+.root[data-first-minute="greeting"] .mobileTrigger {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.root[data-first-minute="inviting"] .toolbarDesktop,
+.root[data-first-minute="inviting"] .mobileTrigger {
+  animation: toolbarFadeIn var(--ling-duration-slow) var(--ling-ease-enter) both;
+}
+
+/* Inviting phase: chat outer entrance */
+.root[data-first-minute="inviting"] .chatOuter {
+  animation: overlaySlideUp var(--ling-duration-slow) var(--ling-ease-enter) both;
+}
+
+/* Inviting phase: vignette dissolves */
+.root[data-first-minute="inviting"]::after,
+.root[data-first-minute="nudge"]::after,
+.root[data-first-minute="waiting"]::after,
+.root[data-first-minute="interacted"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 21;
+  pointer-events: none;
+  background: transparent;
+}
+
+@keyframes overlayGroundPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+@keyframes overlaySlideUp {
+  from { opacity: 0; transform: translateY(var(--ling-space-5)); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes vignetteIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes toolbarFadeIn {
+  from { opacity: 0; transform: translateY(calc(-1 * var(--ling-space-2))); }
+  to { opacity: 1; transform: translateY(0); }
+}

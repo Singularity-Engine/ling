@@ -1,0 +1,54 @@
+# Ling Engine Docker Image
+FROM python:3.11 AS base
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app \
+    HF_HOME=/app/models \
+    MODELSCOPE_CACHE=/app/models \
+    PIP_TIMEOUT=120
+
+WORKDIR /app
+
+# 分步安装依赖
+RUN pip install --no-cache-dir --upgrade pip
+
+# PyTorch CPU (单独指定源)
+RUN pip install --no-cache-dir torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+
+# 常规依赖
+RUN pip install --no-cache-dir \
+    fastapi uvicorn python-dotenv pydantic loguru PyYAML \
+    requests aiohttp websockets numpy scipy \
+    edge-tts pydub python-multipart httpx pysbd redis \
+    openai anthropic groq stripe \
+    python-jose[cryptography] bcrypt slowapi psycopg2-binary \
+    qdrant-client \
+    langchain langchain-community langchain-core langchain-openai langchain-anthropic \
+    langchain-mcp-adapters langgraph \
+    sherpa-onnx silero-vad soundfile chardet langdetect tqdm \
+    ruamel-yaml tomli
+
+# 安装 git (soul-fabric 通过 git 依赖安装)
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
+# GitHub token for private repo access (soul-memory-fabric)
+ARG GITHUB_TOKEN
+RUN if [ -n "$GITHUB_TOKEN" ]; then \
+        git config --global url."https://${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"; \
+    fi
+
+# 复制应用代码
+COPY . /app/
+
+# 安装包
+RUN pip install --no-cache-dir -e .
+
+# 清理 git credentials
+RUN git config --global --unset-all url.https://@github.com/.insteadof 2>/dev/null || true
+
+# 创建必要目录
+RUN mkdir -p /app/logs /app/chat_history /app/cache /app/affinity_data /app/models
+
+EXPOSE 12393
+
+CMD ["python3", "run_server.py"]

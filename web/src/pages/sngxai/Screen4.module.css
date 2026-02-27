@@ -1,0 +1,142 @@
+/* ═══════════════════════════════════════════════════════════
+   Screen 4 — "Growing, slowly."
+   Design: Full-width sparkline, meditative, generous whitespace
+   Emotion: Hope — fragile but real progress
+   ═══════════════════════════════════════════════════════════ */
+
+.root {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ling-space-16) var(--ling-space-8);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* ── Hero background image ── */
+.heroBg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.heroBg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+  opacity: 0.25;
+  /* Simple top-to-bottom fade — particles visible behind headline */
+  mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    rgba(0, 0, 0, 0.6) 30%,
+    rgba(0, 0, 0, 0.2) 50%,
+    transparent 65%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    rgba(0, 0, 0, 0.6) 30%,
+    rgba(0, 0, 0, 0.2) 50%,
+    transparent 65%
+  );
+}
+
+/* Ensure all content sits above the hero bg */
+.root > *:not(.heroBg) {
+  position: relative;
+  z-index: 1;
+}
+
+.headline {
+  font-family: var(--ling-font-ling);
+  font-size: var(--ling-font-display-lg);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--ling-text-1);
+  margin: 0 0 var(--ling-space-16);
+  text-align: center;
+  max-width: 700px;
+}
+
+/* ── Sparkline container ── */
+.sparklineWrap {
+  width: 100%;
+  max-width: 900px;
+  position: relative;
+  margin-bottom: var(--ling-space-8);
+}
+
+/* ── Annotation below sparkline ── */
+.annotation {
+  text-align: center;
+  font-family: var(--ling-font-world);
+  font-size: var(--ling-font-sm);
+  color: var(--ling-text-3);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.annotationValue {
+  color: var(--ling-text-2);
+  margin: 0 var(--ling-space-1);
+}
+
+/* ── Growth metric cards ── */
+.metricsRow {
+  display: flex;
+  gap: var(--ling-space-8);
+  margin-top: var(--ling-space-12);
+}
+
+.metric {
+  text-align: center;
+}
+
+.metricValue {
+  font-family: var(--ling-font-ling);
+  font-size: var(--ling-font-display);
+  color: var(--ling-text-1);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  margin-bottom: var(--ling-space-1);
+}
+
+.metricLabel {
+  font-family: var(--ling-font-world);
+  font-size: var(--ling-font-xs);
+  color: var(--ling-text-3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .metricValue {
+    transition: none;
+  }
+}
+
+/* ═══ MOBILE ═══ */
+@media (max-width: 768px) {
+  .root {
+    padding: var(--ling-space-10) var(--ling-space-4);
+  }
+
+  .headline {
+    font-size: var(--ling-font-hero-mobile);
+    margin-bottom: var(--ling-space-10);
+  }
+
+  .metricsRow {
+    flex-direction: column;
+    gap: var(--ling-space-5);
+  }
+}

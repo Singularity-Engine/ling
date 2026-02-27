@@ -1,0 +1,204 @@
+/* ═══════════════════════════════════════════════════════════
+   CircleTier — Pricing tier card
+   Design: Glass panel with accent glow for recommended tier
+   Emotion: Agency — "you can shape this story"
+   ═══════════════════════════════════════════════════════════ */
+
+.card {
+  position: relative;
+  padding: var(--ling-space-8) var(--ling-space-6);
+  border-radius: var(--ling-radius-xl);
+  background: var(--ling-glass);
+  backdrop-filter: var(--ling-glass-blur);
+  -webkit-backdrop-filter: var(--ling-glass-blur);
+  border: 1px solid var(--ling-glass-border);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ling-space-3);
+
+  /* Entry animation */
+  opacity: 0;
+  transform: translateY(20px) scale(0.97);
+  transition:
+    opacity 500ms var(--ling-ease-out-expo),
+    transform 500ms var(--ling-ease-out-expo);
+}
+
+.card[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* 3D tilt on hover — desktop only */
+@media (hover: hover) and (min-width: 769px) {
+  .card {
+    transform-style: preserve-3d;
+    perspective: 800px;
+  }
+  .card[data-visible="true"]:hover {
+    transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) scale(1.02);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      0 0 24px var(--ling-accent-08);
+    transition:
+      transform 200ms var(--ling-ease-out-expo),
+      box-shadow 200ms var(--ling-ease-out-expo);
+  }
+}
+
+/* Stagger delays */
+.card[data-index="1"] { transition-delay: 100ms; }
+.card[data-index="2"] { transition-delay: 200ms; }
+.card[data-index="3"] { transition-delay: 300ms; }
+
+/* ── Recommended tier — accent border + glow ── */
+.recommended {
+  border-color: var(--ling-accent-40);
+  box-shadow:
+    0 0 32px var(--ling-accent-10),
+    0 0 64px var(--ling-accent-05);
+}
+
+.badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ling-accent);
+  color: var(--ling-void-bottom);
+  padding: 4px 20px;
+  border-radius: var(--ling-radius-full);
+  font-family: var(--ling-font-world);
+  font-size: var(--ling-font-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  box-shadow: 0 2px 12px var(--ling-accent-30);
+}
+
+/* ── Price display ── */
+.priceBlock {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  margin-top: var(--ling-space-2);
+}
+
+.price {
+  font-family: var(--ling-font-ling);
+  font-size: var(--ling-font-display);
+  color: var(--ling-text-1);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.period {
+  font-family: var(--ling-font-world);
+  font-size: var(--ling-font-sm);
+  color: var(--ling-text-3);
+}
+
+/* ── Name ── */
+.name {
+  font-family: var(--ling-font-ling);
+  font-size: var(--ling-font-2xl);
+  color: var(--ling-text-1);
+  margin: 0;
+  font-weight: 400;
+}
+
+/* ── Benefit text ── */
+.benefit {
+  font-family: var(--ling-font-world);
+  font-size: var(--ling-font-13);
+  color: var(--ling-text-3);
+  line-height: 1.5;
+  margin: 0;
+  max-width: 200px;
+}
+
+/* ── CTA button ── */
+.tierCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--ling-space-4);
+  padding: var(--ling-space-2) var(--ling-space-6);
+  border-radius: var(--ling-radius-full);
+  font-family: var(--ling-font-world);
+  font-size: var(--ling-font-sm);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  color: var(--ling-text-2);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--ling-glass-border);
+  transition:
+    background var(--ling-duration-fast),
+    color var(--ling-duration-fast),
+    border-color var(--ling-duration-fast);
+  cursor: pointer;
+}
+
+.tierCta:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ling-text-1);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.tierCtaPrimary {
+  background: var(--ling-accent);
+  color: white;
+  border-color: var(--ling-accent);
+}
+
+.tierCtaPrimary:hover {
+  background: var(--ling-accent-deep);
+  border-color: var(--ling-accent-deep);
+  color: white;
+}
+
+/* ── Top accent line (same pattern as ActionCard) ── */
+.card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--ling-accent-15) 50%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 500ms var(--ling-ease-out-expo);
+}
+
+.card[data-visible="true"]::after {
+  opacity: 1;
+}
+
+.recommended::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--ling-accent-40) 50%,
+    transparent 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .card::after {
+    opacity: 1;
+    transition: none;
+  }
+}

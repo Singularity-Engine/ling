@@ -1,0 +1,32 @@
+.root {
+  display: flex;
+  align-items: center;
+  gap: var(--ling-space-3, 12px);
+  width: 100%;
+  max-width: 320px;
+}
+
+.track {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: var(--ling-radius-full, 9999px);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background: var(--ling-accent, #8B5CF6);
+  border-radius: inherit;
+  transition: width 1s var(--ling-ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1));
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
+}
+
+.label {
+  font-family: var(--ling-font-world, system-ui, sans-serif);
+  font-size: var(--ling-font-xs, 12px);
+  color: var(--ling-text-3, #71717A);
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  white-space: nowrap;
+}

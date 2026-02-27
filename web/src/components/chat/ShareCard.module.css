@@ -1,0 +1,247 @@
+/* ShareCard — Share message as branded image card */
+
+/* ── Action menu (bottom sheet) ── */
+.actionMenu {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--ling-surface-deep);
+  border-top: 1px solid var(--ling-purple-25);
+  border-radius: var(--ling-radius-lg) var(--ling-radius-lg) 0 0;
+  padding: var(--ling-space-4) var(--ling-space-4) max(var(--ling-space-4), env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: var(--ling-space-2);
+  animation: shareMenuSlideUp 0.25s var(--ling-ease-enter);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.actionMenuBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: rgba(0, 0, 0, 0.5);
+  animation: overlayFadeIn 0.2s ease-out;
+}
+
+.actionMenuItem {
+  display: flex;
+  align-items: center;
+  gap: var(--ling-space-3);
+  padding: var(--ling-space-3) var(--ling-space-4);
+  border: none;
+  border-radius: var(--ling-radius-md);
+  background: transparent;
+  color: var(--ling-text-secondary);
+  font-size: var(--ling-font-md);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  transition: background var(--ling-duration-fast) var(--ling-ease-default);
+  min-height: 44px;
+}
+
+.actionMenuItem:hover {
+  background: var(--ling-surface);
+}
+
+.actionMenuItem:active {
+  background: var(--ling-surface-hover);
+}
+
+.actionMenuCancel {
+  composes: actionMenuItem;
+  justify-content: center;
+  color: var(--ling-text-dim);
+  margin-top: var(--ling-space-2);
+  border-top: 1px solid var(--ling-surface-border);
+  border-radius: 0;
+  padding-top: var(--ling-space-4);
+}
+
+/* ── Share card preview ── */
+.cardPreview {
+  position: fixed;
+  inset: 0;
+  z-index: 101;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ling-space-4);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: overlayFadeIn 0.3s ease-out;
+  padding: var(--ling-space-6);
+}
+
+.cardCanvas {
+  max-width: min(360px, calc(100vw - 48px));
+  border-radius: var(--ling-radius-lg);
+  box-shadow: var(--ling-shadow-lg);
+}
+
+.cardImage {
+  width: min(360px, calc(100vw - 48px));
+  aspect-ratio: 3 / 4; /* matches canvas 720×960 */
+  border-radius: var(--ling-radius-lg);
+  box-shadow: var(--ling-shadow-lg);
+}
+
+.cardActions {
+  display: flex;
+  gap: var(--ling-space-3);
+}
+
+.cardActionBtn {
+  padding: var(--ling-space-3) var(--ling-space-6);
+  border-radius: var(--ling-radius-full);
+  font-size: var(--ling-font-md);
+  cursor: pointer;
+  border: none;
+  transition: background var(--ling-duration-fast) var(--ling-ease-default),
+              transform 0.12s ease;
+  font-family: inherit;
+  min-height: 44px;
+}
+
+.cardActionBtn:active {
+  transform: scale(0.96);
+}
+
+.cardSaveBtn {
+  composes: cardActionBtn;
+  background: var(--ling-purple-50);
+  color: var(--ling-text-primary);
+}
+
+.cardSaveBtn:hover {
+  background: var(--ling-purple-60);
+}
+
+.cardShareBtn {
+  composes: cardActionBtn;
+  background: var(--ling-surface);
+  color: var(--ling-text-secondary);
+  border: 1px solid var(--ling-surface-border);
+}
+
+.cardShareBtn:hover {
+  background: var(--ling-surface-hover);
+}
+
+.cardCloseBtn {
+  position: absolute;
+  top: max(var(--ling-space-4), env(safe-area-inset-top));
+  right: var(--ling-space-4);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: var(--ling-text-dim);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--ling-duration-fast);
+}
+
+.cardCloseBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Privacy warning (confirmation dialog) ── */
+.privacyWarning {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 102;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ling-space-3);
+  padding: var(--ling-space-4) var(--ling-space-4) max(var(--ling-space-4), env(safe-area-inset-bottom));
+  background: var(--ling-surface-deep);
+  border-top: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: var(--ling-radius-lg) var(--ling-radius-lg) 0 0;
+  font-size: var(--ling-font-sm);
+  color: var(--ling-warning);
+  line-height: 1.5;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  animation: shareMenuSlideUp 0.25s var(--ling-ease-enter);
+}
+
+.privacyActions {
+  display: flex;
+  gap: var(--ling-space-2);
+  margin-top: var(--ling-space-1);
+}
+
+.privacyConfirmBtn {
+  flex: 1;
+  padding: var(--ling-space-2) var(--ling-space-4);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: var(--ling-radius-md);
+  background: rgba(251, 191, 36, 0.15);
+  color: var(--ling-warning);
+  font-size: var(--ling-font-sm);
+  font-family: inherit;
+  cursor: pointer;
+  min-height: 44px;
+  transition: background var(--ling-duration-fast);
+}
+
+.privacyConfirmBtn:hover {
+  background: rgba(251, 191, 36, 0.25);
+}
+
+.privacyCancelBtn {
+  flex: 1;
+  padding: var(--ling-space-2) var(--ling-space-4);
+  border: 1px solid var(--ling-surface-border);
+  border-radius: var(--ling-radius-md);
+  background: transparent;
+  color: var(--ling-text-dim);
+  font-size: var(--ling-font-sm);
+  font-family: inherit;
+  cursor: pointer;
+  min-height: 44px;
+  transition: background var(--ling-duration-fast);
+}
+
+.privacyCancelBtn:hover {
+  background: var(--ling-surface);
+}
+
+/* ── Generating state ── */
+.generating {
+  display: flex;
+  align-items: center;
+  gap: var(--ling-space-2);
+  color: var(--ling-text-dim);
+  font-size: var(--ling-font-sm);
+}
+
+/* ── Generation error state ── */
+.genError {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ling-space-3);
+  color: var(--ling-error, #f87171);
+  font-size: var(--ling-font-sm);
+  text-align: center;
+  animation: overlayFadeIn 0.2s ease-out;
+}
+
+@keyframes shareMenuSlideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}

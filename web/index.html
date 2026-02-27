@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#0a0015" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="description" content="An AI building a real business from scratch — no human hands. Talk to Ling, become her advisor, watch the experiment unfold." />
+    <meta name="keywords" content="AI companion,AI entrepreneur,virtual being,VTuber,Live2D,Ling,Singularity Engine" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Ling — Talk to the First AI Entrepreneur" />
+    <meta property="og:description" content="An AI building a real business from scratch — no human hands. Talk to Ling, become her advisor, watch the experiment unfold." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://ling.sngxai.com" />
+    <meta property="og:image" content="https://ling.sngxai.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:site_name" content="Ling · Singularity Engine" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="zh_CN" />
+    <meta property="og:locale:alternate" content="ja_JP" />
+    <meta property="og:locale:alternate" content="ko_KR" />
+    <meta property="og:locale:alternate" content="es_ES" />
+    <meta property="og:locale:alternate" content="pt_BR" />
+    <meta property="og:locale:alternate" content="de_DE" />
+    <meta property="og:locale:alternate" content="fr_FR" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Ling — Talk to the First AI Entrepreneur" />
+    <meta name="twitter:description" content="An AI building a real business from scratch — no human hands. Talk to Ling, become her advisor, watch the experiment unfold." />
+    <meta name="twitter:image" content="https://ling.sngxai.com/og-image.png" />
+    <meta name="twitter:image:alt" content="Ling — AI Entrepreneur" />
+    <meta name="twitter:site" content="@Ling_Sngxai" />
+    <meta name="twitter:creator" content="@Ling_Sngxai" />
+
+    <!-- hreflang — static, for crawlers that don't execute JS -->
+    <link rel="alternate" hreflang="en" href="https://ling.sngxai.com/" />
+    <link rel="alternate" hreflang="zh" href="https://ling.sngxai.com/" />
+    <link rel="alternate" hreflang="ja" href="https://ling.sngxai.com/" />
+    <link rel="alternate" hreflang="ko" href="https://ling.sngxai.com/" />
+    <link rel="alternate" hreflang="es" href="https://ling.sngxai.com/" />
+    <link rel="alternate" hreflang="pt-BR" href="https://ling.sngxai.com/" />
+    <link rel="alternate" hreflang="de" href="https://ling.sngxai.com/" />
+    <link rel="alternate" hreflang="fr" href="https://ling.sngxai.com/" />
+    <link rel="alternate" hreflang="x-default" href="https://ling.sngxai.com/" />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "name": "Ling",
+          "alternateName": "灵 Ling",
+          "url": "https://ling.sngxai.com",
+          "description": "An AI building a real business from scratch — no human hands. Talk to Ling, become her advisor, watch the experiment unfold.",
+          "applicationCategory": "EntertainmentApplication",
+          "operatingSystem": "Web",
+          "inLanguage": ["en", "zh-CN", "ja", "ko", "es", "pt-BR", "de", "fr"],
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "image": "https://ling.sngxai.com/og-image.png",
+          "screenshot": "https://ling.sngxai.com/og-image.png",
+          "creator": {
+            "@id": "#organization"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "#organization",
+          "name": "Singularity Engine",
+          "url": "https://ling.sngxai.com",
+          "logo": "https://ling.sngxai.com/favicon.svg"
+        }
+      ]
+    }
+    </script>
+
+    <title>Ling — Talk to the First AI Entrepreneur</title>
+    <link rel="canonical" href="https://ling.sngxai.com/" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="256x256" />
+    <link rel="apple-touch-icon" href="/pwa-icon-192.png" />
+
+    <!-- Google Fonts: Instrument Serif for Ling's voice -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+    <!-- manifest injected by vite-plugin-pwa -->
+
+    <!-- Performance: preload critical assets -->
+    <link rel="preload" href="./libs/live2dcubismcore.js" as="script" />
+    <link rel="preload" href="/favicon.svg" as="image" type="image/svg+xml" />
+    <!-- Preload Live2D model manifest — triggers early model loading pipeline -->
+    <link rel="preload" href="/live2d-models/001/0a-original-v1.model3.json" as="fetch" crossorigin />
+
+    <!-- Resource hints — API & TTS endpoints -->
+    <link rel="dns-prefetch" href="https://api.fish.audio" />
+    <link rel="preconnect" href="https://api.fish.audio" crossorigin />
+    <link rel="dns-prefetch" href="https://tts.sngxai.com" />
+    <link rel="preconnect" href="https://tts.sngxai.com" crossorigin />
+
+    <!-- SEO: geographic/audience hints -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="googlebot" content="index, follow" />
+
+    <!-- HTTPS redirect — must be absolute first script -->
+    <script>
+      if (location.protocol === 'http:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        location.replace('https://' + location.host + location.pathname + location.search + location.hash);
+      }
+    </script>
+
+    <!-- crypto.randomUUID polyfill — MUST run before any ES module -->
+    <script>
+      (function() {
+        function fallback() {
+          if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+            return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, function(c) {
+              return (+c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (+c / 4)))).toString(16);
+            });
+          }
+          return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = (Math.random() * 16) | 0;
+            return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+          });
+        }
+        if (typeof globalThis.crypto === 'undefined') {
+          globalThis.crypto = { randomUUID: fallback, getRandomValues: function(arr) { for (var i = 0; i < arr.length; i++) arr[i] = Math.floor(Math.random() * 256); return arr; } };
+        } else if (!crypto.randomUUID) {
+          crypto.randomUUID = fallback;
+        } else {
+          try { crypto.randomUUID(); } catch(e) { crypto.randomUUID = fallback; }
+        }
+      })();
+    </script>
+
+    <!-- Sync theme to prevent FOUC for light-mode returning visitors -->
+    <script>
+      (function() {
+        var t = localStorage.getItem('ling-theme');
+        var r = t === 'light' ? 'light'
+              : t === 'system' && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light'
+              : null;
+        if (r) document.documentElement.setAttribute('data-theme', r);
+      })();
+    </script>
+
+    <!-- Sync lang attribute from i18next localStorage — supports 8 languages -->
+    <script>
+      (function() {
+        var supported = ['en','zh','ja','ko','es','pt-BR','de','fr'];
+        var raw = localStorage.getItem('i18nextLng') || '';
+        var lng = 'en';
+        // Normalize: zh-CN/zh-TW → zh, pt-br → pt-BR, en-US → en, ja-JP → ja
+        if (raw.indexOf('zh') === 0) { lng = 'zh'; }
+        else if (raw.toLowerCase() === 'pt-br' || raw.indexOf('pt') === 0) { lng = 'pt-BR'; }
+        else {
+          var base = raw.split('-')[0].toLowerCase();
+          for (var i = 0; i < supported.length; i++) {
+            if (supported[i] === base) { lng = supported[i]; break; }
+          }
+        }
+        document.documentElement.lang = lng;
+        window.__LING_LANG = lng;
+      })();
+    </script>
+
+    <style>
+      /* color-scheme: tell browser we're dark — prevents white flash on native scrollbar/input */
+      html, body { margin: 0; padding: 0; background: #0a0015; overflow: hidden; color-scheme: dark; }
+      #root { width: 100%; height: 100vh; height: 100dvh; }
+
+      /* Critical CSS variables — available before external stylesheet loads.
+         Landing inline React styles use var(--ling-*); if external CSS races with JS,
+         these ensure correct colors from first paint. */
+      :root {
+        --ling-void-top: #13111C; --ling-void-mid: #0A0A0F; --ling-void-bottom: #060608;
+        --ling-void-cool: #0d1b2a; --ling-void-warm: #1a0a2e;
+        --ling-accent: #8B5CF6; --ling-accent-light: #A78BFA; --ling-accent-lighter: #C4B5FD;
+        --ling-accent-deep: #6D28D9; --ling-accent-text: #E2D4FF;
+        --ling-accent-20: rgba(139,92,246,0.2); --ling-accent-25: rgba(139,92,246,0.25);
+        --ling-accent-30: rgba(139,92,246,0.3); --ling-accent-40: rgba(139,92,246,0.4);
+        --ling-accent-60: rgba(139,92,246,0.6);
+        --ling-bg-deep: var(--ling-void-bottom); --ling-bg-mid: var(--ling-void-cool); --ling-bg-warm: var(--ling-void-warm);
+        --ling-purple: var(--ling-accent); --ling-purple-light: var(--ling-accent-light);
+        --ling-purple-20: var(--ling-accent-20); --ling-purple-25: var(--ling-accent-25);
+        --ling-purple-30: var(--ling-accent-30); --ling-purple-40: var(--ling-accent-40);
+        --ling-purple-60: var(--ling-accent-60);
+        --ling-text-secondary: rgba(255,255,255,0.75); --ling-text-tertiary: rgba(255,255,255,0.4);
+      }
+
+      /* Loading fallback — gradient matches landing bg for seamless cross-dissolve */
+      #loading-fallback {
+        position: fixed; inset: 0; z-index: 99999;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        background: linear-gradient(180deg, #0a0015 0%, #0d1b2a 50%, #1a0a2e 100%);
+        color: rgba(255,255,255,0.6);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', system-ui, sans-serif;
+        transition: opacity 0.35s ease;
+      }
+      #loading-fallback .spinner {
+        width: 32px; height: 32px;
+        border: 3px solid rgba(139,92,246,0.2); border-top-color: #8b5cf6;
+        border-radius: 50%; animation: spin 0.8s linear infinite;
+        filter: drop-shadow(0 0 8px rgba(139,92,246,0.4));
+      }
+      #loading-fallback .text { margin-top: 16px; font-size: 14px; }
+      #loading-fallback .error { color: #ff6b6b; margin-top: 12px; font-size: 12px; max-width: 80vw; word-break: break-all; display: none; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      /* Critical keyframes — available before external CSS loads */
+      @keyframes blink { 0%,50% { opacity: 1 } 51%,100% { opacity: 0 } }
+      @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }
+    </style>
+    <script>
+      window.onerror = function(msg, url, line, col, error) {
+        var el = document.getElementById('loading-error');
+        if (el) { el.style.display = 'block'; el.textContent = msg + ' (' + url + ':' + line + ')'; }
+      };
+      setTimeout(function() {
+        var fb = document.getElementById('loading-fallback');
+        if (fb && fb.style.opacity !== '0') {
+          var el = document.getElementById('loading-error');
+          if (el && !el.textContent) {
+            var _t = {
+              en: 'Loading timed out. Please refresh and try again.',
+              zh: '加载超时，请刷新页面重试',
+              ja: '読み込みがタイムアウトしました。ページを更新してください。',
+              ko: '로딩 시간이 초과되었습니다. 페이지를 새로고침해 주세요.',
+              es: 'Tiempo de carga agotado. Por favor, actualiza la página.',
+              'pt-BR': 'O carregamento expirou. Atualize a página e tente novamente.',
+              de: 'Ladezeit überschritten. Bitte aktualisiere die Seite.',
+              fr: 'Le chargement a expiré. Veuillez rafraîchir la page.'
+            };
+            el.style.display = 'block';
+            el.textContent = _t[window.__LING_LANG] || _t.en;
+          }
+        }
+      }, 8000);
+    </script>
+    <script defer data-domain="ling.sngxai.com" src="https://plausible.io/js/script.js"></script>
+  </head>
+
+  <body>
+    <div id="loading-fallback">
+      <div class="spinner"></div>
+      <div class="text" id="loading-text"></div>
+      <script>
+        var _loadTexts = {
+          en: 'Ling is waking up\u2026',
+          zh: '\u7075\u6b63\u5728\u9192\u6765\u2026',
+          ja: '\u30ea\u30f3\u304c\u76ee\u899a\u3081\u3066\u3044\u307e\u3059\u2026',
+          ko: '\ub9c1\uc774 \uae68\uc5b4\ub098\uace0 \uc788\uc5b4\uc694\u2026',
+          es: 'Ling est\u00e1 despertando\u2026',
+          'pt-BR': 'Ling est\u00e1 acordando\u2026',
+          de: 'Ling wacht auf\u2026',
+          fr: 'Ling se r\u00e9veille\u2026'
+        };
+        document.getElementById('loading-text').textContent = _loadTexts[window.__LING_LANG] || _loadTexts.en;
+      </script>
+      <div class="error" id="loading-error"></div>
+    </div>
+    <div id="root"></div>
+    <script type="module" src="./src/entries/ling.tsx"></script>
+  </body>
+</html>

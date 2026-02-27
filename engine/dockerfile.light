@@ -1,0 +1,39 @@
+# Lightweight CPU-only
+FROM python:3.11-slim AS base
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libsndfile1 \
+    git \
+    curl \
+    ffmpeg \
+    libportaudio2 \
+  && rm -rf /var/lib/apt/lists/*
+
+# Install Python deps
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt && \
+    pip install --no-cache-dir \
+      funasr \
+      modelscope \
+      huggingface_hub \
+      pywhispercpp \
+      torch \
+      torchaudio \
+      edge-tts \
+      azure-cognitiveservices-speech \
+      py3-tts
+
+# App
+WORKDIR /app
+COPY . /app
+
+# Install package (pyproject.toml)
+RUN pip install --no-cache-dir -e .
+
+EXPOSE 12393
+CMD ["python3", "run_server.py"]

@@ -1,0 +1,391 @@
+import { memo, useState, useRef, useCallback, useEffect, type CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
+import { useWebSocketState, useWebSocketActions } from "@/context/WebsocketContext";
+import { useChatMessagesActions } from "@/context/ChatHistoryContext";
+import { useAiStateRead } from "@/context/AiStateContext";
+import { useInterrupt } from "@/components/canvas/live2d";
+import { useVADState, useVADActions } from "@/context/VadContext";
+import { trackEvent } from "@/utils/track-event";
+import { trackEvent as analyticsEvent } from "@/utils/analytics";
+
+// ─── Static style constants (avoid per-render allocation during typing) ───
+
+const S_BAR_WRAP: CSSProperties = {
+  padding: "10px 16px",
+  background: "rgba(6, 0, 15, 0.7)",
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
+  borderTop: "1px solid var(--ling-purple-08)",
+  paddingBottom: "calc(10px + env(safe-area-inset-bottom, 0px))",
+};
+
+const S_STATE_ROW: CSSProperties = { display: "flex", justifyContent: "center", marginBottom: "6px" };
+const S_STATE_TEXT: CSSProperties = {
+  fontSize: "11px", color: "var(--ling-purple-70)",
+  animation: "inputPulse 1.5s ease-in-out infinite",
+};
+const S_STATE_TEXT_WARN: CSSProperties = {
+  fontSize: "11px", color: "var(--ling-error)", opacity: 0.85,
+};
+
+const S_INPUT_ROW: CSSProperties = {
+  display: "flex", alignItems: "flex-end", gap: "8px",
+  maxWidth: "var(--ling-chat-input-max-width, 860px)", margin: "0 auto",
+};
+
+const S_MIC_BASE: CSSProperties = {
+  width: "44px", height: "44px", borderRadius: "50%",
+  display: "flex", alignItems: "center", justifyContent: "center",
+  cursor: "pointer", transition: "filter 0.2s ease, transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease", flexShrink: 0, padding: 0,
+};
+const S_MIC_OFF: CSSProperties = {
+  ...S_MIC_BASE,
+  background: "var(--ling-btn-muted-bg)", border: "1px solid var(--ling-btn-muted-border)",
+  color: "var(--ling-btn-muted-color)", animation: "none",
+};
+const S_MIC_ON: CSSProperties = {
+  ...S_MIC_BASE,
+  background: "var(--ling-error-bg)", border: "1px solid var(--ling-error-border)",
+  color: "var(--ling-error)",
+};
+
+const S_SEND_BASE: CSSProperties = {
+  width: "44px", height: "44px", borderRadius: "50%",
+  display: "flex", alignItems: "center", justifyContent: "center",
+  color: "var(--ling-text-primary)",
+  transition: "filter 0.2s ease, transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease", flexShrink: 0, padding: 0,
+};
+
+const S_SEND_SPEAKING: CSSProperties = {
+  ...S_SEND_BASE,
+  background: "var(--ling-error-bg)",
+  border: "1px solid var(--ling-error-border)",
+  cursor: "pointer",
+};
+const S_SEND_LOADING: CSSProperties = {
+  ...S_SEND_BASE,
+  background: "linear-gradient(135deg, var(--ling-purple), var(--ling-purple-deep))",
+  border: "none",
+  opacity: 0.7,
+  cursor: "not-allowed",
+};
+const S_SEND_READY: CSSProperties = {
+  ...S_SEND_BASE,
+  background: "linear-gradient(135deg, var(--ling-purple), var(--ling-purple-deep))",
+  border: "none",
+  cursor: "pointer",
+  boxShadow: "0 0 14px var(--ling-purple-40), 0 0 4px var(--ling-purple-20)",
+};
+const S_SEND_OVERLIMIT: CSSProperties = {
+  ...S_SEND_BASE,
+  background: "var(--ling-btn-muted-bg)",
+  border: "1px solid var(--ling-btn-muted-bg)",
+  opacity: 0.4,
+  cursor: "not-allowed",
+};
+const S_SEND_IDLE: CSSProperties = {
+  ...S_SEND_BASE,
+  background: "var(--ling-btn-muted-bg)",
+  border: "1px solid var(--ling-btn-muted-border)",
+  cursor: "not-allowed",
+};
+
+const S_HINTS_ROW: CSSProperties = {
+  maxWidth: "var(--ling-chat-input-max-width, 860px)", margin: "2px auto 0", paddingLeft: "52px",
+  display: "flex", justifyContent: "space-between",
+  boxSizing: "border-box",
+};
+const S_MD_HINT: CSSProperties = { fontSize: "10px", color: "var(--ling-input-hint)" };
+const S_CHAR_BASE: CSSProperties = { fontSize: "10px", transition: "color 0.2s ease" };
+const S_CHAR_NORMAL: CSSProperties = { ...S_CHAR_BASE, color: "var(--ling-input-counter)" };
+const S_CHAR_WARN: CSSProperties = { ...S_CHAR_BASE, color: "var(--ling-input-counter-warn)" };
+const S_CHAR_OVER: CSSProperties = { ...S_CHAR_BASE, color: "var(--ling-error)" };
+
+// Pre-created SVG icon elements — shared across all renders to avoid
+// redundant React.createElement overhead (matches ChatBubble ICON_COPY pattern).
+const ICON_MIC = (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+    <line x1="12" y1="19" x2="12" y2="23" />
+    <line x1="8" y1="23" x2="16" y2="23" />
+  </svg>
+);
+const ICON_SEND = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="22" y1="2" x2="11" y2="13" />
+    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+  </svg>
+);
+const S_LOADING_SPIN: CSSProperties = { animation: "sendSpin 0.8s linear infinite" };
+const ICON_LOADING = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={S_LOADING_SPIN} aria-hidden="true">
+    <path d="M12 2a10 10 0 0 1 10 10" />
+  </svg>
+);
+const ICON_STOP = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <rect x="6" y="6" width="12" height="12" rx="2" />
+  </svg>
+);
+
+/** Module-level empty array — avoids allocating a new [] on every send. */
+const EMPTY_IMAGES: never[] = [];
+
+const AI_STATE_KEYS: Record<string, string> = {
+  idle: "",
+  loading: "chat.loading",
+  thinking: "chat.thinking",
+  "thinking-speaking": "chat.speaking",
+  interrupted: "",
+};
+
+const MAX_LENGTH = 2000;
+/** Safety ceiling: auto-reset isSending after this many ms to unblock the UI */
+const SEND_SAFETY_TIMEOUT_MS = 10_000;
+
+export const InputBar = memo(() => {
+  const { t } = useTranslation();
+  const [inputText, setInputText] = useState("");
+  const isComposingRef = useRef(false);
+  const [isSending, setIsSending] = useState(false);
+  // Synchronous mirror — prevents double-send when rapid Enter events fire
+  // before React re-renders (state reads via closure can be stale).
+  const isSendingRef = useRef(false);
+  // Tracks whether AI was already busy when we sent (interrupt-then-send case).
+  // Prevents premature isSending reset when isAiBusy is true at send time.
+  const sentWhileBusyRef = useRef(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const firstMsgFiredRef = useRef(!!sessionStorage.getItem("ling-first-msg"));
+
+  /** Resize textarea to fit content (max 96px). Shared by input, fill, and send-fail handlers.
+   *  Wrapped in rAF to coalesce rapid input events and avoid forced synchronous reflow per keystroke. */
+  const resizeRafRef = useRef(0);
+  const resizeTextarea = useCallback((el: HTMLTextAreaElement | null) => {
+    if (!el) return;
+    cancelAnimationFrame(resizeRafRef.current);
+    resizeRafRef.current = requestAnimationFrame(() => {
+      el.style.height = "auto";
+      el.style.height = Math.min(el.scrollHeight, 96) + "px";
+    });
+  }, []);
+  // Cleanup pending rAF on unmount
+  useEffect(() => () => { cancelAnimationFrame(resizeRafRef.current); }, []);
+  const { wsState } = useWebSocketState();
+  const { sendMessage } = useWebSocketActions();
+  const { appendHumanMessage, popLastHumanMessage } = useChatMessagesActions();
+  const { aiState } = useAiStateRead();
+  const { interrupt } = useInterrupt();
+  const { micOn } = useVADState();
+  const { startMic, stopMic } = useVADActions();
+
+  const handleStop = useCallback(() => interrupt(), [interrupt]);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const text = (e as CustomEvent).detail?.text;
+      if (typeof text === 'string') {
+        setInputText(text.slice(0, MAX_LENGTH));
+        requestAnimationFrame(() => {
+          const el = textareaRef.current;
+          if (el) { el.focus(); resizeTextarea(el); }
+        });
+      }
+    };
+    window.addEventListener('fill-input', handler);
+    return () => window.removeEventListener('fill-input', handler);
+  }, [resizeTextarea]);
+
+  // Ref mirror so the send-failed handler reads latest inputText without
+  // re-attaching the listener on every keystroke.
+  const inputTextRef = useRef(inputText);
+  inputTextRef.current = inputText;
+
+  // Restore input text when send fails (dispatched by websocket-handler)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const text = (e as CustomEvent).detail?.text;
+      isSendingRef.current = false;
+      setIsSending(false);
+      // Roll back the optimistic human message that appendHumanMessage added
+      popLastHumanMessage();
+      if (typeof text === 'string' && !inputTextRef.current) {
+        setInputText(text.slice(0, MAX_LENGTH));
+        requestAnimationFrame(() => {
+          const el = textareaRef.current;
+          if (el) { el.focus(); resizeTextarea(el); }
+        });
+      }
+    };
+    window.addEventListener('send-failed', handler);
+    return () => window.removeEventListener('send-failed', handler);
+  }, [popLastHumanMessage, resizeTextarea]);
+
+  const isConnected = wsState === "OPEN";
+  // Ref mirror — lets handleSend read the latest value without depending on it
+  // (fixes stale closure: isConnected was used in handleSend but missing from deps).
+  const isConnectedRef = useRef(isConnected);
+  isConnectedRef.current = isConnected;
+
+  // Auto-focus on mount and reconnect (skip touch devices to avoid keyboard popup)
+  useEffect(() => {
+    if (window.matchMedia("(hover: hover)").matches && isConnected) {
+      textareaRef.current?.focus();
+    }
+  }, [isConnected]);
+
+  const trimmed = inputText.trim();
+  const hasText = trimmed.length > 0;
+  const charCount = trimmed.length;
+  const isOverLimit = charCount > MAX_LENGTH;
+  const isAiBusy = aiState === "thinking-speaking" || aiState === "loading";
+  const isAiSpeaking = aiState === "thinking-speaking";
+  const stateKey = AI_STATE_KEYS[aiState] || "";
+  const stateText = isOverLimit ? t("chat.overLimit") : isSending && !stateKey ? t("chat.sending") : stateKey ? t(stateKey) : "";
+  const canSend = hasText && !isOverLimit && !isSending && isConnected;
+
+  const handleSend = useCallback(() => {
+    const text = inputText.trim();
+    if (!text || text.length > MAX_LENGTH || isSendingRef.current || !isConnectedRef.current) return;
+
+    if (aiState === "thinking-speaking") {
+      interrupt();
+    }
+
+    sentWhileBusyRef.current = isAiBusy;
+    isSendingRef.current = true;
+    setIsSending(true);
+    appendHumanMessage(text);
+    sendMessage({
+      type: "text-input",
+      text: text,
+      images: EMPTY_IMAGES,
+    });
+    trackEvent("message_sent", { source: "input_bar" });
+    if (!firstMsgFiredRef.current) {
+      firstMsgFiredRef.current = true;
+      sessionStorage.setItem("ling-first-msg", "1");
+      analyticsEvent("first_message_sent");
+    }
+
+    setInputText("");
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.focus();
+    }
+    // isSending reset is driven by aiState effect + send-failed listener
+  }, [inputText, sendMessage, aiState, interrupt, appendHumanMessage]);
+
+  // Reset isSending when AI starts processing, connection drops, or safety timeout.
+  // Handles the interrupt-then-send case: if AI was already busy when we sent,
+  // wait for it to cycle through idle before resetting.
+  useEffect(() => {
+    if (!isSending) return;
+    if (!isConnected) {
+      isSendingRef.current = false;
+      setIsSending(false);
+      return;
+    }
+    if (isAiBusy) {
+      if (!sentWhileBusyRef.current) {
+        // Normal case: AI just became busy processing our message → reset
+        isSendingRef.current = false;
+        setIsSending(false);
+        return;
+      }
+      // Interrupt case: AI was already busy when we sent → wait for it to cycle
+    } else if (sentWhileBusyRef.current) {
+      // AI went idle after interrupt → ready for next busy transition
+      sentWhileBusyRef.current = false;
+    }
+    const timer = setTimeout(() => {
+      isSendingRef.current = false;
+      setIsSending(false);
+    }, SEND_SAFETY_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [isSending, isAiBusy, isConnected]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (isComposingRef.current) return;
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    },
+    [handleSend]
+  );
+
+  const handleInput = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    // Hard cap at MAX_LENGTH + small buffer for paste UX (counter turns red)
+    setInputText(value.length > MAX_LENGTH + 200 ? value.slice(0, MAX_LENGTH + 200) : value);
+    resizeTextarea(e.target);
+  }, [resizeTextarea]);
+
+  const handleMicToggle = useCallback(() => {
+    if (micOn) {
+      stopMic();
+    } else {
+      startMic();
+    }
+  }, [micOn, startMic, stopMic]);
+
+  return (
+    <div style={S_BAR_WRAP}>
+      <div style={S_STATE_ROW} role="status" aria-live="polite">
+        {stateText && <span style={isOverLimit ? S_STATE_TEXT_WARN : S_STATE_TEXT}>{stateText}</span>}
+      </div>
+
+      <div style={S_INPUT_ROW}>
+        <button
+          className={micOn ? "ling-mic-btn ling-mic-recording" : "ling-mic-btn"}
+          onClick={handleMicToggle}
+          aria-label={micOn ? t("chat.micOn") : t("chat.micOff")}
+          aria-pressed={micOn}
+          title={micOn ? t("chat.micOn") : t("chat.micOff")}
+          style={micOn ? S_MIC_ON : S_MIC_OFF}
+        >
+          {ICON_MIC}
+        </button>
+
+        <textarea
+          ref={textareaRef}
+          className="ling-textarea"
+          value={inputText}
+          onChange={handleInput}
+          onKeyDown={handleKeyDown}
+          onCompositionStart={() => { isComposingRef.current = true; }}
+          onCompositionEnd={() => { isComposingRef.current = false; }}
+          disabled={!isConnected}
+          placeholder={!isConnected ? t("chat.placeholderDisconnected") : micOn ? t("chat.placeholderListening") : t("chat.placeholder")}
+          aria-label={t("chat.inputLabel")}
+          rows={1}
+        />
+
+        <button
+          className="ling-send-btn"
+          onClick={isAiSpeaking ? handleStop : handleSend}
+          disabled={!isAiSpeaking && !canSend}
+          aria-label={isAiSpeaking ? t("chat.stopReply") : !isConnected ? t("chat.sendDisconnected") : t("chat.sendMessage")}
+          title={isAiSpeaking ? t("chat.stopReply") : !isConnected ? t("chat.sendDisconnected") : t("chat.sendMessage")}
+          style={isAiSpeaking ? S_SEND_SPEAKING : isSending ? S_SEND_LOADING : canSend ? S_SEND_READY : hasText ? S_SEND_OVERLIMIT : S_SEND_IDLE}
+        >
+          {isAiSpeaking ? ICON_STOP : isSending ? ICON_LOADING : ICON_SEND}
+        </button>
+      </div>
+      <div style={S_HINTS_ROW}>
+        <span style={S_MD_HINT}>
+          {t("chat.markdownHint")}
+        </span>
+        {charCount > 0 && (
+          <span style={isOverLimit ? S_CHAR_OVER : charCount > MAX_LENGTH * 0.9 ? S_CHAR_WARN : S_CHAR_NORMAL}>
+            {charCount}/{MAX_LENGTH}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+});
+
+InputBar.displayName = "InputBar";

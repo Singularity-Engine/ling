@@ -5,9 +5,9 @@ set -e
 # 配置变量 - 请根据实际情况修改
 SERVER_IP="35.193.74.48"
 SERVER_USER="open-llm-vtuber-deploy"
-SSH_KEY="C:/Users/20597/.ssh/open_llm_vtuber_deploy"
-REMOTE_PATH="/home/${SERVER_USER}/App/qdyqszr"
-IMAGE_NAME="qdyqszr"
+SSH_KEY="C:/Users/20597/.ssh/ling_engine_deploy"
+REMOTE_PATH="/home/${SERVER_USER}/App/ling"
+IMAGE_NAME="ling-engine"
 IMAGE_TAG="v3"
 
 # 颜色输出
@@ -41,8 +41,8 @@ if [ ! -f "${SSH_KEY}" ]; then
     exit 1
 fi
 
-if [ ! -f "Open-LLM-VTuber/conf.yaml" ]; then
-    echo -e "${RED}❌ 错误: Open-LLM-VTuber/conf.yaml 配置文件不存在${NC}"
+if [ ! -f "engine/conf.yaml" ]; then
+    echo -e "${RED}❌ 错误: engine/conf.yaml 配置文件不存在${NC}"
     exit 1
 fi
 
@@ -60,11 +60,11 @@ ssh -i ${SSH_KEY} -o ConnectTimeout=10 ${SERVER_USER}@${SERVER_IP} "echo 'SSH连
 echo -e "${YELLOW}📁 创建远程目录结构...${NC}"
 ssh -i ${SSH_KEY} ${SERVER_USER}@${SERVER_IP} "
     mkdir -p ${REMOTE_PATH}
-    mkdir -p ${REMOTE_PATH}/Open-LLM-VTuber/chat_history
-    mkdir -p ${REMOTE_PATH}/Open-LLM-VTuber/cache
-    mkdir -p ${REMOTE_PATH}/Open-LLM-VTuber/affinity_data
-    mkdir -p ${REMOTE_PATH}/Open-LLM-VTuber/models
-    mkdir -p ${REMOTE_PATH}/Open-LLM-VTuber/logs
+    mkdir -p ${REMOTE_PATH}/engine/chat_history
+    mkdir -p ${REMOTE_PATH}/engine/cache
+    mkdir -p ${REMOTE_PATH}/engine/affinity_data
+    mkdir -p ${REMOTE_PATH}/engine/models
+    mkdir -p ${REMOTE_PATH}/engine/logs
 "
 
 # 3. 上传文件（使用rsync支持断点续传）
@@ -84,18 +84,18 @@ scp -i ${SSH_KEY} .env.docker ${SERVER_USER}@${SERVER_IP}:${REMOTE_PATH}/.env
 scp -i ${SSH_KEY} docker-compose.yml ${SERVER_USER}@${SERVER_IP}:${REMOTE_PATH}/
 
 echo "上传项目配置..."
-scp -i ${SSH_KEY} Open-LLM-VTuber/conf.yaml ${SERVER_USER}@${SERVER_IP}:${REMOTE_PATH}/Open-LLM-VTuber/
+scp -i ${SSH_KEY} engine/conf.yaml ${SERVER_USER}@${SERVER_IP}:${REMOTE_PATH}/engine/
 
 # 上传字符配置文件（如果存在）
-if [ -d "Open-LLM-VTuber/characters" ]; then
+if [ -d "engine/characters" ]; then
     echo "上传角色配置文件..."
-    scp -r -i ${SSH_KEY} Open-LLM-VTuber/characters ${SERVER_USER}@${SERVER_IP}:${REMOTE_PATH}/Open-LLM-VTuber/
+    scp -r -i ${SSH_KEY} engine/characters ${SERVER_USER}@${SERVER_IP}:${REMOTE_PATH}/engine/
 fi
 
 # 上传MCP配置（如果存在）
-if [ -f "Open-LLM-VTuber/enhanced_mcp_config.json" ]; then
+if [ -f "engine/enhanced_mcp_config.json" ]; then
     echo "上传MCP配置文件..."
-    scp -i ${SSH_KEY} Open-LLM-VTuber/enhanced_mcp_config.json ${SERVER_USER}@${SERVER_IP}:${REMOTE_PATH}/Open-LLM-VTuber/
+    scp -i ${SSH_KEY} engine/enhanced_mcp_config.json ${SERVER_USER}@${SERVER_IP}:${REMOTE_PATH}/engine/
 fi
 
 # 4. 服务器部署
@@ -134,14 +134,14 @@ ssh -i ${SSH_KEY} ${SERVER_USER}@${SERVER_IP} << EOF
     docker compose ps
 
     echo "检查容器日志..."
-    docker compose logs --tail=10 open-llm-vtuber
+    docker compose logs --tail=10 ling-engine
 
     echo "测试服务健康状态..."
     if curl -f -s http://localhost:12393/web-tool > /dev/null; then
-        echo "✅ Open-LLM-VTuber 服务健康检查通过"
+        echo "✅ Ling Engine 服务健康检查通过"
     else
-        echo "⚠️  警告: Open-LLM-VTuber 服务健康检查失败，查看详细日志..."
-        docker compose logs --tail=50 open-llm-vtuber
+        echo "⚠️  警告: Ling Engine 服务健康检查失败，查看详细日志..."
+        docker compose logs --tail=50 ling-engine
     fi
 
     echo "检查数据库连接..."
@@ -188,7 +188,7 @@ echo -e "${BLUE}🔴 Redis: ${SERVER_IP}:6380${NC}"
 echo -e "${YELLOW}🔍 执行最终连通性测试...${NC}"
 sleep 5
 if curl -f -s http://${SERVER_IP}:12393/web-tool > /dev/null; then
-    echo -e "${GREEN}✅ Open-LLM-VTuber 服务访问正常${NC}"
+    echo -e "${GREEN}✅ Ling Engine 服务访问正常${NC}"
 else
     echo -e "${YELLOW}⚠️  服务暂时无法访问，可能需要等待服务完全启动${NC}"
     echo -e "${BLUE}💡 请稍后访问: http://${SERVER_IP}:12393${NC}"
@@ -196,6 +196,6 @@ fi
 
 echo -e "${GREEN}🔧 部署完成后的操作建议:${NC}"
 echo -e "${BLUE}1. 检查服务状态: ssh -i ${SSH_KEY} ${SERVER_USER}@${SERVER_IP} 'cd ${REMOTE_PATH} && docker compose ps'${NC}"
-echo -e "${BLUE}2. 查看服务日志: ssh -i ${SSH_KEY} ${SERVER_USER}@${SERVER_IP} 'cd ${REMOTE_PATH} && docker compose logs -f open-llm-vtuber'${NC}"
+echo -e "${BLUE}2. 查看服务日志: ssh -i ${SSH_KEY} ${SERVER_USER}@${SERVER_IP} 'cd ${REMOTE_PATH} && docker compose logs -f ling-engine'${NC}"
 echo -e "${BLUE}3. 重启服务: ssh -i ${SSH_KEY} ${SERVER_USER}@${SERVER_IP} 'cd ${REMOTE_PATH} && docker compose restart'${NC}"
 echo -e "${BLUE}4. 停止服务: ssh -i ${SSH_KEY} ${SERVER_USER}@${SERVER_IP} 'cd ${REMOTE_PATH} && docker compose down'${NC}"

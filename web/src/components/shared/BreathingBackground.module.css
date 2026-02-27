@@ -1,0 +1,38 @@
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: var(--ling-z-base, 0);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.gradient {
+  position: absolute;
+  /* Oversized so translate drift doesn't reveal edges */
+  width: 140%;
+  height: 140%;
+  top: -20%;
+  left: -20%;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    var(--ling-void-top, #13111C) 0%,
+    var(--ling-void-mid, #0A0A0F) 50%,
+    var(--ling-void-bottom, #060608) 100%
+  );
+  animation: breathDrift var(--ling-duration-breath, 60s) ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes breathDrift {
+  0%   { transform: translate(0%, 0%); }
+  33%  { transform: translate(2%, -1.5%); }
+  66%  { transform: translate(-1.5%, 2%); }
+  100% { transform: translate(1%, -1%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gradient {
+    animation: none;
+    transform: translate(0, 0);
+  }
+}

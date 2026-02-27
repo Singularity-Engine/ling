@@ -1,0 +1,222 @@
+/* ═══════════════════════════════════════════════════════════
+   ActionCard — Cinematic journal entry
+   Design: Floating glass panel with depth, editorial typography
+   ═══════════════════════════════════════════════════════════ */
+
+.card {
+  position: relative;
+  padding: var(--ling-space-8) var(--ling-space-8) var(--ling-space-6);
+  border-radius: var(--ling-radius-xl);
+  background: var(--ling-glass);
+  backdrop-filter: var(--ling-glass-blur);
+  -webkit-backdrop-filter: var(--ling-glass-blur);
+  border: 1px solid var(--ling-glass-border);
+  overflow: hidden;
+
+  /* Entry animation — float up from depth */
+  opacity: 0;
+  transform: translateY(24px) scale(0.97);
+  transition:
+    opacity 600ms var(--ling-ease-out-expo),
+    transform 600ms var(--ling-ease-out-expo);
+}
+
+.card[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* 3D tilt on hover — desktop only */
+@media (hover: hover) and (min-width: 769px) {
+  .card {
+    transform-style: preserve-3d;
+    perspective: 800px;
+  }
+  .card[data-visible="true"]:hover {
+    transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) scale(1.02);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      0 0 24px var(--ling-accent-08);
+    transition:
+      transform 200ms var(--ling-ease-out-expo),
+      box-shadow 200ms var(--ling-ease-out-expo);
+  }
+}
+
+/* Stagger delay per card */
+.card[data-index="1"] { transition-delay: 100ms; }
+.card[data-index="2"] { transition-delay: 200ms; }
+.card[data-index="3"] { transition-delay: 300ms; }
+.card[data-index="4"] { transition-delay: 400ms; }
+.card[data-index="5"] { transition-delay: 500ms; }
+
+/* ── Header: icon + type + time ── */
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--ling-space-3);
+  margin-bottom: var(--ling-space-5);
+}
+
+.icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ling-radius-8);
+  background: var(--ling-accent-08);
+  color: var(--ling-accent-light);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.typeBadge {
+  font-family: var(--ling-font-world);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ling-text-3);
+}
+
+.time {
+  margin-left: auto;
+  font-family: var(--ling-font-world);
+  font-size: var(--ling-font-xs);
+  color: var(--ling-text-3);
+  white-space: nowrap;
+}
+
+/* ── Quote: the main serif text ── */
+.quote {
+  font-family: var(--ling-font-ling);
+  font-size: var(--ling-font-xl);
+  line-height: 1.4;
+  color: var(--ling-text-1);
+  margin: 0 0 var(--ling-space-4);
+  position: relative;
+}
+
+.quote::before {
+  content: '\201C';
+  position: absolute;
+  left: -4px;
+  top: -12px;
+  font-size: 48px;
+  color: var(--ling-accent-15);
+  font-family: var(--ling-font-ling);
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* ── Signal block (SIGNAL_DECISION only) ── */
+.signalBlock {
+  padding: var(--ling-space-4) 0;
+  margin-bottom: var(--ling-space-3);
+  border-top: 1px solid var(--ling-glass-border);
+  border-bottom: 1px solid var(--ling-glass-border);
+}
+
+.signalLabel {
+  font-family: var(--ling-font-world);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ling-warning);
+  margin-bottom: var(--ling-space-1);
+}
+
+.signalText {
+  font-family: var(--ling-font-world);
+  font-size: var(--ling-font-md);
+  color: var(--ling-text-2);
+  line-height: 1.5;
+}
+
+/* ── Context ── */
+.context {
+  font-family: var(--ling-font-world);
+  font-size: var(--ling-font-13);
+  color: var(--ling-text-3);
+  line-height: 1.5;
+  margin-bottom: var(--ling-space-3);
+}
+
+/* ── Metrics (CONTENT type) ── */
+.metrics {
+  font-family: var(--ling-font-world);
+  font-size: var(--ling-font-xs);
+  color: var(--ling-text-3);
+  letter-spacing: 0.02em;
+  margin-bottom: var(--ling-space-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Footer: action link + watermark ── */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--ling-space-4);
+  padding-top: var(--ling-space-3);
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.actionLink {
+  font-family: var(--ling-font-world);
+  font-size: var(--ling-font-sm);
+  color: var(--ling-accent-light);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: color var(--ling-duration-fast);
+}
+
+.actionLink:hover {
+  color: var(--ling-accent-lighter);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.watermark {
+  font-family: var(--ling-font-world);
+  font-size: 10px;
+  color: var(--ling-text-3);
+  opacity: 0.4;
+  letter-spacing: 0.04em;
+}
+
+/* ── Accent edge glow (top border shimmer) ── */
+.card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--ling-accent-20) 50%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 600ms var(--ling-ease-out-expo);
+}
+
+.card[data-visible="true"]::after {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .card::after {
+    opacity: 1;
+    transition: none;
+  }
+}

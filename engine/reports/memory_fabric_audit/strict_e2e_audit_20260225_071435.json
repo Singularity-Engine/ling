@@ -1,0 +1,748 @@
+{
+  "generated_at": "2026-02-25T07:14:35.718796+00:00",
+  "started_at": "2026-02-25T07:13:47.654208+00:00",
+  "benchmark_started_at": "2026-02-25T07:13:51.704974+00:00",
+  "env_snapshot": {
+    "SOUL_FABRIC_STRICT_MODE": "true",
+    "SOUL_BENCHMARK_REQUIRE_REAL": "true",
+    "SOUL_BENCHMARK_MIN_IMPROVEMENT": "0.05",
+    "SOUL_BENCHMARK_BASELINE_LONGMEMEVAL": "0.35",
+    "SOUL_BENCHMARK_BASELINE_LOCOMO": "0.4",
+    "SOUL_BENCHMARK_BASELINE_MEMORYARENA": "0.3",
+    "SOUL_BENCHMARK_BASELINE_LOCOMO_PLUS": "0.35",
+    "SOUL_BENCHMARK_CMD_LONGMEMEVAL": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LongMemEval --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+    "SOUL_BENCHMARK_CMD_LOCOMO": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+    "SOUL_BENCHMARK_CMD_MEMORYARENA": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite MemoryArena --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+    "SOUL_BENCHMARK_CMD_LOCOMO_PLUS": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo-Plus --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220"
+  },
+  "dependency": {
+    "ports": {
+      "mongo_27017": true,
+      "qdrant_6333": true,
+      "neo4j_bolt_7687": true,
+      "evermemos_1995": true
+    },
+    "imports": {
+      "motor": true,
+      "pymongo": true,
+      "mem0": true,
+      "graphiti_core": true
+    },
+    "adapters": {
+      "graphiti_health": true,
+      "graphiti_runtime": {
+        "available": true,
+        "initialized": true,
+        "fallback": false,
+        "permanently_unavailable": false,
+        "unknown": false,
+        "last_init_attempt": 574431.011973166
+      },
+      "mem0_health": true,
+      "mem0_runtime": {
+        "available": true,
+        "initialized": true,
+        "permanently_unavailable": false,
+        "unknown": false,
+        "last_init_attempt": 574431.210098041
+      }
+    }
+  },
+  "strict_coverage": {
+    "capability_to_providers": {
+      "episodic": [
+        "qdrant",
+        "evermemos"
+      ],
+      "semantic": [
+        "qdrant",
+        "mem0"
+      ],
+      "entity": [
+        "mem0"
+      ],
+      "temporal_graph": [
+        "graphiti"
+      ],
+      "relationship": [
+        "mongodb_internal"
+      ],
+      "affective": [
+        "mongodb_internal"
+      ],
+      "abstraction": [
+        "mongodb_internal"
+      ],
+      "collective": [
+        "collective"
+      ],
+      "core_blocks": [
+        "letta_core_blocks"
+      ],
+      "procedural": [
+        "langmem"
+      ],
+      "safety_memory": [
+        "safety_memory"
+      ],
+      "governance": [
+        "mongodb_internal",
+        "letta_core_blocks",
+        "langmem"
+      ],
+      "evaluation": [
+        "evaluation_runner"
+      ]
+    },
+    "provider_runtime_health": {
+      "mongodb_internal": true,
+      "qdrant": true,
+      "evermemos": true,
+      "graphiti": true,
+      "mem0": true,
+      "collective": true,
+      "letta_core_blocks": true,
+      "langmem": true,
+      "safety_memory": true,
+      "evaluation_runner": true
+    },
+    "unhealthy_enabled_providers": [],
+    "required_capabilities": [
+      "abstraction",
+      "affective",
+      "collective",
+      "core_blocks",
+      "entity",
+      "episodic",
+      "evaluation",
+      "governance",
+      "procedural",
+      "relationship",
+      "safety_memory",
+      "semantic",
+      "temporal_graph"
+    ],
+    "missing_capabilities": [],
+    "missing_optional_capabilities": [],
+    "strict_mode": true
+  },
+  "plan_recall_error": null,
+  "benchmark_error": "benchmark gates unmet: missing_runners=[], failed_improvement=[{'suite': 'LongMemEval', 'score': 0.257759, 'baseline': 0.35, 'delta': -0.092241}, {'suite': 'LoCoMo', 'score': 0.001179, 'baseline': 0.4, 'delta': -0.398821}, {'suite': 'LoCoMo-Plus', 'score': 0.130847, 'baseline': 0.35, 'delta': -0.219153}], missing_baseline=[]",
+  "benchmark_summary": null,
+  "benchmark_suites": {
+    "LongMemEval": {
+      "status": null,
+      "mode": null,
+      "score": null
+    },
+    "LoCoMo": {
+      "status": null,
+      "mode": null,
+      "score": null
+    },
+    "MemoryArena": {
+      "status": null,
+      "mode": null,
+      "score": null
+    },
+    "LoCoMo-Plus": {
+      "status": null,
+      "mode": null,
+      "score": null
+    }
+  },
+  "benchmark_gates": {},
+  "recent_benchmark_runs": [
+    {
+      "suite": "LoCoMo-Plus",
+      "score": 0.130847,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "LoCoMo-Plus(EverMemBench-Dynamic topic01)",
+          "qa_used": 8,
+          "cases": 8
+        },
+        "user_id": "bench.locomo_plus_1772003664",
+        "ingested_chunks": 192,
+        "case_count": 8,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 1,
+        "hit_rate": 0.125,
+        "avg_f1": 0.005074,
+        "recall_avg_ms": 532.056,
+        "recall_p50_ms": 501.95,
+        "recall_p95_ms": 740.655,
+        "recall_latencies_ms": [
+          740.655,
+          503.431,
+          501.95,
+          501.885,
+          500.985,
+          501.806,
+          501.944,
+          503.788
+        ],
+        "ingest_ms": 2688,
+        "eval_ms": 4260,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 740.655
+          },
+          {
+            "index": 1,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 503.431
+          },
+          {
+            "index": 2,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 501.95
+          },
+          {
+            "index": 3,
+            "score": 0.011646,
+            "exact_hit": false,
+            "f1": 0.009317,
+            "recall_ms": 501.885
+          },
+          {
+            "index": 4,
+            "score": 0.007886,
+            "exact_hit": false,
+            "f1": 0.006309,
+            "recall_ms": 500.985
+          },
+          {
+            "index": 5,
+            "score": 0.023328,
+            "exact_hit": false,
+            "f1": 0.018663,
+            "recall_ms": 501.806
+          },
+          {
+            "index": 6,
+            "score": 0.003918,
+            "exact_hit": false,
+            "f1": 0.003135,
+            "recall_ms": 501.944
+          },
+          {
+            "index": 7,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.00317,
+            "recall_ms": 503.788
+          }
+        ],
+        "elapsed_ms": 11684,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo-Plus --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": " resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:14:33.962 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count\n2026-02-25 02:14:33.962 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x126e59b50>",
+        "stdout_tail": "xact_hit\": false, \"f1\": 0.0, \"recall_ms\": 501.95}, {\"index\": 3, \"score\": 0.011646, \"exact_hit\": false, \"f1\": 0.009317, \"recall_ms\": 501.885}, {\"index\": 4, \"score\": 0.007886, \"exact_hit\": false, \"f1\": 0.006309, \"recall_ms\": 500.985}, {\"index\": 5, \"score\": 0.023328, \"exact_hit\": false, \"f1\": 0.018663, \"recall_ms\": 501.806}, {\"index\": 6, \"score\": 0.003918, \"exact_hit\": false, \"f1\": 0.003135, \"recall_ms\": 501.944}, {\"index\": 7, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.00317, \"recall_ms\": 503.788}]}}",
+        "baseline": 0.35,
+        "delta": -0.219153,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.219153,
+      "created_at": "2026-02-25T07:14:35.714000"
+    },
+    {
+      "suite": "MemoryArena",
+      "score": 1.0,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "MemoryArena",
+          "files_used": 1,
+          "cases": 8
+        },
+        "user_id": "bench.memoryarena_1772003655",
+        "ingested_chunks": 16,
+        "case_count": 8,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 8,
+        "hit_rate": 1.0,
+        "avg_f1": 0.016313,
+        "recall_avg_ms": 530.285,
+        "recall_p50_ms": 502.218,
+        "recall_p95_ms": 725.518,
+        "recall_latencies_ms": [
+          725.518,
+          502.33,
+          504.518,
+          502.034,
+          501.847,
+          501.891,
+          501.924,
+          502.218
+        ],
+        "ingest_ms": 166,
+        "eval_ms": 4245,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.016313,
+            "recall_ms": 725.518
+          },
+          {
+            "index": 1,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.016313,
+            "recall_ms": 502.33
+          },
+          {
+            "index": 2,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.016313,
+            "recall_ms": 504.518
+          },
+          {
+            "index": 3,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.016313,
+            "recall_ms": 502.034
+          },
+          {
+            "index": 4,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.016313,
+            "recall_ms": 501.847
+          },
+          {
+            "index": 5,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.016313,
+            "recall_ms": 501.891
+          },
+          {
+            "index": 6,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.016313,
+            "recall_ms": 501.924
+          },
+          {
+            "index": 7,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.016313,
+            "recall_ms": 502.218
+          }
+        ],
+        "elapsed_ms": 9161,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite MemoryArena --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": " resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:14:22.178 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation\n2026-02-25 02:14:22.178 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x122d39cd0>",
+        "stdout_tail": ", \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.016313, \"recall_ms\": 504.518}, {\"index\": 3, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.016313, \"recall_ms\": 502.034}, {\"index\": 4, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.016313, \"recall_ms\": 501.847}, {\"index\": 5, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.016313, \"recall_ms\": 501.891}, {\"index\": 6, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.016313, \"recall_ms\": 501.924}, {\"index\": 7, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.016313, \"recall_ms\": 502.218}]}}",
+        "baseline": 0.3,
+        "delta": 0.7,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": 0.7,
+      "created_at": "2026-02-25T07:14:24.019000"
+    },
+    {
+      "suite": "LoCoMo",
+      "score": 0.001179,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "LoCoMo",
+          "samples_used": 1,
+          "cases": 8
+        },
+        "user_id": "bench.locomo_1772003641",
+        "ingested_chunks": 220,
+        "case_count": 8,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 0,
+        "hit_rate": 0.0,
+        "avg_f1": 0.000943,
+        "recall_avg_ms": 533.958,
+        "recall_p50_ms": 502.219,
+        "recall_p95_ms": 755.823,
+        "recall_latencies_ms": [
+          755.823,
+          502.219,
+          501.921,
+          501.888,
+          501.912,
+          501.809,
+          503.583,
+          502.511
+        ],
+        "ingest_ms": 3483,
+        "eval_ms": 4274,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 755.823
+          },
+          {
+            "index": 1,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 502.219
+          },
+          {
+            "index": 2,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 501.921
+          },
+          {
+            "index": 3,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 501.888
+          },
+          {
+            "index": 4,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 501.912
+          },
+          {
+            "index": 5,
+            "score": 0.009434,
+            "exact_hit": false,
+            "f1": 0.007547,
+            "recall_ms": 501.809
+          },
+          {
+            "index": 6,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 503.583
+          },
+          {
+            "index": 7,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 502.511
+          }
+        ],
+        "elapsed_ms": 13314,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": " resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:14:13.180 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation\n2026-02-25 02:14:13.180 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x1260914d0>",
+        "stdout_tail": "}, {\"index\": 2, \"score\": 0.0, \"exact_hit\": false, \"f1\": 0.0, \"recall_ms\": 501.921}, {\"index\": 3, \"score\": 0.0, \"exact_hit\": false, \"f1\": 0.0, \"recall_ms\": 501.888}, {\"index\": 4, \"score\": 0.0, \"exact_hit\": false, \"f1\": 0.0, \"recall_ms\": 501.912}, {\"index\": 5, \"score\": 0.009434, \"exact_hit\": false, \"f1\": 0.007547, \"recall_ms\": 501.809}, {\"index\": 6, \"score\": 0.0, \"exact_hit\": false, \"f1\": 0.0, \"recall_ms\": 503.583}, {\"index\": 7, \"score\": 0.0, \"exact_hit\": false, \"f1\": 0.0, \"recall_ms\": 502.511}]}}",
+        "baseline": 0.4,
+        "delta": -0.398821,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.39882100000000004,
+      "created_at": "2026-02-25T07:14:14.853000"
+    },
+    {
+      "suite": "LongMemEval",
+      "score": 0.257759,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "LongMemEval-oracle",
+          "rows_used": 8,
+          "cases": 8
+        },
+        "user_id": "bench.longmemeval_1772003631",
+        "ingested_chunks": 27,
+        "case_count": 8,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 2,
+        "hit_rate": 0.25,
+        "avg_f1": 0.01035,
+        "recall_avg_ms": 535.26,
+        "recall_p50_ms": 502.058,
+        "recall_p95_ms": 765.759,
+        "recall_latencies_ms": [
+          765.759,
+          502.279,
+          501.936,
+          501.576,
+          501.668,
+          504.986,
+          502.058,
+          501.819
+        ],
+        "ingest_ms": 311,
+        "eval_ms": 4284,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 765.759
+          },
+          {
+            "index": 1,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 502.279
+          },
+          {
+            "index": 2,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 501.936
+          },
+          {
+            "index": 3,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 501.576
+          },
+          {
+            "index": 4,
+            "score": 0.031034,
+            "exact_hit": false,
+            "f1": 0.024828,
+            "recall_ms": 501.668
+          },
+          {
+            "index": 5,
+            "score": 0.031034,
+            "exact_hit": false,
+            "f1": 0.024828,
+            "recall_ms": 504.986
+          },
+          {
+            "index": 6,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.030345,
+            "recall_ms": 502.058
+          },
+          {
+            "index": 7,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.002797,
+            "recall_ms": 501.819
+          }
+        ],
+        "elapsed_ms": 9785,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LongMemEval --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": " resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:13:59.866 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation\n2026-02-25 02:13:59.866 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x126060210>",
+        "stdout_tail": "core\": 0.0, \"exact_hit\": false, \"f1\": 0.0, \"recall_ms\": 501.936}, {\"index\": 3, \"score\": 0.0, \"exact_hit\": false, \"f1\": 0.0, \"recall_ms\": 501.576}, {\"index\": 4, \"score\": 0.031034, \"exact_hit\": false, \"f1\": 0.024828, \"recall_ms\": 501.668}, {\"index\": 5, \"score\": 0.031034, \"exact_hit\": false, \"f1\": 0.024828, \"recall_ms\": 504.986}, {\"index\": 6, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.030345, \"recall_ms\": 502.058}, {\"index\": 7, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.002797, \"recall_ms\": 501.819}]}}",
+        "baseline": 0.35,
+        "delta": -0.092241,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.09224099999999996,
+      "created_at": "2026-02-25T07:14:01.537000"
+    },
+    {
+      "suite": "LoCoMo-Plus",
+      "score": 0.0,
+      "status": "runner_failed",
+      "details": {
+        "return_code": 2,
+        "stderr": "stores/qdrant.py:71: UserWarning: Qdrant client version 1.16.2 is incompatible with server version 1.13.2. Major versions should match and minor version difference must not exceed 1. Set check_compatibility=False to skip version check.\n  self.client = QdrantClient(**params)\n2026-02-25 02:08:10.114 | INFO     | ling_engine.soul.adapters.mem0_adapter:_ensure_client:115 - [Mem0] Client initialized\n2026-02-25 02:08:10.118 | WARNING  | ling_engine.soul.fabric.service:coverage_report:58 - [MemoryFabric] Missing strict required capabilities: temporal_graph\n2026-02-25 02:08:10.118 | WARNING  | ling_engine.soul.fabric.service:coverage_report:63 - [MemoryFabric] Runtime-unhealthy providers detected: graphiti\n/Users/caoruipeng/.local/share/uv/python/cpython-3.11.14-macos-aarch64-none/lib/python3.11/asyncio/runners.py:71: RuntimeWarning: coroutine 'Neo4jDriver._execute_index_query' was never awaited\n  _cancel_all_tasks(loop)\nRuntimeWarning: Enable tracemalloc to get the object allocation traceback",
+        "stdout": "{\"suite\": \"LoCoMo-Plus\", \"score\": 0.0, \"status\": \"runner_failed\", \"mode\": \"real\", \"details\": {\"error\": \"strict coverage unmet: temporal_graph\"}}",
+        "elapsed_ms": 4485,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo-Plus --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "baseline": 0.35,
+        "delta": -0.35,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.35,
+      "created_at": "2026-02-25T07:08:11.620000"
+    },
+    {
+      "suite": "MemoryArena",
+      "score": 0.0,
+      "status": "runner_failed",
+      "details": {
+        "return_code": 2,
+        "stderr": "stores/qdrant.py:71: UserWarning: Qdrant client version 1.16.2 is incompatible with server version 1.13.2. Major versions should match and minor version difference must not exceed 1. Set check_compatibility=False to skip version check.\n  self.client = QdrantClient(**params)\n2026-02-25 02:08:05.822 | INFO     | ling_engine.soul.adapters.mem0_adapter:_ensure_client:115 - [Mem0] Client initialized\n2026-02-25 02:08:05.831 | WARNING  | ling_engine.soul.fabric.service:coverage_report:58 - [MemoryFabric] Missing strict required capabilities: temporal_graph\n2026-02-25 02:08:05.831 | WARNING  | ling_engine.soul.fabric.service:coverage_report:63 - [MemoryFabric] Runtime-unhealthy providers detected: graphiti\n/Users/caoruipeng/.local/share/uv/python/cpython-3.11.14-macos-aarch64-none/lib/python3.11/asyncio/runners.py:71: RuntimeWarning: coroutine 'Neo4jDriver._execute_index_query' was never awaited\n  _cancel_all_tasks(loop)\nRuntimeWarning: Enable tracemalloc to get the object allocation traceback",
+        "stdout": "{\"suite\": \"MemoryArena\", \"score\": 0.0, \"status\": \"runner_failed\", \"mode\": \"real\", \"details\": {\"error\": \"strict coverage unmet: temporal_graph\"}}",
+        "elapsed_ms": 4472,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite MemoryArena --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "baseline": 0.3,
+        "delta": -0.3,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.3,
+      "created_at": "2026-02-25T07:08:07.124000"
+    },
+    {
+      "suite": "LoCoMo",
+      "score": 0.0,
+      "status": "runner_failed",
+      "details": {
+        "return_code": 2,
+        "stderr": "stores/qdrant.py:71: UserWarning: Qdrant client version 1.16.2 is incompatible with server version 1.13.2. Major versions should match and minor version difference must not exceed 1. Set check_compatibility=False to skip version check.\n  self.client = QdrantClient(**params)\n2026-02-25 02:08:01.165 | INFO     | ling_engine.soul.adapters.mem0_adapter:_ensure_client:115 - [Mem0] Client initialized\n2026-02-25 02:08:01.169 | WARNING  | ling_engine.soul.fabric.service:coverage_report:58 - [MemoryFabric] Missing strict required capabilities: temporal_graph\n2026-02-25 02:08:01.169 | WARNING  | ling_engine.soul.fabric.service:coverage_report:63 - [MemoryFabric] Runtime-unhealthy providers detected: graphiti\n/Users/caoruipeng/.local/share/uv/python/cpython-3.11.14-macos-aarch64-none/lib/python3.11/asyncio/runners.py:71: RuntimeWarning: coroutine 'Neo4jDriver._execute_index_query' was never awaited\n  _cancel_all_tasks(loop)\nRuntimeWarning: Enable tracemalloc to get the object allocation traceback",
+        "stdout": "{\"suite\": \"LoCoMo\", \"score\": 0.0, \"status\": \"runner_failed\", \"mode\": \"real\", \"details\": {\"error\": \"strict coverage unmet: temporal_graph\"}}",
+        "elapsed_ms": 4482,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "baseline": 0.4,
+        "delta": -0.4,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.4,
+      "created_at": "2026-02-25T07:08:02.645000"
+    },
+    {
+      "suite": "LongMemEval",
+      "score": 0.0,
+      "status": "runner_failed",
+      "details": {
+        "return_code": 2,
+        "stderr": "stores/qdrant.py:71: UserWarning: Qdrant client version 1.16.2 is incompatible with server version 1.13.2. Major versions should match and minor version difference must not exceed 1. Set check_compatibility=False to skip version check.\n  self.client = QdrantClient(**params)\n2026-02-25 02:07:56.903 | INFO     | ling_engine.soul.adapters.mem0_adapter:_ensure_client:115 - [Mem0] Client initialized\n2026-02-25 02:07:56.915 | WARNING  | ling_engine.soul.fabric.service:coverage_report:58 - [MemoryFabric] Missing strict required capabilities: temporal_graph\n2026-02-25 02:07:56.915 | WARNING  | ling_engine.soul.fabric.service:coverage_report:63 - [MemoryFabric] Runtime-unhealthy providers detected: graphiti\n/Users/caoruipeng/.local/share/uv/python/cpython-3.11.14-macos-aarch64-none/lib/python3.11/asyncio/runners.py:71: RuntimeWarning: coroutine 'Neo4jDriver._execute_index_query' was never awaited\n  _cancel_all_tasks(loop)\nRuntimeWarning: Enable tracemalloc to get the object allocation traceback",
+        "stdout": "{\"suite\": \"LongMemEval\", \"score\": 0.0, \"status\": \"runner_failed\", \"mode\": \"real\", \"details\": {\"error\": \"strict coverage unmet: temporal_graph\"}}",
+        "elapsed_ms": 4481,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LongMemEval --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "baseline": 0.35,
+        "delta": -0.35,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.35,
+      "created_at": "2026-02-25T07:07:58.155000"
+    },
+    {
+      "suite": "LoCoMo-Plus",
+      "score": 0.0,
+      "status": "runner_failed",
+      "details": {
+        "return_code": 2,
+        "stderr": "register:150 - ✅ 工具已注册: search_similar_memories\n2026-02-25 02:01:01.021 | INFO     | ling_engine.tools.base_tool:register:150 - ✅ 工具已注册: search_similar_memories\n2026-02-25 02:01:01.021 | INFO     | ling_engine.tools.base_tool:register:150 - ✅ 工具已注册: query_dashboard\n2026-02-25 02:01:01.203 | ERROR    | ling_engine.important.memories:create_embedding:99 - 生成嵌入向量时出错: AuthenticationError - Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************P-QA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}\n2026-02-25 02:01:01.203 | WARNING  | ling_engine.important.memories:search_similar_memories:262 - 无法为查询创建嵌入向量，返回空结果\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x1279ac650>",
+        "stdout": "✅ 记忆搜索工具 search_similar_memories 已手动注册到全局注册表\n✅ 创建了 1 个记忆工具\n{\"suite\": \"LoCoMo-Plus\", \"score\": 0.0, \"status\": \"runner_failed\", \"mode\": \"real\", \"details\": {\"error\": \"strict coverage unmet: entity,temporal_graph\"}}",
+        "elapsed_ms": 8897,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo-Plus --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "baseline": 0.35,
+        "delta": -0.35,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.35,
+      "created_at": "2026-02-25T07:01:02.531000"
+    },
+    {
+      "suite": "MemoryArena",
+      "score": 0.0,
+      "status": "runner_failed",
+      "details": {
+        "return_code": 2,
+        "stderr": "register:150 - ✅ 工具已注册: search_similar_memories\n2026-02-25 02:00:51.570 | INFO     | ling_engine.tools.base_tool:register:150 - ✅ 工具已注册: search_similar_memories\n2026-02-25 02:00:51.570 | INFO     | ling_engine.tools.base_tool:register:150 - ✅ 工具已注册: query_dashboard\n2026-02-25 02:00:51.730 | ERROR    | ling_engine.important.memories:create_embedding:99 - 生成嵌入向量时出错: AuthenticationError - Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************P-QA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}\n2026-02-25 02:00:51.730 | WARNING  | ling_engine.important.memories:search_similar_memories:262 - 无法为查询创建嵌入向量，返回空结果\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x125220610>",
+        "stdout": "✅ 记忆搜索工具 search_similar_memories 已手动注册到全局注册表\n✅ 创建了 1 个记忆工具\n{\"suite\": \"MemoryArena\", \"score\": 0.0, \"status\": \"runner_failed\", \"mode\": \"real\", \"details\": {\"error\": \"strict coverage unmet: entity,temporal_graph\"}}",
+        "elapsed_ms": 5766,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite MemoryArena --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "baseline": 0.3,
+        "delta": -0.3,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.3,
+      "created_at": "2026-02-25T07:00:53.619000"
+    },
+    {
+      "suite": "LoCoMo",
+      "score": 0.0,
+      "status": "runner_failed",
+      "details": {
+        "return_code": 2,
+        "stderr": "register:150 - ✅ 工具已注册: search_similar_memories\n2026-02-25 02:00:46.151 | INFO     | ling_engine.tools.base_tool:register:150 - ✅ 工具已注册: search_similar_memories\n2026-02-25 02:00:46.152 | INFO     | ling_engine.tools.base_tool:register:150 - ✅ 工具已注册: query_dashboard\n2026-02-25 02:00:46.317 | ERROR    | ling_engine.important.memories:create_embedding:99 - 生成嵌入向量时出错: AuthenticationError - Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************P-QA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}\n2026-02-25 02:00:46.317 | WARNING  | ling_engine.important.memories:search_similar_memories:262 - 无法为查询创建嵌入向量，返回空结果\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x125562990>",
+        "stdout": "✅ 记忆搜索工具 search_similar_memories 已手动注册到全局注册表\n✅ 创建了 1 个记忆工具\n{\"suite\": \"LoCoMo\", \"score\": 0.0, \"status\": \"runner_failed\", \"mode\": \"real\", \"details\": {\"error\": \"strict coverage unmet: entity,temporal_graph\"}}",
+        "elapsed_ms": 7913,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "baseline": 0.4,
+        "delta": -0.4,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.4,
+      "created_at": "2026-02-25T07:00:47.851000"
+    },
+    {
+      "suite": "LongMemEval",
+      "score": 0.0,
+      "status": "runner_failed",
+      "details": {
+        "return_code": 2,
+        "stderr": "register:150 - ✅ 工具已注册: search_similar_memories\n2026-02-25 02:00:37.922 | INFO     | ling_engine.tools.base_tool:register:150 - ✅ 工具已注册: search_similar_memories\n2026-02-25 02:00:37.922 | INFO     | ling_engine.tools.base_tool:register:150 - ✅ 工具已注册: query_dashboard\n2026-02-25 02:00:38.113 | ERROR    | ling_engine.important.memories:create_embedding:99 - 生成嵌入向量时出错: AuthenticationError - Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************P-QA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}\n2026-02-25 02:00:38.113 | WARNING  | ling_engine.important.memories:search_similar_memories:262 - 无法为查询创建嵌入向量，返回空结果\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x127cbfd50>",
+        "stdout": "✅ 记忆搜索工具 search_similar_memories 已手动注册到全局注册表\n✅ 创建了 1 个记忆工具\n{\"suite\": \"LongMemEval\", \"score\": 0.0, \"status\": \"runner_failed\", \"mode\": \"real\", \"details\": {\"error\": \"strict coverage unmet: entity,temporal_graph\"}}",
+        "elapsed_ms": 5949,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LongMemEval --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "baseline": 0.35,
+        "delta": -0.35,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.35,
+      "created_at": "2026-02-25T07:00:39.935000"
+    }
+  ],
+  "release_gates": [
+    {
+      "name": "G1 Dependencies Online",
+      "passed": true,
+      "evidence": "ports_ok=True, imports_ok=True, adapters_ok=True"
+    },
+    {
+      "name": "G2 Strict Coverage",
+      "passed": true,
+      "evidence": "missing_capabilities=[], unhealthy=[], plan_error=None"
+    },
+    {
+      "name": "G3 Real Benchmarks Passed",
+      "passed": false,
+      "evidence": "suites={'LongMemEval': {'status': None, 'mode': None, 'score': None}, 'LoCoMo': {'status': None, 'mode': None, 'score': None}, 'MemoryArena': {'status': None, 'mode': None, 'score': None}, 'LoCoMo-Plus': {'status': None, 'mode': None, 'score': None}}, benchmark_error=benchmark gates unmet: missing_runners=[], failed_improvement=[{'suite': 'LongMemEval', 'score': 0.257759, 'baseline': 0.35, 'delta': -0.092241}, {'suite': 'LoCoMo', 'score': 0.001179, 'baseline': 0.4, 'delta': -0.398821}, {'suite': 'LoCoMo-Plus', 'score': 0.130847, 'baseline': 0.35, 'delta': -0.219153}], missing_baseline=[]"
+    },
+    {
+      "name": "G4 Improvement Gate",
+      "passed": false,
+      "evidence": "failed_improvement=[], missing_baseline=[]"
+    },
+    {
+      "name": "G5 Benchmark Persistence",
+      "passed": true,
+      "evidence": "persisted_suites=['LoCoMo', 'LoCoMo-Plus', 'LongMemEval', 'MemoryArena']"
+    },
+    {
+      "name": "G6 Recall P95 SLO",
+      "passed": false,
+      "evidence": "recall_p95_ms=None, target_ms=450"
+    }
+  ],
+  "release_blocked": true,
+  "sota_reached": false,
+  "notes": "SOTA verdict in this checklist is tied to strict engineering gates (dependency online + strict coverage + real benchmark + improvement + persistence + SLO)."
+}

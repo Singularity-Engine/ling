@@ -1,0 +1,42 @@
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: var(--ling-z-max, 9999);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ling-void-bottom, #060608);
+  animation: revealFadeOut 0.5s ease-in 1.8s forwards;
+}
+
+/* Generic serif — does NOT depend on Instrument Serif loading */
+.text {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(48px, 12vw, 96px);
+  font-weight: 400;
+  color: var(--ling-text-1, #FAFAFA);
+  letter-spacing: 0.5em;
+  opacity: 0;
+  animation: letterReveal 1.5s cubic-bezier(0.33, 1, 0.68, 1) 0.3s forwards;
+}
+
+@keyframes letterReveal {
+  0%   { letter-spacing: 0.5em; opacity: 0; }
+  30%  { opacity: 1; }
+  100% { letter-spacing: 0.02em; opacity: 1; }
+}
+
+@keyframes revealFadeOut {
+  to { opacity: 0; visibility: hidden; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    animation: revealFadeOut 0.2s ease-in 0.5s forwards;
+  }
+  .text {
+    animation: none;
+    opacity: 1;
+    letter-spacing: 0.02em;
+  }
+}

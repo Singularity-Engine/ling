@@ -1,0 +1,187 @@
+/* ═══════════════════════════════════════════════════════════
+   Screen 5 — "The boundary is fracturing."
+   Design: Climactic final screen. Fracture + CTA + Pricing.
+   Emotion: Resolution / Agency — "now it's your turn"
+   ═══════════════════════════════════════════════════════════ */
+
+.root {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  padding: var(--ling-space-16) var(--ling-space-10) var(--ling-space-16) var(--ling-space-8);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* ── Hero background image ── */
+.heroBg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.heroBg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 15% 42%;
+  opacity: 0.72;
+  /* Left-to-right fade: Ling clearly visible in left 30%, fades to protect text on right */
+  mask-image: linear-gradient(
+    to right,
+    black 0%,
+    black 28%,
+    rgba(0, 0, 0, 0.25) 42%,
+    transparent 52%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    black 0%,
+    black 28%,
+    rgba(0, 0, 0, 0.25) 42%,
+    transparent 52%
+  );
+}
+
+/* Ensure all content sits above the hero bg */
+.root > *:not(.heroBg) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Headline — right-aligned to leave Ling visible on left ── */
+.headline {
+  font-family: var(--ling-font-ling);
+  font-size: var(--ling-font-display-lg);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ling-text-1);
+  margin: 0 0 var(--ling-space-10);
+  text-align: right;
+  max-width: 60%;
+}
+
+/* ── Fracture container ── */
+.fractureWrap {
+  width: 75%;
+  max-width: 800px;
+  margin-bottom: var(--ling-space-12);
+  opacity: 0.6;
+}
+
+/* ── CTA — The primary conversion button ── */
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: var(--ling-space-4) var(--ling-space-12);
+  border-radius: var(--ling-radius-full);
+  background: var(--ling-accent);
+  color: white;
+  font-family: var(--ling-font-world);
+  font-size: var(--ling-font-lg);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  cursor: pointer;
+  margin-bottom: var(--ling-space-16);
+
+  /* Double-layer glow (P1 #13) */
+  box-shadow:
+    0 0 40px var(--ling-accent-25),
+    0 0 80px rgba(139, 92, 246, 0.06);
+
+  transition:
+    background var(--ling-duration-fast),
+    box-shadow var(--ling-duration-normal),
+    transform var(--ling-duration-fast);
+}
+
+.cta:hover {
+  background: var(--ling-accent-deep);
+  box-shadow:
+    0 0 48px var(--ling-accent-30),
+    0 0 96px rgba(139, 92, 246, 0.1);
+  transform: translateY(-1px);
+}
+
+.cta:active {
+  transform: translateY(0);
+}
+
+/* ── Tiers grid — shifted right to leave Ling visible on left ── */
+.tiersGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--ling-space-5);
+  width: 75%;
+  max-width: 850px;
+  margin-left: auto;
+  margin-right: 0;
+}
+
+/* ── Safe area for iPhone home indicator ── */
+.safeArea {
+  height: env(safe-area-inset-bottom, 0px);
+  flex-shrink: 0;
+}
+
+/* ═══ TABLET ═══ */
+@media (max-width: 1024px) {
+  .tiersGrid {
+    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* ═══ MOBILE ═══ */
+@media (max-width: 768px) {
+  .root {
+    align-items: center;
+    padding: var(--ling-space-10) var(--ling-space-4);
+  }
+
+  .headline {
+    font-size: var(--ling-font-hero-mobile);
+    margin-bottom: var(--ling-space-8);
+    text-align: center;
+    max-width: 100%;
+  }
+
+  .fractureWrap {
+    width: 100%;
+  }
+
+  .fractureWrap {
+    margin-bottom: var(--ling-space-8);
+  }
+
+  .cta {
+    min-height: 56px;
+    width: 100%;
+    max-width: 320px;
+    margin-bottom: var(--ling-space-10);
+  }
+
+  .tiersGrid {
+    grid-template-columns: 1fr;
+    max-width: 360px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta {
+    transition: none;
+  }
+}

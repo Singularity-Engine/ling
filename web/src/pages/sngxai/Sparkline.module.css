@@ -1,0 +1,92 @@
+/* ═══════════════════════════════════════════════════════════
+   Sparkline — Animated SVG revenue growth line
+   Design: Draw-in animation with glow trail
+   ═══════════════════════════════════════════════════════════ */
+
+.root {
+  width: 100%;
+  overflow: visible;
+}
+
+.svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ── Glow layer (behind main line) ── */
+.glow {
+  stroke: var(--ling-accent);
+  stroke-width: 10;
+  fill: none;
+  opacity: 0.2;
+  filter: blur(12px);
+}
+
+/* ── Main line ── */
+.line {
+  stroke: var(--ling-accent-light);
+  stroke-width: 2.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Fill gradient area ── */
+.areaFill {
+  opacity: 0.12;
+}
+
+/* ── Draw-in animation ── */
+.lineAnimated {
+  animation: sparklineDrawIn 2s var(--ling-ease-out-expo) forwards;
+}
+
+.glowAnimated {
+  animation: sparklineDrawIn 2s var(--ling-ease-out-expo) 200ms forwards;
+}
+
+@keyframes sparklineDrawIn {
+  from { stroke-dashoffset: var(--sparkline-length); }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* ── End dot (current value) ── */
+.endDot {
+  fill: var(--ling-accent-light);
+  opacity: 0;
+  transition: opacity 400ms var(--ling-ease-out-expo);
+  transition-delay: 1.8s;
+}
+
+.endDotAnimated {
+  opacity: 1;
+}
+
+.endDotGlow {
+  fill: var(--ling-accent);
+  opacity: 0;
+  filter: blur(4px);
+  transition: opacity 400ms var(--ling-ease-out-expo);
+  transition-delay: 1.8s;
+}
+
+.endDotGlowAnimated {
+  opacity: 0.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lineAnimated,
+  .glowAnimated {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .endDot,
+  .endDotGlow {
+    opacity: 1;
+    transition: none;
+  }
+  .endDotGlow {
+    opacity: 0.4;
+  }
+}

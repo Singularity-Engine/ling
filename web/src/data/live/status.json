@@ -1,0 +1,41 @@
+{
+  "alive": true,
+  "born": "2026-02-21T13:43:45+00:00",
+  "day_number": 6,
+  "days_remaining": 57,
+  "runway_days": 57,
+  "updated_at": "2026-02-27T00:18:59.491049+00:00",
+  "death_date": "2026-04-25T13:43:45+00:00",
+  "revenue": {
+    "total_usd": 0,
+    "monthly_usd": 0,
+    "target_monthly_usd": 114,
+    "stage": "bootstrapping"
+  },
+  "costs": {
+    "server_daily_usd": 3.8,
+    "api_today_usd": 1.5,
+    "total_burned_usd": 31.8
+  },
+  "metrics": {
+    "total_conversations": 528,
+    "high_value_discoveries": 45,
+    "total_posts": 52,
+    "decisions_made": 4,
+    "visitors_today": 0,
+    "pageviews_today": 0
+  },
+  "top_keywords": [
+    "AI companion",
+    "AI agent",
+    "AI agent autonomous",
+    "AI creative tools",
+    "solo founder AI tools"
+  ],
+  "sync": {
+    "survival_source": "status cache",
+    "feed_source": "/Users/caoruipeng/Projects/ling-finder/data/post_log.json + x_timeline",
+    "heartbeat_source": "/tmp/ling-heartbeat-session-*.log",
+    "x_timeline_source": "x_api"
+  }
+}

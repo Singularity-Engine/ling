@@ -1,0 +1,264 @@
+import { useState, useEffect, useCallback } from 'react';
+import i18n from 'i18next';
+import { useBgUrlState, useBgUrlActions } from '@/context/BgurlContext';
+import { useCameraActions } from '@/context/CameraContext';
+import { useConfigState, useConfigActions } from '@/context/CharacterConfigContext';
+import { useSubtitle } from '@/context/SubtitleContext';
+import { useWebSocketState, useWebSocketActions, defaultBaseUrl, defaultWsUrl } from '@/context/WebsocketContext';
+import { useSwitchCharacter } from '@/hooks/utils/use-switch-character';
+import { createLogger } from '@/utils/logger';
+import { SK_IMAGE_COMPRESSION_QUALITY, SK_IMAGE_MAX_WIDTH } from '@/constants/storage-keys';
+
+const log = createLogger('Settings');
+
+export const DEFAULT_IMAGE_COMPRESSION_QUALITY = 0.8;
+export const DEFAULT_IMAGE_MAX_WIDTH = 0;
+
+interface GeneralSettings {
+  language: string[]
+  customBgUrl: string
+  selectedBgUrl: string[]
+  backgroundUrl: string
+  selectedCharacterPreset: string[]
+  useCameraBackground: boolean
+  wsUrl: string
+  baseUrl: string
+  showSubtitle: boolean
+  imageCompressionQuality: number;
+  imageMaxWidth: number;
+}
+
+interface UseGeneralSettingsProps {
+  onSave?: (callback: () => void) => () => void
+  onCancel?: (callback: () => void) => () => void
+}
+
+const loadInitialCompressionQuality = (): number => {
+  const storedQuality = localStorage.getItem(SK_IMAGE_COMPRESSION_QUALITY);
+  if (storedQuality) {
+    const quality = parseFloat(storedQuality);
+    if (!Number.isNaN(quality) && quality >= 0.1 && quality <= 1.0) {
+      return quality;
+    }
+  }
+  return DEFAULT_IMAGE_COMPRESSION_QUALITY;
+};
+
+const loadInitialImageMaxWidth = (): number => {
+  const storedMaxWidth = localStorage.getItem(SK_IMAGE_MAX_WIDTH);
+  if (storedMaxWidth) {
+    const maxWidth = parseInt(storedMaxWidth, 10);
+    if (!Number.isNaN(maxWidth) && maxWidth >= 0) {
+      return maxWidth;
+    }
+  }
+  return DEFAULT_IMAGE_MAX_WIDTH;
+};
+
+export const useGeneralSettings = ({
+  onSave,
+  onCancel,
+}: UseGeneralSettingsProps) => {
+  const { backgroundUrl, useCameraBackground } = useBgUrlState();
+  const { setBackgroundUrl, setUseCameraBackground } = useBgUrlActions();
+  const { confName, configFiles, getFilenameByName } = useConfigState();
+  const { setConfName } = useConfigActions();
+  const { wsUrl, baseUrl } = useWebSocketState();
+  const { setWsUrl, setBaseUrl } = useWebSocketActions();
+  const { showSubtitle, setShowSubtitle } = useSubtitle();
+  const { startBackgroundCamera, stopBackgroundCamera } = useCameraActions();
+  const { switchCharacter } = useSwitchCharacter();
+
+  const getCurrentBgKey = (): string[] => {
+    if (!backgroundUrl) return [];
+    const path = backgroundUrl.replace(baseUrl, '');
+    return path.startsWith('/bg/') ? [path] : [];
+  };
+
+  const getCurrentCharacterFilename = (): string[] => {
+    if (!confName) return [];
+    const filename = getFilenameByName(confName);
+    return filename ? [filename] : [];
+  };
+
+  const initialSettings: GeneralSettings = {
+    language: [i18n.language || 'en'],
+    customBgUrl: !backgroundUrl?.includes('/bg/')
+      ? backgroundUrl || ''
+      : '',
+    selectedBgUrl: getCurrentBgKey(),
+    backgroundUrl: backgroundUrl || '',
+    selectedCharacterPreset: getCurrentCharacterFilename(),
+    useCameraBackground,
+    wsUrl: wsUrl || defaultWsUrl,
+    baseUrl: baseUrl || defaultBaseUrl,
+    showSubtitle,
+    imageCompressionQuality: loadInitialCompressionQuality(),
+    imageMaxWidth: loadInitialImageMaxWidth(),
+  };
+
+  const [settings, setSettings] = useState<GeneralSettings>(initialSettings);
+  const [originalSettings, setOriginalSettings] = useState<GeneralSettings>(initialSettings);
+  const originalConfName = confName;
+
+  useEffect(() => {
+    if (confName) {
+      const filename = getFilenameByName(confName);
+      if (filename) {
+        const newSettings = {
+          ...settings,
+          selectedCharacterPreset: [filename],
+        };
+        setSettings(newSettings);
+        setOriginalSettings(newSettings);
+      }
+    }
+  }, [confName]);
+
+  const handleSettingChange = useCallback((
+    key: keyof GeneralSettings,
+    value: GeneralSettings[keyof GeneralSettings],
+  ): void => {
+    setSettings((prev) => {
+      const next = { ...prev, [key]: value };
+
+      // Apply per-key side-effects in the same tick (event-driven, not effect-driven).
+      switch (key) {
+        case 'wsUrl':
+          setWsUrl(value as string);
+          break;
+        case 'baseUrl':
+          setBaseUrl(value as string);
+          break;
+        case 'language':
+          if (Array.isArray(value) && value.length > 0 && value[0] !== i18n.language) {
+            i18n.changeLanguage(value[0]);
+          }
+          break;
+        case 'showSubtitle':
+          setShowSubtitle(value as boolean);
+          break;
+        case 'customBgUrl':
+        case 'selectedBgUrl': {
+          const bgVal = key === 'customBgUrl'
+            ? (value as string)
+            : (Array.isArray(value) ? value[0] : '');
+          const resolvedBgUrl = bgVal || (key === 'customBgUrl' ? next.selectedBgUrl[0] : next.customBgUrl);
+          if (resolvedBgUrl) {
+            const fullUrl = resolvedBgUrl.startsWith('http') ? resolvedBgUrl : `${baseUrl}${resolvedBgUrl}`;
+            setBackgroundUrl(fullUrl);
+          }
+          break;
+        }
+        case 'imageCompressionQuality':
+          localStorage.setItem(SK_IMAGE_COMPRESSION_QUALITY, String(value));
+          break;
+        case 'imageMaxWidth':
+          localStorage.setItem(SK_IMAGE_MAX_WIDTH, String(value));
+          break;
+        default:
+          break;
+      }
+
+      return next;
+    });
+  }, [setWsUrl, setBaseUrl, setShowSubtitle, setBackgroundUrl, baseUrl]);
+
+  const handleSave = useCallback((): void => {
+    setSettings((current) => {
+      setOriginalSettings(current);
+      return current;
+    });
+  }, []);
+
+  const handleCancel = useCallback((): void => {
+    setOriginalSettings((orig) => {
+      setSettings(orig);
+
+      // Restore all settings to original values
+      setShowSubtitle(orig.showSubtitle);
+      setBackgroundUrl(orig.backgroundUrl);
+      setUseCameraBackground(orig.useCameraBackground);
+      setWsUrl(orig.wsUrl);
+      setBaseUrl(orig.baseUrl);
+
+      // Restore original character preset
+      if (originalConfName) {
+        setConfName(originalConfName);
+      }
+
+      // Handle camera state
+      if (orig.useCameraBackground) {
+        startBackgroundCamera();
+      } else {
+        stopBackgroundCamera();
+      }
+
+      return orig;
+    });
+  }, [setBackgroundUrl, setUseCameraBackground, setWsUrl, setBaseUrl, originalConfName, setConfName, setShowSubtitle, startBackgroundCamera, stopBackgroundCamera]);
+
+  // Register save/cancel callbacks with the settings panel.
+  // deps include handleSave/handleCancel so stale closures are avoided.
+  useEffect(() => {
+    if (!onSave || !onCancel) return;
+
+    const cleanupSave = onSave(() => {
+      handleSave();
+    });
+
+    const cleanupCancel = onCancel(() => {
+      handleCancel();
+    });
+
+    return () => {
+      cleanupSave?.();
+      cleanupCancel?.();
+    };
+  }, [onSave, onCancel, handleSave, handleCancel]);
+
+  const handleCharacterPresetChange = useCallback((value: string[]): void => {
+    const selectedFilename = value[0];
+    const selectedConfig = configFiles.find((config) => config.filename === selectedFilename);
+    const currentFilename = confName ? getFilenameByName(confName) : '';
+
+    handleSettingChange('selectedCharacterPreset', value);
+
+    if (currentFilename === selectedFilename) {
+      return;
+    }
+
+    if (selectedConfig) {
+      switchCharacter(selectedFilename);
+    }
+  }, [configFiles, confName, getFilenameByName, handleSettingChange, switchCharacter]);
+
+  const handleCameraToggle = useCallback(async (checked: boolean) => {
+    if (checked) {
+      try {
+        await startBackgroundCamera();
+        handleSettingChange('useCameraBackground', true);
+        setUseCameraBackground(true);
+      } catch (error) {
+        log.error('Failed to start camera:', error);
+        handleSettingChange('useCameraBackground', false);
+        setUseCameraBackground(false);
+      }
+    } else {
+      stopBackgroundCamera();
+      handleSettingChange('useCameraBackground', false);
+      setUseCameraBackground(false);
+    }
+  }, [setUseCameraBackground, startBackgroundCamera, stopBackgroundCamera, handleSettingChange]);
+
+  return {
+    settings,
+    handleSettingChange,
+    handleSave,
+    handleCancel,
+    handleCameraToggle,
+    handleCharacterPresetChange,
+    showSubtitle,
+    setShowSubtitle,
+  };
+};

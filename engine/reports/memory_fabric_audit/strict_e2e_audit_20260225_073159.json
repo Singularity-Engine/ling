@@ -1,0 +1,2201 @@
+{
+  "generated_at": "2026-02-25T07:31:59.824182+00:00",
+  "started_at": "2026-02-25T07:30:50.931964+00:00",
+  "benchmark_started_at": "2026-02-25T07:30:54.223790+00:00",
+  "env_snapshot": {
+    "SOUL_FABRIC_STRICT_MODE": "true",
+    "SOUL_BENCHMARK_REQUIRE_REAL": "true",
+    "SOUL_BENCHMARK_MIN_IMPROVEMENT": "0.05",
+    "SOUL_BENCHMARK_BASELINE_LONGMEMEVAL": "0.35",
+    "SOUL_BENCHMARK_BASELINE_LOCOMO": "0.4",
+    "SOUL_BENCHMARK_BASELINE_MEMORYARENA": "0.3",
+    "SOUL_BENCHMARK_BASELINE_LOCOMO_PLUS": "0.35",
+    "SOUL_BENCHMARK_CMD_LONGMEMEVAL": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LongMemEval --cases 40 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+    "SOUL_BENCHMARK_CMD_LOCOMO": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo --cases 40 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+    "SOUL_BENCHMARK_CMD_MEMORYARENA": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite MemoryArena --cases 40 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+    "SOUL_BENCHMARK_CMD_LOCOMO_PLUS": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo-Plus --cases 40 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220"
+  },
+  "dependency": {
+    "ports": {
+      "mongo_27017": true,
+      "qdrant_6333": true,
+      "neo4j_bolt_7687": true,
+      "evermemos_1995": true
+    },
+    "imports": {
+      "motor": true,
+      "pymongo": true,
+      "mem0": true,
+      "graphiti_core": true
+    },
+    "adapters": {
+      "graphiti_health": true,
+      "graphiti_runtime": {
+        "available": true,
+        "initialized": true,
+        "fallback": false,
+        "permanently_unavailable": false,
+        "unknown": false,
+        "last_init_attempt": 575453.952902708
+      },
+      "mem0_health": true,
+      "mem0_runtime": {
+        "available": true,
+        "initialized": true,
+        "permanently_unavailable": false,
+        "unknown": false,
+        "last_init_attempt": 575454.062541125
+      }
+    }
+  },
+  "strict_coverage": {
+    "capability_to_providers": {
+      "episodic": [
+        "qdrant",
+        "evermemos"
+      ],
+      "semantic": [
+        "qdrant",
+        "mem0"
+      ],
+      "entity": [
+        "mem0"
+      ],
+      "temporal_graph": [
+        "graphiti"
+      ],
+      "relationship": [
+        "mongodb_internal"
+      ],
+      "affective": [
+        "mongodb_internal"
+      ],
+      "abstraction": [
+        "mongodb_internal"
+      ],
+      "collective": [
+        "collective"
+      ],
+      "core_blocks": [
+        "letta_core_blocks"
+      ],
+      "procedural": [
+        "langmem"
+      ],
+      "safety_memory": [
+        "safety_memory"
+      ],
+      "governance": [
+        "mongodb_internal",
+        "letta_core_blocks",
+        "langmem"
+      ],
+      "evaluation": [
+        "evaluation_runner"
+      ]
+    },
+    "provider_runtime_health": {
+      "mongodb_internal": true,
+      "qdrant": true,
+      "evermemos": true,
+      "graphiti": true,
+      "mem0": true,
+      "collective": true,
+      "letta_core_blocks": true,
+      "langmem": true,
+      "safety_memory": true,
+      "evaluation_runner": true
+    },
+    "unhealthy_enabled_providers": [],
+    "required_capabilities": [
+      "abstraction",
+      "affective",
+      "collective",
+      "core_blocks",
+      "entity",
+      "episodic",
+      "evaluation",
+      "governance",
+      "procedural",
+      "relationship",
+      "safety_memory",
+      "semantic",
+      "temporal_graph"
+    ],
+    "missing_capabilities": [],
+    "missing_optional_capabilities": [],
+    "strict_mode": true
+  },
+  "plan_recall_error": null,
+  "benchmark_error": null,
+  "benchmark_summary": {
+    "total_atoms": 2578,
+    "quarantined": 0,
+    "quarantine_ratio": 0.0,
+    "recall_p95_ms": 209.041,
+    "recall_p95_source": "real_runner",
+    "historical_recall_p95_ms": 504.392,
+    "real_runs": 4,
+    "proxy_runs": 0,
+    "missing_real_suites": []
+  },
+  "benchmark_suites": {
+    "LongMemEval": {
+      "status": "ok",
+      "mode": "real",
+      "score": 0.308383
+    },
+    "LoCoMo": {
+      "status": "ok",
+      "mode": "real",
+      "score": 0.233323
+    },
+    "MemoryArena": {
+      "status": "ok",
+      "mode": "real",
+      "score": 0.353451
+    },
+    "LoCoMo-Plus": {
+      "status": "ok",
+      "mode": "real",
+      "score": 0.352106
+    }
+  },
+  "benchmark_gates": {
+    "min_improvement_required": 0.05,
+    "failed_improvement_suites": [
+      {
+        "suite": "LongMemEval",
+        "score": 0.308383,
+        "baseline": 0.35,
+        "delta": -0.041617
+      },
+      {
+        "suite": "LoCoMo",
+        "score": 0.233323,
+        "baseline": 0.4,
+        "delta": -0.166677
+      },
+      {
+        "suite": "LoCoMo-Plus",
+        "score": 0.352106,
+        "baseline": 0.35,
+        "delta": 0.002106
+      }
+    ],
+    "missing_baseline_suites": []
+  },
+  "recent_benchmark_runs": [
+    {
+      "suite": "LoCoMo-Plus",
+      "score": 0.352106,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "LoCoMo-Plus(EverMemBench-Dynamic topic01)",
+          "qa_used": 40,
+          "cases": 40
+        },
+        "user_id": "bench.locomo_plus_1772004701",
+        "ingested_chunks": 220,
+        "case_count": 40,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 14,
+        "hit_rate": 0.35,
+        "avg_f1": 0.005899,
+        "recall_avg_ms": 205.442,
+        "recall_p50_ms": 204.715,
+        "recall_p95_ms": 207.942,
+        "recall_latencies_ms": [
+          207.672,
+          203.899,
+          204.715,
+          207.033,
+          204.009,
+          202.994,
+          206.521,
+          207.143,
+          204.19,
+          207.181,
+          204.141,
+          212.274,
+          204.539,
+          202.633,
+          207.219,
+          204.203,
+          204.462,
+          206.171,
+          205.294,
+          203.687,
+          206.952,
+          205.856,
+          203.546,
+          206.212,
+          202.974,
+          203.75,
+          207.797,
+          203.911,
+          209.186,
+          203.319,
+          206.214,
+          206.996,
+          206.184,
+          203.762,
+          207.942,
+          204.526,
+          206.325,
+          204.058,
+          203.796,
+          204.404
+        ],
+        "ingest_ms": 3933,
+        "eval_ms": 8234,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 207.672
+          },
+          {
+            "index": 1,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 203.899
+          },
+          {
+            "index": 2,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 204.715
+          },
+          {
+            "index": 3,
+            "score": 0.02095,
+            "exact_hit": false,
+            "f1": 0.01676,
+            "recall_ms": 207.033
+          },
+          {
+            "index": 4,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 204.009
+          },
+          {
+            "index": 5,
+            "score": 0.013986,
+            "exact_hit": false,
+            "f1": 0.011189,
+            "recall_ms": 202.994
+          },
+          {
+            "index": 6,
+            "score": 0.010563,
+            "exact_hit": false,
+            "f1": 0.008451,
+            "recall_ms": 206.521
+          },
+          {
+            "index": 7,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.0,
+            "recall_ms": 207.143
+          },
+          {
+            "index": 8,
+            "score": 0.013947,
+            "exact_hit": false,
+            "f1": 0.011158,
+            "recall_ms": 204.19
+          },
+          {
+            "index": 9,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.011331,
+            "recall_ms": 207.181
+          }
+        ],
+        "elapsed_ms": 18564,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo-Plus --cases 40 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": ":292 - [Soul] Recall completed in 204ms (qdrant=0, evermemos=8, fabric_events=8, foresight=0, resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:31:58.147 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation\n2026-02-25 02:31:58.147 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count",
+        "stdout_tail": "\": 0.0, \"exact_hit\": false, \"f1\": 0.0, \"recall_ms\": 204.009}, {\"index\": 5, \"score\": 0.013986, \"exact_hit\": false, \"f1\": 0.011189, \"recall_ms\": 202.994}, {\"index\": 6, \"score\": 0.010563, \"exact_hit\": false, \"f1\": 0.008451, \"recall_ms\": 206.521}, {\"index\": 7, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.0, \"recall_ms\": 207.143}, {\"index\": 8, \"score\": 0.013947, \"exact_hit\": false, \"f1\": 0.011158, \"recall_ms\": 204.19}, {\"index\": 9, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.011331, \"recall_ms\": 207.181}]}}",
+        "baseline": 0.35,
+        "delta": 0.002106,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": 0.0021059999999999968,
+      "created_at": "2026-02-25T07:31:59.814000"
+    },
+    {
+      "suite": "MemoryArena",
+      "score": 0.353451,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "MemoryArena",
+          "files_used": 1,
+          "cases": 40
+        },
+        "user_id": "bench.memoryarena_1772004686",
+        "ingested_chunks": 80,
+        "case_count": 40,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 14,
+        "hit_rate": 0.35,
+        "avg_f1": 0.009041,
+        "recall_avg_ms": 206.209,
+        "recall_p50_ms": 206.098,
+        "recall_p95_ms": 210.94,
+        "recall_latencies_ms": [
+          206.446,
+          206.326,
+          205.575,
+          206.819,
+          205.053,
+          205.067,
+          204.458,
+          204.9,
+          207.568,
+          205.084,
+          203.291,
+          208.768,
+          203.871,
+          206.216,
+          207.113,
+          203.267,
+          203.22,
+          202.808,
+          207.223,
+          203.631,
+          207.103,
+          204.811,
+          206.598,
+          208.003,
+          203.996,
+          206.366,
+          206.99,
+          204.765,
+          213.418,
+          210.94,
+          206.098,
+          212.049,
+          205.544,
+          209.855,
+          204.079,
+          208.567,
+          203.581,
+          204.999,
+          207.903,
+          205.971
+        ],
+        "ingest_ms": 1099,
+        "eval_ms": 8266,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 0.007092,
+            "exact_hit": false,
+            "f1": 0.005674,
+            "recall_ms": 206.446
+          },
+          {
+            "index": 1,
+            "score": 0.007092,
+            "exact_hit": false,
+            "f1": 0.005674,
+            "recall_ms": 206.326
+          },
+          {
+            "index": 2,
+            "score": 0.007092,
+            "exact_hit": false,
+            "f1": 0.005674,
+            "recall_ms": 205.575
+          },
+          {
+            "index": 3,
+            "score": 0.007092,
+            "exact_hit": false,
+            "f1": 0.005674,
+            "recall_ms": 206.819
+          },
+          {
+            "index": 4,
+            "score": 0.007092,
+            "exact_hit": false,
+            "f1": 0.005674,
+            "recall_ms": 205.053
+          },
+          {
+            "index": 5,
+            "score": 0.007092,
+            "exact_hit": false,
+            "f1": 0.005674,
+            "recall_ms": 205.067
+          },
+          {
+            "index": 6,
+            "score": 0.003546,
+            "exact_hit": false,
+            "f1": 0.002837,
+            "recall_ms": 204.458
+          },
+          {
+            "index": 7,
+            "score": 0.007092,
+            "exact_hit": false,
+            "f1": 0.005674,
+            "recall_ms": 204.9
+          },
+          {
+            "index": 8,
+            "score": 0.007092,
+            "exact_hit": false,
+            "f1": 0.005674,
+            "recall_ms": 207.568
+          },
+          {
+            "index": 9,
+            "score": 0.003551,
+            "exact_hit": false,
+            "f1": 0.002841,
+            "recall_ms": 205.084
+          }
+        ],
+        "elapsed_ms": 14692,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite MemoryArena --cases 40 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": ":292 - [Soul] Recall completed in 206ms (qdrant=0, evermemos=8, fabric_events=8, foresight=0, resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:31:39.275 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation\n2026-02-25 02:31:39.275 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count",
+        "stdout_tail": "false, \"f1\": 0.005674, \"recall_ms\": 205.053}, {\"index\": 5, \"score\": 0.007092, \"exact_hit\": false, \"f1\": 0.005674, \"recall_ms\": 205.067}, {\"index\": 6, \"score\": 0.003546, \"exact_hit\": false, \"f1\": 0.002837, \"recall_ms\": 204.458}, {\"index\": 7, \"score\": 0.007092, \"exact_hit\": false, \"f1\": 0.005674, \"recall_ms\": 204.9}, {\"index\": 8, \"score\": 0.007092, \"exact_hit\": false, \"f1\": 0.005674, \"recall_ms\": 207.568}, {\"index\": 9, \"score\": 0.003551, \"exact_hit\": false, \"f1\": 0.002841, \"recall_ms\": 205.084}]}}",
+        "baseline": 0.3,
+        "delta": 0.053451,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": 0.053451000000000026,
+      "created_at": "2026-02-25T07:31:41.248000"
+    },
+    {
+      "suite": "LoCoMo",
+      "score": 0.233323,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "LoCoMo",
+          "samples_used": 1,
+          "cases": 40
+        },
+        "user_id": "bench.locomo_1772004670",
+        "ingested_chunks": 220,
+        "case_count": 40,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 9,
+        "hit_rate": 0.225,
+        "avg_f1": 0.013409,
+        "recall_avg_ms": 205.367,
+        "recall_p50_ms": 204.938,
+        "recall_p95_ms": 208.312,
+        "recall_latencies_ms": [
+          203.415,
+          203.646,
+          207.267,
+          203.464,
+          202.831,
+          207.804,
+          204.642,
+          202.648,
+          203.596,
+          210.711,
+          205.304,
+          206.857,
+          203.639,
+          204.938,
+          206.987,
+          205.754,
+          204.109,
+          206.433,
+          204.589,
+          203.803,
+          207.835,
+          204.177,
+          203.864,
+          207.999,
+          205.187,
+          208.388,
+          204.084,
+          206.356,
+          206.632,
+          204.684,
+          204.546,
+          206.803,
+          205.119,
+          204.659,
+          206.338,
+          203.659,
+          204.421,
+          208.312,
+          203.379,
+          205.811
+        ],
+        "ingest_ms": 3175,
+        "eval_ms": 8223,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 0.006702,
+            "exact_hit": false,
+            "f1": 0.005362,
+            "recall_ms": 203.415
+          },
+          {
+            "index": 1,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 203.646
+          },
+          {
+            "index": 2,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 207.267
+          },
+          {
+            "index": 3,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 203.464
+          },
+          {
+            "index": 4,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 202.831
+          },
+          {
+            "index": 5,
+            "score": 0.026596,
+            "exact_hit": false,
+            "f1": 0.021277,
+            "recall_ms": 207.804
+          },
+          {
+            "index": 6,
+            "score": 0.00672,
+            "exact_hit": false,
+            "f1": 0.005376,
+            "recall_ms": 204.642
+          },
+          {
+            "index": 7,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 202.648
+          },
+          {
+            "index": 8,
+            "score": 0.026596,
+            "exact_hit": false,
+            "f1": 0.021277,
+            "recall_ms": 203.596
+          },
+          {
+            "index": 9,
+            "score": 0.026596,
+            "exact_hit": false,
+            "f1": 0.021277,
+            "recall_ms": 210.711
+          }
+        ],
+        "elapsed_ms": 16660,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo --cases 40 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": ":292 - [Soul] Recall completed in 206ms (qdrant=0, evermemos=8, fabric_events=8, foresight=0, resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:31:24.775 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count\n2026-02-25 02:31:24.775 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation",
+        "stdout_tail": " \"exact_hit\": false, \"f1\": 0.0, \"recall_ms\": 202.831}, {\"index\": 5, \"score\": 0.026596, \"exact_hit\": false, \"f1\": 0.021277, \"recall_ms\": 207.804}, {\"index\": 6, \"score\": 0.00672, \"exact_hit\": false, \"f1\": 0.005376, \"recall_ms\": 204.642}, {\"index\": 7, \"score\": 0.0, \"exact_hit\": false, \"f1\": 0.0, \"recall_ms\": 202.648}, {\"index\": 8, \"score\": 0.026596, \"exact_hit\": false, \"f1\": 0.021277, \"recall_ms\": 203.596}, {\"index\": 9, \"score\": 0.026596, \"exact_hit\": false, \"f1\": 0.021277, \"recall_ms\": 210.711}]}}",
+        "baseline": 0.4,
+        "delta": -0.166677,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.16667700000000002,
+      "created_at": "2026-02-25T07:31:26.552000"
+    },
+    {
+      "suite": "LongMemEval",
+      "score": 0.308383,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "LongMemEval-oracle",
+          "rows_used": 40,
+          "cases": 40
+        },
+        "user_id": "bench.longmemeval_1772004654",
+        "ingested_chunks": 144,
+        "case_count": 40,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 12,
+        "hit_rate": 0.3,
+        "avg_f1": 0.01362,
+        "recall_avg_ms": 206.08,
+        "recall_p50_ms": 205.885,
+        "recall_p95_ms": 208.581,
+        "recall_latencies_ms": [
+          203.971,
+          206.679,
+          205.172,
+          204.266,
+          203.851,
+          207.295,
+          204.044,
+          208.307,
+          204.973,
+          208.065,
+          207.017,
+          203.041,
+          205.139,
+          205.788,
+          206.632,
+          207.673,
+          206.32,
+          215.242,
+          207.434,
+          205.58,
+          208.444,
+          209.041,
+          203.966,
+          203.964,
+          207.052,
+          204.281,
+          203.785,
+          207.266,
+          206.08,
+          207.871,
+          205.158,
+          205.885,
+          208.581,
+          203.487,
+          204.106,
+          207.181,
+          203.833,
+          204.733,
+          208.344,
+          203.67
+        ],
+        "ingest_ms": 1837,
+        "eval_ms": 8253,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 203.971
+          },
+          {
+            "index": 1,
+            "score": 0.005285,
+            "exact_hit": false,
+            "f1": 0.004228,
+            "recall_ms": 206.679
+          },
+          {
+            "index": 2,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 205.172
+          },
+          {
+            "index": 3,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 204.266
+          },
+          {
+            "index": 4,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.045929,
+            "recall_ms": 203.851
+          },
+          {
+            "index": 5,
+            "score": 0.046973,
+            "exact_hit": false,
+            "f1": 0.037578,
+            "recall_ms": 207.295
+          },
+          {
+            "index": 6,
+            "score": 0.046973,
+            "exact_hit": false,
+            "f1": 0.037578,
+            "recall_ms": 204.044
+          },
+          {
+            "index": 7,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 208.307
+          },
+          {
+            "index": 8,
+            "score": 0.046973,
+            "exact_hit": false,
+            "f1": 0.037578,
+            "recall_ms": 204.973
+          },
+          {
+            "index": 9,
+            "score": 0.005319,
+            "exact_hit": false,
+            "f1": 0.004255,
+            "recall_ms": 208.065
+          }
+        ],
+        "elapsed_ms": 15634,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LongMemEval --cases 40 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": ":292 - [Soul] Recall completed in 204ms (qdrant=0, evermemos=8, fabric_events=8, foresight=0, resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:31:07.804 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count\n2026-02-25 02:31:07.804 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation",
+        "stdout_tail": "ct_hit\": true, \"f1\": 0.045929, \"recall_ms\": 203.851}, {\"index\": 5, \"score\": 0.046973, \"exact_hit\": false, \"f1\": 0.037578, \"recall_ms\": 207.295}, {\"index\": 6, \"score\": 0.046973, \"exact_hit\": false, \"f1\": 0.037578, \"recall_ms\": 204.044}, {\"index\": 7, \"score\": 0.0, \"exact_hit\": false, \"f1\": 0.0, \"recall_ms\": 208.307}, {\"index\": 8, \"score\": 0.046973, \"exact_hit\": false, \"f1\": 0.037578, \"recall_ms\": 204.973}, {\"index\": 9, \"score\": 0.005319, \"exact_hit\": false, \"f1\": 0.004255, \"recall_ms\": 208.065}]}}",
+        "baseline": 0.35,
+        "delta": -0.041617,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.04161699999999996,
+      "created_at": "2026-02-25T07:31:09.888000"
+    },
+    {
+      "suite": "LoCoMo-Plus",
+      "score": 1.0,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "LoCoMo-Plus(EverMemBench-Dynamic topic01)",
+          "qa_used": 8,
+          "cases": 8
+        },
+        "user_id": "bench.locomo_plus_1772004191",
+        "ingested_chunks": 192,
+        "case_count": 8,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 8,
+        "hit_rate": 1.0,
+        "avg_f1": 0.014881,
+        "recall_avg_ms": 205.407,
+        "recall_p50_ms": 206.208,
+        "recall_p95_ms": 208.401,
+        "recall_latencies_ms": [
+          203.887,
+          208.12,
+          206.208,
+          206.539,
+          203.363,
+          202.82,
+          203.918,
+          208.401
+        ],
+        "ingest_ms": 2835,
+        "eval_ms": 1645,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.002805,
+            "recall_ms": 203.887
+          },
+          {
+            "index": 1,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.002805,
+            "recall_ms": 208.12
+          },
+          {
+            "index": 2,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.002805,
+            "recall_ms": 206.208
+          },
+          {
+            "index": 3,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.038567,
+            "recall_ms": 206.539
+          },
+          {
+            "index": 4,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.011173,
+            "recall_ms": 203.363
+          },
+          {
+            "index": 5,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.035862,
+            "recall_ms": 202.82
+          },
+          {
+            "index": 6,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.022222,
+            "recall_ms": 203.918
+          },
+          {
+            "index": 7,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.002805,
+            "recall_ms": 208.401
+          }
+        ],
+        "elapsed_ms": 9559,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo-Plus --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": ":292 - [Soul] Recall completed in 208ms (qdrant=0, evermemos=8, fabric_events=8, foresight=0, resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:23:19.399 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count\n2026-02-25 02:23:19.399 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation",
+        "stdout_tail": "2, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.002805, \"recall_ms\": 206.208}, {\"index\": 3, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.038567, \"recall_ms\": 206.539}, {\"index\": 4, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.011173, \"recall_ms\": 203.363}, {\"index\": 5, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.035862, \"recall_ms\": 202.82}, {\"index\": 6, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.022222, \"recall_ms\": 203.918}, {\"index\": 7, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.002805, \"recall_ms\": 208.401}]}}",
+        "baseline": 0.35,
+        "delta": 0.65,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": 0.65,
+      "created_at": "2026-02-25T07:23:21.134000"
+    },
+    {
+      "suite": "MemoryArena",
+      "score": 1.0,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "MemoryArena",
+          "files_used": 1,
+          "cases": 8
+        },
+        "user_id": "bench.memoryarena_1772004184",
+        "ingested_chunks": 16,
+        "case_count": 8,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 8,
+        "hit_rate": 1.0,
+        "avg_f1": 0.019268,
+        "recall_avg_ms": 205.212,
+        "recall_p50_ms": 204.968,
+        "recall_p95_ms": 207.8,
+        "recall_latencies_ms": [
+          204.026,
+          207.8,
+          203.694,
+          204.968,
+          206.24,
+          203.847,
+          204.024,
+          207.099
+        ],
+        "ingest_ms": 154,
+        "eval_ms": 1643,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 204.026
+          },
+          {
+            "index": 1,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 207.8
+          },
+          {
+            "index": 2,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 203.694
+          },
+          {
+            "index": 3,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 204.968
+          },
+          {
+            "index": 4,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 206.24
+          },
+          {
+            "index": 5,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 203.847
+          },
+          {
+            "index": 6,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 204.024
+          },
+          {
+            "index": 7,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 207.099
+          }
+        ],
+        "elapsed_ms": 7064,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite MemoryArena --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": ":292 - [Soul] Recall completed in 207ms (qdrant=0, evermemos=8, fabric_events=8, foresight=0, resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:23:09.681 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count\n2026-02-25 02:23:09.681 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation",
+        "stdout_tail": "2, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.019268, \"recall_ms\": 203.694}, {\"index\": 3, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.019268, \"recall_ms\": 204.968}, {\"index\": 4, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.019268, \"recall_ms\": 206.24}, {\"index\": 5, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.019268, \"recall_ms\": 203.847}, {\"index\": 6, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.019268, \"recall_ms\": 204.024}, {\"index\": 7, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.019268, \"recall_ms\": 207.099}]}}",
+        "baseline": 0.3,
+        "delta": 0.7,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": 0.7,
+      "created_at": "2026-02-25T07:23:11.573000"
+    },
+    {
+      "suite": "LoCoMo",
+      "score": 1.0,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "LoCoMo",
+          "samples_used": 1,
+          "cases": 8
+        },
+        "user_id": "bench.locomo_1772004174",
+        "ingested_chunks": 220,
+        "case_count": 8,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 8,
+        "hit_rate": 1.0,
+        "avg_f1": 0.016813,
+        "recall_avg_ms": 205.168,
+        "recall_p50_ms": 205.353,
+        "recall_p95_ms": 207.58,
+        "recall_latencies_ms": [
+          203.974,
+          203.48,
+          206.933,
+          203.777,
+          203.601,
+          207.58,
+          206.644,
+          205.353
+        ],
+        "ingest_ms": 3182,
+        "eval_ms": 1642,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.020202,
+            "recall_ms": 203.974
+          },
+          {
+            "index": 1,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.00678,
+            "recall_ms": 203.48
+          },
+          {
+            "index": 2,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.020202,
+            "recall_ms": 206.933
+          },
+          {
+            "index": 3,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.013514,
+            "recall_ms": 203.777
+          },
+          {
+            "index": 4,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.013514,
+            "recall_ms": 203.601
+          },
+          {
+            "index": 5,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.04,
+            "recall_ms": 207.58
+          },
+          {
+            "index": 6,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.013514,
+            "recall_ms": 206.644
+          },
+          {
+            "index": 7,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.00678,
+            "recall_ms": 205.353
+          }
+        ],
+        "elapsed_ms": 10505,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": ":292 - [Soul] Recall completed in 205ms (qdrant=0, evermemos=8, fabric_events=8, foresight=0, resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:23:02.192 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count\n2026-02-25 02:23:02.192 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation",
+        "stdout_tail": "ex\": 2, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.020202, \"recall_ms\": 206.933}, {\"index\": 3, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.013514, \"recall_ms\": 203.777}, {\"index\": 4, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.013514, \"recall_ms\": 203.601}, {\"index\": 5, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.04, \"recall_ms\": 207.58}, {\"index\": 6, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.013514, \"recall_ms\": 206.644}, {\"index\": 7, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.00678, \"recall_ms\": 205.353}]}}",
+        "baseline": 0.4,
+        "delta": 0.6,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": 0.6,
+      "created_at": "2026-02-25T07:23:04.491000"
+    },
+    {
+      "suite": "LongMemEval",
+      "score": 1.0,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "LongMemEval-oracle",
+          "rows_used": 8,
+          "cases": 8
+        },
+        "user_id": "bench.longmemeval_1772004167",
+        "ingested_chunks": 27,
+        "case_count": 8,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 8,
+        "hit_rate": 1.0,
+        "avg_f1": 0.022953,
+        "recall_avg_ms": 205.225,
+        "recall_p50_ms": 205.694,
+        "recall_p95_ms": 207.479,
+        "recall_latencies_ms": [
+          203.752,
+          203.489,
+          206.284,
+          207.479,
+          205.694,
+          206.507,
+          203.512,
+          205.085
+        ],
+        "ingest_ms": 219,
+        "eval_ms": 1643,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 203.752
+          },
+          {
+            "index": 1,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 203.489
+          },
+          {
+            "index": 2,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.003883,
+            "recall_ms": 206.284
+          },
+          {
+            "index": 3,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.011605,
+            "recall_ms": 207.479
+          },
+          {
+            "index": 4,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.041905,
+            "recall_ms": 205.694
+          },
+          {
+            "index": 5,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.041905,
+            "recall_ms": 206.507
+          },
+          {
+            "index": 6,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.041905,
+            "recall_ms": 203.512
+          },
+          {
+            "index": 7,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.003883,
+            "recall_ms": 205.085
+          }
+        ],
+        "elapsed_ms": 7078,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LongMemEval --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": ":292 - [Soul] Recall completed in 205ms (qdrant=0, evermemos=8, fabric_events=8, foresight=0, resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:22:52.192 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count\n2026-02-25 02:22:52.192 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation",
+        "stdout_tail": ", \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.003883, \"recall_ms\": 206.284}, {\"index\": 3, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.011605, \"recall_ms\": 207.479}, {\"index\": 4, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.041905, \"recall_ms\": 205.694}, {\"index\": 5, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.041905, \"recall_ms\": 206.507}, {\"index\": 6, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.041905, \"recall_ms\": 203.512}, {\"index\": 7, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.003883, \"recall_ms\": 205.085}]}}",
+        "baseline": 0.35,
+        "delta": 0.65,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": 0.65,
+      "created_at": "2026-02-25T07:22:53.984000"
+    },
+    {
+      "suite": "LoCoMo-Plus",
+      "score": 1.0,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "LoCoMo-Plus(EverMemBench-Dynamic topic01)",
+          "qa_used": 8,
+          "cases": 8
+        },
+        "user_id": "bench.locomo_plus_1772003957",
+        "ingested_chunks": 192,
+        "case_count": 8,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 8,
+        "hit_rate": 1.0,
+        "avg_f1": 0.014881,
+        "recall_avg_ms": 202.332,
+        "recall_p50_ms": 202.048,
+        "recall_p95_ms": 205.154,
+        "recall_latencies_ms": [
+          202.332,
+          201.419,
+          202.014,
+          202.048,
+          205.154,
+          202.234,
+          201.925,
+          201.534
+        ],
+        "ingest_ms": 2913,
+        "eval_ms": 1621,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.002805,
+            "recall_ms": 202.332
+          },
+          {
+            "index": 1,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.002805,
+            "recall_ms": 201.419
+          },
+          {
+            "index": 2,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.002805,
+            "recall_ms": 202.014
+          },
+          {
+            "index": 3,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.038567,
+            "recall_ms": 202.048
+          },
+          {
+            "index": 4,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.011173,
+            "recall_ms": 205.154
+          },
+          {
+            "index": 5,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.035862,
+            "recall_ms": 202.234
+          },
+          {
+            "index": 6,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.022222,
+            "recall_ms": 201.925
+          },
+          {
+            "index": 7,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.002805,
+            "recall_ms": 201.534
+          }
+        ],
+        "elapsed_ms": 9736,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo-Plus --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": " resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:19:25.203 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation\n2026-02-25 02:19:25.203 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x1245e8fd0>",
+        "stdout_tail": ", \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.002805, \"recall_ms\": 202.014}, {\"index\": 3, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.038567, \"recall_ms\": 202.048}, {\"index\": 4, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.011173, \"recall_ms\": 205.154}, {\"index\": 5, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.035862, \"recall_ms\": 202.234}, {\"index\": 6, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.022222, \"recall_ms\": 201.925}, {\"index\": 7, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.002805, \"recall_ms\": 201.534}]}}",
+        "baseline": 0.35,
+        "delta": 0.65,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": 0.65,
+      "created_at": "2026-02-25T07:19:26.770000"
+    },
+    {
+      "suite": "MemoryArena",
+      "score": 1.0,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "MemoryArena",
+          "files_used": 1,
+          "cases": 8
+        },
+        "user_id": "bench.memoryarena_1772003949",
+        "ingested_chunks": 16,
+        "case_count": 8,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 8,
+        "hit_rate": 1.0,
+        "avg_f1": 0.019268,
+        "recall_avg_ms": 205.119,
+        "recall_p50_ms": 201.945,
+        "recall_p95_ms": 226.679,
+        "recall_latencies_ms": [
+          226.679,
+          201.937,
+          201.312,
+          201.945,
+          202.848,
+          202.455,
+          201.884,
+          201.888
+        ],
+        "ingest_ms": 154,
+        "eval_ms": 1644,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 226.679
+          },
+          {
+            "index": 1,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 201.937
+          },
+          {
+            "index": 2,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 201.312
+          },
+          {
+            "index": 3,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 201.945
+          },
+          {
+            "index": 4,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 202.848
+          },
+          {
+            "index": 5,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 202.455
+          },
+          {
+            "index": 6,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 201.884
+          },
+          {
+            "index": 7,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 201.888
+          }
+        ],
+        "elapsed_ms": 7662,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite MemoryArena --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": " resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:19:14.735 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count\n2026-02-25 02:19:14.735 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x124963650>",
+        "stdout_tail": ", \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.019268, \"recall_ms\": 201.312}, {\"index\": 3, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.019268, \"recall_ms\": 201.945}, {\"index\": 4, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.019268, \"recall_ms\": 202.848}, {\"index\": 5, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.019268, \"recall_ms\": 202.455}, {\"index\": 6, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.019268, \"recall_ms\": 201.884}, {\"index\": 7, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.019268, \"recall_ms\": 201.888}]}}",
+        "baseline": 0.3,
+        "delta": 0.7,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": 0.7,
+      "created_at": "2026-02-25T07:19:17.031000"
+    },
+    {
+      "suite": "LoCoMo",
+      "score": 1.0,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "LoCoMo",
+          "samples_used": 1,
+          "cases": 8
+        },
+        "user_id": "bench.locomo_1772003938",
+        "ingested_chunks": 220,
+        "case_count": 8,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 8,
+        "hit_rate": 1.0,
+        "avg_f1": 0.016813,
+        "recall_avg_ms": 202.388,
+        "recall_p50_ms": 201.912,
+        "recall_p95_ms": 205.451,
+        "recall_latencies_ms": [
+          202.134,
+          201.854,
+          205.451,
+          202.133,
+          201.912,
+          201.816,
+          201.898,
+          201.906
+        ],
+        "ingest_ms": 3434,
+        "eval_ms": 1620,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.020202,
+            "recall_ms": 202.134
+          },
+          {
+            "index": 1,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.00678,
+            "recall_ms": 201.854
+          },
+          {
+            "index": 2,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.020202,
+            "recall_ms": 205.451
+          },
+          {
+            "index": 3,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.013514,
+            "recall_ms": 202.133
+          },
+          {
+            "index": 4,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.013514,
+            "recall_ms": 201.912
+          },
+          {
+            "index": 5,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.04,
+            "recall_ms": 201.816
+          },
+          {
+            "index": 6,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.013514,
+            "recall_ms": 201.898
+          },
+          {
+            "index": 7,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.00678,
+            "recall_ms": 201.906
+          }
+        ],
+        "elapsed_ms": 10754,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": " resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:19:07.240 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation\n2026-02-25 02:19:07.240 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x126eab9d0>",
+        "stdout_tail": "x\": 2, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.020202, \"recall_ms\": 205.451}, {\"index\": 3, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.013514, \"recall_ms\": 202.133}, {\"index\": 4, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.013514, \"recall_ms\": 201.912}, {\"index\": 5, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.04, \"recall_ms\": 201.816}, {\"index\": 6, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.013514, \"recall_ms\": 201.898}, {\"index\": 7, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.00678, \"recall_ms\": 201.906}]}}",
+        "baseline": 0.4,
+        "delta": 0.6,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": 0.6,
+      "created_at": "2026-02-25T07:19:09.367000"
+    },
+    {
+      "suite": "LongMemEval",
+      "score": 1.0,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "LongMemEval-oracle",
+          "rows_used": 8,
+          "cases": 8
+        },
+        "user_id": "bench.longmemeval_1772003931",
+        "ingested_chunks": 27,
+        "case_count": 8,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 8,
+        "hit_rate": 1.0,
+        "avg_f1": 0.022953,
+        "recall_avg_ms": 204.71,
+        "recall_p50_ms": 201.873,
+        "recall_p95_ms": 214.871,
+        "recall_latencies_ms": [
+          201.508,
+          201.584,
+          201.733,
+          214.871,
+          212.457,
+          201.679,
+          201.979,
+          201.873
+        ],
+        "ingest_ms": 245,
+        "eval_ms": 1640,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 201.508
+          },
+          {
+            "index": 1,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.019268,
+            "recall_ms": 201.584
+          },
+          {
+            "index": 2,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.003883,
+            "recall_ms": 201.733
+          },
+          {
+            "index": 3,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.011605,
+            "recall_ms": 214.871
+          },
+          {
+            "index": 4,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.041905,
+            "recall_ms": 212.457
+          },
+          {
+            "index": 5,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.041905,
+            "recall_ms": 201.679
+          },
+          {
+            "index": 6,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.041905,
+            "recall_ms": 201.979
+          },
+          {
+            "index": 7,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.003883,
+            "recall_ms": 201.873
+          }
+        ],
+        "elapsed_ms": 7300,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LongMemEval --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": " resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:18:56.857 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation\n2026-02-25 02:18:56.857 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x126615dd0>",
+        "stdout_tail": ", \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.003883, \"recall_ms\": 201.733}, {\"index\": 3, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.011605, \"recall_ms\": 214.871}, {\"index\": 4, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.041905, \"recall_ms\": 212.457}, {\"index\": 5, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.041905, \"recall_ms\": 201.679}, {\"index\": 6, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.041905, \"recall_ms\": 201.979}, {\"index\": 7, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.003883, \"recall_ms\": 201.873}]}}",
+        "baseline": 0.35,
+        "delta": 0.65,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": 0.65,
+      "created_at": "2026-02-25T07:18:58.607000"
+    },
+    {
+      "suite": "LoCoMo-Plus",
+      "score": 0.130847,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "LoCoMo-Plus(EverMemBench-Dynamic topic01)",
+          "qa_used": 8,
+          "cases": 8
+        },
+        "user_id": "bench.locomo_plus_1772003664",
+        "ingested_chunks": 192,
+        "case_count": 8,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 1,
+        "hit_rate": 0.125,
+        "avg_f1": 0.005074,
+        "recall_avg_ms": 532.056,
+        "recall_p50_ms": 501.95,
+        "recall_p95_ms": 740.655,
+        "recall_latencies_ms": [
+          740.655,
+          503.431,
+          501.95,
+          501.885,
+          500.985,
+          501.806,
+          501.944,
+          503.788
+        ],
+        "ingest_ms": 2688,
+        "eval_ms": 4260,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 740.655
+          },
+          {
+            "index": 1,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 503.431
+          },
+          {
+            "index": 2,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 501.95
+          },
+          {
+            "index": 3,
+            "score": 0.011646,
+            "exact_hit": false,
+            "f1": 0.009317,
+            "recall_ms": 501.885
+          },
+          {
+            "index": 4,
+            "score": 0.007886,
+            "exact_hit": false,
+            "f1": 0.006309,
+            "recall_ms": 500.985
+          },
+          {
+            "index": 5,
+            "score": 0.023328,
+            "exact_hit": false,
+            "f1": 0.018663,
+            "recall_ms": 501.806
+          },
+          {
+            "index": 6,
+            "score": 0.003918,
+            "exact_hit": false,
+            "f1": 0.003135,
+            "recall_ms": 501.944
+          },
+          {
+            "index": 7,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.00317,
+            "recall_ms": 503.788
+          }
+        ],
+        "elapsed_ms": 11684,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo-Plus --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": " resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:14:33.962 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count\n2026-02-25 02:14:33.962 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x126e59b50>",
+        "stdout_tail": "xact_hit\": false, \"f1\": 0.0, \"recall_ms\": 501.95}, {\"index\": 3, \"score\": 0.011646, \"exact_hit\": false, \"f1\": 0.009317, \"recall_ms\": 501.885}, {\"index\": 4, \"score\": 0.007886, \"exact_hit\": false, \"f1\": 0.006309, \"recall_ms\": 500.985}, {\"index\": 5, \"score\": 0.023328, \"exact_hit\": false, \"f1\": 0.018663, \"recall_ms\": 501.806}, {\"index\": 6, \"score\": 0.003918, \"exact_hit\": false, \"f1\": 0.003135, \"recall_ms\": 501.944}, {\"index\": 7, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.00317, \"recall_ms\": 503.788}]}}",
+        "baseline": 0.35,
+        "delta": -0.219153,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.219153,
+      "created_at": "2026-02-25T07:14:35.714000"
+    },
+    {
+      "suite": "MemoryArena",
+      "score": 1.0,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "MemoryArena",
+          "files_used": 1,
+          "cases": 8
+        },
+        "user_id": "bench.memoryarena_1772003655",
+        "ingested_chunks": 16,
+        "case_count": 8,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 8,
+        "hit_rate": 1.0,
+        "avg_f1": 0.016313,
+        "recall_avg_ms": 530.285,
+        "recall_p50_ms": 502.218,
+        "recall_p95_ms": 725.518,
+        "recall_latencies_ms": [
+          725.518,
+          502.33,
+          504.518,
+          502.034,
+          501.847,
+          501.891,
+          501.924,
+          502.218
+        ],
+        "ingest_ms": 166,
+        "eval_ms": 4245,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.016313,
+            "recall_ms": 725.518
+          },
+          {
+            "index": 1,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.016313,
+            "recall_ms": 502.33
+          },
+          {
+            "index": 2,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.016313,
+            "recall_ms": 504.518
+          },
+          {
+            "index": 3,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.016313,
+            "recall_ms": 502.034
+          },
+          {
+            "index": 4,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.016313,
+            "recall_ms": 501.847
+          },
+          {
+            "index": 5,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.016313,
+            "recall_ms": 501.891
+          },
+          {
+            "index": 6,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.016313,
+            "recall_ms": 501.924
+          },
+          {
+            "index": 7,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.016313,
+            "recall_ms": 502.218
+          }
+        ],
+        "elapsed_ms": 9161,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite MemoryArena --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": " resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:14:22.178 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation\n2026-02-25 02:14:22.178 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x122d39cd0>",
+        "stdout_tail": ", \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.016313, \"recall_ms\": 504.518}, {\"index\": 3, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.016313, \"recall_ms\": 502.034}, {\"index\": 4, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.016313, \"recall_ms\": 501.847}, {\"index\": 5, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.016313, \"recall_ms\": 501.891}, {\"index\": 6, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.016313, \"recall_ms\": 501.924}, {\"index\": 7, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.016313, \"recall_ms\": 502.218}]}}",
+        "baseline": 0.3,
+        "delta": 0.7,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": 0.7,
+      "created_at": "2026-02-25T07:14:24.019000"
+    },
+    {
+      "suite": "LoCoMo",
+      "score": 0.001179,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "LoCoMo",
+          "samples_used": 1,
+          "cases": 8
+        },
+        "user_id": "bench.locomo_1772003641",
+        "ingested_chunks": 220,
+        "case_count": 8,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 0,
+        "hit_rate": 0.0,
+        "avg_f1": 0.000943,
+        "recall_avg_ms": 533.958,
+        "recall_p50_ms": 502.219,
+        "recall_p95_ms": 755.823,
+        "recall_latencies_ms": [
+          755.823,
+          502.219,
+          501.921,
+          501.888,
+          501.912,
+          501.809,
+          503.583,
+          502.511
+        ],
+        "ingest_ms": 3483,
+        "eval_ms": 4274,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 755.823
+          },
+          {
+            "index": 1,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 502.219
+          },
+          {
+            "index": 2,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 501.921
+          },
+          {
+            "index": 3,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 501.888
+          },
+          {
+            "index": 4,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 501.912
+          },
+          {
+            "index": 5,
+            "score": 0.009434,
+            "exact_hit": false,
+            "f1": 0.007547,
+            "recall_ms": 501.809
+          },
+          {
+            "index": 6,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 503.583
+          },
+          {
+            "index": 7,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 502.511
+          }
+        ],
+        "elapsed_ms": 13314,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": " resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:14:13.180 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation\n2026-02-25 02:14:13.180 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x1260914d0>",
+        "stdout_tail": "}, {\"index\": 2, \"score\": 0.0, \"exact_hit\": false, \"f1\": 0.0, \"recall_ms\": 501.921}, {\"index\": 3, \"score\": 0.0, \"exact_hit\": false, \"f1\": 0.0, \"recall_ms\": 501.888}, {\"index\": 4, \"score\": 0.0, \"exact_hit\": false, \"f1\": 0.0, \"recall_ms\": 501.912}, {\"index\": 5, \"score\": 0.009434, \"exact_hit\": false, \"f1\": 0.007547, \"recall_ms\": 501.809}, {\"index\": 6, \"score\": 0.0, \"exact_hit\": false, \"f1\": 0.0, \"recall_ms\": 503.583}, {\"index\": 7, \"score\": 0.0, \"exact_hit\": false, \"f1\": 0.0, \"recall_ms\": 502.511}]}}",
+        "baseline": 0.4,
+        "delta": -0.398821,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.39882100000000004,
+      "created_at": "2026-02-25T07:14:14.853000"
+    },
+    {
+      "suite": "LongMemEval",
+      "score": 0.257759,
+      "status": "ok",
+      "details": {
+        "dataset": {
+          "dataset": "LongMemEval-oracle",
+          "rows_used": 8,
+          "cases": 8
+        },
+        "user_id": "bench.longmemeval_1772003631",
+        "ingested_chunks": 27,
+        "case_count": 8,
+        "top_k": 8,
+        "timeout_ms": 1200,
+        "exact_hits": 2,
+        "hit_rate": 0.25,
+        "avg_f1": 0.01035,
+        "recall_avg_ms": 535.26,
+        "recall_p50_ms": 502.058,
+        "recall_p95_ms": 765.759,
+        "recall_latencies_ms": [
+          765.759,
+          502.279,
+          501.936,
+          501.576,
+          501.668,
+          504.986,
+          502.058,
+          501.819
+        ],
+        "ingest_ms": 311,
+        "eval_ms": 4284,
+        "sample_cases": [
+          {
+            "index": 0,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 765.759
+          },
+          {
+            "index": 1,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 502.279
+          },
+          {
+            "index": 2,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 501.936
+          },
+          {
+            "index": 3,
+            "score": 0.0,
+            "exact_hit": false,
+            "f1": 0.0,
+            "recall_ms": 501.576
+          },
+          {
+            "index": 4,
+            "score": 0.031034,
+            "exact_hit": false,
+            "f1": 0.024828,
+            "recall_ms": 501.668
+          },
+          {
+            "index": 5,
+            "score": 0.031034,
+            "exact_hit": false,
+            "f1": 0.024828,
+            "recall_ms": 504.986
+          },
+          {
+            "index": 6,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.030345,
+            "recall_ms": 502.058
+          },
+          {
+            "index": 7,
+            "score": 1.0,
+            "exact_hit": true,
+            "f1": 0.002797,
+            "recall_ms": 501.819
+          }
+        ],
+        "elapsed_ms": 9785,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LongMemEval --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "stderr_tail": " resonance=0, graph=0, graphiti=0, mem0=0, core=0, procedural=0, safety=0, abstract=0, collective=0, stage=stranger)\n2026-02-25 02:13:59.866 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: fabric_record_recall_observation\n2026-02-25 02:13:59.866 | DEBUG    | ling_engine.soul.utils.async_tasks:_on_done:38 - [Soul] Background task cancelled: bump_recall_count\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x126060210>",
+        "stdout_tail": "core\": 0.0, \"exact_hit\": false, \"f1\": 0.0, \"recall_ms\": 501.936}, {\"index\": 3, \"score\": 0.0, \"exact_hit\": false, \"f1\": 0.0, \"recall_ms\": 501.576}, {\"index\": 4, \"score\": 0.031034, \"exact_hit\": false, \"f1\": 0.024828, \"recall_ms\": 501.668}, {\"index\": 5, \"score\": 0.031034, \"exact_hit\": false, \"f1\": 0.024828, \"recall_ms\": 504.986}, {\"index\": 6, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.030345, \"recall_ms\": 502.058}, {\"index\": 7, \"score\": 1.0, \"exact_hit\": true, \"f1\": 0.002797, \"recall_ms\": 501.819}]}}",
+        "baseline": 0.35,
+        "delta": -0.092241,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.09224099999999996,
+      "created_at": "2026-02-25T07:14:01.537000"
+    },
+    {
+      "suite": "LoCoMo-Plus",
+      "score": 0.0,
+      "status": "runner_failed",
+      "details": {
+        "return_code": 2,
+        "stderr": "stores/qdrant.py:71: UserWarning: Qdrant client version 1.16.2 is incompatible with server version 1.13.2. Major versions should match and minor version difference must not exceed 1. Set check_compatibility=False to skip version check.\n  self.client = QdrantClient(**params)\n2026-02-25 02:08:10.114 | INFO     | ling_engine.soul.adapters.mem0_adapter:_ensure_client:115 - [Mem0] Client initialized\n2026-02-25 02:08:10.118 | WARNING  | ling_engine.soul.fabric.service:coverage_report:58 - [MemoryFabric] Missing strict required capabilities: temporal_graph\n2026-02-25 02:08:10.118 | WARNING  | ling_engine.soul.fabric.service:coverage_report:63 - [MemoryFabric] Runtime-unhealthy providers detected: graphiti\n/Users/caoruipeng/.local/share/uv/python/cpython-3.11.14-macos-aarch64-none/lib/python3.11/asyncio/runners.py:71: RuntimeWarning: coroutine 'Neo4jDriver._execute_index_query' was never awaited\n  _cancel_all_tasks(loop)\nRuntimeWarning: Enable tracemalloc to get the object allocation traceback",
+        "stdout": "{\"suite\": \"LoCoMo-Plus\", \"score\": 0.0, \"status\": \"runner_failed\", \"mode\": \"real\", \"details\": {\"error\": \"strict coverage unmet: temporal_graph\"}}",
+        "elapsed_ms": 4485,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo-Plus --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "baseline": 0.35,
+        "delta": -0.35,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.35,
+      "created_at": "2026-02-25T07:08:11.620000"
+    },
+    {
+      "suite": "MemoryArena",
+      "score": 0.0,
+      "status": "runner_failed",
+      "details": {
+        "return_code": 2,
+        "stderr": "stores/qdrant.py:71: UserWarning: Qdrant client version 1.16.2 is incompatible with server version 1.13.2. Major versions should match and minor version difference must not exceed 1. Set check_compatibility=False to skip version check.\n  self.client = QdrantClient(**params)\n2026-02-25 02:08:05.822 | INFO     | ling_engine.soul.adapters.mem0_adapter:_ensure_client:115 - [Mem0] Client initialized\n2026-02-25 02:08:05.831 | WARNING  | ling_engine.soul.fabric.service:coverage_report:58 - [MemoryFabric] Missing strict required capabilities: temporal_graph\n2026-02-25 02:08:05.831 | WARNING  | ling_engine.soul.fabric.service:coverage_report:63 - [MemoryFabric] Runtime-unhealthy providers detected: graphiti\n/Users/caoruipeng/.local/share/uv/python/cpython-3.11.14-macos-aarch64-none/lib/python3.11/asyncio/runners.py:71: RuntimeWarning: coroutine 'Neo4jDriver._execute_index_query' was never awaited\n  _cancel_all_tasks(loop)\nRuntimeWarning: Enable tracemalloc to get the object allocation traceback",
+        "stdout": "{\"suite\": \"MemoryArena\", \"score\": 0.0, \"status\": \"runner_failed\", \"mode\": \"real\", \"details\": {\"error\": \"strict coverage unmet: temporal_graph\"}}",
+        "elapsed_ms": 4472,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite MemoryArena --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "baseline": 0.3,
+        "delta": -0.3,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.3,
+      "created_at": "2026-02-25T07:08:07.124000"
+    },
+    {
+      "suite": "LoCoMo",
+      "score": 0.0,
+      "status": "runner_failed",
+      "details": {
+        "return_code": 2,
+        "stderr": "stores/qdrant.py:71: UserWarning: Qdrant client version 1.16.2 is incompatible with server version 1.13.2. Major versions should match and minor version difference must not exceed 1. Set check_compatibility=False to skip version check.\n  self.client = QdrantClient(**params)\n2026-02-25 02:08:01.165 | INFO     | ling_engine.soul.adapters.mem0_adapter:_ensure_client:115 - [Mem0] Client initialized\n2026-02-25 02:08:01.169 | WARNING  | ling_engine.soul.fabric.service:coverage_report:58 - [MemoryFabric] Missing strict required capabilities: temporal_graph\n2026-02-25 02:08:01.169 | WARNING  | ling_engine.soul.fabric.service:coverage_report:63 - [MemoryFabric] Runtime-unhealthy providers detected: graphiti\n/Users/caoruipeng/.local/share/uv/python/cpython-3.11.14-macos-aarch64-none/lib/python3.11/asyncio/runners.py:71: RuntimeWarning: coroutine 'Neo4jDriver._execute_index_query' was never awaited\n  _cancel_all_tasks(loop)\nRuntimeWarning: Enable tracemalloc to get the object allocation traceback",
+        "stdout": "{\"suite\": \"LoCoMo\", \"score\": 0.0, \"status\": \"runner_failed\", \"mode\": \"real\", \"details\": {\"error\": \"strict coverage unmet: temporal_graph\"}}",
+        "elapsed_ms": 4482,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "baseline": 0.4,
+        "delta": -0.4,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.4,
+      "created_at": "2026-02-25T07:08:02.645000"
+    },
+    {
+      "suite": "LongMemEval",
+      "score": 0.0,
+      "status": "runner_failed",
+      "details": {
+        "return_code": 2,
+        "stderr": "stores/qdrant.py:71: UserWarning: Qdrant client version 1.16.2 is incompatible with server version 1.13.2. Major versions should match and minor version difference must not exceed 1. Set check_compatibility=False to skip version check.\n  self.client = QdrantClient(**params)\n2026-02-25 02:07:56.903 | INFO     | ling_engine.soul.adapters.mem0_adapter:_ensure_client:115 - [Mem0] Client initialized\n2026-02-25 02:07:56.915 | WARNING  | ling_engine.soul.fabric.service:coverage_report:58 - [MemoryFabric] Missing strict required capabilities: temporal_graph\n2026-02-25 02:07:56.915 | WARNING  | ling_engine.soul.fabric.service:coverage_report:63 - [MemoryFabric] Runtime-unhealthy providers detected: graphiti\n/Users/caoruipeng/.local/share/uv/python/cpython-3.11.14-macos-aarch64-none/lib/python3.11/asyncio/runners.py:71: RuntimeWarning: coroutine 'Neo4jDriver._execute_index_query' was never awaited\n  _cancel_all_tasks(loop)\nRuntimeWarning: Enable tracemalloc to get the object allocation traceback",
+        "stdout": "{\"suite\": \"LongMemEval\", \"score\": 0.0, \"status\": \"runner_failed\", \"mode\": \"real\", \"details\": {\"error\": \"strict coverage unmet: temporal_graph\"}}",
+        "elapsed_ms": 4481,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LongMemEval --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "baseline": 0.35,
+        "delta": -0.35,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.35,
+      "created_at": "2026-02-25T07:07:58.155000"
+    },
+    {
+      "suite": "LoCoMo-Plus",
+      "score": 0.0,
+      "status": "runner_failed",
+      "details": {
+        "return_code": 2,
+        "stderr": "register:150 - ✅ 工具已注册: search_similar_memories\n2026-02-25 02:01:01.021 | INFO     | ling_engine.tools.base_tool:register:150 - ✅ 工具已注册: search_similar_memories\n2026-02-25 02:01:01.021 | INFO     | ling_engine.tools.base_tool:register:150 - ✅ 工具已注册: query_dashboard\n2026-02-25 02:01:01.203 | ERROR    | ling_engine.important.memories:create_embedding:99 - 生成嵌入向量时出错: AuthenticationError - Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************P-QA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}\n2026-02-25 02:01:01.203 | WARNING  | ling_engine.important.memories:search_similar_memories:262 - 无法为查询创建嵌入向量，返回空结果\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x1279ac650>",
+        "stdout": "✅ 记忆搜索工具 search_similar_memories 已手动注册到全局注册表\n✅ 创建了 1 个记忆工具\n{\"suite\": \"LoCoMo-Plus\", \"score\": 0.0, \"status\": \"runner_failed\", \"mode\": \"real\", \"details\": {\"error\": \"strict coverage unmet: entity,temporal_graph\"}}",
+        "elapsed_ms": 8897,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo-Plus --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "baseline": 0.35,
+        "delta": -0.35,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.35,
+      "created_at": "2026-02-25T07:01:02.531000"
+    },
+    {
+      "suite": "MemoryArena",
+      "score": 0.0,
+      "status": "runner_failed",
+      "details": {
+        "return_code": 2,
+        "stderr": "register:150 - ✅ 工具已注册: search_similar_memories\n2026-02-25 02:00:51.570 | INFO     | ling_engine.tools.base_tool:register:150 - ✅ 工具已注册: search_similar_memories\n2026-02-25 02:00:51.570 | INFO     | ling_engine.tools.base_tool:register:150 - ✅ 工具已注册: query_dashboard\n2026-02-25 02:00:51.730 | ERROR    | ling_engine.important.memories:create_embedding:99 - 生成嵌入向量时出错: AuthenticationError - Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************P-QA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}\n2026-02-25 02:00:51.730 | WARNING  | ling_engine.important.memories:search_similar_memories:262 - 无法为查询创建嵌入向量，返回空结果\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x125220610>",
+        "stdout": "✅ 记忆搜索工具 search_similar_memories 已手动注册到全局注册表\n✅ 创建了 1 个记忆工具\n{\"suite\": \"MemoryArena\", \"score\": 0.0, \"status\": \"runner_failed\", \"mode\": \"real\", \"details\": {\"error\": \"strict coverage unmet: entity,temporal_graph\"}}",
+        "elapsed_ms": 5766,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite MemoryArena --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "baseline": 0.3,
+        "delta": -0.3,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.3,
+      "created_at": "2026-02-25T07:00:53.619000"
+    },
+    {
+      "suite": "LoCoMo",
+      "score": 0.0,
+      "status": "runner_failed",
+      "details": {
+        "return_code": 2,
+        "stderr": "register:150 - ✅ 工具已注册: search_similar_memories\n2026-02-25 02:00:46.151 | INFO     | ling_engine.tools.base_tool:register:150 - ✅ 工具已注册: search_similar_memories\n2026-02-25 02:00:46.152 | INFO     | ling_engine.tools.base_tool:register:150 - ✅ 工具已注册: query_dashboard\n2026-02-25 02:00:46.317 | ERROR    | ling_engine.important.memories:create_embedding:99 - 生成嵌入向量时出错: AuthenticationError - Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************P-QA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}\n2026-02-25 02:00:46.317 | WARNING  | ling_engine.important.memories:search_similar_memories:262 - 无法为查询创建嵌入向量，返回空结果\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x125562990>",
+        "stdout": "✅ 记忆搜索工具 search_similar_memories 已手动注册到全局注册表\n✅ 创建了 1 个记忆工具\n{\"suite\": \"LoCoMo\", \"score\": 0.0, \"status\": \"runner_failed\", \"mode\": \"real\", \"details\": {\"error\": \"strict coverage unmet: entity,temporal_graph\"}}",
+        "elapsed_ms": 7913,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LoCoMo --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "baseline": 0.4,
+        "delta": -0.4,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.4,
+      "created_at": "2026-02-25T07:00:47.851000"
+    },
+    {
+      "suite": "LongMemEval",
+      "score": 0.0,
+      "status": "runner_failed",
+      "details": {
+        "return_code": 2,
+        "stderr": "register:150 - ✅ 工具已注册: search_similar_memories\n2026-02-25 02:00:37.922 | INFO     | ling_engine.tools.base_tool:register:150 - ✅ 工具已注册: search_similar_memories\n2026-02-25 02:00:37.922 | INFO     | ling_engine.tools.base_tool:register:150 - ✅ 工具已注册: query_dashboard\n2026-02-25 02:00:38.113 | ERROR    | ling_engine.important.memories:create_embedding:99 - 生成嵌入向量时出错: AuthenticationError - Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************P-QA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}\n2026-02-25 02:00:38.113 | WARNING  | ling_engine.important.memories:search_similar_memories:262 - 无法为查询创建嵌入向量，返回空结果\nUnclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x127cbfd50>",
+        "stdout": "✅ 记忆搜索工具 search_similar_memories 已手动注册到全局注册表\n✅ 创建了 1 个记忆工具\n{\"suite\": \"LongMemEval\", \"score\": 0.0, \"status\": \"runner_failed\", \"mode\": \"real\", \"details\": {\"error\": \"strict coverage unmet: entity,temporal_graph\"}}",
+        "elapsed_ms": 5949,
+        "cmd": "/Users/caoruipeng/Projects/ling-platform/engine/.venv/bin/python /Users/caoruipeng/Projects/ling-platform/engine/scripts/memory_bench/suite_runner.py --suite LongMemEval --cases 8 --top-k 8 --timeout-ms 1200 --max-ingest-chunks 220",
+        "baseline": 0.35,
+        "delta": -0.35,
+        "mode": "real",
+        "require_real": true
+      },
+      "baseline_delta": -0.35,
+      "created_at": "2026-02-25T07:00:39.935000"
+    }
+  ],
+  "release_gates": [
+    {
+      "name": "G1 Dependencies Online",
+      "passed": true,
+      "evidence": "ports_ok=True, imports_ok=True, adapters_ok=True"
+    },
+    {
+      "name": "G2 Strict Coverage",
+      "passed": true,
+      "evidence": "missing_capabilities=[], unhealthy=[], plan_error=None"
+    },
+    {
+      "name": "G3 Real Benchmarks Passed",
+      "passed": true,
+      "evidence": "suites={'LongMemEval': {'status': 'ok', 'mode': 'real', 'score': 0.308383}, 'LoCoMo': {'status': 'ok', 'mode': 'real', 'score': 0.233323}, 'MemoryArena': {'status': 'ok', 'mode': 'real', 'score': 0.353451}, 'LoCoMo-Plus': {'status': 'ok', 'mode': 'real', 'score': 0.352106}}, benchmark_error=None"
+    },
+    {
+      "name": "G4 Improvement Gate",
+      "passed": false,
+      "evidence": "failed_improvement=[{'suite': 'LongMemEval', 'score': 0.308383, 'baseline': 0.35, 'delta': -0.041617}, {'suite': 'LoCoMo', 'score': 0.233323, 'baseline': 0.4, 'delta': -0.166677}, {'suite': 'LoCoMo-Plus', 'score': 0.352106, 'baseline': 0.35, 'delta': 0.002106}], missing_baseline=[]"
+    },
+    {
+      "name": "G5 Benchmark Persistence",
+      "passed": true,
+      "evidence": "persisted_suites=['LoCoMo', 'LoCoMo-Plus', 'LongMemEval', 'MemoryArena']"
+    },
+    {
+      "name": "G6 Recall P95 SLO",
+      "passed": true,
+      "evidence": "recall_p95_ms=209.041, target_ms=450"
+    }
+  ],
+  "release_blocked": true,
+  "sota_reached": false,
+  "notes": "SOTA verdict in this checklist is tied to strict engineering gates (dependency online + strict coverage + real benchmark + improvement + persistence + SLO)."
+}

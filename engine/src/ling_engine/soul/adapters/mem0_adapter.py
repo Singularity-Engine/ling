@@ -1,0 +1,347 @@
+"""
+Mem0 适配器 — 语义记忆 + 实体搜索 MemoryPort 实现
+
+提供 Soul System 缺少的能力:
+- Entity-level memory: "小明是用户的大学同学，去年换了工作"
+- Graph Memory: 实体间关系网络
+- Hybrid search: 语义 + 图谱混合检索
+
+大师建议:
+- 🤖对话: Entity Search 对对话价值最大 (用户说"小明"能立即知道是谁)
+- 🏗️架构: 作为第 11 路搜索源, 不替换任何现有组件
+- 🔐安全: user_id 强制校验, 所有操作带 user_id 隔离
+- ⚡性能: 300ms 超时, 本地部署优先
+"""
+
+import asyncio
+import time
+from typing import Any, Dict, List, Optional
+
+from loguru import logger
+
+from ..config import get_soul_config
+from ..ethics.sensitive_filter import check_sensitivity
+from ..ports.memory_port import MemoryPort, MemoryResult, MemorySource, MemoryWriteRequest
+from ..utils.validation import is_valid_user_id
+
+
+class Mem0Adapter(MemoryPort):
+    """Mem0 语义记忆适配器
+
+    search: Entity search + semantic search 混合
+    write: 通过 Mem0 API 写入记忆
+    Mem0 不可用时静默返回空结果 (不影响其他路)
+    """
+
+    def __init__(self):
+        self._client = None
+        self._initialized = False
+        self._available = False
+        self._permanently_unavailable = False
+        self._last_init_attempt = 0.0
+        self._init_lock = asyncio.Lock()
+
+    @property
+    def section_name(self) -> str:
+        return "entity-context"
+
+    @property
+    def priority(self) -> float:
+        return 4.5  # 在 user-profile(4) 和 graph-insights(5) 之间
+
+    @property
+    def port_name(self) -> str:
+        return "mem0"
+
+    @property
+    def timeout_seconds(self) -> float:
+        cfg = get_soul_config()
+        return max(0.05, cfg.mem0_timeout_ms / 1000.0)
+
+    async def _ensure_client(self):
+        """懒初始化 Mem0 客户端（失败后按间隔重试）。"""
+        if self._permanently_unavailable:
+            return
+        if self._available and self._client is not None:
+            return
+
+        cfg = get_soul_config()
+        retry_interval = max(1.0, cfg.adapter_retry_interval_sec)
+        now = time.monotonic()
+        if self._initialized and (now - self._last_init_attempt) < retry_interval:
+            return
+
+        async with self._init_lock:
+            now = time.monotonic()
+            if self._permanently_unavailable:
+                return
+            if self._available and self._client is not None:
+                return
+            if self._initialized and (now - self._last_init_attempt) < retry_interval:
+                return
+
+            self._initialized = True
+            self._last_init_attempt = now
+            try:
+                from mem0 import MemoryClient
+
+                if cfg.mem0_api_key:
+                    # 云端模式
+                    self._client = MemoryClient(api_key=cfg.mem0_api_key)
+                else:
+                    # 本地模式 (self-hosted)
+                    from mem0 import Memory
+
+                    config = {
+                        "graph_store": {
+                            "provider": "neo4j",
+                            "config": {
+                                "url": cfg.neo4j_url,
+                                "username": cfg.neo4j_user,
+                                "password": cfg.neo4j_password,
+                            },
+                        },
+                        "vector_store": {
+                            "provider": "qdrant",
+                            "config": {
+                                "host": cfg.qdrant_host,
+                                "port": cfg.qdrant_port,
+                            },
+                        },
+                    }
+                    self._client = Memory.from_config(config)
+
+                self._available = True
+                logger.info("[Mem0] Client initialized")
+            except ImportError as e:
+                # 仅当 mem0 主包缺失时永久禁用; 其余依赖缺失可在补齐后重试恢复。
+                self._mark_temporarily_unavailable()
+                err_msg = str(e)
+                if "No module named 'mem0'" in err_msg:
+                    logger.info("[Mem0] mem0 not installed, adapter disabled")
+                    self._permanently_unavailable = True
+                else:
+                    logger.warning(f"[Mem0] Init import failed (retry in {retry_interval:.0f}s): {e}")
+            except Exception as e:
+                self._mark_temporarily_unavailable()
+                logger.warning(f"[Mem0] Init failed (retry in {retry_interval:.0f}s): {e}")
+
+    def _mark_temporarily_unavailable(self):
+        """标记客户端暂不可用，后续由 _ensure_client 周期性重试。"""
+        self._client = None
+        self._available = False
+
+    async def search(
+        self,
+        query: str,
+        user_id: str,
+        top_k: int = 3,
+        **kwargs,
+    ) -> List[MemoryResult]:
+        """搜索 Mem0 记忆 — 语义 + 实体混合"""
+        if not is_valid_user_id(user_id):
+            return []
+
+        await self._ensure_client()
+        if not self._available or self._client is None:
+            return []
+
+        try:
+            return await self._search_inner(query, user_id, top_k)
+        except Exception as e:
+            logger.debug(f"[Mem0] Search failed: {e}")
+            self._mark_temporarily_unavailable()
+            return []
+
+    async def _search_inner(
+        self, query: str, user_id: str, top_k: int,
+    ) -> List[MemoryResult]:
+        """Mem0 搜索内部实现"""
+        loop = asyncio.get_event_loop()
+
+        # 1. 语义搜索
+        search_results = await loop.run_in_executor(
+            None,
+            lambda: self._client.search(query, user_id=user_id, limit=top_k),
+        )
+
+        results = []
+        if search_results:
+            memories = search_results if isinstance(search_results, list) else search_results.get("results", [])
+            for mem in memories:
+                content = ""
+                if isinstance(mem, dict):
+                    content = mem.get("memory", mem.get("content", ""))
+                elif hasattr(mem, "memory"):
+                    content = mem.memory
+                else:
+                    content = str(mem)
+
+                if not content:
+                    continue
+
+                # 敏感内容过滤 (🔐安全)
+                if check_sensitivity(content) == "block":
+                    continue
+
+                score = 0.0
+                if isinstance(mem, dict):
+                    score = mem.get("score", mem.get("relevance", 0.5))
+                elif hasattr(mem, "score"):
+                    score = mem.score
+
+                results.append(MemoryResult(
+                    content=content,
+                    source=MemorySource.MEM0,
+                    confidence=min(float(score), 1.0) if score else 0.6,
+                    metadata={"type": "semantic"},
+                ))
+
+        return results[:top_k]
+
+    async def write(self, request: MemoryWriteRequest) -> bool:
+        """写入 Mem0 记忆"""
+        await self._ensure_client()
+        if not self._available or self._client is None:
+            return False
+
+        if not is_valid_user_id(request.user_id):
+            return False
+
+        # 敏感内容过滤
+        sensitivity = check_sensitivity(request.content)
+        if sensitivity == "block":
+            return False
+
+        content = request.content
+        if sensitivity == "caution":
+            content = "[用户分享了健康相关信息]"
+
+        try:
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(
+                None,
+                lambda: self._client.add(
+                    content,
+                    user_id=request.user_id,
+                    metadata=request.metadata,
+                ),
+            )
+            return True
+        except Exception as e:
+            logger.debug(f"[Mem0] Write failed: {e}")
+            self._mark_temporarily_unavailable()
+            return False
+
+    async def write_conversation(
+        self,
+        user_input: str,
+        ai_response: str,
+        user_id: str,
+    ) -> bool:
+        """从对话中提取记忆写入 Mem0
+
+        Mem0 内部会自动提取实体和事实。
+        """
+        if not is_valid_user_id(user_id):
+            return False
+
+        await self._ensure_client()
+        if not self._available or self._client is None:
+            return False
+
+        # 敏感内容过滤
+        if check_sensitivity(user_input) == "block":
+            return False
+
+        try:
+            loop = asyncio.get_event_loop()
+            messages = [
+                {"role": "user", "content": user_input},
+                {"role": "assistant", "content": ai_response},
+            ]
+            await loop.run_in_executor(
+                None,
+                lambda: self._client.add(
+                    messages,
+                    user_id=user_id,
+                ),
+            )
+            return True
+        except Exception as e:
+            logger.debug(f"[Mem0] Conversation write failed: {e}")
+            self._mark_temporarily_unavailable()
+            return False
+
+    async def delete_user_data(self, user_id: str) -> int:
+        """GDPR: 删除用户在 Mem0 中的所有记忆"""
+        if not is_valid_user_id(user_id):
+            return 0
+
+        await self._ensure_client()
+        if not self._available or self._client is None:
+            return 0
+
+        try:
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(
+                None,
+                lambda: self._client.delete_all(user_id=user_id),
+            )
+            return 1  # Mem0 批量删除不返回计数
+        except Exception as e:
+            logger.warning(f"[Mem0] GDPR delete failed: {e}")
+            self._mark_temporarily_unavailable()
+            return -1
+
+    async def health_check(self) -> bool:
+        """Mem0 健康检查"""
+        await self._ensure_client()
+        return self._available
+
+    def runtime_status(self) -> Dict[str, Any]:
+        """返回适配器运行态健康快照（不触发网络请求）。"""
+        if self._permanently_unavailable:
+            available = False
+        elif not self._initialized:
+            # 冷启动未知态按不可用处理（fail-closed），避免 strict 模式误判通过。
+            available = False
+        else:
+            available = bool(self._available and self._client is not None)
+        return {
+            "available": available,
+            "initialized": bool(self._initialized),
+            "permanently_unavailable": bool(self._permanently_unavailable),
+            "unknown": bool((not self._initialized) and (not self._permanently_unavailable)),
+            "last_init_attempt": self._last_init_attempt,
+        }
+
+    def format_section(self, results: List[MemoryResult]) -> Optional[str]:
+        """格式化实体上下文 — 🤖对话设计师风格"""
+        if not results:
+            return None
+        items = "\n".join(f"- {r.content}" for r in results)
+        return (
+            f"<entity-context>\n"
+            f"你记得的关于用户提到的人和事:\n"
+            f"{items}\n"
+            f"这些是你对用户世界中具体人物和事件的了解，自然地融入对话。\n"
+            f"</entity-context>"
+        )
+
+
+# 单例
+_mem0_adapter: Optional[Mem0Adapter] = None
+
+
+def get_mem0_adapter() -> Mem0Adapter:
+    global _mem0_adapter
+    if _mem0_adapter is None:
+        _mem0_adapter = Mem0Adapter()
+    return _mem0_adapter
+
+
+def reset_mem0_adapter_for_testing():
+    """测试辅助: 重置 Mem0Adapter 单例。"""
+    global _mem0_adapter
+    _mem0_adapter = None
